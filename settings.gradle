@@ -1,0 +1,8 @@
+rootProject.name = 'opentelemetry-java-contrib'
+
+include ':example'
+
+rootProject.children.each {
+    it.projectDir = "${rootDir}/contrib/" + it.name as File
+    it.buildFileName = "${it.name}.gradle"
+}
