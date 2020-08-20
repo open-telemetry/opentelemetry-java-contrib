@@ -4,7 +4,7 @@ This project is intended to provide helpful libraries and standalone OpenTelemet
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or
 [Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects.  If you need an
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
-feature or via bytecode instrumentation, this project is hopefully for you.
+feature or via instrumentation, this project is hopefully for you.
 
 *This project is in its early stages and doesn't provide any assurances of stability or production readiness.*
 
