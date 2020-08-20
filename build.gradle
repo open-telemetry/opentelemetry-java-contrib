@@ -1,0 +1,21 @@
+plugins {
+    id 'com.diffplug.spotless' version '5.1.1'
+}
+
+description = 'OpenTelemetry Contrib libraries and utilities for the JVM'
+
+allprojects {
+    group = 'io.opentelemetry.contrib'
+    version = '0.0.1'
+
+    apply from: "$rootDir/gradle/spotless.gradle"
+    apply from: "$rootDir/gradle/dependencies.gradle"
+
+    it.ext.contrib = "$rootDir/gradle/contrib.gradle"
+
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+    }
+}

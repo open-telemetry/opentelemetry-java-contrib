@@ -1,0 +1,9 @@
+apply from: project.contrib
+
+description = 'An example OpenTelemetry Java Contrib library'
+
+jar {
+    manifest {
+        attributes('Main-Class': 'io.opentelemetry.contrib.example.Library')
+    }
+}

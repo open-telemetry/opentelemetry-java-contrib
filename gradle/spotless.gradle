@@ -1,0 +1,30 @@
+apply plugin: 'com.diffplug.spotless'
+apply plugin: 'groovy'
+
+spotless {
+    format 'misc', {
+        target '**/*.md', '.gitignore'
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    java {
+        target '**/src/*/java/**/*.java'
+        googleJavaFormat()
+        indentWithSpaces()
+        licenseHeaderFile rootProject.file('gradle/java.license.header'), '(package|import|public)'
+    }
+    groovy {
+        target '**/*.groovy'
+        greclipse()
+        indentWithSpaces()
+        licenseHeaderFile rootProject.file('gradle/java.license.header'), '(package|import|class)'
+    }
+    groovyGradle {
+        target '**/*.gradle'
+        greclipse()
+        indentWithSpaces()
+    }
+}
+
+check.dependsOn 'spotlessCheck'
