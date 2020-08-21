@@ -15,3 +15,11 @@ check:
 .PHONY: clean
 clean:
 	./gradlew clean
+
+.PHONY: assemble
+assemble:
+	./gradlew assemble
+
+.PHONY: test
+test:
+	./gradlew test
