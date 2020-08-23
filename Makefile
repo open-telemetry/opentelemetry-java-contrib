@@ -23,3 +23,7 @@ assemble:
 .PHONY: test
 test:
 	./gradlew test
+
+.PHONY: integration-test
+integration-test:
+	./gradlew -Pojc.integration.test=true test

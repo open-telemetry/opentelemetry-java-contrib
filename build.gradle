@@ -18,4 +18,8 @@ allprojects {
         jcenter()
         mavenCentral()
     }
+
+    if (Gradle.properties['ojc.integration.test'] == 'true') {
+        System.setProperty('ojc.integration.test', 'true')
+    }
 }
