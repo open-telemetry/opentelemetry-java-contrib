@@ -19,7 +19,9 @@ allprojects {
         mavenCentral()
     }
 
-    if (Gradle.properties['ojc.integration.test'] == 'true') {
-        System.setProperty('ojc.integration.test', 'true')
+    if (property('ojc.integration.tests') == 'true') {
+        tasks.withType(Test) {
+            systemProperty 'ojc.integration.tests', 'true'
+        }
     }
 }

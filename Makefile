@@ -26,4 +26,4 @@ test:
 
 .PHONY: integration-test
 integration-test:
-	./gradlew -Pojc.integration.test=true test
+	./gradlew -Pojc.integration.tests=true test
