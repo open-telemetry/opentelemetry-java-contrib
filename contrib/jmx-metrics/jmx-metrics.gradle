@@ -1,5 +1,6 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "6.0.0"
+    id "application"
 }
 
 apply from: project.contrib
@@ -21,11 +22,7 @@ sourceSets.test.groovy.srcDirs = [
 sourceSets.main.java.srcDirs = []
 sourceSets.test.java.srcDirs = []
 
-jar {
-    manifest {
-        attributes('Main-Class': 'io.opentelemetry.contrib.jmxmetrics.JmxMetrics')
-    }
-}
+mainClassName = 'io.opentelemetry.contrib.jmxmetrics.JmxMetrics'
 
 def versions = [
     grpc : '1.30.2',
