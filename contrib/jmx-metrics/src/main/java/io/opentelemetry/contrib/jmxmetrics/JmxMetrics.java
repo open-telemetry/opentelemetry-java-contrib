@@ -21,20 +21,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JmxMetrics {
   private static final Logger logger = Logger.getLogger(JmxMetrics.class.getName());
 
-  private final Timer timer = new Timer();
+  private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
   private GroovyRunner runner;
 
   /**
    * Begins the core metric scraping and reporting loop on configured interval after parsing and
-   * binding the configured groovy script and establishing the {@link JmxClient} connection.
+   * binding the configured groovy script and establishing the {@link
+   * io.opentelemetry.contrib.jmxmetrics.JmxClient} connection.
    *
    * @param config - {@link JmxConfig} with Groovy script path, JMX connection info, and metric
    *     export options.
@@ -49,35 +51,26 @@ public class JmxMetrics {
 
     runner = new GroovyRunner(config.groovyScript, jmxClient, new GroovyUtils(config));
 
-    timer.scheduleAtFixedRate(
-        wrapTimerTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  runner.run();
-                } catch (Throwable e) {
-                  logger.log(Level.SEVERE, "Error gathering JMX metrics", e);
-                }
-              }
-            }),
+    exec.scheduleWithFixedDelay(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              runner.run();
+            } catch (Throwable e) {
+              logger.log(Level.SEVERE, "Error gathering JMX metrics", e);
+            }
+          }
+        },
         0,
-        config.intervalMilliseconds);
+        config.intervalMilliseconds,
+        TimeUnit.MILLISECONDS);
     logger.info("Started GroovyRunner.");
-  }
-
-  private static TimerTask wrapTimerTask(final Runnable r) {
-    return new TimerTask() {
-      @Override
-      public void run() {
-        r.run();
-      }
-    };
   }
 
   private void shutdown() {
     logger.info("Shutting down JmxMetrics Groovy runner and exporting final metrics.");
-    timer.cancel();
+    exec.shutdown();
     runner.flush();
   }
 
