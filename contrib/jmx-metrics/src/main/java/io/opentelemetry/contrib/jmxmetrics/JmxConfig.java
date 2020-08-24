@@ -101,19 +101,19 @@ public class JmxConfig {
    */
   public void validate() throws ConfigureError {
     if (isBlank(this.serviceUrl)) {
-      throw new ConfigureError(PREFIX + "service.url must be specified.");
+      throw new ConfigureError(PREFIX + SERVICE_URL + " must be specified.");
     }
 
     if (isBlank(this.groovyScript)) {
-      throw new ConfigureError(PREFIX + "groovy.script must be specified.");
+      throw new ConfigureError(PREFIX + GROOVY_SCRIPT + " must be specified.");
     }
 
     if (isBlank(this.otlpExporterEndpoint) && this.exporterType.equalsIgnoreCase("otlp")) {
-      throw new ConfigureError(PREFIX + "exporter.endpoint must be specified for otlp format.");
+      throw new ConfigureError(PREFIX + OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 
     if (this.intervalMilliseconds < 0) {
-      throw new ConfigureError(PREFIX + "interval.milliseconds must be positive.");
+      throw new ConfigureError(PREFIX + INTERVAL_MILLISECONDS + " must be positive.");
     }
 
     if (this.intervalMilliseconds == 0) {

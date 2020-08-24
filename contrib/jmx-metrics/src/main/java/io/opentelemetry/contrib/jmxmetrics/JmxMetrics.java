@@ -106,12 +106,7 @@ public class JmxMetrics {
     config.validate();
 
     final JmxMetrics jmxMetrics = new JmxMetrics();
-    try {
-      jmxMetrics.start(config);
-    } catch (ConfigureError e) {
-      logger.severe(e.getMessage());
-      System.exit(1);
-    }
+    jmxMetrics.start(config);
 
     Runtime.getRuntime()
         .addShutdownHook(
