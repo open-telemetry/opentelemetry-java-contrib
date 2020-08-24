@@ -59,6 +59,7 @@ jobs:
           command: make build
 
   integration-tests:
+    # machine executor required for testcontainers docker access
     executor: integration
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
