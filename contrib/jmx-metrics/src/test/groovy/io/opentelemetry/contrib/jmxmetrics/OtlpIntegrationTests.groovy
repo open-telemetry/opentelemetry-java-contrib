@@ -16,7 +16,6 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import spock.lang.Requires
 
 import static io.opentelemetry.proto.metrics.v1.MetricDescriptor.Type.SUMMARY
 import static org.junit.Assert.assertTrue
@@ -34,11 +33,14 @@ import io.opentelemetry.proto.metrics.v1.MetricDescriptor
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
 import org.testcontainers.Testcontainers
+import spock.lang.Requires
 import spock.lang.Shared
+import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
+@Timeout(60)
 class OtlpIntegrationTests extends IntegrationTest  {
 
     @Shared

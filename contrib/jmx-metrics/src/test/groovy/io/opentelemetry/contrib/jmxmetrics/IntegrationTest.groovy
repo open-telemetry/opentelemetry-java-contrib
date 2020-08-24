@@ -72,8 +72,8 @@ class IntegrationTest extends Specification{
                 .withCopyFileToContainer(
                 MountableFile.forHostPath(configPath), "/app/${configName}")
                 .withCommand("java -cp /app/OpenTelemetryJava.jar "
-                + "-Dotel.jmx.metrics.username=cassandra "
-                + "-Dotel.jmx.metrics.password=cassandra "
+                + "-Dotel.jmx.username=cassandra "
+                + "-Dotel.jmx.password=cassandra "
                 + "io.opentelemetry.contrib.jmxmetrics.JmxMetrics "
                 + "-config /app/${configName}")
                 .withStartupTimeout(Duration.ofSeconds(120))

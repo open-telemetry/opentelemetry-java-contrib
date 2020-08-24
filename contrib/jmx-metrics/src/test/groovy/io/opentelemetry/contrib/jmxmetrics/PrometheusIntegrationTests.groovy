@@ -17,11 +17,13 @@
 package io.opentelemetry.contrib.jmxmetrics
 
 import org.apache.hc.client5.http.fluent.Request
-import spock.lang.Requires;
+import spock.lang.Requires
+import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
+@Timeout(60)
 class PrometheusIntegrationTests extends IntegrationTest {
 
     def setupSpec() {
@@ -29,17 +31,23 @@ class PrometheusIntegrationTests extends IntegrationTest {
     }
 
     def receivedMetrics() {
-        def received = ''
-        while (received == '' || received.charAt(0) != '#') {
+        def scraped = []
+        for (int i = 0; i < 120; i++) {
+            def received = Request.get("http://localhost:${jmxExposedPort}/metrics").execute().returnContent().asString()
+            if (received != '') {
+                scraped = received.split('\n')
+                if (scraped.size() > 2) {
+                    break
+                }
+            }
             Thread.sleep(500)
-            received = Request.get("http://localhost:${jmxExposedPort}/metrics").execute().returnContent().asString()
         }
-        return received
+        return scraped
     }
 
     def 'end to end'() {
         when: 'we receive metrics from the prometheus endpoint'
-        def scraped = receivedMetrics().split('\n')
+        def scraped = receivedMetrics()
 
         then: 'they are of the expected format'
         scraped.size() == 6

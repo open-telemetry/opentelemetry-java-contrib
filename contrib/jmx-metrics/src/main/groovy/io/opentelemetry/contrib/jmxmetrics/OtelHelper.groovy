@@ -27,11 +27,10 @@ import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 
 class OtelHelper {
+    private static final String SCALAR = '1'
 
     private final JmxClient jmxClient
     private final GroovyUtils groovyUtils
-
-    final String scalar = '1'
 
     OtelHelper(JmxClient jmxClient, GroovyUtils groovyUtils) {
         this.jmxClient = jmxClient
@@ -68,7 +67,7 @@ class OtelHelper {
     }
 
     DoubleCounter doubleCounter(String name, String description) {
-        return doubleCounter(name, description, scalar)
+        return doubleCounter(name, description, SCALAR)
     }
 
     DoubleCounter doubleCounter(String name) {
@@ -84,7 +83,7 @@ class OtelHelper {
     }
 
     LongCounter longCounter(String name, String description) {
-        return longCounter(name, description, scalar)
+        return longCounter(name, description, SCALAR)
     }
 
     LongCounter longCounter(String name) {
@@ -100,7 +99,7 @@ class OtelHelper {
     }
 
     DoubleUpDownCounter doubleUpDownCounter(String name, String description) {
-        return doubleUpDownCounter(name, description, scalar)
+        return doubleUpDownCounter(name, description, SCALAR)
     }
 
     DoubleUpDownCounter doubleUpDownCounter(String name) {
@@ -116,7 +115,7 @@ class OtelHelper {
     }
 
     LongUpDownCounter longUpDownCounter(String name, String description) {
-        return longUpDownCounter(name, description, scalar)
+        return longUpDownCounter(name, description, SCALAR)
     }
 
     LongUpDownCounter longUpDownCounter(String name) {
@@ -132,7 +131,7 @@ class OtelHelper {
     }
 
     DoubleValueRecorder doubleValueRecorder(String name, String description) {
-        return doubleValueRecorder(name, description, scalar)
+        return doubleValueRecorder(name, description, SCALAR)
     }
 
     DoubleValueRecorder doubleValueRecorder(String name) {
@@ -148,7 +147,7 @@ class OtelHelper {
     }
 
     LongValueRecorder longValueRecorder(String name, String description) {
-        return longValueRecorder(name, description, scalar)
+        return longValueRecorder(name, description, SCALAR)
     }
 
     LongValueRecorder longValueRecorder(String name) {

@@ -13,13 +13,13 @@ $ java -D<otel.jmx.metrics.property=value> -jar io.opentelemetry.contrib.jmx-met
 ##### `optional_config.properties` example
 
 ```properties
-otel.jmx.metrics.service.url = service:jmx:rmi:///jndi/rmi://<my-jmx-host>:<my-jmx-port>/jmxrmi
-otel.jmx.metrics.groovy.script = /opt/script.groovy
-otel.jmx.metrics.interval.seconds = 5
-otel.jmx.metrics.exporter.type = otlp
-otel.jmx.metrics.exporter.otlp.endpoint = my-opentelemetry-collector:55680
-otel.jmx.metrics.username = my-username
-otel.jmx.metrics.password = my-password
+otel.jmx.service.url = service:jmx:rmi:///jndi/rmi://<my-jmx-host>:<my-jmx-port>/jmxrmi
+otel.jmx.groovy.script = /opt/script.groovy
+otel.jmx.interval.milliseconds = 5000
+otel.exporter = otlp
+otel.otlp.endpoint = my-opentelemetry-collector:55680
+otel.jmx.username = my-username
+otel.jmx.password = my-password
 ```
 
 ##### `script.groovy` example
@@ -40,10 +40,10 @@ lvr.record(load.Count, Labels.of("myKey", "myVal"))
 ```
 
 As configured in the example, this metric gatherer will configure an otlp gRPC metric exporter
-at the `otel.jmx.metrics.exporter.otlp.endpoint` and establish an MBean server connection using the
-provided `otel.jmx.metrics.service.url`. After loading the Groovy script whose path is specified
-via `otel.jmx.metrics.groovy.script`, it will then run the script on the specified
-`otel.jmx.metrics.interval.seconds` and export the resulting metrics.
+at the `otel.otlp.endpoint` and establish an MBean server connection using the
+provided `otel.jmx.service.url`. After loading the Groovy script whose path is specified
+via `otel.jmx.groovy.script`, it will then run the script on the specified
+`otel.jmx.interval.milliseconds` and export the resulting metrics.
 
 ### JMX Query Helpers
 
@@ -94,19 +94,22 @@ Those provided as command line properties take priority of those contained in a 
 
 | Property | Required | Description |
 | ------------- | -------- | ----------- |
-| `otel.jmx.metrics.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
-| `otel.jmx.metrics.groovy.script` | **yes** | The path for the desired Groovy script. |
-| `otel.jmx.metrics.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10 by default. |
-| `otel.jmx.metrics.exporter.type` | no | The type of `io.opentelemetry.sdk.metrics.export.MetricExporter` to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
-| `otel.jmx.metrics.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
-| `otel.jmx.metrics.exporter.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
-| `otel.jmx.metrics.exporter.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
-| `otel.jmx.metrics.username` | no | Username for JMX authentication, if applicable. |
-| `otel.jmx.metrics.password` | no | Password for JMX authentication, if applicable. |
-| `otel.jmx.metrics.keystore.path` | no | The key store path is required if client authentication is enabled on the target JVM. |
-| `otel.jmx.metrics.keystore.password` | no | The key store file password if required. |
-| `otel.jmx.metrics.keystore.type` | no | The key store type. |
-| `otel.jmx.metrics.truststore.path` | no | The trusted store path if the TLS profile is required. |
-| `otel.jmx.metrics.truststore.password` | no | The trust store file password if required. |
-| `otel.jmx.metrics.remote.profiles` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |
-| `otel.jmx.metrics.realm` | no | The realm is required by profile SASL/DIGEST-MD5. |
+| `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
+| `otel.jmx.groovy.script` | **yes** | The path for the desired Groovy script. |
+| `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10 by default. |
+| `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
+| `otel.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
+| `otel.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
+| `otel.otlp.use.tls` | no | Whether to use TLS for otlp channel.  Setting any value evaluates to `true`. |
+| `otel.otlp.metadata` | no | Any headers to include in otlp exporter metric submissions.  Of the form `'header1=value1;header2=value2'` |
+| `otel.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
+| `otel.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
+| `otel.jmx.username` | no | Username for JMX authentication, if applicable. |
+| `otel.jmx.password` | no | Password for JMX authentication, if applicable. |
+| `javax.net.ssl.keyStore` | no | The key store path is required if client authentication is enabled on the target JVM. |
+| `javax.net.ssl.keyStorePassword` | no | The key store file password if required. |
+| `javax.net.ssl.keyStoreType` | no | The key store type. |
+| `javax.net.ssl.trustStore` | no | The trusted store path if the TLS profile is required. |
+| `javax.net.ssl.trustStorePassword` | no | The trust store file password if required. |
+| `otel.jmx.remote.profiles` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |
+| `otel.jmx.realm` | no | The realm is required by profile SASL/DIGEST-MD5. |

@@ -39,34 +39,15 @@ public class JmxClient {
   private final String username;
   private final String password;
   private final String realm;
-  private final String jmxRemoteProfiles;
+  private final String remoteProfiles;
   @Nullable private JMXConnector jmxConn;
 
   JmxClient(final JmxConfig config) throws MalformedURLException {
-    setSystemProperties(config);
     this.url = new JMXServiceURL(config.serviceUrl);
     this.username = config.username;
     this.password = config.password;
     this.realm = config.realm;
-    this.jmxRemoteProfiles = config.jmxRemoteProfiles;
-  }
-
-  private static void setSystemProperties(final JmxConfig config) {
-    if (!JmxConfig.isBlank(config.keyStorePath)) {
-      System.setProperty("javax.net.ssl.keyStore", config.keyStorePath);
-    }
-    if (!JmxConfig.isBlank(config.keyStorePassword)) {
-      System.setProperty("javax.net.ssl.keyStorePassword", config.keyStorePassword);
-    }
-    if (!JmxConfig.isBlank(config.keyStoreType)) {
-      System.setProperty("javax.net.ssl.keyStoreType", config.keyStoreType);
-    }
-    if (!JmxConfig.isBlank(config.trustStorePath)) {
-      System.setProperty("javax.net.ssl.trustStore", config.trustStorePath);
-    }
-    if (!JmxConfig.isBlank(config.trustStorePassword)) {
-      System.setProperty("javax.net.ssl.trustStorePassword", config.trustStorePassword);
-    }
+    this.remoteProfiles = config.remoteProfiles;
   }
 
   private MBeanServerConnection ensureConnected() {
@@ -88,7 +69,7 @@ public class JmxClient {
         Provider provider = (Provider) klass.getDeclaredConstructor().newInstance();
         Security.addProvider(provider);
 
-        env.put("jmx.remote.profiles", this.jmxRemoteProfiles);
+        env.put("jmx.remote.profiles", this.remoteProfiles);
         env.put(
             "jmx.remote.sasl.callback.handler",
             new ClientCallbackHandler(this.username, this.password, this.realm));

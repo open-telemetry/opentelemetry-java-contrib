@@ -19,11 +19,27 @@ package io.opentelemetry.contrib.jmxmetrics;
 import java.util.Properties;
 
 public class JmxConfig {
+  private static final String PREFIX = "otel.";
+  private static final String SERVICE_URL = "jmx.service.url";
+  private static final String GROOVY_SCRIPT = "jmx.groovy.script";
+  private static final String INTERVAL_MILLISECONDS = "jmx.interval.milliseconds";
+  private static final String EXPORTER_TYPE = "exporter";
+
+  private static final String OTLP_ENDPOINT = "otlp.endpoint";
+
+  private static final String PROMETHEUS_HOST = "prometheus.host";
+  private static final String PROMETHEUS_PORT = "prometheus.port";
+
+  private static final String JMX_USERNAME = "jmx.username";
+  private static final String JMX_PASSWORD = "jmx.password";
+  private static final String JMX_REMOTE_PROFILES = "jmx.remote.profiles";
+  private static final String JMX_REALM = "jmx.realm";
+
   public String serviceUrl;
   public String groovyScript;
-
   public int intervalMilliseconds;
   public String exporterType;
+
   public String otlpExporterEndpoint;
 
   public String prometheusExporterHost;
@@ -31,49 +47,30 @@ public class JmxConfig {
 
   public String username;
   public String password;
-
-  public String keyStorePath;
-  public String keyStorePassword;
-  public String keyStoreType;
-  public String trustStorePath;
-  public String trustStorePassword;
-  public String jmxRemoteProfiles;
   public String realm;
+  public String remoteProfiles;
 
-  private Properties properties;
-  private static final String prefix = "otel.jmx.metrics.";
+  public Properties properties;
 
   public JmxConfig(final Properties properties) {
     this.properties = new Properties(properties);
     // command line takes precedence
     this.properties.putAll(System.getProperties());
 
-    serviceUrl = getProperty("service.url", null);
-    groovyScript = getProperty("groovy.script", null);
-    try {
-      intervalMilliseconds = Integer.parseInt(getProperty("interval.milliseconds", "10000"));
-    } catch (NumberFormatException e) {
-      throw new ConfigureError("Failed to parse " + prefix + "interval.milliseconds", e);
-    }
-    exporterType = getProperty("exporter.type", "logging");
-    otlpExporterEndpoint = getProperty("exporter.otlp.endpoint", null);
+    serviceUrl = getProperty(SERVICE_URL, "");
+    groovyScript = getProperty(GROOVY_SCRIPT, "");
+    intervalMilliseconds = getProperty(INTERVAL_MILLISECONDS, 10000);
+    exporterType = getProperty(EXPORTER_TYPE, "logging");
 
-    prometheusExporterHost = getProperty("exporter.prometheus.host", "localhost");
-    try {
-      prometheusExporterPort = Integer.parseInt(getProperty("exporter.prometheus.port", "9090"));
-    } catch (NumberFormatException e) {
-      throw new ConfigureError("Failed to parse " + prefix + "exporter.prometheus.port", e);
-    }
+    otlpExporterEndpoint = getProperty(OTLP_ENDPOINT, "");
 
-    username = getProperty("username", null);
-    password = getProperty("password", null);
-    keyStorePath = getProperty("keystore.path", null);
-    keyStorePassword = getProperty("keystore.password", null);
-    keyStoreType = getProperty("keystore.type", null);
-    trustStorePath = getProperty("truststore.path", null);
-    trustStorePassword = getProperty("truststore.password", null);
-    jmxRemoteProfiles = getProperty("remote.profiles", null);
-    realm = getProperty("realm", null);
+    prometheusExporterHost = getProperty(PROMETHEUS_HOST, "localhost");
+    prometheusExporterPort = getProperty(PROMETHEUS_PORT, 9090);
+
+    username = getProperty(JMX_USERNAME, "");
+    password = getProperty(JMX_PASSWORD, "");
+    remoteProfiles = getProperty(JMX_REMOTE_PROFILES, "");
+    realm = getProperty(JMX_REALM, "");
   }
 
   public JmxConfig() {
@@ -81,7 +78,20 @@ public class JmxConfig {
   }
 
   private String getProperty(final String key, final String dfault) {
-    return properties.getProperty(prefix + key, dfault);
+    final String propVal = properties.getProperty(PREFIX + key);
+    return (propVal == null) ? dfault : propVal;
+  }
+
+  private int getProperty(final String key, final int dfault) {
+    final String propVal = properties.getProperty(PREFIX + key);
+    if (propVal == null) {
+      return dfault;
+    }
+    try {
+      return Integer.parseInt(propVal);
+    } catch (NumberFormatException e) {
+      throw new ConfigureError("Failed to parse " + PREFIX + key, e);
+    }
   }
 
   /**
@@ -91,23 +101,23 @@ public class JmxConfig {
    */
   public void validate() throws ConfigureError {
     if (isBlank(this.serviceUrl)) {
-      throw new ConfigureError(prefix + "service.url must be specified.");
+      throw new ConfigureError(PREFIX + "service.url must be specified.");
     }
 
     if (isBlank(this.groovyScript)) {
-      throw new ConfigureError(prefix + "groovy.script must be specified.");
+      throw new ConfigureError(PREFIX + "groovy.script must be specified.");
     }
 
     if (isBlank(this.otlpExporterEndpoint) && this.exporterType.equalsIgnoreCase("otlp")) {
-      throw new ConfigureError(prefix + "exporter.endpoint must be specified for otlp format.");
+      throw new ConfigureError(PREFIX + "exporter.endpoint must be specified for otlp format.");
     }
 
     if (this.intervalMilliseconds < 0) {
-      throw new ConfigureError(prefix + "interval.milliseconds must be positive.");
+      throw new ConfigureError(PREFIX + "interval.milliseconds must be positive.");
     }
 
     if (this.intervalMilliseconds == 0) {
-      this.intervalMilliseconds = 10;
+      this.intervalMilliseconds = 10000;
     }
   }
 

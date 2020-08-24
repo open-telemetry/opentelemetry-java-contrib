@@ -18,7 +18,6 @@ package io.opentelemetry.contrib.jmxmetrics;
 
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.common.Labels;
-import io.opentelemetry.common.Labels.Builder;
 import io.opentelemetry.exporters.inmemory.InMemoryMetricExporter;
 import io.opentelemetry.exporters.logging.LoggingMetricExporter;
 import io.opentelemetry.exporters.otlp.OtlpGrpcMetricExporter;
@@ -61,8 +60,7 @@ public class GroovyUtils {
 
     switch (config.exporterType.toLowerCase()) {
       case "otlp":
-        exporter =
-            OtlpGrpcMetricExporter.newBuilder().setEndpoint(config.otlpExporterEndpoint).build();
+        exporter = OtlpGrpcMetricExporter.newBuilder().readProperties(config.properties).build();
         break;
       case "prometheus":
         configurePrometheus(config);
@@ -108,7 +106,7 @@ public class GroovyUtils {
   }
 
   private static Labels mapToLabels(final Map<String, String> labelMap) {
-    Builder labels = new Builder();
+    Labels.Builder labels = new Labels.Builder();
     if (labelMap != null) {
       for (Map.Entry<String, String> kv : labelMap.entrySet()) {
         labels.setLabel(kv.getKey(), kv.getValue());
