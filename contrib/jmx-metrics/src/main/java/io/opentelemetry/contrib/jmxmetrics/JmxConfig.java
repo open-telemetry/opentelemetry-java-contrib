@@ -19,47 +19,50 @@ package io.opentelemetry.contrib.jmxmetrics;
 import java.util.Properties;
 
 public class JmxConfig {
-  private static final String PREFIX = "otel.";
-  private static final String SERVICE_URL = "jmx.service.url";
-  private static final String GROOVY_SCRIPT = "jmx.groovy.script";
-  private static final String INTERVAL_MILLISECONDS = "jmx.interval.milliseconds";
-  private static final String EXPORTER_TYPE = "exporter";
+  protected static final String PREFIX = "otel.";
+  protected static final String SERVICE_URL = PREFIX + "jmx.service.url";
+  protected static final String GROOVY_SCRIPT = PREFIX + "jmx.groovy.script";
+  protected static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
+  protected static final String EXPORTER_TYPE = PREFIX + "exporter";
 
-  private static final String OTLP_ENDPOINT = "otlp.endpoint";
+  protected static final String OTLP_ENDPOINT = PREFIX + "otlp.endpoint";
 
-  private static final String PROMETHEUS_HOST = "prometheus.host";
-  private static final String PROMETHEUS_PORT = "prometheus.port";
+  protected static final String PROMETHEUS_HOST = PREFIX + "prometheus.host";
+  protected static final String PROMETHEUS_PORT = PREFIX + "prometheus.port";
 
-  private static final String JMX_USERNAME = "jmx.username";
-  private static final String JMX_PASSWORD = "jmx.password";
-  private static final String JMX_REMOTE_PROFILES = "jmx.remote.profiles";
-  private static final String JMX_REALM = "jmx.realm";
+  protected static final String JMX_USERNAME = PREFIX + "jmx.username";
+  protected static final String JMX_PASSWORD = PREFIX + "jmx.password";
+  protected static final String JMX_REMOTE_PROFILES = PREFIX + "jmx.remote.profiles";
+  protected static final String JMX_REALM = PREFIX + "jmx.realm";
 
-  public String serviceUrl;
-  public String groovyScript;
-  public int intervalMilliseconds;
-  public String exporterType;
+  public final String serviceUrl;
+  public final String groovyScript;
+  public final int intervalMilliseconds;
+  public final String exporterType;
 
-  public String otlpExporterEndpoint;
+  public final String otlpExporterEndpoint;
 
-  public String prometheusExporterHost;
-  public int prometheusExporterPort;
+  public final String prometheusExporterHost;
+  public final int prometheusExporterPort;
 
-  public String username;
-  public String password;
-  public String realm;
-  public String remoteProfiles;
+  public final String username;
+  public final String password;
+  public final String realm;
+  public final String remoteProfiles;
 
-  public Properties properties;
+  public final Properties properties;
 
-  public JmxConfig(final Properties properties) {
-    this.properties = new Properties(properties);
+  public JmxConfig(final Properties props) {
+    this.properties = new Properties(props);
     // command line takes precedence
     this.properties.putAll(System.getProperties());
 
     serviceUrl = getProperty(SERVICE_URL, "");
     groovyScript = getProperty(GROOVY_SCRIPT, "");
-    intervalMilliseconds = getProperty(INTERVAL_MILLISECONDS, 10000);
+
+    final int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
+    intervalMilliseconds = interval == 0 ? 10000 : interval;
+
     exporterType = getProperty(EXPORTER_TYPE, "logging");
 
     otlpExporterEndpoint = getProperty(OTLP_ENDPOINT, "");
@@ -78,19 +81,19 @@ public class JmxConfig {
   }
 
   private String getProperty(final String key, final String dfault) {
-    final String propVal = properties.getProperty(PREFIX + key);
+    final String propVal = properties.getProperty(key);
     return (propVal == null) ? dfault : propVal;
   }
 
   private int getProperty(final String key, final int dfault) {
-    final String propVal = properties.getProperty(PREFIX + key);
+    final String propVal = properties.getProperty(key);
     if (propVal == null) {
       return dfault;
     }
     try {
       return Integer.parseInt(propVal);
     } catch (NumberFormatException e) {
-      throw new ConfigureError("Failed to parse " + PREFIX + key, e);
+      throw new ConfigureError("Failed to parse " + key, e);
     }
   }
 
@@ -101,23 +104,19 @@ public class JmxConfig {
    */
   public void validate() throws ConfigureError {
     if (isBlank(this.serviceUrl)) {
-      throw new ConfigureError(PREFIX + SERVICE_URL + " must be specified.");
+      throw new ConfigureError(SERVICE_URL + " must be specified.");
     }
 
     if (isBlank(this.groovyScript)) {
-      throw new ConfigureError(PREFIX + GROOVY_SCRIPT + " must be specified.");
+      throw new ConfigureError(GROOVY_SCRIPT + " must be specified.");
     }
 
     if (isBlank(this.otlpExporterEndpoint) && this.exporterType.equalsIgnoreCase("otlp")) {
-      throw new ConfigureError(PREFIX + OTLP_ENDPOINT + " must be specified for otlp format.");
+      throw new ConfigureError(OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 
     if (this.intervalMilliseconds < 0) {
-      throw new ConfigureError(PREFIX + INTERVAL_MILLISECONDS + " must be positive.");
-    }
-
-    if (this.intervalMilliseconds == 0) {
-      this.intervalMilliseconds = 10000;
+      throw new ConfigureError(INTERVAL_MILLISECONDS + " must be positive.");
     }
   }
 

@@ -31,17 +31,12 @@ public class JmxMetrics {
   private static final Logger logger = Logger.getLogger(JmxMetrics.class.getName());
 
   private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-  private GroovyRunner runner;
+  private final GroovyRunner runner;
+  private final JmxConfig config;
 
-  /**
-   * Begins the core metric scraping and reporting loop on configured interval after parsing and
-   * binding the configured groovy script and establishing the {@link
-   * io.opentelemetry.contrib.jmxmetrics.JmxClient} connection.
-   *
-   * @param config - {@link JmxConfig} with Groovy script path, JMX connection info, and metric
-   *     export options.
-   */
-  public void start(final JmxConfig config) {
+  public JmxMetrics(final JmxConfig config) {
+    this.config = config;
+
     JmxClient jmxClient;
     try {
       jmxClient = new JmxClient(config);
@@ -50,7 +45,9 @@ public class JmxMetrics {
     }
 
     runner = new GroovyRunner(config.groovyScript, jmxClient, new GroovyUtils(config));
+  }
 
+  public void start() {
     exec.scheduleWithFixedDelay(
         new Runnable() {
           @Override
@@ -105,8 +102,8 @@ public class JmxMetrics {
     JmxConfig config = getConfigFromArgs(args);
     config.validate();
 
-    final JmxMetrics jmxMetrics = new JmxMetrics();
-    jmxMetrics.start(config);
+    final JmxMetrics jmxMetrics = new JmxMetrics(config);
+    jmxMetrics.start();
 
     Runtime.getRuntime()
         .addShutdownHook(

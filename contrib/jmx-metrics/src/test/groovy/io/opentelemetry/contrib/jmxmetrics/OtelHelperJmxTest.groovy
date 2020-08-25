@@ -56,8 +56,9 @@ class OtelHelperJmxTest extends Specification {
         return new OtelHelper(new JmxClient(config), new GroovyUtils(config))
     }
 
-    private void verifyClient(JmxConfig config) {
-        config.groovyScript = "myscript.groovy"
+    private void verifyClient(Properties props) {
+        props.setProperty(JmxConfig.GROOVY_SCRIPT, "myscript.groovy")
+        def config = new JmxConfig(props)
         config.validate()
         def otel = setupHelper(config)
         def mbeans = otel.queryJmx(thingName)
@@ -69,11 +70,11 @@ class OtelHelperJmxTest extends Specification {
     def "no authentication"() {
         when:
         def serverAddr = setupServer([:])
-        def config = new JmxConfig().tap {
-            serviceUrl = serverAddr
+        def props = new Properties().tap {
+            it.setProperty(JmxConfig.SERVICE_URL, "${serverAddr}")
         }
         then:
-        verifyClient(config)
+        verifyClient(props)
     }
 
     def "password authentication"() {
@@ -81,27 +82,28 @@ class OtelHelperJmxTest extends Specification {
         def pwFile = ClassLoader.getSystemClassLoader().getResource('jmxremote.password').getPath()
         def serverAddr = setupServer(['jmx.remote.x.password.file':pwFile])
 
-        def config = new JmxConfig().tap {
-            serviceUrl = serverAddr
-            username = 'wrongUsername'
-            password = 'wrongPassword'
+        def props = new Properties().tap {
+            it.setProperty('otel.jmx.service.url', "${serverAddr}")
+            it.setProperty(JmxConfig.JMX_USERNAME, 'wrongUsername')
+            it.setProperty(JmxConfig.JMX_PASSWORD, 'wrongPassword')
         }
+
         then:
         try {
-            verifyClient(config)
+            verifyClient(props)
             assertTrue('Authentication should have failed.', false)
         } catch (final SecurityException e) {
             // desired
         }
 
         when:
-        config = new JmxConfig().tap {
-            serviceUrl = serverAddr
-            username = 'correctUsername'
-            password = 'correctPassword'
+        props = new Properties().tap {
+            it.setProperty(JmxConfig.SERVICE_URL, "${serverAddr}")
+            it.setProperty(JmxConfig.JMX_USERNAME, 'correctUsername')
+            it.setProperty(JmxConfig.JMX_PASSWORD, 'correctPassword')
         }
         then:
-        verifyClient(config)
+        verifyClient(props)
     }
 
     interface ThingMBean {

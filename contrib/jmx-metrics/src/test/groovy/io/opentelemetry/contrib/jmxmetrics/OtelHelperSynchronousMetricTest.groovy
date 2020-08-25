@@ -44,9 +44,9 @@ class OtelHelperSynchronousMetricTest extends Specification{
     def setup() {
         // Set up a MeterSdk per test to be able to collect its metrics alone
         gutil = new GroovyUtils(
-                new JmxConfig().tap {
-                    exporterType = 'inmemory'
-                },
+                new JmxConfig(new Properties().tap {
+                    it.setProperty(JmxConfig.EXPORTER_TYPE, 'inmemory')
+                }),
                 name.methodName, ''
                 )
         otel = new OtelHelper(null, gutil)

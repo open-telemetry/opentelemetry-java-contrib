@@ -26,7 +26,7 @@ import javax.security.sasl.RealmCallback;
 
 public class ClientCallbackHandler implements CallbackHandler {
   private final String username;
-  @Nullable private char[] password;
+  @Nullable private final char[] password;
   private final String realm;
 
   /**
@@ -39,9 +39,7 @@ public class ClientCallbackHandler implements CallbackHandler {
    */
   public ClientCallbackHandler(final String username, final String password, final String realm) {
     this.username = username;
-    if (password != null) {
-      this.password = password.toCharArray();
-    }
+    this.password = password != null ? password.toCharArray() : null;
     this.realm = realm;
   }
 
