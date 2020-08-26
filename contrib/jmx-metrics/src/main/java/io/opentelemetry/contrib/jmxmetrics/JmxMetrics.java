@@ -27,14 +27,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JmxMetrics {
+class JmxMetrics {
   private static final Logger logger = Logger.getLogger(JmxMetrics.class.getName());
 
   private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
   private final GroovyRunner runner;
   private final JmxConfig config;
 
-  public JmxMetrics(final JmxConfig config) {
+  JmxMetrics(final JmxConfig config) {
     this.config = config;
 
     JmxClient jmxClient;
@@ -47,7 +47,7 @@ public class JmxMetrics {
     runner = new GroovyRunner(config.groovyScript, jmxClient, new GroovyUtils(config));
   }
 
-  public void start() {
+  private void start() {
     exec.scheduleWithFixedDelay(
         new Runnable() {
           @Override
