@@ -46,14 +46,14 @@ public class GroovyRunner {
       scriptSource = getFileAsString(groovyScript);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Failed to read groovy script", e);
-      throw new ConfigureError("Failed to read groovy script", e);
+      throw new ConfigurationException("Failed to read groovy script", e);
     }
 
     try {
       this.script = gshell.parse(scriptSource);
     } catch (CompilationFailedException e) {
       logger.log(Level.SEVERE, "Failed to compile groovy script", e);
-      throw new ConfigureError("Failed to compile groovy script", e);
+      throw new ConfigurationException("Failed to compile groovy script", e);
     }
 
     Binding binding = new Binding();

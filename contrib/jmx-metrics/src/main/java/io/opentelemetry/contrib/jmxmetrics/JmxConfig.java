@@ -93,30 +93,30 @@ public class JmxConfig {
     try {
       return Integer.parseInt(propVal);
     } catch (NumberFormatException e) {
-      throw new ConfigureError("Failed to parse " + key, e);
+      throw new ConfigurationException("Failed to parse " + key, e);
     }
   }
 
   /**
    * Will determine if parsed config is complete, setting any applicable defaults.
    *
-   * @throws ConfigureError - Thrown if a configuration value is missing or invalid.
+   * @throws ConfigurationException - Thrown if a configuration value is missing or invalid.
    */
-  public void validate() throws ConfigureError {
+  public void validate() throws ConfigurationException {
     if (isBlank(this.serviceUrl)) {
-      throw new ConfigureError(SERVICE_URL + " must be specified.");
+      throw new ConfigurationException(SERVICE_URL + " must be specified.");
     }
 
     if (isBlank(this.groovyScript)) {
-      throw new ConfigureError(GROOVY_SCRIPT + " must be specified.");
+      throw new ConfigurationException(GROOVY_SCRIPT + " must be specified.");
     }
 
     if (isBlank(this.otlpExporterEndpoint) && this.exporterType.equalsIgnoreCase("otlp")) {
-      throw new ConfigureError(OTLP_ENDPOINT + " must be specified for otlp format.");
+      throw new ConfigurationException(OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 
     if (this.intervalMilliseconds < 0) {
-      throw new ConfigureError(INTERVAL_MILLISECONDS + " must be positive.");
+      throw new ConfigurationException(INTERVAL_MILLISECONDS + " must be positive.");
     }
   }
 

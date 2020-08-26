@@ -93,7 +93,7 @@ public class GroovyUtils {
       prometheusServer =
           new HTTPServer(config.prometheusExporterHost, config.prometheusExporterPort);
     } catch (IOException e) {
-      throw new ConfigureError("Cannot configure prometheus exporter server:", e);
+      throw new ConfigurationException("Cannot configure prometheus exporter server:", e);
     }
   }
 

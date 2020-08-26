@@ -16,14 +16,14 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-public class ConfigureError extends RuntimeException {
+public class ConfigurationException extends RuntimeException {
   private static final long serialVersionUID = 0L;
 
-  public ConfigureError(final String message, final Throwable cause) {
+  public ConfigurationException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public ConfigureError(final String message) {
+  public ConfigurationException(final String message) {
     super(message);
   }
 }

@@ -103,7 +103,7 @@ class JmxConfigTest extends Specification {
         def raised = null
         try {
             new JmxConfig()
-        } catch (ConfigureError e) {
+        } catch (ConfigurationException e) {
             raised = e
         }
 
