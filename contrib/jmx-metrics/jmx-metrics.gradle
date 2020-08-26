@@ -38,10 +38,7 @@ def deps = [
 ]
 
 dependencies {
-    implementation "com.google.guava:guava:25.0-jre",
-            "com.google.protobuf:protobuf-java:${versions.protobuf}",
-            "com.google.protobuf:protobuf-java-util:${versions.protobuf}",
-            "io.grpc:grpc-netty-shaded:${versions.grpc}",
+    implementation "io.grpc:grpc-netty-shaded:${versions.grpc}",
             "org.codehaus.groovy:groovy-jmx:${versions.groovy}",
             "org.codehaus.groovy:groovy:${versions.groovy}",
             "io.prometheus:simpleclient:${versions.prometheus}",
