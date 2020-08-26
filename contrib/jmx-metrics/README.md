@@ -96,7 +96,7 @@ Those provided as command line properties take priority of those contained in a 
 | ------------- | -------- | ----------- |
 | `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
 | `otel.jmx.groovy.script` | **yes** | The path for the desired Groovy script. |
-| `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10 by default. |
+| `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
 | `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
 | `otel.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
 | `otel.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
