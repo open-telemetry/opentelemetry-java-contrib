@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,7 @@ import javax.management.remote.JMXServiceURL;
 
 public class JmxClient {
   private static final Logger logger = Logger.getLogger(JmxClient.class.getName());
+  private static final Set<ObjectName> EMPTY_SET = Collections.emptySet();
 
   private final JMXServiceURL url;
   private final String username;
@@ -50,7 +52,7 @@ public class JmxClient {
     this.remoteProfiles = config.remoteProfiles;
   }
 
-  private MBeanServerConnection ensureConnected() {
+  public MBeanServerConnection getConnection() {
     if (jmxConn != null) {
       try {
         return jmxConn.getMBeanServerConnection();
@@ -65,7 +67,7 @@ public class JmxClient {
       }
       try {
         // Not all supported versions of Java contain this Provider
-        Class klass = Class.forName("com.sun.security.sasl.Provider");
+        Class<?> klass = Class.forName("com.sun.security.sasl.Provider");
         Provider provider = (Provider) klass.getDeclaredConstructor().newInstance();
         Security.addProvider(provider);
 
@@ -85,10 +87,6 @@ public class JmxClient {
     }
   }
 
-  public MBeanServerConnection getConnection() {
-    return ensureConnected();
-  }
-
   /**
    * Query the MBean server for a given ObjectName.
    *
@@ -96,16 +94,16 @@ public class JmxClient {
    * @return the set of applicable ObjectName instances found by server
    */
   public Set<ObjectName> query(final ObjectName objectName) {
-    MBeanServerConnection mbsc = ensureConnected();
+    MBeanServerConnection mbsc = getConnection();
     if (mbsc == null) {
-      return null;
+      return EMPTY_SET;
     }
 
     try {
       return mbsc.queryNames(objectName, null);
     } catch (IOException e) {
-      jmxConn = null;
-      return null;
+      logger.log(Level.WARNING, "Could not query remote JMX server: ", e);
+      return EMPTY_SET;
     }
   }
 }

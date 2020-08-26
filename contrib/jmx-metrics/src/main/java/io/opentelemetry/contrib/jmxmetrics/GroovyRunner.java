@@ -93,4 +93,9 @@ public class GroovyRunner {
   public void flush() {
     gutil.exportMetrics();
   }
+
+  public void shutdown() {
+    flush();
+    gutil.shutdown();
+  }
 }

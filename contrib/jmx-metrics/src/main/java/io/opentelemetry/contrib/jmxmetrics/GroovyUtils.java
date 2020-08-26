@@ -40,9 +40,9 @@ import java.util.Map;
 
 public class GroovyUtils {
 
-  public Meter meter;
-  public MetricExporter exporter;
-  public HTTPServer prometheusServer;
+  private final Meter meter;
+  private MetricExporter exporter;
+  private HTTPServer prometheusServer;
 
   /**
    * A central context for creating and exporting metrics, to be used by groovy scripts via {@link
@@ -102,6 +102,12 @@ public class GroovyUtils {
     if (exporter != null) {
       Collection<MetricData> md = getMetricProducer().collectAllMetrics();
       exporter.export(md);
+    }
+  }
+
+  public void shutdown() {
+    if (prometheusServer != null) {
+      prometheusServer.stop();
     }
   }
 
