@@ -18,75 +18,70 @@ package io.opentelemetry.contrib.jmxmetrics;
 
 import java.util.Properties;
 
-public class JmxConfig {
-  protected static final String PREFIX = "otel.";
-  protected static final String SERVICE_URL = PREFIX + "jmx.service.url";
-  protected static final String GROOVY_SCRIPT = PREFIX + "jmx.groovy.script";
-  protected static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
-  protected static final String EXPORTER_TYPE = PREFIX + "exporter";
+class JmxConfig {
+  static final String PREFIX = "otel.";
+  static final String SERVICE_URL = PREFIX + "jmx.service.url";
+  static final String GROOVY_SCRIPT = PREFIX + "jmx.groovy.script";
+  static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
+  static final String EXPORTER_TYPE = PREFIX + "exporter";
 
-  protected static final String OTLP_ENDPOINT = PREFIX + "otlp.endpoint";
+  static final String OTLP_ENDPOINT = PREFIX + "otlp.endpoint";
 
-  protected static final String PROMETHEUS_HOST = PREFIX + "prometheus.host";
-  protected static final String PROMETHEUS_PORT = PREFIX + "prometheus.port";
+  static final String PROMETHEUS_HOST = PREFIX + "prometheus.host";
+  static final String PROMETHEUS_PORT = PREFIX + "prometheus.port";
 
-  protected static final String JMX_USERNAME = PREFIX + "jmx.username";
-  protected static final String JMX_PASSWORD = PREFIX + "jmx.password";
-  protected static final String JMX_REMOTE_PROFILES = PREFIX + "jmx.remote.profiles";
-  protected static final String JMX_REALM = PREFIX + "jmx.realm";
+  static final String JMX_USERNAME = PREFIX + "jmx.username";
+  static final String JMX_PASSWORD = PREFIX + "jmx.password";
+  static final String JMX_REMOTE_PROFILES = PREFIX + "jmx.remote.profiles";
+  static final String JMX_REALM = PREFIX + "jmx.realm";
 
-  public final String serviceUrl;
-  public final String groovyScript;
-  public final int intervalMilliseconds;
-  public final String exporterType;
+  final String serviceUrl;
+  final String groovyScript;
+  final int intervalMilliseconds;
+  final String exporterType;
 
-  public final String otlpExporterEndpoint;
+  final String otlpExporterEndpoint;
 
-  public final String prometheusExporterHost;
-  public final int prometheusExporterPort;
+  final String prometheusExporterHost;
+  final int prometheusExporterPort;
 
-  public final String username;
-  public final String password;
-  public final String realm;
-  public final String remoteProfiles;
+  final String username;
+  final String password;
+  final String realm;
+  final String remoteProfiles;
 
-  public final Properties properties;
+  final Properties properties;
 
-  public JmxConfig(final Properties props) {
-    this.properties = new Properties(props);
+  JmxConfig(final Properties props) {
+    properties = new Properties(props);
     // command line takes precedence
-    this.properties.putAll(System.getProperties());
+    properties.putAll(System.getProperties());
 
-    serviceUrl = getProperty(SERVICE_URL, "");
-    groovyScript = getProperty(GROOVY_SCRIPT, "");
+    serviceUrl = properties.getProperty(SERVICE_URL);
+    groovyScript = properties.getProperty(GROOVY_SCRIPT);
 
-    final int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
+    int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
     intervalMilliseconds = interval == 0 ? 10000 : interval;
 
-    exporterType = getProperty(EXPORTER_TYPE, "logging");
+    exporterType = properties.getProperty(EXPORTER_TYPE, "logging");
 
-    otlpExporterEndpoint = getProperty(OTLP_ENDPOINT, "");
+    otlpExporterEndpoint = properties.getProperty(OTLP_ENDPOINT);
 
-    prometheusExporterHost = getProperty(PROMETHEUS_HOST, "localhost");
+    prometheusExporterHost = properties.getProperty(PROMETHEUS_HOST, "localhost");
     prometheusExporterPort = getProperty(PROMETHEUS_PORT, 9090);
 
-    username = getProperty(JMX_USERNAME, "");
-    password = getProperty(JMX_PASSWORD, "");
-    remoteProfiles = getProperty(JMX_REMOTE_PROFILES, "");
-    realm = getProperty(JMX_REALM, "");
+    username = properties.getProperty(JMX_USERNAME);
+    password = properties.getProperty(JMX_PASSWORD);
+    remoteProfiles = properties.getProperty(JMX_REMOTE_PROFILES);
+    realm = properties.getProperty(JMX_REALM);
   }
 
-  public JmxConfig() {
+  JmxConfig() {
     this(new Properties());
   }
 
-  private String getProperty(final String key, final String dfault) {
-    final String propVal = properties.getProperty(key);
-    return (propVal == null) ? dfault : propVal;
-  }
-
   private int getProperty(final String key, final int dfault) {
-    final String propVal = properties.getProperty(key);
+    String propVal = properties.getProperty(key);
     if (propVal == null) {
       return dfault;
     }
@@ -97,25 +92,22 @@ public class JmxConfig {
     }
   }
 
-  /**
-   * Will determine if parsed config is complete, setting any applicable defaults.
-   *
-   * @throws ConfigurationException - Thrown if a configuration value is missing or invalid.
-   */
-  public void validate() throws ConfigurationException {
-    if (isBlank(this.serviceUrl)) {
+  /** Will determine if parsed config is complete, setting any applicable defaults. */
+  void validate() {
+    if (isBlank(serviceUrl)) {
       throw new ConfigurationException(SERVICE_URL + " must be specified.");
     }
 
-    if (isBlank(this.groovyScript)) {
+    if (isBlank(groovyScript)) {
       throw new ConfigurationException(GROOVY_SCRIPT + " must be specified.");
     }
 
-    if (isBlank(this.otlpExporterEndpoint) && this.exporterType.equalsIgnoreCase("otlp")) {
+    if (isBlank(otlpExporterEndpoint)
+        && (!isBlank(exporterType) && exporterType.equalsIgnoreCase("otlp"))) {
       throw new ConfigurationException(OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 
-    if (this.intervalMilliseconds < 0) {
+    if (intervalMilliseconds < 0) {
       throw new ConfigurationException(INTERVAL_MILLISECONDS + " must be positive.");
     }
   }
@@ -126,7 +118,7 @@ public class JmxConfig {
    * @param s - {@link String} to evaluate
    * @return - if s is null or without non-whitespace chars.
    */
-  public static boolean isBlank(final String s) {
+  static boolean isBlank(final String s) {
     if (s == null) {
       return true;
     }

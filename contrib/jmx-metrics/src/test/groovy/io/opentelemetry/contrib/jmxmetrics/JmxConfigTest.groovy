@@ -52,17 +52,17 @@ class JmxConfigTest extends Specification {
         def config = new JmxConfig()
 
         then:
-        config.serviceUrl == ""
-        config.groovyScript == ""
+        config.serviceUrl == null
+        config.groovyScript == null
         config.intervalMilliseconds == 10000
         config.exporterType == "logging"
-        config.otlpExporterEndpoint == ""
+        config.otlpExporterEndpoint == null
         config.prometheusExporterHost == "localhost"
         config.prometheusExporterPort == 9090
-        config.username == ""
-        config.password == ""
-        config.remoteProfiles == ""
-        config.realm == ""
+        config.username == null
+        config.password == null
+        config.remoteProfiles == null
+        config.realm == null
     }
 
     def 'specified values'() {
