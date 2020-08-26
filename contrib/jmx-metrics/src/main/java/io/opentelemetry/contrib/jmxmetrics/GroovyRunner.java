@@ -33,8 +33,6 @@ import org.codehaus.groovy.control.CompilationFailedException;
 public class GroovyRunner {
   private static final Logger logger = Logger.getLogger(GroovyRunner.class.getName());
 
-  private final GroovyShell gshell = new GroovyShell();
-
   private final Script script;
   private final GroovyUtils gutil;
 
@@ -50,7 +48,7 @@ public class GroovyRunner {
     }
 
     try {
-      this.script = gshell.parse(scriptSource);
+      this.script = new GroovyShell().parse(scriptSource);
     } catch (CompilationFailedException e) {
       logger.log(Level.SEVERE, "Failed to compile groovy script", e);
       throw new ConfigurationException("Failed to compile groovy script", e);
@@ -59,7 +57,7 @@ public class GroovyRunner {
     Binding binding = new Binding();
     binding.setVariable("log", logger);
 
-    OtelHelper otelHelper = new OtelHelper(jmxClient, gutil);
+    OtelHelper otelHelper = new OtelHelper(jmxClient, this.gutil);
     binding.setVariable("otel", otelHelper);
 
     script.setBinding(binding);
