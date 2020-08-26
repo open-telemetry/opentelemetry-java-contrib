@@ -44,7 +44,7 @@ class JmxMetrics {
       throw new ConfigurationException("Malformed serviceUrl: ", e);
     }
 
-    runner = new GroovyRunner(config.groovyScript, jmxClient, new GroovyUtils(config));
+    runner = new GroovyRunner(config.groovyScript, jmxClient, new GroovyMetricEnvironment(config));
   }
 
   private void start() {

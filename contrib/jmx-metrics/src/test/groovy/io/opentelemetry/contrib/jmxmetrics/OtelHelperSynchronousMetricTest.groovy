@@ -34,7 +34,7 @@ import spock.lang.Specification
 class OtelHelperSynchronousMetricTest extends Specification{
 
     @Shared
-    GroovyUtils gutil
+    GroovyMetricEnvironment gme
 
     @Shared
     OtelHelper otel
@@ -43,13 +43,13 @@ class OtelHelperSynchronousMetricTest extends Specification{
 
     def setup() {
         // Set up a MeterSdk per test to be able to collect its metrics alone
-        gutil = new GroovyUtils(
+        gme = new GroovyMetricEnvironment(
                 new JmxConfig(new Properties().tap {
                     it.setProperty(JmxConfig.EXPORTER_TYPE, 'inmemory')
                 }),
                 name.methodName, ''
                 )
-        otel = new OtelHelper(null, gutil)
+        otel = new OtelHelper(null, gme)
     }
 
     def exportMetrics() {

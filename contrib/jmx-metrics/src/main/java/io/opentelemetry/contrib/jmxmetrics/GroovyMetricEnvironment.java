@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-public class GroovyUtils {
+public class GroovyMetricEnvironment {
 
   private final Meter meter;
   private MetricExporter exporter;
@@ -52,7 +52,7 @@ public class GroovyUtils {
    * @param instrumentationName - meter's instrumentationName
    * @param instrumentationVersion - meter's instrumentationVersion
    */
-  public GroovyUtils(
+  public GroovyMetricEnvironment(
       final JmxConfig config,
       final String instrumentationName,
       final String instrumentationVersion) {
@@ -79,8 +79,8 @@ public class GroovyUtils {
    *
    * @param config - used to establish exporter type (logging by default) and connection info
    */
-  public GroovyUtils(final JmxConfig config) {
-    this(config, "jmx-metrics", "0.0.1");
+  public GroovyMetricEnvironment(final JmxConfig config) {
+    this(config, "io.opentelemetry.contrib.jmxmetrics", "0.0.1");
   }
 
   private static MetricProducer getMetricProducer() {

@@ -34,10 +34,13 @@ public class GroovyRunner {
   private static final Logger logger = Logger.getLogger(GroovyRunner.class.getName());
 
   private final Script script;
-  private final GroovyUtils gutil;
+  private final GroovyMetricEnvironment groovyMetricEnvironment;
 
-  GroovyRunner(final String groovyScript, final JmxClient jmxClient, final GroovyUtils gutil) {
-    this.gutil = gutil;
+  GroovyRunner(
+      final String groovyScript,
+      final JmxClient jmxClient,
+      final GroovyMetricEnvironment groovyMetricEnvironment) {
+    this.groovyMetricEnvironment = groovyMetricEnvironment;
 
     String scriptSource;
     try {
@@ -57,7 +60,7 @@ public class GroovyRunner {
     Binding binding = new Binding();
     binding.setVariable("log", logger);
 
-    OtelHelper otelHelper = new OtelHelper(jmxClient, this.gutil);
+    OtelHelper otelHelper = new OtelHelper(jmxClient, this.groovyMetricEnvironment);
     binding.setVariable("otel", otelHelper);
 
     script.setBinding(binding);
@@ -91,11 +94,11 @@ public class GroovyRunner {
   }
 
   public void flush() {
-    gutil.exportMetrics();
+    groovyMetricEnvironment.exportMetrics();
   }
 
   public void shutdown() {
     flush();
-    gutil.shutdown();
+    groovyMetricEnvironment.shutdown();
   }
 }

@@ -53,7 +53,7 @@ class OtelHelperJmxTest extends Specification {
     }
 
     private OtelHelper setupHelper(JmxConfig config) {
-        return new OtelHelper(new JmxClient(config), new GroovyUtils(config))
+        return new OtelHelper(new JmxClient(config), new GroovyMetricEnvironment(config))
     }
 
     private void verifyClient(Properties props) {
