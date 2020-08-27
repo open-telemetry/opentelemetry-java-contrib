@@ -33,7 +33,7 @@ class JmxConfigTest extends Specification {
             "prometheus.port",
             "jmx.username",
             "jmx.password",
-            "jmx.remote.profiles",
+            "jmx.remote.profile",
             "jmx.realm"
         ]
         properties.each {System.clearProperty("otel.${it}")}
@@ -61,7 +61,7 @@ class JmxConfigTest extends Specification {
         config.prometheusExporterPort == 9090
         config.username == null
         config.password == null
-        config.remoteProfiles == null
+        config.remoteProfile == null
         config.realm == null
     }
 
@@ -77,7 +77,7 @@ class JmxConfigTest extends Specification {
             "prometheus.port": "234",
             "jmx.username": "myUsername",
             "jmx.password": "myPassword",
-            "jmx.remote.profiles": "myRemoteProfile",
+            "jmx.remote.profile": "myRemoteProfile",
             "jmx.realm": "myRealm"
         ]
         properties.each {System.setProperty("otel.${it.key}", it.value)}
@@ -93,7 +93,7 @@ class JmxConfigTest extends Specification {
         config.prometheusExporterPort == 234
         config.username == "myUsername"
         config.password == "myPassword"
-        config.remoteProfiles == "myRemoteProfile"
+        config.remoteProfile == "myRemoteProfile"
         config.realm == "myRealm"
     }
 

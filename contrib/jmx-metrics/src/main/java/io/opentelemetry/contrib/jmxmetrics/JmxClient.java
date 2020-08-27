@@ -41,7 +41,7 @@ public class JmxClient {
   private final String username;
   private final String password;
   private final String realm;
-  private final String remoteProfiles;
+  private final String remoteProfile;
   @Nullable private JMXConnector jmxConn;
 
   JmxClient(final JmxConfig config) throws MalformedURLException {
@@ -49,7 +49,7 @@ public class JmxClient {
     this.username = config.username;
     this.password = config.password;
     this.realm = config.realm;
-    this.remoteProfiles = config.remoteProfiles;
+    this.remoteProfile = config.remoteProfile;
   }
 
   public MBeanServerConnection getConnection() {
@@ -71,7 +71,7 @@ public class JmxClient {
         Provider provider = (Provider) klass.getDeclaredConstructor().newInstance();
         Security.addProvider(provider);
 
-        env.put("jmx.remote.profiles", this.remoteProfiles);
+        env.put("jmx.remote.profile", this.remoteProfile);
         env.put(
             "jmx.remote.sasl.callback.handler",
             new ClientCallbackHandler(this.username, this.password, this.realm));

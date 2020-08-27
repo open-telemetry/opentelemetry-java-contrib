@@ -111,5 +111,5 @@ Those provided as command line properties take priority of those contained in a 
 | `javax.net.ssl.keyStoreType` | no | The key store type. |
 | `javax.net.ssl.trustStore` | no | The trusted store path if the TLS profile is required. |
 | `javax.net.ssl.trustStorePassword` | no | The trust store file password if required. |
-| `otel.jmx.remote.profiles` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |
+| `otel.jmx.remote.profile` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |
 | `otel.jmx.realm` | no | The realm is required by profile SASL/DIGEST-MD5. |

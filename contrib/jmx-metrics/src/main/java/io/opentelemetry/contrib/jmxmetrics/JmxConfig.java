@@ -32,7 +32,7 @@ class JmxConfig {
 
   static final String JMX_USERNAME = PREFIX + "jmx.username";
   static final String JMX_PASSWORD = PREFIX + "jmx.password";
-  static final String JMX_REMOTE_PROFILES = PREFIX + "jmx.remote.profiles";
+  static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
   final String serviceUrl;
@@ -48,7 +48,7 @@ class JmxConfig {
   final String username;
   final String password;
   final String realm;
-  final String remoteProfiles;
+  final String remoteProfile;
 
   final Properties properties;
 
@@ -72,7 +72,7 @@ class JmxConfig {
 
     username = properties.getProperty(JMX_USERNAME);
     password = properties.getProperty(JMX_PASSWORD);
-    remoteProfiles = properties.getProperty(JMX_REMOTE_PROFILES);
+    remoteProfile = properties.getProperty(JMX_REMOTE_PROFILE);
     realm = properties.getProperty(JMX_REALM);
   }
 
