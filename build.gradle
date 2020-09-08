@@ -18,4 +18,10 @@ allprojects {
         jcenter()
         mavenCentral()
     }
+
+    if (property('ojc.integration.tests') == 'true') {
+        tasks.withType(Test) {
+            systemProperty 'ojc.integration.tests', 'true'
+        }
+    }
 }

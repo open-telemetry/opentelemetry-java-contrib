@@ -9,11 +9,19 @@ feature or via instrumentation, this project is hopefully for you.
 
 *This project is in its early stages and doesn't provide any assurances of stability or production readiness.*
 
+
+## Provided Libraries
+
+* [JMX Metric Gatherer](./contrib/jmx-metrics/README.md)
+
 ## Getting Started
 
 ```bash
 # Build the complete project
 $ make build
+
+# Run integration tests
+$ make integration-test
 
 # Clean artifacts
 $ make clean

@@ -1,0 +1,72 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "6.0.0"
+    id "application"
+}
+
+apply from: project.contrib
+apply plugin: 'com.github.johnrengelman.shadow'
+
+archivesBaseName = 'io.opentelemetry.contrib.jmx-metrics'
+
+description = 'JMX metrics gathering Groovy script runner'
+
+// we are joint compiling so rely on groovy plugin entirely
+sourceSets.main.groovy.srcDirs = [
+    "src/main/java",
+    "src/main/groovy"
+]
+sourceSets.test.groovy.srcDirs = [
+    "src/test/java",
+    "src/test/groovy"
+]
+sourceSets.main.java.srcDirs = []
+sourceSets.test.java.srcDirs = []
+
+mainClassName = 'io.opentelemetry.contrib.jmxmetrics.JmxMetrics'
+
+def versions = [
+    grpc : '1.30.2',
+    protobuf : '3.11.4',
+    groovy : '2.5.11',
+    slf4j : "1.7.30",
+    prometheus: "0.8.1",
+]
+
+def deps = [
+    slf4j : "org.slf4j:slf4j-api:${versions.slf4j}",
+    testcontainers : "org.testcontainers:testcontainers:1.14.3",
+]
+
+dependencies {
+    implementation "io.grpc:grpc-netty-shaded:${versions.grpc}",
+            "org.codehaus.groovy:groovy-jmx:${versions.groovy}",
+            "org.codehaus.groovy:groovy:${versions.groovy}",
+            "io.prometheus:simpleclient:${versions.prometheus}",
+            "io.prometheus:simpleclient_httpserver:${versions.prometheus}",
+            libraries.otelApi,
+            libraries.otelExporterLogging,
+            libraries.otelExporterOtlp,
+            libraries.otelExporterPrometheus,
+            libraries.otelExporterInMemory,
+            libraries.otelSdk,
+            deps.slf4j,
+            dependencies.create(group: 'org.slf4j', name: 'slf4j-simple', version: versions.slf4j)
+
+    runtime "org.terracotta:jmxremote_optional-tc:1.0.5"
+
+    testImplementation "io.grpc:grpc-api:${versions.grpc}",
+            "io.grpc:grpc-protobuf:${versions.grpc}",
+            "io.grpc:grpc-stub:${versions.grpc}",
+            "io.grpc:grpc-testing:${versions.grpc}",
+            "org.codehaus.groovy:groovy-test:${versions.groovy}",
+            'io.rest-assured:rest-assured:4.2.0',
+            'org.awaitility:awaitility:3.0.0',
+            'org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1',
+            deps.testcontainers,
+            libraries.otelProto
+}
+
+tasks.withType(Test) {
+    dependsOn shadowJar
+    systemProperty 'shadow.jar.path', shadowJar.archiveFile.asFile.get().path
+}
