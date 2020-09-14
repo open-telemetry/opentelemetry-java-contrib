@@ -17,7 +17,6 @@
 package io.opentelemetry.contrib.jmxmetrics
 
 
-import static io.opentelemetry.proto.metrics.v1.MetricDescriptor.Type.SUMMARY
 import static org.junit.Assert.assertTrue
 
 import io.grpc.ServerBuilder
@@ -29,9 +28,9 @@ import io.opentelemetry.proto.common.v1.InstrumentationLibrary
 import io.opentelemetry.proto.common.v1.StringKeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
-import io.opentelemetry.proto.metrics.v1.MetricDescriptor
+import io.opentelemetry.proto.metrics.v1.DoubleHistogram
+import io.opentelemetry.proto.metrics.v1.DoubleHistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
-import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Shared
@@ -86,30 +85,30 @@ class OtlpIntegrationTests extends IntegrationTest  {
         then: 'it is of the expected size'
         metrics.size() == 1
 
-        when: 'we examine the metric descriptor'
+        when: 'we examine the metric metadata'
         Metric metric = metrics.get(0)
-        MetricDescriptor md = metric.metricDescriptor
         then: 'it is of the expected content'
-        md.name == 'cassandra.storage.load'
-        md.description == 'Size, in bytes, of the on disk data size this node manages'
-        md.unit == 'By'
-        md.type == SUMMARY
+        metric.name == 'cassandra.storage.load'
+        metric.description == 'Size, in bytes, of the on disk data size this node manages'
+        metric.unit == 'By'
+        metric.hasDoubleHistogram()
 
         when: 'we examine the datapoints'
-        List<SummaryDataPoint> datapoints = metric.summaryDataPointsList
+        DoubleHistogram datapoints = metric.doubleHistogram
         then: 'they are of the expected size'
-        datapoints.size() == 1
+        datapoints.dataPointsCount == 1
 
         when: 'we example the datapoint labels and sum'
-        SummaryDataPoint datapoint = datapoints.get(0)
+        DoubleHistogramDataPoint datapoint = datapoints.getDataPoints(0)
         List<StringKeyValue> labels = datapoint.labelsList
         def sum = datapoint.sum
         then: 'they are of the expected content'
         labels.size() == 1
         labels.get(0) == StringKeyValue.newBuilder().setKey("myKey").setValue("myVal").build()
+
         datapoint.count == 1
-        datapoint.getPercentileValues(0).value == sum
-        datapoint.getPercentileValues(1).value == sum
+        datapoint.getBucketCounts(0).value == sum
+        datapoint.getBucketCounts(1).value == sum
     }
 
     static final class Collector extends MetricsServiceGrpc.MetricsServiceImplBase {

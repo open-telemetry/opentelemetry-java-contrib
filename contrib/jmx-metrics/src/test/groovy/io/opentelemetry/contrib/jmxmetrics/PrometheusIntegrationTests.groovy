@@ -52,17 +52,16 @@ class PrometheusIntegrationTests extends IntegrationTest {
         then: 'they are of the expected format'
         scraped.size() == 6
         scraped[0].contains(
-                '# HELP io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load Size, in bytes, of the on disk data size this node manages')
+                '# HELP cassandra_storage_load Size, in bytes, of the on disk data size this node manages')
         scraped[1].contains(
-                '# TYPE io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load summary')
+                '# TYPE cassandra_storage_load summary')
         scraped[2].contains(
-                'io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load_count{myKey="myVal",} ')
+                'cassandra_storage_load_count{myKey="myVal",} ')
         scraped[3].contains(
-                'io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load_sum{myKey="myVal",} ')
+                'cassandra_storage_load_sum{myKey="myVal",} ')
         scraped[4].contains(
-                'io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load{myKey="myVal",quantile="0.0",} ')
-
+                'cassandra_storage_load{myKey="myVal",quantile="0.0",} ')
         scraped[5].contains(
-                'io_opentelemetry_contrib_jmxmetrics_cassandra_storage_load{myKey="myVal",quantile="100.0",} ')
+                'cassandra_storage_load{myKey="myVal",quantile="100.0",} ')
     }
 }
