@@ -26,7 +26,9 @@ import org.testcontainers.images.builder.ImageFromDockerfile
 import org.testcontainers.utility.MountableFile
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
+@Unroll
 class IntegrationTest extends Specification{
 
     @Shared
@@ -38,7 +40,7 @@ class IntegrationTest extends Specification{
     @Shared
     def jmxExposedPort
 
-    void configureContainers(String configName, int exporterPort) {
+    void configureContainers(String configName, int otlpPort, int prometheusPort, boolean configFromStdin) {
         def jarPath = System.getProperty("shadow.jar.path")
 
         def scriptName = "script.groovy"
@@ -52,6 +54,28 @@ class IntegrationTest extends Specification{
                 + "RUN chmod 0400 /etc/cassandra/jmxremote.password\n")
 
         def network = Network.SHARED
+
+        def jvmCommand = [
+            "java",
+            "-cp",
+            "/app/OpenTelemetryJava.jar",
+            "-Dotel.jmx.username=cassandra",
+            "-Dotel.jmx.password=cassandra",
+            "-Dotel.otlp.endpoint=host.testcontainers.internal:${otlpPort}",
+            "io.opentelemetry.contrib.jmxmetrics.JmxMetrics",
+            "-config",
+        ]
+
+        if (configFromStdin) {
+            def cmd = jvmCommand.join(' ')
+            jvmCommand = [
+                "sh",
+                "-c",
+                "cat /app/${configName} | ${cmd} -",
+            ]
+        } else {
+            jvmCommand.add("/app/${configName}")
+        }
 
         cassandraContainer =
                 new GenericContainer<>(
@@ -71,24 +95,20 @@ class IntegrationTest extends Specification{
                 MountableFile.forHostPath(scriptPath), "/app/${scriptName}")
                 .withCopyFileToContainer(
                 MountableFile.forHostPath(configPath), "/app/${configName}")
-                .withCommand("java -cp /app/OpenTelemetryJava.jar "
-                + "-Dotel.jmx.username=cassandra "
-                + "-Dotel.jmx.password=cassandra "
-                + "io.opentelemetry.contrib.jmxmetrics.JmxMetrics "
-                + "-config /app/${configName}")
+                .withCommand(jvmCommand as String[])
                 .withStartupTimeout(Duration.ofSeconds(120))
                 .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1))
                 .dependsOn(cassandraContainer)
-        if (exporterPort != 0) {
-            jmxExtensionAppContainer.withExposedPorts(exporterPort)
+        if (prometheusPort != 0) {
+            jmxExtensionAppContainer.withExposedPorts(prometheusPort)
         }
         jmxExtensionAppContainer.start()
 
         assertTrue(cassandraContainer.running)
         assertTrue(jmxExtensionAppContainer.running)
 
-        if (exporterPort != 0) {
-            jmxExposedPort = jmxExtensionAppContainer.getMappedPort(exporterPort)
+        if (prometheusPort != 0) {
+            jmxExposedPort = jmxExtensionAppContainer.getMappedPort(prometheusPort)
         }
     }
 }

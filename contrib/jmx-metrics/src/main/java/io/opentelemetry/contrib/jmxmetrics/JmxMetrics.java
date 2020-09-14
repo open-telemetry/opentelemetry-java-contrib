@@ -16,6 +16,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,28 +76,46 @@ class JmxMetrics {
     if (args.length != 0 && (args.length != 2 || !args[0].equalsIgnoreCase("-config"))) {
       System.out.println(
           "Usage: java io.opentelemetry.contrib.jmxmetrics.JmxMetrics "
-              + "-config <path_to_config.properties>");
+              + "-config <path_to_config.properties or - for stdin>");
       System.exit(1);
     }
 
     Properties props = new Properties();
     if (args.length == 2) {
-      try (InputStream is = new FileInputStream(args[1])) {
-        props.load(is);
-      } catch (IOException e) {
-        System.out.println(
-            "Failed to read config properties file at '" + args[1] + "': " + e.getMessage());
-        System.exit(1);
+      String path = args[1];
+      if (path.trim().equals("-")) {
+        loadPropertiesFromStdin(props);
+      } else {
+        loadPropertiesFromPath(props, path);
       }
     }
 
     return new JmxConfig(props);
   }
 
+  private static void loadPropertiesFromStdin(Properties props) {
+    try (InputStream is = new DataInputStream(System.in)) {
+      props.load(is);
+    } catch (IOException e) {
+      System.out.println("Failed to read config properties from stdin: " + e.getMessage());
+      System.exit(1);
+    }
+  }
+
+  private static void loadPropertiesFromPath(Properties props, String path) {
+    try (InputStream is = new FileInputStream(path)) {
+      props.load(is);
+    } catch (IOException e) {
+      System.out.println(
+          "Failed to read config properties file at '" + path + "': " + e.getMessage());
+      System.exit(1);
+    }
+  }
+
   /**
    * Main method to create and run a {@link JmxMetrics} instance.
    *
-   * @param args - must be of the form "-config jmx_config_path"
+   * @param args - must be of the form "-config {jmx_config_path,'-'}"
    */
   public static void main(final String[] args) {
     JmxConfig config = getConfigFromArgs(args);

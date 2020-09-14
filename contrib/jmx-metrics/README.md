@@ -7,7 +7,7 @@ object with methods for obtaining MBeans and constructing synchronous OpenTeleme
 ### Usage
 
 ```bash
-$ java -D<otel.jmx.property=value> -jar io.opentelemetry.contrib.jmx-metrics-<version>-all.jar [-config ./optional_config.properties]
+$ java -D<otel.jmx.property=value> -jar io.opentelemetry.contrib.jmx-metrics-<version>-all.jar [-config {optional_config.properties, '-'}]
 ```
 
 ##### `optional_config.properties` example
@@ -90,7 +90,8 @@ This metric extension supports Java 7+, though SASL is only supported where
 ### Configuration
 
 The following properties are supported via the command line or specified config properties file `(-config)`.
-Those provided as command line properties take priority of those contained in a properties file.
+Those provided as command line properties take priority of those contained in a properties file.  Properties
+file contents can also be provided via stdin on startup when using `-config -` as an option.
 
 | Property | Required | Description |
 | ------------- | -------- | ----------- |

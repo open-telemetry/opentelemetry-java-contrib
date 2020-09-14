@@ -16,7 +16,6 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-
 import static org.junit.Assert.assertTrue
 
 import io.grpc.ServerBuilder
@@ -31,10 +30,12 @@ import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.DoubleHistogram
 import io.opentelemetry.proto.metrics.v1.DoubleHistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Timeout
+import spock.lang.Unroll
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
@@ -43,24 +44,39 @@ import spock.lang.Timeout
 class OtlpIntegrationTests extends IntegrationTest  {
 
     @Shared
-    def collector = new Collector()
+    def collector
     @Shared
-    def collectorServer = ServerBuilder.forPort(55680).addService(collector).build()
-
-    def setupSpec() {
-        Testcontainers.exposeHostPorts(55680)
-        configureContainers('otlp_config.properties', 0)
-    }
+    def collectorServer
+    @Shared
+    def otlpPort
 
     def setup() {
+        // set up a collector per test to avoid noisy neighbor
+        otlpPort = availablePort()
+        collector = new Collector()
+        collectorServer = ServerBuilder.forPort(otlpPort).addService(collector).build()
         collectorServer.start()
     }
 
-    def cleanupSpec() {
-        collectorServer.shutdown()
+    def cleanup() {
+        collectorServer.shutdownNow()
+        collectorServer.awaitTermination(5, TimeUnit.SECONDS)
     }
 
-    def 'end to end'() {
+    def availablePort() {
+        def sock = new ServerSocket(0);
+        def port = sock.getLocalPort()
+        sock.close()
+        return port
+    }
+
+    @Unroll
+    def 'end to end with stdin config: #useStdin'() {
+        setup: 'we configure JMX metrics gatherer and target server'
+        Testcontainers.exposeHostPorts(otlpPort)
+        configureContainers('otlp_config.properties',  otlpPort, 0, useStdin)
+
+        expect:
         when: 'we receive metrics from the JMX metrics gatherer'
         List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
         then: 'they are of the expected size'
@@ -109,6 +125,15 @@ class OtlpIntegrationTests extends IntegrationTest  {
         datapoint.count == 1
         datapoint.getBucketCounts(0).value == sum
         datapoint.getBucketCounts(1).value == sum
+
+        cleanup:
+        cassandraContainer.stop()
+        jmxExtensionAppContainer.stop()
+
+        where:
+        useStdin | _
+        false | _
+        true | _
     }
 
     static final class Collector extends MetricsServiceGrpc.MetricsServiceImplBase {

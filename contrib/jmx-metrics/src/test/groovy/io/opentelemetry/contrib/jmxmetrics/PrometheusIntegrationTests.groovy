@@ -19,16 +19,13 @@ package io.opentelemetry.contrib.jmxmetrics
 import org.apache.hc.client5.http.fluent.Request
 import spock.lang.Requires
 import spock.lang.Timeout
+import spock.lang.Unroll
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(60)
 class PrometheusIntegrationTests extends IntegrationTest {
-
-    def setupSpec() {
-        configureContainers('prometheus_config.properties', 9123)
-    }
 
     def receivedMetrics() {
         def scraped = []
@@ -45,7 +42,12 @@ class PrometheusIntegrationTests extends IntegrationTest {
         return scraped
     }
 
-    def 'end to end'() {
+    @Unroll
+    def 'end to end with stdin config: #useStdin'() {
+        setup: 'we configure JMX metrics gatherer and target server'
+        configureContainers('prometheus_config.properties', 0, 9123, useStdin)
+
+        expect:
         when: 'we receive metrics from the prometheus endpoint'
         def scraped = receivedMetrics()
 
@@ -63,5 +65,14 @@ class PrometheusIntegrationTests extends IntegrationTest {
                 'cassandra_storage_load{myKey="myVal",quantile="0.0",} ')
         scraped[5].contains(
                 'cassandra_storage_load{myKey="myVal",quantile="100.0",} ')
+
+        cleanup:
+        cassandraContainer.stop()
+        jmxExtensionAppContainer.stop()
+
+        where:
+        useStdin | _
+        false | _
+        true | _
     }
 }
