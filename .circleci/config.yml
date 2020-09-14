@@ -10,6 +10,7 @@ executors:
       - image: circleci/openjdk:8-jdk
   integration:
     machine:
+      resource_class: large
       image: ubuntu-1604:201903-01
 jobs:
   build:
