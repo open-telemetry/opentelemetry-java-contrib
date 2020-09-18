@@ -27,3 +27,11 @@ test:
 .PHONY: integration-test
 integration-test:
 	./gradlew -Pojc.integration.tests=true test
+
+.PHONY: maven-publish
+maven-publish:
+	./gradlew publish
+
+.PHONY: oss-snapshot
+oss-snapshot:
+	./gradlew artifactoryPublish

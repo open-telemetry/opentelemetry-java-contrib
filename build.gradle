@@ -1,5 +1,6 @@
 plugins {
     id 'com.diffplug.spotless' version '5.1.1'
+    id "com.jfrog.artifactory" version "4.17.2" apply false
 }
 
 description = 'OpenTelemetry Contrib libraries and utilities for the JVM'
@@ -12,6 +13,7 @@ allprojects {
     apply from: "$rootDir/gradle/dependencies.gradle"
 
     it.ext.contrib = "$rootDir/gradle/contrib.gradle"
+    it.ext.publish = "$rootDir/gradle/publish.gradle"
 
     repositories {
         mavenLocal()
