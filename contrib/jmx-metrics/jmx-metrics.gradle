@@ -1,13 +1,14 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "6.0.0"
     id "application"
 }
 
 apply from: project.contrib
 apply plugin: 'com.github.johnrengelman.shadow'
+apply from: project.publish
 
-archivesBaseName = 'io.opentelemetry.contrib.jmx-metrics'
+ext.shadowPublish = true
 
+ext.libraryName = 'OpenTelemetry Java Contrib JMX Metric Gatherer'
 description = 'JMX metrics gathering Groovy script runner'
 
 // we are joint compiling so rely on groovy plugin entirely
@@ -64,6 +65,11 @@ dependencies {
             'org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1',
             deps.testcontainers,
             libraries.otelProto
+}
+
+shadowJar {
+    // This should always be standalone, so remove '-all' to prevent unnecessary artifact.
+    archiveClassifier.set('')
 }
 
 tasks.withType(Test) {

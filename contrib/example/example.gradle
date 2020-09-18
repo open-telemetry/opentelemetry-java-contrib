@@ -1,5 +1,6 @@
 apply from: project.contrib
 
+ext.libraryName = 'OpenTelemetry Java Contrib Example'
 description = 'An example OpenTelemetry Java Contrib library'
 
 jar {
