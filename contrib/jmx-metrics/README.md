@@ -7,7 +7,7 @@ object with methods for obtaining MBeans and constructing synchronous OpenTeleme
 ### Usage
 
 ```bash
-$ java -D<otel.jmx.property=value> -jar io.opentelemetry.contrib.jmx-metrics-<version>-all.jar [-config {optional_config.properties, '-'}]
+$ java -D<otel.jmx.property=value> -jar opentelemetry-java-contrib-jmx-metrics-<version>.jar [-config {optional_config.properties, '-'}]
 ```
 
 ##### `optional_config.properties` example

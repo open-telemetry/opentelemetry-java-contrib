@@ -1,0 +1,82 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+
+publishing {
+    repositories {
+        maven {
+            url = "$rootDir/build/repo"
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            if (project.tasks.findByName('shadowJar') != null && findProperty('shadowPublish')) {
+                project.shadow.component(it)
+            } else {
+                from components.java
+            }
+
+            afterEvaluate {
+                artifactId = artifactPrefix(archivesBaseName) + archivesBaseName
+            }
+
+            pom {
+                name = 'OpenTelemetry Java Contrib'
+                packaging = 'jar'
+                url = 'https://github.com/open-telemetry/opentelemetry-java-contrib'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'opentelemetry'
+                        name = 'OpenTelemetry Gitter'
+                        url = 'https://gitter.im/open-telemetry/community'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git'
+                    developerConnection = 'scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git'
+                    url = 'git@github.com:open-telemetry/opentelemetry-java-contrib.git'
+                }
+
+                afterEvaluate {
+                    // these properties aren't available until evaluated
+                    if (project.findProperty('libraryName') != null) {
+                        name = project.getProperty('libraryName')
+                    }
+                    description = project.description
+                }
+            }
+        }
+    }
+}
+
+def artifactPrefix(archivesBaseName) {
+    if (archivesBaseName.startsWith(rootProject.name)) {
+        return ''
+    }
+    return rootProject.name
+}
+
+artifactory {
+    contextUrl = 'https://oss.jfrog.org'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = System.getenv('BINTRAY_USER')
+            password = System.getenv('BINTRAY_API_KEY')
+        }
+    }
+}
+
+artifactoryPublish {
+    enabled = version.toString().contains('SNAPSHOT')
+    publications('maven')
+}
