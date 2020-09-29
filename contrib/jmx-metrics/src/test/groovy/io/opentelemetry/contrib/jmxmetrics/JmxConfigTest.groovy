@@ -16,35 +16,12 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import spock.lang.Specification
 
+class JmxConfigTest extends UnitTest {
 
-class JmxConfigTest extends Specification {
-
-    void clearProperties() {
-        // ensure relevant properties aren't set
-        def properties = [
-            "jmx.service.url",
-            "jmx.groovy.script",
-            "jmx.interval.milliseconds",
-            "exporter",
-            "otlp.endpoint",
-            "prometheus.host",
-            "prometheus.port",
-            "jmx.username",
-            "jmx.password",
-            "jmx.remote.profile",
-            "jmx.realm"
-        ]
-        properties.each {System.clearProperty("otel.${it}")}
-    }
-
-    def setup() {
-        clearProperties()
-    }
-
-    def cleanupSpec() {
-        clearProperties()
+    def 'static values'() {
+        expect: 'static values to be expected'
+        JmxConfig.AVAILABLE_TARGET_SYSTEMS == ["jvm"]
     }
 
     def 'default values'() {
@@ -54,6 +31,7 @@ class JmxConfigTest extends Specification {
         then:
         config.serviceUrl == null
         config.groovyScript == null
+        config.targetSystem == ""
         config.intervalMilliseconds == 10000
         config.exporterType == "logging"
         config.otlpExporterEndpoint == null
@@ -70,6 +48,7 @@ class JmxConfigTest extends Specification {
         def properties = [
             "jmx.service.url" : "myServiceUrl",
             "jmx.groovy.script" : "myGroovyScript",
+            "jmx.target.system" : "mytargetsystem",
             "jmx.interval.milliseconds": "123",
             "exporter": "inmemory",
             "otlp.endpoint": "myOtlpEndpoint",
@@ -86,6 +65,7 @@ class JmxConfigTest extends Specification {
         then:
         config.serviceUrl == "myServiceUrl"
         config.groovyScript == "myGroovyScript"
+        config.targetSystem == "mytargetsystem"
         config.intervalMilliseconds == 123
         config.exporterType == "inmemory"
         config.otlpExporterEndpoint == "myOtlpEndpoint"
@@ -110,11 +90,55 @@ class JmxConfigTest extends Specification {
         expect: 'config fails to be created'
         raised != null
         raised.message ==  "Failed to parse ${prop}"
-        println "JmxConfigTest.invalid values: ${raised.message}"
 
         where:
         prop | _
         'otel.jmx.interval.milliseconds' | _
         'otel.prometheus.port' | _
+    }
+
+    def 'conflicting groovy script and target system'() {
+        setup: 'config is set with both groovy script and target system'
+        [
+            "service.url" : "requiredValue",
+            "groovy.script": "myGroovyScript",
+            "target.system": "myTargetSystem"
+        ].each {
+            System.setProperty("otel.jmx.${it.key}", it.value)
+        }
+        def config = new JmxConfig()
+
+        def raised = null
+        try {
+            config.validate()
+        } catch (ConfigurationException e) {
+            raised = e
+        }
+
+        expect: 'config fails to validate'
+        raised != null
+        raised.message ==  "Only one of otel.jmx.groovy.script or otel.jmx.target.system can be specified."
+    }
+
+    def "invalid target system"() {
+        setup: "config is set with nonexistant target system"
+        [
+            "service.url" : "requiredValue",
+            "target.system": "unavailableTargetSystem"
+        ].each {
+            System.setProperty("otel.jmx.${it.key}", it.value)
+        }
+        def config = new JmxConfig()
+
+        def raised = null
+        try {
+            config.validate()
+        } catch (ConfigurationException e) {
+            raised = e
+        }
+
+        expect: 'config fails to validate'
+        raised != null
+        raised.message ==  "unavailabletargetsystem must be one of [jvm]"
     }
 }

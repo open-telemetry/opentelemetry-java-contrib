@@ -16,12 +16,15 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 class JmxConfig {
   static final String PREFIX = "otel.";
   static final String SERVICE_URL = PREFIX + "jmx.service.url";
   static final String GROOVY_SCRIPT = PREFIX + "jmx.groovy.script";
+  static final String TARGET_SYSTEM = PREFIX + "jmx.target.system";
   static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
   static final String EXPORTER_TYPE = PREFIX + "exporter";
 
@@ -35,8 +38,11 @@ class JmxConfig {
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
+  static final List<String> AVAILABLE_TARGET_SYSTEMS = Collections.singletonList("jvm");
+
   final String serviceUrl;
   final String groovyScript;
+  final String targetSystem;
   final int intervalMilliseconds;
   final String exporterType;
 
@@ -59,6 +65,7 @@ class JmxConfig {
 
     serviceUrl = properties.getProperty(SERVICE_URL);
     groovyScript = properties.getProperty(GROOVY_SCRIPT);
+    targetSystem = properties.getProperty(TARGET_SYSTEM, "").toLowerCase().trim();
 
     int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
     intervalMilliseconds = interval == 0 ? 10000 : interval;
@@ -92,14 +99,25 @@ class JmxConfig {
     }
   }
 
-  /** Will determine if parsed config is complete, setting any applicable defaults. */
+  /** Will determine if parsed config is complete, setting any applicable values and defaults. */
   void validate() {
     if (isBlank(serviceUrl)) {
       throw new ConfigurationException(SERVICE_URL + " must be specified.");
     }
 
-    if (isBlank(groovyScript)) {
-      throw new ConfigurationException(GROOVY_SCRIPT + " must be specified.");
+    if (isBlank(groovyScript) && isBlank(targetSystem)) {
+      throw new ConfigurationException(
+          GROOVY_SCRIPT + " or " + TARGET_SYSTEM + " must be specified.");
+    }
+
+    if (!isBlank(groovyScript) && !isBlank(targetSystem)) {
+      throw new ConfigurationException(
+          "Only one of " + GROOVY_SCRIPT + " or " + TARGET_SYSTEM + " can be specified.");
+    }
+
+    if (!isBlank(targetSystem) && !AVAILABLE_TARGET_SYSTEMS.contains(targetSystem)) {
+      throw new ConfigurationException(
+          String.format("%s must be one of %s", targetSystem, AVAILABLE_TARGET_SYSTEMS));
     }
 
     if (isBlank(otlpExporterEndpoint)

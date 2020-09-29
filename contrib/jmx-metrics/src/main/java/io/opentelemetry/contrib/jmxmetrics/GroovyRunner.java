@@ -26,6 +26,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -37,14 +45,19 @@ public class GroovyRunner {
   private final GroovyMetricEnvironment groovyMetricEnvironment;
 
   GroovyRunner(
-      final String groovyScript,
+      final JmxConfig config,
       final JmxClient jmxClient,
       final GroovyMetricEnvironment groovyMetricEnvironment) {
     this.groovyMetricEnvironment = groovyMetricEnvironment;
 
     String scriptSource;
     try {
-      scriptSource = getFileAsString(groovyScript);
+      if (!JmxConfig.isBlank(config.targetSystem)) {
+        String systemResourcePath = "target-systems/" + config.targetSystem + ".groovy";
+        scriptSource = getTargetSystemResourceAsString(systemResourcePath);
+      } else {
+        scriptSource = getFileAsString(config.groovyScript);
+      }
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Failed to read groovy script", e);
       throw new ConfigurationException("Failed to read groovy script", e);
@@ -66,13 +79,45 @@ public class GroovyRunner {
     script.setBinding(binding);
   }
 
-  static String getFileAsString(final String fileName) throws IOException {
+  private static String getFileAsString(final String fileName) throws IOException {
     try (InputStream is = new FileInputStream(fileName)) {
       return getFileFromInputStream(is);
     }
   }
 
-  static String getFileFromInputStream(final InputStream is) throws IOException {
+  private String getTargetSystemResourceAsString(final String targetSystem) throws IOException {
+    URL res = getClass().getClassLoader().getResource(targetSystem);
+    if (res == null) {
+      throw new ConfigurationException("Failed to load " + targetSystem);
+    }
+
+    if (res.toString().contains("!")) {
+      return getTargetSystemResourceFromJarAsString(res);
+    }
+    return getFileAsString(res.getPath());
+  }
+
+  private static String getTargetSystemResourceFromJarAsString(URL res) throws IOException {
+    final String[] array = res.toString().split("!");
+    if (array.length != 2) {
+      throw new ConfigurationException(
+          "Invalid path for target system resource from jar: " + res.toString());
+    }
+
+    final Map<String, String> env = Collections.emptyMap();
+    try {
+      try (final FileSystem fs = FileSystems.newFileSystem(URI.create(array[0]), env)) {
+        Path path = fs.getPath(array[1]);
+        try (InputStream is = Files.newInputStream(path)) {
+          return getFileFromInputStream(is);
+        }
+      }
+    } catch (IOException e) {
+      throw new ConfigurationException("Failed to load " + res.toString(), e);
+    }
+  }
+
+  private static String getFileFromInputStream(final InputStream is) throws IOException {
     if (is == null) {
       return null;
     }
