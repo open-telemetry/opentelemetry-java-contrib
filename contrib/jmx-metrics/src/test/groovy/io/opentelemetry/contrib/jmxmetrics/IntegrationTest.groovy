@@ -19,6 +19,14 @@ package io.opentelemetry.contrib.jmxmetrics
 import static org.junit.Assert.assertTrue
 
 import java.time.Duration
+import java.util.concurrent.TimeUnit
+
+import io.grpc.ServerBuilder
+import io.grpc.stub.StreamObserver
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse
+import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc
+import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
@@ -109,6 +117,72 @@ class IntegrationTest extends Specification{
 
         if (prometheusPort != 0) {
             jmxExposedPort = jmxExtensionAppContainer.getMappedPort(prometheusPort)
+        }
+    }
+}
+
+class OtlpIntegrationTest extends IntegrationTest  {
+
+    @Shared
+    def collector
+    @Shared
+    def collectorServer
+    @Shared
+    def otlpPort
+
+    def setup() {
+        // set up a collector per test to avoid noisy neighbor
+        otlpPort = availablePort()
+        collector = new Collector()
+        collectorServer = ServerBuilder.forPort(otlpPort).addService(collector).build()
+        collectorServer.start()
+    }
+
+    def cleanup() {
+        collectorServer.shutdownNow()
+        collectorServer.awaitTermination(5, TimeUnit.SECONDS)
+    }
+
+    def availablePort() {
+        def sock = new ServerSocket(0);
+        def port = sock.getLocalPort()
+        sock.close()
+        return port
+    }
+
+    static final class Collector extends MetricsServiceGrpc.MetricsServiceImplBase {
+        private final List<ResourceMetrics> receivedMetrics = new ArrayList<>()
+        private final Object monitor = new Object()
+
+        @Override
+        void export(
+                ExportMetricsServiceRequest request,
+                StreamObserver<ExportMetricsServiceResponse> responseObserver) {
+            synchronized (receivedMetrics) {
+                receivedMetrics.addAll(request.resourceMetricsList)
+            }
+            synchronized (monitor) {
+                monitor.notify()
+            }
+            responseObserver.onNext(ExportMetricsServiceResponse.newBuilder().build())
+            responseObserver.onCompleted()
+        }
+
+        List<ResourceMetrics> getReceivedMetrics() {
+            List<ResourceMetrics> received
+            try {
+                synchronized (monitor) {
+                    monitor.wait(15000)
+                }
+            } catch (final InterruptedException e) {
+                assertTrue(e.message, false)
+            }
+
+            synchronized (receivedMetrics) {
+                received = new ArrayList<>(receivedMetrics)
+                receivedMetrics.clear()
+            }
+            return received
         }
     }
 }
