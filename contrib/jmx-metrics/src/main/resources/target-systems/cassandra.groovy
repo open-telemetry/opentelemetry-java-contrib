@@ -16,10 +16,10 @@
 
 class CassandraMBean {
     // Necessary to have script-bound `otel` and `log` in class scope
-    public Binding sb
-    public GroovyMBean mbean
+    protected Binding sb
+    protected GroovyMBean mbean
 
-    String objectName
+    private String objectName
 
     CassandraMBean(Binding scriptBinding, objectName) {
         sb = scriptBinding
@@ -45,13 +45,13 @@ class CassandraMBean {
 }
 
 class CassandraMetric {
-    CassandraMBean cassandraMBean
-    Binding sb
-    String instrumentName
-    String description
-    String unit
-    String attribute
-    Closure instrument
+    private CassandraMBean cassandraMBean
+    private Binding sb
+    private String instrumentName
+    private String description
+    private String unit
+    private String attribute
+    private Closure instrument
 
     CassandraMetric(CassandraMBean cassandraMBean, String instrumentName, String description, String unit, String attribute, Closure instrument) {
         this.cassandraMBean = cassandraMBean
