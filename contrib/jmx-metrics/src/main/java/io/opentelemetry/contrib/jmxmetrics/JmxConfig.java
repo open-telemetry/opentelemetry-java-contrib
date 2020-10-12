@@ -16,7 +16,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -38,7 +38,7 @@ class JmxConfig {
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
-  static final List<String> AVAILABLE_TARGET_SYSTEMS = Collections.singletonList("jvm");
+  static final List<String> AVAILABLE_TARGET_SYSTEMS = Arrays.asList("jvm", "cassandra");
 
   final String serviceUrl;
   final String groovyScript;

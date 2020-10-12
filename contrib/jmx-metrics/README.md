@@ -87,6 +87,16 @@ aren't desired upon invocation.
 This metric extension supports Java 7+, though SASL is only supported where
 `com.sun.security.sasl.Provider` is available.
 
+### Target Systems
+
+The JMX Metric Gatherer also provides built in metric producing Groovy scripts for supported target systems
+capable of being specified via the `otel.jmx.target.system` property (mutually exclusive with `otel.jmx.groovy.script`).
+The currently available target systems are:
+
+| `otel.jmx.target.system` |
+| ------------------------ |
+| [`cassandra`](./docs/target-systems/cassandra.md) |
+
 ### Configuration
 
 The following properties are supported via the command line or specified config properties file `(-config)`.
@@ -96,7 +106,8 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | Property | Required | Description |
 | ------------- | -------- | ----------- |
 | `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
-| `otel.jmx.groovy.script` | **yes** | The path for the desired Groovy script. |
+| `otel.jmx.groovy.script` | if not using `otel.jmx.target.system` | The path for the desired Groovy script. |
+| `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | The supported target application with built in Groovy script. |
 | `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
 | `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
 | `otel.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
