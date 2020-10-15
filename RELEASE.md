@@ -1,7 +1,7 @@
 # Releasing OpenTelemetry Java Contrib Artifacts
 
-This project currently has two make targets capable of preparing and releasing artifacts: `maven-publish`
-and `oss-snapshot`.  In order for you to register your contributed project to be published by these commands,
+This project currently has two gradle tasks capable of preparing and releasing artifacts: `mavenPublish`
+and `ossSnapshot`.  In order for you to register your contributed project to be published by these commands,
 you must apply the provided publish script plugin in your subproject's gradle file:
 
 ```groovy
@@ -25,15 +25,15 @@ apply plugin: 'com.github.johnrengelman.shadow'
 ext.shadowPublish = true
 ```
 
-## `make maven-publish`
+## `./gradlew mavenPublish`
 
-This make target will invoke the [Maven Publish](https://docs.gradle.org/current/userguide/publishing_maven.html) task
+This task will invoke the [Maven Publish](https://docs.gradle.org/current/userguide/publishing_maven.html) task
 and publish all applicable artifacts to a `build/repo` directory in the root OpenTelemetry Java Contrib project path of
 your machine. The ability to publish to a stable remote repository like Maven Central is not provided at this time.
 
-## `make oss-snapshot`
+## `./gradlew ossSnapshot`
 
-This make target will invoke the [Artifactory Plugin](https://www.jfrog.com/confluence/display/JFROG/Gradle+Artifactory+Plugin)
+This task will invoke the [Artifactory Plugin](https://www.jfrog.com/confluence/display/JFROG/Gradle+Artifactory+Plugin)
 and publish all applicable snapshot artifacts to https://oss.jfrog.org/artifactory/oss-snapshot-local.  It's important
 to note that these snapshot releases are often from unstable development states and should generally not be used in
 production environments.
