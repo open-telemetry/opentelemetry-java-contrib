@@ -21,10 +21,18 @@ allprojects {
         jcenter()
         mavenCentral()
     }
+}
 
-    if (property('ojc.integration.tests') == 'true') {
-        tasks.withType(Test) {
-            systemProperty 'ojc.integration.tests', 'true'
+task lint(dependsOn: ['spotlessCheck'])
+task format(dependsOn: ['spotlessApply'])
+
+task integrationTest {
+    doFirst {
+        allprojects.test.each { test ->
+            test.configure {
+                systemProperty 'ojc.integration.tests', 'true'
+            }
         }
     }
 }
+integrationTest.finalizedBy allprojects.test

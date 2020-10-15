@@ -17,17 +17,17 @@ feature or via instrumentation, this project is hopefully for you.
 ## Getting Started
 
 ```bash
+# Apply formatting
+$ ./gradlew format
+
 # Build the complete project
-$ make build
+$ ./gradlew build
 
 # Run integration tests
-$ make integration-test
+$ ./gradlew integrationTest
 
 # Clean artifacts
-$ make clean
-
-# Apply formatting
-$ make lint
+$ ./gradlew clean
 ```
 
 ## Contributing

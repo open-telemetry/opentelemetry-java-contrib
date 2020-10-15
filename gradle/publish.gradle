@@ -65,6 +65,18 @@ def artifactPrefix(archivesBaseName) {
     return rootProject.name
 }
 
+task mavenPublish {
+    allprojects{
+        afterEvaluate { project ->
+            project.tasks.forEach { task ->
+                if (task.name.endsWith('publishMavenPublicationToMavenRepository')) {
+                    finalizedBy task
+                }
+            }
+        }
+    }
+}
+
 artifactory {
     contextUrl = 'https://oss.jfrog.org'
     publish {
@@ -76,7 +88,10 @@ artifactory {
     }
 }
 
-artifactoryPublish {
-    enabled = version.toString().contains('SNAPSHOT')
-    publications('maven')
+task ossSnapshot {
+    artifactoryPublish {
+        enabled = version.toString().contains('SNAPSHOT')
+        publications('maven')
+    }
+    finalizedBy artifactoryPublish
 }
