@@ -25,18 +25,11 @@ otel.jmx.password = my-password
 ##### `script.groovy` example
 
 ```groovy
-import io.opentelemetry.common.Labels
-
-def loadMatches = otel.queryJmx("org.apache.cassandra.metrics:type=Storage,name=Load")
-def load = loadMatches.first()
-
-def lvr = otel.longValueRecorder(
-        "cassandra.storage.load",
+def storageLoadMBean = otel.mbean("org.apache.cassandra.metrics:type=Storage,name=Load")
+otel.instrument(storageLoadMBean, "cassandra.storage.load",
         "Size, in bytes, of the on disk data size this node manages",
-        "By", [myConstantLabelKey:"myConstantLabelValue"]
+        "By", "Count", otel.&longValueRecorder
 )
-
-lvr.record(load.Count, Labels.of("myKey", "myVal"))
 ```
 
 As configured in the example, this metric gatherer will configure an otlp gRPC metric exporter
@@ -49,7 +42,7 @@ via `otel.jmx.groovy.script`, it will then run the script on the specified
 
 - `otel.queryJmx(String objectNameStr)`
    - This method will query the connected JMX application for the given `objectName`, which can
-   include wildcards.  The return value will be a `List<GroovyMBean>` of zero or more
+   include wildcards.  The return value will be a sorted `List<GroovyMBean>` of zero or more
    [`GroovyMBean` objects](http://docs.groovy-lang.org/latest/html/api/groovy/jmx/GroovyMBean.html),
    which are conveniently wrapped to make accessing attributes on the MBean simple.
    See http://groovy-lang.org/jmx.html for more information about their usage.
@@ -57,6 +50,41 @@ via `otel.jmx.groovy.script`, it will then run the script on the specified
 - `otel.queryJmx(javax.management.ObjectName objectName)`
    - This helper has the same functionality as its other signature, but takes an `ObjectName`
    instance if constructing raw names is undesired.
+
+### JMX `MBeanHelper` and `InstrumentHelper` Access Methods
+
+- `otel.mbean(String objectNameStr)`
+   - This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
+   but returns an `MBeanHelper` instance representing the alphabetically first matching MBean for usage by
+   subsequent `InstrumentHelper` instances (available via `otel.instrument()`) as described below.
+
+- `otel.mbeans(String objectNameStr)`
+   - This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
+   but returns an `MBeanHelper` instance representing all matching MBeans for usage by subsequent `InstrumentHelper`
+   instances (available via `otel.instrument()`) as described below.
+
+- `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument)`
+   - This method provides the ability to easily create and automatically update instrument instances from an
+   `MBeanHelper`'s underlying MBean instances via an OpenTelemetry instrument helper method pointer as described below.
+   - The method parameters map to those of the instrument helpers, while the new `Map<String, Closure> labelFuncs` will
+   be used to specify updated instrument labels that have access to the inspected MBean:
+
+   ```groovy
+      // This example's resulting datapoint(s) will have Labels consisting of the specified key
+      // and a dynamically evaluated value from the GroovyMBean being examined.
+      [ "myLabelKey": { mbean -> mbean.name().getKeyProperty("myObjectNameProperty") } ]
+   ```
+
+  - If the underlying MBean(s) held by the provided MBeanHelper are
+  [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances,
+  each key of their `CompositeType` `keySet` will be `.`-appended to the specified `instrumentName`, whose resulting
+  instrument will be updated for each respective value.
+
+`otel.instrument()` provides additional signatures to obtain and update the returned `InstrumentHelper`:
+
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, String attribute, Closure instrument)` - `labelFuncs` are empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map.
 
 ### OpenTelemetry Synchronous Instrument Helpers
 
