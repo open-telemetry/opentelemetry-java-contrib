@@ -106,6 +106,32 @@ class OtelHelperJmxTest extends Specification {
         verifyClient(props)
     }
 
+    def "sorted query results"() {
+        when:
+        def serverAddr = setupServer([:])
+        def config = new JmxConfig(new Properties().tap {
+            it.setProperty(JmxConfig.SERVICE_URL, "${serverAddr}")
+            it.setProperty(JmxConfig.GROOVY_SCRIPT, "myscript.groovy")
+        })
+        config.validate()
+        def otel = setupHelper(config)
+
+        def things = (0..99).collect {new Thing()}
+
+        def mbeanServer = getPlatformMBeanServer()
+        things.eachWithIndex { thing, i ->
+            mbeanServer.registerMBean(thing, new ObjectName("sorted.query.results:type=Thing,thing=${i}"))
+        }
+
+        then:
+        def mbeans = otel.queryJmx("sorted.query.results:type=Thing,*")
+        assertEquals(100, mbeans.size())
+
+        def names = mbeans.collect { it.name() as String }
+        def sortedNames = names.collect().sort()
+        assertEquals(sortedNames, names)
+    }
+
     interface ThingMBean {
 
         String getSomeAttribute()
