@@ -40,7 +40,10 @@ import spock.lang.Unroll
 class IntegrationTest extends Specification{
 
     @Shared
-    def cassandraContainer
+    def targets
+
+    @Shared
+    def targetContainers = []
 
     @Shared
     def jmxExtensionAppContainer
@@ -53,14 +56,7 @@ class IntegrationTest extends Specification{
 
         def scriptName = "script.groovy"
         def scriptPath = ClassLoader.getSystemClassLoader().getResource(scriptName).path
-
         def configPath = ClassLoader.getSystemClassLoader().getResource(configName).path
-
-        def cassandraDockerfile = ("FROM cassandra:3.11\n"
-                + "ENV LOCAL_JMX=no\n"
-                + "RUN echo 'cassandra cassandra' > /etc/cassandra/jmxremote.password\n"
-                + "RUN chmod 0400 /etc/cassandra/jmxremote.password\n")
-
         def network = Network.SHARED
 
         def jvmCommand = [
@@ -85,15 +81,26 @@ class IntegrationTest extends Specification{
             jvmCommand.add("/app/${configName}")
         }
 
-        cassandraContainer =
-                new GenericContainer<>(
-                new ImageFromDockerfile().withFileFromString("Dockerfile", cassandraDockerfile))
-                .withNetwork(network)
-                .withNetworkAliases("cassandra")
-                .withExposedPorts(7199)
-                .withStartupTimeout(Duration.ofSeconds(120))
-                .waitingFor(Wait.forListeningPort())
-        cassandraContainer.start()
+        if ("cassandra" in targets) {
+            targetContainers.add(
+                    new GenericContainer<>(
+                    new ImageFromDockerfile().withFileFromString("Dockerfile",
+                    ("FROM cassandra:3.11\n"
+                    + "ENV LOCAL_JMX=no\n"
+                    + "RUN echo 'cassandra cassandra' > /etc/cassandra/jmxremote.password\n"
+                    + "RUN chmod 0400 /etc/cassandra/jmxremote.password\n")
+                    )
+                    )
+                    .withNetwork(network)
+                    .withNetworkAliases("cassandra")
+                    .withExposedPorts(7199)
+                    .withStartupTimeout(Duration.ofSeconds(120))
+                    .waitingFor(Wait.forListeningPort())
+                    )
+        }
+        targetContainers.each {
+            it.start()
+        }
 
         jmxExtensionAppContainer =
                 new GenericContainer<>("openjdk:7u111-jre-alpine")
@@ -106,13 +113,15 @@ class IntegrationTest extends Specification{
                 .withCommand(jvmCommand as String[])
                 .withStartupTimeout(Duration.ofSeconds(120))
                 .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1))
-                .dependsOn(cassandraContainer)
+                .dependsOn(targetContainers)
         if (prometheusPort != 0) {
             jmxExtensionAppContainer.withExposedPorts(prometheusPort)
         }
         jmxExtensionAppContainer.start()
 
-        assertTrue(cassandraContainer.running)
+        targetContainers.each {
+            assertTrue(it.running)
+        }
         assertTrue(jmxExtensionAppContainer.running)
 
         if (prometheusPort != 0) {

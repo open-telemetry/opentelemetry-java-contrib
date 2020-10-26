@@ -45,6 +45,7 @@ class PrometheusIntegrationTests extends IntegrationTest {
     @Unroll
     def 'end to end with stdin config: #useStdin'() {
         setup: 'we configure JMX metrics gatherer and target server'
+        targets = ["cassandra"]
         configureContainers('prometheus_config.properties', 0, 9123, useStdin)
 
         expect:
@@ -67,7 +68,7 @@ class PrometheusIntegrationTests extends IntegrationTest {
                 'cassandra_storage_load{myKey="myVal",quantile="100.0",} ')
 
         cleanup:
-        cassandraContainer.stop()
+        targetContainers.each { it.stop() }
         jmxExtensionAppContainer.stop()
 
         where:
