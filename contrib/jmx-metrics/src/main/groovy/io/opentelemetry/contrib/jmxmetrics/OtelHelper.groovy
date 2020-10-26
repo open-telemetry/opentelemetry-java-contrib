@@ -26,7 +26,7 @@ import io.opentelemetry.metrics.LongValueRecorder
 import javax.management.ObjectName
 
 class OtelHelper {
-    protected static final String SCALAR = '1'
+    private static final String SCALAR = '1'
 
     private final JmxClient jmxClient
     private final GroovyMetricEnvironment groovyMetricEnvironment
@@ -100,7 +100,6 @@ class OtelHelper {
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String attribute, Closure otelInstrument) {
         return instrument(mBeanHelper, instrumentName, "", OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
     }
-
 
     DoubleCounter doubleCounter(String name, String description, String unit, Map<String, String> labels) {
         return groovyMetricEnvironment.getDoubleCounter(name, description, unit, labels)

@@ -77,7 +77,6 @@ class MBeanHelperTest extends Specification {
 
         then: "${quantity} returned"
         def returned = mbeanHelper.getAttribute("SomeAttribute")
-        println "MBeanHelperTest.represents #quantity MBean(s): ${returned}"
         returned == isSingle ? ["0"]: (0..100).collect {it as String}.sort()
 
         where:

@@ -22,7 +22,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import javax.management.remote.JMXServiceURL;
 
 public class JmxClient {
   private static final Logger logger = Logger.getLogger(JmxClient.class.getName());
-  private static final List<ObjectName> EMPTY_LIST = Collections.emptyList();
 
   private final JMXServiceURL url;
   private final String username;
@@ -98,23 +96,16 @@ public class JmxClient {
   public List<ObjectName> query(final ObjectName objectName) {
     MBeanServerConnection mbsc = getConnection();
     if (mbsc == null) {
-      return EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     try {
       List<ObjectName> objectNames = new ArrayList<>(mbsc.queryNames(objectName, null));
-      Collections.sort(
-          objectNames,
-          new Comparator<ObjectName>() {
-            @Override
-            public int compare(ObjectName o1, ObjectName o2) {
-              return o1.compareTo(o2);
-            }
-          });
+      Collections.sort(objectNames);
       return objectNames;
     } catch (IOException e) {
       logger.log(Level.WARNING, "Could not query remote JMX server: ", e);
-      return EMPTY_LIST;
+      return Collections.emptyList();
     }
   }
 }

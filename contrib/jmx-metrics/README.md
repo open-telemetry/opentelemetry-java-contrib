@@ -123,6 +123,7 @@ The currently available target systems are:
 
 | `otel.jmx.target.system` |
 | ------------------------ |
+| [`jvm`](./docs/target-systems/jvm.md) |
 | [`cassandra`](./docs/target-systems/cassandra.md) |
 
 ### Configuration

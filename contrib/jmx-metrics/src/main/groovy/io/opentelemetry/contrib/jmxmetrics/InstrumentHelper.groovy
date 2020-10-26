@@ -47,13 +47,13 @@ import javax.management.openmbean.CompositeData
 class InstrumentHelper {
     private static final Logger logger = Logger.getLogger(InstrumentHelper.class.getName());
 
-    private MBeanHelper mBeanHelper
-    private String instrumentName
-    private String description
-    private String unit
-    private String attribute
-    private Map<String, Closure> labelFuncs
-    private Closure instrument
+    private final MBeanHelper mBeanHelper
+    private final String instrumentName
+    private final String description
+    private final String unit
+    private final String attribute
+    private final Map<String, Closure> labelFuncs
+    private final Closure instrument
 
     /**
      * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.metrics.Instrument}
@@ -94,27 +94,26 @@ class InstrumentHelper {
                 value.getCompositeType().keySet().each { key ->
                     def val = value.get(key)
                     def updatedInstrumentName = "${instrumentName}.${key}"
-
-                    def labels = [:]
-                    labelFuncs.each { label, labelFunc ->
-                        labels[label] = labelFunc(mbean) as String
-                    }
-
+                    def labels = getLabels(mbean, labelFuncs)
                     def inst = instrument(updatedInstrumentName, description, unit)
                     logger.fine("Recording ${updatedInstrumentName} - ${inst} w/ ${val} - ${labels}")
                     updateInstrumentWithValue(inst, val, labels)
                 }
             } else {
-                def labels = [:]
-                labelFuncs.each { label, labelFunc ->
-                    labels[label] = labelFunc(mbean) as String
-                }
+                def labels = getLabels(mbean, labelFuncs)
                 def inst = instrument(instrumentName, description, unit)
-
                 logger.fine("Recording ${instrumentName} - ${inst} w/ ${value} - ${labels}")
                 updateInstrumentWithValue(inst, value, labels)
             }
         }
+    }
+
+    private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs) {
+        def labels = [:]
+        labelFuncs.each { label, labelFunc ->
+            labels[label] = labelFunc(mbean) as String
+        }
+        return labels
     }
 
     private static void updateInstrumentWithValue(inst, value, labels) {

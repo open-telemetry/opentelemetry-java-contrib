@@ -16,6 +16,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import groovy.transform.PackageScope
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 import java.util.logging.Logger
@@ -40,11 +41,11 @@ import java.util.logging.Logger
 class MBeanHelper {
     private static final Logger logger = Logger.getLogger(MBeanHelper.class.getName());
 
-    private List<GroovyMBean> mbeans
-    protected JmxClient jmxClient
-    protected boolean isSingle
+    private final JmxClient jmxClient
+    private final boolean isSingle
+    private final String objectName
 
-    private String objectName
+    private List<GroovyMBean> mbeans
 
     MBeanHelper(JmxClient jmxClient, String objectName, boolean isSingle) {
         this.jmxClient = jmxClient
@@ -52,11 +53,11 @@ class MBeanHelper {
         this.isSingle = isSingle
     }
 
-    static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
+    @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
         return queryJmx(jmxClient, new ObjectName(objNameStr))
     }
 
-    static List<GroovyMBean> queryJmx(JmxClient jmxClient, ObjectName objName) {
+    @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, ObjectName objName) {
         List<ObjectName> names = jmxClient.query(objName)
         MBeanServerConnection server = jmxClient.connection
         return names.collect { new GroovyMBean(server, it) }
@@ -71,7 +72,7 @@ class MBeanHelper {
         }
     }
 
-    List<GroovyMBean> getMBeans() {
+    @PackageScope List<GroovyMBean> getMBeans() {
         if (mbeans == null) {
             logger.warning("No active MBeans.  Be sure to fetch() before updating any applicable instruments.")
             return []
@@ -79,18 +80,13 @@ class MBeanHelper {
         return mbeans
     }
 
-    protected List<Object> getAttribute(String attribute) {
+    @PackageScope List<Object> getAttribute(String attribute) {
         if (mbeans == null || mbeans.size() == 0) {
             return []
         }
 
-        if (isSingle) {
-            return [
-                mbeans[0].getProperty(attribute)
-            ]
-        }
-
-        return mbeans.collect {
+        def ofInterest = isSingle ? [mbeans[0]]: mbeans
+        return ofInterest.collect {
             it.getProperty(attribute)
         }
     }

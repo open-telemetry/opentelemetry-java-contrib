@@ -14,10 +14,30 @@
  * limitations under the License.
  */
 
-package io.opentelemetry.contrib.jmxmetrics
+def classLoading = otel.mbean("java.lang:type=ClassLoading")
+otel.instrument(classLoading, "jvm.classes.loaded", "number of loaded classes",
+        "1", "LoadedClassCount", otel.&longUpDownCounter)
 
-// This is a placeholder for default metric functionality
-// per https://github.com/open-telemetry/opentelemetry-java-contrib/issues/12
+def garbageCollector = otel.mbeans("java.lang:type=GarbageCollector,*")
+otel.instrument(garbageCollector, "jvm.gc.collections.count", "total number of collections that have occurred",
+        "1", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
+        "CollectionCount", otel.&longCounter)
+otel.instrument(garbageCollector, "jvm.gc.collections.elapsed",
+        "the approximate accumulated collection elapsed time in milliseconds", "ms",
+        ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
+        "CollectionTime", otel.&longCounter)
 
-def counter = otel.longCounter("placeholder.metric", "For testing purposes")
-counter.add(1)
+def memory = otel.mbean("java.lang:type=Memory")
+otel.instrument(memory, "jvm.memory.heap", "current heap usage",
+        "by", "HeapMemoryUsage", otel.&longUpDownCounter)
+otel.instrument(memory, "jvm.memory.nonheap", "current non-heap usage",
+        "by", "NonHeapMemoryUsage", otel.&longUpDownCounter)
+
+def memoryPool = otel.mbeans("java.lang:type=MemoryPool,*")
+otel.instrument(memoryPool, "jvm.memory.pool", "current memory pool usage",
+        "by", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
+        "Usage", otel.&longUpDownCounter)
+
+def threading = otel.mbean("java.lang:type=Threading")
+otel.instrument(threading, "jvm.threads.count", "number of threads",
+        "1", "ThreadCount", otel.&longUpDownCounter)
