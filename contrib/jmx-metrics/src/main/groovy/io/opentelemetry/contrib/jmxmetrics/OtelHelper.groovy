@@ -23,7 +23,6 @@ import io.opentelemetry.metrics.LongCounter
 import io.opentelemetry.metrics.LongUpDownCounter
 import io.opentelemetry.metrics.LongValueRecorder
 
-import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 
 class OtelHelper {
@@ -40,22 +39,66 @@ class OtelHelper {
     /**
      * Returns a list of {@link GroovyMBean} for a given object name String.
      * @param objNameStr - the {@link String} representation of an object name or pattern, to be
-     * used as the argument to the basic {@link ObjectName} constructor for the JmxClient query.
+     * used as the argument to the basic {@link javax.management.ObjectName} constructor for the JmxClient query.
      * @return a {@link List<GroovyMBean>} from which to create metrics.
      */
     List<GroovyMBean> queryJmx(String objNameStr) {
-        return queryJmx(new ObjectName(objNameStr))
+        return MBeanHelper.queryJmx(jmxClient, objNameStr);
     }
 
     /**
-     * Returns a list of {@link GroovyMBean} for a given {@link ObjectName}.
-     * @param objName - the {@link ObjectName} used for the JmxClient query.
+     * Returns a list of {@link GroovyMBean} for a given {@link javax.management.ObjectName}.
+     * @param objName - the {@link javax.management.ObjectName} used for the JmxClient query.
      * @return a {@link List<GroovyMBean>} from which to create metrics.
      */
     List<GroovyMBean> queryJmx(ObjectName objName) {
-        Set<ObjectName> names = jmxClient.query(objName)
-        MBeanServerConnection server = jmxClient.connection
-        return names.collect { new GroovyMBean(server, it) }
+        return MBeanHelper.queryJmx(jmxClient, objName);
+    }
+
+    /**
+     * Returns a fetched, potentially multi-{@link GroovyMBean} {@link MBeanHelper} for a given object name String.
+     * @param objNameStr - the {@link String} representation of an object name or pattern, to be
+     * used as the argument to the basic {@link javax.management.ObjectName} constructor for the JmxClient query.
+     * @return a {@link MBeanHelper} that operates over all resulting {@link GroovyMBean} instances.
+     */
+    MBeanHelper mbeans(String objNameStr) {
+        def mbeanHelper = new MBeanHelper(jmxClient, objNameStr, false)
+        mbeanHelper.fetch()
+        return mbeanHelper
+    }
+
+    /**
+     * Returns a fetched, single {@link GroovyMBean} {@link MBeanHelper} for a given object name String.
+     * @param objNameStr - the {@link String} representation of an object name or pattern, to be
+     * used as the argument to the basic {@link javax.management.ObjectName} constructor for the JmxClient query.
+     * @return a {@link MBeanHelper} that operates over all resulting {@link GroovyMBean} instances.
+     */
+    MBeanHelper mbean(String objNameStr) {
+        def mbeanHelper = new MBeanHelper(jmxClient, objNameStr, true)
+        mbeanHelper.fetch()
+        return mbeanHelper
+    }
+
+    /**
+     * Returns an updated @{link InstrumentHelper} associated with the provided {@link MBeanHelper} and its specified
+     * attribute value(s).  The parameters map to the InstrumentHelper constructor.
+     */
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure otelInstrument) {
+        def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, attribute, otelInstrument)
+        instrumentHelper.update()
+        return instrumentHelper
+    }
+
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, String attribute, Closure otelInstrument) {
+        return instrument(mBeanHelper, instrumentName, description, unit, [:] as Map<String, Closure>, attribute, otelInstrument)
+    }
+
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String attribute, Closure otelInstrument) {
+        return instrument(mBeanHelper, instrumentName, description, OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
+    }
+
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String attribute, Closure otelInstrument) {
+        return instrument(mBeanHelper, instrumentName, "", OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
     }
 
     DoubleCounter doubleCounter(String name, String description, String unit, Map<String, String> labels) {

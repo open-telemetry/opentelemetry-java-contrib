@@ -16,7 +16,14 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import org.apache.hc.client5.http.fluent.Request
+import io.opentelemetry.proto.metrics.v1.IntSum
+
+import io.opentelemetry.proto.common.v1.InstrumentationLibrary
+import io.opentelemetry.proto.common.v1.StringKeyValue
+import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
+import io.opentelemetry.proto.metrics.v1.Metric
+import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
 
@@ -24,40 +31,192 @@ import spock.lang.Timeout
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(60)
-class JVMTargetSystemIntegrationTests extends IntegrationTest {
-
-    def receivedMetrics() {
-        def scraped = []
-        for (int i = 0; i < 120; i++) {
-            def resp = Request.get("http://localhost:${jmxExposedPort}/metrics").execute()
-            def received = resp.returnContent().asString()
-            if (received != '') {
-                scraped = received.split('\n')
-                if (scraped.size() > 2) {
-                    break
-                }
-            }
-            Thread.sleep(500)
-        }
-        return scraped
-    }
+class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
-        setup: 'we configure JMX metrics gatherer and target server to use default JVM target system script'
-        configureContainers('jvm_config.properties', 0, 9123, false)
+        setup: 'we configure JMX metrics gatherer and target server to use JVM as target system'
+        Testcontainers.exposeHostPorts(otlpPort)
+        configureContainers('target-systems/jvm.properties',  otlpPort, 0, false)
 
         expect:
-        when: 'we receive metrics from the prometheus endpoint'
-        def scraped = receivedMetrics()
+        when: 'we receive metrics from the JMX metrics gatherer'
+        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+        then: 'they are of the expected size'
+        receivedMetrics.size() == 1
 
-        then: 'they are of the expected format'
-        scraped.size() == 3
-        scraped[0].contains(
-                '# HELP placeholder_metric For testing purposes')
-        scraped[1].contains(
-                '# TYPE placeholder_metric counter')
-        scraped[2].contains(
-                'placeholder_metric 1.0')
+        when: "we examine the received metric's instrumentation library metrics lists"
+        ResourceMetrics receivedMetric = receivedMetrics.get(0)
+        List<InstrumentationLibraryMetrics> ilMetrics =
+                receivedMetric.instrumentationLibraryMetricsList
+        then: 'they of the expected size'
+        ilMetrics.size() == 1
+
+        when: 'we examine the instrumentation library'
+        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+        InstrumentationLibrary il = ilMetric.instrumentationLibrary
+        then: 'it is of the expected content'
+        il.name  == 'io.opentelemetry.contrib.jmxmetrics'
+        il.version == '0.0.1'
+
+        when: 'we examine the instrumentation library metric metrics list'
+        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
+        metrics.sort{ a, b -> a.name <=> b.name}
+        then: 'they are of the expected size and content'
+        metrics.size() == 16
+
+        def expectedMetrics = [
+            [
+                'jvm.classes.loaded',
+                'number of loaded classes',
+                '1',
+                []
+            ],
+            [
+                'jvm.gc.collections.count',
+                'total number of collections that have occurred',
+                '1',
+                [
+                    "ConcurrentMarkSweep",
+                    "ParNew"]
+            ],
+            [
+                'jvm.gc.collections.elapsed',
+                'the approximate accumulated collection elapsed time in milliseconds',
+                'ms',
+                [
+                    "ConcurrentMarkSweep",
+                    "ParNew"]
+            ],
+            [
+                'jvm.memory.heap.committed',
+                'current heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.heap.init',
+                'current heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.heap.max',
+                'current heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.heap.used',
+                'current heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.nonheap.committed',
+                'current non-heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.nonheap.init',
+                'current non-heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.nonheap.max',
+                'current non-heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.nonheap.used',
+                'current non-heap usage',
+                'by',
+                []
+            ],
+            [
+                'jvm.memory.pool.committed',
+                'current memory pool usage',
+                'by',
+                [
+                    "Code Cache",
+                    "Par Eden Space",
+                    "CMS Old Gen",
+                    "Compressed Class Space",
+                    "Metaspace",
+                    "Par Survivor Space"]
+            ],
+            [
+                'jvm.memory.pool.init',
+                'current memory pool usage',
+                'by',
+                [
+                    "Code Cache",
+                    "Par Eden Space",
+                    "CMS Old Gen",
+                    "Compressed Class Space",
+                    "Metaspace",
+                    "Par Survivor Space"]
+            ],
+            [
+                'jvm.memory.pool.max',
+                'current memory pool usage',
+                'by',
+                [
+                    "Code Cache",
+                    "Par Eden Space",
+                    "CMS Old Gen",
+                    "Compressed Class Space",
+                    "Metaspace",
+                    "Par Survivor Space"]
+            ],
+            [
+                'jvm.memory.pool.used',
+                'current memory pool usage',
+                'by',
+                [
+                    "Code Cache",
+                    "Par Eden Space",
+                    "CMS Old Gen",
+                    "Compressed Class Space",
+                    "Metaspace",
+                    "Par Survivor Space"]
+            ],
+            [
+                'jvm.threads.count',
+                'number of threads',
+                '1',
+                []
+            ],
+        ].eachWithIndex{ item, index ->
+            Metric metric = metrics.get(index)
+            assert metric.name == item[0]
+            assert metric.description == item[1]
+            assert metric.unit == item[2]
+            assert metric.hasIntSum()
+            IntSum datapoints = metric.intSum
+            def expectedLabelCount = item[3].size()
+            def expectedLabels = item[3] as Set
+
+            def expectedDatapointCount = expectedLabelCount == 0 ? 1 : expectedLabelCount
+            assert datapoints.dataPointsCount == expectedDatapointCount
+
+            (0..<expectedDatapointCount).each { i ->
+                def datapoint = datapoints.getDataPoints(i)
+                List<StringKeyValue> labels = datapoint.labelsList
+                if (expectedLabelCount != 0) {
+                    assert labels.size() == 1
+                    assert labels[0].key == 'name'
+                    def value = labels[0].value
+                    assert expectedLabels.remove(value)
+                } else {
+                    assert labels.size() == 0
+                }
+            }
+
+            assert expectedLabels.size() == 0
+        }
 
         cleanup:
         cassandraContainer.stop()

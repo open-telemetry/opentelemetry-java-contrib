@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -35,7 +36,6 @@ import javax.management.remote.JMXServiceURL;
 
 public class JmxClient {
   private static final Logger logger = Logger.getLogger(JmxClient.class.getName());
-  private static final Set<ObjectName> EMPTY_SET = Collections.emptySet();
 
   private final JMXServiceURL url;
   private final String username;
@@ -91,19 +91,21 @@ public class JmxClient {
    * Query the MBean server for a given ObjectName.
    *
    * @param objectName ObjectName to query
-   * @return the set of applicable ObjectName instances found by server
+   * @return the sorted list of applicable ObjectName instances found by server
    */
-  public Set<ObjectName> query(final ObjectName objectName) {
+  public List<ObjectName> query(final ObjectName objectName) {
     MBeanServerConnection mbsc = getConnection();
     if (mbsc == null) {
-      return EMPTY_SET;
+      return Collections.emptyList();
     }
 
     try {
-      return mbsc.queryNames(objectName, null);
+      List<ObjectName> objectNames = new ArrayList<>(mbsc.queryNames(objectName, null));
+      Collections.sort(objectNames);
+      return objectNames;
     } catch (IOException e) {
       logger.log(Level.WARNING, "Could not query remote JMX server: ", e);
-      return EMPTY_SET;
+      return Collections.emptyList();
     }
   }
 }

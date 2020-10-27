@@ -18,7 +18,7 @@ spotless {
         target '**/*.groovy'
         greclipse()
         indentWithSpaces()
-        licenseHeaderFile rootProject.file('gradle/java.license.header'), '(package|import|class)'
+        licenseHeaderFile rootProject.file('gradle/java.license.header'), '(package|import|class|def)'
     }
     groovyGradle {
         target '**/*.gradle'

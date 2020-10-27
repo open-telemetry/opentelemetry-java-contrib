@@ -111,7 +111,7 @@ public class GroovyMetricEnvironment {
     }
   }
 
-  private static Labels mapToLabels(final Map<String, String> labelMap) {
+  protected static Labels mapToLabels(final Map<String, String> labelMap) {
     Labels.Builder labels = new Labels.Builder();
     if (labelMap != null) {
       for (Map.Entry<String, String> kv : labelMap.entrySet()) {

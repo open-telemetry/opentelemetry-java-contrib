@@ -64,7 +64,6 @@ class CassandraIntegrationTests extends OtlpIntegrationTest  {
         metrics.sort{ a, b -> a.name <=> b.name}
         then: 'they are of the expected size and content'
         metrics.size() == 23
-        println "CassandraIntegrationTests.end to end: ${metrics}"
 
         def expectedMetrics = [
             [

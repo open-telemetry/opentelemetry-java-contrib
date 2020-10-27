@@ -16,18 +16,27 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import javax.management.ObjectName
+
 class GroovyRunnerTest extends UnitTest {
 
     def 'target system scripts are loaded from resources'() {
         when: 'available target system script is used'
-        System.setProperty('otel.jmx.service.url', 'requiredValue')
+        System.setProperty('otel.jmx.service.url', 'service:jmx:rmi:///jndi/rmi://localhost:12345/jmxrmi')
         System.setProperty('otel.jmx.target.system', 'jvm')
         def config = new JmxConfig()
         config.validate()
 
         def exportCalled = false
 
-        def groovyRunner = new GroovyRunner(config, null, new GroovyMetricEnvironment(config) {
+        def stub = new JmxClient(config) {
+                    @Override
+                    List<ObjectName> query(final ObjectName objectName) {
+                        return [] as List<ObjectName>;
+                    }
+                }
+
+        def groovyRunner = new GroovyRunner(config, stub, new GroovyMetricEnvironment(config) {
                     @Override
                     void exportMetrics() {
                         exportCalled = true
