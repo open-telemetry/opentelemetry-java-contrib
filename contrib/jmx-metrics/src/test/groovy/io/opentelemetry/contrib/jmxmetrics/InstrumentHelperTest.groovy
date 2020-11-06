@@ -16,11 +16,11 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.SUMMARY
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
 import io.opentelemetry.common.Labels
@@ -142,7 +142,6 @@ class InstrumentHelperTest extends Specification {
             assert metric.descriptor.name == instrumentName
             assert metric.descriptor.description == description
             assert metric.descriptor.unit == "1"
-            assert metric.descriptor.constantLabels == Labels.empty()
             assert metric.descriptor.type ==  descriptorType
             assert metric.points.size() == isSingle ? 1 : 4
             metric.points.eachWithIndex { point, i ->

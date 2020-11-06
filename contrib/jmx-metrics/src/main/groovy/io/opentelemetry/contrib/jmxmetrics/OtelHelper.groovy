@@ -107,12 +107,8 @@ class OtelHelper {
         return instrument(mBeanHelper, instrumentName, "", OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
     }
 
-    DoubleCounter doubleCounter(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleCounter(name, description, unit, labels)
-    }
-
     DoubleCounter doubleCounter(String name, String description, String unit) {
-        return doubleCounter(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleCounter(name, description, unit)
     }
 
     DoubleCounter doubleCounter(String name, String description) {
@@ -123,12 +119,8 @@ class OtelHelper {
         return doubleCounter(name, '')
     }
 
-    LongCounter longCounter(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongCounter(name, description, unit, labels)
-    }
-
     LongCounter longCounter(String name, String description, String unit) {
-        return longCounter(name, description, unit, null)
+        return groovyMetricEnvironment.getLongCounter(name, description, unit)
     }
 
     LongCounter longCounter(String name, String description) {
@@ -139,12 +131,8 @@ class OtelHelper {
         return longCounter(name, '')
     }
 
-    DoubleUpDownCounter doubleUpDownCounter(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleUpDownCounter(name, description, unit, labels)
-    }
-
     DoubleUpDownCounter doubleUpDownCounter(String name, String description, String unit) {
-        return doubleUpDownCounter(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleUpDownCounter(name, description, unit)
     }
 
     DoubleUpDownCounter doubleUpDownCounter(String name, String description) {
@@ -155,12 +143,8 @@ class OtelHelper {
         return doubleUpDownCounter(name, '')
     }
 
-    LongUpDownCounter longUpDownCounter(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongUpDownCounter(name, description, unit, labels)
-    }
-
     LongUpDownCounter longUpDownCounter(String name, String description, String unit) {
-        return longUpDownCounter(name, description, unit, null)
+        return groovyMetricEnvironment.getLongUpDownCounter(name, description, unit)
     }
 
     LongUpDownCounter longUpDownCounter(String name, String description) {
@@ -171,12 +155,8 @@ class OtelHelper {
         return longUpDownCounter(name, '')
     }
 
-    DoubleValueRecorder doubleValueRecorder(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleValueRecorder(name, description, unit, labels)
-    }
-
     DoubleValueRecorder doubleValueRecorder(String name, String description, String unit) {
-        return doubleValueRecorder(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleValueRecorder(name, description, unit)
     }
 
     DoubleValueRecorder doubleValueRecorder(String name, String description) {
@@ -187,12 +167,8 @@ class OtelHelper {
         return doubleValueRecorder(name, '')
     }
 
-    LongValueRecorder longValueRecorder(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongValueRecorder(name, description, unit, labels)
-    }
-
     LongValueRecorder longValueRecorder(String name, String description, String unit) {
-        return longValueRecorder(name, description, unit, null)
+        return groovyMetricEnvironment.getLongValueRecorder(name, description, unit)
     }
 
     LongValueRecorder longValueRecorder(String name, String description) {
@@ -203,12 +179,8 @@ class OtelHelper {
         return longValueRecorder(name, '')
     }
 
-    DoubleSumObserver doubleSumObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit, labels)
-    }
-
     DoubleSumObserver doubleSumObserver(String name, String description, String unit) {
-        return doubleSumObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit)
     }
 
     DoubleSumObserver doubleSumObserver(String name, String description) {
@@ -219,12 +191,8 @@ class OtelHelper {
         return doubleSumObserver(name, '')
     }
 
-    LongSumObserver longSumObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongSumObserver(name, description, unit, labels)
-    }
-
     LongSumObserver longSumObserver(String name, String description, String unit) {
-        return longSumObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getLongSumObserver(name, description, unit)
     }
 
     LongSumObserver longSumObserver(String name, String description) {
@@ -235,12 +203,8 @@ class OtelHelper {
         return longSumObserver(name, '')
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit, labels)
-    }
-
     DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit) {
-        return doubleUpDownSumObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit)
     }
 
     DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description) {
@@ -251,12 +215,8 @@ class OtelHelper {
         return doubleUpDownSumObserver(name, '')
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit, labels)
-    }
-
     LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit) {
-        return longUpDownSumObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit)
     }
 
     LongUpDownSumObserver longUpDownSumObserver(String name, String description) {
@@ -267,12 +227,8 @@ class OtelHelper {
         return longUpDownSumObserver(name, '')
     }
 
-    DoubleValueObserver doubleValueObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit, labels)
-    }
-
     DoubleValueObserver doubleValueObserver(String name, String description, String unit) {
-        return doubleValueObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit)
     }
 
     DoubleValueObserver doubleValueObserver(String name, String description) {
@@ -283,12 +239,8 @@ class OtelHelper {
         return doubleValueObserver(name, '')
     }
 
-    LongValueObserver longValueObserver(String name, String description, String unit, Map<String, String> labels) {
-        return groovyMetricEnvironment.getLongValueObserver(name, description, unit, labels)
-    }
-
     LongValueObserver longValueObserver(String name, String description, String unit) {
-        return longValueObserver(name, description, unit, null)
+        return groovyMetricEnvironment.getLongValueObserver(name, description, unit)
     }
 
     LongValueObserver longValueObserver(String name, String description) {

@@ -16,11 +16,11 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.SUMMARY
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 
 import io.opentelemetry.common.Labels
 import io.opentelemetry.sdk.OpenTelemetrySdk
@@ -74,8 +74,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.doubleSumObserver(
                 'double-sum', 'a double sum',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({doubleResult ->
             doubleResult.observe(123.456, Labels.of('key', 'value'))
         })
@@ -107,9 +106,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'double-sum'
         assert first.descriptor.description == 'a double sum'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == MONOTONIC_DOUBLE
         assert first.points.size() == 1
         assert first.points[0].value == 123.456
@@ -118,7 +114,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-double-sum'
         assert second.descriptor.description == 'another double sum'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == MONOTONIC_DOUBLE
         assert second.points.size() == 1
         assert second.points[0].value == 234.567
@@ -127,7 +122,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-double-sum'
         assert third.descriptor.description == 'double sum'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == MONOTONIC_DOUBLE
         assert third.points.size() == 1
         assert third.points[0].value == 345.678
@@ -136,7 +130,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-double-sum'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == MONOTONIC_DOUBLE
         assert fourth.points.size() == 1
         assert fourth.points[0].value == 456.789
@@ -177,7 +170,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'double'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == MONOTONIC_DOUBLE
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].value == 20.2
@@ -187,7 +179,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'double'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == MONOTONIC_DOUBLE
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].value == 20.2
@@ -200,8 +191,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.longSumObserver(
                 'long-sum', 'a long sum',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({longResult ->
             longResult.observe(123, Labels.of('key', 'value'))
         })
@@ -233,9 +223,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'long-sum'
         assert first.descriptor.description == 'a long sum'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == MONOTONIC_LONG
         assert first.points.size() == 1
         assert first.points[0].value == 123
@@ -244,7 +231,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-long-sum'
         assert second.descriptor.description == 'another long sum'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == MONOTONIC_LONG
         assert second.points.size() == 1
         assert second.points[0].value == 234
@@ -253,7 +239,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-long-sum'
         assert third.descriptor.description == 'long sum'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == MONOTONIC_LONG
         assert third.points.size() == 1
         assert third.points[0].value == 345
@@ -262,7 +247,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-long-sum'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == MONOTONIC_LONG
         assert fourth.points.size() == 1
         assert fourth.points[0].value == 456
@@ -303,7 +287,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'long'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == MONOTONIC_LONG
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].value == 20
@@ -313,7 +296,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'long'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == MONOTONIC_LONG
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].value == 20
@@ -326,8 +308,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.doubleUpDownSumObserver(
                 'double-up-down-sum', 'a double up down sum',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({doubleResult ->
             doubleResult.observe(123.456, Labels.of('key', 'value'))
         })
@@ -359,9 +340,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'double-up-down-sum'
         assert first.descriptor.description == 'a double up down sum'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == NON_MONOTONIC_DOUBLE
         assert first.points.size() == 1
         assert first.points[0].value == 123.456
@@ -370,7 +348,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-double-up-down-sum'
         assert second.descriptor.description == 'another double up down sum'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == NON_MONOTONIC_DOUBLE
         assert second.points.size() == 1
         assert second.points[0].value == 234.567
@@ -379,7 +356,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-double-up-down-sum'
         assert third.descriptor.description == 'double up down sum'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == NON_MONOTONIC_DOUBLE
         assert third.points.size() == 1
         assert third.points[0].value == 345.678
@@ -388,7 +364,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-double-up-down-sum'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == NON_MONOTONIC_DOUBLE
         assert fourth.points.size() == 1
         assert fourth.points[0].value == 456.789
@@ -429,7 +404,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'double'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == NON_MONOTONIC_DOUBLE
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].value == 20.2
@@ -439,7 +413,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'double'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == NON_MONOTONIC_DOUBLE
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].value == 20.2
@@ -452,8 +425,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.longUpDownSumObserver(
                 'long-up-down-sum', 'a long up down sum',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({longResult ->
             longResult.observe(123, Labels.of('key', 'value'))
         })
@@ -485,9 +457,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'long-up-down-sum'
         assert first.descriptor.description == 'a long up down sum'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == NON_MONOTONIC_LONG
         assert first.points.size() == 1
         assert first.points[0].value == 123
@@ -496,7 +465,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-long-up-down-sum'
         assert second.descriptor.description == 'another long up down sum'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == NON_MONOTONIC_LONG
         assert second.points.size() == 1
         assert second.points[0].value == 234
@@ -505,7 +473,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-long-up-down-sum'
         assert third.descriptor.description == 'long up down sum'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == NON_MONOTONIC_LONG
         assert third.points.size() == 1
         assert third.points[0].value == 345
@@ -514,7 +481,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-long-up-down-sum'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == NON_MONOTONIC_LONG
         assert fourth.points.size() == 1
         assert fourth.points[0].value == 456
@@ -555,7 +521,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'long'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == NON_MONOTONIC_LONG
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].value == 20
@@ -565,7 +530,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'long'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == NON_MONOTONIC_LONG
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].value == 20
@@ -578,8 +542,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.doubleValueObserver(
                 'double-value', 'a double value',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({doubleResult ->
             doubleResult.observe(123.456, Labels.of('key', 'value'))
         })
@@ -611,9 +574,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'double-value'
         assert first.descriptor.description == 'a double value'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == SUMMARY
         assert first.points.size() == 1
         assert first.points[0].count == 1
@@ -627,7 +587,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-double-value'
         assert second.descriptor.description == 'another double value'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == SUMMARY
         assert second.points[0].count == 1
         assert second.points[0].sum == 234.567
@@ -640,7 +599,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-double-value'
         assert third.descriptor.description == 'double value'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == SUMMARY
         assert third.points.size() == 1
         assert third.points[0].count == 1
@@ -654,7 +612,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-double-value'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == SUMMARY
         assert fourth.points.size() == 1
         assert fourth.points[0].count == 1
@@ -701,7 +658,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'double'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == SUMMARY
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].count == 1
@@ -716,7 +672,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'double'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == SUMMARY
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].count == 1
@@ -739,8 +694,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         when:
         def dso = otel.longValueObserver(
                 'long-value', 'a long value',
-                'ms', [key1:'value1', key2:'value2']
-                )
+                'ms')
         dso.setCallback({longResult ->
             longResult.observe(123, Labels.of('key', 'value'))
         })
@@ -772,9 +726,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.descriptor.name == 'long-value'
         assert first.descriptor.description == 'a long value'
         assert first.descriptor.unit == 'ms'
-        assert first.descriptor.constantLabels == Labels.of(
-        'key1', 'value1', 'key2', 'value2'
-        )
         assert first.descriptor.type == SUMMARY
         assert first.points.size() == 1
         assert first.points[0].count == 1
@@ -788,7 +739,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.descriptor.name == 'my-long-value'
         assert second.descriptor.description == 'another long value'
         assert second.descriptor.unit == 'µs'
-        assert second.descriptor.constantLabels == Labels.empty()
         assert second.descriptor.type == SUMMARY
         assert second.points.size() == 1
         assert second.points[0].count == 1
@@ -802,7 +752,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.descriptor.name == 'another-long-value'
         assert third.descriptor.description == 'long value'
         assert third.descriptor.unit == '1'
-        assert third.descriptor.constantLabels == Labels.empty()
         assert third.descriptor.type == SUMMARY
         assert third.points.size() == 1
         assert third.points[0].count == 1
@@ -816,7 +765,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.descriptor.name == 'yet-another-long-value'
         assert fourth.descriptor.description == ''
         assert fourth.descriptor.unit == '1'
-        assert fourth.descriptor.constantLabels == Labels.empty()
         assert fourth.descriptor.type == SUMMARY
         assert fourth.points.size() == 1
         assert fourth.points[0].count == 1
@@ -863,7 +811,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.descriptor.name == 'dc'
         assert firstMetric.descriptor.description == 'long'
         assert firstMetric.descriptor.unit == '1'
-        assert firstMetric.descriptor.constantLabels == Labels.empty()
         assert firstMetric.descriptor.type == SUMMARY
         assert firstMetric.points.size() == 1
         assert firstMetric.points[0].sum == 20
@@ -877,7 +824,6 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.descriptor.name == 'dc'
         assert secondMetric.descriptor.description == 'long'
         assert secondMetric.descriptor.unit == '1'
-        assert secondMetric.descriptor.constantLabels == Labels.empty()
         assert secondMetric.descriptor.type == SUMMARY
         assert secondMetric.points.size() == 2
         assert secondMetric.points[0].sum == 40

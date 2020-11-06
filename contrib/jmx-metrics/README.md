@@ -88,51 +88,47 @@ via `otel.jmx.groovy.script`, it will then run the script on the specified
 
 ### OpenTelemetry Synchronous Instrument Helpers
 
-- `otel.doubleCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleCounter(String name, String description, String unit)`
 
-- `otel.longCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longCounter(String name, String description, String unit)`
 
-- `otel.doubleUpDownCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleUpDownCounter(String name, String description, String unit)`
 
-- `otel.longUpDownCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longUpDownCounter(String name, String description, String unit)`
 
-- `otel.doubleValueRecorder(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleValueRecorder(String name, String description, String unit)`
 
-- `otel.longValueRecorder(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longValueRecorder(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
-instruments.  Each one provides three additional signatures where labels, unit, and description
+instruments.  Each one provides three additional signatures where unit and description
 aren't desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description, String unit)` - `labels` are empty map.
+- `otel.<meterMethod>(String name, String description)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name, String description)` - `unit` is "1" and `labels` are empty map.
-
-- `otel.<meterMethod>(String name)` - `description` is empty string, `unit` is "1" and `labels` are empty map.
+- `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
 
 ### OpenTelemetry Asynchronous Instrument Helpers
 
-- `otel.doubleSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleSumObserver(String name, String description, String unit)`
 
-- `otel.longSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longSumObserver(String name, String description, String unit)`
 
-- `otel.doubleUpDownSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleUpDownSumObserver(String name, String description, String unit)`
 
-- `otel.longUpDownSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longUpDownSumObserver(String name, String description, String unit)`
 
-- `otel.doubleValueObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleValueObserver(String name, String description, String unit)`
 
-- `otel.longValueObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longValueObserver(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
-instruments.  Each one provides three additional signatures where labels, unit, and description
-aren't desired upon invocation.
+instruments.  Each one provides two additional signatures where unit and description aren't
+desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description, String unit)` - `labels` are empty map.
+- `otel.<meterMethod>(String name, String description)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name, String description)` - `unit` is "1" and `labels` are empty map.
-
-- `otel.<meterMethod>(String name)` - `description` is empty string, `unit` is "1" and `labels` are empty map.
+- `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
 
 ### Compatibility
 
