@@ -23,10 +23,16 @@ import io.opentelemetry.exporters.logging.LoggingMetricExporter;
 import io.opentelemetry.exporters.otlp.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporters.prometheus.PrometheusCollector;
 import io.opentelemetry.metrics.DoubleCounter;
+import io.opentelemetry.metrics.DoubleSumObserver;
 import io.opentelemetry.metrics.DoubleUpDownCounter;
+import io.opentelemetry.metrics.DoubleUpDownSumObserver;
+import io.opentelemetry.metrics.DoubleValueObserver;
 import io.opentelemetry.metrics.DoubleValueRecorder;
 import io.opentelemetry.metrics.LongCounter;
+import io.opentelemetry.metrics.LongSumObserver;
 import io.opentelemetry.metrics.LongUpDownCounter;
+import io.opentelemetry.metrics.LongUpDownSumObserver;
+import io.opentelemetry.metrics.LongValueObserver;
 import io.opentelemetry.metrics.LongValueRecorder;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -253,6 +259,144 @@ public class GroovyMetricEnvironment {
     Labels labels = mapToLabels(constantLabels);
     return meter
         .longValueRecorderBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link DoubleSumObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link DoubleSumObserver}
+   */
+  public DoubleSumObserver getDoubleSumObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .doubleSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link LongSumObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link LongSumObserver}
+   */
+  public LongSumObserver getLongSumObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .longSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link DoubleUpDownSumObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link DoubleUpDownSumObserver}
+   */
+  public DoubleUpDownSumObserver getDoubleUpDownSumObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .doubleUpDownSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link LongUpDownSumObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link LongUpDownSumObserver}
+   */
+  public LongUpDownSumObserver getLongUpDownSumObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .longUpDownSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link DoubleValueObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link DoubleValueObserver}
+   */
+  public DoubleValueObserver getDoubleValueObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .doubleValueObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setConstantLabels(labels)
+        .build();
+  }
+
+  /**
+   * Build or retrieve previously registered {@link LongValueObserver}.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param constantLabels - metric descriptor's constant labels
+   * @return new or memoized {@link LongValueObserver}
+   */
+  public LongValueObserver getLongValueObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final Map<String, String> constantLabels) {
+    Labels labels = mapToLabels(constantLabels);
+    return meter
+        .longValueObserverBuilder(name)
         .setDescription(description)
         .setUnit(unit)
         .setConstantLabels(labels)

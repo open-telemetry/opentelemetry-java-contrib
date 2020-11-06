@@ -17,9 +17,16 @@
 package io.opentelemetry.contrib.jmxmetrics
 
 import io.opentelemetry.metrics.DoubleCounter
+import io.opentelemetry.metrics.DoubleSumObserver
 import io.opentelemetry.metrics.DoubleUpDownCounter
+import io.opentelemetry.metrics.DoubleUpDownSumObserver
+import io.opentelemetry.metrics.DoubleValueObserver
 import io.opentelemetry.metrics.LongCounter
+import io.opentelemetry.metrics.LongSumObserver
 import io.opentelemetry.metrics.LongUpDownCounter
+import io.opentelemetry.metrics.LongUpDownSumObserver
+import io.opentelemetry.metrics.LongValueObserver
+
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
 
@@ -89,6 +96,11 @@ class InstrumentHelper {
             return
         }
 
+        // Observer instruments need to have a single callback set, so pool all update
+        // operations in a list of closures per instrument to be executed after all values
+        // are established, potentially as the callback.
+        def instToUpdates = [:]
+
         [mbeans, values].transpose().each { mbean, value ->
             if (value instanceof CompositeData) {
                 value.getCompositeType().keySet().each { key ->
@@ -96,14 +108,36 @@ class InstrumentHelper {
                     def updatedInstrumentName = "${instrumentName}.${key}"
                     def labels = getLabels(mbean, labelFuncs)
                     def inst = instrument(updatedInstrumentName, description, unit)
+                    println "InstrumentHelper.update (composite) - ${inst}"
                     logger.fine("Recording ${updatedInstrumentName} - ${inst} w/ ${val} - ${labels}")
-                    updateInstrumentWithValue(inst, val, labels)
+                    if (!instToUpdates.containsKey(inst)) {
+                        instToUpdates[inst] = []
+                    }
+                    instToUpdates[inst].add(prepareUpdateClosure(inst, val, labels))
                 }
             } else {
                 def labels = getLabels(mbean, labelFuncs)
                 def inst = instrument(instrumentName, description, unit)
+                println "InstrumentHelper.update - ${inst}"
                 logger.fine("Recording ${instrumentName} - ${inst} w/ ${value} - ${labels}")
-                updateInstrumentWithValue(inst, value, labels)
+                if (!instToUpdates.containsKey(inst)) {
+                    instToUpdates[inst] = []
+                }
+                instToUpdates[inst].add(prepareUpdateClosure(inst, value, labels))
+            }
+        }
+
+        instToUpdates.each {inst, updateClosures ->
+            if (instrumentIsObserver(inst)) {
+                inst.setCallback({ result ->
+                    updateClosures.each { update ->
+                        update(result)
+                    }
+                })
+            } else {
+                updateClosures.each {
+                    it(inst)
+                }
             }
         }
     }
@@ -116,15 +150,32 @@ class InstrumentHelper {
         return labels
     }
 
-    private static void updateInstrumentWithValue(inst, value, labels) {
+    private static Closure prepareUpdateClosure(inst, value, labels) {
         def labelMap = GroovyMetricEnvironment.mapToLabels(labels)
-        if (inst instanceof DoubleCounter
-        || inst instanceof DoubleUpDownCounter
-        || inst instanceof LongCounter
-        || inst instanceof LongUpDownCounter) {
-            inst.add(value, labelMap)
+        if (instrumentIsObserver(inst)) {
+            return { result ->
+                result.observe(value, labelMap)
+            }
+        } else if (instrumentIsCounter(inst)) {
+            return { i -> i.add(value, labelMap) }
         } else {
-            inst.record(value, labelMap)
+            return { i -> i.record(value, labelMap) }
         }
+    }
+
+    private static boolean instrumentIsObserver(inst) {
+        return (inst instanceof DoubleSumObserver
+                || inst instanceof DoubleUpDownSumObserver
+                || inst instanceof LongSumObserver
+                || inst instanceof LongUpDownSumObserver
+                || inst instanceof DoubleValueObserver
+                || inst instanceof LongValueObserver)
+    }
+
+    private static boolean instrumentIsCounter(inst) {
+        return (inst instanceof DoubleCounter
+                || inst instanceof DoubleUpDownCounter
+                || inst instanceof LongCounter
+                || inst instanceof LongUpDownCounter)
     }
 }
