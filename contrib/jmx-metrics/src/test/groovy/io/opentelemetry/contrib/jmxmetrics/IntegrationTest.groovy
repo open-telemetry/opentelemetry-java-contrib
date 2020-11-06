@@ -82,22 +82,39 @@ class IntegrationTest extends Specification{
         }
 
         if ("cassandra" in targets) {
-            targetContainers.add(
-                    new GenericContainer<>(
-                    new ImageFromDockerfile().withFileFromString("Dockerfile",
-                    ("FROM cassandra:3.11\n"
-                    + "ENV LOCAL_JMX=no\n"
+            def dockerfile = ("FROM cassandra:3.11\nENV LOCAL_JMX=no\n"
                     + "RUN echo 'cassandra cassandra' > /etc/cassandra/jmxremote.password\n"
                     + "RUN chmod 0400 /etc/cassandra/jmxremote.password\n")
-                    )
-                    )
-                    .withNetwork(network)
+            targetContainers.add(
+                    new GenericContainer<>(
+                    new ImageFromDockerfile().withFileFromString( "Dockerfile", dockerfile)
+                    ).withNetwork(network)
                     .withNetworkAliases("cassandra")
                     .withExposedPorts(7199)
                     .withStartupTimeout(Duration.ofSeconds(120))
                     .waitingFor(Wait.forListeningPort())
                     )
         }
+
+        if ("kafka" in targets) {
+            def zookeeper = new GenericContainer<>("zookeeper:3.5")
+                    .withNetwork(network)
+                    .withNetworkAliases("zookeeper")
+                    .withStartupTimeout(Duration.ofSeconds(120))
+                    .waitingFor(Wait.forListeningPort())
+            targetContainers.add(zookeeper)
+            targetContainers.add(
+                    new GenericContainer<>("bitnami/kafka:latest")
+                    .withNetwork(network)
+                    .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
+                    .withNetworkAliases("kafka")
+                    .withExposedPorts(7199)
+                    .withStartupTimeout(Duration.ofSeconds(120))
+                    .waitingFor(Wait.forListeningPort())
+                    .dependsOn(zookeeper)
+                    )
+        }
+
         targetContainers.each {
             it.start()
         }

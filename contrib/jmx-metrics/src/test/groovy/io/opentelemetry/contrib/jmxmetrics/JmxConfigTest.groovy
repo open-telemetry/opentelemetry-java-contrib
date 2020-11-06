@@ -21,7 +21,7 @@ class JmxConfigTest extends UnitTest {
 
     def 'static values'() {
         expect: 'static values to be expected'
-        JmxConfig.AVAILABLE_TARGET_SYSTEMS == ["jvm", "cassandra"]
+        JmxConfig.AVAILABLE_TARGET_SYSTEMS == ["jvm", "kafka", "cassandra"]
     }
 
     def 'default values'() {
@@ -139,6 +139,6 @@ class JmxConfigTest extends UnitTest {
 
         expect: 'config fails to validate'
         raised != null
-        raised.message ==  "unavailabletargetsystem must be one of [jvm, cassandra]"
+        raised.message ==  "unavailabletargetsystem must be one of [jvm, kafka, cassandra]"
     }
 }

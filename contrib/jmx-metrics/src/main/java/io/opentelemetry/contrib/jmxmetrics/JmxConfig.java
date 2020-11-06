@@ -38,7 +38,7 @@ class JmxConfig {
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
-  static final List<String> AVAILABLE_TARGET_SYSTEMS = Arrays.asList("jvm", "cassandra");
+  static final List<String> AVAILABLE_TARGET_SYSTEMS = Arrays.asList("jvm", "kafka", "cassandra");
 
   final String serviceUrl;
   final String groovyScript;
