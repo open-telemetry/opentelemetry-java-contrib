@@ -1,6 +1,6 @@
 ext {
     versions = [
-        otelStable : '0.8.0'
+        otelStable : '0.9.1'
     ]
 
     libraries = [
