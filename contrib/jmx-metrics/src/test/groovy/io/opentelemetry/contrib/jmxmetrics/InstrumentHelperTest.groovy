@@ -175,5 +175,17 @@ class InstrumentHelperTest extends Specification {
         false | "multiple" | "Double" | "doubleValueRecorder" | SUMMARY | 123.456
         true | "single" | "Long" | "longValueRecorder" | SUMMARY | 234
         false | "multiple" | "Long" | "longValueRecorder" | SUMMARY | 234
+        true | "single" | "Double" | "doubleSumObserver" | MONOTONIC_DOUBLE | 123.456
+        false | "multiple" | "Double" | "doubleSumObserver" | MONOTONIC_DOUBLE | 123.456
+        true | "single" | "Double" | "doubleUpDownSumObserver" | NON_MONOTONIC_DOUBLE | 123.456
+        false | "multiple" | "Double" | "doubleUpDownSumObserver" | NON_MONOTONIC_DOUBLE | 123.456
+        true | "single" | "Long" | "longSumObserver" | MONOTONIC_LONG | 234
+        false | "multiple" | "Long" | "longSumObserver" | MONOTONIC_LONG | 234
+        true | "single" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
+        false | "multiple" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
+        true | "single" | "Double" | "doubleValueObserver" | SUMMARY | 123.456
+        false | "multiple" | "Double" | "doubleValueObserver" | SUMMARY | 123.456
+        true | "single" | "Long" | "longValueObserver" | SUMMARY | 234
+        false | "multiple" | "Long" | "longValueObserver" | SUMMARY | 234
     }
 }

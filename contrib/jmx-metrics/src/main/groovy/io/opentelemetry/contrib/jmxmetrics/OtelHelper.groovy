@@ -17,10 +17,16 @@
 package io.opentelemetry.contrib.jmxmetrics
 
 import io.opentelemetry.metrics.DoubleCounter
+import io.opentelemetry.metrics.DoubleSumObserver
 import io.opentelemetry.metrics.DoubleUpDownCounter
+import io.opentelemetry.metrics.DoubleUpDownSumObserver
+import io.opentelemetry.metrics.DoubleValueObserver
 import io.opentelemetry.metrics.DoubleValueRecorder
 import io.opentelemetry.metrics.LongCounter
+import io.opentelemetry.metrics.LongSumObserver
 import io.opentelemetry.metrics.LongUpDownCounter
+import io.opentelemetry.metrics.LongUpDownSumObserver
+import io.opentelemetry.metrics.LongValueObserver
 import io.opentelemetry.metrics.LongValueRecorder
 
 import javax.management.ObjectName
@@ -195,5 +201,101 @@ class OtelHelper {
 
     LongValueRecorder longValueRecorder(String name) {
         return longValueRecorder(name, '')
+    }
+
+    DoubleSumObserver doubleSumObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit, labels)
+    }
+
+    DoubleSumObserver doubleSumObserver(String name, String description, String unit) {
+        return doubleSumObserver(name, description, unit, null)
+    }
+
+    DoubleSumObserver doubleSumObserver(String name, String description) {
+        return doubleSumObserver(name, description, SCALAR)
+    }
+
+    DoubleSumObserver doubleSumObserver(String name) {
+        return doubleSumObserver(name, '')
+    }
+
+    LongSumObserver longSumObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getLongSumObserver(name, description, unit, labels)
+    }
+
+    LongSumObserver longSumObserver(String name, String description, String unit) {
+        return longSumObserver(name, description, unit, null)
+    }
+
+    LongSumObserver longSumObserver(String name, String description) {
+        return longSumObserver(name, description, SCALAR)
+    }
+
+    LongSumObserver longSumObserver(String name) {
+        return longSumObserver(name, '')
+    }
+
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit, labels)
+    }
+
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit) {
+        return doubleUpDownSumObserver(name, description, unit, null)
+    }
+
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description) {
+        return doubleUpDownSumObserver(name, description, SCALAR)
+    }
+
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name) {
+        return doubleUpDownSumObserver(name, '')
+    }
+
+    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit, labels)
+    }
+
+    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit) {
+        return longUpDownSumObserver(name, description, unit, null)
+    }
+
+    LongUpDownSumObserver longUpDownSumObserver(String name, String description) {
+        return longUpDownSumObserver(name, description, SCALAR)
+    }
+
+    LongUpDownSumObserver longUpDownSumObserver(String name) {
+        return longUpDownSumObserver(name, '')
+    }
+
+    DoubleValueObserver doubleValueObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit, labels)
+    }
+
+    DoubleValueObserver doubleValueObserver(String name, String description, String unit) {
+        return doubleValueObserver(name, description, unit, null)
+    }
+
+    DoubleValueObserver doubleValueObserver(String name, String description) {
+        return doubleValueObserver(name, description, SCALAR)
+    }
+
+    DoubleValueObserver doubleValueObserver(String name) {
+        return doubleValueObserver(name, '')
+    }
+
+    LongValueObserver longValueObserver(String name, String description, String unit, Map<String, String> labels) {
+        return groovyMetricEnvironment.getLongValueObserver(name, description, unit, labels)
+    }
+
+    LongValueObserver longValueObserver(String name, String description, String unit) {
+        return longValueObserver(name, description, unit, null)
+    }
+
+    LongValueObserver longValueObserver(String name, String description) {
+        return longValueObserver(name, description, SCALAR)
+    }
+
+    LongValueObserver longValueObserver(String name) {
+        return longValueObserver(name, '')
     }
 }
