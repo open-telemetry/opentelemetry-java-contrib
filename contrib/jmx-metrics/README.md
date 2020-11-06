@@ -125,6 +125,7 @@ The currently available target systems are:
 | ------------------------ |
 | [`jvm`](./docs/target-systems/jvm.md) |
 | [`cassandra`](./docs/target-systems/cassandra.md) |
+| [`kafka`](./docs/target-systems/kafka.md) |
 
 ### Configuration
 

@@ -35,6 +35,7 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
         setup: 'we configure JMX metrics gatherer and target server to use JVM as target system'
+        targets = ["cassandra"]
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/jvm.properties',  otlpPort, 0, false)
 
@@ -219,7 +220,7 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
         }
 
         cleanup:
-        cassandraContainer.stop()
+        targetContainers.each { it.stop() }
         jmxExtensionAppContainer.stop()
     }
 }

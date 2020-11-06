@@ -37,6 +37,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
     @Unroll
     def 'end to end with stdin config: #useStdin'() {
         setup: 'we configure JMX metrics gatherer and target server'
+        targets = ["cassandra"]
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('otlp_config.properties',  otlpPort, 0, useStdin)
 
@@ -91,7 +92,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         datapoint.getBucketCounts(1).value == sum
 
         cleanup:
-        cassandraContainer.stop()
+        targetContainers.each { it.stop() }
         jmxExtensionAppContainer.stop()
 
         where:
