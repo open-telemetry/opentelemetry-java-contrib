@@ -120,7 +120,7 @@ class IntegrationTest extends Specification{
         }
 
         jmxExtensionAppContainer =
-                new GenericContainer<>("openjdk:7u111-jre-alpine")
+                new GenericContainer<>("openjdk:8u272-jre-slim")
                 .withNetwork(network)
                 .withCopyFileToContainer(MountableFile.forHostPath(jarPath), "/app/OpenTelemetryJava.jar")
                 .withCopyFileToContainer(

@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-ext.releaseJavaVersion = JavaVersion.VERSION_1_7
+ext.releaseJavaVersion = JavaVersion.VERSION_1_8
 ext.testJavaVersion = JavaVersion.VERSION_1_8
 
 java {
