@@ -160,12 +160,12 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | The supported target application with built in Groovy script. |
 | `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
 | `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
-| `otel.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
-| `otel.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
-| `otel.otlp.use.tls` | no | Whether to use TLS for otlp channel.  Setting any value evaluates to `true`. |
-| `otel.otlp.metadata` | no | Any headers to include in otlp exporter metric submissions.  Of the form `'header1=value1;header2=value2'` |
-| `otel.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
-| `otel.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
+| `otel.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
+| `otel.exporter.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
+| `otel.exporter.otlp.use.tls` | no | Whether to use TLS for otlp channel.  Setting any value evaluates to `true`. |
+| `otel.exporter.otlp.metadata` | no | Any headers to include in otlp exporter metric submissions.  Of the form `'header1=value1;header2=value2'` |
+| `otel.exporter.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
+| `otel.exporter.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
 | `otel.jmx.username` | no | Username for JMX authentication, if applicable. |
 | `otel.jmx.password` | no | Password for JMX authentication, if applicable. |
 | `javax.net.ssl.keyStore` | no | The key store path is required if client authentication is enabled on the target JVM. |
