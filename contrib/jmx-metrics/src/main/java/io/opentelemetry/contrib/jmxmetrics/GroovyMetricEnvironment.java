@@ -18,7 +18,6 @@ package io.opentelemetry.contrib.jmxmetrics;
 
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.common.Labels;
-import io.opentelemetry.exporters.inmemory.InMemoryMetricExporter;
 import io.opentelemetry.exporters.logging.LoggingMetricExporter;
 import io.opentelemetry.exporters.otlp.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporters.prometheus.PrometheusCollector;
@@ -39,6 +38,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter;
 import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.util.Collection;

@@ -48,8 +48,8 @@ dependencies {
             libraries.otelExporterLogging,
             libraries.otelExporterOtlp,
             libraries.otelExporterPrometheus,
-            libraries.otelExporterInMemory,
             libraries.otelSdk,
+            libraries.otelSdkTesting,
             deps.slf4j,
             dependencies.create(group: 'org.slf4j', name: 'slf4j-simple', version: versions.slf4j)
 
