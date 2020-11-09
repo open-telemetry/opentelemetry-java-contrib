@@ -16,6 +16,8 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
@@ -23,7 +25,7 @@ import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LO
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
-import io.opentelemetry.common.Labels
+import io.opentelemetry.api.common.Labels
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import javax.management.MBeanServer
 import javax.management.ObjectName
@@ -95,7 +97,7 @@ class InstrumentHelperTest extends Specification {
     }
 
     def exportMetrics() {
-        def provider = OpenTelemetrySdk.meterProvider.get(name.methodName, '')
+        def provider = OpenTelemetrySdk.globalMeterProvider.get(name.methodName, '')
         return provider.collectAll().sort { md1, md2 ->
             def p1 = md1.points[0]
             def p2 = md2.points[0]
@@ -182,9 +184,9 @@ class InstrumentHelperTest extends Specification {
         false | "multiple" | "Long" | "longSumObserver" | MONOTONIC_LONG | 234
         true | "single" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
         false | "multiple" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
-        true | "single" | "Double" | "doubleValueObserver" | SUMMARY | 123.456
-        false | "multiple" | "Double" | "doubleValueObserver" | SUMMARY | 123.456
-        true | "single" | "Long" | "longValueObserver" | SUMMARY | 234
-        false | "multiple" | "Long" | "longValueObserver" | SUMMARY | 234
+        true | "single" | "Double" | "doubleValueObserver" | GAUGE_DOUBLE | 123.456
+        false | "multiple" | "Double" | "doubleValueObserver" | GAUGE_DOUBLE | 123.456
+        true | "single" | "Long" | "longValueObserver" | GAUGE_LONG | 234
+        false | "multiple" | "Long" | "longValueObserver" | GAUGE_LONG | 234
     }
 }
