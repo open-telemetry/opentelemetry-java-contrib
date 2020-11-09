@@ -16,7 +16,8 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.proto.metrics.v1.DoubleSum
+import io.opentelemetry.proto.metrics.v1.DoubleGauge
+import io.opentelemetry.proto.metrics.v1.IntGauge
 import io.opentelemetry.proto.metrics.v1.IntSum
 
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
@@ -71,139 +72,139 @@ class CassandraIntegrationTests extends OtlpIntegrationTest  {
                 'cassandra.client.request.range_slice.latency.50p',
                 'Token range read request latency - 50th percentile',
                 'µs',
-                'double',
+                DoubleGauge
             ],
             [
                 'cassandra.client.request.range_slice.latency.99p',
                 'Token range read request latency - 99th percentile',
                 'µs',
-                'double',
+                DoubleGauge
             ],
             [
                 'cassandra.client.request.range_slice.latency.count',
                 'Total token range read request latency',
                 'µs',
-                'int',
+                IntSum
             ],
             [
                 'cassandra.client.request.range_slice.latency.max',
                 'Maximum token range read request latency',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.range_slice.timeout.count',
                 'Number of token range read request timeouts encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.range_slice.unavailable.count',
                 'Number of token range read request unavailable exceptions encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.read.latency.50p',
                 'Standard read request latency - 50th percentile',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.read.latency.99p',
                 'Standard read request latency - 99th percentile',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.read.latency.count',
                 'Total standard read request latency',
                 'µs',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.read.latency.max',
                 'Maximum standard read request latency',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.read.timeout.count',
                 'Number of standard read request timeouts encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.read.unavailable.count',
                 'Number of standard read request unavailable exceptions encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.write.latency.50p',
                 'Regular write request latency - 50th percentile',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.write.latency.99p',
                 'Regular write request latency - 99th percentile',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.write.latency.count',
                 'Total regular write request latency',
                 'µs',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.write.latency.max',
                 'Maximum regular write request latency',
                 'µs',
-                'double',
+                DoubleGauge,
             ],
             [
                 'cassandra.client.request.write.timeout.count',
                 'Number of regular write request timeouts encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.client.request.write.unavailable.count',
                 'Number of regular write request unavailable exceptions encountered',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.compaction.tasks.completed',
                 'Number of completed compactions since server [re]start',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.compaction.tasks.pending',
                 'Estimated number of compactions remaining to perform',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'cassandra.storage.load.count',
                 'Size of the on disk data size this node manages',
                 'by',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.storage.total_hints.count',
                 'Number of hint messages written to this node since [re]start',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'cassandra.storage.total_hints.in_progress.count',
                 'Number of hints attempting to be sent currently',
                 '1',
-                'int',
+                IntSum,
             ],
         ].eachWithIndex{ item, index ->
             Metric metric = metrics.get(index)
@@ -212,13 +213,19 @@ class CassandraIntegrationTests extends OtlpIntegrationTest  {
             assert metric.unit == item[2]
             def datapoint
             switch(item[3]) {
-                case 'double':
-                    assert metric.hasDoubleSum()
-                    DoubleSum datapoints = metric.doubleSum
+                case DoubleGauge:
+                    assert metric.hasDoubleGauge()
+                    DoubleGauge datapoints = metric.doubleGauge
                     assert datapoints.dataPointsCount == 1
                     datapoint = datapoints.getDataPoints(0)
                     break
-                case 'int':
+                case IntGauge:
+                    assert metric.hasIntGauge()
+                    IntGauge datapoints = metric.intGauge
+                    assert datapoints.dataPointsCount == 1
+                    datapoint = datapoints.getDataPoints(0)
+                    break
+                case IntSum:
                     assert metric.hasIntSum()
                     IntSum datapoints = metric.intSum
                     assert datapoints.dataPointsCount == 1

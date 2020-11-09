@@ -28,7 +28,7 @@ otel.jmx.password = my-password
 def storageLoadMBean = otel.mbean("org.apache.cassandra.metrics:type=Storage,name=Load")
 otel.instrument(storageLoadMBean, "cassandra.storage.load",
         "Size, in bytes, of the on disk data size this node manages",
-        "By", "Count", otel.&longValueRecorder
+        "By", "Count", otel.&longValueObserver
 )
 ```
 
