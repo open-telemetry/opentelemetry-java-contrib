@@ -16,11 +16,11 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.NON_MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type.SUMMARY
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
 import io.opentelemetry.common.Labels
@@ -102,7 +102,7 @@ class InstrumentHelperTest extends Specification {
             def s1 = p1.startEpochNanos
             def s2 = p2.startEpochNanos
             if (s1 == s2) {
-                if (md1.descriptor.type == SUMMARY) {
+                if (md1.type == SUMMARY) {
                     return p1.percentileValues[0].value <=> p2.percentileValues[0].value
                 }
                 return p1.value <=> p2.value
@@ -139,16 +139,15 @@ class InstrumentHelperTest extends Specification {
         metrics.size() == 1
 
         metrics.each { metric ->
-            assert metric.descriptor.name == instrumentName
-            assert metric.descriptor.description == description
-            assert metric.descriptor.unit == "1"
-            assert metric.descriptor.constantLabels == Labels.empty()
-            assert metric.descriptor.type ==  descriptorType
+            assert metric.name == instrumentName
+            assert metric.description == description
+            assert metric.unit == "1"
+            assert metric.type ==  metricType
             assert metric.points.size() == isSingle ? 1 : 4
             metric.points.eachWithIndex { point, i ->
                 assert point.labels == Labels.of("labelOne", "labelOneValue", "labelTwo", "${i}")
 
-                if (descriptorType == SUMMARY) {
+                if (metricType == SUMMARY) {
                     assert point.count == 1
                     assert point.sum == value
                     assert point.percentileValues[0].percentile == 0
@@ -162,7 +161,7 @@ class InstrumentHelperTest extends Specification {
         }
 
         where:
-        isSingle | quantity | attribute | instrumentMethod | descriptorType | value
+        isSingle | quantity | attribute | instrumentMethod | metricType | value
         true | "single" | "Double" | "doubleCounter" | MONOTONIC_DOUBLE | 123.456
         false | "multiple" | "Double" | "doubleCounter" | MONOTONIC_DOUBLE | 123.456
         true | "single" | "Double" | "doubleUpDownCounter" | NON_MONOTONIC_DOUBLE | 123.456

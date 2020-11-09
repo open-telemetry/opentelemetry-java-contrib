@@ -27,11 +27,12 @@ class JmxConfig {
   static final String TARGET_SYSTEM = PREFIX + "jmx.target.system";
   static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
   static final String EXPORTER_TYPE = PREFIX + "exporter";
+  static final String EXPORTER = EXPORTER_TYPE + ".";
 
-  static final String OTLP_ENDPOINT = PREFIX + "otlp.endpoint";
+  static final String OTLP_ENDPOINT = EXPORTER + "otlp.endpoint";
 
-  static final String PROMETHEUS_HOST = PREFIX + "prometheus.host";
-  static final String PROMETHEUS_PORT = PREFIX + "prometheus.port";
+  static final String PROMETHEUS_HOST = EXPORTER + "prometheus.host";
+  static final String PROMETHEUS_PORT = EXPORTER + "prometheus.port";
 
   static final String JMX_USERNAME = PREFIX + "jmx.username";
   static final String JMX_PASSWORD = PREFIX + "jmx.password";

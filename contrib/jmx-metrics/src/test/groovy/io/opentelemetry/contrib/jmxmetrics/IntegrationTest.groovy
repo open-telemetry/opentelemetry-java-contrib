@@ -65,7 +65,7 @@ class IntegrationTest extends Specification{
             "/app/OpenTelemetryJava.jar",
             "-Dotel.jmx.username=cassandra",
             "-Dotel.jmx.password=cassandra",
-            "-Dotel.otlp.endpoint=host.testcontainers.internal:${otlpPort}",
+            "-Dotel.exporter.otlp.endpoint=host.testcontainers.internal:${otlpPort}",
             "io.opentelemetry.contrib.jmxmetrics.JmxMetrics",
             "-config",
         ]
@@ -120,7 +120,7 @@ class IntegrationTest extends Specification{
         }
 
         jmxExtensionAppContainer =
-                new GenericContainer<>("openjdk:7u111-jre-alpine")
+                new GenericContainer<>("openjdk:8u272-jre-slim")
                 .withNetwork(network)
                 .withCopyFileToContainer(MountableFile.forHostPath(jarPath), "/app/OpenTelemetryJava.jar")
                 .withCopyFileToContainer(

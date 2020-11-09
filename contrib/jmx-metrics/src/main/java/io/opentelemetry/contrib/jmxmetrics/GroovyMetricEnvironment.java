@@ -133,21 +133,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleCounter}
    */
   public DoubleCounter getDoubleCounter(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .doubleCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.doubleCounterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -156,21 +146,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongCounter}
    */
   public LongCounter getLongCounter(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .longCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.longCounterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -179,21 +159,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleUpDownCounter}
    */
   public DoubleUpDownCounter getDoubleUpDownCounter(
-      final String name,
-      final String description,
-      final String unit,
-      Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .doubleUpDownCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.doubleUpDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -202,21 +172,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongUpDownCounter}
    */
   public LongUpDownCounter getLongUpDownCounter(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .longUpDownCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.longUpDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -225,21 +185,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleValueRecorder}
    */
   public DoubleValueRecorder getDoubleValueRecorder(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .doubleValueRecorderBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.doubleValueRecorderBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -248,21 +198,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongValueRecorder}
    */
   public LongValueRecorder getLongValueRecorder(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .longValueRecorderBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.longValueRecorderBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -271,21 +211,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleSumObserver}
    */
   public DoubleSumObserver getDoubleSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .doubleSumObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.doubleSumObserverBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -294,21 +224,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongSumObserver}
    */
   public LongSumObserver getLongSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .longSumObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.longSumObserverBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -317,20 +237,14 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleUpDownSumObserver}
    */
   public DoubleUpDownSumObserver getDoubleUpDownSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
+      final String name, final String description, final String unit) {
     return meter
         .doubleUpDownSumObserverBuilder(name)
         .setDescription(description)
         .setUnit(unit)
-        .setConstantLabels(labels)
         .build();
   }
 
@@ -340,20 +254,14 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongUpDownSumObserver}
    */
   public LongUpDownSumObserver getLongUpDownSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
+      final String name, final String description, final String unit) {
     return meter
         .longUpDownSumObserverBuilder(name)
         .setDescription(description)
         .setUnit(unit)
-        .setConstantLabels(labels)
         .build();
   }
 
@@ -363,21 +271,11 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link DoubleValueObserver}
    */
   public DoubleValueObserver getDoubleValueObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .doubleValueObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.doubleValueObserverBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -386,20 +284,10 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @param constantLabels - metric descriptor's constant labels
    * @return new or memoized {@link LongValueObserver}
    */
   public LongValueObserver getLongValueObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Map<String, String> constantLabels) {
-    Labels labels = mapToLabels(constantLabels);
-    return meter
-        .longValueObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setConstantLabels(labels)
-        .build();
+      final String name, final String description, final String unit) {
+    return meter.longValueObserverBuilder(name).setDescription(description).setUnit(unit).build();
   }
 }

@@ -88,51 +88,47 @@ via `otel.jmx.groovy.script`, it will then run the script on the specified
 
 ### OpenTelemetry Synchronous Instrument Helpers
 
-- `otel.doubleCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleCounter(String name, String description, String unit)`
 
-- `otel.longCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longCounter(String name, String description, String unit)`
 
-- `otel.doubleUpDownCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleUpDownCounter(String name, String description, String unit)`
 
-- `otel.longUpDownCounter(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longUpDownCounter(String name, String description, String unit)`
 
-- `otel.doubleValueRecorder(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleValueRecorder(String name, String description, String unit)`
 
-- `otel.longValueRecorder(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longValueRecorder(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
-instruments.  Each one provides three additional signatures where labels, unit, and description
+instruments.  Each one provides three additional signatures where unit and description
 aren't desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description, String unit)` - `labels` are empty map.
+- `otel.<meterMethod>(String name, String description)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name, String description)` - `unit` is "1" and `labels` are empty map.
-
-- `otel.<meterMethod>(String name)` - `description` is empty string, `unit` is "1" and `labels` are empty map.
+- `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
 
 ### OpenTelemetry Asynchronous Instrument Helpers
 
-- `otel.doubleSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleSumObserver(String name, String description, String unit)`
 
-- `otel.longSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longSumObserver(String name, String description, String unit)`
 
-- `otel.doubleUpDownSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleUpDownSumObserver(String name, String description, String unit)`
 
-- `otel.longUpDownSumObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longUpDownSumObserver(String name, String description, String unit)`
 
-- `otel.doubleValueObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.doubleValueObserver(String name, String description, String unit)`
 
-- `otel.longValueObserver(String name, String description, String unit, Map<String, String> labels)`
+- `otel.longValueObserver(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
-instruments.  Each one provides three additional signatures where labels, unit, and description
-aren't desired upon invocation.
+instruments.  Each one provides two additional signatures where unit and description aren't
+desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description, String unit)` - `labels` are empty map.
+- `otel.<meterMethod>(String name, String description)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name, String description)` - `unit` is "1" and `labels` are empty map.
-
-- `otel.<meterMethod>(String name)` - `description` is empty string, `unit` is "1" and `labels` are empty map.
+- `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
 
 ### Compatibility
 
@@ -164,12 +160,12 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | The supported target application with built in Groovy script. |
 | `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
 | `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
-| `otel.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
-| `otel.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
-| `otel.otlp.use.tls` | no | Whether to use TLS for otlp channel.  Setting any value evaluates to `true`. |
-| `otel.otlp.metadata` | no | Any headers to include in otlp exporter metric submissions.  Of the form `'header1=value1;header2=value2'` |
-| `otel.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
-| `otel.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
+| `otel.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
+| `otel.exporter.otlp.metric.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
+| `otel.exporter.otlp.use.tls` | no | Whether to use TLS for otlp channel.  Setting any value evaluates to `true`. |
+| `otel.exporter.otlp.metadata` | no | Any headers to include in otlp exporter metric submissions.  Of the form `'header1=value1;header2=value2'` |
+| `otel.exporter.prometheus.host` | no | The prometheus collector server host. Default is `localhost`.  |
+| `otel.exporter.prometheus.port` | no | The prometheus collector server port. Default is `9090`.  |
 | `otel.jmx.username` | no | Username for JMX authentication, if applicable. |
 | `otel.jmx.password` | no | Password for JMX authentication, if applicable. |
 | `javax.net.ssl.keyStore` | no | The key store path is required if client authentication is enabled on the target JVM. |

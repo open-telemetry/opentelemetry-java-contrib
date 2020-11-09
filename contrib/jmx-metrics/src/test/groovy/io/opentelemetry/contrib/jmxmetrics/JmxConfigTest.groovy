@@ -51,9 +51,9 @@ class JmxConfigTest extends UnitTest {
             "jmx.target.system" : "mytargetsystem",
             "jmx.interval.milliseconds": "123",
             "exporter": "inmemory",
-            "otlp.endpoint": "myOtlpEndpoint",
-            "prometheus.host": "myPrometheusHost",
-            "prometheus.port": "234",
+            "exporter.otlp.endpoint": "myOtlpEndpoint",
+            "exporter.prometheus.host": "myPrometheusHost",
+            "exporter.prometheus.port": "234",
             "jmx.username": "myUsername",
             "jmx.password": "myPassword",
             "jmx.remote.profile": "myRemoteProfile",
@@ -94,7 +94,7 @@ class JmxConfigTest extends UnitTest {
         where:
         prop | _
         'otel.jmx.interval.milliseconds' | _
-        'otel.prometheus.port' | _
+        'otel.exporter.prometheus.port' | _
     }
 
     def 'conflicting groovy script and target system'() {
