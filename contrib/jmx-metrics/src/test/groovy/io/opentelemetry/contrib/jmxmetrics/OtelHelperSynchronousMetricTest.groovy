@@ -22,7 +22,7 @@ import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DO
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 
-import io.opentelemetry.common.Labels
+import io.opentelemetry.api.common.Labels
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -53,7 +53,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
     }
 
     def exportMetrics() {
-        def provider = OpenTelemetrySdk.meterProvider.get(name.methodName, '')
+        def provider = OpenTelemetrySdk.globalMeterProvider.get(name.methodName, '')
         return provider.collectAll().sort { md1, md2 ->
             def p1 = md1.points[0]
             def p2 = md2.points[0]

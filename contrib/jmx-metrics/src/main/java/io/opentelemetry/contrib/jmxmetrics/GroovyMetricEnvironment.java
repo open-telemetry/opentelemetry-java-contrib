@@ -16,29 +16,29 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.common.Labels;
-import io.opentelemetry.exporters.inmemory.InMemoryMetricExporter;
-import io.opentelemetry.exporters.logging.LoggingMetricExporter;
-import io.opentelemetry.exporters.otlp.OtlpGrpcMetricExporter;
-import io.opentelemetry.exporters.prometheus.PrometheusCollector;
-import io.opentelemetry.metrics.DoubleCounter;
-import io.opentelemetry.metrics.DoubleSumObserver;
-import io.opentelemetry.metrics.DoubleUpDownCounter;
-import io.opentelemetry.metrics.DoubleUpDownSumObserver;
-import io.opentelemetry.metrics.DoubleValueObserver;
-import io.opentelemetry.metrics.DoubleValueRecorder;
-import io.opentelemetry.metrics.LongCounter;
-import io.opentelemetry.metrics.LongSumObserver;
-import io.opentelemetry.metrics.LongUpDownCounter;
-import io.opentelemetry.metrics.LongUpDownSumObserver;
-import io.opentelemetry.metrics.LongValueObserver;
-import io.opentelemetry.metrics.LongValueRecorder;
-import io.opentelemetry.metrics.Meter;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Labels;
+import io.opentelemetry.api.metrics.DoubleCounter;
+import io.opentelemetry.api.metrics.DoubleSumObserver;
+import io.opentelemetry.api.metrics.DoubleUpDownCounter;
+import io.opentelemetry.api.metrics.DoubleUpDownSumObserver;
+import io.opentelemetry.api.metrics.DoubleValueObserver;
+import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongSumObserver;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.LongUpDownSumObserver;
+import io.opentelemetry.api.metrics.LongValueObserver;
+import io.opentelemetry.api.metrics.LongValueRecorder;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.exporter.logging.LoggingMetricExporter;
+import io.opentelemetry.exporter.otlp.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.prometheus.PrometheusCollector;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter;
 import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.util.Collection;
@@ -62,11 +62,11 @@ public class GroovyMetricEnvironment {
       final JmxConfig config,
       final String instrumentationName,
       final String instrumentationVersion) {
-    meter = OpenTelemetry.getMeter(instrumentationName, instrumentationVersion);
+    meter = OpenTelemetry.getGlobalMeter(instrumentationName, instrumentationVersion);
 
     switch (config.exporterType.toLowerCase()) {
       case "otlp":
-        exporter = OtlpGrpcMetricExporter.newBuilder().readProperties(config.properties).build();
+        exporter = OtlpGrpcMetricExporter.builder().readProperties(config.properties).build();
         break;
       case "prometheus":
         configurePrometheus(config);
@@ -90,11 +90,11 @@ public class GroovyMetricEnvironment {
   }
 
   private static MetricProducer getMetricProducer() {
-    return OpenTelemetrySdk.getMeterProvider().getMetricProducer();
+    return OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer();
   }
 
   private void configurePrometheus(final JmxConfig config) {
-    PrometheusCollector.newBuilder().setMetricProducer(getMetricProducer()).buildAndRegister();
+    PrometheusCollector.builder().setMetricProducer(getMetricProducer()).buildAndRegister();
     try {
       prometheusServer =
           new HTTPServer(config.prometheusExporterHost, config.prometheusExporterPort);
@@ -121,7 +121,7 @@ public class GroovyMetricEnvironment {
     Labels.Builder labels = new Labels.Builder();
     if (labelMap != null) {
       for (Map.Entry<String, String> kv : labelMap.entrySet()) {
-        labels.setLabel(kv.getKey(), kv.getValue());
+        labels.put(kv.getKey(), kv.getValue());
       }
     }
     return labels.build();

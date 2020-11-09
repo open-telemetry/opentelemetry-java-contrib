@@ -16,16 +16,16 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.metrics.DoubleCounter
-import io.opentelemetry.metrics.DoubleSumObserver
-import io.opentelemetry.metrics.DoubleUpDownCounter
-import io.opentelemetry.metrics.DoubleUpDownSumObserver
-import io.opentelemetry.metrics.DoubleValueObserver
-import io.opentelemetry.metrics.LongCounter
-import io.opentelemetry.metrics.LongSumObserver
-import io.opentelemetry.metrics.LongUpDownCounter
-import io.opentelemetry.metrics.LongUpDownSumObserver
-import io.opentelemetry.metrics.LongValueObserver
+import io.opentelemetry.api.metrics.DoubleCounter
+import io.opentelemetry.api.metrics.DoubleSumObserver
+import io.opentelemetry.api.metrics.DoubleUpDownCounter
+import io.opentelemetry.api.metrics.DoubleUpDownSumObserver
+import io.opentelemetry.api.metrics.DoubleValueObserver
+import io.opentelemetry.api.metrics.LongCounter
+import io.opentelemetry.api.metrics.LongSumObserver
+import io.opentelemetry.api.metrics.LongUpDownCounter
+import io.opentelemetry.api.metrics.LongUpDownSumObserver
+import io.opentelemetry.api.metrics.LongValueObserver
 
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
@@ -63,7 +63,7 @@ class InstrumentHelper {
     private final Closure instrument
 
     /**
-     * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.metrics.Instrument}
+     * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.api.metrics.Instrument}
      * instances from an MBeanHelper's underlying {@link GroovyMBean} instances via an {@link OtelHelper}'s instrument
      * method pointer.
      *
@@ -75,7 +75,7 @@ class InstrumentHelper {
      *        {@link GroovyMBean}-provided Closures: (e.g. [ "myLabelName" : { mbean -> "myLabelValue"} ]). The
      *        resulting Label instances will be used for each individual update.
      * @param attribute - The {@link GroovyMBean} attribute for which to use as the instrument value.
-     * @param instrument - The {@link io.opentelemetry.metrics.Instrument}-producing {@link OtelHelper} method pointer:
+     * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
     InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument) {

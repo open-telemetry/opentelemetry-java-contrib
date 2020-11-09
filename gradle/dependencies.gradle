@@ -1,18 +1,18 @@
 ext {
     versions = [
-        otelStable : '0.9.1'
+        otelStable : '0.10.0'
     ]
 
     libraries = [
         // otel
         otelApi            : "io.opentelemetry:opentelemetry-api:${versions.otelStable}",
         otelSdk            : "io.opentelemetry:opentelemetry-sdk:${versions.otelStable}",
-        otelExporterInMemory       : "io.opentelemetry:opentelemetry-exporters-inmemory:${versions.otelStable}",
-        otelExporterJaeger         : "io.opentelemetry:opentelemetry-exporters-jaeger:${versions.otelStable}",
-        otelExporterLogging        : "io.opentelemetry:opentelemetry-exporters-logging:${versions.otelStable}",
-        otelExporterOtlp           : "io.opentelemetry:opentelemetry-exporters-otlp:${versions.otelStable}",
-        otelExporterPrometheus     : "io.opentelemetry:opentelemetry-exporters-prometheus:${versions.otelStable}",
-        otelExporterZipkin         : "io.opentelemetry:opentelemetry-exporters-zipkin:${versions.otelStable}",
+        otelSdkTesting       : "io.opentelemetry:opentelemetry-sdk-testing:${versions.otelStable}",
+        otelExporterJaeger         : "io.opentelemetry:opentelemetry-exporter-jaeger:${versions.otelStable}",
+        otelExporterLogging        : "io.opentelemetry:opentelemetry-exporter-logging:${versions.otelStable}",
+        otelExporterOtlp           : "io.opentelemetry:opentelemetry-exporter-otlp:${versions.otelStable}",
+        otelExporterPrometheus     : "io.opentelemetry:opentelemetry-exporter-prometheus:${versions.otelStable}",
+        otelExporterZipkin         : "io.opentelemetry:opentelemetry-exporter-zipkin:${versions.otelStable}",
         otelProto          : "io.opentelemetry:opentelemetry-proto:${versions.otelStable}",
 
         // testing

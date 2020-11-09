@@ -16,13 +16,15 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_DOUBLE
+import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
 import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
 
-import io.opentelemetry.common.Labels
+import io.opentelemetry.api.common.Labels
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -54,7 +56,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
     }
 
     def exportMetrics() {
-        def provider = OpenTelemetrySdk.meterProvider.get(name.methodName, '')
+        def provider = OpenTelemetrySdk.globalMeterProvider.get(name.methodName, '')
         return provider.collectAll().sort { md1, md2 ->
             def p1 = md1.points[0]
             def p2 = md2.points[0]
@@ -574,52 +576,32 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.name == 'double-value'
         assert first.description == 'a double value'
         assert first.unit == 'ms'
-        assert first.type == SUMMARY
+        assert first.type == GAUGE_DOUBLE
         assert first.points.size() == 1
-        assert first.points[0].count == 1
-        assert first.points[0].sum == 123.456
-        assert first.points[0].percentileValues[0].percentile == 0
-        assert first.points[0].percentileValues[0].value ==  123.456
-        assert first.points[0].percentileValues[1].percentile == 100
-        assert first.points[0].percentileValues[1].value == 123.456
+        assert first.points[0].value == 123.456
         assert first.points[0].labels == Labels.of('key', 'value')
 
         assert second.name == 'my-double-value'
         assert second.description == 'another double value'
         assert second.unit == 'µs'
-        assert second.type == SUMMARY
-        assert second.points[0].count == 1
-        assert second.points[0].sum == 234.567
-        assert second.points[0].percentileValues[0].percentile == 0
-        assert second.points[0].percentileValues[0].value ==  234.567
-        assert second.points[0].percentileValues[1].percentile == 100
-        assert second.points[0].percentileValues[1].value == 234.567
+        assert second.type == GAUGE_DOUBLE
+        assert second.points[0].value == 234.567
         assert second.points[0].labels == Labels.of('myKey', 'myValue')
 
         assert third.name == 'another-double-value'
         assert third.description == 'double value'
         assert third.unit == '1'
-        assert third.type == SUMMARY
+        assert third.type == GAUGE_DOUBLE
         assert third.points.size() == 1
-        assert third.points[0].count == 1
-        assert third.points[0].sum == 345.678
-        assert third.points[0].percentileValues[0].percentile == 0
-        assert third.points[0].percentileValues[0].value ==  345.678
-        assert third.points[0].percentileValues[1].percentile == 100
-        assert third.points[0].percentileValues[1].value == 345.678
+        assert third.points[0].value == 345.678
         assert third.points[0].labels == Labels.of('anotherKey', 'anotherValue')
 
         assert fourth.name == 'yet-another-double-value'
         assert fourth.description == ''
         assert fourth.unit == '1'
-        assert fourth.type == SUMMARY
+        assert fourth.type == GAUGE_DOUBLE
         assert fourth.points.size() == 1
-        assert fourth.points[0].count == 1
-        assert fourth.points[0].sum == 456.789
-        assert fourth.points[0].percentileValues[0].percentile == 0
-        assert fourth.points[0].percentileValues[0].value ==  456.789
-        assert fourth.points[0].percentileValues[1].percentile == 100
-        assert fourth.points[0].percentileValues[1].value == 456.789
+        assert fourth.points[0].value == 456.789
         assert fourth.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
     }
 
@@ -658,35 +640,20 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.name == 'dc'
         assert firstMetric.description == 'double'
         assert firstMetric.unit == '1'
-        assert firstMetric.type == SUMMARY
+        assert firstMetric.type == GAUGE_DOUBLE
         assert firstMetric.points.size() == 1
-        assert firstMetric.points[0].count == 1
-        assert firstMetric.points[0].sum == 20.2
-        assert firstMetric.points[0].percentileValues[0].percentile == 0
-        assert firstMetric.points[0].percentileValues[0].value ==  20.2
-        assert firstMetric.points[0].percentileValues[1].percentile == 100
-        assert firstMetric.points[0].percentileValues[1].value == 20.2
+        assert firstMetric.points[0].value == 20.2
         assert firstMetric.points[0].labels == Labels.of('key2', 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
         assert secondMetric.description == 'double'
         assert secondMetric.unit == '1'
-        assert secondMetric.type == SUMMARY
+        assert secondMetric.type == GAUGE_DOUBLE
         assert secondMetric.points.size() == 2
-        assert secondMetric.points[0].count == 1
-        assert secondMetric.points[0].sum == 40.4
-        assert secondMetric.points[0].percentileValues[0].percentile == 0
-        assert secondMetric.points[0].percentileValues[0].value ==  40.4
-        assert secondMetric.points[0].percentileValues[1].percentile == 100
-        assert secondMetric.points[0].percentileValues[1].value == 40.4
+        assert secondMetric.points[0].value == 40.4
         assert secondMetric.points[0].labels == Labels.of('key4', 'value4')
-        assert secondMetric.points[1].count == 1
-        assert secondMetric.points[1].sum == 50.5
-        assert secondMetric.points[1].percentileValues[0].percentile == 0
-        assert secondMetric.points[1].percentileValues[0].value ==  50.5
-        assert secondMetric.points[1].percentileValues[1].percentile == 100
-        assert secondMetric.points[1].percentileValues[1].value == 50.5
+        assert secondMetric.points[1].value == 50.5
         assert secondMetric.points[1].labels == Labels.of('key2', 'value2')
     }
 
@@ -726,53 +693,33 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.name == 'long-value'
         assert first.description == 'a long value'
         assert first.unit == 'ms'
-        assert first.type == SUMMARY
+        assert first.type == GAUGE_LONG
         assert first.points.size() == 1
-        assert first.points[0].count == 1
-        assert first.points[0].sum == 123
-        assert first.points[0].percentileValues[0].percentile == 0
-        assert first.points[0].percentileValues[0].value == 123
-        assert first.points[0].percentileValues[1].percentile == 100
-        assert first.points[0].percentileValues[1].value == 123
+        assert first.points[0].value == 123
         assert first.points[0].labels == Labels.of('key', 'value')
 
         assert second.name == 'my-long-value'
         assert second.description == 'another long value'
         assert second.unit == 'µs'
-        assert second.type == SUMMARY
+        assert second.type == GAUGE_LONG
         assert second.points.size() == 1
-        assert second.points[0].count == 1
-        assert second.points[0].sum == 234
-        assert second.points[0].percentileValues[0].percentile == 0
-        assert second.points[0].percentileValues[0].value == 234
-        assert second.points[0].percentileValues[1].percentile == 100
-        assert second.points[0].percentileValues[1].value == 234
+        assert second.points[0].value == 234
         assert second.points[0].labels == Labels.of('myKey', 'myValue')
 
         assert third.name == 'another-long-value'
         assert third.description == 'long value'
         assert third.unit == '1'
-        assert third.type == SUMMARY
+        assert third.type == GAUGE_LONG
         assert third.points.size() == 1
-        assert third.points[0].count == 1
-        assert third.points[0].sum == 345
-        assert third.points[0].percentileValues[0].percentile == 0
-        assert third.points[0].percentileValues[0].value == 345
-        assert third.points[0].percentileValues[1].percentile == 100
-        assert third.points[0].percentileValues[1].value == 345
+        assert third.points[0].value == 345
         assert third.points[0].labels == Labels.of('anotherKey', 'anotherValue')
 
         assert fourth.name == 'yet-another-long-value'
         assert fourth.description == ''
         assert fourth.unit == '1'
-        assert fourth.type == SUMMARY
+        assert fourth.type == GAUGE_LONG
         assert fourth.points.size() == 1
-        assert fourth.points[0].count == 1
-        assert fourth.points[0].sum == 456
-        assert fourth.points[0].percentileValues[0].percentile == 0
-        assert fourth.points[0].percentileValues[0].value == 456
-        assert fourth.points[0].percentileValues[1].percentile == 100
-        assert fourth.points[0].percentileValues[1].value == 456
+        assert fourth.points[0].value == 456
         assert fourth.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
     }
 
@@ -811,32 +758,20 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.name == 'dc'
         assert firstMetric.description == 'long'
         assert firstMetric.unit == '1'
-        assert firstMetric.type == SUMMARY
+        assert firstMetric.type == GAUGE_LONG
         assert firstMetric.points.size() == 1
-        assert firstMetric.points[0].sum == 20
-        assert firstMetric.points[0].percentileValues[0].percentile == 0
-        assert firstMetric.points[0].percentileValues[0].value == 20
-        assert firstMetric.points[0].percentileValues[1].percentile == 100
-        assert firstMetric.points[0].percentileValues[1].value == 20
+        assert firstMetric.points[0].value == 20
         assert firstMetric.points[0].labels == Labels.of('key2', 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
         assert secondMetric.description == 'long'
         assert secondMetric.unit == '1'
-        assert secondMetric.type == SUMMARY
+        assert secondMetric.type == GAUGE_LONG
         assert secondMetric.points.size() == 2
-        assert secondMetric.points[0].sum == 40
-        assert secondMetric.points[0].percentileValues[0].percentile == 0
-        assert secondMetric.points[0].percentileValues[0].value == 40
-        assert secondMetric.points[0].percentileValues[1].percentile == 100
-        assert secondMetric.points[0].percentileValues[1].value == 40
+        assert secondMetric.points[0].value == 40
         assert secondMetric.points[0].labels == Labels.of('key4', 'value4')
-        assert secondMetric.points[1].sum == 50
-        assert secondMetric.points[1].percentileValues[0].percentile == 0
-        assert secondMetric.points[1].percentileValues[0].value == 50
-        assert secondMetric.points[1].percentileValues[1].percentile == 100
-        assert secondMetric.points[1].percentileValues[1].value == 50
+        assert secondMetric.points[1].value == 50
         assert secondMetric.points[1].labels == Labels.of('key2', 'value2')
     }
 }
