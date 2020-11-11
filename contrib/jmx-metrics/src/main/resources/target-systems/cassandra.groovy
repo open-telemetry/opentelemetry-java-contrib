@@ -14,271 +14,138 @@
  * limitations under the License.
  */
 
-class CassandraMBean {
-    // Necessary to have script-bound `otel` and `log` in class scope
-    protected Binding sb
-    protected GroovyMBean mbean
-
-    private String objectName
-
-    CassandraMBean(Binding scriptBinding, objectName) {
-        sb = scriptBinding
-        this.objectName = objectName
-    }
-
-    def fetch() {
-        def mbeans = sb.otel.queryJmx(objectName)
-        if (mbeans.size() == 0) {
-            sb.log.warning("CassandraMBean.fetch(): Failed to fetch MBean ${objectName}.")
-        } else {
-            sb.log.fine("CassandraMBean.fetch(): Fetched ${mbeans.size()} MBeans - ${mbeans}")
-            mbean = mbeans.first()
-        }
-    }
-
-    def getAttribute(String attribute) {
-        if (mbean == null) {
-            return null
-        }
-        return mbean.getProperty(attribute)
-    }
-}
-
-class CassandraMetric {
-    private CassandraMBean cassandraMBean
-    private Binding sb
-    private String instrumentName
-    private String description
-    private String unit
-    private String attribute
-    private Closure instrument
-
-    CassandraMetric(CassandraMBean cassandraMBean, String instrumentName, String description, String unit, String attribute, Closure instrument) {
-        this.cassandraMBean = cassandraMBean
-        this.sb = cassandraMBean.sb
-        this.instrumentName = instrumentName
-        this.description = description
-        this.unit = unit
-        this.attribute = attribute
-        this.instrument = instrument
-    }
-
-    def update() {
-        def value = cassandraMBean.getAttribute(attribute)
-        if (value == null) {
-            sb.log.warning("No valid value for ${instrumentName} - ${cassandraMBean}.${attribute}" as String)
-            return
-        }
-        def inst = instrument(instrumentName, description, unit)
-        sb.log.fine("Recording ${instrumentName} - ${inst} w/ ${value}")
-        inst.add(value)
-    }
-}
-
 def cassandraMetrics = "org.apache.cassandra.metrics"
-
 def clientRequest = "${cassandraMetrics}:type=ClientRequest"
 def clientRequestRangeSlice = "${clientRequest},scope=RangeSlice"
-def clientRequestRead = "${clientRequest},scope=Read"
-def clientRequestWrite = "${clientRequest},scope=Write"
-def compaction = "${cassandraMetrics}:type=Compaction"
-def storage = "${cassandraMetrics}:type=Storage"
-
-def clientRequestRangeSliceLatency = new CassandraMBean(binding, "${clientRequestRangeSlice},name=Latency")
-def clientRequestRangeSliceTimeouts = new CassandraMBean(binding, "${clientRequestRangeSlice},name=Timeouts")
-def clientRequestRangeSliceUnavailables = new CassandraMBean(binding, "${clientRequestRangeSlice},name=Unavailables")
-def clientRequestReadLatency = new CassandraMBean(binding, "${clientRequestRead},name=Latency")
-def clientRequestReadTimeouts = new CassandraMBean(binding, "${clientRequestRead},name=Timeouts")
-def clientRequestReadUnavailables = new CassandraMBean(binding, "${clientRequestRead},name=Unavailables")
-def clientRequestWriteLatency = new CassandraMBean(binding, "${clientRequestWrite},name=Latency")
-def clientRequestWriteTimeouts = new CassandraMBean(binding, "${clientRequestWrite},name=Timeouts")
-def clientRequestWriteUnavailables = new CassandraMBean(binding, "${clientRequestWrite},name=Unavailables")
-def compactionCompletedTasks = new CassandraMBean(binding, "${compaction},name=CompletedTasks")
-def compactionPendingTasks = new CassandraMBean(binding, "${compaction},name=PendingTasks")
-def storageLoad = new CassandraMBean(binding, "${storage},name=Load")
-def storageTotalHints = new CassandraMBean(binding, "${storage},name=TotalHints")
-def storageTotalHintsInProgress = new CassandraMBean(binding, "${storage},name=TotalHintsInProgress")
-
-def clientRequestRangeSliceLatency50p = new CassandraMetric(
-        clientRequestRangeSliceLatency,
+def clientRequestRangeSliceLatency = otel.mbean("${clientRequestRangeSlice},name=Latency")
+otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.50p",
         "Token range read request latency - 50th percentile", "µs", "50thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestRangeSliceLatency99p = new CassandraMetric(
-        clientRequestRangeSliceLatency,
+otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.99p",
         "Token range read request latency - 99th percentile", "µs", "99thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestRangeSliceLatencyCount = new CassandraMetric(
-        clientRequestRangeSliceLatency,
+otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.count",
         "Total token range read request latency", "µs", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestRangeSliceLatencyMax = new CassandraMetric(
-        clientRequestRangeSliceLatency,
+otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.max",
         "Maximum token range read request latency", "µs", "Max",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestRangeSliceTimeoutCount = new CassandraMetric(
-        clientRequestRangeSliceTimeouts,
+def clientRequestRangeSliceTimeouts = otel.mbean("${clientRequestRangeSlice},name=Timeouts")
+otel.instrument(clientRequestRangeSliceTimeouts,
         "cassandra.client.request.range_slice.timeout.count",
         "Number of token range read request timeouts encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestRangeSliceUnavailableCount = new CassandraMetric(
-        clientRequestRangeSliceUnavailables,
+def clientRequestRangeSliceUnavailables = otel.mbean("${clientRequestRangeSlice},name=Unavailables")
+otel.instrument(clientRequestRangeSliceUnavailables,
         "cassandra.client.request.range_slice.unavailable.count",
         "Number of token range read request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestReadLatency50p = new CassandraMetric(clientRequestReadLatency,
+def clientRequestRead = "${clientRequest},scope=Read"
+def clientRequestReadLatency = otel.mbean("${clientRequestRead},name=Latency")
+otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.50p",
         "Standard read request latency - 50th percentile", "µs", "50thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestReadLatency99p = new CassandraMetric(
-        clientRequestReadLatency,
+otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.99p",
         "Standard read request latency - 99th percentile", "µs", "99thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestReadLatencyCount = new CassandraMetric(
-        clientRequestReadLatency,
+otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.count",
         "Total standard read request latency", "µs", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestReadLatencyMax = new CassandraMetric(
-        clientRequestReadLatency,
+otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.max",
         "Maximum standard read request latency", "µs", "Max",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestReadTimeoutCount = new CassandraMetric(
-        clientRequestReadTimeouts,
+def clientRequestReadTimeouts = otel.mbean("${clientRequestRead},name=Timeouts")
+otel.instrument(clientRequestReadTimeouts,
         "cassandra.client.request.read.timeout.count",
         "Number of standard read request timeouts encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestReadUnavailableCount = new CassandraMetric(
-        clientRequestReadUnavailables,
+def clientRequestReadUnavailables = otel.mbean("${clientRequestRead},name=Unavailables")
+otel.instrument(clientRequestReadUnavailables,
         "cassandra.client.request.read.unavailable.count",
         "Number of standard read request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestWriteLatency50p = new CassandraMetric(
-        clientRequestWriteLatency,
+def clientRequestWrite = "${clientRequest},scope=Write"
+def clientRequestWriteLatency = otel.mbean("${clientRequestWrite},name=Latency")
+otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.50p",
         "Regular write request latency - 50th percentile", "µs", "50thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestWriteLatency99p = new CassandraMetric(
-        clientRequestWriteLatency,
+otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.99p",
         "Regular write request latency - 99th percentile", "µs", "99thPercentile",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestWriteLatencyCount = new CassandraMetric(
-        clientRequestWriteLatency,
+otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.count",
         "Total regular write request latency", "µs", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestWriteLatencyMax = new CassandraMetric(
-        clientRequestWriteLatency,
+otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.max",
         "Maximum regular write request latency", "µs", "Max",
-        otel.&doubleUpDownCounter)
+        otel.&doubleValueObserver)
 
-def clientRequestWriteTimeoutCount = new CassandraMetric(
-        clientRequestWriteTimeouts,
+def clientRequestWriteTimeouts = otel.mbean("${clientRequestWrite},name=Timeouts")
+otel.instrument(clientRequestWriteTimeouts,
         "cassandra.client.request.write.timeout.count",
         "Number of regular write request timeouts encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def clientRequestWriteUnavailableCount = new CassandraMetric(
-        clientRequestWriteUnavailables,
+def clientRequestWriteUnavailables = otel.mbean("${clientRequestWrite},name=Unavailables")
+otel.instrument(clientRequestWriteUnavailables,
         "cassandra.client.request.write.unavailable.count",
         "Number of regular write request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def storageLoadCount = new CassandraMetric(
-        storageLoad,
+def storage = "${cassandraMetrics}:type=Storage"
+def storageLoad = otel.mbean("${storage},name=Load")
+otel.instrument(storageLoad,
         "cassandra.storage.load.count",
         "Size of the on disk data size this node manages", "by", "Count",
-        otel.&longUpDownCounter)
+        otel.&longSumObserver)
 
-def storageTotalHintsCount = new CassandraMetric(
-        storageTotalHints,
+def storageTotalHints = otel.mbean("${storage},name=TotalHints")
+otel.instrument(storageTotalHints,
         "cassandra.storage.total_hints.count",
         "Number of hint messages written to this node since [re]start", "1", "Count",
-        otel.&longCounter)
+        otel.&longSumObserver)
 
-def storageTotalHintsInProgressCount = new CassandraMetric(
-        storageTotalHintsInProgress,
+def storageTotalHintsInProgress = otel.mbean("${storage},name=TotalHintsInProgress")
+otel.instrument(storageTotalHintsInProgress,
         "cassandra.storage.total_hints.in_progress.count",
         "Number of hints attempting to be sent currently", "1", "Count",
-        otel.&longUpDownCounter)
+        otel.&longSumObserver)
 
-def compactionTasksPending = new CassandraMetric(
-        compactionPendingTasks,
+def compaction = "${cassandraMetrics}:type=Compaction"
+def compactionPendingTasks = otel.mbean("${compaction},name=PendingTasks")
+otel.instrument(compactionPendingTasks,
         "cassandra.compaction.tasks.pending",
         "Estimated number of compactions remaining to perform", "1", "Value",
-        otel.&longUpDownCounter)
+        otel.&longValueObserver)
 
-def compactionTasksCompleted = new CassandraMetric(
-        compactionCompletedTasks,
+def compactionCompletedTasks = otel.mbean("${compaction},name=CompletedTasks")
+otel.instrument(compactionCompletedTasks,
         "cassandra.compaction.tasks.completed",
         "Number of completed compactions since server [re]start", "1", "Value",
-        otel.&longCounter)
-
-[
-    clientRequestRangeSliceLatency,
-    clientRequestRangeSliceTimeouts,
-    clientRequestRangeSliceUnavailables,
-    clientRequestReadLatency,
-    clientRequestReadTimeouts,
-    clientRequestReadUnavailables,
-    clientRequestWriteLatency,
-    clientRequestWriteTimeouts,
-    clientRequestWriteUnavailables,
-    compactionCompletedTasks,
-    compactionPendingTasks,
-    storageLoad,
-    storageTotalHints,
-    storageTotalHintsInProgress,
-].each {
-    it.fetch()
-}
-
-[
-    clientRequestRangeSliceLatency50p,
-    clientRequestRangeSliceLatency99p,
-    clientRequestRangeSliceLatencyCount,
-    clientRequestRangeSliceLatencyMax,
-    clientRequestRangeSliceTimeoutCount,
-    clientRequestRangeSliceUnavailableCount,
-    clientRequestReadLatency50p,
-    clientRequestReadLatency99p,
-    clientRequestReadLatencyCount,
-    clientRequestReadLatencyMax,
-    clientRequestReadTimeoutCount,
-    clientRequestReadUnavailableCount,
-    clientRequestWriteLatency50p,
-    clientRequestWriteLatency99p,
-    clientRequestWriteLatencyCount,
-    clientRequestWriteLatencyMax,
-    clientRequestWriteTimeoutCount,
-    clientRequestWriteUnavailableCount,
-    compactionTasksCompleted,
-    compactionTasksPending,
-    storageLoadCount,
-    storageTotalHintsCount,
-    storageTotalHintsInProgressCount,
-].each {
-    it.update()
-}
+        otel.&longSumObserver)
