@@ -18,8 +18,10 @@ package io.opentelemetry.contrib.jmxmetrics
 
 import io.opentelemetry.proto.common.v1.StringKeyValue
 import io.opentelemetry.proto.metrics.v1.DoubleSum
+import io.opentelemetry.proto.metrics.v1.DoubleGauge
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.IntSum
+import io.opentelemetry.proto.metrics.v1.IntGauge
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.Testcontainers
@@ -63,127 +65,127 @@ class KafkaTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 'kafka.bytes.in',
                 'bytes in per second from clients',
                 'by',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.bytes.out',
                 'bytes out per second to clients',
                 'by',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.controller.active.count',
                 'controller is active on broker',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.99p',
                 'fetch consumer request time - 99th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.count',
                 'fetch consumer request count',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'kafka.fetch.consumer.total.time.median',
                 'fetch consumer request time - 50th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.fetch.follower.total.time.99p',
                 'fetch follower request time - 99th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.fetch.follower.total.time.count',
                 'fetch follower request count',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'kafka.fetch.follower.total.time.median',
                 'fetch follower request time - 50th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.isr.expands',
                 'in-sync replica expands per second',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.isr.shrinks',
                 'in-sync replica shrinks per second',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.leader.election.rate',
                 'leader election rate - non-zero indicates broker failures',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.max.lag',
                 'max lag in messages between follower and leader replicas',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.messages.in',
                 'number of messages in per second',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.partitions.offline.count',
                 'number of partitions without an active leader',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.partitions.underreplicated.count',
                 'number of under replicated partitions',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.produce.total.time.99p',
                 'produce request time - 99th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.produce.total.time.count',
                 'produce request count',
                 '1',
-                'int',
+                IntSum,
             ],
             [
                 'kafka.produce.total.time.median',
                 'produce request time - 50th percentile',
                 'ms',
-                'double',
+                DoubleGauge,
             ],
             [
                 'kafka.request.queue',
                 'size of the request queue',
                 '1',
-                'int',
+                IntGauge,
             ],
             [
                 'kafka.unclean.election.rate',
                 'unclean leader election rate - non-zero indicates broker failures',
                 '1',
-                'int',
+                IntGauge,
             ],
         ].eachWithIndex{ item, index ->
             Metric metric = metrics.get(index)
@@ -192,13 +194,25 @@ class KafkaTargetSystemIntegrationTests extends OtlpIntegrationTest {
             assert metric.unit == item[2]
             def datapoint
             switch(item[3]) {
-                case 'double':
+                case DoubleGauge:
+                    assert metric.hasDoubleGauge()
+                    DoubleGauge datapoints = metric.doubleGauge
+                    assert datapoints.dataPointsCount == 1
+                    datapoint = datapoints.getDataPoints(0)
+                    break
+                case DoubleSum:
                     assert metric.hasDoubleSum()
                     DoubleSum datapoints = metric.doubleSum
                     assert datapoints.dataPointsCount == 1
                     datapoint = datapoints.getDataPoints(0)
                     break
-                case 'int':
+                case IntGauge:
+                    assert metric.hasIntGauge()
+                    IntGauge datapoints = metric.intGauge
+                    assert datapoints.dataPointsCount == 1
+                    datapoint = datapoints.getDataPoints(0)
+                    break
+                case IntSum:
                     assert metric.hasIntSum()
                     IntSum datapoints = metric.intSum
                     assert datapoints.dataPointsCount == 1
