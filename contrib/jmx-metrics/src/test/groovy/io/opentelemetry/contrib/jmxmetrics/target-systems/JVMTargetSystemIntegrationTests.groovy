@@ -16,6 +16,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import io.opentelemetry.proto.metrics.v1.IntGauge
 import io.opentelemetry.proto.metrics.v1.IntSum
 
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
@@ -70,7 +71,8 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 'jvm.classes.loaded',
                 'number of loaded classes',
                 '1',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.gc.collections.count',
@@ -78,7 +80,9 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 '1',
                 [
                     "ConcurrentMarkSweep",
-                    "ParNew"]
+                    "ParNew"
+                ],
+                IntSum
             ],
             [
                 'jvm.gc.collections.elapsed',
@@ -86,55 +90,65 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 'ms',
                 [
                     "ConcurrentMarkSweep",
-                    "ParNew"]
+                    "ParNew"
+                ],
+                IntSum
             ],
             [
                 'jvm.memory.heap.committed',
                 'current heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.heap.init',
                 'current heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.heap.max',
                 'current heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.heap.used',
                 'current heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.nonheap.committed',
                 'current non-heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.nonheap.init',
                 'current non-heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.nonheap.max',
                 'current non-heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.nonheap.used',
                 'current non-heap usage',
                 'by',
-                []
+                [],
+                IntGauge
             ],
             [
                 'jvm.memory.pool.committed',
@@ -146,7 +160,9 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                     "CMS Old Gen",
                     "Compressed Class Space",
                     "Metaspace",
-                    "Par Survivor Space"]
+                    "Par Survivor Space"
+                ],
+                IntGauge
             ],
             [
                 'jvm.memory.pool.init',
@@ -158,7 +174,9 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                     "CMS Old Gen",
                     "Compressed Class Space",
                     "Metaspace",
-                    "Par Survivor Space"]
+                    "Par Survivor Space"
+                ],
+                IntGauge
             ],
             [
                 'jvm.memory.pool.max',
@@ -170,7 +188,9 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                     "CMS Old Gen",
                     "Compressed Class Space",
                     "Metaspace",
-                    "Par Survivor Space"]
+                    "Par Survivor Space"
+                ],
+                IntGauge
             ],
             [
                 'jvm.memory.pool.used',
@@ -182,21 +202,33 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                     "CMS Old Gen",
                     "Compressed Class Space",
                     "Metaspace",
-                    "Par Survivor Space"]
+                    "Par Survivor Space"
+                ],
+                IntGauge
             ],
             [
                 'jvm.threads.count',
                 'number of threads',
                 '1',
-                []
+                [],
+                IntGauge
             ],
         ].eachWithIndex{ item, index ->
+            def expectedType = item[4]
+
             Metric metric = metrics.get(index)
             assert metric.name == item[0]
             assert metric.description == item[1]
             assert metric.unit == item[2]
-            assert metric.hasIntSum()
-            IntSum datapoints = metric.intSum
+
+            def datapoints
+            if (expectedType == IntGauge) {
+                assert metric.hasIntGauge()
+                datapoints = metric.intGauge
+            } else {
+                assert metric.hasIntSum()
+                datapoints = metric.intSum
+            }
             def expectedLabelCount = item[3].size()
             def expectedLabels = item[3] as Set
 
