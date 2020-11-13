@@ -108,7 +108,6 @@ class InstrumentHelper {
                     def updatedInstrumentName = "${instrumentName}.${key}"
                     def labels = getLabels(mbean, labelFuncs)
                     def inst = instrument(updatedInstrumentName, description, unit)
-                    println "InstrumentHelper.update (composite) - ${inst}"
                     logger.fine("Recording ${updatedInstrumentName} - ${inst} w/ ${val} - ${labels}")
                     if (!instToUpdates.containsKey(inst)) {
                         instToUpdates[inst] = []
@@ -118,7 +117,6 @@ class InstrumentHelper {
             } else {
                 def labels = getLabels(mbean, labelFuncs)
                 def inst = instrument(instrumentName, description, unit)
-                println "InstrumentHelper.update - ${inst}"
                 logger.fine("Recording ${instrumentName} - ${inst} w/ ${value} - ${labels}")
                 if (!instToUpdates.containsKey(inst)) {
                     instToUpdates[inst] = []
