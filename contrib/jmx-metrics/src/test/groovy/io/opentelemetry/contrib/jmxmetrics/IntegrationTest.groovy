@@ -31,6 +31,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.images.builder.ImageFromDockerfile
+import org.testcontainers.lifecycle.Startable
 import org.testcontainers.utility.MountableFile
 import spock.lang.Shared
 import spock.lang.Specification
@@ -96,15 +97,14 @@ class IntegrationTest extends Specification{
                     )
         }
 
-        if ("kafka" in targets) {
+        if (["kafka", "kafka-consumer"].any { it in targets }) {
             def zookeeper = new GenericContainer<>("zookeeper:3.5")
                     .withNetwork(network)
                     .withNetworkAliases("zookeeper")
                     .withStartupTimeout(Duration.ofSeconds(120))
                     .waitingFor(Wait.forListeningPort())
             targetContainers.add(zookeeper)
-            targetContainers.add(
-                    new GenericContainer<>("bitnami/kafka:latest")
+            def kafka = new GenericContainer<>("bitnami/kafka:latest")
                     .withNetwork(network)
                     .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
                     .withNetworkAliases("kafka")
@@ -112,7 +112,32 @@ class IntegrationTest extends Specification{
                     .withStartupTimeout(Duration.ofSeconds(120))
                     .waitingFor(Wait.forListeningPort())
                     .dependsOn(zookeeper)
-                    )
+            targetContainers.add(kafka)
+            if ("kafka-consumer" in targets) {
+                def createTopics = new Startable() {
+                            @Override
+                            void start() {
+                                kafka.execInContainer(
+                                        "sh", "-c",
+                                        "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-\$i; done"
+                                        )
+                            }
+
+                            @Override
+                            void stop() { }
+                        }
+                def kafkaConsumer = new GenericContainer<>("bitnami/kafka:latest")
+                        .withNetwork(network)
+                        .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
+                        .withNetworkAliases("kafka-consumer")
+                        .withExposedPorts(7199)
+                        .withCommand("kafka-console-consumer.sh", "--bootstrap-server", "kafka:9092",
+                        "--whitelist", "test-topic-.*", "--max-messages", "100"
+                        ).withStartupTimeout(Duration.ofSeconds(120))
+                        .waitingFor(Wait.forListeningPort())
+                        .dependsOn(kafka, createTopics)
+                targetContainers.add(kafkaConsumer)
+            }
         }
 
         targetContainers.each {
