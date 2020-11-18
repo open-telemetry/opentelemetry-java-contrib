@@ -25,7 +25,8 @@ class JmxConfigTest extends UnitTest {
             "cassandra",
             "jvm",
             "kafka",
-            "kafka-consumer"
+            "kafka-consumer",
+            "kafka-producer"
         ]
     }
 
@@ -144,6 +145,6 @@ class JmxConfigTest extends UnitTest {
 
         expect: 'config fails to validate'
         raised != null
-        raised.message ==  "unavailabletargetsystem must be one of [cassandra, jvm, kafka, kafka-consumer]"
+        raised.message ==  "unavailabletargetsystem must be one of [cassandra, jvm, kafka, kafka-consumer, kafka-producer]"
     }
 }

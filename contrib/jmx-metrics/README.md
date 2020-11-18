@@ -147,6 +147,7 @@ The currently available target systems are:
 | [`cassandra`](./docs/target-systems/cassandra.md) |
 | [`kafka`](./docs/target-systems/kafka.md) |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
+| [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
 
 ### Configuration
 

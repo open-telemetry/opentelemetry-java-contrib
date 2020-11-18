@@ -97,7 +97,7 @@ class IntegrationTest extends Specification{
                     )
         }
 
-        if (["kafka", "kafka-consumer"].any { it in targets }) {
+        if (targets.any { it.contains("kafka") }) {
             def zookeeper = new GenericContainer<>("zookeeper:3.5")
                     .withNetwork(network)
                     .withNetworkAliases("zookeeper")
@@ -113,7 +113,12 @@ class IntegrationTest extends Specification{
                     .waitingFor(Wait.forListeningPort())
                     .dependsOn(zookeeper)
             targetContainers.add(kafka)
-            if ("kafka-consumer" in targets) {
+            if (targets.any {
+                it in [
+                    "kafka-consumer",
+                    "kafka-producer"
+                ]
+            }) {
                 def createTopics = new Startable() {
                             @Override
                             void start() {
@@ -126,17 +131,32 @@ class IntegrationTest extends Specification{
                             @Override
                             void stop() { }
                         }
-                def kafkaConsumer = new GenericContainer<>("bitnami/kafka:latest")
-                        .withNetwork(network)
-                        .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
-                        .withNetworkAliases("kafka-consumer")
-                        .withExposedPorts(7199)
-                        .withCommand("kafka-console-consumer.sh", "--bootstrap-server", "kafka:9092",
-                        "--whitelist", "test-topic-.*", "--max-messages", "100"
-                        ).withStartupTimeout(Duration.ofSeconds(120))
-                        .waitingFor(Wait.forListeningPort())
-                        .dependsOn(kafka, createTopics)
-                targetContainers.add(kafkaConsumer)
+                if ("kafka-consumer" in targets) {
+                    def kafkaConsumer = new GenericContainer<>("bitnami/kafka:latest")
+                            .withNetwork(network)
+                            .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
+                            .withNetworkAliases("kafka-consumer")
+                            .withExposedPorts(7199)
+                            .withCommand("kafka-console-consumer.sh", "--bootstrap-server", "kafka:9092",
+                            "--whitelist", "test-topic-.*", "--max-messages", "100"
+                            ).withStartupTimeout(Duration.ofSeconds(120))
+                            .waitingFor(Wait.forListeningPort())
+                            .dependsOn(kafka, createTopics)
+                    targetContainers.add(kafkaConsumer)
+                } else {
+                    def producerPath = ClassLoader.getSystemClassLoader().getResource("target-systems/kafka-producer.sh").path
+                    def kafkaProducer = new GenericContainer<>("bitnami/kafka:latest")
+                            .withNetwork(network)
+                            .withEnv([ "KAFKA_CFG_ZOOKEEPER_CONNECT" : "zookeeper:2181", "ALLOW_PLAINTEXT_LISTENER" : "yes", "JMX_PORT": "7199"])
+                            .withNetworkAliases("kafka-producer")
+                            .withExposedPorts(7199)
+                            .withCopyFileToContainer(MountableFile.forHostPath(producerPath), "/usr/bin/kafka-producer.sh")
+                            .withCommand( "kafka-producer.sh")
+                            .withStartupTimeout(Duration.ofSeconds(120))
+                            .waitingFor(Wait.forListeningPort())
+                            .dependsOn(kafka, createTopics)
+                    targetContainers.add(kafkaProducer)
+                }
             }
         }
 
