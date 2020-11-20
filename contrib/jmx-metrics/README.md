@@ -14,7 +14,7 @@ $ java -D<otel.jmx.property=value> -jar opentelemetry-java-contrib-jmx-metrics-<
 
 ```properties
 otel.jmx.service.url = service:jmx:rmi:///jndi/rmi://<my-jmx-host>:<my-jmx-port>/jmxrmi
-otel.jmx.groovy.script = /opt/script.groovy
+otel.jmx.target.system = jvm,kafka
 otel.jmx.interval.milliseconds = 5000
 otel.exporter = otlp
 otel.otlp.endpoint = my-opentelemetry-collector:55680
@@ -34,8 +34,8 @@ otel.instrument(storageLoadMBean, "cassandra.storage.load",
 
 As configured in the example, this metric gatherer will configure an otlp gRPC metric exporter
 at the `otel.otlp.endpoint` and establish an MBean server connection using the
-provided `otel.jmx.service.url`. After loading the Groovy script whose path is specified
-via `otel.jmx.groovy.script`, it will then run the script on the specified
+provided `otel.jmx.service.url`. After loading the included metric gathering scripts specified by the
+comma-separated list in `otel.jmx.target.system`, it will then run the scripts on the specified
 `otel.jmx.interval.milliseconds` and export the resulting metrics.
 
 ### JMX Query Helpers
@@ -138,8 +138,8 @@ This metric extension supports Java 7+, though SASL is only supported where
 ### Target Systems
 
 The JMX Metric Gatherer also provides built in metric producing Groovy scripts for supported target systems
-capable of being specified via the `otel.jmx.target.system` property (mutually exclusive with `otel.jmx.groovy.script`).
-The currently available target systems are:
+capable of being specified via the `otel.jmx.target.system` property as a comma-separated list (mutually exclusive with
+`otel.jmx.groovy.script`). The currently available target systems are:
 
 | `otel.jmx.target.system` |
 | ------------------------ |
@@ -159,7 +159,7 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | ------------- | -------- | ----------- |
 | `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
 | `otel.jmx.groovy.script` | if not using `otel.jmx.target.system` | The path for the desired Groovy script. |
-| `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | The supported target application with built in Groovy script. |
+| `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | A comma-separated list of the supported target applications with built in Groovy scripts. |
 | `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
 | `otel.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
 | `otel.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
