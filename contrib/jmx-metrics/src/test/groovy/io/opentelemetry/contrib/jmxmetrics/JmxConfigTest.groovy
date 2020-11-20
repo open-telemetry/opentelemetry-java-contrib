@@ -38,6 +38,7 @@ class JmxConfigTest extends UnitTest {
         config.serviceUrl == null
         config.groovyScript == null
         config.targetSystem == ""
+        config.targetSystems == [] as LinkedHashSet
         config.intervalMilliseconds == 10000
         config.exporterType == "logging"
         config.otlpExporterEndpoint == null
@@ -54,7 +55,7 @@ class JmxConfigTest extends UnitTest {
         def properties = [
             "jmx.service.url" : "myServiceUrl",
             "jmx.groovy.script" : "myGroovyScript",
-            "jmx.target.system" : "mytargetsystem",
+            "jmx.target.system" : "mytargetsystem,mytargetsystem,myothertargetsystem,myadditionaltargetsystem",
             "jmx.interval.milliseconds": "123",
             "exporter": "inmemory",
             "exporter.otlp.endpoint": "myOtlpEndpoint",
@@ -71,7 +72,12 @@ class JmxConfigTest extends UnitTest {
         then:
         config.serviceUrl == "myServiceUrl"
         config.groovyScript == "myGroovyScript"
-        config.targetSystem == "mytargetsystem"
+        config.targetSystem == "mytargetsystem,mytargetsystem,myothertargetsystem,myadditionaltargetsystem"
+        config.targetSystems == [
+            "mytargetsystem",
+            "myothertargetsystem",
+            "myadditionaltargetsystem"
+        ] as LinkedHashSet
         config.intervalMilliseconds == 123
         config.exporterType == "inmemory"
         config.otlpExporterEndpoint == "myOtlpEndpoint"
@@ -130,7 +136,7 @@ class JmxConfigTest extends UnitTest {
         setup: "config is set with nonexistant target system"
         [
             "service.url" : "requiredValue",
-            "target.system": "unavailableTargetSystem"
+            "target.system": "jvm,unavailableTargetSystem"
         ].each {
             System.setProperty("otel.jmx.${it.key}", it.value)
         }
@@ -145,6 +151,6 @@ class JmxConfigTest extends UnitTest {
 
         expect: 'config fails to validate'
         raised != null
-        raised.message ==  "unavailabletargetsystem must be one of [cassandra, jvm, kafka, kafka-consumer, kafka-producer]"
+        raised.message ==  "[jvm, unavailabletargetsystem] must specify targets from [cassandra, jvm, kafka, kafka-consumer, kafka-producer]"
     }
 }

@@ -44,7 +44,7 @@ class GroovyRunnerTest extends UnitTest {
                 })
 
         then: 'it is successfully loaded and runnable'
-        groovyRunner.script != null
+        groovyRunner.scripts.size() == 1
         groovyRunner.run()
         exportCalled
     }

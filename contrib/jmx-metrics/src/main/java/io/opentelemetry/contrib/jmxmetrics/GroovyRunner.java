@@ -32,7 +32,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +43,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 public class GroovyRunner {
   private static final Logger logger = Logger.getLogger(GroovyRunner.class.getName());
 
-  private final Script script;
+  private final List<Script> scripts;
   private final GroovyMetricEnvironment groovyMetricEnvironment;
 
   GroovyRunner(
@@ -50,21 +52,26 @@ public class GroovyRunner {
       final GroovyMetricEnvironment groovyMetricEnvironment) {
     this.groovyMetricEnvironment = groovyMetricEnvironment;
 
-    String scriptSource;
+    List<String> scriptSources = new ArrayList<>();
     try {
-      if (!JmxConfig.isBlank(config.targetSystem)) {
-        String systemResourcePath = "target-systems/" + config.targetSystem + ".groovy";
-        scriptSource = getTargetSystemResourceAsString(systemResourcePath);
+      if (config.targetSystems.size() != 0) {
+        for (final String target : config.targetSystems) {
+          String systemResourcePath = "target-systems/" + target + ".groovy";
+          scriptSources.add(getTargetSystemResourceAsString(systemResourcePath));
+        }
       } else {
-        scriptSource = getFileAsString(config.groovyScript);
+        scriptSources.add(getFileAsString(config.groovyScript));
       }
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Failed to read groovy script", e);
       throw new ConfigurationException("Failed to read groovy script", e);
     }
 
+    this.scripts = new ArrayList<>();
     try {
-      this.script = new GroovyShell().parse(scriptSource);
+      for (final String source : scriptSources) {
+        this.scripts.add(new GroovyShell().parse(source));
+      }
     } catch (CompilationFailedException e) {
       logger.log(Level.SEVERE, "Failed to compile groovy script", e);
       throw new ConfigurationException("Failed to compile groovy script", e);
@@ -76,7 +83,9 @@ public class GroovyRunner {
     OtelHelper otelHelper = new OtelHelper(jmxClient, this.groovyMetricEnvironment);
     binding.setVariable("otel", otelHelper);
 
-    script.setBinding(binding);
+    for (final Script script : scripts) {
+      script.setBinding(binding);
+    }
   }
 
   private static String getFileAsString(final String fileName) throws IOException {
@@ -134,7 +143,9 @@ public class GroovyRunner {
   }
 
   public void run() {
-    script.run();
+    for (final Script script : scripts) {
+      script.run();
+    }
     flush();
   }
 

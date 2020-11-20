@@ -17,8 +17,10 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 class JmxConfig {
   static final String PREFIX = "otel.";
@@ -45,6 +47,7 @@ class JmxConfig {
   final String serviceUrl;
   final String groovyScript;
   final String targetSystem;
+  final Set<String> targetSystems;
   final int intervalMilliseconds;
   final String exporterType;
 
@@ -68,6 +71,10 @@ class JmxConfig {
     serviceUrl = properties.getProperty(SERVICE_URL);
     groovyScript = properties.getProperty(GROOVY_SCRIPT);
     targetSystem = properties.getProperty(TARGET_SYSTEM, "").toLowerCase().trim();
+
+    List<String> targets =
+        Arrays.asList(isBlank(targetSystem) ? new String[0] : targetSystem.split(","));
+    targetSystems = new LinkedHashSet<>(targets);
 
     int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
     intervalMilliseconds = interval == 0 ? 10000 : interval;
@@ -117,9 +124,10 @@ class JmxConfig {
           "Only one of " + GROOVY_SCRIPT + " or " + TARGET_SYSTEM + " can be specified.");
     }
 
-    if (!isBlank(targetSystem) && !AVAILABLE_TARGET_SYSTEMS.contains(targetSystem)) {
+    if (targetSystems.size() != 0 && !AVAILABLE_TARGET_SYSTEMS.containsAll(targetSystems)) {
       throw new ConfigurationException(
-          String.format("%s must be one of %s", targetSystem, AVAILABLE_TARGET_SYSTEMS));
+          String.format(
+              "%s must specify targets from %s", targetSystems, AVAILABLE_TARGET_SYSTEMS));
     }
 
     if (isBlank(otlpExporterEndpoint)
