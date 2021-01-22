@@ -40,3 +40,11 @@ production environments.
 
 This task requires an account and API key for the OpenTelemetry Bintray organization.  If you have been provided access
 and configured your key, please set the required environment variables detailed in the publish script plugin.
+
+## `./gradlew otelRelease`
+
+This task will invoke the [Bintray Plugin](https://github.com/bintray/gradle-bintray-plugin)
+and publish all applicable snapshot artifacts to https://dl.bintray.com/open-telemetry/maven/io/opentelemetry/contrib/,
+assuming the current version is not a snapshot.  Syncing with Maven Central is not performed at this time.
+
+Like `ossSnapshot`, this task requires an account and API key for the OpenTelemetry Bintray organization.
