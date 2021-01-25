@@ -35,7 +35,7 @@ def versions = [
 
 def deps = [
     slf4j : "org.slf4j:slf4j-api:${versions.slf4j}",
-    testcontainers : "org.testcontainers:testcontainers:1.14.3",
+    testcontainers : "org.testcontainers:testcontainers:1.15.1",
 ]
 
 dependencies {
