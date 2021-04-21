@@ -24,8 +24,8 @@ allprojects {
     }
 }
 
-task lint(dependsOn: ['spotlessCheck'])
-task format(dependsOn: ['spotlessApply'])
+task lint(dependsOn: [allprojects.spotlessCheck])
+task format(dependsOn: [allprojects.spotlessApply])
 
 task integrationTest {
     doFirst {
