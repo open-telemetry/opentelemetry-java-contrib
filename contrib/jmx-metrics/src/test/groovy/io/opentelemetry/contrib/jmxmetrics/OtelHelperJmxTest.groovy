@@ -46,7 +46,7 @@ class OtelHelperJmxTest extends Specification {
     }
 
     private JMXServiceURL setupServer(Map env) {
-        def serviceUrl = new JMXServiceURL('rmi', 'localhost', 0)
+        def serviceUrl = new JMXServiceURL('rmi', 'localhost', OtlpIntegrationTest.availablePort())
         jmxServer = JMXConnectorServerFactory.newJMXConnectorServer(serviceUrl, env, getPlatformMBeanServer())
         jmxServer.start()
         return jmxServer.getAddress()
