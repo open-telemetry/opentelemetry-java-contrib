@@ -25,6 +25,7 @@ import io.opentelemetry.proto.metrics.v1.DoubleHistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
+import spock.lang.Retry
 import spock.lang.Timeout
 import spock.lang.Unroll
 
@@ -32,6 +33,7 @@ import spock.lang.Unroll
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
+@Retry
 class OtlpIntegrationTests extends OtlpIntegrationTest {
 
     @Unroll
