@@ -31,7 +31,7 @@ import spock.lang.Unroll
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
-@Timeout(60)
+@Timeout(90)
 class OtlpIntegrationTests extends OtlpIntegrationTest {
 
     @Unroll

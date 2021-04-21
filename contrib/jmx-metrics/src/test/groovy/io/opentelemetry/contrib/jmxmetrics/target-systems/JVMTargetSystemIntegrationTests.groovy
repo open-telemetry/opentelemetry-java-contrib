@@ -31,7 +31,7 @@ import spock.lang.Timeout
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
-@Timeout(60)
+@Timeout(90)
 class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
