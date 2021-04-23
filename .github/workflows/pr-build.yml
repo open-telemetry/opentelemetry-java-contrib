@@ -28,21 +28,11 @@ jobs:
           gradle-version: wrapper
           job-id: java-contrib
           remote-build-cache-proxy-enabled: false
-      - uses: burrunan/gradle-cache-action@v1
-        name: ./gradlew assemble
-        with:
-          arguments: --stacktrace assemble
-          gradle-version: wrapper
-          job-id: java-contrib
-          remote-build-cache-proxy-enabled: false
+      - name: ./gradlew assemble
+        run: ./gradlew --stacktrace assemble
       - name: ./gradlew build
-        uses: burrunan/gradle-cache-action@v1
+        run: ./gradlew --stacktrace --max-workers 2 build
         timeout-minutes: 5
-        with:
-          arguments: --stacktrace --max-workers 2 build
-          gradle-version: wrapper
-          job-id: java-contrib
-          remote-build-cache-proxy-enabled: false
       - uses: actions/upload-artifact@v2
         name: Save unit test results
         if: always()
