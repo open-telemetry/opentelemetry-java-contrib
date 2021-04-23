@@ -214,7 +214,7 @@ class OtlpIntegrationTest extends IntegrationTest  {
         collectorServer.awaitTermination(5, TimeUnit.SECONDS)
     }
 
-    def availablePort() {
+    static def availablePort() {
         def sock = new ServerSocket(0);
         def port = sock.getLocalPort()
         sock.close()

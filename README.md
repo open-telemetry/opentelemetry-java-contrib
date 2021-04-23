@@ -1,5 +1,5 @@
 # OpenTelemetry Java Contrib
-[![Build status](https://img.shields.io/circleci/build/github/open-telemetry/opentelemetry-java-contrib?style=for-the-badge)](https://app.circleci.com/pipelines/github/open-telemetry/opentelemetry-java-contrib?branch=master)
+[![Build](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/pr-build.yml/badge.svg)](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/pr-build.yml)
 
 This project is intended to provide helpful libraries and standalone OpenTelemetry-based utilities that don't fit
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or

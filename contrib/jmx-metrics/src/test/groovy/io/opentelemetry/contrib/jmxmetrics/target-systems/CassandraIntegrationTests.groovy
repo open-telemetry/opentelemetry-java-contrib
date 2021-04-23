@@ -27,12 +27,14 @@ import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
+import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
-@Timeout(60)
+@Timeout(90)
+@Retry
 class CassandraIntegrationTests extends OtlpIntegrationTest  {
 
     def 'end to end'() {
