@@ -16,14 +16,15 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.Labels;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.AsynchronousInstrument;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleSumObserver;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
 import io.opentelemetry.api.metrics.DoubleUpDownSumObserver;
 import io.opentelemetry.api.metrics.DoubleValueObserver;
 import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.GlobalMetricsProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongSumObserver;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
@@ -31,24 +32,38 @@ import io.opentelemetry.api.metrics.LongUpDownSumObserver;
 import io.opentelemetry.api.metrics.LongValueObserver;
 import io.opentelemetry.api.metrics.LongValueRecorder;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.exporter.logging.LoggingMetricExporter;
-import io.opentelemetry.exporter.otlp.OtlpGrpcMetricExporter;
-import io.opentelemetry.exporter.prometheus.PrometheusCollector;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.api.metrics.common.Labels;
+import io.opentelemetry.api.metrics.common.LabelsBuilder;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
+import io.opentelemetry.sdk.metrics.common.InstrumentType;
+import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricProducer;
-import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter;
-import io.prometheus.client.exporter.HTTPServer;
-import java.io.IOException;
+import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class GroovyMetricEnvironment {
 
+  private final SdkMeterProvider meterProvider;
   private final Meter meter;
+
+  // will only be `inmemory` since otel-java autoconfigure sdk extension manages other exporters
   private MetricExporter exporter;
-  private HTTPServer prometheusServer;
+
+  // Observer updaters can only be specified in the builder as of v0.13.0, so to work with our model
+  // of running groovy scripts on an interval a reference to the desired updater should be held and
+  // updated w/ each instrument creation call.  Otherwise no observed changes in MBean availability
+  // would be possible.  These registry stores are maps of instrument descriptor hashes to updater
+  // consumer references.
+  private final Map<Integer, AtomicReference<Consumer<AsynchronousInstrument.LongResult>>>
+      longUpdaterRegistry = new ConcurrentHashMap<>();
+  private final Map<Integer, AtomicReference<Consumer<AsynchronousInstrument.DoubleResult>>>
+      doubleUpdaterRegistry = new ConcurrentHashMap<>();
 
   /**
    * A central context for creating and exporting metrics, to be used by groovy scripts via {@link
@@ -62,22 +77,32 @@ public class GroovyMetricEnvironment {
       final JmxConfig config,
       final String instrumentationName,
       final String instrumentationVersion) {
-    meter = OpenTelemetry.getGlobalMeter(instrumentationName, instrumentationVersion);
 
-    switch (config.exporterType.toLowerCase()) {
+    switch (config.metricsExporterType.toLowerCase()) {
       case "otlp":
-        exporter = OtlpGrpcMetricExporter.builder().readProperties(config.properties).build();
-        break;
       case "prometheus":
-        configurePrometheus(config);
+      case "logging":
+        // no need for autoconfigure sdk-extension to enable default traces exporter
+        config.properties.setProperty("otel.traces.exporter", "none");
+        // merge our sdk-supported properties to utilize autoconfigure features
+        config.properties.forEach(
+            (k, value) -> {
+              String key = k.toString();
+              if (key.startsWith("otel.") && !key.startsWith("otel.jmx")) {
+                System.setProperty(key, value.toString());
+              }
+            });
+        // this call will dynamically load the autoconfigure extension
+        // and take care of provider and exporter creation for us based on system properties.
+        GlobalOpenTelemetry.get();
+        meterProvider = (SdkMeterProvider) GlobalMetricsProvider.get();
         break;
-      case "inmemory":
+      default: // inmemory fallback
+        meterProvider = SdkMeterProvider.builder().buildAndRegisterGlobal();
         exporter = InMemoryMetricExporter.create();
-        break;
-      default:
-        exporter = new LoggingMetricExporter();
-        break;
     }
+
+    meter = meterProvider.get(instrumentationName, instrumentationVersion);
   }
 
   /**
@@ -86,39 +111,19 @@ public class GroovyMetricEnvironment {
    * @param config - used to establish exporter type (logging by default) and connection info
    */
   public GroovyMetricEnvironment(final JmxConfig config) {
-    this(config, "io.opentelemetry.contrib.jmxmetrics", "0.0.1");
-  }
-
-  private static MetricProducer getMetricProducer() {
-    return OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer();
-  }
-
-  private void configurePrometheus(final JmxConfig config) {
-    PrometheusCollector.builder().setMetricProducer(getMetricProducer()).buildAndRegister();
-    try {
-      prometheusServer =
-          new HTTPServer(config.prometheusExporterHost, config.prometheusExporterPort);
-    } catch (IOException e) {
-      throw new ConfigurationException("Cannot configure prometheus exporter server:", e);
-    }
+    this(config, "io.opentelemetry.contrib.jmxmetrics", "1.0.0-alpha");
   }
 
   /** Will collect all metrics from OpenTelemetrySdk and export via configured exporter. */
   public void exportMetrics() {
     if (exporter != null) {
-      Collection<MetricData> md = getMetricProducer().collectAllMetrics();
+      Collection<MetricData> md = meterProvider.collectAllMetrics();
       exporter.export(md);
     }
   }
 
-  public void shutdown() {
-    if (prometheusServer != null) {
-      prometheusServer.stop();
-    }
-  }
-
   protected static Labels mapToLabels(final Map<String, String> labelMap) {
-    Labels.Builder labels = new Labels.Builder();
+    LabelsBuilder labels = Labels.builder();
     if (labelMap != null) {
       for (Map.Entry<String, String> kv : labelMap.entrySet()) {
         labels.put(kv.getKey(), kv.getValue());
@@ -211,11 +216,21 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link DoubleSumObserver}
    */
   public DoubleSumObserver getDoubleSumObserver(
-      final String name, final String description, final String unit) {
-    return meter.doubleSumObserverBuilder(name).setDescription(description).setUnit(unit).build();
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
+    return meter
+        .doubleSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setUpdater(
+            proxiedDoubleObserver(name, description, unit, InstrumentType.SUM_OBSERVER, updater))
+        .build();
   }
 
   /**
@@ -224,11 +239,21 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link LongSumObserver}
    */
   public LongSumObserver getLongSumObserver(
-      final String name, final String description, final String unit) {
-    return meter.longSumObserverBuilder(name).setDescription(description).setUnit(unit).build();
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.LongResult> updater) {
+    return meter
+        .longSumObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setUpdater(
+            proxiedLongObserver(name, description, unit, InstrumentType.SUM_OBSERVER, updater))
+        .build();
   }
 
   /**
@@ -237,14 +262,21 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link DoubleUpDownSumObserver}
    */
   public DoubleUpDownSumObserver getDoubleUpDownSumObserver(
-      final String name, final String description, final String unit) {
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
     return meter
         .doubleUpDownSumObserverBuilder(name)
         .setDescription(description)
         .setUnit(unit)
+        .setUpdater(
+            proxiedDoubleObserver(
+                name, description, unit, InstrumentType.UP_DOWN_SUM_OBSERVER, updater))
         .build();
   }
 
@@ -254,14 +286,21 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link LongUpDownSumObserver}
    */
   public LongUpDownSumObserver getLongUpDownSumObserver(
-      final String name, final String description, final String unit) {
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.LongResult> updater) {
     return meter
         .longUpDownSumObserverBuilder(name)
         .setDescription(description)
         .setUnit(unit)
+        .setUpdater(
+            proxiedLongObserver(
+                name, description, unit, InstrumentType.UP_DOWN_SUM_OBSERVER, updater))
         .build();
   }
 
@@ -271,11 +310,21 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link DoubleValueObserver}
    */
   public DoubleValueObserver getDoubleValueObserver(
-      final String name, final String description, final String unit) {
-    return meter.doubleValueObserverBuilder(name).setDescription(description).setUnit(unit).build();
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
+    return meter
+        .doubleValueObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setUpdater(
+            proxiedDoubleObserver(name, description, unit, InstrumentType.VALUE_OBSERVER, updater))
+        .build();
   }
 
   /**
@@ -284,10 +333,58 @@ public class GroovyMetricEnvironment {
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
+   * @param updater - the value updater
    * @return new or memoized {@link LongValueObserver}
    */
   public LongValueObserver getLongValueObserver(
-      final String name, final String description, final String unit) {
-    return meter.longValueObserverBuilder(name).setDescription(description).setUnit(unit).build();
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<AsynchronousInstrument.LongResult> updater) {
+    return meter
+        .longValueObserverBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .setUpdater(
+            proxiedLongObserver(name, description, unit, InstrumentType.VALUE_OBSERVER, updater))
+        .build();
+  }
+
+  private Consumer<AsynchronousInstrument.DoubleResult> proxiedDoubleObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final InstrumentType instrumentType,
+      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
+    InstrumentDescriptor descriptor =
+        InstrumentDescriptor.create(
+            name, description, unit, instrumentType, InstrumentValueType.DOUBLE);
+    doubleUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
+    AtomicReference<Consumer<AsynchronousInstrument.DoubleResult>> existingUpdater =
+        doubleUpdaterRegistry.get(descriptor.hashCode());
+    existingUpdater.set(updater);
+    return doubleResult -> {
+      Consumer<AsynchronousInstrument.DoubleResult> existing = existingUpdater.get();
+      existing.accept(doubleResult);
+    };
+  }
+
+  private Consumer<AsynchronousInstrument.LongResult> proxiedLongObserver(
+      final String name,
+      final String description,
+      final String unit,
+      final InstrumentType instrumentType,
+      final Consumer<AsynchronousInstrument.LongResult> updater) {
+    InstrumentDescriptor descriptor =
+        InstrumentDescriptor.create(
+            name, description, unit, instrumentType, InstrumentValueType.LONG);
+    longUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
+    AtomicReference<Consumer<AsynchronousInstrument.LongResult>> existingUpdater =
+        longUpdaterRegistry.get(descriptor.hashCode());
+    existingUpdater.set(updater);
+    return longResult -> {
+      Consumer<AsynchronousInstrument.LongResult> existing = existingUpdater.get();
+      existing.accept(longResult);
+    };
   }
 }

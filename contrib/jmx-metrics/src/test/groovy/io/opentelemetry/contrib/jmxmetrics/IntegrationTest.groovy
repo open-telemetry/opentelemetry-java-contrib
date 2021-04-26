@@ -66,7 +66,7 @@ class IntegrationTest extends Specification{
             "/app/OpenTelemetryJava.jar",
             "-Dotel.jmx.username=cassandra",
             "-Dotel.jmx.password=cassandra",
-            "-Dotel.exporter.otlp.endpoint=host.testcontainers.internal:${otlpPort}",
+            "-Dotel.exporter.otlp.endpoint=http://host.testcontainers.internal:${otlpPort}",
             "io.opentelemetry.contrib.jmxmetrics.JmxMetrics",
             "-config",
         ]

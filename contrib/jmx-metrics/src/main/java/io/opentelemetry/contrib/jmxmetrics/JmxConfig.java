@@ -28,8 +28,10 @@ class JmxConfig {
   static final String GROOVY_SCRIPT = PREFIX + "jmx.groovy.script";
   static final String TARGET_SYSTEM = PREFIX + "jmx.target.system";
   static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
-  static final String EXPORTER_TYPE = PREFIX + "exporter";
-  static final String EXPORTER = EXPORTER_TYPE + ".";
+  static final String METRICS_EXPORTER_TYPE = PREFIX + "metrics.exporter";
+  static final String EXPORTER = PREFIX + "exporter.";
+
+  static final String EXPORTER_INTERVAL = PREFIX + "imr.export.interval";
 
   static final String OTLP_ENDPOINT = EXPORTER + "otlp.endpoint";
 
@@ -49,7 +51,7 @@ class JmxConfig {
   final String targetSystem;
   final Set<String> targetSystems;
   final int intervalMilliseconds;
-  final String exporterType;
+  final String metricsExporterType;
 
   final String otlpExporterEndpoint;
 
@@ -64,8 +66,12 @@ class JmxConfig {
   final Properties properties;
 
   JmxConfig(final Properties props) {
-    properties = new Properties(props);
-    // command line takes precedence
+    properties = new Properties();
+    // putAll() instead of using constructor defaults
+    // to ensure they will be recorded to underlying map
+    properties.putAll(props);
+
+    // command line takes precedence so replace any that were specified via config file properties
     properties.putAll(System.getProperties());
 
     serviceUrl = properties.getProperty(SERVICE_URL);
@@ -78,16 +84,18 @@ class JmxConfig {
 
     int interval = getProperty(INTERVAL_MILLISECONDS, 10000);
     intervalMilliseconds = interval == 0 ? 10000 : interval;
+    // set for autoconfigure usage
+    getAndSetProperty(EXPORTER_INTERVAL, intervalMilliseconds);
 
-    exporterType = properties.getProperty(EXPORTER_TYPE, "logging");
-
+    metricsExporterType = getAndSetProperty(METRICS_EXPORTER_TYPE, "logging");
     otlpExporterEndpoint = properties.getProperty(OTLP_ENDPOINT);
 
-    prometheusExporterHost = properties.getProperty(PROMETHEUS_HOST, "localhost");
-    prometheusExporterPort = getProperty(PROMETHEUS_PORT, 9090);
+    prometheusExporterHost = getAndSetProperty(PROMETHEUS_HOST, "0.0.0.0");
+    prometheusExporterPort = getAndSetProperty(PROMETHEUS_PORT, 9464);
 
     username = properties.getProperty(JMX_USERNAME);
     password = properties.getProperty(JMX_PASSWORD);
+
     remoteProfile = properties.getProperty(JMX_REMOTE_PROFILE);
     realm = properties.getProperty(JMX_REALM);
   }
@@ -106,6 +114,25 @@ class JmxConfig {
     } catch (NumberFormatException e) {
       throw new ConfigurationException("Failed to parse " + key, e);
     }
+  }
+
+  /**
+   * Similar to getProperty(key, defaultValue) but sets the property to default if not in object.
+   */
+  private String getAndSetProperty(final String key, final String defaultValue) {
+    String propVal = properties.getProperty(key, defaultValue);
+    if (propVal.equals(defaultValue)) {
+      properties.setProperty(key, defaultValue);
+    }
+    return propVal;
+  }
+
+  private int getAndSetProperty(final String key, final int defaultValue) {
+    int propVal = getProperty(key, defaultValue);
+    if (propVal == defaultValue) {
+      properties.setProperty(key, String.valueOf(defaultValue));
+    }
+    return propVal;
   }
 
   /** Will determine if parsed config is complete, setting any applicable values and defaults. */
@@ -131,7 +158,7 @@ class JmxConfig {
     }
 
     if (isBlank(otlpExporterEndpoint)
-        && (!isBlank(exporterType) && exporterType.equalsIgnoreCase("otlp"))) {
+        && (!isBlank(metricsExporterType) && metricsExporterType.equalsIgnoreCase("otlp"))) {
       throw new ConfigurationException(OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 

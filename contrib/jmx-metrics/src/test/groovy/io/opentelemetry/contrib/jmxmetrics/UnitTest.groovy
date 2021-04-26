@@ -28,7 +28,7 @@ class UnitTest extends Specification {
             JmxConfig.GROOVY_SCRIPT,
             JmxConfig.TARGET_SYSTEM,
             JmxConfig.INTERVAL_MILLISECONDS,
-            JmxConfig.EXPORTER_TYPE,
+            JmxConfig.METRICS_EXPORTER_TYPE,
             JmxConfig.OTLP_ENDPOINT,
             JmxConfig.PROMETHEUS_HOST,
             JmxConfig.PROMETHEUS_PORT,
