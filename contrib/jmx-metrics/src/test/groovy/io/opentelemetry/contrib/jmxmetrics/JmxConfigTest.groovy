@@ -40,10 +40,10 @@ class JmxConfigTest extends UnitTest {
         config.targetSystem == ""
         config.targetSystems == [] as LinkedHashSet
         config.intervalMilliseconds == 10000
-        config.exporterType == "logging"
+        config.metricsExporterType == "logging"
         config.otlpExporterEndpoint == null
-        config.prometheusExporterHost == "localhost"
-        config.prometheusExporterPort == 9090
+        config.prometheusExporterHost == "0.0.0.0"
+        config.prometheusExporterPort == 9464
         config.username == null
         config.password == null
         config.remoteProfile == null
@@ -57,8 +57,8 @@ class JmxConfigTest extends UnitTest {
             "jmx.groovy.script" : "myGroovyScript",
             "jmx.target.system" : "mytargetsystem,mytargetsystem,myothertargetsystem,myadditionaltargetsystem",
             "jmx.interval.milliseconds": "123",
-            "exporter": "inmemory",
-            "exporter.otlp.endpoint": "myOtlpEndpoint",
+            "metrics.exporter": "inmemory",
+            "exporter.otlp.endpoint": "https://myOtlpEndpoint",
             "exporter.prometheus.host": "myPrometheusHost",
             "exporter.prometheus.port": "234",
             "jmx.username": "myUsername",
@@ -79,8 +79,8 @@ class JmxConfigTest extends UnitTest {
             "myadditionaltargetsystem"
         ] as LinkedHashSet
         config.intervalMilliseconds == 123
-        config.exporterType == "inmemory"
-        config.otlpExporterEndpoint == "myOtlpEndpoint"
+        config.metricsExporterType == "inmemory"
+        config.otlpExporterEndpoint == "https://myOtlpEndpoint"
         config.prometheusExporterHost == "myPrometheusHost"
         config.prometheusExporterPort == 234
         config.username == "myUsername"

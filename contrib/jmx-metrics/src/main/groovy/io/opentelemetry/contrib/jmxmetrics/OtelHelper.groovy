@@ -179,75 +179,75 @@ class OtelHelper {
         return longValueRecorder(name, '')
     }
 
-    DoubleSumObserver doubleSumObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit)
+    DoubleSumObserver doubleSumObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit, updater)
     }
 
-    DoubleSumObserver doubleSumObserver(String name, String description) {
-        return doubleSumObserver(name, description, SCALAR)
+    DoubleSumObserver doubleSumObserver(String name, String description, Closure updater) {
+        return doubleSumObserver(name, description, SCALAR, updater)
     }
 
-    DoubleSumObserver doubleSumObserver(String name) {
-        return doubleSumObserver(name, '')
+    DoubleSumObserver doubleSumObserver(String name, Closure updater) {
+        return doubleSumObserver(name, '', updater)
     }
 
-    LongSumObserver longSumObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getLongSumObserver(name, description, unit)
+    LongSumObserver longSumObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getLongSumObserver(name, description, unit, updater)
     }
 
-    LongSumObserver longSumObserver(String name, String description) {
-        return longSumObserver(name, description, SCALAR)
+    LongSumObserver longSumObserver(String name, String description, Closure updater) {
+        return longSumObserver(name, description, SCALAR, updater)
     }
 
-    LongSumObserver longSumObserver(String name) {
-        return longSumObserver(name, '')
+    LongSumObserver longSumObserver(String name, Closure updater) {
+        return longSumObserver(name, '', updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit)
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit, updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description) {
-        return doubleUpDownSumObserver(name, description, SCALAR)
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, Closure updater) {
+        return doubleUpDownSumObserver(name, description, SCALAR, updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name) {
-        return doubleUpDownSumObserver(name, '')
+    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, Closure updater) {
+        return doubleUpDownSumObserver(name, '', updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit)
+    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit, updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, String description) {
-        return longUpDownSumObserver(name, description, SCALAR)
+    LongUpDownSumObserver longUpDownSumObserver(String name, String description, Closure updater) {
+        return longUpDownSumObserver(name, description, SCALAR, updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name) {
-        return longUpDownSumObserver(name, '')
+    LongUpDownSumObserver longUpDownSumObserver(String name, Closure updater) {
+        return longUpDownSumObserver(name, '', updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit)
+    DoubleValueObserver doubleValueObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit, updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name, String description) {
-        return doubleValueObserver(name, description, SCALAR)
+    DoubleValueObserver doubleValueObserver(String name, String description, Closure updater) {
+        return doubleValueObserver(name, description, SCALAR, updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name) {
-        return doubleValueObserver(name, '')
+    DoubleValueObserver doubleValueObserver(String name, Closure updater) {
+        return doubleValueObserver(name, '', updater)
     }
 
-    LongValueObserver longValueObserver(String name, String description, String unit) {
-        return groovyMetricEnvironment.getLongValueObserver(name, description, unit)
+    LongValueObserver longValueObserver(String name, String description, String unit, Closure updater) {
+        return groovyMetricEnvironment.getLongValueObserver(name, description, unit, updater)
     }
 
-    LongValueObserver longValueObserver(String name, String description) {
-        return longValueObserver(name, description, SCALAR)
+    LongValueObserver longValueObserver(String name, String description, Closure updater) {
+        return longValueObserver(name, description, SCALAR, updater)
     }
 
-    LongValueObserver longValueObserver(String name) {
-        return longValueObserver(name, '')
+    LongValueObserver longValueObserver(String name, Closure updater) {
+        return longValueObserver(name, '', updater)
     }
 }

@@ -155,6 +155,5 @@ public class GroovyRunner {
 
   public void shutdown() {
     flush();
-    groovyMetricEnvironment.shutdown();
   }
 }

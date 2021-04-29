@@ -16,17 +16,16 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.GAUGE_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_DOUBLE
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.NON_MONOTONIC_LONG
-import static io.opentelemetry.sdk.metrics.data.MetricData.Type.SUMMARY
+
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_GAUGE
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
-import io.opentelemetry.api.common.Labels
-import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.api.metrics.common.Labels
+import io.opentelemetry.api.metrics.GlobalMetricsProvider
 import javax.management.MBeanServer
 import javax.management.ObjectName
 import javax.management.remote.JMXConnectorServer
@@ -64,7 +63,7 @@ class InstrumentHelperTest extends Specification {
         def completeAddress = jmxServer.getAddress()
 
         def jmxConfig = new JmxConfig(new Properties().tap {
-            it.setProperty(JmxConfig.EXPORTER_TYPE, 'inmemory')
+            it.setProperty(JmxConfig.METRICS_EXPORTER_TYPE, 'inmemory')
             it.setProperty(JmxConfig.SERVICE_URL, "${completeAddress}")
         })
 
@@ -97,10 +96,10 @@ class InstrumentHelperTest extends Specification {
     }
 
     def exportMetrics() {
-        def provider = OpenTelemetrySdk.globalMeterProvider.get(name.methodName, '')
-        return provider.collectAll().sort { md1, md2 ->
-            def p1 = md1.points[0]
-            def p2 = md2.points[0]
+        def provider = GlobalMetricsProvider.get().get(name.methodName, '')
+        return provider.collectAll(0).sort { md1, md2 ->
+            def p1 = md1.data.points[0]
+            def p2 = md2.data.points[0]
             def s1 = p1.startEpochNanos
             def s2 = p2.startEpochNanos
             if (s1 == s2) {
@@ -144,9 +143,9 @@ class InstrumentHelperTest extends Specification {
             assert metric.name == instrumentName
             assert metric.description == description
             assert metric.unit == "1"
-            assert metric.type ==  metricType
-            assert metric.points.size() == isSingle ? 1 : 4
-            metric.points.eachWithIndex { point, i ->
+            assert metric.type == metricType
+            assert metric.data.points.size() == isSingle ? 1 : 4
+            metric.data.points.eachWithIndex { point, i ->
                 assert point.labels == Labels.of("labelOne", "labelOneValue", "labelTwo", "${i}")
 
                 if (metricType == SUMMARY) {
@@ -164,29 +163,52 @@ class InstrumentHelperTest extends Specification {
 
         where:
         isSingle | quantity | attribute | instrumentMethod | metricType | value
-        true | "single" | "Double" | "doubleCounter" | MONOTONIC_DOUBLE | 123.456
-        false | "multiple" | "Double" | "doubleCounter" | MONOTONIC_DOUBLE | 123.456
-        true | "single" | "Double" | "doubleUpDownCounter" | NON_MONOTONIC_DOUBLE | 123.456
-        false | "multiple" | "Double" | "doubleUpDownCounter" | NON_MONOTONIC_DOUBLE | 123.456
-        true | "single" | "Long" | "longCounter" | MONOTONIC_LONG | 234
-        false | "multiple" | "Long" | "longCounter" | MONOTONIC_LONG | 234
-        true | "single" | "Long" | "longUpDownCounter" | NON_MONOTONIC_LONG | 234
-        false | "multiple" | "Long" | "longUpDownCounter" | NON_MONOTONIC_LONG | 234
+        true | "single" | "Double" | "doubleCounter" | DOUBLE_SUM | 123.456
+        false | "multiple" | "Double" | "doubleCounter" | DOUBLE_SUM | 123.456
+        true | "single" | "Double" | "doubleUpDownCounter" | DOUBLE_SUM | 123.456
+        false | "multiple" | "Double" | "doubleUpDownCounter" | DOUBLE_SUM | 123.456
+        true | "single" | "Long" | "longCounter" | LONG_SUM | 234
+        false | "multiple" | "Long" | "longCounter" | LONG_SUM | 234
+        true | "single" | "Long" | "longUpDownCounter" | LONG_SUM | 234
+        false | "multiple" | "Long" | "longUpDownCounter" | LONG_SUM | 234
         true | "single" | "Double" | "doubleValueRecorder" | SUMMARY | 123.456
         false | "multiple" | "Double" | "doubleValueRecorder" | SUMMARY | 123.456
         true | "single" | "Long" | "longValueRecorder" | SUMMARY | 234
         false | "multiple" | "Long" | "longValueRecorder" | SUMMARY | 234
-        true | "single" | "Double" | "doubleSumObserver" | MONOTONIC_DOUBLE | 123.456
-        false | "multiple" | "Double" | "doubleSumObserver" | MONOTONIC_DOUBLE | 123.456
-        true | "single" | "Double" | "doubleUpDownSumObserver" | NON_MONOTONIC_DOUBLE | 123.456
-        false | "multiple" | "Double" | "doubleUpDownSumObserver" | NON_MONOTONIC_DOUBLE | 123.456
-        true | "single" | "Long" | "longSumObserver" | MONOTONIC_LONG | 234
-        false | "multiple" | "Long" | "longSumObserver" | MONOTONIC_LONG | 234
-        true | "single" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
-        false | "multiple" | "Long" | "longUpDownSumObserver" | NON_MONOTONIC_LONG | 234
-        true | "single" | "Double" | "doubleValueObserver" | GAUGE_DOUBLE | 123.456
-        false | "multiple" | "Double" | "doubleValueObserver" | GAUGE_DOUBLE | 123.456
-        true | "single" | "Long" | "longValueObserver" | GAUGE_LONG | 234
-        false | "multiple" | "Long" | "longValueObserver" | GAUGE_LONG | 234
+        true | "single" | "Double" | "doubleSumObserver" | DOUBLE_SUM | 123.456
+        false | "multiple" | "Double" | "doubleSumObserver" | DOUBLE_SUM | 123.456
+        true | "single" | "Double" | "doubleUpDownSumObserver" | DOUBLE_SUM | 123.456
+        false | "multiple" | "Double" | "doubleUpDownSumObserver" | DOUBLE_SUM | 123.456
+        true | "single" | "Long" | "longSumObserver" | LONG_SUM | 234
+        false | "multiple" | "Long" | "longSumObserver" | LONG_SUM | 234
+        true | "single" | "Long" | "longUpDownSumObserver" | LONG_SUM | 234
+        false | "multiple" | "Long" | "longUpDownSumObserver" | LONG_SUM | 234
+        true | "single" | "Double" | "doubleValueObserver" | DOUBLE_GAUGE | 123.456
+        false | "multiple" | "Double" | "doubleValueObserver" | DOUBLE_GAUGE | 123.456
+        true | "single" | "Long" | "longValueObserver" | LONG_GAUGE | 234
+        false | "multiple" | "Long" | "longValueObserver" | LONG_GAUGE | 234
+    }
+
+    @Unroll
+    def "#instrumentMethod correctly classified"() {
+        expect:
+        def instrument = otel.&"${instrumentMethod}"
+        assert InstrumentHelper.instrumentIsObserver(instrument) == isObserver
+        assert InstrumentHelper.instrumentIsCounter(instrument) == isCounter
+
+        where:
+        instrumentMethod | isObserver | isCounter
+        "doubleCounter" | false | true
+        "longCounter" | false | true
+        "doubleSumObserver" | true | false
+        "longSumObserver" | true | false
+        "doubleUpDownCounter" | false | true
+        "longUpDownCounter" | false | true
+        "doubleUpDownSumObserver" | true | false
+        "longUpDownSumObserver" | true | false
+        "doubleValueObserver" | true | false
+        "longValueObserver" | true | false
+        "doubleValueRecorder" | false | false
+        "longValueRecorder" | false | false
     }
 }

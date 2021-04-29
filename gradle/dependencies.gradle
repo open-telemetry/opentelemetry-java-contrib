@@ -1,19 +1,23 @@
 ext {
     versions = [
-        otelStable : '0.10.0'
+        otelStable : '1.0.0',
+        otelAlpha : '1.0.0-alpha'
     ]
 
     libraries = [
         // otel
         otelApi            : "io.opentelemetry:opentelemetry-api:${versions.otelStable}",
+        otelApiMetrics            : "io.opentelemetry:opentelemetry-api-metrics:${versions.otelAlpha}",
         otelSdk            : "io.opentelemetry:opentelemetry-sdk:${versions.otelStable}",
+        otelSdkMetrics            : "io.opentelemetry:opentelemetry-sdk-metrics:${versions.otelAlpha}",
+        otelAutoconfig     : "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:${versions.otelAlpha}",
         otelSdkTesting       : "io.opentelemetry:opentelemetry-sdk-testing:${versions.otelStable}",
         otelExporterJaeger         : "io.opentelemetry:opentelemetry-exporter-jaeger:${versions.otelStable}",
         otelExporterLogging        : "io.opentelemetry:opentelemetry-exporter-logging:${versions.otelStable}",
-        otelExporterOtlp           : "io.opentelemetry:opentelemetry-exporter-otlp:${versions.otelStable}",
-        otelExporterPrometheus     : "io.opentelemetry:opentelemetry-exporter-prometheus:${versions.otelStable}",
+        otelExporterOtlp           : "io.opentelemetry:opentelemetry-exporter-otlp-metrics:${versions.otelAlpha}",
+        otelExporterPrometheus     : "io.opentelemetry:opentelemetry-exporter-prometheus:${versions.otelAlpha}",
         otelExporterZipkin         : "io.opentelemetry:opentelemetry-exporter-zipkin:${versions.otelStable}",
-        otelProto          : "io.opentelemetry:opentelemetry-proto:${versions.otelStable}",
+        otelProto          : "io.opentelemetry:opentelemetry-proto:${versions.otelAlpha}",
 
         // testing
         spock : dependencies.create('org.spockframework:spock-core:1.3-groovy-2.5', {

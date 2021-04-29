@@ -60,7 +60,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
         InstrumentationLibrary il = ilMetric.instrumentationLibrary
         then: 'it is of the expected content'
         il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '0.0.1'
+        il.version == '1.0.0-alpha'
 
         when: 'we examine the instrumentation library metric metrics list'
         ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList

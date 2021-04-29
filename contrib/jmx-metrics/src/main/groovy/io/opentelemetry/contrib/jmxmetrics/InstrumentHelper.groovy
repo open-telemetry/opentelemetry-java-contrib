@@ -16,17 +16,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.api.metrics.DoubleCounter
-import io.opentelemetry.api.metrics.DoubleSumObserver
-import io.opentelemetry.api.metrics.DoubleUpDownCounter
-import io.opentelemetry.api.metrics.DoubleUpDownSumObserver
-import io.opentelemetry.api.metrics.DoubleValueObserver
-import io.opentelemetry.api.metrics.LongCounter
-import io.opentelemetry.api.metrics.LongSumObserver
-import io.opentelemetry.api.metrics.LongUpDownCounter
-import io.opentelemetry.api.metrics.LongUpDownSumObserver
-import io.opentelemetry.api.metrics.LongValueObserver
-
+import groovy.transform.PackageScope
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
 
@@ -67,7 +57,7 @@ class InstrumentHelper {
      * instances from an MBeanHelper's underlying {@link GroovyMBean} instances via an {@link OtelHelper}'s instrument
      * method pointer.
      *
-     * @param mBeanHelper - the single or multiple {@link GroovyMBean} instance from which to access attribute values
+     * @param mBeanHelper - the single or multiple {@link GroovyMBean}-representing MBeanHelper from which to access attribute values
      * @param instrumentName - the resulting instruments' name to register.
      * @param description - the resulting instruments' description to register.
      * @param unit - the resulting instruments' unit to register.
@@ -96,10 +86,12 @@ class InstrumentHelper {
             return
         }
 
-        // Observer instruments need to have a single callback set, so pool all update
-        // operations in a list of closures per instrument to be executed after all values
-        // are established, potentially as the callback.
-        def instToUpdates = [:]
+        // Observer instruments need to have a single updater set at build time, so pool all
+        // update operations in a list of closures per instrument to be executed after all values
+        // are established, potentially as a single updater.  This is done because a single MBeanHelper
+        // can represent multiple MBeans (each with different values for an attribute) and the labelFuncs
+        // will create multiple datapoints from the same instrument identifiers.
+        def tupleToUpdates = [:] // tuple is of form (instrument, instrumentName, description, unit)
 
         [mbeans, values].transpose().each { mbean, value ->
             if (value instanceof CompositeData) {
@@ -107,32 +99,41 @@ class InstrumentHelper {
                     def val = value.get(key)
                     def updatedInstrumentName = "${instrumentName}.${key}"
                     def labels = getLabels(mbean, labelFuncs)
-                    def inst = instrument(updatedInstrumentName, description, unit)
-                    logger.fine("Recording ${updatedInstrumentName} - ${inst} w/ ${val} - ${labels}")
-                    if (!instToUpdates.containsKey(inst)) {
-                        instToUpdates[inst] = []
+                    def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
+                    logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
+                    if (!tupleToUpdates.containsKey(tuple)) {
+                        tupleToUpdates[tuple] = []
                     }
-                    instToUpdates[inst].add(prepareUpdateClosure(inst, val, labels))
+                    tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
                 }
             } else {
                 def labels = getLabels(mbean, labelFuncs)
-                def inst = instrument(instrumentName, description, unit)
-                logger.fine("Recording ${instrumentName} - ${inst} w/ ${value} - ${labels}")
-                if (!instToUpdates.containsKey(inst)) {
-                    instToUpdates[inst] = []
+                def tuple = new Tuple(instrument, instrumentName, description, unit)
+                logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+                if (!tupleToUpdates.containsKey(tuple)) {
+                    tupleToUpdates[tuple] = []
                 }
-                instToUpdates[inst].add(prepareUpdateClosure(inst, value, labels))
+                tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, value, labels))
             }
         }
 
-        instToUpdates.each {inst, updateClosures ->
-            if (instrumentIsObserver(inst)) {
-                inst.setCallback({ result ->
+        tupleToUpdates.each {tuple, updateClosures ->
+            def instrument = tuple.getAt(0)
+            def instrumentName = tuple.getAt(1)
+            def description = tuple.getAt(2)
+            def unit = tuple.getAt(3)
+
+            if (instrumentIsObserver(instrument)) {
+                // Though the instrument updater is only set at build time,
+                // our GroovyMetricEnvironment helpers ensure the updater
+                // uses the Closure specified here.
+                instrument(instrumentName, description, unit, { result ->
                     updateClosures.each { update ->
                         update(result)
                     }
                 })
             } else {
+                def inst = instrument(instrumentName, description, unit)
                 updateClosures.each {
                     it(inst)
                 }
@@ -161,19 +162,23 @@ class InstrumentHelper {
         }
     }
 
-    private static boolean instrumentIsObserver(inst) {
-        return (inst instanceof DoubleSumObserver
-                || inst instanceof DoubleUpDownSumObserver
-                || inst instanceof LongSumObserver
-                || inst instanceof LongUpDownSumObserver
-                || inst instanceof DoubleValueObserver
-                || inst instanceof LongValueObserver)
+    @PackageScope static boolean instrumentIsObserver(inst) {
+        return [
+            "doubleSumObserver",
+            "doubleUpDownSumObserver",
+            "longSumObserver",
+            "longUpDownSumObserver",
+            "doubleValueObserver" ,
+            "longValueObserver"
+        ].contains(inst.method)
     }
 
-    private static boolean instrumentIsCounter(inst) {
-        return (inst instanceof DoubleCounter
-                || inst instanceof DoubleUpDownCounter
-                || inst instanceof LongCounter
-                || inst instanceof LongUpDownCounter)
+    @PackageScope static boolean instrumentIsCounter(inst) {
+        return [
+            "doubleCounter",
+            "doubleUpDownCounter",
+            "longCounter",
+            "longUpDownCounter"
+        ].contains(inst.method)
     }
 }
