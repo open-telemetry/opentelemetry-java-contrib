@@ -1,8 +1,7 @@
 plugins {
     id 'com.diffplug.spotless' version '5.1.1'
     id "com.github.johnrengelman.shadow" version "6.0.0" apply false
-    id "com.jfrog.artifactory" version "4.17.2" apply false
-    id 'com.jfrog.bintray' version '1.8.5' apply false
+    id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
 }
 
 description = 'OpenTelemetry Contrib libraries and utilities for the JVM'
@@ -37,3 +36,11 @@ task integrationTest {
     }
 }
 integrationTest.finalizedBy allprojects.test
+
+// At this time authentication relies on sonatypeUsername and sonatypePassword project properties or
+// ORG_GRADLE_PROJECT_sonatypeUsername and ORG_GRADLE_PROJECT_sonatypePassword environment variables.
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}

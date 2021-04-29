@@ -1,8 +1,8 @@
 # Releasing OpenTelemetry Java Contrib Artifacts
 
-This project currently has two gradle tasks capable of preparing and releasing artifacts: `mavenPublish`
-and `ossSnapshot`.  In order for you to register your contributed project to be published by these commands,
-you must apply the provided publish script plugin in your subproject's gradle file:
+This project currently has three gradle tasks capable of preparing and releasing artifacts: `mavenPublish`,
+`ossSnapshot`, and `otelRelease`.  In order for you to register your contributed project to be published by
+these commands, you must apply the provided publish script plugin in your subproject's gradle file:
 
 ```groovy
 apply from: project.publish
@@ -33,18 +33,20 @@ your machine. The ability to publish to a stable remote repository like Maven Ce
 
 ## `./gradlew ossSnapshot`
 
-This task will invoke the [Artifactory Plugin](https://www.jfrog.com/confluence/display/JFROG/Gradle+Artifactory+Plugin)
-and publish all applicable snapshot artifacts to https://oss.jfrog.org/artifactory/oss-snapshot-local.  It's important
+This task will invoke the [Gradle Nexus Publish Plugin](https://github.com/gradle-nexus/publish-plugin)
+and publish all applicable snapshot artifacts to https://oss.sonatype.org/content/repositories/snapshots.  It's important
 to note that these snapshot releases are often from unstable development states and should generally not be used in
 production environments.
 
-This task requires an account and API key for the OpenTelemetry Bintray organization.  If you have been provided access
-and configured your key, please set the required environment variables detailed in the publish script plugin.
+This task requires an account and password for Sonatype's OSSRH with `io.opentelemetry` group permissions.  If you have been
+provided access please set the required gradle properties detailed in the publish script plugin.
 
 ## `./gradlew otelRelease`
 
-This task will invoke the [Bintray Plugin](https://github.com/bintray/gradle-bintray-plugin)
-and publish all applicable snapshot artifacts to https://dl.bintray.com/open-telemetry/maven/io/opentelemetry/contrib/,
-assuming the current version is not a snapshot.  Syncing with Maven Central is not performed at this time.
+This task will also invoke the [Gradle Nexus Publish Plugin](https://github.com/gradle-nexus/publish-plugin)
+and publish all applicable artifacts to a new staging repository at https://oss.sonatype.org/#stagingRepositories before
+closing it for manual release through the Nexus UI.  Releasing the repository will initiate automatic syncing with
+Maven Central.
 
-Like `ossSnapshot`, this task requires an account and API key for the OpenTelemetry Bintray organization.
+Like `ossSnapshot`, this task requires an account and permissions for Sonatype OSSRH, in addition to a PGP key registered
+with a public keyserver.
