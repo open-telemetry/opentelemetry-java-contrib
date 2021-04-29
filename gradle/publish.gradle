@@ -1,6 +1,5 @@
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'signing'
 
 publishing {
     repositories {
@@ -36,8 +35,8 @@ publishing {
                 developers {
                     developer {
                         id = 'opentelemetry'
-                        name = 'OpenTelemetry Gitter'
-                        url = 'https://gitter.im/open-telemetry/community'
+                        name = 'OpenTelemetry'
+                        url = "https://github.com/open-telemetry/opentelemetry-java-contrib/issues"
                     }
                 }
 
@@ -78,52 +77,29 @@ task mavenPublish {
     }
 }
 
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-            username = System.getenv('BINTRAY_USER')
-            password = System.getenv('BINTRAY_API_KEY')
-        }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_API_KEY')
-    publications = ['maven']
-    publish = true
-
-    pkg {
-        repo = 'maven'
-        name = 'opentelemetry-java-contrib'
-        userOrg = 'open-telemetry'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/open-telemetry/opentelemetry-java-contrib.git'
-
-        githubRepo = 'open-telemetry/opentelemetry-java-contrib'
-
-        version {
-            name = project.version
-            gpg {
-                sign = true
-            }
-        }
-    }
-}
-
 task ossSnapshot {
-    artifactoryPublish {
-        enabled = version.toString().contains('SNAPSHOT')
-        publications('maven')
+    if (version.toString().endsWith("-SNAPSHOT")) {
+        it.finalizedBy tasks.publishToSonatype
+    } else {
+        it.doFirst {
+            println "ossSnapshot: ${version} isn't a snapshot.  Not releasing."
+        }
     }
-    finalizedBy artifactoryPublish
 }
 
 task otelRelease {
-    bintrayUpload {
-        enabled = !version.toString().contains('SNAPSHOT')
+    if (!version.toString().endsWith("-SNAPSHOT")) {
+        // closeSonatypeStagingRepository is a dynamically registered task and cannot be referenced directly
+        it.finalizedBy "publishToSonatype", rootProject.tasks.named("closeSonatypeStagingRepository")
+    } else {
+        it.doFirst {
+            println "otelRelease: ${version} is a snapshot.  Not releasing."
+        }
     }
-    finalizedBy bintrayUpload
+}
+
+// At this time signing depends on properly configured gradle properties for registered public key:
+// https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials.
+signing {
+    sign publishing.publications.maven
 }
