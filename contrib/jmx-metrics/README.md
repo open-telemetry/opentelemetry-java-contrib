@@ -24,7 +24,7 @@ otel.jmx.username = my-username
 otel.jmx.password = my-password
 
 otel.metrics.exporter = otlp
-otel.exporter.otlp.endpoint = http://my-opentelemetry-collector:55680
+otel.exporter.otlp.endpoint = http://my-opentelemetry-collector:4317
 ```
 
 As configured in this example, the metric gatherer will establish an MBean server connection using the
