@@ -190,6 +190,39 @@ class InstrumentHelperTest extends Specification {
     }
 
     @Unroll
+    def "handles nulls returned from MBeanHelper"() {
+        setup: "Create and register four Things and create ${quantity} MBeanHelper"
+        def thingName = "${quantity}:type=${instrumentMethod}.${attribute}.Thing"
+        def things = (0..3).collect { new Thing() }
+        things.eachWithIndex { thing, i ->
+            def name = "${thingName},thing=${i}"
+            mBeanServer.registerMBean(thing, new ObjectName(name))
+        }
+        def mbeanHelper = new MBeanHelper(jmxClient, "${thingName},*", isSingle)
+        mbeanHelper.fetch()
+
+        expect:
+        when:
+        def instrumentName = "${quantity}.${instrumentMethod}.counter"
+        def description = "${quantity} double counter description"
+        def instrument = otel.&"${instrumentMethod}"
+        def instrumentHelper = new InstrumentHelper(
+                mbeanHelper, instrumentName, description, "1",
+                ["labelOne" : { "labelOneValue"}, "labelTwo": { mbean -> mbean.name().getKeyProperty("thing") }],
+                attribute, instrument)
+        instrumentHelper.update()
+
+        then:
+        def metrics = exportMetrics()
+        metrics.size() == 0
+
+        where:
+        isSingle | quantity | attribute | instrumentMethod | metricType | value
+        true | "single" | "Missing" | "longValueObserver" | LONG_GAUGE | null
+        false | "multiple" | "Missing" | "longValueObserver" | LONG_GAUGE | null
+    }
+
+    @Unroll
     def "#instrumentMethod correctly classified"() {
         expect:
         def instrument = otel.&"${instrumentMethod}"
