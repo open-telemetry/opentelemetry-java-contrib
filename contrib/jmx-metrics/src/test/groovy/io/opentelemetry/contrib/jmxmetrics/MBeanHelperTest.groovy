@@ -85,6 +85,31 @@ class MBeanHelperTest extends Specification {
         false    | "multiple"
     }
 
+    @Unroll
+    def "handles missing attributes"() {
+        setup:
+        def thingName = "io.opentelemetry.contrib.jmxmetrics:type=${quantity}MissingAttributeThing"
+        def things = (0..100).collect { new Thing(it as String) }
+        things.eachWithIndex { thing, i ->
+            def name = "${thingName},thing=${i}"
+            mBeanServer.registerMBean(thing, new ObjectName(name))
+        }
+
+        expect:
+        when: "We request a nonexistent attribute via MBeanHelper"
+        def mbeanHelper = new MBeanHelper(jmxClient, "${thingName},*", isSingle)
+        mbeanHelper.fetch()
+
+        then: "nulls are returned"
+        def returned = mbeanHelper.getAttribute("MissingAttribute")
+        returned == isSingle ? [null]: (0..100).collect {null}
+
+        where:
+        isSingle | quantity
+        true     | "single"
+        false    | "multiple"
+    }
+
     interface ThingMBean {
 
         String getSomeAttribute()

@@ -106,7 +106,7 @@ class InstrumentHelper {
                     }
                     tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
                 }
-            } else {
+            } else if (value != null) {
                 def labels = getLabels(mbean, labelFuncs)
                 def tuple = new Tuple(instrument, instrumentName, description, unit)
                 logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")

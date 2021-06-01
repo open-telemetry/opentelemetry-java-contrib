@@ -19,6 +19,7 @@ package io.opentelemetry.contrib.jmxmetrics
 import groovy.transform.PackageScope
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName
+import javax.management.AttributeNotFoundException
 import java.util.logging.Logger
 
 /**
@@ -87,7 +88,12 @@ class MBeanHelper {
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return ofInterest.collect {
-            it.getProperty(attribute)
+            try {
+                it.getProperty(attribute)
+            } catch (AttributeNotFoundException e) {
+                logger.warning("Expected attribute ${attribute} not found in mbean ${it.name()}")
+                null
+            }
         }
     }
 }
