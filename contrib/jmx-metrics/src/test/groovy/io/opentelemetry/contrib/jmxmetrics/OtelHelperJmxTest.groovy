@@ -132,6 +132,32 @@ class OtelHelperJmxTest extends Specification {
         assertEquals(sortedNames, names)
     }
 
+    def "multiple objectname query"() {
+        when:
+        def serverAddr = setupServer([:])
+        def config = new JmxConfig(new Properties().tap {
+            it.setProperty(JmxConfig.SERVICE_URL, "${serverAddr}")
+            it.setProperty(JmxConfig.GROOVY_SCRIPT, "myscript.groovy")
+        })
+        config.validate()
+        def otel = setupHelper(config)
+
+        def things = (0..99).collect {new Thing()}
+
+        def mbeanServer = getPlatformMBeanServer()
+        things.eachWithIndex { thing, i ->
+            mbeanServer.registerMBean(thing, new ObjectName("multiobjectname.query.results:type=Thing,thing=${i}"))
+        }
+
+        then:
+        def mbeanHelper = otel.mbeans([
+            "multiobjectname.query.results:type=Thing,thing=1",
+            "multiobjectname.query.results:type=Thing,thing=2"
+        ])
+        def mbeans = mbeanHelper.getMBeans()
+        assertEquals(2, mbeans.size())
+    }
+
     interface ThingMBean {
 
         String getSomeAttribute()
