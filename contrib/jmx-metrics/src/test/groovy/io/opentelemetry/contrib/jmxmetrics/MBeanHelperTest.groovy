@@ -61,7 +61,7 @@ class MBeanHelperTest extends Specification {
     }
 
     @Unroll
-    def"represents #quantity MBean(s)"() {
+    def "represents #quantity MBean(s)"() {
         setup:
         def thingName = "io.opentelemetry.contrib.jmxmetrics:type=${quantity}Thing"
         def things = (0..100).collect { new Thing(it as String) }
