@@ -101,6 +101,8 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
    but returns an `MBeanHelper` instance representing all matching MBeans for usage by subsequent `InstrumentHelper`
    instances (available via `otel.instrument()`) as described below.  It is intended to be used in cases
    where your given `objectNameStr` can return a multiple element `List<GroovyMBean>`.
+- `otel.mbeans(List<String> objectNameStrs)`
+   - This method is equavalant to the above method except, it adds support for multiple ObjectNames. This support is meant for when there are multiple mbeans that relate to the same metric and can be seperated using labels in `otel.instrument()`.
 
 - `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument)`
    - This method provides the ability to easily create and automatically update instrument instances from an
