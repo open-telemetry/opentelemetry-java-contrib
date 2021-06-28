@@ -38,7 +38,7 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: contrib/jmx-metrics/build/reports/tests/test
+          path: jmx-metrics/build/reports/tests/test
   integration-test:
     name: integration-test
     runs-on: ubuntu-latest
@@ -66,4 +66,4 @@ jobs:
         if: always()
         with:
           name: integration-test-results
-          path: contrib/jmx-metrics/build/reports/tests/test
+          path: jmx-metrics/build/reports/tests/test
