@@ -12,7 +12,7 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-* [JMX Metric Gatherer](./contrib/jmx-metrics/README.md)
+* [JMX Metric Gatherer](./jmx-metrics/README.md)
 
 ## Getting Started
 
