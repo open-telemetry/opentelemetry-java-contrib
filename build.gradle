@@ -8,7 +8,7 @@ description = 'OpenTelemetry Contrib libraries and utilities for the JVM'
 
 allprojects {
     group = 'io.opentelemetry.contrib'
-    version = '1.0.0-alpha-SNAPSHOT'
+    version = '1.0.0-alpha'
 
     apply from: "$rootDir/gradle/spotless.gradle"
     apply from: "$rootDir/gradle/dependencies.gradle"
