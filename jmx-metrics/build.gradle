@@ -1,10 +1,11 @@
 plugins {
     id "application"
+    id "com.github.johnrengelman.shadow"
+
+    id("otel.groovy-conventions")
 }
 
-apply from: project.contrib
-apply plugin: 'com.github.johnrengelman.shadow'
-apply from: project.publish
+apply from: "$rootDir/gradle/publish.gradle"
 
 ext.shadowPublish = true
 
@@ -38,25 +39,36 @@ def deps = [
     testcontainers : "org.testcontainers:testcontainers:1.15.1",
 ]
 
+repositories {
+    mavenCentral()
+    maven {
+        setUrl("http://www.terracotta.org/download/reflector/releases")
+        content {
+            includeGroup("org.terracotta")
+        }
+    }
+    mavenLocal()
+}
+
 dependencies {
     implementation "io.grpc:grpc-netty-shaded:${versions.grpc}",
             "org.codehaus.groovy:groovy-jmx:${versions.groovy}",
             "org.codehaus.groovy:groovy:${versions.groovy}",
             "io.prometheus:simpleclient:${versions.prometheus}",
             "io.prometheus:simpleclient_httpserver:${versions.prometheus}",
-            libraries.otelApi,
-            libraries.otelApiMetrics,
-            libraries.otelAutoconfig,
-            libraries.otelExporterLogging,
-            libraries.otelExporterOtlp,
-            libraries.otelExporterPrometheus,
-            libraries.otelSdk,
-            libraries.otelSdkMetrics,
-            libraries.otelSdkTesting,
+            "io.opentelemetry:opentelemetry-api",
+            "io.opentelemetry:opentelemetry-api-metrics",
+            "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-sdk-metrics",
+            "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure",
+            "io.opentelemetry:opentelemetry-sdk-testing",
+            "io.opentelemetry:opentelemetry-exporter-logging",
+            "io.opentelemetry:opentelemetry-exporter-otlp-metrics",
+            "io.opentelemetry:opentelemetry-exporter-prometheus",
             deps.slf4j,
             dependencies.create(group: 'org.slf4j', name: 'slf4j-simple', version: versions.slf4j)
 
-    runtime "org.terracotta:jmxremote_optional-tc:1.0.5"
+    runtime "org.terracotta:jmxremote_optional-tc:1.0.8"
 
     testImplementation "io.grpc:grpc-api:${versions.grpc}",
             "io.grpc:grpc-protobuf:${versions.grpc}",
@@ -67,7 +79,7 @@ dependencies {
             'org.awaitility:awaitility:3.0.0',
             'org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1',
             deps.testcontainers,
-            libraries.otelProto
+            "io.opentelemetry:opentelemetry-proto"
 }
 
 shadowJar {

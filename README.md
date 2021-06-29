@@ -18,7 +18,7 @@ feature or via instrumentation, this project is hopefully for you.
 
 ```bash
 # Apply formatting
-$ ./gradlew format
+$ ./gradlew spotlessApply
 
 # Build the complete project
 $ ./gradlew build
