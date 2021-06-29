@@ -28,3 +28,10 @@ spotless {
         endWithNewline()
     }
 }
+
+tasks {
+    withType<GroovyCompile> {
+        sourceCompatibility = "8"
+        targetCompatibility = "8"
+    }
+}
