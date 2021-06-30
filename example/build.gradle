@@ -1,4 +1,6 @@
-apply from: project.contrib
+plugins {
+    id("otel.java-conventions")
+}
 
 ext.libraryName = 'OpenTelemetry Java Contrib Example'
 description = 'An example OpenTelemetry Java Contrib library'

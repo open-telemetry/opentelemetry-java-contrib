@@ -1,4 +1,0 @@
-rootProject.name = 'opentelemetry-java-contrib'
-
-include ':example'
-include ':jmx-metrics'
