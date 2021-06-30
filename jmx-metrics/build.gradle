@@ -44,7 +44,7 @@ repositories {
     maven {
         setUrl("http://www.terracotta.org/download/reflector/releases")
         content {
-            includeGroup("org.terracotta")
+            includeGroupByRegex($/org\.terracotta.*/$)
         }
     }
     mavenLocal()
