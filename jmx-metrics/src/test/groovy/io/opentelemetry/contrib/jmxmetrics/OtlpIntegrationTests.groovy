@@ -4,16 +4,16 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
+import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
-import io.opentelemetry.proto.common.v1.StringKeyValue
+import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
-import io.opentelemetry.proto.metrics.v1.DoubleHistogram
-import io.opentelemetry.proto.metrics.v1.DoubleHistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import io.opentelemetry.proto.metrics.v1.Summary
+import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 import spock.lang.Unroll
 
@@ -21,7 +21,6 @@ import spock.lang.Unroll
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class OtlpIntegrationTests extends OtlpIntegrationTest {
 
     @Unroll
@@ -62,24 +61,24 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         metric.name == 'cassandra.storage.load'
         metric.description == 'Size, in bytes, of the on disk data size this node manages'
         metric.unit == 'By'
-        metric.hasDoubleHistogram()
+        metric.hasSummary()
 
         when: 'we examine the datapoints'
-        DoubleHistogram datapoints = metric.doubleHistogram
+        Summary datapoints = metric.summary
         then: 'they are of the expected size'
         datapoints.dataPointsCount == 1
 
         when: 'we example the datapoint labels and sum'
-        DoubleHistogramDataPoint datapoint = datapoints.getDataPoints(0)
-        List<StringKeyValue> labels = datapoint.labelsList
+        SummaryDataPoint datapoint = datapoints.getDataPoints(0)
+        List<KeyValue> attributes = datapoint.attributesList
         def sum = datapoint.sum
         then: 'they are of the expected content'
-        labels.size() == 1
-        labels.get(0) == StringKeyValue.newBuilder().setKey("myKey").setValue("myVal").build()
+        attributes.size() == 1
+        attributes.get(0) == KeyValue.newBuilder().setKey("myKey").setValue(AnyValue.newBuilder().setStringValue("myVal")).build()
 
         datapoint.count == 1
-        datapoint.getBucketCounts(0).value == sum
-        datapoint.getBucketCounts(1).value == sum
+        datapoint.getQuantileValues(0).value == sum
+        datapoint.getQuantileValues(1).value == sum
 
         cleanup:
         targetContainers.each { it.stop() }

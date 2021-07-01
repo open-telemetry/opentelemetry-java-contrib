@@ -12,8 +12,8 @@ val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
 val DEPENDENCY_BOMS = listOf(
-    "io.opentelemetry:opentelemetry-bom:1.0.0",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.0.0-alpha"
+    "io.opentelemetry:opentelemetry-bom:1.3.0",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.3.0-alpha"
 )
 
 val DEPENDENCY_SETS = listOf<DependencySet>()

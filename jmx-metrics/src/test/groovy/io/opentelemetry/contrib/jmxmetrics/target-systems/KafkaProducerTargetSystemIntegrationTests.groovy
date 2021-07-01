@@ -4,20 +4,18 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.proto.common.v1.StringKeyValue
+import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -113,8 +111,8 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
             assert metric.description == item[1]
             assert metric.unit == item[2]
 
-            assert metric.hasDoubleGauge()
-            def datapoints = metric.doubleGauge
+            assert metric.hasGauge()
+            def datapoints = metric.gauge
 
             Map<String, String> expectedLabels = item[3]
             def expectedLabelCount = expectedLabels.size()
@@ -123,7 +121,7 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             def datapoint = datapoints.getDataPoints(0)
 
-            List<StringKeyValue> labels = datapoint.labelsList
+            List<KeyValue> labels = datapoint.attributesList
             assert labels.size() == expectedLabelCount
 
             (0..<expectedLabelCount).each { j ->
@@ -131,7 +129,7 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 assert expectedLabels.containsKey(key)
                 def value = expectedLabels[key]
                 if (!value.empty) {
-                    def actual = labels[j].value
+                    def actual = labels[j].value.stringValue
                     assert value.contains(actual)
                     value.remove(actual)
                     if (value.empty) {

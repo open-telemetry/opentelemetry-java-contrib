@@ -5,23 +5,20 @@
 package io.opentelemetry.contrib.jmxmetrics
 
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
-import io.opentelemetry.proto.common.v1.StringKeyValue
-import io.opentelemetry.proto.metrics.v1.DoubleGauge
+import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.metrics.v1.Gauge
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
-import io.opentelemetry.proto.metrics.v1.IntGauge
-import io.opentelemetry.proto.metrics.v1.IntSum
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import io.opentelemetry.proto.metrics.v1.Sum
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -62,7 +59,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                 'number of loaded classes',
                 '1',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.gc.collections.count',
@@ -72,7 +69,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Young Generation",
                     "G1 Old Generation",
                 ],
-                IntSum
+                Sum
             ],
             [
                 'jvm.gc.collections.elapsed',
@@ -82,63 +79,63 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Young Generation",
                     "G1 Old Generation",
                 ],
-                IntSum
+                Sum
             ],
             [
                 'jvm.memory.heap.committed',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.init',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.max',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.used',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.committed',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.init',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.max',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.used',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.committed',
@@ -154,7 +151,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.init',
@@ -170,7 +167,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.max',
@@ -186,7 +183,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.used',
@@ -202,161 +199,161 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.threads.count',
                 'number of threads',
                 '1',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'kafka.bytes.in',
                 'bytes in per second from clients',
                 'by',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.bytes.out',
                 'bytes out per second to clients',
                 'by',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.controller.active.count',
                 'controller is active on broker',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.99p',
                 'fetch consumer request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.count',
                 'fetch consumer request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.fetch.consumer.total.time.median',
                 'fetch consumer request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.follower.total.time.99p',
                 'fetch follower request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.follower.total.time.count',
                 'fetch follower request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.fetch.follower.total.time.median',
                 'fetch follower request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.isr.expands',
                 'in-sync replica expands per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.isr.shrinks',
                 'in-sync replica shrinks per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.leader.election.rate',
                 'leader election rate - non-zero indicates broker failures',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.max.lag',
                 'max lag in messages between follower and leader replicas',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.messages.in',
                 'number of messages in per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.partitions.offline.count',
                 'number of partitions without an active leader',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.partitions.underreplicated.count',
                 'number of under replicated partitions',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.produce.total.time.99p',
                 'produce request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.produce.total.time.count',
                 'produce request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.produce.total.time.median',
                 'produce request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.request.queue',
                 'size of the request queue',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.unclean.election.rate',
                 'unclean leader election rate - non-zero indicates broker failures',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
         ].eachWithIndex{ item, index ->
             def expectedType = item[4]
@@ -368,17 +365,13 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
             def datapoints
             switch(expectedType) {
-                case IntGauge :
-                    assert metric.hasIntGauge()
-                    datapoints = metric.intGauge
-                    break
-                case DoubleGauge :
-                    assert metric.hasDoubleGauge()
-                    datapoints = metric.doubleGauge
+                case Gauge :
+                    assert metric.hasGauge()
+                    datapoints = metric.gauge
                     break
                 default:
-                    assert metric.hasIntSum()
-                    datapoints = metric.intSum
+                    assert metric.hasSum()
+                    datapoints = metric.sum
             }
 
             def expectedLabelCount = item[3].size()
@@ -389,11 +382,11 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
             (0..<expectedDatapointCount).each { i ->
                 def datapoint = datapoints.getDataPoints(i)
-                List<StringKeyValue> labels = datapoint.labelsList
+                List<KeyValue> labels = datapoint.attributesList
                 if (expectedLabelCount != 0) {
                     assert labels.size() == 1
                     assert labels[0].key == 'name'
-                    def value = labels[0].value
+                    def value = labels[0].value.stringValue
                     assert expectedLabels.remove(value)
                 } else {
                     assert labels.size() == 0

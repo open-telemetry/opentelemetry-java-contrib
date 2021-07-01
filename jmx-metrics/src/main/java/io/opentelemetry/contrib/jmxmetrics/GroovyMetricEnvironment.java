@@ -12,7 +12,7 @@ import io.opentelemetry.api.metrics.DoubleUpDownCounter;
 import io.opentelemetry.api.metrics.DoubleUpDownSumObserver;
 import io.opentelemetry.api.metrics.DoubleValueObserver;
 import io.opentelemetry.api.metrics.DoubleValueRecorder;
-import io.opentelemetry.api.metrics.GlobalMetricsProvider;
+import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongSumObserver;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
@@ -83,7 +83,7 @@ public class GroovyMetricEnvironment {
         // this call will dynamically load the autoconfigure extension
         // and take care of provider and exporter creation for us based on system properties.
         GlobalOpenTelemetry.get();
-        meterProvider = (SdkMeterProvider) GlobalMetricsProvider.get();
+        meterProvider = (SdkMeterProvider) GlobalMeterProvider.get();
         break;
       default: // inmemory fallback
         meterProvider = SdkMeterProvider.builder().buildAndRegisterGlobal();
