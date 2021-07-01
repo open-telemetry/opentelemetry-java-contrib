@@ -4,24 +4,21 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
+import io.opentelemetry.proto.common.v1.InstrumentationLibrary
+import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.IntGauge
 import io.opentelemetry.proto.metrics.v1.IntSum
-
-import io.opentelemetry.proto.common.v1.InstrumentationLibrary
-import io.opentelemetry.proto.common.v1.StringKeyValue
-import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -213,11 +210,11 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             def datapoints
             if (expectedType == IntGauge) {
-                assert metric.hasIntGauge()
-                datapoints = metric.intGauge
+                assert metric.hasGauge()
+                datapoints = metric.gauge
             } else {
-                assert metric.hasIntSum()
-                datapoints = metric.intSum
+                assert metric.hasSum()
+                datapoints = metric.sum
             }
             def expectedLabelCount = item[3].size()
             def expectedLabels = item[3] as Set
@@ -227,11 +224,11 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             (0..<expectedDatapointCount).each { i ->
                 def datapoint = datapoints.getDataPoints(i)
-                List<StringKeyValue> labels = datapoint.labelsList
+                List<KeyValue> labels = datapoint.attributesList
                 if (expectedLabelCount != 0) {
                     assert labels.size() == 1
                     assert labels[0].key == 'name'
-                    def value = labels[0].value
+                    def value = labels[0].value.stringValue
                     assert expectedLabels.remove(value)
                 } else {
                     assert labels.size() == 0

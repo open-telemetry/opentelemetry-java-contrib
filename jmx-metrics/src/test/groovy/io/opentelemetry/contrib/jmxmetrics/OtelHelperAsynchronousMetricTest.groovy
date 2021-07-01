@@ -14,7 +14,7 @@ import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 
-import io.opentelemetry.api.metrics.GlobalMetricsProvider
+import io.opentelemetry.api.metrics.GlobalMeterProvider
 import io.opentelemetry.api.metrics.common.Labels
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -49,7 +49,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         def now = Clock.systemUTC().instant();
         def nanos = TimeUnit.SECONDS.toNanos(now.epochSecond) + now.nano
 
-        def provider = GlobalMetricsProvider.get().get(name.methodName, '')
+        def provider = GlobalMeterProvider.get().get(name.methodName, '')
         def all = provider.collectAll(nanos)
         return all.sort { md1, md2 ->
             def p1 = md1.data.points[0]

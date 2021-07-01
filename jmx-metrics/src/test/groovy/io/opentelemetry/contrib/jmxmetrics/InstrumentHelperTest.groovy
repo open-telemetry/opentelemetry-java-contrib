@@ -13,7 +13,7 @@ import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
 import io.opentelemetry.api.metrics.common.Labels
-import io.opentelemetry.api.metrics.GlobalMetricsProvider
+import io.opentelemetry.api.metrics.GlobalMeterProvider
 import javax.management.MBeanServer
 import javax.management.ObjectName
 import javax.management.remote.JMXConnectorServer
@@ -84,7 +84,7 @@ class InstrumentHelperTest extends Specification {
     }
 
     def exportMetrics() {
-        def provider = GlobalMetricsProvider.get().get(name.methodName, '')
+        def provider = GlobalMeterProvider.get().get(name.methodName, '')
         return provider.collectAll(0).sort { md1, md2 ->
             def p1 = md1.data.points[0]
             def p2 = md2.data.points[0]

@@ -27,11 +27,11 @@ sourceSets.test.java.srcDirs = []
 mainClassName = 'io.opentelemetry.contrib.jmxmetrics.JmxMetrics'
 
 def versions = [
-    grpc : '1.37.0',
-    protobuf : '3.11.4',
+    grpc : '1.38.0',
+    protobuf : '3.17.2',
     groovy : '2.5.11',
     slf4j : "1.7.30",
-    prometheus: "0.8.1",
+    prometheus: "0.11.0",
 ]
 
 def deps = [
