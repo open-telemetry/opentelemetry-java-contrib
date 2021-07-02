@@ -29,6 +29,7 @@ class KafkaTargetSystemIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/kafka.properties',  otlpPort, 0, false)
 
+        ArrayList<Metric> metrics
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
             assert receivedMetrics.size() == 1
@@ -39,7 +40,7 @@ class KafkaTargetSystemIntegrationTests extends OtlpIntegrationTest {
             assert ilMetrics.size() == 1
 
             InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-            ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
+            metrics = ilMetric.metricsList as ArrayList
             metrics.sort{ a, b -> a.name <=> b.name}
             assert metrics.size() == 21
         }
