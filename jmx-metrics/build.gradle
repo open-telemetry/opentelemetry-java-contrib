@@ -42,7 +42,7 @@ def deps = [
 repositories {
     mavenCentral()
     maven {
-        setUrl("http://www.terracotta.org/download/reflector/releases")
+        setUrl("https://repo.terracotta.org/maven2")
         content {
             includeGroupByRegex($/org\.terracotta.*/$)
         }
