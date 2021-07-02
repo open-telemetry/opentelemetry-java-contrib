@@ -15,6 +15,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "opentelemetry-java-contrib"
 
+include(":aws-xray")
 include(":dependencyManagement")
 include(":example")
 include(":jmx-metrics")
