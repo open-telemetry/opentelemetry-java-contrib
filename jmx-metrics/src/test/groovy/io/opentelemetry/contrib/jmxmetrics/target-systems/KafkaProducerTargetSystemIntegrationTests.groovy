@@ -4,10 +4,13 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
+import static org.awaitility.Awaitility.await
+
 import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
@@ -24,25 +27,21 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/kafka-producer.properties',  otlpPort, 0, false)
 
-        expect:
-        when: 'we receive metrics from the JMX metric gatherer'
-        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
-        then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        ArrayList<Metric> metrics
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
+            List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+            assert receivedMetrics.size() == 1
 
-        when: "we examine the received metric's instrumentation library metrics lists"
-        ResourceMetrics receivedMetric = receivedMetrics.get(0)
-        List<InstrumentationLibraryMetrics> ilMetrics =
-                receivedMetric.instrumentationLibraryMetricsList
-        then: 'they of the expected size'
-        ilMetrics.size() == 1
+            ResourceMetrics receivedMetric = receivedMetrics.get(0)
+            List<InstrumentationLibraryMetrics> ilMetrics =
+                    receivedMetric.instrumentationLibraryMetricsList
+            assert ilMetrics.size() == 1
 
-        when: 'we examine the instrumentation library metric metrics list'
-        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
-        metrics.sort{ a, b -> a.name <=> b.name}
-        then: 'they are of the expected size and content'
-        metrics.size() == 10
+            InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+            metrics = ilMetric.metricsList as ArrayList
+            metrics.sort{ a, b -> a.name <=> b.name}
+            metrics.size() == 10
+        }
 
         [
             [
