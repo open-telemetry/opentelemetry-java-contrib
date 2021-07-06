@@ -12,5 +12,8 @@
 #  https://help.github.com/en/articles/about-code-owners
 #
 #
+
+aws-xray/ @open-telemetry/opentelemetry-java-contrib-approvers @willarmiros
+
 # Global Owners
-* @anuraaga @pmcollins @rmfitzpatrick @trask
+* @open-telemetry/opentelemetry-java-contrib-approvers
