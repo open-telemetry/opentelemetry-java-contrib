@@ -40,12 +40,23 @@ domain we would be very interested in supporting it.  Please
 suggestion.  PRs are always welcome and greatly appreciated, but for larger functional changes a pre-coding introduction
 can be helpful to ensure this is the correct place and that active or conflicting efforts don't exist.
 
-## Owners
+Approvers ([@open-telemetry/java-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/java-instrumentation-approvers)):
+
+- [Lauri Tulmin](https://github.com/laurit), Splunk
+- [Pablo Collins](https://github.com/pmcollins), Splunk
+
+Maintainers ([@open-telemetry/java-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/java-instrumentation-maintainers)):
 
 - [Anuraag Agrawal](https://github.com/anuraaga), AWS
-- [Pablo Collins](https://github.com/pmcollins), Splunk
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk (maintainer)
+- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
+- [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
+- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
 
-For more information on the OpenTelemetry community please see the
-[community content project](https://github.com/open-telemetry/community).
+Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
+
+Thanks to all the people who already contributed!
+
+<a href="https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=open-telemetry/opentelemetry-java-contrib" />
+</a>
