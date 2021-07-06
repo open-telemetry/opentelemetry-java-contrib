@@ -42,7 +42,7 @@ def deps = [
 repositories {
     mavenCentral()
     maven {
-        setUrl("http://www.terracotta.org/download/reflector/releases")
+        setUrl("https://repo.terracotta.org/maven2")
         content {
             includeGroupByRegex($/org\.terracotta.*/$)
         }
@@ -68,7 +68,7 @@ dependencies {
             deps.slf4j,
             dependencies.create(group: 'org.slf4j', name: 'slf4j-simple', version: versions.slf4j)
 
-    runtime "org.terracotta:jmxremote_optional-tc:1.0.8"
+    runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
 
     testImplementation "io.grpc:grpc-api:${versions.grpc}",
             "io.grpc:grpc-protobuf:${versions.grpc}",
