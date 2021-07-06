@@ -4,6 +4,8 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
+import static org.awaitility.Awaitility.await
+
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
 import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.Gauge
@@ -11,6 +13,7 @@ import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
 import io.opentelemetry.proto.metrics.v1.Sum
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
@@ -27,31 +30,25 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/jvm-and-kafka.properties',  otlpPort, 0, false)
 
-        expect:
-        when: 'we receive metrics from the JMX metrics gatherer'
-        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
-        then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        ArrayList<Metric> metrics
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
+            List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+            assert receivedMetrics.size() == 1
 
-        when: "we examine the received metric's instrumentation library metrics lists"
-        ResourceMetrics receivedMetric = receivedMetrics.get(0)
-        List<InstrumentationLibraryMetrics> ilMetrics =
-                receivedMetric.instrumentationLibraryMetricsList
-        then: 'they of the expected size'
-        ilMetrics.size() == 1
+            ResourceMetrics receivedMetric = receivedMetrics.get(0)
+            List<InstrumentationLibraryMetrics> ilMetrics =
+                    receivedMetric.instrumentationLibraryMetricsList
+            assert ilMetrics.size() == 1
 
-        when: 'we examine the instrumentation library'
-        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-        InstrumentationLibrary il = ilMetric.instrumentationLibrary
-        then: 'it is of the expected content'
-        il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '1.0.0-alpha'
+            InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+            InstrumentationLibrary il = ilMetric.instrumentationLibrary
+            assert il.name  == 'io.opentelemetry.contrib.jmxmetrics'
+            assert il.version == '1.0.0-alpha'
 
-        when: 'we examine the instrumentation library metric metrics list'
-        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
-        metrics.sort{ a, b -> a.name <=> b.name}
-        then: 'they are of the expected size and content'
-        metrics.size() == 37
+            metrics = ilMetric.metricsList as ArrayList
+            metrics.sort{ a, b -> a.name <=> b.name}
+            assert metrics.size() == 37
+        }
 
         def expectedMetrics = [
             [
