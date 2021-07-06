@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Generates tracing ids compatible with the AWS X-Ray tracing service. In the X-Ray system the
  * first 32 bits of the trace id are the Unix epoch time in secords. Spans (AWS calls them segments)
- * submit with trace id timestamps outside of the last 30 days are rejected.
+ * submitted with trace id timestamps outside of the last 30 days are rejected.
  *
  * @see <a
  *     href="https://docs.aws.amazon.com/xray/latest/devguide/xray-api-sendingdata.html#xray-api-traceids">Generating

@@ -12,6 +12,7 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
+* [AWS X-Ray Support](./aws-xray/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 
 ## Getting Started
