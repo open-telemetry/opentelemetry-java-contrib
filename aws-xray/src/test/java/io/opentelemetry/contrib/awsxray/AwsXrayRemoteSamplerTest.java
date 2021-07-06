@@ -183,7 +183,8 @@ class AwsXrayRemoteSamplerTest {
   }
 
   @Test
-  void initialSampler() {
-    assertThat(sampler.getDescription()).isEqualTo("AwsXrayRemoteSampler{AlwaysOnSampler}");
+  void defaultInitialSampler() {
+    assertThat(AwsXrayRemoteSampler.newBuilder(Resource.empty()).build().getDescription())
+        .startsWith("AwsXrayRemoteSampler{ParentBased{root:TraceIdRatioBased{0.050000}");
   }
 }

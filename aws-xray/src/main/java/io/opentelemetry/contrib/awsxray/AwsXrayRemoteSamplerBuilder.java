@@ -20,7 +20,7 @@ public final class AwsXrayRemoteSamplerBuilder {
   private final Resource resource;
 
   private String endpoint = DEFAULT_ENDPOINT;
-  private Sampler initialSampler = Sampler.parentBased(Sampler.alwaysOn());
+  private Sampler initialSampler = Sampler.parentBased(Sampler.traceIdRatioBased(0.05));
   private long pollingIntervalNanos = TimeUnit.SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
 
   AwsXrayRemoteSamplerBuilder(Resource resource) {
