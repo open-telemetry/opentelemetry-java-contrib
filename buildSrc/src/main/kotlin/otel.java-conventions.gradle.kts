@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     `java-library`
 
@@ -7,7 +9,7 @@ plugins {
 group = "io.opentelemetry.contrib"
 version = "1.3.0-alpha"
 
-base.archivesBaseName = "${rootProject.name}-${project.name}"
+base.archivesBaseName = "opentelemetry-${project.name}"
 
 java {
     toolchain {
@@ -34,6 +36,33 @@ tasks {
             systemProperty("ojc.integration.tests", "true")
         }
     }
+
+    withType<Test>().configureEach {
+        useJUnitPlatform()
+
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
+    }
+
+    withType<Javadoc>().configureEach {
+        exclude("io/opentelemetry/**/internal/**")
+
+        with(options as StandardJavadocDocletOptions) {
+            source = "8"
+            encoding = "UTF-8"
+            docEncoding = "UTF-8"
+            breakIterator(true)
+
+            addBooleanOption("html5", true)
+
+            links("https://docs.oracle.com/javase/8/docs/api/")
+            addBooleanOption("Xdoclint:all,-missing", true)
+        }
+    }
 }
 
 val dependencyManagement by configurations.creating {
@@ -51,4 +80,12 @@ dependencies {
             }
         }
     }
+
+    testImplementation("org.assertj:assertj-core")
+    testImplementation("org.awaitility:awaitility")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
