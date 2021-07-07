@@ -190,9 +190,12 @@ final class SamplingRuleApplier {
       List<LinkData> parentLinks) {
     // Incrementing requests first ensures sample / borrow rate are positive.
     statistics.requests.increment();
+    boolean reservoirExpired = System.nanoTime() >= reservoirEndTimeNanos;
     SamplingResult result =
-        reservoirSampler.shouldSample(
-            parentContext, traceId, name, spanKind, attributes, parentLinks);
+        !reservoirExpired
+            ? reservoirSampler.shouldSample(
+                parentContext, traceId, name, spanKind, attributes, parentLinks)
+            : SamplingResult.create(SamplingDecision.DROP);
     if (result.getDecision() != SamplingDecision.DROP) {
       // We use the result from the reservoir sampler if it worked.
       if (borrowing) {
