@@ -8,6 +8,9 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.awsxray.GetSamplingTargetsRequest.SamplingStatisticsDocument;
+import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -15,11 +18,13 @@ import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,7 +49,9 @@ final class SamplingRuleApplier {
 
   private final String clientId;
   private final String ruleName;
+  private final Clock clock;
   private final Sampler reservoirSampler;
+  private final long reservoirEndTimeNanos;
   private final Sampler fixedRateSampler;
   private final boolean borrowing;
 
@@ -58,20 +65,30 @@ final class SamplingRuleApplier {
 
   private final Statistics statistics;
 
-  SamplingRuleApplier(String clientId, GetSamplingRulesResponse.SamplingRule rule) {
+  private final long nextSnapshotTimeNanos;
+
+  SamplingRuleApplier(String clientId, GetSamplingRulesResponse.SamplingRule rule, Clock clock) {
     this.clientId = clientId;
+    this.clock = clock;
     ruleName = rule.getRuleName();
+
+    // We don't have a SamplingTarget so are ready to report a snapshot right away.
+    nextSnapshotTimeNanos = clock.nanoTime();
+
+    // We either have no reservoir sampling or borrow until we get a quota so have no end time.
+    reservoirEndTimeNanos = Long.MAX_VALUE;
+
     if (rule.getReservoirSize() > 0) {
       // Until calling GetSamplingTargets, the default is to borrow 1/s if reservoir size is
       // positive.
-      reservoirSampler = new RateLimitingSampler(1);
+      reservoirSampler = createRateLimited(1);
       borrowing = true;
     } else {
       // No reservoir sampling, we will always use the fixed rate.
       reservoirSampler = Sampler.alwaysOff();
       borrowing = false;
     }
-    fixedRateSampler = Sampler.parentBased(Sampler.traceIdRatioBased(rule.getFixedRate()));
+    fixedRateSampler = createFixedRate(rule.getFixedRate());
 
     if (rule.getAttributes().isEmpty()) {
       attributeMatchers = Collections.emptyMap();
@@ -89,6 +106,41 @@ final class SamplingRuleApplier {
     resourceArnMatcher = toMatcher(rule.getResourceArn());
 
     statistics = new Statistics();
+  }
+
+  private SamplingRuleApplier(
+      String clientId,
+      String ruleName,
+      Clock clock,
+      Sampler reservoirSampler,
+      long reservoirEndTimeNanos,
+      Sampler fixedRateSampler,
+      boolean borrowing,
+      Map<String, Matcher> attributeMatchers,
+      Matcher urlPathMatcher,
+      Matcher serviceNameMatcher,
+      Matcher httpMethodMatcher,
+      Matcher hostMatcher,
+      Matcher serviceTypeMatcher,
+      Matcher resourceArnMatcher,
+      Statistics statistics,
+      long nextSnapshotTimeNanos) {
+    this.clientId = clientId;
+    this.ruleName = ruleName;
+    this.clock = clock;
+    this.reservoirSampler = reservoirSampler;
+    this.reservoirEndTimeNanos = reservoirEndTimeNanos;
+    this.fixedRateSampler = fixedRateSampler;
+    this.borrowing = borrowing;
+    this.attributeMatchers = attributeMatchers;
+    this.urlPathMatcher = urlPathMatcher;
+    this.serviceNameMatcher = serviceNameMatcher;
+    this.httpMethodMatcher = httpMethodMatcher;
+    this.hostMatcher = hostMatcher;
+    this.serviceTypeMatcher = serviceTypeMatcher;
+    this.resourceArnMatcher = resourceArnMatcher;
+    this.statistics = statistics;
+    this.nextSnapshotTimeNanos = nextSnapshotTimeNanos;
   }
 
   boolean matches(String name, Attributes attributes, Resource resource) {
@@ -158,8 +210,12 @@ final class SamplingRuleApplier {
     return result;
   }
 
-  GetSamplingTargetsRequest.SamplingStatisticsDocument snapshot(Date now) {
-    return GetSamplingTargetsRequest.SamplingStatisticsDocument.newBuilder()
+  @Nullable
+  SamplingStatisticsDocument snapshot(Date now) {
+    if (clock.nanoTime() < nextSnapshotTimeNanos) {
+      return null;
+    }
+    return SamplingStatisticsDocument.newBuilder()
         .setClientId(clientId)
         .setRuleName(ruleName)
         .setTimestamp(now)
@@ -169,6 +225,71 @@ final class SamplingRuleApplier {
         .setSampledCount(statistics.sampled.sumThenReset())
         .setBorrowCount(statistics.borrowed.sumThenReset())
         .build();
+  }
+
+  long getNextSnapshotTimeNanos() {
+    return nextSnapshotTimeNanos;
+  }
+
+  SamplingRuleApplier withTarget(SamplingTargetDocument target, Date now) {
+    Sampler newFixedRateSampler = createFixedRate(target.getFixedRate());
+    Sampler newReservoirSampler = Sampler.alwaysOff();
+    long newReservoirEndTimeNanos = System.nanoTime();
+    // Not well documented but a quota should always come with a TTL
+    if (target.getReservoirQuota() != null && target.getReservoirQuotaTtl() != null) {
+      newReservoirSampler = createRateLimited(target.getReservoirQuota());
+      newReservoirEndTimeNanos =
+          clock.nanoTime()
+              + Duration.between(now.toInstant(), target.getReservoirQuotaTtl().toInstant())
+                  .toNanos();
+    }
+    long intervalNanos =
+        target.getIntervalSecs() != null
+            ? TimeUnit.SECONDS.toNanos(target.getIntervalSecs())
+            : AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS;
+    long newNextSnapshotTimeNanos = System.nanoTime() + intervalNanos;
+
+    return new SamplingRuleApplier(
+        clientId,
+        ruleName,
+        clock,
+        newReservoirSampler,
+        newReservoirEndTimeNanos,
+        newFixedRateSampler,
+        /* borrowing= */ false,
+        attributeMatchers,
+        urlPathMatcher,
+        serviceNameMatcher,
+        httpMethodMatcher,
+        hostMatcher,
+        serviceTypeMatcher,
+        resourceArnMatcher,
+        statistics,
+        newNextSnapshotTimeNanos);
+  }
+
+  SamplingRuleApplier withNextSnapshotTimeNanos(long newNextSnapshotTimeNanos) {
+    return new SamplingRuleApplier(
+        clientId,
+        ruleName,
+        clock,
+        reservoirSampler,
+        reservoirEndTimeNanos,
+        fixedRateSampler,
+        borrowing,
+        attributeMatchers,
+        urlPathMatcher,
+        serviceNameMatcher,
+        httpMethodMatcher,
+        hostMatcher,
+        serviceTypeMatcher,
+        resourceArnMatcher,
+        statistics,
+        newNextSnapshotTimeNanos);
+  }
+
+  String getRuleName() {
+    return ruleName;
   }
 
   @Nullable
@@ -184,6 +305,7 @@ final class SamplingRuleApplier {
     return null;
   }
 
+  @Nullable
   private static String getLambdaArn(Attributes attributes, Resource resource) {
     String arn = resource.getAttributes().get(ResourceAttributes.FAAS_ID);
     if (arn != null) {
@@ -303,6 +425,14 @@ final class SamplingRuleApplier {
     public String toString() {
       return pattern.toString();
     }
+  }
+
+  private Sampler createRateLimited(int numPerSecond) {
+    return Sampler.parentBased(new RateLimitingSampler(numPerSecond, clock));
+  }
+
+  private Sampler createFixedRate(double rate) {
+    return Sampler.parentBased(Sampler.traceIdRatioBased(rate));
   }
 
   // We keep track of sampling requests and decisions to report to X-Ray to allow it to allocate

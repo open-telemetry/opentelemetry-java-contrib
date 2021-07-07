@@ -153,9 +153,9 @@ class XraySamplerClientTest {
             document -> {
               assertThat(document.getRuleName()).isEqualTo("polling-scorekeep");
               assertThat(document.getFixedRate()).isEqualTo(0.003);
-              assertThat(document.getReservoirQuota()).isZero();
+              assertThat(document.getReservoirQuota()).isNull();
               assertThat(document.getReservoirQuotaTtl()).isNull();
-              assertThat(document.getIntervalSecs()).isZero();
+              assertThat(document.getIntervalSecs()).isNull();
             });
     assertThat(response.getUnprocessedStatistics())
         .satisfiesExactly(
