@@ -118,7 +118,6 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
                 CLIENT_ID, resource, clock, initialSampler, response.getSamplingRules());
         previousRulesResponse = response;
         executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
-        fetchTargets();
       }
     } catch (Throwable t) {
       logger.log(Level.FINE, "Failed to update sampler", t);
