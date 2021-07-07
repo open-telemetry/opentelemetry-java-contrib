@@ -25,6 +25,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /** Remote sampler that gets sampling configuration from AWS X-Ray. */
 public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
+  private static final Random RANDOM = new Random();
+
   private static final Logger logger = Logger.getLogger(AwsXrayRemoteSampler.class.getName());
 
   private static final String WORKER_THREAD_NAME =
@@ -37,8 +39,10 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   private final Sampler initialSampler;
   private final XraySamplerClient client;
   private final ScheduledExecutorService executor;
-  private final ScheduledFuture<?> pollFuture;
+  private final long pollingIntervalNanos;
+  private final int jitterNanos;
 
+  @Nullable private volatile ScheduledFuture<?> pollFuture;
   @Nullable private volatile GetSamplingRulesResponse previousRulesResponse;
   private volatile Sampler sampler;
 
@@ -72,9 +76,12 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
     sampler = initialSampler;
 
-    pollFuture =
-        executor.scheduleAtFixedRate(
-            this::getAndUpdateSampler, 0, pollingIntervalNanos, TimeUnit.NANOSECONDS);
+    this.pollingIntervalNanos = pollingIntervalNanos;
+    // Add ~1% of jitter. Truncating to int is safe for any practical polling interval.
+    jitterNanos = (int) (pollingIntervalNanos / 100);
+
+    // Execute first update right away on the executor thread.
+    executor.execute(this::getAndUpdateSampler);
   }
 
   @Override
@@ -106,11 +113,20 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     } catch (Throwable t) {
       logger.log(Level.FINE, "Failed to update sampler", t);
     }
+    scheduleSamplerUpdate();
+  }
+
+  private void scheduleSamplerUpdate() {
+    long delay = pollingIntervalNanos + RANDOM.nextInt(jitterNanos);
+    pollFuture = executor.schedule(this::getAndUpdateSampler, delay, TimeUnit.NANOSECONDS);
   }
 
   @Override
   public void close() {
-    pollFuture.cancel(true);
+    ScheduledFuture<?> pollFuture = this.pollFuture;
+    if (pollFuture != null) {
+      pollFuture.cancel(true);
+    }
     executor.shutdownNow();
     // No flushing behavior so no need to wait for the shutdown.
   }
