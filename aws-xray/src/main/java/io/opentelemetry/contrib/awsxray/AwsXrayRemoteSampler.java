@@ -36,6 +36,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
   static final long DEFAULT_TARGET_INTERVAL_NANOS = TimeUnit.SECONDS.toNanos(10);
 
+  private static final Random RANDOM = new Random();
   private static final Logger logger = Logger.getLogger(AwsXrayRemoteSampler.class.getName());
 
   // Unique per-process client ID, generated as a random string.
@@ -46,8 +47,11 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   private final Sampler initialSampler;
   private final XraySamplerClient client;
   private final ScheduledExecutorService executor;
-  private final ScheduledFuture<?> pollFuture;
+  private final long pollingIntervalNanos;
+  private final int jitterNanos;
 
+  @Nullable private volatile ScheduledFuture<?> pollFuture;
+  @Nullable private volatile ScheduledFuture<?> fetchTargetsFuture;
   @Nullable private volatile GetSamplingRulesResponse previousRulesResponse;
   private volatile Sampler sampler;
 
@@ -86,9 +90,12 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
     sampler = initialSampler;
 
-    pollFuture =
-        executor.scheduleAtFixedRate(
-            this::getAndUpdateSampler, 0, pollingIntervalNanos, TimeUnit.NANOSECONDS);
+    this.pollingIntervalNanos = pollingIntervalNanos;
+    // Add ~1% of jitter. Truncating to int is safe for any practical polling interval.
+    jitterNanos = (int) (pollingIntervalNanos / 100);
+
+    // Execute first update right away on the executor thread.
+    executor.execute(this::getAndUpdateSampler);
   }
 
   @Override
@@ -117,11 +124,23 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
             new XrayRulesSampler(
                 CLIENT_ID, resource, clock, initialSampler, response.getSamplingRules());
         previousRulesResponse = response;
-        executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+        ScheduledFuture<?> existingFetchTargetsFuture = fetchTargetsFuture;
+        if (existingFetchTargetsFuture != null) {
+          existingFetchTargetsFuture.cancel(false);
+        }
+        fetchTargetsFuture =
+            executor.schedule(
+                this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
       }
     } catch (Throwable t) {
       logger.log(Level.FINE, "Failed to update sampler", t);
     }
+    scheduleSamplerUpdate();
+  }
+
+  private void scheduleSamplerUpdate() {
+    long delay = pollingIntervalNanos + RANDOM.nextInt(jitterNanos);
+    pollFuture = executor.schedule(this::getAndUpdateSampler, delay, TimeUnit.NANOSECONDS);
   }
 
   private void fetchTargets() {
@@ -146,12 +165,16 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
     long nextTargetFetchIntervalNanos =
         xrayRulesSampler.nextTargetFetchTimeNanos() - System.nanoTime();
-    executor.schedule(this::fetchTargets, nextTargetFetchIntervalNanos, TimeUnit.NANOSECONDS);
+    fetchTargetsFuture =
+        executor.schedule(this::fetchTargets, nextTargetFetchIntervalNanos, TimeUnit.NANOSECONDS);
   }
 
   @Override
   public void close() {
-    pollFuture.cancel(true);
+    ScheduledFuture<?> pollFuture = this.pollFuture;
+    if (pollFuture != null) {
+      pollFuture.cancel(true);
+    }
     executor.shutdownNow();
     // No flushing behavior so no need to wait for the shutdown.
   }
