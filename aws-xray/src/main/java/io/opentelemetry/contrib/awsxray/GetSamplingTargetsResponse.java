@@ -51,6 +51,8 @@ abstract class GetSamplingTargetsResponse {
     @Nullable
     abstract Integer getReservoirQuota();
 
+    // Careful that this is a timestamp when the quota expires, not a duration as we'd normally
+    // expect for a Time to live.
     @Nullable
     abstract Date getReservoirQuotaTtl();
 
