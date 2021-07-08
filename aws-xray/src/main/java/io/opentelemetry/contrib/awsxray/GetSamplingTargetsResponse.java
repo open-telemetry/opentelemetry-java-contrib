@@ -35,8 +35,8 @@ abstract class GetSamplingTargetsResponse {
     @JsonCreator
     static SamplingTargetDocument create(
         @JsonProperty("FixedRate") double fixedRate,
-        @JsonProperty("Interval") int intervalSecs,
-        @JsonProperty("ReservoirQuota") int reservoirQuota,
+        @JsonProperty("Interval") @Nullable Integer intervalSecs,
+        @JsonProperty("ReservoirQuota") @Nullable Integer reservoirQuota,
         @JsonProperty("ReservoirQuotaTTL") @Nullable Date reservoirQuotaTtl,
         @JsonProperty("RuleName") String ruleName) {
       return new AutoValue_GetSamplingTargetsResponse_SamplingTargetDocument(
@@ -45,10 +45,14 @@ abstract class GetSamplingTargetsResponse {
 
     abstract double getFixedRate();
 
-    abstract int getIntervalSecs();
+    @Nullable
+    abstract Integer getIntervalSecs();
 
-    abstract int getReservoirQuota();
+    @Nullable
+    abstract Integer getReservoirQuota();
 
+    // Careful that this is a timestamp when the quota expires, not a duration as we'd normally
+    // expect for a Time to live.
     @Nullable
     abstract Date getReservoirQuotaTtl();
 

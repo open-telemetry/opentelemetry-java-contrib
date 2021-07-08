@@ -11,6 +11,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.internal.TestClock;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class RateLimitingSamplerTest {
   @Test
   void limitsRate() {
     TestClock clock = TestClock.create();
-    RateLimitingSampler sampler = new RateLimitingSampler(1, clock);
+    Sampler sampler = new RateLimitingSampler(1, clock);
     assertThat(sampler.getDescription()).isEqualTo("RateLimitingSampler{1}");
 
     assertThat(
