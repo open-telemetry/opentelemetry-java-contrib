@@ -23,6 +23,7 @@ import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.DoubleHistogram
 import io.opentelemetry.proto.metrics.v1.DoubleHistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import javax.management.remote.JMXServiceURL
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Retry
@@ -44,17 +45,18 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         configureContainers('otlp_config.properties',  otlpPort, 0, useStdin)
 
         expect:
+
         when: 'we receive metrics from the JMX metrics gatherer'
         List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
         then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        receivedMetrics.size() == 46
 
         when: "we examine the received metric's instrumentation library metrics lists"
         ResourceMetrics receivedMetric = receivedMetrics.get(0)
         List<InstrumentationLibraryMetrics> ilMetrics =
                 receivedMetric.instrumentationLibraryMetricsList
         then: 'they of the expected size'
-        ilMetrics.size() == 1
+        ilMetrics.size() == 46
 
         when: 'we examine the instrumentation library'
         InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
@@ -66,30 +68,30 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         when: 'we examine the instrumentation library metric metrics list'
         List<Metric> metrics = ilMetric.metricsList
         then: 'it is of the expected size'
-        metrics.size() == 1
+        metrics.size() == 46
 
         when: 'we examine the metric metadata'
         Metric metric = metrics.get(0)
         then: 'it is of the expected content'
-        metric.name == 'cassandra.storage.load'
-        metric.description == 'Size, in bytes, of the on disk data size this node manages'
-        metric.unit == 'By'
+        metric.name == 'cassandra.current_tasks'
+        metric.description == 'Number of tasks in queue with the given task status.'
+        metric.unit == '1'
         metric.hasDoubleHistogram()
 
         when: 'we examine the datapoints'
         DoubleHistogram datapoints = metric.doubleHistogram
         then: 'they are of the expected size'
-        datapoints.dataPointsCount == 1
+        datapoints.dataPointsCount == 46
 
         when: 'we example the datapoint labels and sum'
         DoubleHistogramDataPoint datapoint = datapoints.getDataPoints(0)
         List<StringKeyValue> labels = datapoint.labelsList
         def sum = datapoint.sum
         then: 'they are of the expected content'
-        labels.size() == 1
+        labels.size() == 46
         labels.get(0) == StringKeyValue.newBuilder().setKey("myKey").setValue("myVal").build()
 
-        datapoint.count == 1
+        datapoint.count == 46
         datapoint.getBucketCounts(0).value == sum
         datapoint.getBucketCounts(1).value == sum
 
