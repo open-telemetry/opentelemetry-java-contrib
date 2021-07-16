@@ -14,7 +14,7 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.internal.SystemClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -41,9 +41,7 @@ class SamplingRuleApplierTest {
 
     private final SamplingRuleApplier applier =
         new SamplingRuleApplier(
-            CLIENT_ID,
-            readSamplingRule("/sampling-rule-exactmatch.json"),
-            SystemClock.getInstance());
+            CLIENT_ID, readSamplingRule("/sampling-rule-exactmatch.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -199,9 +197,7 @@ class SamplingRuleApplierTest {
 
     private final SamplingRuleApplier applier =
         new SamplingRuleApplier(
-            CLIENT_ID,
-            readSamplingRule("/sampling-rule-wildcards.json"),
-            SystemClock.getInstance());
+            CLIENT_ID, readSamplingRule("/sampling-rule-wildcards.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -464,9 +460,7 @@ class SamplingRuleApplierTest {
 
     private final SamplingRuleApplier applier =
         new SamplingRuleApplier(
-            CLIENT_ID,
-            readSamplingRule("/sampling-rule-awslambda.json"),
-            SystemClock.getInstance());
+            CLIENT_ID, readSamplingRule("/sampling-rule-awslambda.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -522,9 +516,7 @@ class SamplingRuleApplierTest {
   void borrowing() {
     SamplingRuleApplier applier =
         new SamplingRuleApplier(
-            CLIENT_ID,
-            readSamplingRule("/sampling-rule-reservoir.json"),
-            SystemClock.getInstance());
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), Clock.getDefault());
 
     // Borrow
     assertThat(
@@ -595,9 +587,7 @@ class SamplingRuleApplierTest {
   void ruleWithTarget() {
     SamplingRuleApplier applier =
         new SamplingRuleApplier(
-            CLIENT_ID,
-            readSamplingRule("/sampling-rule-reservoir.json"),
-            SystemClock.getInstance());
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), Clock.getDefault());
   }
 
   private static GetSamplingRulesResponse.SamplingRule readSamplingRule(String resourcePath) {

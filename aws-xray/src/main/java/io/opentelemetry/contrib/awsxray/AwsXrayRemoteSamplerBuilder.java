@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.awsxray;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.sdk.common.Clock;
-import io.opentelemetry.sdk.internal.SystemClock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
@@ -21,9 +20,7 @@ public final class AwsXrayRemoteSamplerBuilder {
 
   private final Resource resource;
 
-  // TODO(anuraaga): Don't use internal class.
-  // https://github.com/open-telemetry/opentelemetry-java/issues/3359
-  private Clock clock = SystemClock.getInstance();
+  private Clock clock = Clock.getDefault();
   private String endpoint = DEFAULT_ENDPOINT;
   private Sampler initialSampler = Sampler.parentBased(Sampler.traceIdRatioBased(0.05));
   private long pollingIntervalNanos = TimeUnit.SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
