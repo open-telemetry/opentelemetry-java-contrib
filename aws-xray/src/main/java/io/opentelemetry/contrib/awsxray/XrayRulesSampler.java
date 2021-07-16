@@ -109,7 +109,7 @@ final class XrayRulesSampler implements Sampler {
         .mapToLong(SamplingRuleApplier::getNextSnapshotTimeNanos)
         .min()
         // There is always at least one rule in practice so this should never be exercised.
-        .orElseGet(() -> System.nanoTime() + AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS);
+        .orElseGet(() -> clock.nanoTime() + AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS);
   }
 
   XrayRulesSampler withTargets(

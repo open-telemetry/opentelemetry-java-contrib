@@ -164,7 +164,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
         xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
 
     long nextTargetFetchIntervalNanos =
-        xrayRulesSampler.nextTargetFetchTimeNanos() - System.nanoTime();
+        xrayRulesSampler.nextTargetFetchTimeNanos() - clock.nanoTime();
     fetchTargetsFuture =
         executor.schedule(this::fetchTargets, nextTargetFetchIntervalNanos, TimeUnit.NANOSECONDS);
   }

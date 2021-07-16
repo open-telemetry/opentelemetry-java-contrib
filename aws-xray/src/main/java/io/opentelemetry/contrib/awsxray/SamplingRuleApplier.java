@@ -190,7 +190,7 @@ final class SamplingRuleApplier {
       List<LinkData> parentLinks) {
     // Incrementing requests first ensures sample / borrow rate are positive.
     statistics.requests.increment();
-    boolean reservoirExpired = System.nanoTime() >= reservoirEndTimeNanos;
+    boolean reservoirExpired = clock.nanoTime() >= reservoirEndTimeNanos;
     SamplingResult result =
         !reservoirExpired
             ? reservoirSampler.shouldSample(
@@ -237,7 +237,7 @@ final class SamplingRuleApplier {
   SamplingRuleApplier withTarget(SamplingTargetDocument target, Date now) {
     Sampler newFixedRateSampler = createFixedRate(target.getFixedRate());
     Sampler newReservoirSampler = Sampler.alwaysOff();
-    long newReservoirEndTimeNanos = System.nanoTime();
+    long newReservoirEndTimeNanos = clock.nanoTime();
     // Not well documented but a quota should always come with a TTL
     if (target.getReservoirQuota() != null && target.getReservoirQuotaTtl() != null) {
       newReservoirSampler = createRateLimited(target.getReservoirQuota());
@@ -250,7 +250,7 @@ final class SamplingRuleApplier {
         target.getIntervalSecs() != null
             ? TimeUnit.SECONDS.toNanos(target.getIntervalSecs())
             : AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS;
-    long newNextSnapshotTimeNanos = System.nanoTime() + intervalNanos;
+    long newNextSnapshotTimeNanos = clock.nanoTime() + intervalNanos;
 
     return new SamplingRuleApplier(
         clientId,
