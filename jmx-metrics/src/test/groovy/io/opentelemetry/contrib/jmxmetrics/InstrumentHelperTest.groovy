@@ -4,15 +4,15 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
-
+import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_GAUGE
-import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
-import io.opentelemetry.api.metrics.common.Labels
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.GlobalMeterProvider
 import javax.management.MBeanServer
 import javax.management.ObjectName
@@ -134,7 +134,7 @@ class InstrumentHelperTest extends Specification {
             assert metric.type == metricType
             assert metric.data.points.size() == isSingle ? 1 : 4
             metric.data.points.eachWithIndex { point, i ->
-                assert point.labels == Labels.of("labelOne", "labelOneValue", "labelTwo", "${i}")
+                assert point.attributes == Attributes.of(stringKey("labelOne"), "labelOneValue", stringKey("labelTwo"), "${i}".toString())
 
                 if (metricType == SUMMARY) {
                     assert point.count == 1
