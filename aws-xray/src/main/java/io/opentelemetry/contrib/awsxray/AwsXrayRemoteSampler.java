@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.awsxray;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.awsxray.GetSamplingRulesResponse.SamplingRuleRecord;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsRequest.SamplingStatisticsDocument;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
 import io.opentelemetry.sdk.common.Clock;
@@ -122,7 +123,13 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       if (!response.equals(previousRulesResponse)) {
         sampler =
             new XrayRulesSampler(
-                CLIENT_ID, resource, clock, initialSampler, response.getSamplingRules());
+                CLIENT_ID,
+                resource,
+                clock,
+                initialSampler,
+                response.getSamplingRules().stream()
+                    .map(SamplingRuleRecord::getRule)
+                    .collect(Collectors.toList()));
         previousRulesResponse = response;
         ScheduledFuture<?> existingFetchTargetsFuture = fetchTargetsFuture;
         if (existingFetchTargetsFuture != null) {

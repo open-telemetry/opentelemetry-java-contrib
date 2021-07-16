@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.awsxray;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.awsxray.GetSamplingRulesResponse.SamplingRuleRecord;
+import io.opentelemetry.contrib.awsxray.GetSamplingRulesResponse.SamplingRule;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
@@ -40,14 +40,13 @@ final class XrayRulesSampler implements Sampler {
       Resource resource,
       Clock clock,
       Sampler fallbackSampler,
-      List<SamplingRuleRecord> rules) {
+      List<SamplingRule> rules) {
     this(
         clientId,
         resource,
         clock,
         fallbackSampler,
         rules.stream()
-            .map(GetSamplingRulesResponse.SamplingRuleRecord::getRule)
             // Lower priority value takes precedence so normal ascending sort.
             .sorted(Comparator.comparingInt(GetSamplingRulesResponse.SamplingRule::getPriority))
             .map(rule -> new SamplingRuleApplier(clientId, rule, clock))
