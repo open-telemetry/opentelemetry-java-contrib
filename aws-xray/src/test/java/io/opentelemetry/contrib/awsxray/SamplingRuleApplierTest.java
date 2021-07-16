@@ -591,6 +591,15 @@ class SamplingRuleApplierTest {
     assertThat(statistics.getBorrowCount()).isEqualTo(1);
   }
 
+  @Test
+  void ruleWithTarget() {
+    SamplingRuleApplier applier =
+        new SamplingRuleApplier(
+            CLIENT_ID,
+            readSamplingRule("/sampling-rule-reservoir.json"),
+            SystemClock.getInstance());
+  }
+
   private static GetSamplingRulesResponse.SamplingRule readSamplingRule(String resourcePath) {
     try {
       return OBJECT_MAPPER.readValue(
