@@ -16,8 +16,8 @@ val DEPENDENCY_BOMS = listOf(
     "com.google.guava:guava-bom:30.1.1-jre",
     "org.junit:junit-bom:5.7.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
-    "io.opentelemetry:opentelemetry-bom:1.3.0",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.3.0-alpha"
+    "io.opentelemetry:opentelemetry-bom:1.4.1",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.4.1-alpha"
 )
 
 val DEPENDENCY_SETS = listOf<DependencySet>(

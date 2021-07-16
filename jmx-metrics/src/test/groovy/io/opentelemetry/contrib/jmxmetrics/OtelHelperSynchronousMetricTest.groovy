@@ -4,16 +4,17 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
+import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 
-import io.opentelemetry.api.metrics.common.Labels
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.GlobalMeterProvider
+import io.opentelemetry.api.metrics.common.Labels
 import org.junit.Rule
 import org.junit.rules.TestName
 import org.junit.rules.TestRule
-
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -86,7 +87,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.type == DOUBLE_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123.456
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-counter'
         assert second.description == 'another double counter'
@@ -94,7 +95,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.type == DOUBLE_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234.567
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-counter'
         assert third.description == 'double counter'
@@ -102,7 +103,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.type == DOUBLE_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-counter'
         assert fourth.description == ''
@@ -110,7 +111,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.type == DOUBLE_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double counter memoization"() {
@@ -133,7 +134,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.type == DOUBLE_SUM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].value == 20.2
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
     def "long counter"() {
@@ -167,7 +168,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.type == LONG_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-counter'
         assert second.description == 'another long counter'
@@ -175,7 +176,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.type == LONG_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-counter'
         assert third.description == 'long counter'
@@ -183,7 +184,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.type == LONG_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-counter'
         assert fourth.description == ''
@@ -191,7 +192,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.type == LONG_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long counter memoization"() {
@@ -214,7 +215,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.type == LONG_SUM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].value == 20
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
     def "double up down counter"() {
@@ -248,7 +249,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.type == DOUBLE_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == -234.567
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-up-down-counter'
         assert second.description == 'another double up-down-counter'
@@ -256,7 +257,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.type == DOUBLE_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == -123.456
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-up-down-counter'
         assert third.description == 'double up-down-counter'
@@ -264,7 +265,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.type == DOUBLE_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-up-down-counter'
         assert fourth.description == ''
@@ -272,7 +273,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.type == DOUBLE_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double up down counter memoization"() {
@@ -295,7 +296,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.type == DOUBLE_SUM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].value == 0
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
     def "long up down counter"() {
@@ -329,7 +330,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.type == LONG_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == -234
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-up-down-counter'
         assert second.description == 'another long up-down-counter'
@@ -337,7 +338,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.type == LONG_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == -123
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-up-down-counter'
         assert third.description == 'long up-down-counter'
@@ -345,7 +346,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.type == LONG_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-up-down-counter'
         assert fourth.description == ''
@@ -353,7 +354,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.type == LONG_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long up down counter memoization"() {
@@ -376,7 +377,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.type == LONG_SUM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].value == 0
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
     def "double value recorder"() {
@@ -415,7 +416,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.data.points[0].percentileValues[0].value ==  -234.567
         assert first.data.points[0].percentileValues[1].percentile == 100
         assert first.data.points[0].percentileValues[1].value == -234.567
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-value-recorder'
         assert second.description == 'another double value-recorder'
@@ -428,7 +429,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.data.points[0].percentileValues[0].value == -123.456
         assert second.data.points[0].percentileValues[1].percentile == 100
         assert second.data.points[0].percentileValues[1].value == -123.456
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-value-recorder'
         assert third.description == 'double value-recorder'
@@ -441,7 +442,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.data.points[0].percentileValues[0].value == 345.678
         assert third.data.points[0].percentileValues[1].percentile == 100
         assert third.data.points[0].percentileValues[1].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-value-recorder'
         assert fourth.description == ''
@@ -454,7 +455,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.data.points[0].percentileValues[0].value == 456.789
         assert fourth.data.points[0].percentileValues[1].percentile == 100
         assert fourth.data.points[0].percentileValues[1].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double value recorder memoization"() {
@@ -482,7 +483,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.data.points[0].percentileValues[0].value == -10.1
         assert metric.data.points[0].percentileValues[1].percentile == 100
         assert metric.data.points[0].percentileValues[1].value == 10.1
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
     def "long value recorder"() {
@@ -521,7 +522,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert first.data.points[0].percentileValues[0].value == -234
         assert first.data.points[0].percentileValues[1].percentile == 100
         assert first.data.points[0].percentileValues[1].value == -234
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-value-recorder'
         assert second.description == 'another long value-recorder'
@@ -534,7 +535,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert second.data.points[0].percentileValues[0].value == -123
         assert second.data.points[0].percentileValues[1].percentile == 100
         assert second.data.points[0].percentileValues[1].value == -123
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-value-recorder'
         assert third.description == 'long value-recorder'
@@ -547,7 +548,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert third.data.points[0].percentileValues[0].value == 345
         assert third.data.points[0].percentileValues[1].percentile == 100
         assert third.data.points[0].percentileValues[1].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-value-recorder'
         assert fourth.description == ''
@@ -560,7 +561,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.data.points[0].percentileValues[0].value == 456
         assert fourth.data.points[0].percentileValues[1].percentile == 100
         assert fourth.data.points[0].percentileValues[1].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long value recorder memoization"() {
@@ -588,7 +589,7 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.data.points[0].percentileValues[0].value == -10
         assert metric.data.points[0].percentileValues[1].percentile == 100
         assert metric.data.points[0].percentileValues[1].value == 10
-        assert metric.data.points[0].labels == Labels.of('key', 'value')
+        assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
 }

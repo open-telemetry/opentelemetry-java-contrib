@@ -4,22 +4,21 @@
  */
 package io.opentelemetry.contrib.jmxmetrics
 
-
+import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_GAUGE
-import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 
-import java.time.Clock
-import java.util.concurrent.TimeUnit
-
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.GlobalMeterProvider
 import io.opentelemetry.api.metrics.common.Labels
+import java.time.Clock
+import java.util.concurrent.TimeUnit
 import org.junit.Rule
 import org.junit.rules.TestName
 import org.junit.rules.TestRule
-
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -101,7 +100,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == DOUBLE_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123.456
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-sum'
         assert second.description == 'another double sum'
@@ -109,7 +108,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.type == DOUBLE_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234.567
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-sum'
         assert third.description == 'double sum'
@@ -117,7 +116,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == DOUBLE_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-sum'
         assert fourth.description == ''
@@ -125,7 +124,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == DOUBLE_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double sum observer memoization"() {
@@ -161,7 +160,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == DOUBLE_SUM
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20.2
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -170,7 +169,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == DOUBLE_SUM
         assert secondMetric.data.points.size() == 1
         assert secondMetric.data.points[0].value == 40.4
-        assert secondMetric.data.points[0].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
     }
 
     def "long sum observer"() {
@@ -208,7 +207,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == LONG_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-sum'
         assert second.description == 'another long sum'
@@ -216,7 +215,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.type == LONG_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-sum'
         assert third.description == 'long sum'
@@ -224,7 +223,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == LONG_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-sum'
         assert fourth.description == ''
@@ -232,7 +231,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == LONG_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long sum observer memoization"() {
@@ -268,7 +267,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == LONG_SUM
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -277,7 +276,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == LONG_SUM
         assert secondMetric.data.points.size() == 1
         assert secondMetric.data.points[0].value == 40
-        assert secondMetric.data.points[0].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
     }
 
     def "double up down sum observer"() {
@@ -315,7 +314,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == DOUBLE_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123.456
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-up-down-sum'
         assert second.description == 'another double up down sum'
@@ -323,7 +322,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.type == DOUBLE_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234.567
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-up-down-sum'
         assert third.description == 'double up down sum'
@@ -331,7 +330,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == DOUBLE_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-up-down-sum'
         assert fourth.description == ''
@@ -339,7 +338,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == DOUBLE_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double up down sum observer memoization"() {
@@ -375,7 +374,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == DOUBLE_SUM
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20.2
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -384,7 +383,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == DOUBLE_SUM
         assert secondMetric.data.points.size() == 1
         assert secondMetric.data.points[0].value == 40.4
-        assert secondMetric.data.points[0].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
     }
 
     def "long up down sum observer"() {
@@ -422,7 +421,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == LONG_SUM
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-up-down-sum'
         assert second.description == 'another long up down sum'
@@ -430,7 +429,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.type == LONG_SUM
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-up-down-sum'
         assert third.description == 'long up down sum'
@@ -438,7 +437,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == LONG_SUM
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-up-down-sum'
         assert fourth.description == ''
@@ -446,7 +445,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == LONG_SUM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long up down sum observer memoization"() {
@@ -482,7 +481,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == LONG_SUM
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -491,7 +490,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == LONG_SUM
         assert secondMetric.data.points.size() == 1
         assert secondMetric.data.points[0].value == 40
-        assert secondMetric.data.points[0].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
     }
 
     def "double value observer"() {
@@ -529,14 +528,14 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == DOUBLE_GAUGE
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123.456
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-double-value'
         assert second.description == 'another double value'
         assert second.unit == 'µs'
         assert second.type == DOUBLE_GAUGE
         assert second.data.points[0].value == 234.567
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-double-value'
         assert third.description == 'double value'
@@ -544,7 +543,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == DOUBLE_GAUGE
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345.678
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-double-value'
         assert fourth.description == ''
@@ -552,7 +551,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == DOUBLE_GAUGE
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456.789
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double value observer memoization"() {
@@ -589,7 +588,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == DOUBLE_GAUGE
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20.2
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -598,9 +597,9 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == DOUBLE_GAUGE
         assert secondMetric.data.points.size() == 2
         assert secondMetric.data.points[1].value == 40.4
-        assert secondMetric.data.points[1].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[1].attributes == Attributes.of(stringKey('key4'), 'value4')
         assert secondMetric.data.points[0].value == 50.5
-        assert secondMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
     }
 
     def "long value observer"() {
@@ -638,7 +637,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert first.type == LONG_GAUGE
         assert first.data.points.size() == 1
         assert first.data.points[0].value == 123
-        assert first.data.points[0].labels == Labels.of('key', 'value')
+        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
         assert second.name == 'my-long-value'
         assert second.description == 'another long value'
@@ -646,7 +645,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert second.type == LONG_GAUGE
         assert second.data.points.size() == 1
         assert second.data.points[0].value == 234
-        assert second.data.points[0].labels == Labels.of('myKey', 'myValue')
+        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
 
         assert third.name == 'another-long-value'
         assert third.description == 'long value'
@@ -654,7 +653,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert third.type == LONG_GAUGE
         assert third.data.points.size() == 1
         assert third.data.points[0].value == 345
-        assert third.data.points[0].labels == Labels.of('anotherKey', 'anotherValue')
+        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
 
         assert fourth.name == 'yet-another-long-value'
         assert fourth.description == ''
@@ -662,7 +661,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert fourth.type == LONG_GAUGE
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].value == 456
-        assert fourth.data.points[0].labels == Labels.of('yetAnotherKey', 'yetAnotherValue')
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long value observer memoization"() {
@@ -699,7 +698,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert firstMetric.type == LONG_GAUGE
         assert firstMetric.data.points.size() == 1
         assert firstMetric.data.points[0].value == 20
-        assert firstMetric.data.points[0].labels == Labels.of('key2', 'value2')
+        assert firstMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
 
         def secondMetric = secondMetrics[0]
         assert secondMetric.name == 'dc'
@@ -708,8 +707,8 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.type == LONG_GAUGE
         assert secondMetric.data.points.size() == 2
         assert secondMetric.data.points[0].value == 40
-        assert secondMetric.data.points[0].labels == Labels.of('key4', 'value4')
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
         assert secondMetric.data.points[1].value == 50
-        assert secondMetric.data.points[1].labels == Labels.of('key2', 'value2')
+        assert secondMetric.data.points[1].attributes == Attributes.of(stringKey('key2'), 'value2')
     }
 }
