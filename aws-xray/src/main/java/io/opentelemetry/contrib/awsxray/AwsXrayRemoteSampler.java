@@ -149,19 +149,26 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     }
 
     XrayRulesSampler xrayRulesSampler = (XrayRulesSampler) sampler;
-    Date now = Date.from(Instant.ofEpochSecond(0, clock.now()));
-    List<SamplingStatisticsDocument> statistics = xrayRulesSampler.snapshot(now);
-    Set<String> requestedTargetRuleNames =
-        statistics.stream()
-            .map(SamplingStatisticsDocument::getRuleName)
-            .collect(Collectors.toSet());
-    GetSamplingTargetsResponse response =
-        client.getSamplingTargets(GetSamplingTargetsRequest.create(statistics));
-    Map<String, SamplingTargetDocument> targets =
-        response.getDocuments().stream()
-            .collect(Collectors.toMap(SamplingTargetDocument::getRuleName, Function.identity()));
-    sampler =
-        xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
+    try {
+      Date now = Date.from(Instant.ofEpochSecond(0, clock.now()));
+      List<SamplingStatisticsDocument> statistics = xrayRulesSampler.snapshot(now);
+      Set<String> requestedTargetRuleNames =
+          statistics.stream()
+              .map(SamplingStatisticsDocument::getRuleName)
+              .collect(Collectors.toSet());
+
+      GetSamplingTargetsResponse response =
+          client.getSamplingTargets(GetSamplingTargetsRequest.create(statistics));
+      Map<String, SamplingTargetDocument> targets =
+          response.getDocuments().stream()
+              .collect(Collectors.toMap(SamplingTargetDocument::getRuleName, Function.identity()));
+      sampler =
+          xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
+    } catch (Throwable t) {
+      // Might be a transient API failure, try again after a default interval.
+      executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+      return;
+    }
 
     long nextTargetFetchIntervalNanos =
         xrayRulesSampler.nextTargetFetchTimeNanos() - clock.nanoTime();
