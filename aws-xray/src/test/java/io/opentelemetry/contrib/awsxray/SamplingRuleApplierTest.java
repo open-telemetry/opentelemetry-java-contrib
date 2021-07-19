@@ -581,7 +581,6 @@ class SamplingRuleApplierTest {
     assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
     assertThat(applier.snapshot(Date.from(now))).isNotNull();
     clock.advance(Duration.ofSeconds(5));
-    now = Instant.ofEpochSecond(0, clock.now());
     // No more reservoir quota, back to fixed rate (0.0)
     assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
     assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
