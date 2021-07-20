@@ -19,11 +19,6 @@ final class RateLimitingSampler implements Sampler {
   private final RateLimiter limiter;
   private final int numPerSecond;
 
-  RateLimitingSampler(int numPerSecond) {
-    this(numPerSecond, Clock.getDefault());
-  }
-
-  // Visible for testing
   RateLimitingSampler(int numPerSecond, Clock clock) {
     limiter = new RateLimiter(numPerSecond, numPerSecond, clock);
     this.numPerSecond = numPerSecond;

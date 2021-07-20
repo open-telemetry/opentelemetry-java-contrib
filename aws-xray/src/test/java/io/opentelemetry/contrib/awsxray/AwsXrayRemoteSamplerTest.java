@@ -8,6 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.linecorp.armeria.common.HttpResponse;
 import com.linecorp.armeria.common.HttpStatus;
@@ -33,27 +34,36 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class AwsXrayRemoteSamplerTest {
 
-  private static final byte[] RESPONSE_1;
-  private static final byte[] RESPONSE_2;
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  private static final byte[] RULE_RESPONSE_1;
+  private static final byte[] RULE_RESPONSE_2;
+  private static final byte[] TARGETS_RESPONE;
 
   static {
     try {
-      RESPONSE_1 =
+      RULE_RESPONSE_1 =
           ByteStreams.toByteArray(
               requireNonNull(
                   AwsXrayRemoteSamplerTest.class.getResourceAsStream(
                       "/test-sampling-rules-response-1.json")));
-      RESPONSE_2 =
+      RULE_RESPONSE_2 =
           ByteStreams.toByteArray(
               requireNonNull(
                   AwsXrayRemoteSamplerTest.class.getResourceAsStream(
                       "/test-sampling-rules-response-2.json")));
+      TARGETS_RESPONE =
+          ByteStreams.toByteArray(
+              requireNonNull(
+                  AwsXrayRemoteSamplerTest.class.getResourceAsStream(
+                      "/test-sampling-targets-response.json")));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
   }
 
-  private static final AtomicReference<byte[]> response = new AtomicReference<>();
+  private static final AtomicReference<byte[]> rulesResponse = new AtomicReference<>();
+  private static final AtomicReference<byte[]> targetsResponse = new AtomicReference<>();
 
   private static final String TRACE_ID = TraceId.fromLongs(1, 2);
 
@@ -65,7 +75,19 @@ class AwsXrayRemoteSamplerTest {
           sb.service(
               "/GetSamplingRules",
               (ctx, req) -> {
-                byte[] response = AwsXrayRemoteSamplerTest.response.get();
+                byte[] response = AwsXrayRemoteSamplerTest.rulesResponse.get();
+                if (response == null) {
+                  // Error out until the test configures a response, the sampler will use the
+                  // initial
+                  // sampler in the meantime.
+                  return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                return HttpResponse.of(HttpStatus.OK, MediaType.JSON_UTF_8, response);
+              });
+          sb.service(
+              "/SamplingTargets",
+              (ctx, req) -> {
+                byte[] response = AwsXrayRemoteSamplerTest.targetsResponse.get();
                 if (response == null) {
                   // Error out until the test configures a response, the sampler will use the
                   // initial
@@ -92,11 +114,11 @@ class AwsXrayRemoteSamplerTest {
   @AfterEach
   void tearDown() {
     sampler.close();
-    response.set(null);
+    rulesResponse.set(null);
   }
 
   @Test
-  void getAndUpdate() {
+  void getAndUpdate() throws Exception {
     // Initial Sampler allows all.
     assertThat(
             sampler
@@ -121,7 +143,7 @@ class AwsXrayRemoteSamplerTest {
                 .getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
 
-    response.set(RESPONSE_1);
+    rulesResponse.set(RULE_RESPONSE_1);
 
     // cat-service allowed, others dropped
     await()
@@ -151,7 +173,7 @@ class AwsXrayRemoteSamplerTest {
                   .isEqualTo(SamplingDecision.DROP);
             });
 
-    response.set(RESPONSE_2);
+    rulesResponse.set(RULE_RESPONSE_2);
 
     // cat-service dropped, others allowed
     await()
@@ -168,6 +190,36 @@ class AwsXrayRemoteSamplerTest {
                               Collections.emptyList())
                           .getDecision())
                   .isEqualTo(SamplingDecision.DROP);
+              assertThat(
+                      sampler
+                          .shouldSample(
+                              Context.root(),
+                              TRACE_ID,
+                              "dog-service",
+                              SpanKind.SERVER,
+                              Attributes.empty(),
+                              Collections.emptyList())
+                          .getDecision())
+                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+            });
+
+    targetsResponse.set(TARGETS_RESPONE);
+
+    // cat-service target sets fixed rate to 1.0 for this test.
+    await()
+        .untilAsserted(
+            () -> {
+              assertThat(
+                      sampler
+                          .shouldSample(
+                              Context.root(),
+                              TRACE_ID,
+                              "cat-service",
+                              SpanKind.SERVER,
+                              Attributes.empty(),
+                              Collections.emptyList())
+                          .getDecision())
+                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
               assertThat(
                       sampler
                           .shouldSample(

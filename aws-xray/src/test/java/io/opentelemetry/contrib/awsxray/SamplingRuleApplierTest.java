@@ -14,15 +14,21 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,7 +45,8 @@ class SamplingRuleApplierTest {
   class ExactMatch {
 
     private final SamplingRuleApplier applier =
-        new SamplingRuleApplier(CLIENT_ID, readSamplingRule("/sampling-rule-exactmatch.json"));
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-exactmatch.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -61,14 +68,7 @@ class SamplingRuleApplierTest {
     // FixedRate set to 1.0 in rule and no reservoir
     @Test
     void fixedRateAlwaysSample() {
-      assertThat(
-              applier.shouldSample(
-                  Context.current(),
-                  TraceId.fromLongs(1, 2),
-                  "span",
-                  SpanKind.CLIENT,
-                  Attributes.empty(),
-                  Collections.emptyList()))
+      assertThat(doSample(applier))
           .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
 
       Date now = new Date();
@@ -86,20 +86,8 @@ class SamplingRuleApplierTest {
       assertThat(statistics.getSampledCount()).isEqualTo(0);
       assertThat(statistics.getBorrowCount()).isEqualTo(0);
 
-      applier.shouldSample(
-          Context.current(),
-          TraceId.fromLongs(1, 2),
-          "span",
-          SpanKind.CLIENT,
-          Attributes.empty(),
-          Collections.emptyList());
-      applier.shouldSample(
-          Context.current(),
-          TraceId.fromLongs(1, 2),
-          "span",
-          SpanKind.CLIENT,
-          Attributes.empty(),
-          Collections.emptyList());
+      doSample(applier);
+      doSample(applier);
       now = new Date();
       statistics = applier.snapshot(now);
       assertThat(statistics.getClientId()).isEqualTo(CLIENT_ID);
@@ -194,7 +182,8 @@ class SamplingRuleApplierTest {
   class WildcardMatch {
 
     private final SamplingRuleApplier applier =
-        new SamplingRuleApplier(CLIENT_ID, readSamplingRule("/sampling-rule-wildcards.json"));
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-wildcards.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -216,15 +205,7 @@ class SamplingRuleApplierTest {
     // FixedRate set to 0.0 in rule and no reservoir
     @Test
     void fixedRateNeverSample() {
-      assertThat(
-              applier.shouldSample(
-                  Context.current(),
-                  TraceId.fromLongs(1, 2),
-                  "span",
-                  SpanKind.CLIENT,
-                  Attributes.empty(),
-                  Collections.emptyList()))
-          .isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+      assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
 
       Date now = new Date();
       GetSamplingTargetsRequest.SamplingStatisticsDocument statistics = applier.snapshot(now);
@@ -241,20 +222,8 @@ class SamplingRuleApplierTest {
       assertThat(statistics.getSampledCount()).isEqualTo(0);
       assertThat(statistics.getBorrowCount()).isEqualTo(0);
 
-      applier.shouldSample(
-          Context.current(),
-          TraceId.fromLongs(1, 2),
-          "span",
-          SpanKind.CLIENT,
-          Attributes.empty(),
-          Collections.emptyList());
-      applier.shouldSample(
-          Context.current(),
-          TraceId.fromLongs(1, 2),
-          "span",
-          SpanKind.CLIENT,
-          Attributes.empty(),
-          Collections.emptyList());
+      doSample(applier);
+      doSample(applier);
       now = new Date();
       statistics = applier.snapshot(now);
       assertThat(statistics.getClientId()).isEqualTo(CLIENT_ID);
@@ -456,7 +425,8 @@ class SamplingRuleApplierTest {
   class AwsLambdaTest {
 
     private final SamplingRuleApplier applier =
-        new SamplingRuleApplier(CLIENT_ID, readSamplingRule("/sampling-rule-awslambda.json"));
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-awslambda.json"), Clock.getDefault());
 
     private final Resource resource =
         Resource.builder()
@@ -511,30 +481,16 @@ class SamplingRuleApplierTest {
   @Test
   void borrowing() {
     SamplingRuleApplier applier =
-        new SamplingRuleApplier(CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"));
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), Clock.getDefault());
 
     // Borrow
-    assertThat(
-            applier.shouldSample(
-                Context.current(),
-                TraceId.fromLongs(1, 2),
-                "span",
-                SpanKind.CLIENT,
-                Attributes.empty(),
-                Collections.emptyList()))
+    assertThat(doSample(applier))
         .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
     // Can only borrow one per second. If a second passes between these two lines of code, the test
     // will be flaky. Revisit if we ever see it, it's unlikely but can be fixed by injecting a
     // a clock.
-    assertThat(
-            applier.shouldSample(
-                Context.current(),
-                TraceId.fromLongs(1, 2),
-                "span",
-                SpanKind.CLIENT,
-                Attributes.empty(),
-                Collections.emptyList()))
-        .isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
 
     Date now = new Date();
     GetSamplingTargetsRequest.SamplingStatisticsDocument statistics = applier.snapshot(now);
@@ -557,14 +513,7 @@ class SamplingRuleApplierTest {
         .untilAsserted(
             () -> {
               numRequests.incrementAndGet();
-              assertThat(
-                      applier.shouldSample(
-                          Context.current(),
-                          TraceId.fromLongs(1, 2),
-                          "span",
-                          SpanKind.CLIENT,
-                          Attributes.empty(),
-                          Collections.emptyList()))
+              assertThat(doSample(applier))
                   .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
             });
 
@@ -576,6 +525,133 @@ class SamplingRuleApplierTest {
     assertThat(statistics.getRequestCount()).isEqualTo(numRequests.get());
     assertThat(statistics.getSampledCount()).isEqualTo(1);
     assertThat(statistics.getBorrowCount()).isEqualTo(1);
+  }
+
+  @Test
+  void ruleWithTarget() {
+    TestClock clock = TestClock.create();
+    SamplingRuleApplier applier =
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), clock);
+    // No target yet, borrows from reservoir every second.
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    clock.advance(Duration.ofSeconds(1));
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+
+    Instant now = Instant.ofEpochSecond(0, clock.now());
+    // No target so always have a snapshot.
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+    assertThat(applier.snapshot(Date.from(now.plus(Duration.ofMinutes(30))))).isNotNull();
+
+    // Got a target!
+    SamplingTargetDocument target =
+        SamplingTargetDocument.create(0.0, 5, 2, Date.from(now.plusSeconds(10)), "test");
+    applier = applier.withTarget(target, Date.from(now));
+    // Statistics not expired yet
+    assertThat(applier.snapshot(Date.from(now))).isNull();
+
+    // Got 2 requests per second quota.
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    clock.advance(Duration.ofSeconds(2));
+    now = Instant.ofEpochSecond(0, clock.now());
+    assertThat(applier.snapshot(Date.from(now))).isNull();
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    clock.advance(Duration.ofSeconds(3));
+    now = Instant.ofEpochSecond(0, clock.now());
+    // Statistics expired, snapshot requests are served.
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+    clock.advance(Duration.ofSeconds(5));
+    // No more reservoir quota, back to fixed rate (0.0)
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+  }
+
+  @Test
+  void ruleWithTargetWithoutQuota() {
+    TestClock clock = TestClock.create();
+    SamplingRuleApplier applier =
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), clock);
+    // No target yet, borrows from reservoir every second.
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    clock.advance(Duration.ofSeconds(1));
+    Instant now = Instant.ofEpochSecond(0, clock.now());
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+
+    // No target so always have a snapshot.
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+    assertThat(applier.snapshot(Date.from(now.plus(Duration.ofMinutes(30))))).isNotNull();
+
+    // Got a target!
+    SamplingTargetDocument target = SamplingTargetDocument.create(0.0, 5, null, null, "test");
+    applier = applier.withTarget(target, Date.from(now));
+    // No reservoir, always use fixed rate (drop)
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    assertThat(applier.snapshot(Date.from(now))).isNull();
+    clock.advance(Duration.ofSeconds(5));
+    now = Instant.ofEpochSecond(0, clock.now());
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+  }
+
+  @Test
+  void withNextSnapshotTime() {
+    TestClock clock = TestClock.create();
+    SamplingRuleApplier applier =
+        new SamplingRuleApplier(
+            CLIENT_ID, readSamplingRule("/sampling-rule-reservoir.json"), clock);
+
+    Instant now = Instant.ofEpochSecond(0, clock.now());
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+
+    applier = applier.withNextSnapshotTimeNanos(clock.now() + TimeUnit.SECONDS.toNanos(10));
+    assertThat(applier.snapshot(Date.from(now))).isNull();
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+    clock.advance(Duration.ofSeconds(10));
+    now = Instant.ofEpochSecond(0, clock.now());
+    assertThat(applier.snapshot(Date.from(now))).isNotNull();
+    assertThat(doSample(applier))
+        .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+    assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
+  }
+
+  private SamplingResult doSample(SamplingRuleApplier applier) {
+    return applier.shouldSample(
+        Context.current(),
+        TraceId.fromLongs(1, 2),
+        "span",
+        SpanKind.CLIENT,
+        Attributes.empty(),
+        Collections.emptyList());
   }
 
   private static GetSamplingRulesResponse.SamplingRule readSamplingRule(String resourcePath) {
