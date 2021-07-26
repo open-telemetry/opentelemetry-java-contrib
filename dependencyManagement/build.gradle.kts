@@ -17,7 +17,8 @@ val DEPENDENCY_BOMS = listOf(
     "org.junit:junit-bom:5.7.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
     "io.opentelemetry:opentelemetry-bom:1.4.1",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.4.1-alpha"
+    "io.opentelemetry:opentelemetry-bom-alpha:1.4.1-alpha",
+    "org.testcontainers:testcontainers-bom:1.16.0"
 )
 
 val DEPENDENCY_SETS = listOf<DependencySet>(
