@@ -10,6 +10,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.awsxray.AwsXrayRemoteSampler;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.IdGenerator;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.time.Duration;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
@@ -49,7 +51,14 @@ class AwsXrayRemoteSamplerIntegrationTest {
 
   @Test
   void keepSampling() throws Exception {
-    AwsXrayRemoteSampler sampler =
+    // Initialize two samplers to try to see centralized reservoir behavior.
+    AwsXrayRemoteSampler sampler1 =
+        AwsXrayRemoteSampler.newBuilder(Resource.getDefault())
+            .setEndpoint("http://localhost:" + otelCollector.getMappedPort(2000))
+            .setPollingInterval(Duration.ofSeconds(5))
+            .build();
+
+    AwsXrayRemoteSampler sampler2 =
         AwsXrayRemoteSampler.newBuilder(Resource.getDefault())
             .setEndpoint("http://localhost:" + otelCollector.getMappedPort(2000))
             .setPollingInterval(Duration.ofSeconds(5))
@@ -57,21 +66,23 @@ class AwsXrayRemoteSamplerIntegrationTest {
 
     try {
       while (true) {
-        logger.info(
-            "Sampling Decision: {}",
-            sampler
-                .shouldSample(
-                    Context.root(),
-                    IdGenerator.random().generateTraceId(),
-                    "cat-service",
-                    SpanKind.SERVER,
-                    Attributes.empty(),
-                    Collections.emptyList())
-                .getDecision());
+        logger.info("[Sampler 1] Sampling Decision: {}", doSample(sampler1).getDecision());
+        logger.info("[Sampler 2] Sampling Decision: {}", doSample(sampler2).getDecision());
         Thread.sleep(500);
       }
     } finally {
-      sampler.close();
+      sampler1.close();
+      sampler2.close();
     }
+  }
+
+  private static SamplingResult doSample(Sampler sampler) {
+    return sampler.shouldSample(
+        Context.root(),
+        IdGenerator.random().generateTraceId(),
+        "cat-service",
+        SpanKind.SERVER,
+        Attributes.empty(),
+        Collections.emptyList());
   }
 }
