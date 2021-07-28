@@ -40,14 +40,13 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   private static final Random RANDOM = new Random();
   private static final Logger logger = Logger.getLogger(AwsXrayRemoteSampler.class.getName());
 
-  // Unique per-process client ID, generated as a random string.
-  private static final String CLIENT_ID = generateClientId();
-
   private final Resource resource;
   private final Clock clock;
   private final Sampler initialSampler;
   private final XraySamplerClient client;
   private final ScheduledExecutorService executor;
+  // Unique per-sampler client ID, generated as a random string.
+  private final String clientId;
   private final long pollingIntervalNanos;
   private final int jitterNanos;
 
@@ -89,6 +88,8 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
               return t;
             });
 
+    clientId = generateClientId();
+
     sampler = initialSampler;
 
     this.pollingIntervalNanos = pollingIntervalNanos;
@@ -123,7 +124,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       if (!response.equals(previousRulesResponse)) {
         sampler =
             new XrayRulesSampler(
-                CLIENT_ID,
+                clientId,
                 resource,
                 clock,
                 initialSampler,

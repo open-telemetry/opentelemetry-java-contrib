@@ -4,7 +4,6 @@
  */
 package io.opentelemetry.contrib.awsxray;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.auto.value.AutoValue;
@@ -47,10 +46,6 @@ abstract class GetSamplingTargetsRequest {
     abstract long getSampledCount();
 
     @JsonProperty("Timestamp")
-    @JsonFormat(
-        shape = JsonFormat.Shape.STRING,
-        pattern = "yyyy-MM-dd'T'HH:mm:ss",
-        timezone = "UTC")
     abstract Date getTimestamp();
 
     @AutoValue.Builder
