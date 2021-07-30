@@ -3,13 +3,9 @@ plugins {
     id "com.github.johnrengelman.shadow"
 
     id("otel.groovy-conventions")
+    id("otel.publish-conventions")
 }
 
-apply from: "$rootDir/gradle/publish.gradle"
-
-ext.shadowPublish = true
-
-ext.libraryName = 'OpenTelemetry Java Contrib JMX Metric Gatherer'
 description = 'JMX metrics gathering Groovy script runner'
 
 // we are joint compiling so rely on groovy plugin entirely
