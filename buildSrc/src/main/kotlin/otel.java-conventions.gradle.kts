@@ -8,9 +8,8 @@ plugins {
 }
 
 group = "io.opentelemetry.contrib"
-version = "1.3.0-alpha"
 
-base.archivesBaseName = "opentelemetry-${project.name}"
+base.archivesName.set("opentelemetry-${project.name}")
 
 java {
     toolchain {
