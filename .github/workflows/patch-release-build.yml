@@ -1,0 +1,121 @@
+# Releases a patch by cherrypicking commits into a release branch based on the previous
+# release tag.
+name: Patch Release Build
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to tag the release with, e.g., 1.2.1, 1.2.2
+        required: true
+      commits:
+        description: Comma separated list of commit shas to cherrypick
+        required: false
+
+jobs:
+  prepare-release-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      release-branch-name: ${{ steps.parse-release-branch.outputs.release-branch-name }}
+    steps:
+      - id: parse-release-branch
+        name: Parse release branch name
+        run: |
+          # Sets the release-branch-name output to the version number with the last non-period element replaced with an 'x' and preprended with v.
+          echo "::set-output name=release-branch-name::$(echo '${{ github.event.inputs.version }}' | sed -E 's/([^.]+)\.([^.]+)\.([^.]+)/v\1.\2.x/')"
+          # Sets the release-tag-name output to the version number with the last non-period element replace with a '0' and prepended with v
+          echo "::set-output name=release-tag-name::$(echo '${{ github.event.inputs.version }}' | sed -E 's/([^.]+)\.([^.]+)\.([^.]+)/v\1.\2.0/')"
+
+      - id: checkout-release-branch
+        name: Check out release branch
+        continue-on-error: true
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ steps.parse-release-branch.outputs.release-branch-name }}
+          fetch-depth: 0
+
+      - id: checkout-release-tag
+        name: Check out release tag
+        if: ${{ steps.checkout-release-branch.outcome == 'failure' }}
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ steps.parse-release-branch.outputs.release-tag-name }}
+          fetch-depth: 0
+
+      - name: Create release branch
+        if: ${{ steps.checkout-release-tag.outcome == 'success' }}
+        run: |
+          git checkout -b ${{ steps.parse-release-branch.outputs.release-branch-name }}
+          git push --set-upstream origin ${{ steps.parse-release-branch.outputs.release-branch-name }}
+
+  build:
+    name: build
+    needs: prepare-release-branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 11
+      - uses: burrunan/gradle-cache-action@v1
+        name: Build
+        with:
+          arguments: --stacktrace build
+          remote-build-cache-proxy-enabled: false
+      - uses: actions/upload-artifact@v2
+        name: Save unit test results
+        if: always()
+        with:
+          name: test-results
+          path: jmx-metrics/build/reports/tests/test
+  integration-test:
+    name: integration-test
+    needs: prepare-release-branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 11
+      - uses: burrunan/gradle-cache-action@v1
+        name: Integration Tests
+        with:
+          arguments: --stacktrace integrationTest
+          remote-build-cache-proxy-enabled: false
+      - uses: actions/upload-artifact@v2
+        name: Save integrationTest results
+        if: always()
+        with:
+          name: integration-test-results
+          path: jmx-metrics/build/reports/tests/test
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: [ build, integration-test ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 11
+      - uses: burrunan/gradle-cache-action@v1
+        name: Publish
+        with:
+          arguments: --stacktrace final closeAndReleaseSonatypeStagingRepository -Prelease.version=${{ github.event.inputs.version }}
+        env:
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
+          GRGIT_USER: ${{ github.actor }}
+          GRGIT_PASS: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
