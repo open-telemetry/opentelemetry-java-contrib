@@ -78,3 +78,13 @@ jobs:
           GRGIT_PASS: ${{ secrets.GITHUB_TOKEN }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          draft: true
+          prerelease: false
