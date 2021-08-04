@@ -24,6 +24,11 @@ val DEPENDENCY_BOMS = listOf(
 
 val DEPENDENCY_SETS = listOf(
     DependencySet(
+        "com.google.auto.service",
+        "1.0",
+        listOf("auto-service", "auto-service-annotations")
+    ),
+    DependencySet(
         "com.google.auto.value",
         "1.8.1",
         listOf("auto-value", "auto-value-annotations")
