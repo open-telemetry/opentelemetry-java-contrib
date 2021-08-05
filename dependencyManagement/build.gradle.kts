@@ -42,6 +42,11 @@ val DEPENDENCY_SETS = listOf(
         "org.slf4j",
         "1.7.30",
         listOf("slf4j-api", "slf4j-simple", "log4j-over-slf4j", "jcl-over-slf4j", "jul-to-slf4j")
+    ),
+    DependencySet(
+        "org.mockito",
+        "3.11.1",
+        listOf("mockito-core", "mockito-junit-jupiter")
     )
 )
 
