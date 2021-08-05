@@ -15,9 +15,14 @@ dependencies {
     api("io.opentelemetry:opentelemetry-api")
     api("io.opentelemetry:opentelemetry-sdk-trace")
 
+    compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+
     implementation("io.opentelemetry:opentelemetry-semconv")
 
     compileOnly("org.checkerframework:checker-qual")
+
+    annotationProcessor("com.google.auto.service:auto-service")
+    compileOnly("com.google.auto.service:auto-service-annotations")
 
     annotationProcessor("com.google.auto.value:auto-value")
     compileOnly("com.google.auto.value:auto-value-annotations")
@@ -26,6 +31,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
 
     testImplementation("com.linecorp.armeria:armeria-junit5")
+    testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
     testImplementation("com.google.guava:guava")
     testImplementation("org.slf4j:slf4j-simple")
