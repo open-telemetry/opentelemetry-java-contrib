@@ -85,6 +85,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.mockito:mockito-junit-jupiter")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
