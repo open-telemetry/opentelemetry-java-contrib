@@ -31,4 +31,11 @@ class UrlMatcher {
     int startOfPath = url.indexOf('/', afterSchema);
     return url.substring(startOfPath == -1 ? 0 : startOfPath, startOfQueryString == -1 ? url.length() : startOfQueryString);
   }
+
+  @Override
+  public String toString() {
+    return "UrlMatcher{" +
+           "patterns=" + patterns +
+           '}';
+  }
 }

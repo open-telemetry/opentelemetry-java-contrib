@@ -12,19 +12,17 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 public class UrlSampler implements Sampler {
-  private final Collection<String> patterns;
+  private final UrlMatcher urlMatcher;
   private final SpanKind kind;
   private final Sampler delegate;
 
   public UrlSampler(Collection<String> patterns, SpanKind kind, Sampler delegate) {
-    this.patterns = Objects.requireNonNull(patterns);
+    this.urlMatcher = new UrlMatcher(Objects.requireNonNull(patterns));
     this.kind = Objects.requireNonNull(kind);
     this.delegate = Objects.requireNonNull(delegate);
   }
@@ -37,20 +35,15 @@ public class UrlSampler implements Sampler {
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
-    if (kind != spanKind || patterns.isEmpty()) {
+    if (kind != spanKind) {
       return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
     String urlString = attributes.get(SemanticAttributes.HTTP_URL);
     if (urlString == null) {
       return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
-    try {
-      String path = new URL(urlString).getPath();
-      if (patterns.contains(path)) {
-        return SamplingResult.create(SamplingDecision.DROP);
-      }
-    } catch (MalformedURLException e) {
-      // No problem, just delegate below
+    if (urlMatcher.matches(urlString)) {
+      return SamplingResult.create(SamplingDecision.DROP);
     }
     return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
   }
@@ -63,7 +56,7 @@ public class UrlSampler implements Sampler {
   @Override
   public String toString() {
     return "UrlSampler{" +
-           "patterns=" + patterns +
+           "patterns=" + urlMatcher +
            ", kind=" + kind +
            '}';
   }

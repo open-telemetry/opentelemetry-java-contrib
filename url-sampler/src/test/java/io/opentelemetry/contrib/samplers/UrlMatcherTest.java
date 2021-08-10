@@ -1,12 +1,18 @@
 package io.opentelemetry.contrib.samplers;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
 class UrlMatcherTest {
+
+  @Test public void returnsFalseOnNoPatterns(){
+    UrlMatcher matcher = new UrlMatcher(emptyList());
+    assertThat(matcher.matches("http://example.com/healthcheck")).isFalse();
+  }
 
   @Test
   public void testExactMatch() {
