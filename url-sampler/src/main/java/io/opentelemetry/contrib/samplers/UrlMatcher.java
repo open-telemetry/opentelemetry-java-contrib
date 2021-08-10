@@ -1,21 +1,23 @@
 package io.opentelemetry.contrib.samplers;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class UrlMatcher {
-  private final Collection<String> patterns;
+  private final Collection<Pattern> patterns;
 
   public UrlMatcher(Collection<String> patterns) {
     this.patterns = patterns.stream()
         .map(p -> p.endsWith("$") ? p : (p + ".*"))
+        .map(Pattern::compile)
         .collect(Collectors.toList());
   }
 
   public boolean matches(String url) {
     String path = extractPath(url);
-    for (String pattern : patterns) {
-      if (path.matches(pattern)) {
+    for (Pattern pattern : patterns) {
+      if (pattern.matcher(path).matches()) {
         return true;
       }
     }
