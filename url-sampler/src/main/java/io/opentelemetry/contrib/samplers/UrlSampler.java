@@ -20,10 +20,12 @@ import java.util.Objects;
 
 public class UrlSampler implements Sampler {
   private final Collection<String> patterns;
+  private final SpanKind kind;
   private final Sampler delegate;
 
-  public UrlSampler(Collection<String> patterns, Sampler delegate) {
+  public UrlSampler(Collection<String> patterns, SpanKind kind, Sampler delegate) {
     this.patterns = Objects.requireNonNull(patterns);
+    this.kind = Objects.requireNonNull(kind);
     this.delegate = Objects.requireNonNull(delegate);
   }
 
@@ -35,7 +37,7 @@ public class UrlSampler implements Sampler {
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
-    if (patterns.isEmpty()) {
+    if (kind != spanKind || patterns.isEmpty()) {
       return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
     String urlString = attributes.get(SemanticAttributes.HTTP_URL);
@@ -55,6 +57,14 @@ public class UrlSampler implements Sampler {
 
   @Override
   public String getDescription() {
-    return "UrlSampler{" + patterns + "}";
+    return toString();
+  }
+
+  @Override
+  public String toString() {
+    return "UrlSampler{" +
+           "patterns=" + patterns +
+           ", kind=" + kind +
+           '}';
   }
 }
