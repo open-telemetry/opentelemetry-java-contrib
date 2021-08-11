@@ -15,7 +15,8 @@ class UrlMatcher {
   }
 
   public boolean matches(String url) {
-    String path = extractPath(url);
+//    String path = extractPath(url);
+    String path = url;
     for (Pattern pattern : patterns) {
       if (pattern.matcher(path).matches()) {
         return true;

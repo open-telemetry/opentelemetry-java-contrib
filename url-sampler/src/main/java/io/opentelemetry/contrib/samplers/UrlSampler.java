@@ -4,6 +4,9 @@
  */
 package io.opentelemetry.contrib.samplers;
 
+import static java.util.stream.Collectors.toMap;
+
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -11,20 +14,22 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class UrlSampler implements Sampler {
-  private final UrlMatcher urlMatcher;
+  private final Map<AttributeKey<String>, UrlMatcher> matchers;
   private final SpanKind kind;
   private final Sampler delegate;
 
-  public UrlSampler(Collection<String> patterns, SpanKind kind, Sampler delegate) {
-    this.urlMatcher = new UrlMatcher(Objects.requireNonNull(patterns));
+  public UrlSampler(Map<AttributeKey<String>, ? extends Collection<String>> patterns, SpanKind kind, Sampler delegate) {
     this.kind = Objects.requireNonNull(kind);
     this.delegate = Objects.requireNonNull(delegate);
+    this.matchers = Objects.requireNonNull(patterns)
+        .entrySet().stream()
+        .collect(toMap(Map.Entry::getKey, e -> new UrlMatcher(e.getValue())));
   }
 
   @Override
@@ -38,12 +43,14 @@ public class UrlSampler implements Sampler {
     if (kind != spanKind) {
       return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
-    String urlString = attributes.get(SemanticAttributes.HTTP_URL);
-    if (urlString == null) {
-      return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
-    }
-    if (urlMatcher.matches(urlString)) {
-      return SamplingResult.create(SamplingDecision.DROP);
+    for (Map.Entry<AttributeKey<String>, UrlMatcher> entry : matchers.entrySet()) {
+      String attributeValue = attributes.get(entry.getKey());
+      if (attributeValue == null) {
+        continue;
+      }
+      if (entry.getValue().matches(attributeValue)) {
+        return SamplingResult.create(SamplingDecision.DROP);
+      }
     }
     return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
   }
@@ -56,7 +63,7 @@ public class UrlSampler implements Sampler {
   @Override
   public String toString() {
     return "UrlSampler{" +
-           "patterns=" + urlMatcher +
+           "patterns=" + matchers +
            ", kind=" + kind +
            '}';
   }

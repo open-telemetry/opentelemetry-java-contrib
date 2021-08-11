@@ -4,8 +4,10 @@
  */
 package io.opentelemetry.contrib.samplers;
 
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -26,6 +29,8 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +48,7 @@ class UrlSamplerTest {
       SpanContext.create(traceId, parentSpanId, TraceFlags.getSampled(), TraceState.getDefault());
   private final Context parentContext = Context.root().with(Span.wrap(sampledSpanContext));
 
-  private final Collection<String> patterns = singletonList("/healthcheck");
+  private final Map<AttributeKey<String>, Collection<String>> patterns = new HashMap<>();
 
   @Mock(lenient = true)
   private Sampler delegate;
@@ -52,6 +57,9 @@ class UrlSamplerTest {
   public void setup() {
     when(delegate.shouldSample(any(), any(), any(), any(), any(), any()))
         .thenReturn(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+
+    patterns.put(HTTP_URL, singletonList(".*/healthcheck"));
+    patterns.put(HTTP_TARGET, singletonList("/actuator"));
   }
 
   @Test
@@ -69,7 +77,7 @@ class UrlSamplerTest {
 
   @Test
   public void testThatDelegatesIfNoPatternsGiven() {
-    UrlSampler sampler = new UrlSampler(emptyList(), SPAN_KIND, delegate);
+    UrlSampler sampler = new UrlSampler(emptyMap(), SPAN_KIND, delegate);
 
     // no http.url attribute
     Attributes attributes = Attributes.empty();
@@ -121,6 +129,14 @@ class UrlSamplerTest {
     assertThat(shouldSample(sampler, "healthcheck").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
+  }
+
+  @Test
+  public void testVerifiesAllGivenAttributes() {
+    UrlSampler sampler = new UrlSampler(patterns, SPAN_KIND, delegate);
+    Attributes attributes = Attributes.of(HTTP_TARGET, "/actuator/info");
+    assertThat(sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList()).getDecision())
+        .isEqualTo(SamplingDecision.DROP);
   }
 
   private SamplingResult shouldSample(Sampler sampler, String url) {

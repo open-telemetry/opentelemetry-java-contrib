@@ -16,7 +16,7 @@ class UrlMatcherTest {
 
   @Test
   public void testExactMatch() {
-    UrlMatcher matcher = new UrlMatcher(asList("/healthcheck", "/actuator"));
+    UrlMatcher matcher = new UrlMatcher(asList(".*/healthcheck", ".*/actuator"));
     assertThat(matcher.matches("http://example.com/healthcheck")).isTrue();
     assertThat(matcher.matches("http://example.com/actuator")).isTrue();
     assertThat(matcher.matches("http://example.com/customers")).isFalse();
@@ -24,7 +24,7 @@ class UrlMatcherTest {
 
   @Test
   public void testPathStartMatches() {
-    UrlMatcher matcher = new UrlMatcher(asList("/healthcheck", "/actuator"));
+    UrlMatcher matcher = new UrlMatcher(asList(".*/healthcheck", ".*/actuator"));
     assertThat(matcher.matches("http://example.com/healthcheck?qw=asd")).isTrue();
     assertThat(matcher.matches("http://example.com/actuator/info")).isTrue();
     assertThat(matcher.matches("http://example.com/context/actuator")).isFalse();
@@ -32,14 +32,14 @@ class UrlMatcherTest {
 
   @Test
   public void testHostIsIgnored() {
-    UrlMatcher matcher = new UrlMatcher(asList("/healthcheck", "/actuator"));
+    UrlMatcher matcher = new UrlMatcher(asList(".*/healthcheck", ".*/actuator"));
     assertThat(matcher.matches("http://healthcheck")).isFalse();
     assertThat(matcher.matches("http://healthcheck/actuator")).isTrue();
   }
 
   @Test
   public void testPatternCanBeRegexp() {
-    UrlMatcher matcher = new UrlMatcher(singletonList("/health.*"));
+    UrlMatcher matcher = new UrlMatcher(singletonList(".*/health.*"));
     assertThat(matcher.matches("http://example.com/healthcheck")).isTrue();
     assertThat(matcher.matches("http://example.com/healthinfo")).isTrue();
     assertThat(matcher.matches("http://example.com/health")).isTrue();
@@ -49,19 +49,16 @@ class UrlMatcherTest {
 
   @Test
   public void testRegexpMatchesEndOfLine() {
-    UrlMatcher matcher = new UrlMatcher(singletonList("/health$"));
+    UrlMatcher matcher = new UrlMatcher(singletonList(".*/health$"));
     assertThat(matcher.matches("http://example.com/health")).isTrue();
     assertThat(matcher.matches("http://example.com/healthcheck")).isFalse();
     assertThat(matcher.matches("http://example.com/health/info")).isFalse();
-    assertThat(matcher.matches("http://example.com/health?as=qw")).isTrue();
   }
 
   @Test
   public void testQueryStringIsIgnored() {
-    UrlMatcher matcher = new UrlMatcher(singletonList("/health$"));
+    UrlMatcher matcher = new UrlMatcher(singletonList(".*/health$"));
     assertThat(matcher.matches("http://example.com/health")).isTrue();
-    assertThat(matcher.matches("http://example.com/healthcheck")).isFalse();
-    assertThat(matcher.matches("http://example.com/health/info")).isFalse();
     assertThat(matcher.matches("http://example.com/health?as=qw")).isTrue();
   }
 
