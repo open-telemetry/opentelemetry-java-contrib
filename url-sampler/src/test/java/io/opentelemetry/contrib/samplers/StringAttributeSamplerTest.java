@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UrlSamplerTest {
+class StringAttributeSamplerTest {
   private static final String SPAN_NAME = "MySpanName";
   private static final SpanKind SPAN_KIND = SpanKind.SERVER;
   private final IdGenerator idsGenerator = IdGenerator.random();
@@ -65,19 +65,19 @@ class UrlSamplerTest {
   @Test
   public void testThatThrowsOnNullParameter() {
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new UrlSampler(patterns, SPAN_KIND, null));
+        .isThrownBy(() -> new StringAttributeSampler(patterns, SPAN_KIND, null));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new UrlSampler(null, SPAN_KIND, delegate));
+        .isThrownBy(() -> new StringAttributeSampler(null, SPAN_KIND, delegate));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new UrlSampler(patterns, null, delegate));
+        .isThrownBy(() -> new StringAttributeSampler(patterns, null, delegate));
 
   }
 
   @Test
   public void testThatDelegatesIfNoPatternsGiven() {
-    UrlSampler sampler = new UrlSampler(emptyMap(), SPAN_KIND, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(emptyMap(), SPAN_KIND, delegate);
 
     // no http.url attribute
     Attributes attributes = Attributes.empty();
@@ -96,14 +96,14 @@ class UrlSamplerTest {
 
   @Test
   public void testDropOnExactMatch() {
-    UrlSampler sampler = new UrlSampler(patterns, SPAN_KIND, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(patterns, SPAN_KIND, delegate);
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
 
   @Test
   public void testDelegateOnDifferentKind() {
-    UrlSampler sampler = new UrlSampler(patterns, SpanKind.CLIENT, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(patterns, SpanKind.CLIENT, delegate);
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -111,7 +111,7 @@ class UrlSamplerTest {
 
   @Test
   public void testDelegateOnNoMatch() {
-    UrlSampler sampler = new UrlSampler(patterns, SPAN_KIND, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(patterns, SPAN_KIND, delegate);
     assertThat(shouldSample(sampler, "https://example.com/customers").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -119,7 +119,7 @@ class UrlSamplerTest {
 
   @Test
   public void testDelegateOnMalformedUrl() {
-    UrlSampler sampler = new UrlSampler(patterns, SPAN_KIND, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(patterns, SPAN_KIND, delegate);
     assertThat(shouldSample(sampler, "abracadabra").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -133,7 +133,7 @@ class UrlSamplerTest {
 
   @Test
   public void testVerifiesAllGivenAttributes() {
-    UrlSampler sampler = new UrlSampler(patterns, SPAN_KIND, delegate);
+    StringAttributeSampler sampler = new StringAttributeSampler(patterns, SPAN_KIND, delegate);
     Attributes attributes = Attributes.of(HTTP_TARGET, "/actuator/info");
     assertThat(sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList()).getDecision())
         .isEqualTo(SamplingDecision.DROP);

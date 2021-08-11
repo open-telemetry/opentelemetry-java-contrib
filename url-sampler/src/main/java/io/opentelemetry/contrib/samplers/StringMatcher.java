@@ -4,10 +4,15 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class UrlMatcher {
+/**
+ * Pretty trivial regex string matcher using {@link Pattern}.
+ *
+ * The only caveat is that patterns are automatically expanded to end with ".*" unless they already ends with "$".
+ */
+class StringMatcher {
   private final Collection<Pattern> patterns;
 
-  public UrlMatcher(Collection<String> patterns) {
+  public StringMatcher(Collection<String> patterns) {
     this.patterns = patterns.stream()
         .map(p -> p.endsWith("$") ? p : (p + ".*"))
         .map(Pattern::compile)
@@ -15,27 +20,17 @@ class UrlMatcher {
   }
 
   public boolean matches(String url) {
-//    String path = extractPath(url);
-    String path = url;
     for (Pattern pattern : patterns) {
-      if (pattern.matcher(path).matches()) {
+      if (pattern.matcher(url).matches()) {
         return true;
       }
     }
     return false;
   }
 
-  private String extractPath(String url) {
-    int startOfQueryString = url.indexOf('?');
-    int i = url.indexOf("//");
-    int afterSchema = (i == -1) ? 0 : (i + 2);
-    int startOfPath = url.indexOf('/', afterSchema);
-    return url.substring(startOfPath == -1 ? 0 : startOfPath, startOfQueryString == -1 ? url.length() : startOfQueryString);
-  }
-
   @Override
   public String toString() {
-    return "UrlMatcher{" +
+    return "StringMatcher{" +
            "patterns=" + patterns +
            '}';
   }
