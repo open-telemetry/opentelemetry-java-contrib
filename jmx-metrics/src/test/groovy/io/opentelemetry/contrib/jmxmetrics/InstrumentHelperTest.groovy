@@ -1,31 +1,19 @@
 /*
  * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.opentelemetry.contrib.jmxmetrics
 
-
+import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_GAUGE
-import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
-import io.opentelemetry.api.metrics.common.Labels
-import io.opentelemetry.api.metrics.GlobalMetricsProvider
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.metrics.GlobalMeterProvider
 import javax.management.MBeanServer
 import javax.management.ObjectName
 import javax.management.remote.JMXConnectorServer
@@ -96,7 +84,7 @@ class InstrumentHelperTest extends Specification {
     }
 
     def exportMetrics() {
-        def provider = GlobalMetricsProvider.get().get(name.methodName, '')
+        def provider = GlobalMeterProvider.get().get(name.methodName, '')
         return provider.collectAll(0).sort { md1, md2 ->
             def p1 = md1.data.points[0]
             def p2 = md2.data.points[0]
@@ -146,7 +134,7 @@ class InstrumentHelperTest extends Specification {
             assert metric.type == metricType
             assert metric.data.points.size() == isSingle ? 1 : 4
             metric.data.points.eachWithIndex { point, i ->
-                assert point.labels == Labels.of("labelOne", "labelOneValue", "labelTwo", "${i}")
+                assert point.attributes == Attributes.of(stringKey("labelOne"), "labelOneValue", stringKey("labelTwo"), "${i}".toString())
 
                 if (metricType == SUMMARY) {
                     assert point.count == 1

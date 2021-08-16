@@ -1,39 +1,27 @@
 /*
  * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.opentelemetry.contrib.jmxmetrics
 
+import static org.awaitility.Awaitility.await
+
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
-import io.opentelemetry.proto.common.v1.StringKeyValue
-import io.opentelemetry.proto.metrics.v1.DoubleGauge
+import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.metrics.v1.Gauge
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
-import io.opentelemetry.proto.metrics.v1.IntGauge
-import io.opentelemetry.proto.metrics.v1.IntSum
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import io.opentelemetry.proto.metrics.v1.Sum
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -42,31 +30,25 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/jvm-and-kafka.properties',  otlpPort, 0, false)
 
-        expect:
-        when: 'we receive metrics from the JMX metrics gatherer'
-        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
-        then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        ArrayList<Metric> metrics
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
+            List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+            assert receivedMetrics.size() == 1
 
-        when: "we examine the received metric's instrumentation library metrics lists"
-        ResourceMetrics receivedMetric = receivedMetrics.get(0)
-        List<InstrumentationLibraryMetrics> ilMetrics =
-                receivedMetric.instrumentationLibraryMetricsList
-        then: 'they of the expected size'
-        ilMetrics.size() == 1
+            ResourceMetrics receivedMetric = receivedMetrics.get(0)
+            List<InstrumentationLibraryMetrics> ilMetrics =
+                    receivedMetric.instrumentationLibraryMetricsList
+            assert ilMetrics.size() == 1
 
-        when: 'we examine the instrumentation library'
-        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-        InstrumentationLibrary il = ilMetric.instrumentationLibrary
-        then: 'it is of the expected content'
-        il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '1.0.0-alpha'
+            InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+            InstrumentationLibrary il = ilMetric.instrumentationLibrary
+            assert il.name  == 'io.opentelemetry.contrib.jmxmetrics'
+            assert il.version == '1.0.0-alpha'
 
-        when: 'we examine the instrumentation library metric metrics list'
-        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
-        metrics.sort{ a, b -> a.name <=> b.name}
-        then: 'they are of the expected size and content'
-        metrics.size() == 37
+            metrics = ilMetric.metricsList as ArrayList
+            metrics.sort{ a, b -> a.name <=> b.name}
+            assert metrics.size() == 37
+        }
 
         def expectedMetrics = [
             [
@@ -74,7 +56,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                 'number of loaded classes',
                 '1',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.gc.collections.count',
@@ -84,7 +66,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Young Generation",
                     "G1 Old Generation",
                 ],
-                IntSum
+                Sum
             ],
             [
                 'jvm.gc.collections.elapsed',
@@ -94,63 +76,63 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Young Generation",
                     "G1 Old Generation",
                 ],
-                IntSum
+                Sum
             ],
             [
                 'jvm.memory.heap.committed',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.init',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.max',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.heap.used',
                 'current heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.committed',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.init',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.max',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.nonheap.used',
                 'current non-heap usage',
                 'by',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.committed',
@@ -166,7 +148,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.init',
@@ -182,7 +164,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.max',
@@ -198,7 +180,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.memory.pool.used',
@@ -214,161 +196,161 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
                     "G1 Survivor Space",
                     "Metaspace",
                 ],
-                IntGauge
+                Gauge
             ],
             [
                 'jvm.threads.count',
                 'number of threads',
                 '1',
                 [],
-                IntGauge
+                Gauge
             ],
             [
                 'kafka.bytes.in',
                 'bytes in per second from clients',
                 'by',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.bytes.out',
                 'bytes out per second to clients',
                 'by',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.controller.active.count',
                 'controller is active on broker',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.99p',
                 'fetch consumer request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.consumer.total.time.count',
                 'fetch consumer request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.fetch.consumer.total.time.median',
                 'fetch consumer request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.follower.total.time.99p',
                 'fetch follower request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.fetch.follower.total.time.count',
                 'fetch follower request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.fetch.follower.total.time.median',
                 'fetch follower request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.isr.expands',
                 'in-sync replica expands per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.isr.shrinks',
                 'in-sync replica shrinks per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.leader.election.rate',
                 'leader election rate - non-zero indicates broker failures',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.max.lag',
                 'max lag in messages between follower and leader replicas',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.messages.in',
                 'number of messages in per second',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.partitions.offline.count',
                 'number of partitions without an active leader',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.partitions.underreplicated.count',
                 'number of under replicated partitions',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.produce.total.time.99p',
                 'produce request time - 99th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.produce.total.time.count',
                 'produce request count',
                 '1',
                 [],
-                IntSum,
+                Sum,
             ],
             [
                 'kafka.produce.total.time.median',
                 'produce request time - 50th percentile',
                 'ms',
                 [],
-                DoubleGauge,
+                Gauge,
             ],
             [
                 'kafka.request.queue',
                 'size of the request queue',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
             [
                 'kafka.unclean.election.rate',
                 'unclean leader election rate - non-zero indicates broker failures',
                 '1',
                 [],
-                IntGauge,
+                Gauge,
             ],
         ].eachWithIndex{ item, index ->
             def expectedType = item[4]
@@ -380,17 +362,13 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
             def datapoints
             switch(expectedType) {
-                case IntGauge :
-                    assert metric.hasIntGauge()
-                    datapoints = metric.intGauge
-                    break
-                case DoubleGauge :
-                    assert metric.hasDoubleGauge()
-                    datapoints = metric.doubleGauge
+                case Gauge :
+                    assert metric.hasGauge()
+                    datapoints = metric.gauge
                     break
                 default:
-                    assert metric.hasIntSum()
-                    datapoints = metric.intSum
+                    assert metric.hasSum()
+                    datapoints = metric.sum
             }
 
             def expectedLabelCount = item[3].size()
@@ -401,11 +379,11 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
 
             (0..<expectedDatapointCount).each { i ->
                 def datapoint = datapoints.getDataPoints(i)
-                List<StringKeyValue> labels = datapoint.labelsList
+                List<KeyValue> labels = datapoint.attributesList
                 if (expectedLabelCount != 0) {
                     assert labels.size() == 1
                     assert labels[0].key == 'name'
-                    def value = labels[0].value
+                    def value = labels[0].value.stringValue
                     assert expectedLabels.remove(value)
                 } else {
                     assert labels.size() == 0

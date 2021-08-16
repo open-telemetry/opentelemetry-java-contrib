@@ -1,35 +1,24 @@
 /*
  * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.proto.common.v1.StringKeyValue
+import static org.awaitility.Awaitility.await
+
+import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -38,25 +27,21 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/kafka-producer.properties',  otlpPort, 0, false)
 
-        expect:
-        when: 'we receive metrics from the JMX metric gatherer'
-        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
-        then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        ArrayList<Metric> metrics
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
+            List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+            assert receivedMetrics.size() == 1
 
-        when: "we examine the received metric's instrumentation library metrics lists"
-        ResourceMetrics receivedMetric = receivedMetrics.get(0)
-        List<InstrumentationLibraryMetrics> ilMetrics =
-                receivedMetric.instrumentationLibraryMetricsList
-        then: 'they of the expected size'
-        ilMetrics.size() == 1
+            ResourceMetrics receivedMetric = receivedMetrics.get(0)
+            List<InstrumentationLibraryMetrics> ilMetrics =
+                    receivedMetric.instrumentationLibraryMetricsList
+            assert ilMetrics.size() == 1
 
-        when: 'we examine the instrumentation library metric metrics list'
-        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
-        metrics.sort{ a, b -> a.name <=> b.name}
-        then: 'they are of the expected size and content'
-        metrics.size() == 10
+            InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+            metrics = ilMetric.metricsList as ArrayList
+            metrics.sort{ a, b -> a.name <=> b.name}
+            metrics.size() == 10
+        }
 
         [
             [
@@ -125,8 +110,8 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
             assert metric.description == item[1]
             assert metric.unit == item[2]
 
-            assert metric.hasDoubleGauge()
-            def datapoints = metric.doubleGauge
+            assert metric.hasGauge()
+            def datapoints = metric.gauge
 
             Map<String, String> expectedLabels = item[3]
             def expectedLabelCount = expectedLabels.size()
@@ -135,7 +120,7 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             def datapoint = datapoints.getDataPoints(0)
 
-            List<StringKeyValue> labels = datapoint.labelsList
+            List<KeyValue> labels = datapoint.attributesList
             assert labels.size() == expectedLabelCount
 
             (0..<expectedLabelCount).each { j ->
@@ -143,7 +128,7 @@ class KafkaProducerTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 assert expectedLabels.containsKey(key)
                 def value = expectedLabels[key]
                 if (!value.empty) {
-                    def actual = labels[j].value
+                    def actual = labels[j].value.stringValue
                     assert value.contains(actual)
                     value.remove(actual)
                     if (value.empty) {

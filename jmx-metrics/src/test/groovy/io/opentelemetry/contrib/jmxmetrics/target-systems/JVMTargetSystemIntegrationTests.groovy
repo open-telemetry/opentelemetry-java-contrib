@@ -1,39 +1,27 @@
 /*
  * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.opentelemetry.contrib.jmxmetrics
 
-import io.opentelemetry.proto.metrics.v1.IntGauge
-import io.opentelemetry.proto.metrics.v1.IntSum
+import static org.awaitility.Awaitility.await
 
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
-import io.opentelemetry.proto.common.v1.StringKeyValue
+import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
+import io.opentelemetry.proto.metrics.v1.IntGauge
+import io.opentelemetry.proto.metrics.v1.IntSum
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
+import java.util.concurrent.TimeUnit
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
-import spock.lang.Retry
 import spock.lang.Timeout
 
 @Requires({
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-@Retry
 class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
     def 'end to end'() {
@@ -42,31 +30,26 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
         Testcontainers.exposeHostPorts(otlpPort)
         configureContainers('target-systems/jvm.properties',  otlpPort, 0, false)
 
-        expect:
-        when: 'we receive metrics from the JMX metrics gatherer'
-        List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
-        then: 'they are of the expected size'
-        receivedMetrics.size() == 1
+        ArrayList<Metric> metrics
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
+            List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
+            assert receivedMetrics.size() == 1
 
-        when: "we examine the received metric's instrumentation library metrics lists"
-        ResourceMetrics receivedMetric = receivedMetrics.get(0)
-        List<InstrumentationLibraryMetrics> ilMetrics =
-                receivedMetric.instrumentationLibraryMetricsList
-        then: 'they of the expected size'
-        ilMetrics.size() == 1
+            ResourceMetrics receivedMetric = receivedMetrics.get(0)
+            List<InstrumentationLibraryMetrics> ilMetrics =
+                    receivedMetric.instrumentationLibraryMetricsList
+            assert ilMetrics.size() == 1
 
-        when: 'we examine the instrumentation library'
-        InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
-        InstrumentationLibrary il = ilMetric.instrumentationLibrary
-        then: 'it is of the expected content'
-        il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '1.0.0-alpha'
+            InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
+            InstrumentationLibrary il = ilMetric.instrumentationLibrary
+            assert il.name  == 'io.opentelemetry.contrib.jmxmetrics'
+            assert il.version == '1.0.0-alpha'
 
-        when: 'we examine the instrumentation library metric metrics list'
-        ArrayList<Metric> metrics = ilMetric.metricsList as ArrayList
-        metrics.sort{ a, b -> a.name <=> b.name}
-        then: 'they are of the expected size and content'
-        metrics.size() == 16
+            when: 'we examine the instrumentation library metric metrics list'
+            metrics = ilMetric.metricsList as ArrayList
+            metrics.sort{ a, b -> a.name <=> b.name}
+            assert metrics.size() == 16
+        }
 
         def expectedMetrics = [
             [
@@ -225,11 +208,11 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             def datapoints
             if (expectedType == IntGauge) {
-                assert metric.hasIntGauge()
-                datapoints = metric.intGauge
+                assert metric.hasGauge()
+                datapoints = metric.gauge
             } else {
-                assert metric.hasIntSum()
-                datapoints = metric.intSum
+                assert metric.hasSum()
+                datapoints = metric.sum
             }
             def expectedLabelCount = item[3].size()
             def expectedLabels = item[3] as Set
@@ -239,11 +222,11 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
 
             (0..<expectedDatapointCount).each { i ->
                 def datapoint = datapoints.getDataPoints(i)
-                List<StringKeyValue> labels = datapoint.labelsList
+                List<KeyValue> labels = datapoint.attributesList
                 if (expectedLabelCount != 0) {
                     assert labels.size() == 1
                     assert labels[0].key == 'name'
-                    def value = labels[0].value
+                    def value = labels[0].value.stringValue
                     assert expectedLabels.remove(value)
                 } else {
                     assert labels.size() == 0
