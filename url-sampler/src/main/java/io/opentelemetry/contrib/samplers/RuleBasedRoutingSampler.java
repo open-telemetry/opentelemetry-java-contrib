@@ -18,17 +18,21 @@ import java.util.Objects;
  * Every rule describes a span's attribute, a pattern against which to match attribute's value, and a sampler that
  * will make a decision about given span if match was successful.
  * <p>
- * If none of the rules matched, the default delegate sampler will make a decision.
+ * If none of the rules matched, the default falback sampler will make a decision.
  */
 public class RuleBasedRoutingSampler implements Sampler {
   private final List<SamplingRule> rules;
   private final SpanKind kind;
-  private final Sampler delegate;
+  private final Sampler fallback;
 
-  public RuleBasedRoutingSampler(List<SamplingRule> rules, SpanKind kind, Sampler defaultDelegate) {
+  RuleBasedRoutingSampler(List<SamplingRule> rules, SpanKind kind, Sampler fallback) {
     this.kind = Objects.requireNonNull(kind);
-    this.delegate = Objects.requireNonNull(defaultDelegate);
+    this.fallback = Objects.requireNonNull(fallback);
     this.rules = Objects.requireNonNull(rules);
+  }
+
+  public RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback){
+    return new RuleBasedRoutingSamplerBuilder(kind, fallback);
   }
 
   @Override
@@ -40,7 +44,7 @@ public class RuleBasedRoutingSampler implements Sampler {
       Attributes attributes,
       List<LinkData> parentLinks) {
     if (kind != spanKind) {
-      return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+      return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
     for (SamplingRule samplingRule : rules) {
       String attributeValue = attributes.get(samplingRule.attributeKey);
@@ -51,7 +55,7 @@ public class RuleBasedRoutingSampler implements Sampler {
         return samplingRule.delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
       }
     }
-    return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+    return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
   }
 
   @Override
@@ -64,7 +68,7 @@ public class RuleBasedRoutingSampler implements Sampler {
     return "RuleBasedRoutingSampler{" +
            "rules=" + rules +
            ", kind=" + kind +
-           ", delegate=" + delegate +
+           ", fallback=" + fallback +
            '}';
   }
 }

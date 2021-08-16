@@ -11,13 +11,9 @@ public class RuleBasedRoutingSamplerBuilder {
   private final SpanKind kind;
   private final Sampler defaultDelegate;
 
-  public RuleBasedRoutingSamplerBuilder(SpanKind kind, Sampler defaultDelegate) {
+  RuleBasedRoutingSamplerBuilder(SpanKind kind, Sampler defaultDelegate) {
     this.kind = kind;
     this.defaultDelegate = defaultDelegate;
-  }
-
-  public RuleBasedRoutingSampler build(){
-    return new RuleBasedRoutingSampler(rules, kind, defaultDelegate);
   }
 
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern){
@@ -28,6 +24,10 @@ public class RuleBasedRoutingSamplerBuilder {
   public RuleBasedRoutingSamplerBuilder recordAndSample(AttributeKey<String> attributeKey, String pattern){
     rules.add(new SamplingRule(attributeKey, pattern, Sampler.alwaysOn()));
     return this;
+  }
+
+  public RuleBasedRoutingSampler build(){
+    return new RuleBasedRoutingSampler(rules, kind, defaultDelegate);
   }
 
 }

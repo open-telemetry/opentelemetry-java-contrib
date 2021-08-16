@@ -5,16 +5,11 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "Sampler which makes its decision based on http.url semantic attribute"
-
-repositories {
-  mavenCentral()
-}
+description = "Sampler which makes its decision based on semantic attributes values"
 
 dependencies {
-  implementation("io.opentelemetry:opentelemetry-sdk")
-  implementation("io.opentelemetry:opentelemetry-semconv")
-  implementation("org.slf4j:slf4j-simple")
+  api("io.opentelemetry:opentelemetry-sdk")
+  api("io.opentelemetry:opentelemetry-semconv")
 }
 
 tasks {
