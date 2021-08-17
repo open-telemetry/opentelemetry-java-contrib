@@ -7,11 +7,12 @@ package io.opentelemetry.contrib.jmxmetrics
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
 import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.common.v1.StringKeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
-import io.opentelemetry.proto.metrics.v1.Summary
-import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
+import io.opentelemetry.proto.metrics.v1.Gauge
+import io.opentelemetry.proto.metrics.v1.NumberDataPoint
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
@@ -35,14 +36,14 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         when: 'we receive metrics from the JMX metrics gatherer'
         List<ResourceMetrics> receivedMetrics = collector.receivedMetrics
         then: 'they are of the expected size'
-        receivedMetrics.size() == 46
+        receivedMetrics.size() == 1
 
         when: "we examine the received metric's instrumentation library metrics lists"
         ResourceMetrics receivedMetric = receivedMetrics.get(0)
         List<InstrumentationLibraryMetrics> ilMetrics =
                 receivedMetric.instrumentationLibraryMetricsList
         then: 'they of the expected size'
-        ilMetrics.size() == 46
+        ilMetrics.size() == 1
 
         when: 'we examine the instrumentation library'
         InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
@@ -54,7 +55,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         when: 'we examine the instrumentation library metric metrics list'
         List<Metric> metrics = ilMetric.metricsList
         then: 'it is of the expected size'
-        metrics.size() == 46
+        metrics.size() == 1
 
         when: 'we examine the metric metadata'
         Metric metric = metrics.get(0)
@@ -62,24 +63,18 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         metric.name == 'cassandra.current_tasks'
         metric.description == 'Number of tasks in queue with the given task status.'
         metric.unit == '1'
-        metric.hasDoubleHistogram()
+        metric.hasGauge()
 
         when: 'we examine the datapoints'
-        Summary datapoints = metric.summary
+        Gauge datapoints = metric.gauge
         then: 'they are of the expected size'
-        datapoints.dataPointsCount == 46
+        datapoints.dataPointsCount == 44
 
         when: 'we example the datapoint labels and sum'
-        SummaryDataPoint datapoint = datapoints.getDataPoints(0)
+        NumberDataPoint datapoint = datapoints.getDataPoints(0)
         List<KeyValue> attributes = datapoint.attributesList
-        def sum = datapoint.sum
         then: 'they are of the expected content'
-        labels.size() == 46
-        labels.get(0) == StringKeyValue.newBuilder().setKey("myKey").setValue("myVal").build()
-
-        datapoint.count == 46
-        datapoint.getBucketCounts(0).value == sum
-        datapoint.getBucketCounts(1).value == sum
+        attributes.size() == 2
 
         cleanup:
         targetContainers.each { it.stop() }
