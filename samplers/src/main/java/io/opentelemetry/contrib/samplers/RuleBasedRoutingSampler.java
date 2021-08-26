@@ -19,7 +19,9 @@ import java.util.Objects;
  * attribute's value, and a sampler that will make a decision about given span if match was
  * successful.
  *
- * <p>If none of the rules matched, the default falback sampler will make a decision.
+ * <p>Matching is performed by {@link java.util.regex.Pattern}.
+ *
+ * <p>If none of the rules matched, the default fallback sampler will make a decision.
  */
 public class RuleBasedRoutingSampler implements Sampler {
   private final List<SamplingRule> rules;
