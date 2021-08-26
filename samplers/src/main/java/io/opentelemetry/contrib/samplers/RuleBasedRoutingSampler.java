@@ -14,11 +14,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed spans against those rules.
- * Every rule describes a span's attribute, a pattern against which to match attribute's value, and a sampler that
- * will make a decision about given span if match was successful.
- * <p>
- * If none of the rules matched, the default falback sampler will make a decision.
+ * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed spans
+ * against those rules. Every rule describes a span's attribute, a pattern against which to match
+ * attribute's value, and a sampler that will make a decision about given span if match was
+ * successful.
+ *
+ * <p>If none of the rules matched, the default falback sampler will make a decision.
  */
 public class RuleBasedRoutingSampler implements Sampler {
   private final List<SamplingRule> rules;
@@ -31,7 +32,7 @@ public class RuleBasedRoutingSampler implements Sampler {
     this.rules = Objects.requireNonNull(rules);
   }
 
-  public RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback){
+  public RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback) {
     return new RuleBasedRoutingSamplerBuilder(kind, fallback);
   }
 
@@ -52,7 +53,8 @@ public class RuleBasedRoutingSampler implements Sampler {
         continue;
       }
       if (samplingRule.pattern.matcher(attributeValue).find()) {
-        return samplingRule.delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+        return samplingRule.delegate.shouldSample(
+            parentContext, traceId, name, spanKind, attributes, parentLinks);
       }
     }
     return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
@@ -65,10 +67,13 @@ public class RuleBasedRoutingSampler implements Sampler {
 
   @Override
   public String toString() {
-    return "RuleBasedRoutingSampler{" +
-           "rules=" + rules +
-           ", kind=" + kind +
-           ", fallback=" + fallback +
-           '}';
+    return "RuleBasedRoutingSampler{"
+        + "rules="
+        + rules
+        + ", kind="
+        + kind
+        + ", fallback="
+        + fallback
+        + '}';
   }
 }

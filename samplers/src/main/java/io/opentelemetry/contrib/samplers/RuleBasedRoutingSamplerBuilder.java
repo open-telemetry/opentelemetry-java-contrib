@@ -1,3 +1,7 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package io.opentelemetry.contrib.samplers;
 
 import io.opentelemetry.api.common.AttributeKey;
@@ -16,18 +20,18 @@ public class RuleBasedRoutingSamplerBuilder {
     this.defaultDelegate = defaultDelegate;
   }
 
-  public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern){
+  public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
     rules.add(new SamplingRule(attributeKey, pattern, Sampler.alwaysOff()));
     return this;
   }
 
-  public RuleBasedRoutingSamplerBuilder recordAndSample(AttributeKey<String> attributeKey, String pattern){
+  public RuleBasedRoutingSamplerBuilder recordAndSample(
+      AttributeKey<String> attributeKey, String pattern) {
     rules.add(new SamplingRule(attributeKey, pattern, Sampler.alwaysOn()));
     return this;
   }
 
-  public RuleBasedRoutingSampler build(){
+  public RuleBasedRoutingSampler build() {
     return new RuleBasedRoutingSampler(rules, kind, defaultDelegate);
   }
-
 }

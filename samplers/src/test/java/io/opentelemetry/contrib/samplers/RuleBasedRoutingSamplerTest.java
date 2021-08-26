@@ -68,7 +68,6 @@ class RuleBasedRoutingSamplerTest {
 
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(() -> new RuleBasedRoutingSampler(patterns, null, delegate));
-
   }
 
   @Test
@@ -99,7 +98,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   public void testDelegateOnDifferentKind() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SpanKind.CLIENT, delegate);
+    RuleBasedRoutingSampler sampler =
+        new RuleBasedRoutingSampler(patterns, SpanKind.CLIENT, delegate);
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -131,7 +131,10 @@ class RuleBasedRoutingSamplerTest {
   public void testVerifiesAllGivenAttributes() {
     RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
     Attributes attributes = Attributes.of(HTTP_TARGET, "/actuator/info");
-    assertThat(sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList()).getDecision())
+    assertThat(
+            sampler
+                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
 
