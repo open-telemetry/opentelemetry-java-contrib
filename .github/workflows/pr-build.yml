@@ -1,9 +1,6 @@
 name: "PR Build"
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -22,27 +19,19 @@ jobs:
           distribution: adopt
           java-version: 11
       - uses: burrunan/gradle-cache-action@v1
-        name: ./gradlew lint
+        name: Build
         with:
-          arguments: --stacktrace lint
-          gradle-version: wrapper
-          job-id: java-contrib
+          arguments: --stacktrace build
           remote-build-cache-proxy-enabled: false
-      - name: ./gradlew assemble
-        run: ./gradlew --stacktrace assemble
-      - name: ./gradlew build
-        run: ./gradlew --stacktrace --max-workers 2 build
-        timeout-minutes: 5
       - uses: actions/upload-artifact@v2
         name: Save unit test results
         if: always()
         with:
           name: test-results
-          path: contrib/jmx-metrics/build/reports/tests/test
+          path: jmx-metrics/build/reports/tests/test
   integration-test:
     name: integration-test
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v2
         with:
@@ -53,17 +42,13 @@ jobs:
           distribution: adopt
           java-version: 11
       - uses: burrunan/gradle-cache-action@v1
-        name: ./gradlew integrationTest
-        id: integration-test
-        timeout-minutes: 10
+        name: Integration Tests
         with:
-          arguments: --stacktrace --max-workers 2 integrationTest
-          gradle-version: wrapper
-          job-id: java-contrib
+          arguments: --stacktrace integrationTest
           remote-build-cache-proxy-enabled: false
       - uses: actions/upload-artifact@v2
         name: Save integrationTest results
         if: always()
         with:
           name: integration-test-results
-          path: contrib/jmx-metrics/build/reports/tests/test
+          path: jmx-metrics/build/reports/tests/test

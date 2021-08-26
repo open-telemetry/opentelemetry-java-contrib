@@ -1,9 +1,0 @@
-rootProject.name = 'opentelemetry-java-contrib'
-
-include ':example'
-include ':jmx-metrics'
-
-rootProject.children.each {
-    it.projectDir = "${rootDir}/contrib/" + it.name as File
-    it.buildFileName = "${it.name}.gradle"
-}
