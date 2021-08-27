@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed spans
+ * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed span
  * against those rules. Every rule describes a span's attribute, a pattern against which to match
  * attribute's value, and a sampler that will make a decision about given span if match was
  * successful.
@@ -23,7 +23,7 @@ import java.util.Objects;
  *
  * <p>If none of the rules matched, the default fallback sampler will make a decision.
  */
-public class RuleBasedRoutingSampler implements Sampler {
+public final class RuleBasedRoutingSampler implements Sampler {
   private final List<SamplingRule> rules;
   private final SpanKind kind;
   private final Sampler fallback;
@@ -34,7 +34,7 @@ public class RuleBasedRoutingSampler implements Sampler {
     this.rules = Objects.requireNonNull(rules);
   }
 
-  public RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback) {
+  public static RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback) {
     return new RuleBasedRoutingSamplerBuilder(kind, fallback);
   }
 

@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RuleBasedRoutingSamplerBuilder {
+public final class RuleBasedRoutingSamplerBuilder {
   private final List<SamplingRule> rules = new ArrayList<>();
   private final SpanKind kind;
   private final Sampler defaultDelegate;
