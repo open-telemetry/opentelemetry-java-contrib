@@ -68,11 +68,34 @@ class RuleBasedRoutingSamplerTest {
 
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(() -> new RuleBasedRoutingSampler(patterns, null, delegate));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> RuleBasedRoutingSampler.builder(SPAN_KIND, null));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> RuleBasedRoutingSampler.builder(null, delegate));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(null, ""));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(HTTP_URL, null));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).recordAndSample(null, ""));
+
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () ->
+                RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
+                    .recordAndSample(HTTP_URL, null));
   }
 
   @Test
-  public void testThatDelegatesIfNoPatternsGiven() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(emptyList(), SPAN_KIND, delegate);
+  public void testThatDelegatesIfNoRulesGiven() {
+    RuleBasedRoutingSampler sampler = RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).build();
 
     // no http.url attribute
     Attributes attributes = Attributes.empty();
@@ -91,7 +114,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   public void testDropOnExactMatch() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    RuleBasedRoutingSampler sampler =
+        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
@@ -99,7 +123,7 @@ class RuleBasedRoutingSamplerTest {
   @Test
   public void testDelegateOnDifferentKind() {
     RuleBasedRoutingSampler sampler =
-        new RuleBasedRoutingSampler(patterns, SpanKind.CLIENT, delegate);
+        addRules(RuleBasedRoutingSampler.builder(SpanKind.CLIENT, delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -107,7 +131,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   public void testDelegateOnNoMatch() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    RuleBasedRoutingSampler sampler =
+        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/customers").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -115,7 +140,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   public void testDelegateOnMalformedUrl() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    RuleBasedRoutingSampler sampler =
+        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
     assertThat(shouldSample(sampler, "abracadabra").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -129,7 +155,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   public void testVerifiesAllGivenAttributes() {
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    RuleBasedRoutingSampler sampler =
+        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
     Attributes attributes = Attributes.of(HTTP_TARGET, "/actuator/info");
     assertThat(
             sampler
@@ -142,5 +169,9 @@ class RuleBasedRoutingSamplerTest {
     Attributes attributes = Attributes.of(HTTP_URL, url);
     return sampler.shouldSample(
         parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+  }
+
+  private RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
+    return builder.drop(HTTP_URL, ".*/healthcheck").drop(HTTP_TARGET, "/actuator");
   }
 }

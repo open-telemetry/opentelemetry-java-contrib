@@ -4,6 +4,8 @@
  */
 package io.opentelemetry.contrib.samplers;
 
+import static java.util.Objects.requireNonNull;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -21,13 +23,17 @@ public final class RuleBasedRoutingSamplerBuilder {
   }
 
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
-    rules.add(new SamplingRule(attributeKey, pattern, Sampler.alwaysOff()));
+    rules.add(
+        new SamplingRule(
+            requireNonNull(attributeKey), requireNonNull(pattern), Sampler.alwaysOff()));
     return this;
   }
 
   public RuleBasedRoutingSamplerBuilder recordAndSample(
       AttributeKey<String> attributeKey, String pattern) {
-    rules.add(new SamplingRule(attributeKey, pattern, Sampler.alwaysOn()));
+    rules.add(
+        new SamplingRule(
+            requireNonNull(attributeKey), requireNonNull(pattern), Sampler.alwaysOn()));
     return this;
   }
 

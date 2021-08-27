@@ -4,6 +4,8 @@
  */
 package io.opentelemetry.contrib.samplers;
 
+import static java.util.Objects.requireNonNull;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -11,13 +13,15 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed span
  * against those rules. Every rule describes a span's attribute, a pattern against which to match
  * attribute's value, and a sampler that will make a decision about given span if match was
  * successful.
+ *
+ * <p>Note that only attributes that were set on {@link io.opentelemetry.api.trace.SpanBuilder} will
+ * be taken into account, attributes set after the span has been started are not used
  *
  * <p>Matching is performed by {@link java.util.regex.Pattern}.
  *
@@ -29,13 +33,13 @@ public final class RuleBasedRoutingSampler implements Sampler {
   private final Sampler fallback;
 
   RuleBasedRoutingSampler(List<SamplingRule> rules, SpanKind kind, Sampler fallback) {
-    this.kind = Objects.requireNonNull(kind);
-    this.fallback = Objects.requireNonNull(fallback);
-    this.rules = Objects.requireNonNull(rules);
+    this.kind = requireNonNull(kind);
+    this.fallback = requireNonNull(fallback);
+    this.rules = requireNonNull(rules);
   }
 
   public static RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback) {
-    return new RuleBasedRoutingSamplerBuilder(kind, fallback);
+    return new RuleBasedRoutingSamplerBuilder(requireNonNull(kind), requireNonNull(fallback));
   }
 
   @Override
@@ -64,11 +68,6 @@ public final class RuleBasedRoutingSampler implements Sampler {
 
   @Override
   public String getDescription() {
-    return toString();
-  }
-
-  @Override
-  public String toString() {
     return "RuleBasedRoutingSampler{"
         + "rules="
         + rules
@@ -77,5 +76,10 @@ public final class RuleBasedRoutingSampler implements Sampler {
         + ", fallback="
         + fallback
         + '}';
+  }
+
+  @Override
+  public String toString() {
+    return getDescription();
   }
 }
