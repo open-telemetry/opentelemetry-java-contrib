@@ -20,10 +20,13 @@ import java.util.List;
  * attribute's value, and a sampler that will make a decision about given span if match was
  * successful.
  *
+ * <p>Matching is performed by {@link java.util.regex.Pattern}.
+ *
+ * <p>Provided span kind is checked first and if differs from the one given to {@link
+ * #builder(SpanKind, Sampler)}, the default fallback sampler will make a decision.
+ *
  * <p>Note that only attributes that were set on {@link io.opentelemetry.api.trace.SpanBuilder} will
  * be taken into account, attributes set after the span has been started are not used
- *
- * <p>Matching is performed by {@link java.util.regex.Pattern}.
  *
  * <p>If none of the rules matched, the default fallback sampler will make a decision.
  */
@@ -39,7 +42,9 @@ public final class RuleBasedRoutingSampler implements Sampler {
   }
 
   public static RuleBasedRoutingSamplerBuilder builder(SpanKind kind, Sampler fallback) {
-    return new RuleBasedRoutingSamplerBuilder(requireNonNull(kind), requireNonNull(fallback));
+    return new RuleBasedRoutingSamplerBuilder(
+        requireNonNull(kind, "span kind must not be null"),
+        requireNonNull(fallback, "fallback sampler must not be null"));
   }
 
   @Override

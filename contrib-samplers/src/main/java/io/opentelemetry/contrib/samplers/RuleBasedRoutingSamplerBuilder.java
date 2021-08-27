@@ -25,7 +25,9 @@ public final class RuleBasedRoutingSamplerBuilder {
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
     rules.add(
         new SamplingRule(
-            requireNonNull(attributeKey), requireNonNull(pattern), Sampler.alwaysOff()));
+            requireNonNull(attributeKey, "attributeKey must not be null"),
+            requireNonNull(pattern, "pattern must not be null"),
+            Sampler.alwaysOff()));
     return this;
   }
 
@@ -33,7 +35,9 @@ public final class RuleBasedRoutingSamplerBuilder {
       AttributeKey<String> attributeKey, String pattern) {
     rules.add(
         new SamplingRule(
-            requireNonNull(attributeKey), requireNonNull(pattern), Sampler.alwaysOn()));
+            requireNonNull(attributeKey, "attributeKey must not be null"),
+            requireNonNull(pattern, "pattern must not be null"),
+            Sampler.alwaysOn()));
     return this;
   }
 

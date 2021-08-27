@@ -19,7 +19,7 @@ rootProject.name = "opentelemetry-java-contrib"
 
 include(":all")
 include(":aws-xray")
+include(":contrib-samplers")
 include(":dependencyManagement")
 include(":example")
 include(":jmx-metrics")
-include(":contrib-samplers")
