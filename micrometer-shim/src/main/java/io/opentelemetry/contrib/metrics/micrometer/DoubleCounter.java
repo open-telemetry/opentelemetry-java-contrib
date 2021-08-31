@@ -12,15 +12,20 @@ import io.opentelemetry.api.metrics.DoubleCounterBuilder;
 import io.opentelemetry.api.metrics.LongCounterBuilder;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.context.Context;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 final class DoubleCounter implements io.opentelemetry.api.metrics.DoubleCounter {
   private final SharedMeterState state;
   private final Reader<Counter.Builder> factory;
+  private final Map<Attributes, Counter> map;
 
   private DoubleCounter(SharedMeterState state, Reader<Counter.Builder> factory) {
     this.state = state;
     this.factory = factory;
+    this.map = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -45,13 +50,13 @@ final class DoubleCounter implements io.opentelemetry.api.metrics.DoubleCounter 
 
   @Override
   public BoundDoubleCounter bind(Attributes attributes) {
-    Tags tags = TagUtils.attributesToTags(attributes);
-    Counter counter = factory.get().tags(tags).register(state.meterRegistry());
+    Counter counter = map.computeIfAbsent(attributes, this::createCounter);
     return new Bound(counter);
   }
 
-  static DoubleCounterBuilder newBuilder(SharedMeterState state, String name) {
-    return new Builder(state, () -> Counter.builder(name));
+  private Counter createCounter(Attributes attributes) {
+    Tags tags = TagUtils.attributesToTags(attributes);
+    return factory.get().tags(tags).register(state.meterRegistry());
   }
 
   static DoubleCounterBuilder newBuilder(SharedMeterState state, Reader<Counter.Builder> factory) {
@@ -90,7 +95,7 @@ final class DoubleCounter implements io.opentelemetry.api.metrics.DoubleCounter 
     @Override
     public void buildWithCallback(Consumer<ObservableDoubleMeasurement> callback) {
       DoubleCounter counter = build();
-      callback.accept(
+      state.registerCallback(() -> callback.accept(
           new ObservableDoubleMeasurement() {
             @Override
             public void observe(double value) {
@@ -101,7 +106,7 @@ final class DoubleCounter implements io.opentelemetry.api.metrics.DoubleCounter 
             public void observe(double value, Attributes attributes) {
               counter.add(value, attributes);
             }
-          });
+          }));
     }
   }
 

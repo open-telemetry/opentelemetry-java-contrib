@@ -13,11 +13,7 @@ import java.util.function.Supplier;
 
 final class LongGauge {
 
-  static LongGaugeBuilder newBuilder(SharedMeterState state, String name) {
-    return newBuilder(state, supplier -> Gauge.builder(name, supplier));
-  }
-
-  public static LongGaugeBuilder newBuilder(
+  static LongGaugeBuilder newBuilder(
       SharedMeterState state, Function<Supplier<Number>, Gauge.Builder<Supplier<Number>>> factory) {
     return new LongGaugeBuilder(state, factory);
   }
@@ -51,7 +47,8 @@ final class LongGauge {
 
     @Override
     public void buildWithCallback(Consumer<ObservableLongMeasurement> callback) {
-      callback.accept(new ObservableGaugeMeasurement(state, factory));
+      ObservableGaugeMeasurement measurement = new ObservableGaugeMeasurement(state, factory);
+      state.registerCallback(() -> callback.accept(measurement));
     }
   }
 }

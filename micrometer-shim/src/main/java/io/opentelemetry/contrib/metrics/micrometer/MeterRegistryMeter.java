@@ -11,6 +11,7 @@ import io.opentelemetry.api.metrics.LongCounterBuilder;
 import io.opentelemetry.api.metrics.LongUpDownCounterBuilder;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterBuilder;
+
 import java.util.function.Supplier;
 
 final class MeterRegistryMeter implements Meter {
@@ -70,9 +71,10 @@ final class MeterRegistryMeter implements Meter {
 
     @Override
     public Meter build() {
+      MeterCallbackFactory callbackFactory = new MeterCallbackFactory(meterRegistrySupplier);
       SharedMeterState state =
           new SharedMeterState(
-              meterRegistrySupplier, instrumentationName, instrumentationVersion, schemaUrl);
+              meterRegistrySupplier, instrumentationName, instrumentationVersion, schemaUrl, callbackFactory);
       return new MeterRegistryMeter(state);
     }
   }

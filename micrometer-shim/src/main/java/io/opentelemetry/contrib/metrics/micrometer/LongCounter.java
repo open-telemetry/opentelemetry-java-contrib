@@ -12,15 +12,20 @@ import io.opentelemetry.api.metrics.DoubleCounterBuilder;
 import io.opentelemetry.api.metrics.LongCounterBuilder;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.context.Context;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 final class LongCounter implements io.opentelemetry.api.metrics.LongCounter {
   private final SharedMeterState state;
   private final Reader<Counter.Builder> factory;
+  private final Map<Attributes, Counter> map;
 
   private LongCounter(SharedMeterState state, Reader<Counter.Builder> factory) {
     this.state = state;
     this.factory = factory;
+    this.map = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -45,9 +50,15 @@ final class LongCounter implements io.opentelemetry.api.metrics.LongCounter {
 
   @Override
   public BoundLongCounter bind(Attributes attributes) {
-    Iterable<Tag> tags = TagUtils.attributesToTags(attributes);
-    Counter counter = factory.get().tags(tags).register(state.meterRegistry());
+    Counter counter = map.computeIfAbsent(attributes, this::createCounter);
     return new Bound(counter);
+  }
+
+  private Counter createCounter(Attributes attributes) {
+    Iterable<Tag> tags = TagUtils.attributesToTags(attributes);
+    return factory.get()
+            .tags(tags)
+            .register(state.meterRegistry());
   }
 
   static LongCounterBuilder newBuilder(SharedMeterState state, String name) {
@@ -79,7 +90,7 @@ final class LongCounter implements io.opentelemetry.api.metrics.LongCounter {
 
     @Override
     public DoubleCounterBuilder ofDoubles() {
-      return null;
+      return DoubleCounter.newBuilder(state, factory);
     }
 
     @Override
@@ -90,18 +101,18 @@ final class LongCounter implements io.opentelemetry.api.metrics.LongCounter {
     @Override
     public void buildWithCallback(Consumer<ObservableLongMeasurement> callback) {
       LongCounter counter = build();
-      callback.accept(
-          new ObservableLongMeasurement() {
-            @Override
-            public void observe(long value) {
-              counter.add(value);
-            }
+      state.registerCallback(() -> callback.accept(
+              new ObservableLongMeasurement() {
+                @Override
+                public void observe(long value) {
+                  counter.add(value);
+                }
 
-            @Override
-            public void observe(long value, Attributes attributes) {
-              counter.add(value, attributes);
-            }
-          });
+                @Override
+                public void observe(long value, Attributes attributes) {
+                  counter.add(value, attributes);
+                }
+              }));
     }
   }
 

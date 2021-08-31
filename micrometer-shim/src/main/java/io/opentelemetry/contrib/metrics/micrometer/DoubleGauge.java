@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.metrics.micrometer;
 import io.micrometer.core.instrument.Gauge;
 import io.opentelemetry.api.metrics.LongGaugeBuilder;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ final class DoubleGauge {
     return newBuilder(state, supplier -> Gauge.builder(name, supplier));
   }
 
-  public static DoubleGaugeBuilder newBuilder(
+  static DoubleGaugeBuilder newBuilder(
       SharedMeterState state, Function<Supplier<Number>, Gauge.Builder<Supplier<Number>>> factory) {
     return new DoubleGaugeBuilder(state, factory);
   }
@@ -51,7 +52,8 @@ final class DoubleGauge {
 
     @Override
     public void buildWithCallback(Consumer<ObservableDoubleMeasurement> callback) {
-      callback.accept(new ObservableGaugeMeasurement(state, factory));
+      ObservableGaugeMeasurement measurement = new ObservableGaugeMeasurement(state, factory);
+      state.registerCallback(() -> callback.accept(measurement));
     }
   }
 }
