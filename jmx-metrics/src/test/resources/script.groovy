@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import io.opentelemetry.api.metrics.common.Labels
+import io.opentelemetry.api.common.Attributes
 
 def loadMatches = otel.queryJmx("org.apache.cassandra.metrics:type=Storage,name=Load")
 def load = loadMatches.first()
 
-def lvr = otel.longValueRecorder(
+def lvr = otel.longHistogram(
         "cassandra.storage.load",
         "Size, in bytes, of the on disk data size this node manages",
         "By"
         )
-lvr.record(load.Count, Labels.of("myKey", "myVal"))
+lvr.record(load.Count, Attributes.builder().put("myKey", "myVal").build())
