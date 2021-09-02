@@ -25,7 +25,7 @@ class KafkaConsumerTargetSystemIntegrationTests extends OtlpIntegrationTest {
         setup: 'we configure JMX metrics gatherer and target server to use Kafka as target system'
         targets = ["kafka-consumer"]
         Testcontainers.exposeHostPorts(otlpPort)
-        configureContainers('target-systems/kafka-consumer.properties',  otlpPort, 0, false)
+        configureContainers('target-systems/kafka-consumer.properties',  otlpPort, 0, false, "script.groovy")
 
         ArrayList<Metric> metrics
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {

@@ -28,7 +28,7 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
         setup: 'we configure JMX metrics gatherer and target server to use JVM as target system'
         targets = ["cassandra"]
         Testcontainers.exposeHostPorts(otlpPort)
-        configureContainers('target-systems/jvm.properties',  otlpPort, 0, false)
+        configureContainers('target-systems/jvm.properties',  otlpPort, 0, false, "script.groovy")
 
         ArrayList<Metric> metrics
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {

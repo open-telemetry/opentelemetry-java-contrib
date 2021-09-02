@@ -28,7 +28,7 @@ class MultipleTargetSystemsIntegrationTests extends OtlpIntegrationTest {
         setup: 'we configure JMX metrics gatherer and target server to use JVM and Kafka as target systems'
         targets = ["kafka"]
         Testcontainers.exposeHostPorts(otlpPort)
-        configureContainers('target-systems/jvm-and-kafka.properties',  otlpPort, 0, false)
+        configureContainers('target-systems/jvm-and-kafka.properties',  otlpPort, 0, false, "script.groovy")
 
         ArrayList<Metric> metrics
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {

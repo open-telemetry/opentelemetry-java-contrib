@@ -16,12 +16,11 @@
 
 import io.opentelemetry.api.metrics.common.Labels
 
-def loadMatches = otel.queryJmx("org.apache.cassandra.metrics:type=Storage,name=Load")
-def load = loadMatches.first()
-
-def lvr = otel.longValueRecorder(
-        "cassandra.storage.load",
-        "Size, in bytes, of the on disk data size this node manages",
-        "By"
-        )
-lvr.record(load.Count, Labels.of("myKey", "myVal"))
+def helper = otel.mbeans([
+    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=*,name=PendingTasks",
+    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=*,name=ActiveTasks"
+])
+otel.instrument(helper, "cassandra.current_tasks", "Number of tasks in queue with the given task status.", "1",
+        ["stage_name":{ mbean -> mbean.name().getKeyProperty("scope")},
+            "task_status":{ mbean -> mbean.name().getKeyProperty("name")}],
+        "Value", otel.&doubleValueObserver)

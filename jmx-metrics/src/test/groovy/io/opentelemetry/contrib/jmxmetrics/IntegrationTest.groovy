@@ -42,10 +42,8 @@ class IntegrationTest extends Specification{
     @Shared
     def jmxExposedPort
 
-    void configureContainers(String configName, int otlpPort, int prometheusPort, boolean configFromStdin) {
+    void configureContainers(String configName, int otlpPort, int prometheusPort, boolean configFromStdin, String scriptName) {
         def jarPath = System.getProperty("shadow.jar.path")
-
-        def scriptName = "script.groovy"
         def scriptPath = ClassLoader.getSystemClassLoader().getResource(scriptName).path
         def configPath = ClassLoader.getSystemClassLoader().getResource(configName).path
         def network = Network.SHARED

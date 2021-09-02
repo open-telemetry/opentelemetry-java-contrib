@@ -10,8 +10,8 @@ import io.opentelemetry.proto.common.v1.KeyValue
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
-import io.opentelemetry.proto.metrics.v1.Summary
-import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
+import io.opentelemetry.proto.metrics.v1.Gauge
+import io.opentelemetry.proto.metrics.v1.NumberDataPoint
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
@@ -21,14 +21,14 @@ import spock.lang.Unroll
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-class OtlpIntegrationTests extends OtlpIntegrationTest {
+class MultiIObjsTest extends OtlpIntegrationTest {
 
     @Unroll
     def 'end to end with stdin config: #useStdin'() {
         setup: 'we configure JMX metrics gatherer and target server'
         targets = ["cassandra"]
         Testcontainers.exposeHostPorts(otlpPort)
-        configureContainers('otlp_config.properties',  otlpPort, 0, useStdin, "script.groovy")
+        configureContainers('otlp_config2.properties',  otlpPort, 0, useStdin, "taskScript.groovy")
 
         expect:
         when: 'we receive metrics from the JMX metrics gatherer'
@@ -58,27 +58,21 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         when: 'we examine the metric metadata'
         Metric metric = metrics.get(0)
         then: 'it is of the expected content'
-        metric.name == 'cassandra.storage.load'
-        metric.description == 'Size, in bytes, of the on disk data size this node manages'
-        metric.unit == 'By'
-        metric.hasSummary()
+        metric.name == 'cassandra.current_tasks'
+        metric.description == 'Number of tasks in queue with the given task status.'
+        metric.unit == '1'
+        metric.hasGauge()
 
         when: 'we examine the datapoints'
-        Summary datapoints = metric.summary
+        Gauge datapoints = metric.gauge
         then: 'they are of the expected size'
-        datapoints.dataPointsCount == 1
+        datapoints.dataPointsCount == 44
 
         when: 'we example the datapoint labels and sum'
-        SummaryDataPoint datapoint = datapoints.getDataPoints(0)
+        NumberDataPoint datapoint = datapoints.getDataPoints(0)
         List<KeyValue> attributes = datapoint.attributesList
-        def sum = datapoint.sum
         then: 'they are of the expected content'
-        attributes.size() == 1
-        attributes.get(0) == KeyValue.newBuilder().setKey("myKey").setValue(AnyValue.newBuilder().setStringValue("myVal")).build()
-
-        datapoint.count == 1
-        datapoint.getQuantileValues(0).value == sum
-        datapoint.getQuantileValues(1).value == sum
+        attributes.size() == 2
 
         cleanup:
         targetContainers.each { it.stop() }
