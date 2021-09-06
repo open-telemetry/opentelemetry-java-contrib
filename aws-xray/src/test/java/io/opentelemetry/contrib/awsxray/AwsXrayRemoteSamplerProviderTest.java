@@ -49,6 +49,8 @@ class AwsXrayRemoteSamplerProviderTest {
 
   @Test
   void setEndpoint() {
+    when(config.getCommaSeparatedMap("otel.resource.attributes"))
+        .thenReturn(Collections.emptyMap());
     when(config.getCommaSeparatedMap("otel.traces.sampler.arg"))
         .thenReturn(Collections.singletonMap("endpoint", "http://localhost:3000"));
     try (AwsXrayRemoteSampler sampler =

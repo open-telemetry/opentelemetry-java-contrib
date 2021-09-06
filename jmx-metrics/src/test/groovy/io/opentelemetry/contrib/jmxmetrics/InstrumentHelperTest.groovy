@@ -28,7 +28,8 @@ import spock.lang.Unroll
 
 class InstrumentHelperTest extends Specification {
 
-    @Rule public final TestRule name = new TestName()
+    @Rule
+    public final TestRule name = new TestName()
 
     @Shared
     MBeanServer mBeanServer
@@ -68,6 +69,7 @@ class InstrumentHelperTest extends Specification {
 
     interface ThingMBean {
         double getDouble()
+
         long getLong()
     }
 
@@ -84,7 +86,7 @@ class InstrumentHelperTest extends Specification {
     }
 
     def exportMetrics() {
-        def provider = GlobalMeterProvider.get().get(name.methodName, '')
+        def provider = GlobalMeterProvider.get().get(name.methodName, '', null)
         return provider.collectAll(0).sort { md1, md2 ->
             def p1 = md1.data.points[0]
             def p2 = md2.data.points[0]
@@ -102,7 +104,8 @@ class InstrumentHelperTest extends Specification {
 
     @Unroll
     def "#instrumentMethod via #quantity MBeanHelper"() {
-        setup: "Create and register four Things and create ${quantity} MBeanHelper"
+        setup:
+        "Create and register four Things and create ${quantity} MBeanHelper"
         def thingName = "${quantity}:type=${instrumentMethod}.Thing"
         def things = (0..3).collect { new Thing() }
         things.eachWithIndex { thing, i ->
@@ -119,7 +122,7 @@ class InstrumentHelperTest extends Specification {
         def instrument = otel.&"${instrumentMethod}"
         def instrumentHelper = new InstrumentHelper(
                 mbeanHelper, instrumentName, description, "1",
-                ["labelOne" : { "labelOneValue"}, "labelTwo": { mbean -> mbean.name().getKeyProperty("thing") }],
+                ["labelOne": { "labelOneValue" }, "labelTwo": { mbean -> mbean.name().getKeyProperty("thing") }],
                 attribute, instrument)
         instrumentHelper.update()
 
@@ -133,6 +136,7 @@ class InstrumentHelperTest extends Specification {
             assert metric.unit == "1"
             assert metric.type == metricType
             assert metric.data.points.size() == isSingle ? 1 : 4
+            metric.data.points.sort { a, b -> String.compare(a.attributes.get(stringKey("labelTwo")), b.attributes.get(stringKey("labelTwo"))) }
             metric.data.points.eachWithIndex { point, i ->
                 assert point.attributes == Attributes.of(stringKey("labelOne"), "labelOneValue", stringKey("labelTwo"), "${i}".toString())
 
@@ -150,36 +154,37 @@ class InstrumentHelperTest extends Specification {
         }
 
         where:
-        isSingle | quantity | attribute | instrumentMethod | metricType | value
-        true | "single" | "Double" | "doubleCounter" | DOUBLE_SUM | 123.456
-        false | "multiple" | "Double" | "doubleCounter" | DOUBLE_SUM | 123.456
-        true | "single" | "Double" | "doubleUpDownCounter" | DOUBLE_SUM | 123.456
-        false | "multiple" | "Double" | "doubleUpDownCounter" | DOUBLE_SUM | 123.456
-        true | "single" | "Long" | "longCounter" | LONG_SUM | 234
-        false | "multiple" | "Long" | "longCounter" | LONG_SUM | 234
-        true | "single" | "Long" | "longUpDownCounter" | LONG_SUM | 234
-        false | "multiple" | "Long" | "longUpDownCounter" | LONG_SUM | 234
-        true | "single" | "Double" | "doubleValueRecorder" | SUMMARY | 123.456
-        false | "multiple" | "Double" | "doubleValueRecorder" | SUMMARY | 123.456
-        true | "single" | "Long" | "longValueRecorder" | SUMMARY | 234
-        false | "multiple" | "Long" | "longValueRecorder" | SUMMARY | 234
-        true | "single" | "Double" | "doubleSumObserver" | DOUBLE_SUM | 123.456
-        false | "multiple" | "Double" | "doubleSumObserver" | DOUBLE_SUM | 123.456
-        true | "single" | "Double" | "doubleUpDownSumObserver" | DOUBLE_SUM | 123.456
-        false | "multiple" | "Double" | "doubleUpDownSumObserver" | DOUBLE_SUM | 123.456
-        true | "single" | "Long" | "longSumObserver" | LONG_SUM | 234
-        false | "multiple" | "Long" | "longSumObserver" | LONG_SUM | 234
-        true | "single" | "Long" | "longUpDownSumObserver" | LONG_SUM | 234
-        false | "multiple" | "Long" | "longUpDownSumObserver" | LONG_SUM | 234
-        true | "single" | "Double" | "doubleValueObserver" | DOUBLE_GAUGE | 123.456
-        false | "multiple" | "Double" | "doubleValueObserver" | DOUBLE_GAUGE | 123.456
-        true | "single" | "Long" | "longValueObserver" | LONG_GAUGE | 234
-        false | "multiple" | "Long" | "longValueObserver" | LONG_GAUGE | 234
+        isSingle | quantity   | attribute | instrumentMethod              | metricType   | value
+        true     | "single"   | "Double"  | "doubleCounter"               | DOUBLE_SUM   | 123.456
+        false    | "multiple" | "Double"  | "doubleCounter"               | DOUBLE_SUM   | 123.456
+        true     | "single"   | "Double"  | "doubleUpDownCounter"         | DOUBLE_SUM   | 123.456
+        false    | "multiple" | "Double"  | "doubleUpDownCounter"         | DOUBLE_SUM   | 123.456
+        true     | "single"   | "Long"    | "longCounter"                 | LONG_SUM     | 234
+        false    | "multiple" | "Long"    | "longCounter"                 | LONG_SUM     | 234
+        true     | "single"   | "Long"    | "longUpDownCounter"           | LONG_SUM     | 234
+        false    | "multiple" | "Long"    | "longUpDownCounter"           | LONG_SUM     | 234
+        true     | "single"   | "Double"  | "doubleHistogram"             | SUMMARY      | 123.456
+        false    | "multiple" | "Double"  | "doubleHistogram"             | SUMMARY      | 123.456
+        true     | "single"   | "Long"    | "longHistogram"               | SUMMARY      | 234
+        false    | "multiple" | "Long"    | "longHistogram"               | SUMMARY      | 234
+        true     | "single"   | "Double"  | "doubleCounterCallback"       | DOUBLE_SUM   | 123.456
+        false    | "multiple" | "Double"  | "doubleCounterCallback"       | DOUBLE_SUM   | 123.456
+        true     | "single"   | "Double"  | "doubleUpDownCounterCallback" | DOUBLE_SUM   | 123.456
+        false    | "multiple" | "Double"  | "doubleUpDownCounterCallback" | DOUBLE_SUM   | 123.456
+        true     | "single"   | "Long"    | "longCounterCallback"         | LONG_SUM     | 234
+        false    | "multiple" | "Long"    | "longCounterCallback"         | LONG_SUM     | 234
+        true     | "single"   | "Long"    | "longUpDownCounterCallback"   | LONG_SUM     | 234
+        false    | "multiple" | "Long"    | "longUpDownCounterCallback"   | LONG_SUM     | 234
+        true     | "single"   | "Double"  | "doubleValueCallback"         | DOUBLE_GAUGE | 123.456
+        false    | "multiple" | "Double"  | "doubleValueCallback"         | DOUBLE_GAUGE | 123.456
+        true     | "single"   | "Long"    | "longValueCallback"           | LONG_GAUGE   | 234
+        false    | "multiple" | "Long"    | "longValueCallback"           | LONG_GAUGE   | 234
     }
 
     @Unroll
     def "handles nulls returned from MBeanHelper"() {
-        setup: "Create and register four Things and create ${quantity} MBeanHelper"
+        setup:
+        "Create and register four Things and create ${quantity} MBeanHelper"
         def thingName = "${quantity}:type=${instrumentMethod}.${attribute}.Thing"
         def things = (0..3).collect { new Thing() }
         things.eachWithIndex { thing, i ->
@@ -196,7 +201,7 @@ class InstrumentHelperTest extends Specification {
         def instrument = otel.&"${instrumentMethod}"
         def instrumentHelper = new InstrumentHelper(
                 mbeanHelper, instrumentName, description, "1",
-                ["labelOne" : { "labelOneValue"}, "labelTwo": { mbean -> mbean.name().getKeyProperty("thing") }],
+                ["labelOne": { "labelOneValue" }, "labelTwo": { mbean -> mbean.name().getKeyProperty("thing") }],
                 attribute, instrument)
         instrumentHelper.update()
 
@@ -205,9 +210,9 @@ class InstrumentHelperTest extends Specification {
         metrics.size() == 0
 
         where:
-        isSingle | quantity | attribute | instrumentMethod | metricType | value
-        true | "single" | "Missing" | "longValueObserver" | LONG_GAUGE | null
-        false | "multiple" | "Missing" | "longValueObserver" | LONG_GAUGE | null
+        isSingle | quantity   | attribute | instrumentMethod    | metricType | value
+        true     | "single"   | "Missing" | "longValueCallback" | LONG_GAUGE | null
+        false    | "multiple" | "Missing" | "longValueCallback" | LONG_GAUGE | null
     }
 
     @Unroll
@@ -218,18 +223,18 @@ class InstrumentHelperTest extends Specification {
         assert InstrumentHelper.instrumentIsCounter(instrument) == isCounter
 
         where:
-        instrumentMethod | isObserver | isCounter
-        "doubleCounter" | false | true
-        "longCounter" | false | true
-        "doubleSumObserver" | true | false
-        "longSumObserver" | true | false
-        "doubleUpDownCounter" | false | true
-        "longUpDownCounter" | false | true
-        "doubleUpDownSumObserver" | true | false
-        "longUpDownSumObserver" | true | false
-        "doubleValueObserver" | true | false
-        "longValueObserver" | true | false
-        "doubleValueRecorder" | false | false
-        "longValueRecorder" | false | false
+        instrumentMethod              | isObserver | isCounter
+        "doubleCounter"               | false      | true
+        "longCounter"                 | false      | true
+        "doubleCounterCallback"       | true       | false
+        "longCounterCallback"         | true       | false
+        "doubleUpDownCounter"         | false      | true
+        "longUpDownCounter"           | false      | true
+        "doubleUpDownCounterCallback" | true       | false
+        "longUpDownCounterCallback"   | true       | false
+        "doubleValueCallback"         | true       | false
+        "longValueCallback"           | true       | false
+        "doubleHistogram"             | false      | false
+        "longHistogram"               | false      | false
     }
 }
