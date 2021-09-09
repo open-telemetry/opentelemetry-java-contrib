@@ -95,7 +95,10 @@ public class GroovyMetricEnvironment {
    * @param config - used to establish exporter type (logging by default) and connection info
    */
   public GroovyMetricEnvironment(final JmxConfig config) {
-    this(config, "io.opentelemetry.contrib.jmxmetrics", "1.0.0-alpha");
+    this(
+        config,
+        "io.opentelemetry.contrib.jmxmetrics",
+        GroovyMetricEnvironment.class.getPackage().getImplementationVersion());
   }
 
   /** Will collect all metrics from OpenTelemetrySdk and export via configured exporter. */

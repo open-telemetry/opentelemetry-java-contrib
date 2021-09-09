@@ -48,7 +48,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         InstrumentationLibrary il = ilMetric.instrumentationLibrary
         then: 'it is of the expected content'
         il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '1.0.0-alpha'
+        il.version == expectedMeterVersion()
 
         when: 'we examine the instrumentation library metric metrics list'
         List<Metric> metrics = ilMetric.metricsList
