@@ -11,7 +11,7 @@ properties file, and stdin (`-`).  Its metric-gathering scripts are specified by
 values or a `otel.jmx.groovy.script` path to run your own.
 
 ```bash
-$ java -D<otel.jmx.property=value> -jar opentelemetry-java-contrib-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
+$ java -D<otel.jmx.property=value> -jar opentelemetry-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
 ```
 
 ##### `session.properties`
@@ -37,7 +37,7 @@ For custom metrics and unsupported targets, you can provide your own MBean query
 OpenTelemetry instruments:
 
 ```bash
-$ java -Dotel.jmx.groovy.script=./script.groovy -jar opentelemetry-java-contrib-jmx-metrics-<version>.jar [-config {optional.properties, '-'}]
+$ java -Dotel.jmx.groovy.script=./script.groovy -jar opentelemetry-jmx-metrics-<version>.jar [-config {optional.properties, '-'}]
 ```
 
 ##### `script.groovy`
