@@ -17,8 +17,8 @@
 import io.opentelemetry.api.metrics.common.Labels
 
 def helper = otel.mbeans([
-    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=*,name=PendingTasks",
-    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=*,name=ActiveTasks"
+    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=MemtablePostFlush,name=PendingTasks",
+    "org.apache.cassandra.metrics:type=ThreadPools,path=*,scope=MemtablePostFlush,name=ActiveTasks"
 ])
 otel.instrument(helper, "cassandra.current_tasks", "Number of tasks in queue with the given task status.", "1",
         ["stage_name":{ mbean -> mbean.name().getKeyProperty("scope")},

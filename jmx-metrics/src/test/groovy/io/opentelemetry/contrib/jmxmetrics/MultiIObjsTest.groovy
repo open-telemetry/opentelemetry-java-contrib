@@ -66,7 +66,7 @@ class MultiIObjsTest extends OtlpIntegrationTest {
         when: 'we examine the datapoints'
         Gauge datapoints = metric.gauge
         then: 'they are of the expected size'
-        datapoints.dataPointsCount == 44
+        datapoints.dataPointsCount == 2
 
         when: 'we example the datapoint labels and sum'
         NumberDataPoint datapoint = datapoints.getDataPoints(0)
