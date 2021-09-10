@@ -59,6 +59,9 @@ dependencies {
 
 tasks {
     shadowJar {
+        manifest {
+            attributes["Implementation-Version"] = project.version
+        }
         // This should always be standalone, so remove "-all" to prevent unnecessary artifact.
         archiveClassifier.set("")
     }
@@ -66,5 +69,6 @@ tasks {
     withType<Test>().configureEach {
         dependsOn(shadowJar)
         systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+        systemProperty("gradle.project.version", "${project.version}")
     }
 }
