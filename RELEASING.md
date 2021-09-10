@@ -32,9 +32,9 @@ release notes, just point it at the created tag.
 
 ### Notifying other OpenTelemetry projects
 
-When cutting a new release, the relevant integration tests for components in other opentelemetry projects need tobe updated.
+When cutting a new release, the relevant integration tests for components in other opentelemetry projects need to be updated.
 
-- OpenTelemetry Collector contrib Jmx receiver - [Downloads latest version here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/integration_test.go)
+- OpenTelemetry Collector contrib JMX receiver - [Downloads latest version here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/integration_test.go)
 
 ## Patch Release
 
