@@ -7,9 +7,9 @@ package io.opentelemetry.contrib.jmxmetrics
 import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.HISTOGRAM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_GAUGE
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
-import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
 
 import io.opentelemetry.api.common.Attributes
@@ -93,8 +93,8 @@ class InstrumentHelperTest extends Specification {
             def s1 = p1.startEpochNanos
             def s2 = p2.startEpochNanos
             if (s1 == s2) {
-                if (md1.type == SUMMARY) {
-                    return p1.percentileValues[0].value <=> p2.percentileValues[0].value
+                if (md1.type == HISTOGRAM) {
+                    return p1.counts[0] <=> p2.counts[0]
                 }
                 return p1.value <=> p2.value
             }
@@ -140,13 +140,10 @@ class InstrumentHelperTest extends Specification {
             metric.data.points.eachWithIndex { point, i ->
                 assert point.attributes == Attributes.of(stringKey("labelOne"), "labelOneValue", stringKey("labelTwo"), "${i}".toString())
 
-                if (metricType == SUMMARY) {
+                if (metricType == HISTOGRAM) {
                     assert point.count == 1
                     assert point.sum == value
-                    assert point.percentileValues[0].percentile == 0
-                    assert point.percentileValues[0].value == value
-                    assert point.percentileValues[1].percentile == 100
-                    assert point.percentileValues[1].value == value
+                    assert point.counts[6].value == 1
                 } else {
                     assert point.value == value
                 }
@@ -163,10 +160,10 @@ class InstrumentHelperTest extends Specification {
         false    | "multiple" | "Long"    | "longCounter"                 | LONG_SUM     | 234
         true     | "single"   | "Long"    | "longUpDownCounter"           | LONG_SUM     | 234
         false    | "multiple" | "Long"    | "longUpDownCounter"           | LONG_SUM     | 234
-        true     | "single"   | "Double"  | "doubleHistogram"             | SUMMARY      | 123.456
-        false    | "multiple" | "Double"  | "doubleHistogram"             | SUMMARY      | 123.456
-        true     | "single"   | "Long"    | "longHistogram"               | SUMMARY      | 234
-        false    | "multiple" | "Long"    | "longHistogram"               | SUMMARY      | 234
+        true     | "single"   | "Double"  | "doubleHistogram"             | HISTOGRAM      | 123.456
+        false    | "multiple" | "Double"  | "doubleHistogram"             | HISTOGRAM      | 123.456
+        true     | "single"   | "Long"    | "longHistogram"               | HISTOGRAM      | 234
+        false    | "multiple" | "Long"    | "longHistogram"               | HISTOGRAM      | 234
         true     | "single"   | "Double"  | "doubleCounterCallback"       | DOUBLE_SUM   | 123.456
         false    | "multiple" | "Double"  | "doubleCounterCallback"       | DOUBLE_SUM   | 123.456
         true     | "single"   | "Double"  | "doubleUpDownCounterCallback" | DOUBLE_SUM   | 123.456

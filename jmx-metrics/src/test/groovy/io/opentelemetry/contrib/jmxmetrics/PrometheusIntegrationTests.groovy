@@ -41,19 +41,19 @@ class PrometheusIntegrationTests extends IntegrationTest {
         def scraped = receivedMetrics()
 
         then: 'they are of the expected format'
-        scraped.size() == 6
+        scraped.size() == 19
         scraped[0].contains(
                 '# HELP cassandra_storage_load Size, in bytes, of the on disk data size this node manages')
         scraped[1].contains(
-                '# TYPE cassandra_storage_load summary')
+                '# TYPE cassandra_storage_load histogram')
         scraped[2].contains(
                 'cassandra_storage_load_count{myKey="myVal",} ')
         scraped[3].contains(
                 'cassandra_storage_load_sum{myKey="myVal",} ')
         scraped[4].contains(
-                'cassandra_storage_load{myKey="myVal",quantile="0.0",} ')
+                'cassandra_storage_load_bucket{myKey="myVal",le="5.0",} ')
         scraped[5].contains(
-                'cassandra_storage_load{myKey="myVal",quantile="100.0",} ')
+                'cassandra_storage_load_bucket{myKey="myVal",le="10.0",} ')
 
         cleanup:
         targetContainers.each { it.stop() }
