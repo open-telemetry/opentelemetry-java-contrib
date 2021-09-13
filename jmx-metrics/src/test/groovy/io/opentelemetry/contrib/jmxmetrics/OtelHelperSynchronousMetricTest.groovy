@@ -404,6 +404,26 @@ class OtelHelperSynchronousMetricTest extends Specification{
         def third = metrics[2]
         def fourth = metrics[3]
 
+        assert first.name == 'yet-another-double-value-recorder'
+        assert first.description == ''
+        assert first.unit == '1'
+        assert first.type == HISTOGRAM
+        assert first.data.points.size() == 1
+        assert first.data.points[0].count == 1
+        assert first.data.points[0].sum == 456.789
+        assert first.data.points[0].counts[7] == 1
+        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
+
+        assert second.name == 'another-double-value-recorder'
+        assert second.description == 'double value-recorder'
+        assert second.unit == '1'
+        assert second.type == HISTOGRAM
+        assert second.data.points.size() == 1
+        assert second.data.points[0].count == 1
+        assert second.data.points[0].sum == 345.678
+        assert second.data.points[0].counts[7] == 1
+        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+
         assert third.name == 'double-value-recorder'
         assert third.description == 'a double value-recorder'
         assert third.unit == 'ms'
@@ -423,26 +443,6 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.data.points[0].sum == -123.456
         assert fourth.data.points[0].counts[0] == 1
         assert fourth.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
-
-        assert second.name == 'another-double-value-recorder'
-        assert second.description == 'double value-recorder'
-        assert second.unit == '1'
-        assert second.type == HISTOGRAM
-        assert second.data.points.size() == 1
-        assert second.data.points[0].count == 1
-        assert second.data.points[0].sum == 345.678
-        assert second.data.points[0].counts[7] == 1
-        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
-
-        assert first.name == 'yet-another-double-value-recorder'
-        assert first.description == ''
-        assert first.unit == '1'
-        assert first.type == HISTOGRAM
-        assert first.data.points.size() == 1
-        assert first.data.points[0].count == 1
-        assert first.data.points[0].sum == 456.789
-        assert first.data.points[0].counts[7] == 1
-        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double value recorder memoization"() {
@@ -496,6 +496,26 @@ class OtelHelperSynchronousMetricTest extends Specification{
         def third = metrics[2]
         def fourth = metrics[3]
 
+        assert first.name == 'yet-another-long-value-recorder'
+        assert first.description == ''
+        assert first.unit == '1'
+        assert first.type == HISTOGRAM
+        assert first.data.points.size() == 1
+        assert first.data.points[0].count == 1
+        assert first.data.points[0].sum == 456
+        assert first.data.points[0].counts[7] == 1
+        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
+
+        assert second.name == 'another-long-value-recorder'
+        assert second.description == 'long value-recorder'
+        assert second.unit == '1'
+        assert second.type == HISTOGRAM
+        assert second.data.points.size() == 1
+        assert second.data.points[0].count == 1
+        assert second.data.points[0].sum == 345
+        assert second.data.points[0].counts[7] == 1
+        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+
         assert third.name == 'long-value-recorder'
         assert third.description == 'a long value-recorder'
         assert third.unit == 'ms'
@@ -515,26 +535,6 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert fourth.data.points[0].sum == -123
         assert fourth.data.points[0].counts[0] == 1
         assert fourth.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
-
-        assert second.name == 'another-long-value-recorder'
-        assert second.description == 'long value-recorder'
-        assert second.unit == '1'
-        assert second.type == HISTOGRAM
-        assert second.data.points.size() == 1
-        assert second.data.points[0].count == 1
-        assert second.data.points[0].sum == 345
-        assert second.data.points[0].counts[7] == 1
-        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
-
-        assert first.name == 'yet-another-long-value-recorder'
-        assert first.description == ''
-        assert first.unit == '1'
-        assert first.type == HISTOGRAM
-        assert first.data.points.size() == 1
-        assert first.data.points[0].count == 1
-        assert first.data.points[0].sum == 456
-        assert first.data.points[0].counts[7] == 1
-        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long value recorder memoization"() {
