@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.jmxmetrics
 import static io.opentelemetry.api.common.AttributeKey.stringKey
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.DOUBLE_SUM
 import static io.opentelemetry.sdk.metrics.data.MetricDataType.LONG_SUM
-import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
+import static io.opentelemetry.sdk.metrics.data.MetricDataType.HISTOGRAM
 
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.GlobalMeterProvider
@@ -46,8 +46,8 @@ class OtelHelperSynchronousMetricTest extends Specification{
             def s1 = p1.startEpochNanos
             def s2 = p2.startEpochNanos
             if (s1 == s2) {
-                if (md1.type == SUMMARY) {
-                    return p1.percentileValues[0].value <=> p2.percentileValues[0].value
+                if (md1.type == HISTOGRAM) {
+                    return p1.counts[0] <=> p2.counts[0]
                 }
                 return p1.value <=> p2.value
             }
@@ -404,57 +404,45 @@ class OtelHelperSynchronousMetricTest extends Specification{
         def third = metrics[2]
         def fourth = metrics[3]
 
-        assert first.name == 'double-value-recorder'
-        assert first.description == 'a double value-recorder'
-        assert first.unit == 'ms'
-        assert first.type == SUMMARY
-        assert first.data.points.size() == 1
-        assert first.data.points[0].count == 1
-        assert first.data.points[0].sum == -234.567
-        assert first.data.points[0].percentileValues[0].percentile == 0
-        assert first.data.points[0].percentileValues[0].value ==  -234.567
-        assert first.data.points[0].percentileValues[1].percentile == 100
-        assert first.data.points[0].percentileValues[1].value == -234.567
-        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
-
-        assert second.name == 'my-double-value-recorder'
-        assert second.description == 'another double value-recorder'
-        assert second.unit == 'µs'
-        assert second.type == SUMMARY
-        assert second.data.points.size() == 1
-        assert second.data.points[0].count == 1
-        assert second.data.points[0].sum == -123.456
-        assert second.data.points[0].percentileValues[0].percentile == 0
-        assert second.data.points[0].percentileValues[0].value == -123.456
-        assert second.data.points[0].percentileValues[1].percentile == 100
-        assert second.data.points[0].percentileValues[1].value == -123.456
-        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
-
-        assert third.name == 'another-double-value-recorder'
-        assert third.description == 'double value-recorder'
-        assert third.unit == '1'
-        assert third.type == SUMMARY
+        assert third.name == 'double-value-recorder'
+        assert third.description == 'a double value-recorder'
+        assert third.unit == 'ms'
+        assert third.type == HISTOGRAM
         assert third.data.points.size() == 1
         assert third.data.points[0].count == 1
-        assert third.data.points[0].sum == 345.678
-        assert third.data.points[0].percentileValues[0].percentile == 0
-        assert third.data.points[0].percentileValues[0].value == 345.678
-        assert third.data.points[0].percentileValues[1].percentile == 100
-        assert third.data.points[0].percentileValues[1].value == 345.678
-        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+        assert third.data.points[0].sum == -234.567
+        assert third.data.points[0].counts[0] ==  1
+        assert third.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
-        assert fourth.name == 'yet-another-double-value-recorder'
-        assert fourth.description == ''
-        assert fourth.unit == '1'
-        assert fourth.type == SUMMARY
+        assert fourth.name == 'my-double-value-recorder'
+        assert fourth.description == 'another double value-recorder'
+        assert fourth.unit == 'µs'
+        assert fourth.type == HISTOGRAM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].count == 1
-        assert fourth.data.points[0].sum == 456.789
-        assert fourth.data.points[0].percentileValues[0].percentile == 0
-        assert fourth.data.points[0].percentileValues[0].value == 456.789
-        assert fourth.data.points[0].percentileValues[1].percentile == 100
-        assert fourth.data.points[0].percentileValues[1].value == 456.789
-        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
+        assert fourth.data.points[0].sum == -123.456
+        assert fourth.data.points[0].counts[0] == 1
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
+
+        assert second.name == 'another-double-value-recorder'
+        assert second.description == 'double value-recorder'
+        assert second.unit == '1'
+        assert second.type == HISTOGRAM
+        assert second.data.points.size() == 1
+        assert second.data.points[0].count == 1
+        assert second.data.points[0].sum == 345.678
+        assert second.data.points[0].counts[7] == 1
+        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+
+        assert first.name == 'yet-another-double-value-recorder'
+        assert first.description == ''
+        assert first.unit == '1'
+        assert first.type == HISTOGRAM
+        assert first.data.points.size() == 1
+        assert first.data.points[0].count == 1
+        assert first.data.points[0].sum == 456.789
+        assert first.data.points[0].counts[7] == 1
+        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "double value recorder memoization"() {
@@ -474,14 +462,12 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.name == 'dvr'
         assert metric.description == 'double value'
         assert metric.unit == '1'
-        assert metric.type == SUMMARY
+        assert metric.type == HISTOGRAM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].count == 2
         assert metric.data.points[0].sum == 0
-        assert metric.data.points[0].percentileValues[0].percentile == 0
-        assert metric.data.points[0].percentileValues[0].value == -10.1
-        assert metric.data.points[0].percentileValues[1].percentile == 100
-        assert metric.data.points[0].percentileValues[1].value == 10.1
+        assert metric.data.points[0].counts[0] == 1
+        assert metric.data.points[0].counts[1] == 0
         assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
@@ -510,57 +496,45 @@ class OtelHelperSynchronousMetricTest extends Specification{
         def third = metrics[2]
         def fourth = metrics[3]
 
-        assert first.name == 'long-value-recorder'
-        assert first.description == 'a long value-recorder'
-        assert first.unit == 'ms'
-        assert first.type == SUMMARY
-        assert first.data.points.size() == 1
-        assert first.data.points[0].count == 1
-        assert first.data.points[0].sum == -234
-        assert first.data.points[0].percentileValues[0].percentile == 0
-        assert first.data.points[0].percentileValues[0].value == -234
-        assert first.data.points[0].percentileValues[1].percentile == 100
-        assert first.data.points[0].percentileValues[1].value == -234
-        assert first.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
-
-        assert second.name == 'my-long-value-recorder'
-        assert second.description == 'another long value-recorder'
-        assert second.unit == 'µs'
-        assert second.type == SUMMARY
-        assert second.data.points.size() == 1
-        assert second.data.points[0].count == 1
-        assert second.data.points[0].sum == -123
-        assert second.data.points[0].percentileValues[0].percentile == 0
-        assert second.data.points[0].percentileValues[0].value == -123
-        assert second.data.points[0].percentileValues[1].percentile == 100
-        assert second.data.points[0].percentileValues[1].value == -123
-        assert second.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
-
-        assert third.name == 'another-long-value-recorder'
-        assert third.description == 'long value-recorder'
-        assert third.unit == '1'
-        assert third.type == SUMMARY
+        assert third.name == 'long-value-recorder'
+        assert third.description == 'a long value-recorder'
+        assert third.unit == 'ms'
+        assert third.type == HISTOGRAM
         assert third.data.points.size() == 1
         assert third.data.points[0].count == 1
-        assert third.data.points[0].sum == 345
-        assert third.data.points[0].percentileValues[0].percentile == 0
-        assert third.data.points[0].percentileValues[0].value == 345
-        assert third.data.points[0].percentileValues[1].percentile == 100
-        assert third.data.points[0].percentileValues[1].value == 345
-        assert third.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+        assert third.data.points[0].sum == -234
+        assert third.data.points[0].counts[0] == 1
+        assert third.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
 
-        assert fourth.name == 'yet-another-long-value-recorder'
-        assert fourth.description == ''
-        assert fourth.unit == '1'
-        assert fourth.type == SUMMARY
+        assert fourth.name == 'my-long-value-recorder'
+        assert fourth.description == 'another long value-recorder'
+        assert fourth.unit == 'µs'
+        assert fourth.type == HISTOGRAM
         assert fourth.data.points.size() == 1
         assert fourth.data.points[0].count == 1
-        assert fourth.data.points[0].sum == 456
-        assert fourth.data.points[0].percentileValues[0].percentile == 0
-        assert fourth.data.points[0].percentileValues[0].value == 456
-        assert fourth.data.points[0].percentileValues[1].percentile == 100
-        assert fourth.data.points[0].percentileValues[1].value == 456
-        assert fourth.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
+        assert fourth.data.points[0].sum == -123
+        assert fourth.data.points[0].counts[0] == 1
+        assert fourth.data.points[0].attributes == Attributes.of(stringKey('myKey'), 'myValue')
+
+        assert second.name == 'another-long-value-recorder'
+        assert second.description == 'long value-recorder'
+        assert second.unit == '1'
+        assert second.type == HISTOGRAM
+        assert second.data.points.size() == 1
+        assert second.data.points[0].count == 1
+        assert second.data.points[0].sum == 345
+        assert second.data.points[0].counts[7] == 1
+        assert second.data.points[0].attributes == Attributes.of(stringKey('anotherKey'), 'anotherValue')
+
+        assert first.name == 'yet-another-long-value-recorder'
+        assert first.description == ''
+        assert first.unit == '1'
+        assert first.type == HISTOGRAM
+        assert first.data.points.size() == 1
+        assert first.data.points[0].count == 1
+        assert first.data.points[0].sum == 456
+        assert first.data.points[0].counts[7] == 1
+        assert first.data.points[0].attributes == Attributes.of(stringKey('yetAnotherKey'), 'yetAnotherValue')
     }
 
     def "long value recorder memoization"() {
@@ -580,14 +554,12 @@ class OtelHelperSynchronousMetricTest extends Specification{
         assert metric.name == 'lvr'
         assert metric.description == 'long value'
         assert metric.unit == '1'
-        assert metric.type == SUMMARY
+        assert metric.type == HISTOGRAM
         assert metric.data.points.size() == 1
         assert metric.data.points[0].count == 2
         assert metric.data.points[0].sum == 0
-        assert metric.data.points[0].percentileValues[0].percentile == 0
-        assert metric.data.points[0].percentileValues[0].value == -10
-        assert metric.data.points[0].percentileValues[1].percentile == 100
-        assert metric.data.points[0].percentileValues[1].value == 10
+        assert metric.data.points[0].counts[0] == 1
+        assert metric.data.points[0].counts[1] == 1
         assert metric.data.points[0].attributes == Attributes.of(stringKey('key'), 'value')
     }
 
