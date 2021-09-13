@@ -5,9 +5,9 @@
 package io.opentelemetry.contrib.awsxray;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.sdk.autoconfigure.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigurableSamplerProvider;
+import io.opentelemetry.sdk.autoconfigure.OpenTelemetryResourceAutoConfiguration;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Map;
 
@@ -17,9 +17,10 @@ public class AwsXrayRemoteSamplerProvider implements ConfigurableSamplerProvider
   @Override
   public Sampler createSampler(ConfigProperties config) {
     AwsXrayRemoteSamplerBuilder builder =
-        AwsXrayRemoteSampler.newBuilder(OpenTelemetrySdkAutoConfiguration.getResource());
+        AwsXrayRemoteSampler.newBuilder(
+            OpenTelemetryResourceAutoConfiguration.configureResource(config));
 
-    Map<String, String> params = config.getCommaSeparatedMap("otel.traces.sampler.arg");
+    Map<String, String> params = config.getMap("otel.traces.sampler.arg");
 
     String endpoint = params.get("endpoint");
     if (endpoint != null) {

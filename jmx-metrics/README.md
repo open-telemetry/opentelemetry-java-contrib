@@ -11,7 +11,7 @@ properties file, and stdin (`-`).  Its metric-gathering scripts are specified by
 values or a `otel.jmx.groovy.script` path to run your own.
 
 ```bash
-$ java -D<otel.jmx.property=value> -jar opentelemetry-java-contrib-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
+$ java -D<otel.jmx.property=value> -jar opentelemetry-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
 ```
 
 ##### `session.properties`
@@ -37,7 +37,7 @@ For custom metrics and unsupported targets, you can provide your own MBean query
 OpenTelemetry instruments:
 
 ```bash
-$ java -Dotel.jmx.groovy.script=./script.groovy -jar opentelemetry-java-contrib-jmx-metrics-<version>.jar [-config {optional.properties, '-'}]
+$ java -Dotel.jmx.groovy.script=./script.groovy -jar opentelemetry-jmx-metrics-<version>.jar [-config {optional.properties, '-'}]
 ```
 
 ##### `script.groovy`
@@ -46,13 +46,13 @@ $ java -Dotel.jmx.groovy.script=./script.groovy -jar opentelemetry-java-contrib-
 // Query the target JMX server for the desired MBean and create a helper representing the first result
 def loadMBean = otel.mbean("io.example.service:type=MyType,name=Load")
 
-// Create a LongValueObserver whose updater will set the instrument value to the
+// Create a LongValueCallback which will set the instrument value to the
 // loadMBean's most recent `Count` attribute's long value.  The instrument will have a
 // name of "my.type.load" and the specified description and unit, respectively.
 otel.instrument(
         loadMBean, "my.type.load",
         "Load, in bytes, of the service of MyType",
-        "By", "Count", otel.&longValueObserver
+        "By", "Count", otel.&longValueCallback
 )
 ```
 
@@ -137,9 +137,9 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 
 - `otel.longUpDownCounter(String name, String description, String unit)`
 
-- `otel.doubleValueRecorder(String name, String description, String unit)`
+- `otel.doubleHistogram(String name, String description, String unit)`
 
-- `otel.longValueRecorder(String name, String description, String unit)`
+- `otel.longHistogram(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
 instruments.  Each one provides three additional signatures where unit and description
@@ -151,17 +151,17 @@ aren't desired upon invocation.
 
 ### OpenTelemetry Asynchronous Instrument Helpers
 
-- `otel.doubleSumObserver(String name, String description, String unit, Closure updater)`
+- `otel.doubleCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longSumObserver(String name, String description, String unit, Closure updater)`
+- `otel.longCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.doubleUpDownSumObserver(String name, String description, String unit, Closure updater)`
+- `otel.doubleUpDownCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longUpDownSumObserver(String name, String description, String unit, Closure updater)`
+- `otel.longUpDownCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.doubleValueObserver(String name, String description, String unit, Closure updater)`
+- `otel.doubleValueCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longValueObserver(String name, String description, String unit, Closure updater)`
+- `otel.longValueCallback(String name, String description, String unit, Closure updater)`
 
 These methods will return a new or previously registered instance of the applicable metric
 instruments.  Each one provides two additional signatures where unit and description aren't
@@ -171,15 +171,15 @@ desired upon invocation.
 
 - `otel.<meterMethod>(String name, Closure updater)` - `description` is empty string and `unit` is "1".
 
-Though asynchronous instrument updaters are exclusively set by their builders in the OpenTelemetry API,
+Though asynchronous instrument callbacks are exclusively set by their builders in the OpenTelemetry API,
 the JMX Metric Gatherer asynchronous instrument helpers allow using the specified updater Closure for
 each instrument as run on the desired interval:
 
 ```groovy
 def loadMBean = otel.mbean("io.example.service:type=MyType,name=Load")
-otel.longValueObserver(
+otel.longValueCallback(
         "my.type.load", "Load, in bytes, of the service of MyType", "By",
-        { longResult -> longResult.observe(storageLoadMBean.getAttribute("Count")) }
+        { measurement -> measurement.observe(storageLoadMBean.getAttribute("Count")) }
 )
 ```
 

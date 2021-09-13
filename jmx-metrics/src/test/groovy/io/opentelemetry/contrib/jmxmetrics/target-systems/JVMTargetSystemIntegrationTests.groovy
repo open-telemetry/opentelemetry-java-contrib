@@ -43,7 +43,7 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
             InstrumentationLibraryMetrics ilMetric = ilMetrics.get(0)
             InstrumentationLibrary il = ilMetric.instrumentationLibrary
             assert il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-            assert il.version == '1.0.0-alpha'
+            assert il.version == expectedMeterVersion()
 
             when: 'we examine the instrumentation library metric metrics list'
             metrics = ilMetric.metricsList as ArrayList

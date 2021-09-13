@@ -244,4 +244,11 @@ class OtlpIntegrationTest extends IntegrationTest  {
             return received
         }
     }
+
+    static final String expectedMeterVersion() {
+        // Automatically set by gradle when running the tests
+        def version = System.getProperty("gradle.project.version")
+        assert version != null && version != ""
+        return version
+    }
 }

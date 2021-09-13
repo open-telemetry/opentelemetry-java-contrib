@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** A builder for {@link AwsXrayRemoteSampler}. */
 public final class AwsXrayRemoteSamplerBuilder {
@@ -22,7 +23,7 @@ public final class AwsXrayRemoteSamplerBuilder {
 
   private Clock clock = Clock.getDefault();
   private String endpoint = DEFAULT_ENDPOINT;
-  private Sampler initialSampler = Sampler.parentBased(Sampler.traceIdRatioBased(0.05));
+  @Nullable private Sampler initialSampler;
   private long pollingIntervalNanos = TimeUnit.SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
 
   AwsXrayRemoteSamplerBuilder(Resource resource) {
@@ -84,6 +85,13 @@ public final class AwsXrayRemoteSamplerBuilder {
 
   /** Returns a {@link AwsXrayRemoteSampler} with the configuration of this builder. */
   public AwsXrayRemoteSampler build() {
+    Sampler initialSampler = this.initialSampler;
+    if (initialSampler == null) {
+      initialSampler =
+          Sampler.parentBased(
+              new OrElseSampler(
+                  new RateLimitingSampler(1, clock), Sampler.traceIdRatioBased(0.05)));
+    }
     return new AwsXrayRemoteSampler(
         resource, clock, endpoint, initialSampler, pollingIntervalNanos);
   }

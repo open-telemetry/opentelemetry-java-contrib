@@ -13,7 +13,6 @@ import static io.opentelemetry.sdk.metrics.data.MetricDataType.SUMMARY
 
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.GlobalMeterProvider
-import io.opentelemetry.api.metrics.common.Labels
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import org.junit.Rule
@@ -48,7 +47,7 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         def now = Clock.systemUTC().instant();
         def nanos = TimeUnit.SECONDS.toNanos(now.epochSecond) + now.nano
 
-        def provider = GlobalMeterProvider.get().get(name.methodName, '')
+        def provider = GlobalMeterProvider.get().get(name.methodName, '', null)
         def all = provider.collectAll(nanos)
         return all.sort { md1, md2 ->
             def p1 = md1.data.points[0]
@@ -67,22 +66,22 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double sum observer"() {
         when:
-        def dso = otel.doubleSumObserver(
+        otel.doubleCounterCallback(
                 'double-sum', 'a double sum',
                 'ms', {doubleResult ->
-                    doubleResult.observe(123.456, Labels.of('key', 'value'))
+                    doubleResult.observe(123.456, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.doubleSumObserver('my-double-sum', 'another double sum', 'µs', { doubleResult ->
-            doubleResult.observe(234.567, Labels.of('myKey', 'myValue'))
+        otel.doubleCounterCallback('my-double-sum', 'another double sum', 'µs', { doubleResult ->
+            doubleResult.observe(234.567, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.doubleSumObserver('another-double-sum', 'double sum', { doubleResult ->
-            doubleResult.observe(345.678, Labels.of('anotherKey', 'anotherValue'))
+        otel.doubleCounterCallback('another-double-sum', 'double sum', { doubleResult ->
+            doubleResult.observe(345.678, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.doubleSumObserver('yet-another-double-sum', { doubleResult ->
-            doubleResult.observe(456.789, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.doubleCounterCallback('yet-another-double-sum', { doubleResult ->
+            doubleResult.observe(456.789, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -129,27 +128,23 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double sum observer memoization"() {
         when:
-        def dcOne = otel.doubleSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(10.1, Labels.of('key1', 'value1'))
+        otel.doubleCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(10.1, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.doubleSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(20.2, Labels.of('key2', 'value2'))
+        otel.doubleCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(20.2, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.doubleSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(30.3, Labels.of('key3', 'value3'))
+        otel.doubleCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(30.3, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.doubleSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(40.4, Labels.of('key4', 'value4'))
+        otel.doubleCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(40.4, Attributes.builder().put('key4', 'value4').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -174,22 +169,22 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "long sum observer"() {
         when:
-        def dso = otel.longSumObserver(
+        otel.longCounterCallback(
                 'long-sum', 'a long sum',
                 'ms', {longResult ->
-                    longResult.observe(123, Labels.of('key', 'value'))
+                    longResult.observe(123, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.longSumObserver('my-long-sum', 'another long sum', 'µs', { longResult ->
-            longResult.observe(234, Labels.of('myKey', 'myValue'))
+        otel.longCounterCallback('my-long-sum', 'another long sum', 'µs', { longResult ->
+            longResult.observe(234, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.longSumObserver('another-long-sum', 'long sum', { longResult ->
-            longResult.observe(345, Labels.of('anotherKey', 'anotherValue'))
+        otel.longCounterCallback('another-long-sum', 'long sum', { longResult ->
+            longResult.observe(345, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.longSumObserver('yet-another-long-sum', { longResult ->
-            longResult.observe(456, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.longCounterCallback('yet-another-long-sum', { longResult ->
+            longResult.observe(456, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -236,27 +231,23 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "long sum observer memoization"() {
         when:
-        def dcOne = otel.longSumObserver('dc', 'long', { longResult ->
-            longResult.observe(10, Labels.of('key1', 'value1'))
+        otel.longCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(10, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.longSumObserver('dc', 'long', { longResult ->
-            longResult.observe(20, Labels.of('key2', 'value2'))
+        otel.longCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(20, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.longSumObserver('dc', 'long', { longResult ->
-            longResult.observe(30, Labels.of('key3', 'value3'))
+        otel.longCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(30, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.longSumObserver('dc', 'long', { longResult ->
-            longResult.observe(40, Labels.of('key4', 'value4'))
+        otel.longCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(40, Attributes.builder().put('key4', 'value4').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -281,22 +272,22 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double up down sum observer"() {
         when:
-        def dso = otel.doubleUpDownSumObserver(
+        otel.doubleUpDownCounterCallback(
                 'double-up-down-sum', 'a double up down sum',
                 'ms', {doubleResult ->
-                    doubleResult.observe(123.456, Labels.of('key', 'value'))
+                    doubleResult.observe(123.456, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.doubleUpDownSumObserver('my-double-up-down-sum', 'another double up down sum', 'µs', { doubleResult ->
-            doubleResult.observe(234.567, Labels.of('myKey', 'myValue'))
+        otel.doubleUpDownCounterCallback('my-double-up-down-sum', 'another double up down sum', 'µs', { doubleResult ->
+            doubleResult.observe(234.567, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.doubleUpDownSumObserver('another-double-up-down-sum', 'double up down sum', { doubleResult ->
-            doubleResult.observe(345.678, Labels.of('anotherKey', 'anotherValue'))
+        otel.doubleUpDownCounterCallback('another-double-up-down-sum', 'double up down sum', { doubleResult ->
+            doubleResult.observe(345.678, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.doubleUpDownSumObserver('yet-another-double-up-down-sum', { doubleResult ->
-            doubleResult.observe(456.789, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.doubleUpDownCounterCallback('yet-another-double-up-down-sum', { doubleResult ->
+            doubleResult.observe(456.789, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -343,27 +334,23 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double up down sum observer memoization"() {
         when:
-        def dcOne = otel.doubleUpDownSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(10.1, Labels.of('key1', 'value1'))
+        otel.doubleUpDownCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(10.1, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.doubleUpDownSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(20.2, Labels.of('key2', 'value2'))
+        otel.doubleUpDownCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(20.2, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.doubleUpDownSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(30.3, Labels.of('key3', 'value3'))
+        otel.doubleUpDownCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(30.3, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.doubleUpDownSumObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(40.4, Labels.of('key4', 'value4'))
+        otel.doubleUpDownCounterCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(40.4, Attributes.builder().put('key4', 'value4').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -388,22 +375,22 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "long up down sum observer"() {
         when:
-        def dso = otel.longUpDownSumObserver(
+        otel.longUpDownCounterCallback(
                 'long-up-down-sum', 'a long up down sum',
                 'ms', {longResult ->
-                    longResult.observe(123, Labels.of('key', 'value'))
+                    longResult.observe(123, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.longUpDownSumObserver('my-long-up-down-sum', 'another long up down sum', 'µs', { longResult ->
-            longResult.observe(234, Labels.of('myKey', 'myValue'))
+        otel.longUpDownCounterCallback('my-long-up-down-sum', 'another long up down sum', 'µs', { longResult ->
+            longResult.observe(234, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.longUpDownSumObserver('another-long-up-down-sum', 'long up down sum', { longResult ->
-            longResult.observe(345, Labels.of('anotherKey', 'anotherValue'))
+        otel.longUpDownCounterCallback('another-long-up-down-sum', 'long up down sum', { longResult ->
+            longResult.observe(345, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.longUpDownSumObserver('yet-another-long-up-down-sum', { longResult ->
-            longResult.observe(456, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.longUpDownCounterCallback('yet-another-long-up-down-sum', { longResult ->
+            longResult.observe(456, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -450,27 +437,23 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "long up down sum observer memoization"() {
         when:
-        def dcOne = otel.longUpDownSumObserver('dc', 'long', { longResult ->
-            longResult.observe(10, Labels.of('key1', 'value1'))
+        otel.longUpDownCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(10, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.longUpDownSumObserver('dc', 'long', { longResult ->
-            longResult.observe(20, Labels.of('key2', 'value2'))
+        otel.longUpDownCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(20, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.longUpDownSumObserver('dc', 'long', { longResult ->
-            longResult.observe(30, Labels.of('key3', 'value3'))
+        otel.longUpDownCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(30, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.longUpDownSumObserver('dc', 'long', { longResult ->
-            longResult.observe(40, Labels.of('key4', 'value4'))
+        otel.longUpDownCounterCallback('dc', 'long', { longResult ->
+            longResult.observe(40, Attributes.builder().put('key4', 'value4').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -495,22 +478,22 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double value observer"() {
         when:
-        def dso = otel.doubleValueObserver(
+        otel.doubleValueCallback(
                 'double-value', 'a double value',
                 'ms', {doubleResult ->
-                    doubleResult.observe(123.456, Labels.of('key', 'value'))
+                    doubleResult.observe(123.456, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.doubleValueObserver('my-double-value', 'another double value', 'µs', { doubleResult ->
-            doubleResult.observe(234.567, Labels.of('myKey', 'myValue'))
+        otel.doubleValueCallback('my-double-value', 'another double value', 'µs', { doubleResult ->
+            doubleResult.observe(234.567, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.doubleValueObserver('another-double-value', 'double value', { doubleResult ->
-            doubleResult.observe(345.678, Labels.of('anotherKey', 'anotherValue'))
+        otel.doubleValueCallback('another-double-value', 'double value', { doubleResult ->
+            doubleResult.observe(345.678, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.doubleValueObserver('yet-another-double-value', { doubleResult ->
-            doubleResult.observe(456.789, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.doubleValueCallback('yet-another-double-value', { doubleResult ->
+            doubleResult.observe(456.789, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -556,28 +539,24 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "double value observer memoization"() {
         when:
-        def dcOne = otel.doubleValueObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(10.1, Labels.of('key1', 'value1'))
+        otel.doubleValueCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(10.1, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.doubleValueObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(20.2, Labels.of('key2', 'value2'))
+        otel.doubleValueCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(20.2, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.doubleValueObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(30.3, Labels.of('key3', 'value3'))
+        otel.doubleValueCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(30.3, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.doubleValueObserver('dc', 'double', { doubleResult ->
-            doubleResult.observe(40.4, Labels.of('key4', 'value4'))
-            doubleResult.observe(50.5, Labels.of('key2', 'value2'))
+        otel.doubleValueCallback('dc', 'double', { doubleResult ->
+            doubleResult.observe(40.4, Attributes.builder().put('key4', 'value4').build())
+            doubleResult.observe(50.5, Attributes.builder().put('key2', 'value2').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -596,30 +575,32 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.unit == '1'
         assert secondMetric.type == DOUBLE_GAUGE
         assert secondMetric.data.points.size() == 2
-        assert secondMetric.data.points[1].value == 40.4
-        assert secondMetric.data.points[1].attributes == Attributes.of(stringKey('key4'), 'value4')
-        assert secondMetric.data.points[0].value == 50.5
-        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key2'), 'value2')
+        // Same epochNanos, order not defined
+        secondMetric.data.points.sort { a, b -> Double.compare(a.value, b.value) }
+        assert secondMetric.data.points[0].value == 40.4
+        assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
+        assert secondMetric.data.points[1].value == 50.5
+        assert secondMetric.data.points[1].attributes == Attributes.of(stringKey('key2'), 'value2')
     }
 
     def "long value observer"() {
         when:
-        def dso = otel.longValueObserver(
+        otel.longValueCallback(
                 'long-value', 'a long value',
                 'ms', {longResult ->
-                    longResult.observe(123, Labels.of('key', 'value'))
+                    longResult.observe(123, Attributes.builder().put('key', 'value').build())
                 })
 
-        dso = otel.longValueObserver('my-long-value', 'another long value', 'µs', { longResult ->
-            longResult.observe(234, Labels.of('myKey', 'myValue'))
+        otel.longValueCallback('my-long-value', 'another long value', 'µs', { longResult ->
+            longResult.observe(234, Attributes.builder().put('myKey', 'myValue').build())
         } )
 
-        dso = otel.longValueObserver('another-long-value', 'long value', { longResult ->
-            longResult.observe(345, Labels.of('anotherKey', 'anotherValue'))
+        otel.longValueCallback('another-long-value', 'long value', { longResult ->
+            longResult.observe(345, Attributes.builder().put('anotherKey', 'anotherValue').build())
         })
 
-        dso = otel.longValueObserver('yet-another-long-value', { longResult ->
-            longResult.observe(456, Labels.of('yetAnotherKey', 'yetAnotherValue'))
+        otel.longValueCallback('yet-another-long-value', { longResult ->
+            longResult.observe(456, Attributes.builder().put('yetAnotherKey', 'yetAnotherValue').build())
         })
 
         def metrics = exportMetrics()
@@ -666,28 +647,24 @@ class OtelHelperAsynchronousMetricTest extends Specification{
 
     def "long value observer memoization"() {
         when:
-        def dcOne = otel.longValueObserver('dc', 'long', { longResult ->
-            longResult.observe(10, Labels.of('key1', 'value1'))
+        otel.longValueCallback('dc', 'long', { longResult ->
+            longResult.observe(10, Attributes.builder().put('key1', 'value1').build())
         })
-        def dcTwo = otel.longValueObserver('dc', 'long', { longResult ->
-            longResult.observe(20, Labels.of('key2', 'value2'))
+        otel.longValueCallback('dc', 'long', { longResult ->
+            longResult.observe(20, Attributes.builder().put('key2', 'value2').build())
         })
         def firstMetrics = exportMetrics()
 
-        def dcThree = otel.longValueObserver('dc', 'long', { longResult ->
-            longResult.observe(30, Labels.of('key3', 'value3'))
+        otel.longValueCallback('dc', 'long', { longResult ->
+            longResult.observe(30, Attributes.builder().put('key3', 'value3').build())
         })
-        def dcFour = otel.longValueObserver('dc', 'long', { longResult ->
-            longResult.observe(40, Labels.of('key4', 'value4'))
-            longResult.observe(50, Labels.of('key2', 'value2'))
+        otel.longValueCallback('dc', 'long', { longResult ->
+            longResult.observe(40, Attributes.builder().put('key4', 'value4').build())
+            longResult.observe(50, Attributes.builder().put('key2', 'value2').build())
         })
         def secondMetrics = exportMetrics()
 
         then:
-        assert dcOne.is(dcTwo)
-        assert dcTwo.is(dcThree)
-        assert dcTwo.is(dcFour)
-
         assert firstMetrics.size() == 1
         assert secondMetrics.size() == 1
 
@@ -706,6 +683,8 @@ class OtelHelperAsynchronousMetricTest extends Specification{
         assert secondMetric.unit == '1'
         assert secondMetric.type == LONG_GAUGE
         assert secondMetric.data.points.size() == 2
+        // Same epochNanos, order not defined
+        secondMetric.data.points.sort { a, b -> Long.compare(a.value, b.value) }
         assert secondMetric.data.points[0].value == 40
         assert secondMetric.data.points[0].attributes == Attributes.of(stringKey('key4'), 'value4')
         assert secondMetric.data.points[1].value == 50
