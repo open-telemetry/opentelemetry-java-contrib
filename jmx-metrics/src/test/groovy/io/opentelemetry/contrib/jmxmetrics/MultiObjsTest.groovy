@@ -21,7 +21,7 @@ import spock.lang.Unroll
     System.getProperty('ojc.integration.tests') == 'true'
 })
 @Timeout(90)
-class MultiIObjsTest extends OtlpIntegrationTest {
+class MultiObjsTest extends OtlpIntegrationTest {
 
     @Unroll
     def 'end to end with stdin config: #useStdin'() {

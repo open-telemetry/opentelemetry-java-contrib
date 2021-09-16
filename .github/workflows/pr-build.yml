@@ -44,7 +44,7 @@ jobs:
       - uses: burrunan/gradle-cache-action@v1
         name: Integration Tests
         with:
-          arguments: --stacktrace integrationTest
+          arguments: --stacktrace --max-workers 1 integrationTest
           remote-build-cache-proxy-enabled: false
       - uses: actions/upload-artifact@v2
         name: Save integrationTest results
