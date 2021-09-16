@@ -7,11 +7,11 @@ package io.opentelemetry.contrib.jmxmetrics
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary
 import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.metrics.v1.Histogram
+import io.opentelemetry.proto.metrics.v1.HistogramDataPoint
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics
 import io.opentelemetry.proto.metrics.v1.Metric
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
-import io.opentelemetry.proto.metrics.v1.Summary
-import io.opentelemetry.proto.metrics.v1.SummaryDataPoint
 import org.testcontainers.Testcontainers
 import spock.lang.Requires
 import spock.lang.Timeout
@@ -48,7 +48,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         InstrumentationLibrary il = ilMetric.instrumentationLibrary
         then: 'it is of the expected content'
         il.name  == 'io.opentelemetry.contrib.jmxmetrics'
-        il.version == '1.0.0-alpha'
+        il.version == expectedMeterVersion()
 
         when: 'we examine the instrumentation library metric metrics list'
         List<Metric> metrics = ilMetric.metricsList
@@ -61,15 +61,15 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         metric.name == 'cassandra.storage.load'
         metric.description == 'Size, in bytes, of the on disk data size this node manages'
         metric.unit == 'By'
-        metric.hasSummary()
+        metric.hasHistogram()
 
         when: 'we examine the datapoints'
-        Summary datapoints = metric.summary
+        Histogram datapoints = metric.histogram
         then: 'they are of the expected size'
         datapoints.dataPointsCount == 1
 
         when: 'we example the datapoint labels and sum'
-        SummaryDataPoint datapoint = datapoints.getDataPoints(0)
+        HistogramDataPoint datapoint = datapoints.getDataPoints(0)
         List<KeyValue> attributes = datapoint.attributesList
         def sum = datapoint.sum
         then: 'they are of the expected content'
@@ -77,8 +77,7 @@ class OtlpIntegrationTests extends OtlpIntegrationTest {
         attributes.get(0) == KeyValue.newBuilder().setKey("myKey").setValue(AnyValue.newBuilder().setStringValue("myVal")).build()
 
         datapoint.count == 1
-        datapoint.getQuantileValues(0).value == sum
-        datapoint.getQuantileValues(1).value == sum
+        datapoint.sum == sum
 
         cleanup:
         targetContainers.each { it.stop() }
