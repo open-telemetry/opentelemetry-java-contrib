@@ -7,7 +7,6 @@ val otelAlphaVersion: String by project
 plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("java")
-    id("com.github.sherter.google-java-format") version "0.8" apply true
 }
 
 repositories {
