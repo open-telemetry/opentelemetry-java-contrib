@@ -68,13 +68,13 @@ The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry auto c
 
 Example of a trace of a Maven build.
 
-![](https://raw.githubusercontent.com/cyrille-leclerc/opentelemetry-java-contrib/add-maven-extension-v2/maven-extension/docs/images/maven-execution-trace-jaeger.png)
+![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/maven-execution-trace-jaeger.png)
 
 ## Example of a distributed trace of a Jenkins pipeline executing a Maven build
 
 Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the  [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
 
-![](https://raw.githubusercontent.com/cyrille-leclerc/opentelemetry-java-contrib/add-maven-extension-v2/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
+![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
 
 # Other CI/CD Tools supporting OpenTelemetry traces
 
