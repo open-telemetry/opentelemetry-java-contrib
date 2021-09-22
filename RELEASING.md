@@ -30,6 +30,12 @@ page](https://github.com/open-telemetry/opentelemetry-java-contrib/releases), pr
 `Draft a new release` to write release notes about the new release. If there is already a draft
 release notes, just point it at the created tag.
 
+### Notifying other OpenTelemetry projects
+
+When cutting a new release, the relevant integration tests for components in other opentelemetry projects need to be updated.
+
+- OpenTelemetry Collector contrib JMX receiver - [Downloads latest version here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/integration_test.go)
+
 ## Patch Release
 
 All patch releases should include only bug-fixes, and must avoid
