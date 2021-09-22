@@ -1,3 +1,6 @@
+import groovy.util.Node
+import groovy.util.NodeList
+
 plugins {
   id("java")
   id("com.github.johnrengelman.shadow")
@@ -25,7 +28,7 @@ dependencies {
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
-  
+
   compileOnly("org.apache.maven:maven-core:3.5.0")
   compileOnly("org.slf4j:slf4j-api")
   compileOnly("org.sonatype.aether:aether-api:1.13.1")
@@ -42,6 +45,29 @@ tasks {
 
   assemble {
     dependsOn(shadowJar)
+  }
+  publishing {
+    (publications) {
+      "maven"(MavenPublication::class) {
+            pom {
+              withXml {
+                val pomNode = asNode()
+                val dependenciesNode = (pomNode.get("dependencies") as NodeList)[0] as Node
+                val dependencyNodes = dependenciesNode.children() as NodeList
+                // the jar dependencies bundled in the uber-jar by the shadow plugin are wrongly added as
+                // 'runtime' dependencies in the generated pom.xml instead of being absent this pom.xml.
+                // Remove those runtime dependencies from the pom.xml:
+                dependencyNodes.removeIf {
+                  val dependencyNode = it as Node
+                  val scope: String = ((dependencyNode.get("scope") as NodeList)[0] as Node).text()
+                  val removeDependency = (scope == "runtime" || scope == "compile")
+                  logger.debug("pom.xml remove: $removeDependency dependency $dependencyNode")
+                  removeDependency
+                }
+              }
+            }
+        }
+    }
   }
 }
 
