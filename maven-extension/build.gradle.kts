@@ -25,7 +25,7 @@ dependencies {
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
-  
+
   compileOnly("org.apache.maven:maven-core:3.5.0")
   compileOnly("org.slf4j:slf4j-api")
   compileOnly("org.sonatype.aether:aether-api:1.13.1")
@@ -33,6 +33,17 @@ dependencies {
 
   testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
+}
+
+// The jar dependencies bundled in the uber-jar by the shadow plugin are wrongly added as
+// 'runtime' dependencies in the generated pom.xml instead of being absent this pom.xml.
+// Remove those runtime dependencies from the pom.xml.
+configure<PublishingExtension> {
+  (components["java"] as AdhocComponentWithVariants).run {
+    withVariantsFromConfiguration(configurations["runtimeElements"]) {
+      skip()
+    }
+  }
 }
 
 tasks {
