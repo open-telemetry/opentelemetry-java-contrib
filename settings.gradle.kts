@@ -8,10 +8,28 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("com.gradle.enterprise") version "3.6.3"
+}
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
         mavenLocal()
+    }
+}
+
+val isCI = System.getenv("CI") != null
+val skipBuildscan = System.getenv("SKIP_BUILDSCAN").toBoolean()
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+
+        if (isCI && !skipBuildscan) {
+            publishAlways()
+            tag("CI")
+        }
     }
 }
 
