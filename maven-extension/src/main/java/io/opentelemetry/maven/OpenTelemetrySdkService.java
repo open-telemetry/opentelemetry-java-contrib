@@ -4,7 +4,6 @@
  */
 package io.opentelemetry.maven;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
@@ -55,6 +54,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   @Requirement private RuntimeInformation runtimeInformation;
 
+  private OpenTelemetry openTelemetry;
   private OpenTelemetrySdk openTelemetrySdk;
 
   private Tracer tracer;
@@ -77,10 +77,10 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
                 + sdkProviderShutdown.isDone()
                 + ")");
       }
-      // reset GlobalOpenTelemetry as we have just shutdown its TraceProvider
-      GlobalOpenTelemetry.resetForTest();
       this.openTelemetrySdk = null;
     }
+    this.openTelemetry = null;
+
     logger.debug("OpenTelemetry: OpenTelemetrySdkService disposed");
   }
 
@@ -95,7 +95,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     if (StringUtils.isBlank(otlpEndpoint)) {
       logger.debug(
           "OpenTelemetry: No -Dotel.exporter.otlp.endpoint property or OTEL_EXPORTER_OTLP_ENDPOINT environment variable found, use a NOOP tracer");
-      GlobalOpenTelemetry.set(OpenTelemetry.noop());
+      this.openTelemetry = OpenTelemetry.noop();
     } else {
       // OtlpGrpcSpanExporterBuilder spanExporterBuilder = OtlpGrpcSpanExporter.builder();
       OtlpGrpcSpanExporterBuilder spanExporterBuilder = OtlpGrpcSpanExporter.builder();
@@ -155,9 +155,10 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
           OpenTelemetrySdk.builder()
               .setTracerProvider(sdkTracerProvider)
               .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-              .buildAndRegisterGlobal();
+              .build();
+      this.openTelemetry = this.openTelemetrySdk;
     }
-    this.tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.contrib.maven");
+    this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
   }
 
   public Tracer getTracer() {
@@ -184,6 +185,6 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
   public ContextPropagators getPropagators() {
-    return openTelemetrySdk.getPropagators();
+    return openTelemetry.getPropagators();
   }
 }
