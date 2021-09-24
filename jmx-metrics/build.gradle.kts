@@ -24,7 +24,7 @@ repositories {
 val groovyVersion = "2.5.11"
 
 dependencies {
-    api(platform("org.codehaus.groovy:groovy-bom:${groovyVersion}"))
+    api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
     implementation("io.grpc:grpc-netty-shaded")
     implementation("org.codehaus.groovy:groovy-jmx")

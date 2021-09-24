@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.aws.xray;
 
 import io.opentelemetry.api.common.Attributes;

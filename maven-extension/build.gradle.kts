@@ -30,7 +30,6 @@ dependencies {
   compileOnly("org.slf4j:slf4j-api")
   compileOnly("org.sonatype.aether:aether-api:1.13.1")
 
-
   testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
 }
@@ -55,4 +54,3 @@ tasks {
     dependsOn(shadowJar)
   }
 }
-

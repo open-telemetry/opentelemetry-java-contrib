@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.jmxmetrics
 
 import org.apache.hc.client5.http.fluent.Request
