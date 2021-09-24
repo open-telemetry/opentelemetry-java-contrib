@@ -11,24 +11,6 @@ dependencies {
     }
 }
 
-spotless {
-    groovy {
-        greclipse()
-        indentWithSpaces()
-        trimTrailingWhitespace()
-        endWithNewline()
-        excludeJava()
-        licenseHeaderFile(rootProject.file("config/license/spotless.license.java"), "(package|import|class|def|// Includes work from:)")
-    }
-
-    groovyGradle {
-        greclipse()
-        indentWithSpaces()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-}
-
 tasks {
     withType<GroovyCompile> {
         sourceCompatibility = "8"
