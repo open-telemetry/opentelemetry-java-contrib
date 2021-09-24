@@ -130,7 +130,7 @@ jobs:
           draft: true
           prerelease: false
       - name: Upload jmx-metrics release asset
-        id: upload-release-asset
+        id: upload-release-asset-jmx-metrics
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -138,4 +138,14 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: jmx-metrics/build/libs/opentelemetry-jmx-metrics-${{ github.event.inputs.version }}.jar
           asset_name: opentelemetry-jmx-metrics.jar
+          asset_content_type: application/java-archive
+      - name: Upload opentelemetry-maven-extension release asset
+        id: upload-release-asset-maven-extension
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: maven-extension/build/libs/opentelemetry-maven-extension-${{ github.event.inputs.version }}.jar
+          asset_name: opentelemetry-maven-extension.jar
           asset_content_type: application/java-archive
