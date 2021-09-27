@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.maven;
 
 import static org.assertj.core.api.Assertions.assertThat;
