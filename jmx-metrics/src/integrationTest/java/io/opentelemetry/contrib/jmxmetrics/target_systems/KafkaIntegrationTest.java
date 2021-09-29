@@ -96,7 +96,10 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "ms"),
           metric ->
               assertSum(
-                  metric, "kafka.fetch.consumer.total.time.count", "fetch consumer request count"),
+                  metric,
+                  "kafka.fetch.consumer.total.time.count",
+                  "fetch consumer request count",
+                  "1"),
           metric ->
               assertGauge(
                   metric,
@@ -111,7 +114,10 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "ms"),
           metric ->
               assertSum(
-                  metric, "kafka.fetch.follower.total.time.count", "fetch follower request count"),
+                  metric,
+                  "kafka.fetch.follower.total.time.count",
+                  "fetch follower request count",
+                  "1"),
           metric ->
               assertGauge(
                   metric,
@@ -152,7 +158,8 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "kafka.produce.total.time.99p",
                   "produce request time - 99th percentile",
                   "ms"),
-          metric -> assertSum(metric, "kafka.produce.total.time.count", "produce request count"),
+          metric ->
+              assertSum(metric, "kafka.produce.total.time.count", "produce request count", "1"),
           metric ->
               assertGauge(
                   metric,
@@ -413,7 +420,10 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "ms"),
           metric ->
               assertSum(
-                  metric, "kafka.fetch.consumer.total.time.count", "fetch consumer request count"),
+                  metric,
+                  "kafka.fetch.consumer.total.time.count",
+                  "fetch consumer request count",
+                  "1"),
           metric ->
               assertGauge(
                   metric,
@@ -428,7 +438,10 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "ms"),
           metric ->
               assertSum(
-                  metric, "kafka.fetch.follower.total.time.count", "fetch follower request count"),
+                  metric,
+                  "kafka.fetch.follower.total.time.count",
+                  "fetch follower request count",
+                  "1"),
           metric ->
               assertGauge(
                   metric,
@@ -469,7 +482,8 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   "kafka.produce.total.time.99p",
                   "produce request time - 99th percentile",
                   "ms"),
-          metric -> assertSum(metric, "kafka.produce.total.time.count", "produce request count"),
+          metric ->
+              assertSum(metric, "kafka.produce.total.time.count", "produce request count", "1"),
           metric ->
               assertGauge(
                   metric,

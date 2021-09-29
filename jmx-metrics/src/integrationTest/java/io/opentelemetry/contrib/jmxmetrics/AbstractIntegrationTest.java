@@ -134,10 +134,6 @@ public abstract class AbstractIntegrationTest {
             });
   }
 
-  protected void assertGauge(Metric metric, String name, String description) {
-    assertGauge(metric, name, description, "µs");
-  }
-
   protected void assertGauge(Metric metric, String name, String description, String unit) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
@@ -145,10 +141,6 @@ public abstract class AbstractIntegrationTest {
     assertThat(metric.hasGauge()).isTrue();
     assertThat(metric.getGauge().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
-  }
-
-  protected void assertSum(Metric metric, String name, String description) {
-    assertSum(metric, name, description, "1");
   }
 
   protected void assertSum(Metric metric, String name, String description, String unit) {

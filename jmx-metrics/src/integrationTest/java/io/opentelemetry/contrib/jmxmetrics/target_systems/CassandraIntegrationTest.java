@@ -40,12 +40,14 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.50p",
-                "Token range read request latency - 50th percentile"),
+                "Token range read request latency - 50th percentile",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.99p",
-                "Token range read request latency - 99th percentile"),
+                "Token range read request latency - 99th percentile",
+                "µs"),
         metric ->
             assertSum(
                 metric,
@@ -56,27 +58,32 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.max",
-                "Maximum token range read request latency"),
+                "Maximum token range read request latency",
+                "µs"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.range_slice.timeout.count",
-                "Number of token range read request timeouts encountered"),
+                "Number of token range read request timeouts encountered",
+                "1"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.range_slice.unavailable.count",
-                "Number of token range read request unavailable exceptions encountered"),
+                "Number of token range read request unavailable exceptions encountered",
+                "1"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.50p",
-                "Standard read request latency - 50th percentile"),
+                "Standard read request latency - 50th percentile",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.99p",
-                "Standard read request latency - 99th percentile"),
+                "Standard read request latency - 99th percentile",
+                "µs"),
         metric ->
             assertSum(
                 metric,
@@ -87,27 +94,32 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.max",
-                "Maximum standard read request latency"),
+                "Maximum standard read request latency",
+                "µs"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.read.timeout.count",
-                "Number of standard read request timeouts encountered"),
+                "Number of standard read request timeouts encountered",
+                "1"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.read.unavailable.count",
-                "Number of standard read request unavailable exceptions encountered"),
+                "Number of standard read request unavailable exceptions encountered",
+                "1"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.50p",
-                "Regular write request latency - 50th percentile"),
+                "Regular write request latency - 50th percentile",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.99p",
-                "Regular write request latency - 99th percentile"),
+                "Regular write request latency - 99th percentile",
+                "µs"),
         metric ->
             assertSum(
                 metric,
@@ -118,22 +130,26 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.max",
-                "Maximum regular write request latency"),
+                "Maximum regular write request latency",
+                "µs"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.write.timeout.count",
-                "Number of regular write request timeouts encountered"),
+                "Number of regular write request timeouts encountered",
+                "1"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.client.request.write.unavailable.count",
-                "Number of regular write request unavailable exceptions encountered"),
+                "Number of regular write request unavailable exceptions encountered",
+                "1"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.compaction.tasks.completed",
-                "Number of completed compactions since server [re]start"),
+                "Number of completed compactions since server [re]start",
+                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -150,11 +166,13 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.storage.total_hints.count",
-                "Number of hint messages written to this node since [re]start"),
+                "Number of hint messages written to this node since [re]start",
+                "1"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.storage.total_hints.in_progress.count",
-                "Number of hints attempting to be sent currently"));
+                "Number of hints attempting to be sent currently",
+                "1"));
   }
 }
