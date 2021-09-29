@@ -22,15 +22,13 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A low-latency event queue for background updating of (possibly contended) objects. This is
  * intended for use by instrumentation methods to ensure that they do not block foreground
  * activities.
  */
-@ThreadSafe
 final class DisruptorEventQueue {
   private static final Logger logger = Logger.getLogger(DisruptorEventQueue.class.getName());
   private static final String WORKER_THREAD_NAME = "DisruptorEventQueue_WorkerThread";
@@ -53,7 +51,6 @@ final class DisruptorEventQueue {
     ON_FORCE_FLUSH
   }
 
-  // Creates a new EventQueue. Private to prevent creation of non-singleton instance.
   DisruptorEventQueue(
       int bufferSize, WaitStrategy waitStrategy, SpanProcessor spanProcessor, boolean blocking) {
     // Create new Disruptor for processing. Note that Disruptor creates a single thread per

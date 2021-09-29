@@ -11,13 +11,11 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.util.Objects;
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A {@link SpanProcessor} implementation that uses {@code Disruptor} to execute all the hooks on a
  * another thread.
  */
-@ThreadSafe
 public final class DisruptorSpanProcessor implements SpanProcessor {
 
   private final DisruptorEventQueue disruptorEventQueue;
