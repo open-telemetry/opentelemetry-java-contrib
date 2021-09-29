@@ -16,7 +16,6 @@ import javax.management.remote.JMXServiceURL
 import spock.lang.Shared
 import spock.lang.Specification
 
-
 class OtelHelperJmxTest extends Specification {
 
     static String thingName = 'io.opentelemetry.extensions.metrics.jmx:type=OtelHelperJmxTest.Thing'
@@ -35,10 +34,17 @@ class OtelHelperJmxTest extends Specification {
     }
 
     private JMXServiceURL setupServer(Map env) {
-        def serviceUrl = new JMXServiceURL('rmi', 'localhost', OtlpIntegrationTest.availablePort())
+        def serviceUrl = new JMXServiceURL('rmi', 'localhost', availablePort())
         jmxServer = JMXConnectorServerFactory.newJMXConnectorServer(serviceUrl, env, getPlatformMBeanServer())
         jmxServer.start()
         return jmxServer.getAddress()
+    }
+
+    private static def availablePort() {
+      def sock = new ServerSocket(0);
+      def port = sock.getLocalPort()
+      sock.close()
+      return port
     }
 
     private OtelHelper setupHelper(JmxConfig config) {

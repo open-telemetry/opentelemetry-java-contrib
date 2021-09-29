@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jmxmetrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,6 +17,7 @@ import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
 import io.opentelemetry.proto.metrics.v1.Metric;
+import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -152,6 +158,44 @@ public abstract class AbstractIntegrationTest {
     assertThat(metric.hasSum()).isTrue();
     assertThat(metric.getSum().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
+  }
+
+  protected void assertTypedGauge(
+      Metric metric, String name, String description, String unit, List<String> types) {
+    assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getDescription()).isEqualTo(description);
+    assertThat(metric.getUnit()).isEqualTo(unit);
+    assertThat(metric.hasGauge()).isTrue();
+    assertTypedPoints(metric.getGauge().getDataPointsList(), types);
+  }
+
+  protected void assertTypedSum(
+      Metric metric, String name, String description, String unit, List<String> types) {
+    assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getDescription()).isEqualTo(description);
+    assertThat(metric.getUnit()).isEqualTo(unit);
+    assertThat(metric.hasSum()).isTrue();
+    assertTypedPoints(metric.getSum().getDataPointsList(), types);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
+    assertThat(points)
+        .satisfiesExactlyInAnyOrder(
+            types.stream()
+                .map(
+                    type ->
+                        (Consumer<NumberDataPoint>)
+                            point ->
+                                assertThat(point.getAttributesList())
+                                    .singleElement()
+                                    .satisfies(
+                                        attribute -> {
+                                          assertThat(attribute.getKey()).isEqualTo("name");
+                                          assertThat(attribute.getValue().getStringValue())
+                                              .isEqualTo(type);
+                                        }))
+                .toArray(Consumer[]::new));
   }
 
   private static class OtlpGrpcServer extends ServerExtension {

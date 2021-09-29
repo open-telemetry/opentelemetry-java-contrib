@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
@@ -45,7 +50,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.range_slice.latency.count",
-                "Total token range read request latency", "µs"),
+                "Total token range read request latency",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
@@ -75,7 +81,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.read.latency.count",
-                "Total standard read request latency", "µs"),
+                "Total standard read request latency",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
@@ -105,7 +112,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.write.latency.count",
-                "Total regular write request latency", "µs"),
+                "Total regular write request latency",
+                "µs"),
         metric ->
             assertGauge(
                 metric,
