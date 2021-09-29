@@ -7,19 +7,16 @@ package io.opentelemetry.contrib.jmxmetrics
 
 import static org.junit.Assert.assertTrue
 
-import java.time.Duration
-import java.util.concurrent.TimeUnit
-
 import io.grpc.ServerBuilder
 import io.grpc.stub.StreamObserver
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics
-import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
-import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.images.builder.ImageFromDockerfile
 import org.testcontainers.lifecycle.Startable

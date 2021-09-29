@@ -65,8 +65,8 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 'total number of collections that have occurred',
                 '1',
                 [
-                    "ConcurrentMarkSweep",
-                    "ParNew"
+                  "ConcurrentMarkSweep",
+                  "ParNew"
                 ],
                 IntSum
             ],
@@ -141,12 +141,12 @@ class JVMTargetSystemIntegrationTests extends OtlpIntegrationTest {
                 'current memory pool usage',
                 'by',
                 [
-                    "Code Cache",
-                    "Par Eden Space",
-                    "CMS Old Gen",
-                    "Compressed Class Space",
-                    "Metaspace",
-                    "Par Survivor Space"
+                  "Code Cache",
+                  "Par Eden Space",
+                  "CMS Old Gen",
+                  "Compressed Class Space",
+                  "Metaspace",
+                  "Par Survivor Space"
                 ],
                 IntGauge
             ],

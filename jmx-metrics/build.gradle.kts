@@ -1,6 +1,7 @@
 plugins {
     application
     id("com.github.johnrengelman.shadow")
+    id("org.unbroken-dome.test-sets")
 
     id("otel.groovy-conventions")
     id("otel.publish-conventions")
@@ -23,6 +24,10 @@ repositories {
 
 val groovyVersion = "2.5.11"
 
+testSets {
+  create("integrationTest")
+}
+
 dependencies {
     api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
@@ -36,6 +41,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-sdk")
     implementation("io.opentelemetry:opentelemetry-sdk-metrics")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+    implementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
     implementation("io.opentelemetry:opentelemetry-sdk-testing")
     implementation("io.opentelemetry:opentelemetry-exporter-logging")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
@@ -55,6 +61,10 @@ dependencies {
     testImplementation("org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("io.opentelemetry:opentelemetry-proto")
+
+    add("integrationTestImplementation", "com.linecorp.armeria:armeria-grpc")
+    add("integrationTestImplementation", "com.linecorp.armeria:armeria-junit5")
+    add("integrationTestImplementation", "org.testcontainers:junit-jupiter")
 }
 
 tasks {

@@ -27,16 +27,6 @@ tasks {
         }
     }
 
-    val integrationTest by registering {
-        dependsOn(test)
-    }
-
-    test {
-        if (gradle.startParameter.taskNames.contains(integrationTest.name)) {
-            systemProperty("ojc.integration.tests", "true")
-        }
-    }
-
     withType<Test>().configureEach {
         useJUnitPlatform()
 
