@@ -121,8 +121,11 @@ public abstract class AbstractIntegrationTest {
                       .filter(
                           ilm ->
                               ilm.getInstrumentationLibrary()
-                                  .getName()
-                                  .equals("io.opentelemetry.contrib.jmxmetrics"))
+                                      .getName()
+                                      .equals("io.opentelemetry.contrib.jmxmetrics")
+                                  && ilm.getInstrumentationLibrary()
+                                      .getVersion()
+                                      .equals(expectedMeterVersion()))
                       .flatMap(ilm -> ilm.getMetricsList().stream())
                       .collect(Collectors.toList());
 
@@ -168,6 +171,13 @@ public abstract class AbstractIntegrationTest {
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasSum()).isTrue();
     assertTypedPoints(metric.getSum().getDataPointsList(), types);
+  }
+
+  private static final String expectedMeterVersion() {
+    // Automatically set by gradle when running the tests
+    String version = System.getProperty("gradle.project.version");
+    assert version != null && !version.isEmpty();
+    return version;
   }
 
   @SuppressWarnings("unchecked")
