@@ -53,7 +53,7 @@ jobs:
         if: always()
         with:
           name: integration-test-results
-          path: jmx-metrics/build/reports/tests/test
+          path: jmx-metrics/build/reports/tests/integrationTest
   publish:
     name: publish
     runs-on: ubuntu-latest
