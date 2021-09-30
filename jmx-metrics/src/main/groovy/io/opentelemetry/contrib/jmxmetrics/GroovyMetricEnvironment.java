@@ -90,6 +90,12 @@ public class GroovyMetricEnvironment {
     meter = meterProvider.get(instrumentationName, instrumentationVersion, null);
   }
 
+  // Visible for testing
+  GroovyMetricEnvironment(SdkMeterProvider meterProvider, String instrumentationName) {
+    this.meterProvider = meterProvider;
+    meter = meterProvider.meterBuilder(instrumentationName).build();
+  }
+
   /**
    * Configures with default meter identifiers.
    *

@@ -55,6 +55,7 @@ val DEPENDENCIES = listOf(
     "org.assertj:assertj-core:3.20.2",
     "org.awaitility:awaitility:4.1.0",
     "org.checkerframework:checker-qual:3.15.0",
+    "org.junit-pioneer:junit-pioneer:1.4.2",
     "org.skyscreamer:jsonassert:1.5.0",
     "org.spockframework:spock-core:1.3-groovy-2.5"
 )
