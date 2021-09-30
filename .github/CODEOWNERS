@@ -16,3 +16,4 @@
 * @open-telemetry/opentelemetry-java-contrib-approvers
 
 aws-xray/ @open-telemetry/opentelemetry-java-contrib-approvers @willarmiros
+maven-extension/ @open-telemetry/opentelemetry-java-contrib-approvers @cyrille-leclerc @kenfinnigan

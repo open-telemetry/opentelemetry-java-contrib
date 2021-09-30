@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+  <components>
+    <component>
+      <role>io.opentelemetry.maven.OpenTelemetrySdkService</role>
+      <role-hint>opentelemetry-service</role-hint>
+      <implementation>io.opentelemetry.maven.OpenTelemetrySdkService</implementation>
+      <description />
+      <isolated-realm>false</isolated-realm>
+      <requirements>
+        <requirement>
+          <role>org.apache.maven.rtinfo.RuntimeInformation</role>
+          <field-name>runtimeInformation</field-name>
+        </requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>io.opentelemetry.maven.SpanRegistry</role>
+      <role-hint>default</role-hint>
+      <implementation>io.opentelemetry.maven.SpanRegistry</implementation>
+      <description />
+      <isolated-realm>false</isolated-realm>
+    </component>
+    <component>
+      <role>org.apache.maven.AbstractMavenLifecycleParticipant</role>
+      <role-hint>default</role-hint>
+      <implementation>io.opentelemetry.maven.OtelLifecycleParticipant</implementation>
+      <description />
+      <isolated-realm>false</isolated-realm>
+      <requirements>
+        <requirement>
+          <role>org.apache.maven.execution.ExecutionListener</role>
+          <role-hint>otel-execution-listener</role-hint>
+          <field-name>otelExecutionListener</field-name>
+        </requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>org.apache.maven.execution.ExecutionListener</role>
+      <role-hint>otel-execution-listener</role-hint>
+      <implementation>io.opentelemetry.maven.OtelExecutionListener</implementation>
+      <description />
+      <isolated-realm>false</isolated-realm>
+      <requirements>
+        <requirement>
+          <role>io.opentelemetry.maven.SpanRegistry</role>
+          <field-name>spanRegistry</field-name>
+        </requirement>
+        <requirement>
+          <role>io.opentelemetry.maven.OpenTelemetrySdkService</role>
+          <field-name>openTelemetrySdkService</field-name>
+        </requirement>
+      </requirements>
+    </component>
+  </components>
+</component-set>
