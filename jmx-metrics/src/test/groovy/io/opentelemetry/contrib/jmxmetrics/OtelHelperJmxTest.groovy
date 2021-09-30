@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.jmxmetrics
 
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer
@@ -14,7 +15,6 @@ import javax.management.remote.JMXConnectorServerFactory
 import javax.management.remote.JMXServiceURL
 import spock.lang.Shared
 import spock.lang.Specification
-
 
 class OtelHelperJmxTest extends Specification {
 
@@ -34,10 +34,17 @@ class OtelHelperJmxTest extends Specification {
     }
 
     private JMXServiceURL setupServer(Map env) {
-        def serviceUrl = new JMXServiceURL('rmi', 'localhost', OtlpIntegrationTest.availablePort())
+        def serviceUrl = new JMXServiceURL('rmi', 'localhost', availablePort())
         jmxServer = JMXConnectorServerFactory.newJMXConnectorServer(serviceUrl, env, getPlatformMBeanServer())
         jmxServer.start()
         return jmxServer.getAddress()
+    }
+
+    private static def availablePort() {
+      def sock = new ServerSocket(0);
+      def port = sock.getLocalPort()
+      sock.close()
+      return port
     }
 
     private OtelHelper setupHelper(JmxConfig config) {
