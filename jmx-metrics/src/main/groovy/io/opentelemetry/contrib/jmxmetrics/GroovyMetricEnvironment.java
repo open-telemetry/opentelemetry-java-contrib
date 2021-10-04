@@ -2,26 +2,22 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.jmxmetrics;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.metrics.AsynchronousInstrument;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleCounter;
-import io.opentelemetry.api.metrics.DoubleSumObserver;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
-import io.opentelemetry.api.metrics.DoubleUpDownSumObserver;
-import io.opentelemetry.api.metrics.DoubleValueObserver;
-import io.opentelemetry.api.metrics.DoubleValueRecorder;
 import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.LongSumObserver;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
-import io.opentelemetry.api.metrics.LongUpDownSumObserver;
-import io.opentelemetry.api.metrics.LongValueObserver;
-import io.opentelemetry.api.metrics.LongValueRecorder;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.common.Labels;
-import io.opentelemetry.api.metrics.common.LabelsBuilder;
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
+import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
@@ -34,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 public class GroovyMetricEnvironment {
 
@@ -48,9 +45,9 @@ public class GroovyMetricEnvironment {
   // updated w/ each instrument creation call.  Otherwise no observed changes in MBean availability
   // would be possible.  These registry stores are maps of instrument descriptor hashes to updater
   // consumer references.
-  private final Map<Integer, AtomicReference<Consumer<AsynchronousInstrument.LongResult>>>
+  private final Map<Integer, AtomicReference<Consumer<ObservableLongMeasurement>>>
       longUpdaterRegistry = new ConcurrentHashMap<>();
-  private final Map<Integer, AtomicReference<Consumer<AsynchronousInstrument.DoubleResult>>>
+  private final Map<Integer, AtomicReference<Consumer<ObservableDoubleMeasurement>>>
       doubleUpdaterRegistry = new ConcurrentHashMap<>();
 
   /**
@@ -90,7 +87,13 @@ public class GroovyMetricEnvironment {
         exporter = InMemoryMetricExporter.create();
     }
 
-    meter = meterProvider.get(instrumentationName, instrumentationVersion);
+    meter = meterProvider.get(instrumentationName, instrumentationVersion, null);
+  }
+
+  // Visible for testing
+  GroovyMetricEnvironment(SdkMeterProvider meterProvider, String instrumentationName) {
+    this.meterProvider = meterProvider;
+    meter = meterProvider.meterBuilder(instrumentationName).build();
   }
 
   /**
@@ -99,7 +102,10 @@ public class GroovyMetricEnvironment {
    * @param config - used to establish exporter type (logging by default) and connection info
    */
   public GroovyMetricEnvironment(final JmxConfig config) {
-    this(config, "io.opentelemetry.contrib.jmxmetrics", "1.0.0-alpha");
+    this(
+        config,
+        "io.opentelemetry.contrib.jmxmetrics",
+        GroovyMetricEnvironment.class.getPackage().getImplementationVersion());
   }
 
   /** Will collect all metrics from OpenTelemetrySdk and export via configured exporter. */
@@ -110,14 +116,15 @@ public class GroovyMetricEnvironment {
     }
   }
 
-  protected static Labels mapToLabels(final Map<String, String> labelMap) {
-    LabelsBuilder labels = Labels.builder();
-    if (labelMap != null) {
-      for (Map.Entry<String, String> kv : labelMap.entrySet()) {
-        labels.put(kv.getKey(), kv.getValue());
-      }
+  protected static Attributes mapToAttributes(@Nullable final Map<String, String> labelMap) {
+    if (labelMap == null) {
+      return Attributes.empty();
     }
-    return labels.build();
+    AttributesBuilder attrs = Attributes.builder();
+    for (Map.Entry<String, String> kv : labelMap.entrySet()) {
+      attrs.put(kv.getKey(), kv.getValue());
+    }
+    return attrs.build();
   }
 
   /**
@@ -130,7 +137,7 @@ public class GroovyMetricEnvironment {
    */
   public DoubleCounter getDoubleCounter(
       final String name, final String description, final String unit) {
-    return meter.doubleCounterBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter.counterBuilder(name).setDescription(description).setUnit(unit).ofDoubles().build();
   }
 
   /**
@@ -143,7 +150,7 @@ public class GroovyMetricEnvironment {
    */
   public LongCounter getLongCounter(
       final String name, final String description, final String unit) {
-    return meter.longCounterBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter.counterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
@@ -156,7 +163,12 @@ public class GroovyMetricEnvironment {
    */
   public DoubleUpDownCounter getDoubleUpDownCounter(
       final String name, final String description, final String unit) {
-    return meter.doubleUpDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter
+        .upDownCounterBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .ofDoubles()
+        .build();
   }
 
   /**
@@ -169,209 +181,201 @@ public class GroovyMetricEnvironment {
    */
   public LongUpDownCounter getLongUpDownCounter(
       final String name, final String description, final String unit) {
-    return meter.longUpDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter.upDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
-   * Build or retrieve previously registered {@link DoubleValueRecorder}.
+   * Build or retrieve previously registered {@link DoubleHistogram}.
    *
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @return new or memoized {@link DoubleValueRecorder}
+   * @return new or memoized {@link DoubleHistogram}
    */
-  public DoubleValueRecorder getDoubleValueRecorder(
+  public DoubleHistogram getDoubleHistogram(
       final String name, final String description, final String unit) {
-    return meter.doubleValueRecorderBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter.histogramBuilder(name).setDescription(description).setUnit(unit).build();
   }
 
   /**
-   * Build or retrieve previously registered {@link LongValueRecorder}.
+   * Build or retrieve previously registered {@link }.
    *
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
-   * @return new or memoized {@link LongValueRecorder}
+   * @return new or memoized {@link LongHistogram}
    */
-  public LongValueRecorder getLongValueRecorder(
+  public LongHistogram getLongHistogram(
       final String name, final String description, final String unit) {
-    return meter.longValueRecorderBuilder(name).setDescription(description).setUnit(unit).build();
+    return meter.histogramBuilder(name).setDescription(description).setUnit(unit).ofLongs().build();
   }
 
   /**
-   * Build or retrieve previously registered {@link DoubleSumObserver}.
+   * Register a double observable gauge.
    *
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
-   * @return new or memoized {@link DoubleSumObserver}
    */
-  public DoubleSumObserver getDoubleSumObserver(
+  public void registerDoubleValueCallback(
       final String name,
       final String description,
       final String unit,
-      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
-    return meter
-        .doubleSumObserverBuilder(name)
+      final Consumer<ObservableDoubleMeasurement> updater) {
+    meter
+        .gaugeBuilder(name)
         .setDescription(description)
         .setUnit(unit)
-        .setUpdater(
-            proxiedDoubleObserver(name, description, unit, InstrumentType.SUM_OBSERVER, updater))
-        .build();
-  }
-
-  /**
-   * Build or retrieve previously registered {@link LongSumObserver}.
-   *
-   * @param name - metric name
-   * @param description metric description
-   * @param unit - metric unit
-   * @param updater - the value updater
-   * @return new or memoized {@link LongSumObserver}
-   */
-  public LongSumObserver getLongSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Consumer<AsynchronousInstrument.LongResult> updater) {
-    return meter
-        .longSumObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setUpdater(
-            proxiedLongObserver(name, description, unit, InstrumentType.SUM_OBSERVER, updater))
-        .build();
-  }
-
-  /**
-   * Build or retrieve previously registered {@link DoubleUpDownSumObserver}.
-   *
-   * @param name - metric name
-   * @param description metric description
-   * @param unit - metric unit
-   * @param updater - the value updater
-   * @return new or memoized {@link DoubleUpDownSumObserver}
-   */
-  public DoubleUpDownSumObserver getDoubleUpDownSumObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
-    return meter
-        .doubleUpDownSumObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setUpdater(
+        .buildWithCallback(
             proxiedDoubleObserver(
-                name, description, unit, InstrumentType.UP_DOWN_SUM_OBSERVER, updater))
-        .build();
+                name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater));
   }
 
   /**
-   * Build or retrieve previously registered {@link LongUpDownSumObserver}.
+   * Register a long observable gauge.
    *
    * @param name - metric name
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
-   * @return new or memoized {@link LongUpDownSumObserver}
    */
-  public LongUpDownSumObserver getLongUpDownSumObserver(
+  public void registerLongValueCallback(
       final String name,
       final String description,
       final String unit,
-      final Consumer<AsynchronousInstrument.LongResult> updater) {
-    return meter
-        .longUpDownSumObserverBuilder(name)
+      final Consumer<ObservableLongMeasurement> updater) {
+    meter
+        .gaugeBuilder(name)
+        .ofLongs()
         .setDescription(description)
         .setUnit(unit)
-        .setUpdater(
+        .buildWithCallback(
+            proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater));
+  }
+
+  /**
+   * Register an observable double counter.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param updater - the value updater
+   */
+  public void registerDoubleCounterCallback(
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<ObservableDoubleMeasurement> updater) {
+    meter
+        .counterBuilder(name)
+        .ofDoubles()
+        .setDescription(description)
+        .setUnit(unit)
+        .buildWithCallback(
+            proxiedDoubleObserver(name, description, unit, InstrumentType.OBSERVABLE_SUM, updater));
+  }
+
+  /**
+   * Register an observable long counter.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param updater - the value updater
+   */
+  public void registerLongCounterCallback(
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<ObservableLongMeasurement> updater) {
+    meter
+        .counterBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .buildWithCallback(
+            proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_SUM, updater));
+  }
+
+  /**
+   * Register an observable double updown counter.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param updater - the value updater
+   */
+  public void registerDoubleUpDownCounterCallback(
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<ObservableDoubleMeasurement> updater) {
+    meter
+        .upDownCounterBuilder(name)
+        .ofDoubles()
+        .setDescription(description)
+        .setUnit(unit)
+        .buildWithCallback(
+            proxiedDoubleObserver(
+                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_SUM, updater));
+  }
+
+  /**
+   * Register an observable long updown counter.
+   *
+   * @param name - metric name
+   * @param description metric description
+   * @param unit - metric unit
+   * @param updater - the value updater
+   */
+  public void registerLongUpDownCounterCallback(
+      final String name,
+      final String description,
+      final String unit,
+      final Consumer<ObservableLongMeasurement> updater) {
+    meter
+        .upDownCounterBuilder(name)
+        .setDescription(description)
+        .setUnit(unit)
+        .buildWithCallback(
             proxiedLongObserver(
-                name, description, unit, InstrumentType.UP_DOWN_SUM_OBSERVER, updater))
-        .build();
+                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_SUM, updater));
   }
 
-  /**
-   * Build or retrieve previously registered {@link DoubleValueObserver}.
-   *
-   * @param name - metric name
-   * @param description metric description
-   * @param unit - metric unit
-   * @param updater - the value updater
-   * @return new or memoized {@link DoubleValueObserver}
-   */
-  public DoubleValueObserver getDoubleValueObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
-    return meter
-        .doubleValueObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setUpdater(
-            proxiedDoubleObserver(name, description, unit, InstrumentType.VALUE_OBSERVER, updater))
-        .build();
-  }
-
-  /**
-   * Build or retrieve previously registered {@link LongValueObserver}.
-   *
-   * @param name - metric name
-   * @param description metric description
-   * @param unit - metric unit
-   * @param updater - the value updater
-   * @return new or memoized {@link LongValueObserver}
-   */
-  public LongValueObserver getLongValueObserver(
-      final String name,
-      final String description,
-      final String unit,
-      final Consumer<AsynchronousInstrument.LongResult> updater) {
-    return meter
-        .longValueObserverBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .setUpdater(
-            proxiedLongObserver(name, description, unit, InstrumentType.VALUE_OBSERVER, updater))
-        .build();
-  }
-
-  private Consumer<AsynchronousInstrument.DoubleResult> proxiedDoubleObserver(
+  private Consumer<ObservableDoubleMeasurement> proxiedDoubleObserver(
       final String name,
       final String description,
       final String unit,
       final InstrumentType instrumentType,
-      final Consumer<AsynchronousInstrument.DoubleResult> updater) {
+      final Consumer<ObservableDoubleMeasurement> updater) {
     InstrumentDescriptor descriptor =
         InstrumentDescriptor.create(
             name, description, unit, instrumentType, InstrumentValueType.DOUBLE);
     doubleUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
-    AtomicReference<Consumer<AsynchronousInstrument.DoubleResult>> existingUpdater =
+    AtomicReference<Consumer<ObservableDoubleMeasurement>> existingUpdater =
         doubleUpdaterRegistry.get(descriptor.hashCode());
     existingUpdater.set(updater);
     return doubleResult -> {
-      Consumer<AsynchronousInstrument.DoubleResult> existing = existingUpdater.get();
+      Consumer<ObservableDoubleMeasurement> existing = existingUpdater.get();
       existing.accept(doubleResult);
     };
   }
 
-  private Consumer<AsynchronousInstrument.LongResult> proxiedLongObserver(
+  private Consumer<ObservableLongMeasurement> proxiedLongObserver(
       final String name,
       final String description,
       final String unit,
       final InstrumentType instrumentType,
-      final Consumer<AsynchronousInstrument.LongResult> updater) {
+      final Consumer<ObservableLongMeasurement> updater) {
     InstrumentDescriptor descriptor =
         InstrumentDescriptor.create(
             name, description, unit, instrumentType, InstrumentValueType.LONG);
     longUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
-    AtomicReference<Consumer<AsynchronousInstrument.LongResult>> existingUpdater =
+    AtomicReference<Consumer<ObservableLongMeasurement>> existingUpdater =
         longUpdaterRegistry.get(descriptor.hashCode());
     existingUpdater.set(updater);
     return longResult -> {
-      Consumer<AsynchronousInstrument.LongResult> existing = existingUpdater.get();
+      Consumer<ObservableLongMeasurement> existing = existingUpdater.get();
       existing.accept(longResult);
     };
   }

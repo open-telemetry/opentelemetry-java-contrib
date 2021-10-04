@@ -2,14 +2,15 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.awsxray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.autoconfigure.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigurableSamplerProvider;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
 import java.util.Collections;
 import java.util.ServiceLoader;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,8 @@ class AwsXrayRemoteSamplerProviderTest {
 
   @Test
   void setEndpoint() {
-    when(config.getCommaSeparatedMap("otel.traces.sampler.arg"))
+    when(config.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+    when(config.getMap("otel.traces.sampler.arg"))
         .thenReturn(Collections.singletonMap("endpoint", "http://localhost:3000"));
     try (AwsXrayRemoteSampler sampler =
         (AwsXrayRemoteSampler) new AwsXrayRemoteSamplerProvider().createSampler(config)) {

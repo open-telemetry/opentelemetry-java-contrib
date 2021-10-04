@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.jmxmetrics
 
 import groovy.transform.PackageScope
@@ -138,7 +139,7 @@ class InstrumentHelper {
     }
 
     private static Closure prepareUpdateClosure(inst, value, labels) {
-        def labelMap = GroovyMetricEnvironment.mapToLabels(labels)
+        def labelMap = GroovyMetricEnvironment.mapToAttributes(labels)
         if (instrumentIsObserver(inst)) {
             return { result ->
                 result.observe(value, labelMap)
@@ -152,12 +153,12 @@ class InstrumentHelper {
 
     @PackageScope static boolean instrumentIsObserver(inst) {
         return [
-            "doubleSumObserver",
-            "doubleUpDownSumObserver",
-            "longSumObserver",
-            "longUpDownSumObserver",
-            "doubleValueObserver" ,
-            "longValueObserver"
+            "doubleCounterCallback",
+            "doubleUpDownCounterCallback",
+            "longCounterCallback",
+            "longUpDownCounterCallback",
+            "doubleValueCallback" ,
+            "longValueCallback"
         ].contains(inst.method)
     }
 

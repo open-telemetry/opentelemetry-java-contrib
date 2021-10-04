@@ -27,16 +27,6 @@ tasks {
         }
     }
 
-    val integrationTest by registering {
-        dependsOn(test)
-    }
-
-    test {
-        if (gradle.startParameter.taskNames.contains(integrationTest.name)) {
-            systemProperty("ojc.integration.tests", "true")
-        }
-    }
-
     withType<Test>().configureEach {
         useJUnitPlatform()
 
@@ -85,6 +75,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

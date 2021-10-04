@@ -1,6 +1,7 @@
 plugins {
     application
     id("com.github.johnrengelman.shadow")
+    id("org.unbroken-dome.test-sets")
 
     id("otel.groovy-conventions")
     id("otel.publish-conventions")
@@ -23,8 +24,12 @@ repositories {
 
 val groovyVersion = "2.5.11"
 
+testSets {
+  create("integrationTest")
+}
+
 dependencies {
-    api(platform("org.codehaus.groovy:groovy-bom:${groovyVersion}"))
+    api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
     implementation("io.grpc:grpc-netty-shaded")
     implementation("org.codehaus.groovy:groovy-jmx")
@@ -36,6 +41,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-sdk")
     implementation("io.opentelemetry:opentelemetry-sdk-metrics")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+    implementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
     implementation("io.opentelemetry:opentelemetry-sdk-testing")
     implementation("io.opentelemetry:opentelemetry-exporter-logging")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
@@ -50,15 +56,23 @@ dependencies {
     testImplementation("io.grpc:grpc-stub")
     testImplementation("io.grpc:grpc-testing")
     testImplementation("org.codehaus.groovy:groovy-test")
+    testImplementation("org.junit-pioneer:junit-pioneer")
     testImplementation("io.rest-assured:rest-assured:4.2.0")
     testImplementation("org.awaitility:awaitility")
     testImplementation("org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("io.opentelemetry:opentelemetry-proto")
+
+    add("integrationTestImplementation", "com.linecorp.armeria:armeria-grpc")
+    add("integrationTestImplementation", "com.linecorp.armeria:armeria-junit5")
+    add("integrationTestImplementation", "org.testcontainers:junit-jupiter")
 }
 
 tasks {
     shadowJar {
+        manifest {
+            attributes["Implementation-Version"] = project.version
+        }
         // This should always be standalone, so remove "-all" to prevent unnecessary artifact.
         archiveClassifier.set("")
     }
@@ -66,5 +80,6 @@ tasks {
     withType<Test>().configureEach {
         dependsOn(shadowJar)
         systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+        systemProperty("gradle.project.version", "${project.version}")
     }
 }

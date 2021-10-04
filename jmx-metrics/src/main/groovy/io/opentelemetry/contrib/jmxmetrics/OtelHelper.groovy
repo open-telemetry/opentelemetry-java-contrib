@@ -2,21 +2,18 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.jmxmetrics
 
 import io.opentelemetry.api.metrics.DoubleCounter
-import io.opentelemetry.api.metrics.DoubleSumObserver
+import io.opentelemetry.api.metrics.DoubleHistogram
 import io.opentelemetry.api.metrics.DoubleUpDownCounter
-import io.opentelemetry.api.metrics.DoubleUpDownSumObserver
-import io.opentelemetry.api.metrics.DoubleValueObserver
-import io.opentelemetry.api.metrics.DoubleValueRecorder
 import io.opentelemetry.api.metrics.LongCounter
-import io.opentelemetry.api.metrics.LongSumObserver
+import io.opentelemetry.api.metrics.LongHistogram
 import io.opentelemetry.api.metrics.LongUpDownCounter
-import io.opentelemetry.api.metrics.LongUpDownSumObserver
-import io.opentelemetry.api.metrics.LongValueObserver
-import io.opentelemetry.api.metrics.LongValueRecorder
-
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.api.metrics.ObservableLongMeasurement
+import java.util.function.Consumer
 import javax.management.ObjectName
 
 class OtelHelper {
@@ -155,99 +152,99 @@ class OtelHelper {
         return longUpDownCounter(name, '')
     }
 
-    DoubleValueRecorder doubleValueRecorder(String name, String description, String unit) {
-        return groovyMetricEnvironment.getDoubleValueRecorder(name, description, unit)
+    DoubleHistogram doubleHistogram(String name, String description, String unit) {
+        return groovyMetricEnvironment.getDoubleHistogram(name, description, unit)
     }
 
-    DoubleValueRecorder doubleValueRecorder(String name, String description) {
-        return doubleValueRecorder(name, description, SCALAR)
+    DoubleHistogram doubleHistogram(String name, String description) {
+        return doubleHistogram(name, description, SCALAR)
     }
 
-    DoubleValueRecorder doubleValueRecorder(String name) {
-        return doubleValueRecorder(name, '')
+    DoubleHistogram doubleHistogram(String name) {
+        return doubleHistogram(name, '')
     }
 
-    LongValueRecorder longValueRecorder(String name, String description, String unit) {
-        return groovyMetricEnvironment.getLongValueRecorder(name, description, unit)
+    LongHistogram longHistogram(String name, String description, String unit) {
+        return groovyMetricEnvironment.getLongHistogram(name, description, unit)
     }
 
-    LongValueRecorder longValueRecorder(String name, String description) {
-        return longValueRecorder(name, description, SCALAR)
+    LongHistogram longHistogram(String name, String description) {
+        return longHistogram(name, description, SCALAR)
     }
 
-    LongValueRecorder longValueRecorder(String name) {
-        return longValueRecorder(name, '')
+    LongHistogram longHistogram(String name) {
+        return longHistogram(name, '')
     }
 
-    DoubleSumObserver doubleSumObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getDoubleSumObserver(name, description, unit, updater)
+    void doubleCounterCallback(String name, String description, String unit, Consumer<ObservableDoubleMeasurement> updater) {
+        groovyMetricEnvironment.registerDoubleCounterCallback(name, description, unit, updater)
     }
 
-    DoubleSumObserver doubleSumObserver(String name, String description, Closure updater) {
-        return doubleSumObserver(name, description, SCALAR, updater)
+    void doubleCounterCallback(String name, String description, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleCounterCallback(name, description, SCALAR, updater)
     }
 
-    DoubleSumObserver doubleSumObserver(String name, Closure updater) {
-        return doubleSumObserver(name, '', updater)
+    void doubleCounterCallback(String name, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleCounterCallback(name, '', updater)
     }
 
-    LongSumObserver longSumObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getLongSumObserver(name, description, unit, updater)
+    void longCounterCallback(String name, String description, String unit, Consumer<ObservableLongMeasurement> updater) {
+        groovyMetricEnvironment.registerLongCounterCallback(name, description, unit, updater)
     }
 
-    LongSumObserver longSumObserver(String name, String description, Closure updater) {
-        return longSumObserver(name, description, SCALAR, updater)
+    void longCounterCallback(String name, String description, Consumer<ObservableLongMeasurement> updater) {
+        longCounterCallback(name, description, SCALAR, updater)
     }
 
-    LongSumObserver longSumObserver(String name, Closure updater) {
-        return longSumObserver(name, '', updater)
+    void longCounterCallback(String name, Consumer<ObservableLongMeasurement> updater) {
+        longCounterCallback(name, '', updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getDoubleUpDownSumObserver(name, description, unit, updater)
+    void doubleUpDownCounterCallback(String name, String description, String unit, Consumer<ObservableDoubleMeasurement> updater) {
+        groovyMetricEnvironment.registerDoubleUpDownCounterCallback(name, description, unit, updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, String description, Closure updater) {
-        return doubleUpDownSumObserver(name, description, SCALAR, updater)
+    void doubleUpDownCounterCallback(String name, String description, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleUpDownCounterCallback(name, description, SCALAR, updater)
     }
 
-    DoubleUpDownSumObserver doubleUpDownSumObserver(String name, Closure updater) {
-        return doubleUpDownSumObserver(name, '', updater)
+    void doubleUpDownCounterCallback(String name, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleUpDownCounterCallback(name, '', updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getLongUpDownSumObserver(name, description, unit, updater)
+    void longUpDownCounterCallback(String name, String description, String unit, Consumer<ObservableLongMeasurement> updater) {
+        groovyMetricEnvironment.registerLongUpDownCounterCallback(name, description, unit, updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, String description, Closure updater) {
-        return longUpDownSumObserver(name, description, SCALAR, updater)
+    void longUpDownCounterCallback(String name, String description, Consumer<ObservableLongMeasurement> updater) {
+        longUpDownCounterCallback(name, description, SCALAR, updater)
     }
 
-    LongUpDownSumObserver longUpDownSumObserver(String name, Closure updater) {
-        return longUpDownSumObserver(name, '', updater)
+    void longUpDownCounterCallback(String name, Consumer<ObservableLongMeasurement> updater) {
+        longUpDownCounterCallback(name, '', updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getDoubleValueObserver(name, description, unit, updater)
+    void doubleValueCallback(String name, String description, String unit, Consumer<ObservableDoubleMeasurement> updater) {
+        groovyMetricEnvironment.registerDoubleValueCallback(name, description, unit, updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name, String description, Closure updater) {
-        return doubleValueObserver(name, description, SCALAR, updater)
+    void doubleValueCallback(String name, String description, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleValueCallback(name, description, SCALAR, updater)
     }
 
-    DoubleValueObserver doubleValueObserver(String name, Closure updater) {
-        return doubleValueObserver(name, '', updater)
+    void doubleValueCallback(String name, Consumer<ObservableDoubleMeasurement> updater) {
+        doubleValueCallback(name, '', updater)
     }
 
-    LongValueObserver longValueObserver(String name, String description, String unit, Closure updater) {
-        return groovyMetricEnvironment.getLongValueObserver(name, description, unit, updater)
+    void longValueCallback(String name, String description, String unit, Consumer<ObservableLongMeasurement> updater) {
+        groovyMetricEnvironment.registerLongValueCallback(name, description, unit, updater)
     }
 
-    LongValueObserver longValueObserver(String name, String description, Closure updater) {
-        return longValueObserver(name, description, SCALAR, updater)
+    void longValueCallback(String name, String description, Consumer<ObservableLongMeasurement> updater) {
+        longValueCallback(name, description, SCALAR, updater)
     }
 
-    LongValueObserver longValueObserver(String name, Closure updater) {
-        return longValueObserver(name, '', updater)
+    void longValueCallback(String name, Consumer<ObservableLongMeasurement> updater) {
+        longValueCallback(name, '', updater)
     }
 }

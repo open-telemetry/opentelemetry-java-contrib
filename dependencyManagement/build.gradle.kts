@@ -14,11 +14,12 @@ rootProject.extra["versions"] = dependencyVersions
 val DEPENDENCY_BOMS = listOf(
     "com.fasterxml.jackson:jackson-bom:2.12.3",
     "com.google.guava:guava-bom:30.1.1-jre",
+    "com.linecorp.armeria:armeria-bom:1.11.0",
     "org.junit:junit-bom:5.7.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
     "io.grpc:grpc-bom:1.39.0",
-    "io.opentelemetry:opentelemetry-bom:1.4.1",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.4.1-alpha",
+    "io.opentelemetry:opentelemetry-bom:1.6.0",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.6.0-alpha",
     "org.testcontainers:testcontainers-bom:1.16.0"
 )
 
@@ -40,7 +41,7 @@ val DEPENDENCY_SETS = listOf(
     ),
     DependencySet(
         "org.mockito",
-        "3.10.0",
+        "3.11.1",
         listOf("mockito-core", "mockito-junit-jupiter")
     ),
     DependencySet(
@@ -54,6 +55,7 @@ val DEPENDENCIES = listOf(
     "org.assertj:assertj-core:3.20.2",
     "org.awaitility:awaitility:4.1.0",
     "org.checkerframework:checker-qual:3.15.0",
+    "org.junit-pioneer:junit-pioneer:1.4.2",
     "org.skyscreamer:jsonassert:1.5.0",
     "org.spockframework:spock-core:1.3-groovy-2.5"
 )
