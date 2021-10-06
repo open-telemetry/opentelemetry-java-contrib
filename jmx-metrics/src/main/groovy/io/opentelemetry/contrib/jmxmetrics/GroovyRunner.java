@@ -145,4 +145,9 @@ public class GroovyRunner {
   public void shutdown() {
     flush();
   }
+
+  // Visible for testing
+  List<Script> getScripts() {
+    return scripts;
+  }
 }

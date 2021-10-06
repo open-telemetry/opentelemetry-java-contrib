@@ -1,42 +1,42 @@
 plugins {
-    id("otel.java-conventions")
-    id("otel.publish-conventions")
+  id("otel.java-conventions")
+  id("otel.publish-conventions")
 
-    id("org.unbroken-dome.test-sets")
+  id("org.unbroken-dome.test-sets")
 }
 
 description = "OpenTelemetry AWS X-Ray Support"
 
 testSets {
-    create("awsTest")
+  create("awsTest")
 }
 
 dependencies {
-    api("io.opentelemetry:opentelemetry-api")
-    api("io.opentelemetry:opentelemetry-sdk-trace")
+  api("io.opentelemetry:opentelemetry-api")
+  api("io.opentelemetry:opentelemetry-sdk-trace")
 
-    compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
-    implementation("io.opentelemetry:opentelemetry-semconv")
+  implementation("io.opentelemetry:opentelemetry-semconv")
 
-    compileOnly("org.checkerframework:checker-qual")
+  compileOnly("org.checkerframework:checker-qual")
 
-    annotationProcessor("com.google.auto.service:auto-service")
-    compileOnly("com.google.auto.service:auto-service-annotations")
+  annotationProcessor("com.google.auto.service:auto-service")
+  compileOnly("com.google.auto.service:auto-service-annotations")
 
-    annotationProcessor("com.google.auto.value:auto-value")
-    compileOnly("com.google.auto.value:auto-value-annotations")
+  annotationProcessor("com.google.auto.value:auto-value")
+  compileOnly("com.google.auto.value:auto-value-annotations")
 
-    implementation("com.fasterxml.jackson.core:jackson-core")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
+  implementation("com.fasterxml.jackson.core:jackson-core")
+  implementation("com.fasterxml.jackson.core:jackson-databind")
 
-    testImplementation("com.linecorp.armeria:armeria-junit5")
-    testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-    testImplementation("com.google.guava:guava")
-    testImplementation("org.slf4j:slf4j-simple")
-    testImplementation("org.skyscreamer:jsonassert")
+  testImplementation("com.linecorp.armeria:armeria-junit5")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("com.google.guava:guava")
+  testImplementation("org.slf4j:slf4j-simple")
+  testImplementation("org.skyscreamer:jsonassert")
 
-    add("awsTestImplementation", "io.opentelemetry:opentelemetry-exporter-otlp-trace")
-    add("awsTestImplementation", "org.testcontainers:junit-jupiter")
+  add("awsTestImplementation", "io.opentelemetry:opentelemetry-exporter-otlp-trace")
+  add("awsTestImplementation", "org.testcontainers:junit-jupiter")
 }
