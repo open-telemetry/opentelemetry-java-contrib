@@ -53,7 +53,8 @@ class MultiObjTest extends AbstractIntegrationTest {
                               },
                               attribute -> {
                                 assertThat(attribute.getKey()).isEqualTo("task_status");
-                                assertThat(attribute.getValue().getStringValue()).isEqualTo("PendingTasks");
+                                assertThat(attribute.getValue().getStringValue())
+                                    .isEqualTo("PendingTasks");
                               }),
                   point ->
                       assertThat(point.getAttributesList())
@@ -64,7 +65,8 @@ class MultiObjTest extends AbstractIntegrationTest {
                               },
                               attribute -> {
                                 assertThat(attribute.getKey()).isEqualTo("task_status");
-                                assertThat(attribute.getValue().getStringValue()).isEqualTo("ActiveTasks");
+                                assertThat(attribute.getValue().getStringValue())
+                                    .isEqualTo("ActiveTasks");
                               }));
         });
   }
