@@ -1,11 +1,10 @@
-package org.jfr.metrics.memory;
+package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
-
-import static org.jfr.metrics.Constants.MILLISECONDS;
 
 /** This class aggregates the duration of G1 Garbage Collection JFR events */
 public final class G1GarbageCollectionHandler implements RecordedEventHandler {
@@ -24,7 +23,7 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   public G1GarbageCollectionHandler init() {
     var builder = otelMeter.histogramBuilder(JFR_G1_GARBAGE_COLLECTION_DURATION);
     builder.setDescription(DESCRIPTION);
-    builder.setUnit(MILLISECONDS);
+    builder.setUnit(Constants.MILLISECONDS);
     gcHistogram = builder.build();
     return this;
   }

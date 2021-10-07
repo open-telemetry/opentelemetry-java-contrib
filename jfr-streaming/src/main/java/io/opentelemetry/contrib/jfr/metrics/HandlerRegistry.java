@@ -1,16 +1,15 @@
-package org.jfr.metrics;
+package io.opentelemetry.contrib.jfr.metrics;
 
+import io.opentelemetry.contrib.jfr.metrics.container.ContainerConfigurationHandler;
+import io.opentelemetry.contrib.jfr.metrics.memory.ObjectAllocationOutsideTLABHandler;
+import io.opentelemetry.contrib.jfr.metrics.network.NetworkReadHandler;
+import io.opentelemetry.contrib.jfr.metrics.network.NetworkWriteHandler;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import org.jfr.metrics.container.ContainerConfigurationHandler;
-import org.jfr.metrics.cpu.ContextSwitchRateHandler;
-import org.jfr.metrics.cpu.OverallCPULoadHandler;
-import org.jfr.metrics.memory.G1GarbageCollectionHandler;
-import org.jfr.metrics.memory.GCHeapSummaryHandler;
-import org.jfr.metrics.memory.ObjectAllocationInNewTLABHandler;
-import org.jfr.metrics.memory.ObjectAllocationOutsideTLABHandler;
-import org.jfr.metrics.network.NetworkReadHandler;
-import org.jfr.metrics.network.NetworkWriteHandler;
-
+import io.opentelemetry.contrib.jfr.metrics.cpu.ContextSwitchRateHandler;
+import io.opentelemetry.contrib.jfr.metrics.cpu.OverallCPULoadHandler;
+import io.opentelemetry.contrib.jfr.metrics.memory.G1GarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.memory.GCHeapSummaryHandler;
+import io.opentelemetry.contrib.jfr.metrics.memory.ObjectAllocationInNewTLABHandler;
 
 
 import java.util.*;

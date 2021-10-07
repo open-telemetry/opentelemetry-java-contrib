@@ -1,10 +1,9 @@
-package org.jfr.metrics.container;
+package io.opentelemetry.contrib.jfr.metrics.container;
 
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
-
-import static org.jfr.metrics.Constants.PERCENTAGE;
 
 public class ContainerConfigurationHandler implements RecordedEventHandler {
     public static final String EVENT_NAME = "jdk.ContainerConfiguration";
@@ -23,7 +22,7 @@ public class ContainerConfigurationHandler implements RecordedEventHandler {
     public ContainerConfigurationHandler init() {
         otelMeter.upDownCounterBuilder(JFR_CONTAINER_CONFIGURATION)
                 .ofDoubles()
-                .setUnit(PERCENTAGE)
+                .setUnit(Constants.PERCENTAGE)
                 .buildWithCallback(codm -> codm.observe(value));
 
         return this;
