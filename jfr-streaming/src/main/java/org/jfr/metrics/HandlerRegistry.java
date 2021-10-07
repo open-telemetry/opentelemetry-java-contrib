@@ -11,10 +11,15 @@ import org.jfr.metrics.memory.ObjectAllocationOutsideTLABHandler;
 import org.jfr.metrics.network.NetworkReadHandler;
 import org.jfr.metrics.network.NetworkWriteHandler;
 
+
+
 import java.util.*;
 import java.util.stream.Stream;
 
 public class HandlerRegistry {
+  private static final String SCHEMA_URL = "https://opentelemetry.io/schemas/1.6.1";
+  private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
+  private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
 
   private final List<RecordedEventHandler> mappers;
 
@@ -23,8 +28,7 @@ public class HandlerRegistry {
   }
 
   public static HandlerRegistry createDefault(SdkMeterProvider meterProvider) {
-    var schemaUrl = "https://localhost/"; // FIXME
-    var otelMeter = meterProvider.get("org.jfr", "0.0.1-SNAPSHOT", schemaUrl);
+    var otelMeter = meterProvider.get(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION, null);
 
     var grouper = new ThreadGrouper();
     var filtered = List.of(

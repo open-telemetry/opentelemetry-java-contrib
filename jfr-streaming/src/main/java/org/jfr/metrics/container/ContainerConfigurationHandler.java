@@ -4,6 +4,8 @@ import io.opentelemetry.api.metrics.Meter;
 import jdk.jfr.consumer.RecordedEvent;
 import org.jfr.metrics.RecordedEventHandler;
 
+import static org.jfr.metrics.Constants.PERCENTAGE;
+
 public class ContainerConfigurationHandler implements RecordedEventHandler {
     public static final String EVENT_NAME = "jdk.ContainerConfiguration";
     public static final String JFR_CONTAINER_CONFIGURATION = "jfr.ContainerConfiguration";
@@ -21,7 +23,7 @@ public class ContainerConfigurationHandler implements RecordedEventHandler {
     public ContainerConfigurationHandler init() {
         otelMeter.upDownCounterBuilder(JFR_CONTAINER_CONFIGURATION)
                 .ofDoubles()
-                .setUnit("%age")
+                .setUnit(PERCENTAGE)
                 .buildWithCallback(codm -> codm.observe(value));
 
         return this;
