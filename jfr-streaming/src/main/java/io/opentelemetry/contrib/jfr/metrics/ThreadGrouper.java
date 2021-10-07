@@ -1,4 +1,4 @@
-package org.jfr.metrics;
+package io.opentelemetry.contrib.jfr.metrics;
 
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;

@@ -1,15 +1,13 @@
-package org.jfr.metrics.memory;
+package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.jfr.metrics.Constants.KILOBYTES;
-import static org.jfr.metrics.Constants.MILLISECONDS;
 
 /**
  * This class handles GCHeapSummary JFR events. For GC purposes they come in
@@ -43,17 +41,17 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   public GCHeapSummaryHandler init() {
     var builder = otelMeter.histogramBuilder(JFR_GC_HEAP_SUMMARY_DURATION);
     builder.setDescription(DESCRIPTION);
-    builder.setUnit(MILLISECONDS);
+    builder.setUnit(Constants.MILLISECONDS);
     gcHistogram = builder.build();
 
     otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_USED)
             .ofDoubles()
-            .setUnit(KILOBYTES)
+            .setUnit(Constants.KILOBYTES)
             .buildWithCallback(codm -> codm.observe(heapUsed));
 
     otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_SPACE)
             .ofDoubles()
-            .setUnit(KILOBYTES)
+            .setUnit(Constants.KILOBYTES)
             .buildWithCallback(codm -> codm.observe(heapSpace));
 
     return this;

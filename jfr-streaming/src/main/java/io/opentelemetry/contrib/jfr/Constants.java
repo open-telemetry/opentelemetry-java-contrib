@@ -1,4 +1,4 @@
-package org.jfr.metrics;
+package io.opentelemetry.contrib.jfr;
 
 public class Constants {
     private Constants() {}
