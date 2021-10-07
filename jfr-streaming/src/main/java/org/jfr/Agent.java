@@ -29,8 +29,13 @@ import static io.opentelemetry.sdk.metrics.data.AggregationTemporality.DELTA;
 public class Agent {
     private static final Logger logger = Logger.getLogger(Agent.class.getName());
 
-    private static final String OTLP_URL = "OTLP_URL"; // https://otlp.nr-data.net:4317/ ; http://localhost:4317
+    private static final String OTLP_URL = "OTLP_URL"; // https://otlp.nr-data.net:4317/
     private static final String API_KEY = "API_KEY";
+    private static final String SERVICE_NAME = "SERVICE_NAME";
+    private static final String API_KEY_HEADER = "api-key";
+    private static final String SERVICE_NAME_HEADER = "service.name";
+    private static final String DEFAULT_URL = "http://localhost:4317";
+    private static final String DEFAULT_SERVICE_NAME = "jfr-otlp-bridge";
 
     private static SdkMeterProvider meterProvider;
 
@@ -62,21 +67,25 @@ public class Agent {
 
     static void configureOpenTelemetry() {
         // Configure the meter provider
+        var serviceName = System.getenv(SERVICE_NAME);
+        if (serviceName == null) {
+            serviceName = DEFAULT_SERVICE_NAME;
+        }
         var resource = Resource.getDefault().merge(
                 Resource.create(Attributes.builder()
-                        .put("service.name", "jfr-otlp-bridge")
+                        .put(SERVICE_NAME_HEADER, serviceName)
                         .build()));
         var apiKey = System.getenv(API_KEY);
         var otlpUrl = System.getenv(OTLP_URL);
         if (otlpUrl == null) {
-            otlpUrl = "http://localhost:4317";
+            otlpUrl = DEFAULT_URL;
         }
 
         var exporterBuilder = OtlpGrpcMetricExporter.builder()
                 .setEndpoint(otlpUrl);
 
         if (apiKey != null) {
-            exporterBuilder.addHeader("api-key", apiKey);
+            exporterBuilder.addHeader(API_KEY_HEADER, apiKey);
         }
         var meterProviderBuilder = SdkMeterProvider.builder().setResource(resource);
         // Set delta aggregation
