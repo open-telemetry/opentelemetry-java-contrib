@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import static org.jfr.metrics.Constants.PERCENTAGE;
+
 public class ContextSwitchRateHandler implements RecordedEventHandler {
   public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
 
@@ -21,7 +23,7 @@ public class ContextSwitchRateHandler implements RecordedEventHandler {
   public ContextSwitchRateHandler init() {
     otelMeter.upDownCounterBuilder("jfr.ThreadContextSwitchRate")
                                      .ofDoubles()
-                                     .setUnit("%age")
+                                     .setUnit(PERCENTAGE)
                                      .buildWithCallback(codm -> codm.observe(value));
     return this;
   }

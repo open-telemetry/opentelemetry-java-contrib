@@ -5,9 +5,8 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
-import io.opentelemetry.sdk.metrics.internal.aggregator.AggregatorFactory;
 import io.opentelemetry.sdk.metrics.view.Aggregation;
+import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
@@ -29,13 +28,14 @@ import static io.opentelemetry.sdk.metrics.data.AggregationTemporality.DELTA;
 public class Agent {
     private static final Logger logger = Logger.getLogger(Agent.class.getName());
 
-    private static final String OTLP_URL = "OTLP_URL"; // https://otlp.nr-data.net:4317/
+    private static final String OTLP_URL = "OTLP_URL";
     private static final String API_KEY = "API_KEY";
     private static final String SERVICE_NAME = "SERVICE_NAME";
     private static final String API_KEY_HEADER = "api-key";
     private static final String SERVICE_NAME_HEADER = "service.name";
     private static final String DEFAULT_URL = "http://localhost:4317";
     private static final String DEFAULT_SERVICE_NAME = "jfr-otlp-bridge";
+    private static final long EXPORT_MILLIS = 2000;
 
     private static SdkMeterProvider meterProvider;
 
@@ -96,7 +96,7 @@ public class Agent {
         meterProvider = meterProviderBuilder.build();
 
         var imr = IntervalMetricReader.builder()
-                .setExportIntervalMillis(2000)
+                .setExportIntervalMillis(EXPORT_MILLIS)
                 .setMetricExporter(exporterBuilder.build())
                 .setMetricProducers(Collections.singletonList(meterProvider))
                 .build();
