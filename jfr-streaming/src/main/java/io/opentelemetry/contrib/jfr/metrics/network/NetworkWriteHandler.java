@@ -1,4 +1,4 @@
-package org.jfr.metrics.network;
+package io.opentelemetry.contrib.jfr.metrics.network;
 
 // jdk.SocketWrite {
 //        startTime = 20:22:57.161
@@ -19,9 +19,9 @@ package org.jfr.metrics.network;
 // }
 
 import io.opentelemetry.api.metrics.Meter;
-import org.jfr.metrics.AbstractThreadDispatchingHandler;
-import org.jfr.metrics.RecordedEventHandler;
-import org.jfr.metrics.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 
 public class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   public static final String EVENT_NAME = "jdk.SocketWrite";

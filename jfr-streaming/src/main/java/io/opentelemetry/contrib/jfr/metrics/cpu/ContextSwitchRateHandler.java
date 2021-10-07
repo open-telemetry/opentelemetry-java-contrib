@@ -1,14 +1,13 @@
-package org.jfr.metrics.cpu;
+package io.opentelemetry.contrib.jfr.metrics.cpu;
 
 import io.opentelemetry.api.metrics.*;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-
-import static org.jfr.metrics.Constants.PERCENTAGE;
 
 public class ContextSwitchRateHandler implements RecordedEventHandler {
   public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
@@ -23,7 +22,7 @@ public class ContextSwitchRateHandler implements RecordedEventHandler {
   public ContextSwitchRateHandler init() {
     otelMeter.upDownCounterBuilder("jfr.ThreadContextSwitchRate")
                                      .ofDoubles()
-                                     .setUnit(PERCENTAGE)
+                                     .setUnit(Constants.PERCENTAGE)
                                      .buildWithCallback(codm -> codm.observe(value));
     return this;
   }

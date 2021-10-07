@@ -1,9 +1,9 @@
-package org.jfr.metrics.memory;
+package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.Meter;
-import org.jfr.metrics.AbstractThreadDispatchingHandler;
-import org.jfr.metrics.RecordedEventHandler;
-import org.jfr.metrics.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 
 /**
  * This class handles TLAB allocation JFR events, and delegates them to the actual per-thread aggregators
