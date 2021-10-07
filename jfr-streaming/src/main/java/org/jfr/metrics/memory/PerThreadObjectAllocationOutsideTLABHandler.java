@@ -7,12 +7,15 @@ import io.opentelemetry.api.metrics.Meter;
 import jdk.jfr.consumer.RecordedEvent;
 import org.jfr.metrics.RecordedEventHandler;
 
+import static org.jfr.metrics.Constants.KILOBYTES;
+
 /** This class aggregates all non-TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationOutsideTLABHandler implements RecordedEventHandler {
   public static final String JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION =
       "jfr.ObjectAllocationOutsideTLAB.allocation";
   public static final String ALLOCATION_SIZE = "allocationSize";
   public static final String THREAD_NAME = "thread.name";
+  private static final String DESCRIPTION = "Non-TLAB Allocation";
 
   private final String threadName;
   private final Meter otelMeter;
@@ -26,8 +29,8 @@ public final class PerThreadObjectAllocationOutsideTLABHandler implements Record
   public PerThreadObjectAllocationOutsideTLABHandler init() {
     var attr = Attributes.of(AttributeKey.stringKey(THREAD_NAME), threadName);
     var builder = otelMeter.histogramBuilder(JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION);
-    builder.setDescription("Non-TLAB Allocation");
-    builder.setUnit("KB");
+    builder.setDescription(DESCRIPTION);
+    builder.setUnit(KILOBYTES);
     histogram = builder.build().bind(attr);
     return this;
   }
