@@ -8,6 +8,9 @@ import org.jfr.metrics.RecordedEventHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.jfr.metrics.Constants.KILOBYTES;
+import static org.jfr.metrics.Constants.MILLISECONDS;
+
 /**
  * This class handles GCHeapSummary JFR events. For GC purposes they come in
  * pairs.
@@ -24,6 +27,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   public static final String WHEN = "when";
   public static final String HEAP_USED = "heapUsed";
   public static final String HEAP_SPACE = "heapSpace";
+  private static final String DESCRIPTION = "GC Duration";
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
@@ -38,18 +42,18 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   public GCHeapSummaryHandler init() {
     var builder = otelMeter.histogramBuilder(JFR_GC_HEAP_SUMMARY_DURATION);
-    builder.setDescription("GC Duration");
-    builder.setUnit("ms");
+    builder.setDescription(DESCRIPTION);
+    builder.setUnit(MILLISECONDS);
     gcHistogram = builder.build();
 
     otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_USED)
             .ofDoubles()
-            .setUnit("KB")
+            .setUnit(KILOBYTES)
             .buildWithCallback(codm -> codm.observe(heapUsed));
 
     otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_SPACE)
             .ofDoubles()
-            .setUnit("KB")
+            .setUnit(KILOBYTES)
             .buildWithCallback(codm -> codm.observe(heapSpace));
 
     return this;

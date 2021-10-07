@@ -9,6 +9,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.jfr.metrics.Constants.PERCENTAGE;
+
 public class OverallCPULoadHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.CPULoad";
@@ -32,17 +34,17 @@ public class OverallCPULoadHandler implements RecordedEventHandler {
   public OverallCPULoadHandler init() {
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_USER)
             .ofDoubles()
-            .setUnit("%age")
+            .setUnit(PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(userValue));
 
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_SYSTEM)
             .ofDoubles()
-            .setUnit("%age")
+            .setUnit(PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(systemValue));
 
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_MACHINE_TOTAL)
             .ofDoubles()
-            .setUnit("%age")
+            .setUnit(PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(machineTotal));
 
     return this;
