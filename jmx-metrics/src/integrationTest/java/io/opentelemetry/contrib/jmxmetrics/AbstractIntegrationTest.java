@@ -88,6 +88,9 @@ public abstract class AbstractIntegrationTest {
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("script.groovy"), "/app/script.groovy")
             .withCopyFileToContainer(
+                MountableFile.forClasspathResource("multi_obj_script.groovy"),
+                "/app/multi_obj_script.groovy")
+            .withCopyFileToContainer(
                 MountableFile.forClasspathResource(configName), "/app/" + configName)
             .withCommand(scraperCommand.toArray(new String[0]))
             .withStartupTimeout(Duration.ofSeconds(120))
