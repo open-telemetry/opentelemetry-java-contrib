@@ -7,13 +7,14 @@ import io.opentelemetry.api.metrics.Meter;
 import jdk.jfr.consumer.RecordedEvent;
 import org.jfr.metrics.RecordedEventHandler;
 
+import static org.jfr.metrics.Constants.*;
+
 public class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private final String threadName;
 
   public static final String JFR_SOCKET_READ_DURATION = "jfr.SocketRead.duration";
   public static final String JFR_SOCKET_READ_BYTES_READ = "jfr.SocketRead.bytesRead";
   public static final String BYTES_READ = "bytesRead";
-  public static final String THREAD_NAME = "thread.name";
   private final Meter otelMeter;
   private BoundDoubleHistogram bytesHistogram;
   private BoundDoubleHistogram durationHistogram;
@@ -28,12 +29,12 @@ public class PerThreadNetworkReadHandler implements RecordedEventHandler {
 
     var builder = otelMeter.histogramBuilder(JFR_SOCKET_READ_BYTES_READ);
     builder.setDescription("Bytes Read");
-    builder.setUnit("KB");
+    builder.setUnit(KILOBYTES);
     bytesHistogram = builder.build().bind(attr);
 
     builder = otelMeter.histogramBuilder(JFR_SOCKET_READ_DURATION);
     builder.setDescription("Read Duration");
-    builder.setUnit("ms");
+    builder.setUnit(MILLISECONDS);
     durationHistogram = builder.build().bind(attr);
 
     return this;
