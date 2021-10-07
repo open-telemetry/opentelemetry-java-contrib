@@ -1,4 +1,4 @@
-package org.jfr;
+package io.opentelemetry.contrib.jfr;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -12,8 +12,8 @@ import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
 import jdk.jfr.EventSettings;
 import jdk.jfr.consumer.RecordingStream;
-import org.jfr.metrics.RecordedEventHandler;
-import org.jfr.metrics.HandlerRegistry;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.HandlerRegistry;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Collections;

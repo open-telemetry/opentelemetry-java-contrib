@@ -1,15 +1,13 @@
-package org.jfr.metrics.cpu;
+package io.opentelemetry.contrib.jfr.metrics.cpu;
 
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Optional;
-
-import static org.jfr.metrics.Constants.PERCENTAGE;
 
 public class OverallCPULoadHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
@@ -34,17 +32,17 @@ public class OverallCPULoadHandler implements RecordedEventHandler {
   public OverallCPULoadHandler init() {
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_USER)
             .ofDoubles()
-            .setUnit(PERCENTAGE)
+            .setUnit(Constants.PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(userValue));
 
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_SYSTEM)
             .ofDoubles()
-            .setUnit(PERCENTAGE)
+            .setUnit(Constants.PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(systemValue));
 
     otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_MACHINE_TOTAL)
             .ofDoubles()
-            .setUnit(PERCENTAGE)
+            .setUnit(Constants.PERCENTAGE)
             .buildWithCallback(codm -> codm.observe(machineTotal));
 
     return this;

@@ -1,14 +1,12 @@
-package org.jfr.metrics.network;
+package io.opentelemetry.contrib.jfr.metrics.network;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-import org.jfr.metrics.RecordedEventHandler;
-
-import static org.jfr.metrics.Constants.KILOBYTES;
-import static org.jfr.metrics.Constants.MILLISECONDS;
 
 public class PerThreadNetworkWriteHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME =
@@ -36,12 +34,12 @@ public class PerThreadNetworkWriteHandler implements RecordedEventHandler {
 
     var builder = otelMeter.histogramBuilder(JFR_SOCKET_WRITE_BYTES_WRITTEN);
     builder.setDescription(DESCRIPTION_BYTES);
-    builder.setUnit(KILOBYTES);
+    builder.setUnit(Constants.KILOBYTES);
     bytesHistogram = builder.build().bind(attr);
 
     builder = otelMeter.histogramBuilder(JFR_SOCKET_WRITE_DURATION);
     builder.setDescription(DESCRIPTION_DURATION);
-    builder.setUnit(MILLISECONDS);
+    builder.setUnit(Constants.MILLISECONDS);
     durationHistogram = builder.build().bind(attr);
 
     return this;
