@@ -62,6 +62,8 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   private SpanExporter spanExporter;
 
+  private boolean mojosInstrumentationEnabled;
+
   @Override
   public synchronized void dispose() {
     logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
@@ -159,6 +161,15 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
               .build();
       this.openTelemetry = this.openTelemetrySdk;
     }
+
+    String mojosInstrumentationEnabledAsString =
+        System.getProperty(
+            "otel.maven.instrumentation.mojos.enabled",
+            System.getenv("OTEL_MAVEN_INSTRUMENTATION_MOJOS_ENABLED"));
+    this.mojosInstrumentationEnabled =
+        Boolean.parseBoolean(
+            StringUtils.defaultIfBlank(mojosInstrumentationEnabledAsString, "true"));
+
     this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
   }
 
@@ -187,5 +198,9 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
   public ContextPropagators getPropagators() {
     return openTelemetry.getPropagators();
+  }
+
+  public boolean isMojosInstrumentationEnabled() {
+    return mojosInstrumentationEnabled;
   }
 }
