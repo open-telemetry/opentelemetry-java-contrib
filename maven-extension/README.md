@@ -63,10 +63,10 @@ The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry auto c
 | otel.exporter.otlp.headers   | OTEL_EXPORTER_OTLP_HEADERS  | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests.        |
 | otel.exporter.otlp.timeout   | OTEL_EXPORTER_OTLP_TIMEOUT  | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch. Default is `10000`.  |
 | otel.resource.attributes | OTEL_RESOURCE_ATTRIBUTES | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3 |
-| otel.maven.instrumentation.mojos.enabled | OTEL_MAVEN_INSTRUMENTATION_MOJOS_ENABLED | Disable the creation of spans for each mojo goal execution, `true` or `false`. Convenient to reduce the number of spans for large builds. Default value: `true` |
+| otel.maven.instrumentation.mojos.enabled | OTEL_MAVEN_INSTRUMENTATION_MOJOS_ENABLED | Whether or not create spans for mojo goal executions, `true` or `false`. Convenient configuration parameter to reduce the number of spans created for large builds. Default value: `true` |
 
 
-ℹ️ The `service.name` is set by default to `maven`, it can be overwritten specifying resource atributes.
+ℹ️ The `service.name` is set by default to `maven`, it can be overwritten specifying resource attributes.
 
 
 ## Examples
