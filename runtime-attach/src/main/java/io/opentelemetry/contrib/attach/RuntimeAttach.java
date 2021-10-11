@@ -20,7 +20,8 @@ public class RuntimeAttach {
   }
 
   private static boolean agentIsDisabled() {
-    String enabledProperty = System.getProperty("otel.javaagent.enabled", System.getenv("OTEL_JAVAAGENT_ENABLED"));
+    String enabledProperty =
+        System.getProperty("otel.javaagent.enabled", System.getenv("OTEL_JAVAAGENT_ENABLED"));
     return "false".equals(enabledProperty);
   }
 
