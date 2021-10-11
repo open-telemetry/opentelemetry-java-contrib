@@ -16,6 +16,7 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +24,14 @@ class OtelHelperSynchronousMetricTest {
 
   // Will eventually be replaced with Jupiter extension in sdk-testing
   private SdkMeterProvider meterProvider;
+  private InMemoryMetricReader metricReader;
 
   private OtelHelper otel;
 
   @BeforeEach
   void setUp() {
-    meterProvider = SdkMeterProvider.builder().build();
+    metricReader = new InMemoryMetricReader();
+    meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     otel = new OtelHelper(null, new GroovyMetricEnvironment(meterProvider, "otel.test"));
   }
 
@@ -46,7 +49,7 @@ class OtelHelperSynchronousMetricTest {
     dc = otel.doubleCounter("yet-another-double-counter");
     dc.add(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -116,7 +119,7 @@ class OtelHelperSynchronousMetricTest {
     lc = otel.longCounter("yet-another-long-counter");
     lc.add(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -189,7 +192,7 @@ class OtelHelperSynchronousMetricTest {
     dudc = otel.doubleUpDownCounter("yet-another-double-up-down-counter");
     dudc.add(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -260,7 +263,7 @@ class OtelHelperSynchronousMetricTest {
     ludc = otel.longUpDownCounter("yet-another-long-up-down-counter");
     ludc.add(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -330,7 +333,7 @@ class OtelHelperSynchronousMetricTest {
     dh = otel.doubleHistogram("yet-another-double-histogram");
     dh.record(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -404,7 +407,7 @@ class OtelHelperSynchronousMetricTest {
     lh = otel.longHistogram("yet-another-long-histogram");
     lh.record(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
