@@ -30,7 +30,7 @@ otel.instrument(clientRequestRangeSliceLatency,
 
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.count",
-        "Total token range read request latency", "µs", "Count",
+        "Total token range read request latency", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestRangeSliceLatency,
@@ -64,7 +64,7 @@ otel.instrument(clientRequestReadLatency,
 
 otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.count",
-        "Total standard read request latency", "µs", "Count",
+        "Total standard read request latency", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestReadLatency,
@@ -98,7 +98,7 @@ otel.instrument(clientRequestWriteLatency,
 
 otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.count",
-        "Total regular write request latency", "µs", "Count",
+        "Total regular write request latency", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestWriteLatency,
