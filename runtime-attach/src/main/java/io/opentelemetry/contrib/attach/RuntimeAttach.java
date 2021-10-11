@@ -10,9 +10,18 @@ import java.lang.management.ManagementFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 public class RuntimeAttach {
+
   public static void attachJavaagentToCurrentJVM() {
+    if (agentIsDisabled()) {
+      return;
+    }
     File javaagentFile = AgentFileLocator.locateAgentFile();
     ByteBuddyAgent.attach(javaagentFile, getPid());
+  }
+
+  private static boolean agentIsDisabled() {
+    String enabledProperty = System.getProperty("otel.javaagent.enabled", System.getenv("OTEL_JAVAAGENT_ENABLED"));
+    return "false".equals(enabledProperty);
   }
 
   private static String getPid() {
