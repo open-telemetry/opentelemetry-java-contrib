@@ -164,8 +164,8 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
     String mojosInstrumentationEnabledAsString =
         System.getProperty(
-            "otel.instrumentation.maven-mojos.enabled",
-            System.getenv("OTEL_INSTRUMENTATION_MAVEN_MOJOS_ENABLED"));
+            "otel.instrumentation.maven.mojo.enabled",
+            System.getenv("OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED"));
     this.mojosInstrumentationEnabled =
         Boolean.parseBoolean(
             StringUtils.defaultIfBlank(mojosInstrumentationEnabledAsString, "true"));
