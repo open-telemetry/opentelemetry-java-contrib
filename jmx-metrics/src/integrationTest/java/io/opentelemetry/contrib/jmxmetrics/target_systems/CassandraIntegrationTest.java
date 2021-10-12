@@ -52,7 +52,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.range_slice.latency.count",
-                "Total token range read request latency",
+                "Number of token range read request operations",
                 "1"),
         metric ->
             assertGauge(
@@ -88,7 +88,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.read.latency.count",
-                "Total standard read request latency",
+                "Number of standard read request operations",
                 "1"),
         metric ->
             assertGauge(
@@ -124,7 +124,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.write.latency.count",
-                "Total regular write request latency",
+                "Number of regular write request operations",
                 "1"),
         metric ->
             assertGauge(
