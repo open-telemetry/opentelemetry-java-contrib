@@ -18,8 +18,8 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Instrument Type: DoubleValueObserver
 
 * Name: `cassandra.client.request.range_slice.latency.count`
-* Description: Total token range read request latency
-* Unit: `µs`
+* Description: Number of token range read request operations
+* Unit: `1`
 * Instrument Type: LongSumObserver
 
 * Name: `cassandra.client.request.range_slice.latency.max`
@@ -48,8 +48,8 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Instrument Type: DoubleValueObserver
 
 * Name: `cassandra.client.request.read.latency.count`
-* Description: Total standard read request latency
-* Unit: `µs`
+* Description: Number of standard read request operations
+* Unit: `1`
 * Instrument Type: LongSumObserver
 
 * Name: `cassandra.client.request.read.latency.max`
@@ -78,8 +78,8 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Instrument Type: DoubleValueObserver
 
 * Name: `cassandra.client.request.write.latency.count`
-* Description: Total regular write request latency
-* Unit: `µs`
+* Description: Number of regular write request operations
+* Unit: `1`
 * Instrument Type: LongSumObserver
 
 * Name: `cassandra.client.request.write.latency.max`
