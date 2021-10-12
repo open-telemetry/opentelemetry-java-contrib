@@ -6,22 +6,14 @@
 package io.opentelemetry.maven;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.maven.rtinfo.RuntimeInformation;
@@ -36,17 +28,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Service to configure the {@link OpenTelemetry} instance.
  *
- * <p>Mimic the <a
- * href="https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure">OpenTelemetry
- * SDK Autoconfigure</a> that can't be used due to class loading issues when declaring the Maven
- * OpenTelemetry extension using the pom.xml {@code <extension>} declaration.
+ * <p>Rely on the OpenTelemetry SDK AutoConfiguration extension. Parameters are passed as system
+ * properties.
  *
- * <p>The OpenTelemetry SDK Autoconfigure extension registers a <a
- * href="https://github.com/open-telemetry/opentelemetry-java/blob/v1.6.0/sdk-extensions/autoconfigure/src/main/java/io/opentelemetry/sdk/autoconfigure/TracerProviderConfiguration.java#L58">
- * JVM shutdown hook on {@code SdkTracerProvider#close()}</a> that is incompatible with the fact
- * that Maven extensions are unloaded before the JVM shuts down, requiring to close the trace
- * provider earlier in the lifecycle of the Maven build, and causing {@link NoClassDefFoundError}
- * when the shutdown hook is invoked.
+ * <p>TODO: verify how we could use a composite {@link
+ * io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties} combining the config passed by JVM
+ * system properties and environment variables with overrides injected by the Otel Maven Extension
  */
 @Component(role = OpenTelemetrySdkService.class, hint = "opentelemetry-service")
 public final class OpenTelemetrySdkService implements Initializable, Disposable {
@@ -55,7 +42,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   @Requirement private RuntimeInformation runtimeInformation;
 
-  private OpenTelemetry openTelemetry;
+  private OpenTelemetry openTelemetry = OpenTelemetry.noop();
   private OpenTelemetrySdk openTelemetrySdk;
 
   private Tracer tracer;
@@ -64,6 +51,18 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   private boolean mojosInstrumentationEnabled;
 
+  /**
+   * Note: the JVM shutdown hook defined by the {@code
+   * io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration} v1.7.0 does NOT cause
+   * classloading issues even when Maven Plexus has unloaded the classes of the Otel Maven Extension
+   * before the shutdown hook is invoked.
+   *
+   * <p>TODO create a feature request on {@code
+   * io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration} to support the capability to
+   * not register a JVM shutdown hook at initialization time (see
+   * https://github.com/open-telemetry/opentelemetry-java/blob/v1.7.0/sdk-extensions/autoconfigure/src/main/java/io/opentelemetry/sdk/autoconfigure/TracerProviderConfiguration.java#L58
+   * )
+   */
   @Override
   public synchronized void dispose() {
     logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
@@ -87,78 +86,53 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     logger.debug("OpenTelemetry: OpenTelemetrySdkService disposed");
   }
 
-  /** TODO add support for `OTEL_EXPORTER_OTLP_CERTIFICATE` */
   @Override
   public void initialize() throws InitializationException {
     logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
-    // OTEL_EXPORTER_OTLP_ENDPOINT
-    String otlpEndpoint =
-        System.getProperty(
-            "otel.exporter.otlp.endpoint", System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"));
-    if (StringUtils.isBlank(otlpEndpoint)) {
+    if (StringUtils.isBlank(
+        OtelUtils.getSystemPropertyOrEnvironmentVariable(
+            "otel.exporter.otlp.endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT", null))) {
       logger.debug(
-          "OpenTelemetry: No -Dotel.exporter.otlp.endpoint property or OTEL_EXPORTER_OTLP_ENDPOINT environment variable found, use a NOOP tracer");
-      this.openTelemetry = OpenTelemetry.noop();
+          "OpenTelemetry: No -Dotel.exporter.otlp.endpoint property or OTEL_EXPORTER_OTLP_ENDPOINT "
+              + "environment variable found, use a NOOP OpenTelemetry SDK");
     } else {
-      // OtlpGrpcSpanExporterBuilder spanExporterBuilder = OtlpGrpcSpanExporter.builder();
-      OtlpGrpcSpanExporterBuilder spanExporterBuilder = OtlpGrpcSpanExporter.builder();
-      spanExporterBuilder.setEndpoint(otlpEndpoint);
+      {
+        // Don't use a {@code io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider} to inject
+        // Maven runtime attributes due to a classloading issue when loading the Maven OpenTelemetry
+        // extension as a pom.xml {@code <extension>}.
+        String initialComaSeparatedAttributes =
+            OtelUtils.getSystemPropertyOrEnvironmentVariable(
+                "otel.resource.attributes", "OTEL_RESOURCE_ATTRIBUTES", "");
+        Map<String, String> attributes =
+            OtelUtils.getCommaSeparatedMap(initialComaSeparatedAttributes);
 
-      // OTEL_EXPORTER_OTLP_HEADERS
-      String otlpExporterHeadersAsString =
-          System.getProperty(
-              "otel.exporter.otlp.headers", System.getenv("OTEL_EXPORTER_OTLP_HEADERS"));
-      Map<String, String> otlpExporterHeaders =
-          OtelUtils.getCommaSeparatedMap(otlpExporterHeadersAsString);
-      otlpExporterHeaders.forEach(spanExporterBuilder::addHeader);
+        // service.name
+        String serviceName =
+            OtelUtils.getSystemPropertyOrEnvironmentVariable(
+                "otel.service.name", "OTEL_SERVICE_NAME", null);
 
-      // OTEL_EXPORTER_OTLP_TIMEOUT
-      String otlpExporterTimeoutMillis =
-          System.getProperty(
-              "otel.exporter.otlp.timeout", System.getenv("OTEL_EXPORTER_OTLP_TIMEOUT"));
-      if (StringUtils.isNotBlank(otlpExporterTimeoutMillis)) {
-        try {
-          spanExporterBuilder.setTimeout(
-              Duration.ofMillis(Long.parseLong(otlpExporterTimeoutMillis)));
-        } catch (NumberFormatException e) {
-          logger.warn("OpenTelemetry: Skip invalid OTLP timeout " + otlpExporterTimeoutMillis, e);
+        if (!attributes.containsKey(ResourceAttributes.SERVICE_NAME.getKey())
+            && StringUtils.isBlank(serviceName)) {
+          // service.name is not defined in passed configuration, we define it
+          attributes.put(
+              ResourceAttributes.SERVICE_NAME.getKey(),
+              MavenOtelSemanticAttributes.ServiceNameValues.SERVICE_NAME_VALUE);
         }
+
+        // service.version
+        final String mavenVersion = this.runtimeInformation.getMavenVersion();
+        if (!attributes.containsKey(ResourceAttributes.SERVICE_VERSION.getKey())) {
+          attributes.put(ResourceAttributes.SERVICE_VERSION.getKey(), mavenVersion);
+        }
+
+        String newComaSeparatedAttributes = OtelUtils.getComaSeparatedString(attributes);
+        logger.debug(
+            "OpenTelemetry: Initial resource attributes: {}", initialComaSeparatedAttributes);
+        logger.debug("OpenTelemetry: Use resource attributes: {}", newComaSeparatedAttributes);
+        System.setProperty("otel.resource.attributes", newComaSeparatedAttributes);
       }
 
-      this.spanExporter = spanExporterBuilder.build();
-
-      // OTEL_RESOURCE_ATTRIBUTES
-      AttributesBuilder resourceAttributesBuilder = Attributes.builder();
-      Resource mavenResource = getMavenResource();
-      resourceAttributesBuilder.putAll(mavenResource.getAttributes());
-      String otelResourceAttributesAsString =
-          System.getProperty("otel.resource.attributes", System.getenv("OTEL_RESOURCE_ATTRIBUTES"));
-      if (StringUtils.isNotBlank(otelResourceAttributesAsString)) {
-        Map<String, String> otelResourceAttributes =
-            OtelUtils.getCommaSeparatedMap(otelResourceAttributesAsString);
-        // see io.opentelemetry.sdk.autoconfigure.EnvironmentResource.getAttributes
-        otelResourceAttributes.forEach(resourceAttributesBuilder::put);
-      }
-      final Attributes resourceAttributes = resourceAttributesBuilder.build();
-
-      logger.debug(
-          "OpenTelemetry: Export OpenTelemetry traces to {} with attributes: {}",
-          otlpEndpoint,
-          resourceAttributes);
-
-      final BatchSpanProcessor batchSpanProcessor =
-          BatchSpanProcessor.builder(spanExporter).build();
-      SdkTracerProvider sdkTracerProvider =
-          SdkTracerProvider.builder()
-              .setResource(Resource.create(resourceAttributes))
-              .addSpanProcessor(batchSpanProcessor)
-              .build();
-
-      this.openTelemetrySdk =
-          OpenTelemetrySdk.builder()
-              .setTracerProvider(sdkTracerProvider)
-              .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-              .build();
+      this.openTelemetrySdk = OpenTelemetrySdkAutoConfiguration.initialize(false);
       this.openTelemetry = this.openTelemetrySdk;
     }
 
@@ -178,21 +152,6 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
       throw new IllegalStateException("Not initialized");
     }
     return tracer;
-  }
-
-  /**
-   * Don't use a {@code io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider} due to classloading
-   * issue when loading the Maven OpenTelemetry extension as a pom.xml {@code <extension>}.
-   */
-  protected Resource getMavenResource() {
-    final String mavenVersion = this.runtimeInformation.getMavenVersion();
-    final Attributes attributes =
-        Attributes.of(
-            ResourceAttributes.SERVICE_NAME,
-            MavenOtelSemanticAttributes.ServiceNameValues.SERVICE_NAME_VALUE,
-            ResourceAttributes.SERVICE_VERSION,
-            mavenVersion);
-    return Resource.create(attributes);
   }
 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
