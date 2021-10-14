@@ -17,22 +17,23 @@ import javax.annotation.Nullable;
 
 final class OtelUtils {
 
-  public static String getComaSeparatedString(Map<String, String> keyValuePairs) {
+  public static String getCommaSeparatedString(Map<String, String> keyValuePairs) {
     return keyValuePairs.entrySet().stream()
         .map(keyValuePair -> keyValuePair.getKey() + "=" + keyValuePair.getValue())
         .collect(Collectors.joining(","));
   }
 
-  public static Map<String, String> getCommaSeparatedMap(String comaSeparatedKeyValuePairs) {
-    if (StringUtils.isBlank(comaSeparatedKeyValuePairs)) {
+  public static Map<String, String> getCommaSeparatedMap(String commaSeparatedKeyValuePairs) {
+    if (StringUtils.isBlank(commaSeparatedKeyValuePairs)) {
       return new HashMap<>();
     }
-    return filterBlanksAndNulls(comaSeparatedKeyValuePairs.split(",")).stream()
+    return filterBlanksAndNulls(commaSeparatedKeyValuePairs.split(",")).stream()
         .map(keyValuePair -> filterBlanksAndNulls(keyValuePair.split("=", 2)))
         .map(
             splitKeyValuePairs -> {
               if (splitKeyValuePairs.size() != 2) {
-                throw new RuntimeException("Invalid key-value pair: " + comaSeparatedKeyValuePairs);
+                throw new RuntimeException(
+                    "Invalid key-value pair: " + commaSeparatedKeyValuePairs);
               }
               return new AbstractMap.SimpleImmutableEntry<>(
                   splitKeyValuePairs.get(0), splitKeyValuePairs.get(1));

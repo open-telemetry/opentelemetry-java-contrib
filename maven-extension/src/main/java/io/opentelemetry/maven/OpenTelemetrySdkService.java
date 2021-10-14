@@ -100,11 +100,11 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
         // Don't use a {@code io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider} to inject
         // Maven runtime attributes due to a classloading issue when loading the Maven OpenTelemetry
         // extension as a pom.xml {@code <extension>}.
-        String initialComaSeparatedAttributes =
+        String initialCommaSeparatedAttributes =
             OtelUtils.getSystemPropertyOrEnvironmentVariable(
                 "otel.resource.attributes", "OTEL_RESOURCE_ATTRIBUTES", "");
         Map<String, String> attributes =
-            OtelUtils.getCommaSeparatedMap(initialComaSeparatedAttributes);
+            OtelUtils.getCommaSeparatedMap(initialCommaSeparatedAttributes);
 
         // service.name
         String serviceName =
@@ -125,11 +125,11 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
           attributes.put(ResourceAttributes.SERVICE_VERSION.getKey(), mavenVersion);
         }
 
-        String newComaSeparatedAttributes = OtelUtils.getComaSeparatedString(attributes);
+        String newCommaSeparatedAttributes = OtelUtils.getCommaSeparatedString(attributes);
         logger.debug(
-            "OpenTelemetry: Initial resource attributes: {}", initialComaSeparatedAttributes);
-        logger.debug("OpenTelemetry: Use resource attributes: {}", newComaSeparatedAttributes);
-        System.setProperty("otel.resource.attributes", newComaSeparatedAttributes);
+            "OpenTelemetry: Initial resource attributes: {}", initialCommaSeparatedAttributes);
+        logger.debug("OpenTelemetry: Use resource attributes: {}", newCommaSeparatedAttributes);
+        System.setProperty("otel.resource.attributes", newCommaSeparatedAttributes);
       }
 
       this.openTelemetrySdk = OpenTelemetrySdkAutoConfiguration.initialize(false);
