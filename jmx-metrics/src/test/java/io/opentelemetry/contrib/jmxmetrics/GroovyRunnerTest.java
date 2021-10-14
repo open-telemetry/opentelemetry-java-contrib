@@ -44,7 +44,7 @@ class GroovyRunnerTest {
             stub,
             new GroovyMetricEnvironment(config) {
               @Override
-              public void exportMetrics() {
+              public void flush() {
                 exportCalled.set(true);
               }
             });

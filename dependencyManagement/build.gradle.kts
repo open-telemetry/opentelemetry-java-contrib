@@ -18,8 +18,8 @@ val DEPENDENCY_BOMS = listOf(
     "org.junit:junit-bom:5.7.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
     "io.grpc:grpc-bom:1.39.0",
-    "io.opentelemetry:opentelemetry-bom:1.6.0",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.6.0-alpha",
+    "io.opentelemetry:opentelemetry-bom:1.7.0",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.7.0-alpha",
     "org.testcontainers:testcontainers-bom:1.16.0"
 )
 
@@ -52,7 +52,7 @@ val DEPENDENCY_SETS = listOf(
 )
 
 val DEPENDENCIES = listOf(
-    "org.assertj:assertj-core:3.20.2",
+    "org.assertj:assertj-core:3.21.0",
     "org.awaitility:awaitility:4.1.0",
     "org.checkerframework:checker-qual:3.15.0",
     "org.junit-pioneer:junit-pioneer:1.4.2",

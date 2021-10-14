@@ -14,6 +14,7 @@ import groovy.util.Eval;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +51,7 @@ class InstrumenterHelperTest {
 
   // Will eventually be replaced with Jupiter extension in sdk-testing
   private SdkMeterProvider meterProvider;
+  private InMemoryMetricReader metricReader;
 
   private OtelHelper otel;
 
@@ -76,7 +78,8 @@ class InstrumenterHelperTest {
 
   @BeforeEach
   void setupOtel() {
-    meterProvider = SdkMeterProvider.builder().build();
+    metricReader = new InMemoryMetricReader();
+    meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
 
     otel = new OtelHelper(jmxClient, new GroovyMetricEnvironment(meterProvider, "otel.test"));
   }
@@ -109,7 +112,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -138,7 +141,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -161,7 +164,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -192,7 +195,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -215,7 +218,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -264,7 +267,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -293,7 +296,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -316,7 +319,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -371,7 +374,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -394,7 +397,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -488,7 +491,7 @@ class InstrumenterHelperTest {
 
     updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Missing");
 
-    assertThat(meterProvider.collectAllMetrics()).isEmpty();
+    assertThat(metricReader.collectAllMetrics()).isEmpty();
   }
 
   @ParameterizedTest

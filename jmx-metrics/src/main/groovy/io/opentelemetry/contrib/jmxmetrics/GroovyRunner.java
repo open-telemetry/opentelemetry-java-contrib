@@ -139,7 +139,7 @@ public class GroovyRunner {
   }
 
   public void flush() {
-    groovyMetricEnvironment.exportMetrics();
+    groovyMetricEnvironment.flush();
   }
 
   public void shutdown() {

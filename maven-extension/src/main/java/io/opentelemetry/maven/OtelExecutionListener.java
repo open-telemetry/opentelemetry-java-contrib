@@ -154,6 +154,9 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   @Override
   public void mojoStarted(ExecutionEvent executionEvent) {
+    if (!this.openTelemetrySdkService.isMojosInstrumentationEnabled()) {
+      return;
+    }
 
     MojoExecution mojoExecution = executionEvent.getMojoExecution();
 
@@ -204,6 +207,9 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   @Override
   public void mojoSucceeded(ExecutionEvent executionEvent) {
+    if (!this.openTelemetrySdkService.isMojosInstrumentationEnabled()) {
+      return;
+    }
     MojoExecution mojoExecution = executionEvent.getMojoExecution();
     logger.debug("OpenTelemetry: End succeeded mojo execution span: {}", mojoExecution);
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
@@ -214,6 +220,9 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   @Override
   public void mojoFailed(ExecutionEvent executionEvent) {
+    if (!this.openTelemetrySdkService.isMojosInstrumentationEnabled()) {
+      return;
+    }
     MojoExecution mojoExecution = executionEvent.getMojoExecution();
     logger.debug("OpenTelemetry: End failed mojo execution span: {}", mojoExecution);
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
