@@ -11,14 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class JfrCPUTest extends AbstractMetricsTest {
 
-  @BeforeAll
-  public static void loadAgent() throws Exception {
-    var pid = ""+ ProcessHandle.current().pid();
-    var vm = VirtualMachine.attach(pid);
-    vm.loadAgent("/home/beevans/projects/opentelemetry-java-contrib/jfr-streaming/jfr-streaming-1.6.0-SNAPSHOT.jar", "");
-    vm.detach();
-  }
-
   @Test
   public void shouldHaveGcAndLockEvents() throws Exception {
     // This should generate some events
