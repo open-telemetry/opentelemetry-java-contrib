@@ -38,5 +38,20 @@ public interface RecordedEventHandler
     return Optional.empty();
   }
 
+  /**
+   * Optionally returns a threshold length for JFR events, if present
+   *
+   * @return {@link Optional} of {@link Duration} representing threshold; empty {@link
+   *     Optional} if no threshold
+   */
+  default Optional<Duration> getThreshold() {
+    return Optional.empty();
+  }
+
+  /**
+   * Initialize the handler. Default implementation is a no-op
+   *
+   * @return
+   */
   default RecordedEventHandler init() { return this; }
 }
