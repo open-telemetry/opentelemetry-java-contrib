@@ -1,9 +1,19 @@
 # jfrs-otlp
 JFR Streaming to OTLP Bridge
 
-* Build it with ./gradlew sJ and you'll get a jar that can be used as an agent. 
-
 * Java 17 only.
+
+* You need to run an initial bootstrapping build:
+
+```
+./gradlew :jfr-streaming:build -x test
+```
+
+* This skips the tests (which themselves run with an agent installed) and gives a jar that can be used as an agent.
+
+* Move it to `jfr-streaming.jar` in the root of the jfr-streaming subproject so that the tests can find it
+
+* Rebuild it with `./gradlew :jfr-streaming:build`
 
 Export a couple of env vars - OTLP_URL and API_KEY
 

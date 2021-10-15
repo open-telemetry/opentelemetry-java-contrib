@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
+import com.sun.tools.attach.VirtualMachine;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,6 +22,14 @@ public class AbstractMetricsTest {
 
   static SdkMeterProvider meterProvider;
   static InMemoryMetricReader metricReader;
+
+  @BeforeAll
+  public static void loadAgent() throws Exception {
+    var pid = ""+ ProcessHandle.current().pid();
+    var vm = VirtualMachine.attach(pid);
+    vm.loadAgent("jfr-streaming.jar", "");
+    vm.detach();
+  }
 
   @BeforeAll
   static void initializeOpenTelemetry() {
