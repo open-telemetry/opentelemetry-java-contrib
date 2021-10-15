@@ -5,8 +5,11 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderFactory;
 import io.opentelemetry.sdk.metrics.view.Aggregation;
-import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
@@ -16,6 +19,7 @@ import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.HandlerRegistry;
 
 import java.lang.instrument.Instrumentation;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -96,12 +100,13 @@ public class Agent {
         setAggregatorFactory(meterProviderBuilder, OBSERVABLE_UP_DOWN_SUM, Aggregation.histogram());
         meterProvider = meterProviderBuilder.build();
 
-        var imr = IntervalMetricReader.builder()
-                .setExportIntervalMillis(EXPORT_MILLIS)
-                .setMetricExporter(exporterBuilder.build())
-                .setMetricProducers(Collections.singletonList(meterProvider))
-                .build();
-        imr.startAndRegisterGlobal();
+        var factory =
+            PeriodicMetricReader.create(exporterBuilder.build(),
+              Duration.ofMillis(EXPORT_MILLIS));
+
+        SdkMeterProvider meterProvider = SdkMeterProvider.builder()
+              .registerMetricReader(factory)
+              .buildAndRegisterGlobal();
     }
 
     private static void setAggregatorFactory(SdkMeterProviderBuilder builder, InstrumentType instrumentType, Aggregation aggregation) {
