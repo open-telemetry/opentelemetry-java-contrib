@@ -5,6 +5,7 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = GCHeapSummaryHandler.class.getSimpleName();
   public static final String JFR_GC_HEAP_SUMMARY_DURATION = "jfr.GCHeapSummary.duration";
   public static final String JFR_GC_HEAP_SUMMARY_HEAP_USED = "jfr.GCHeapSummary.heapUsed";
-  public static final String JFR_GC_HEAP_SUMMARY_HEAP_SPACE = "jfr.GCHeapSummary.heapSpace";
+  public static final String JFR_GC_HEAP_SUMMARY_COMMITTED = "jfr.GCHeapSummary.heapCommitted";
   public static final String EVENT_NAME = "jdk.GCHeapSummary";
   public static final String BEFORE = "Before GC";
   public static final String AFTER = "After GC";
@@ -26,13 +27,14 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   public static final String HEAP_USED = "heapUsed";
   public static final String HEAP_SPACE = "heapSpace";
   private static final String DESCRIPTION = "GC Duration";
+  private static final String COMMITTED_SIZE = "committedSize";
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
   private final Meter otelMeter;
   private DoubleHistogram gcHistogram;
   private volatile long heapUsed = 0;
-  private volatile long heapSpace = 0;
+  private volatile long heapCommitted = 0;
 
   public GCHeapSummaryHandler(Meter otelMeter) {
     this.otelMeter = otelMeter;
@@ -49,10 +51,10 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
             .setUnit(Constants.KILOBYTES)
             .buildWithCallback(codm -> codm.observe(heapUsed));
 
-    otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_SPACE)
+    otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_COMMITTED)
             .ofDoubles()
             .setUnit(Constants.KILOBYTES)
-            .buildWithCallback(codm -> codm.observe(heapSpace));
+            .buildWithCallback(codm -> codm.observe(heapCommitted));
 
     return this;
   }
@@ -100,7 +102,10 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
       heapUsed = after.getLong(HEAP_USED);
     }
     if (after.hasField(HEAP_SPACE)) {
-      heapSpace = after.getLong(HEAP_SPACE);
+      after.getValue(HEAP_SPACE);
+      if (after.getValue(HEAP_SPACE) instanceof RecordedObject ro) {
+        heapCommitted = ro.getLong(COMMITTED_SIZE);
+      }
     }
   }
 }

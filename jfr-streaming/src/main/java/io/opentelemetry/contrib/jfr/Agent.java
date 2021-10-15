@@ -98,15 +98,13 @@ public class Agent {
         setAggregatorFactory(meterProviderBuilder, UP_DOWN_COUNTER, Aggregation.sum(DELTA));
         setAggregatorFactory(meterProviderBuilder, OBSERVABLE_SUM, Aggregation.histogram());
         setAggregatorFactory(meterProviderBuilder, OBSERVABLE_UP_DOWN_SUM, Aggregation.histogram());
-        meterProvider = meterProviderBuilder.build();
 
         var factory =
-            PeriodicMetricReader.create(exporterBuilder.build(),
+          PeriodicMetricReader.create(exporterBuilder.build(),
               Duration.ofMillis(EXPORT_MILLIS));
 
-        SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-              .registerMetricReader(factory)
-              .buildAndRegisterGlobal();
+        meterProvider = meterProviderBuilder.registerMetricReader(factory)
+            .buildAndRegisterGlobal();
     }
 
     private static void setAggregatorFactory(SdkMeterProviderBuilder builder, InstrumentType instrumentType, Aggregation aggregation) {
