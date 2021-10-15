@@ -123,7 +123,7 @@ def storageLoad = otel.mbean("${storage},name=Load")
 otel.instrument(storageLoad,
         "cassandra.storage.load.count",
         "Size of the on disk data size this node manages", "by", "Count",
-        otel.&longCounterCallback)
+        otel.&longUpDownCounterCallback)
 
 def storageTotalHints = otel.mbean("${storage},name=TotalHints")
 otel.instrument(storageTotalHints,
@@ -135,7 +135,7 @@ def storageTotalHintsInProgress = otel.mbean("${storage},name=TotalHintsInProgre
 otel.instrument(storageTotalHintsInProgress,
         "cassandra.storage.total_hints.in_progress.count",
         "Number of hints attempting to be sent currently", "1", "Count",
-        otel.&longCounterCallback)
+        otel.&longUpDownCounterCallback)
 
 def compaction = "${cassandraMetrics}:type=Compaction"
 def compactionPendingTasks = otel.mbean("${compaction},name=PendingTasks")
