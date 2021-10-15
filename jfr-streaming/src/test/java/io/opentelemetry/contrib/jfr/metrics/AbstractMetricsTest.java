@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class AbstractMetricsTest {
+public class AbstractMetricsTest {
 
   static SdkMeterProvider meterProvider;
   static InMemoryMetricReader metricReader;

@@ -22,8 +22,8 @@ public class PerThreadLongLockHandler implements RecordedEventHandler {
   private static final String DESCRIPTION = "Long lock times";
 
   private final String threadName;
-
   private final Meter otelMeter;
+
   private BoundDoubleHistogram histogram;
 
   public PerThreadLongLockHandler(Meter otelMeter, String threadName) {

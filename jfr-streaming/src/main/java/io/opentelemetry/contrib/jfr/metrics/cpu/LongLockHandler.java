@@ -8,6 +8,7 @@ import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Optional;
 import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 import io.opentelemetry.contrib.jfr.metrics.memory.PerThreadObjectAllocationInNewTLABHandler;
 import jdk.jfr.consumer.RecordedEvent;
@@ -32,5 +33,10 @@ public class LongLockHandler extends AbstractThreadDispatchingHandler {
   public RecordedEventHandler createPerThreadSummarizer(String threadName) {
     var ret = new PerThreadLongLockHandler(otelMeter, threadName);
     return ret.init();
+  }
+
+  @Override
+  public Optional<Duration> getThreshold() {
+    return Optional.empty();
   }
 }
