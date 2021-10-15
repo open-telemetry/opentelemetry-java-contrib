@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter;
 import org.junit.jupiter.api.BeforeAll;
 import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
 import io.opentelemetry.sdk.testing.assertj.metrics.MetricAssertions;
