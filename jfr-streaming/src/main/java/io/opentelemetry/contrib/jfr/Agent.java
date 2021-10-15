@@ -5,9 +5,6 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderFactory;
 import io.opentelemetry.sdk.metrics.view.Aggregation;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
@@ -20,7 +17,6 @@ import io.opentelemetry.contrib.jfr.metrics.HandlerRegistry;
 
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -42,6 +38,10 @@ public class Agent {
     private static final long EXPORT_MILLIS = 2000;
 
     private static SdkMeterProvider meterProvider;
+
+    public static void agentmain(String agentArgs, Instrumentation inst) {
+      premain(agentArgs, inst);
+    }
 
     public static void premain(String agentArgs, Instrumentation inst) {
         configureOpenTelemetry();

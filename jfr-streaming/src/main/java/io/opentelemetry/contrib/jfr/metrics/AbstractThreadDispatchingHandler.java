@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractThreadDispatchingHandler implements RecordedEventHandler {
+  // Will need pruning code for fast-cycling thread frameworks to prevent memory leaks
   protected final Map<String, RecordedEventHandler> perThread = new HashMap<>();
   protected final ThreadGrouper grouper;
 
