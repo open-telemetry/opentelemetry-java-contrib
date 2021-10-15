@@ -1,13 +1,7 @@
 package io.opentelemetry.contrib.jfrstreaming;
 
-import com.sun.tools.attach.VirtualMachine;
 import io.opentelemetry.contrib.jfr.metrics.AbstractMetricsTest;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.lang.management.ManagementFactory;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class JfrCPUTest extends AbstractMetricsTest {
 
@@ -20,12 +14,11 @@ public class JfrCPUTest extends AbstractMetricsTest {
     }
 
     waitAndAssertMetrics(
-        metric -> {
-          System.err.println(metric);
+        metric ->
             metric
                 .hasName("jfr.JavaMonitorWait.locktime")
                 .hasUnit("milliseconds")
-                .hasDoubleHistogram();});
+                .hasDoubleHistogram());
 //                .points()
 //                .anySatisfy(point -> assertThat(point.getValue()).isPositive()));
 //        metric ->
