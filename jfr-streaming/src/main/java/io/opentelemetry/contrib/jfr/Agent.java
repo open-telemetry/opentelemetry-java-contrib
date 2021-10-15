@@ -61,6 +61,7 @@ public class Agent {
         return handler -> {
             EventSettings eventSettings = recordingStream.enable(handler.getEventName());
             handler.getPollingDuration().ifPresent(eventSettings::withPeriod);
+            handler.getThreshold().ifPresent(eventSettings::withThreshold);
             recordingStream.onEvent(handler.getEventName(), handler);
         };
     }

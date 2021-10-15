@@ -1,1 +1,1 @@
-rootProject.name = "jfrs-otlp"
+rootProject.name = "jfr-streaming"
