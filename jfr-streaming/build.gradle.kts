@@ -7,11 +7,6 @@ val otelAlphaVersion: String by project
 plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("java")
-<<<<<<< HEAD
-=======
-    id("org.unbroken-dome.test-sets")
-//    id("com.github.sherter.google-java-format") version "0.8" apply true
->>>>>>> ceb8c5df5f9cd158ae6e630cd1e5897c06087d19
 }
 
 repositories {
@@ -20,15 +15,9 @@ repositories {
 }
 
 java {
-<<<<<<< HEAD
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
-=======
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }
->>>>>>> ceb8c5df5f9cd158ae6e630cd1e5897c06087d19
 }
 
 tasks.test {
