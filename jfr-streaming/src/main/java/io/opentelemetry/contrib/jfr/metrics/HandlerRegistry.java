@@ -1,11 +1,11 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
+import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.container.ContainerConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.network.NetworkWriteHandler;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.cpu.OverallCPULoadHandler;
 import io.opentelemetry.contrib.jfr.metrics.memory.G1GarbageCollectionHandler;
@@ -27,7 +27,7 @@ public class HandlerRegistry {
     this.mappers = new ArrayList<>(mappers);
   }
 
-  public static HandlerRegistry createDefault(SdkMeterProvider meterProvider) {
+  public static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var otelMeter = meterProvider.get(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION, null);
 
     var grouper = new ThreadGrouper();

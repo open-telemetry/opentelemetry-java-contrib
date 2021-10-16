@@ -1,6 +1,8 @@
 package io.opentelemetry.contrib.jfr;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.GlobalMeterProvider;
+import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
@@ -37,15 +39,21 @@ public class Agent {
     private static final String DEFAULT_SERVICE_NAME = "jfr-otlp-bridge";
     private static final long EXPORT_MILLIS = 2000;
 
-    private static SdkMeterProvider meterProvider;
+    private static MeterProvider meterProvider;
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
       premain(agentArgs, inst);
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
+      meterProvider = GlobalMeterProvider.get();
+      if (meterProvider == null) {
         configureOpenTelemetry();
+      }
+      startJfrService(agentArgs, inst);
+    }
 
+    public static void startJfrService(String agentArgs, Instrumentation inst) {
         var jfrMonitorService = Executors.newSingleThreadExecutor();
         var toMetricRegistry = HandlerRegistry.createDefault(meterProvider);
 
