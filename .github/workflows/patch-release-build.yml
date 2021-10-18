@@ -55,11 +55,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Setup Java 11
+      - name: Setup Java 17
         uses: actions/setup-java@v2
         with:
           distribution: adopt
-          java-version: 11
+          java-version: 17
       - uses: burrunan/gradle-cache-action@v1
         name: Build
         with:
@@ -79,11 +79,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Setup Java 11
+      - name: Setup Java 17
         uses: actions/setup-java@v2
         with:
           distribution: adopt
-          java-version: 11
+          java-version: 17
       - uses: burrunan/gradle-cache-action@v1
         name: Integration Tests
         with:
@@ -103,11 +103,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Setup Java 11
+      - name: Setup Java 17
         uses: actions/setup-java@v2
         with:
           distribution: adopt
-          java-version: 11
+          java-version: 17
       - uses: burrunan/gradle-cache-action@v1
         name: Publish
         with:
