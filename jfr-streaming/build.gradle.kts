@@ -52,6 +52,12 @@ tasks {
     options.release.set(17)
   }
 
+  withType<Javadoc>().configureEach {
+    with(options as StandardJavadocDocletOptions) {
+      source = "17"
+    }
+  }
+
   shadowJar {
     archiveClassifier.set("")
     manifest {
