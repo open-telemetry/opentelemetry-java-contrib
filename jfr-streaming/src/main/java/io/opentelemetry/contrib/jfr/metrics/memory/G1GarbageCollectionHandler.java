@@ -2,7 +2,7 @@ package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 

@@ -1,12 +1,13 @@
 package io.opentelemetry.contrib.jfr.metrics.network;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 public class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private static final String DESCRIPTION_BYTES = "Bytes Read";
@@ -26,7 +27,7 @@ public class PerThreadNetworkReadHandler implements RecordedEventHandler {
   }
 
   public PerThreadNetworkReadHandler init() {
-    var attr = Attributes.of(AttributeKey.stringKey(Constants.THREAD_NAME), threadName);
+    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
 
     var builder = otelMeter.histogramBuilder(JFR_SOCKET_READ_BYTES_READ);
     builder.setDescription(DESCRIPTION_BYTES);

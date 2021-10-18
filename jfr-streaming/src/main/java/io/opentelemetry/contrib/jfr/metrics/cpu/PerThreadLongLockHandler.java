@@ -1,18 +1,18 @@
 package io.opentelemetry.contrib.jfr.metrics.cpu;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 public class PerThreadLongLockHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = PerThreadLongLockHandler.class.getSimpleName();
   public static final String MONITOR_CLASS = "monitorClass";
   public static final String CLASS = "class";
-  public static final String THREAD_NAME = "thread.name";
   public static final String EVENT_THREAD = "eventThread";
   public static final String DURATION = "duration";
   public static final String STACK_TRACE = "stackTrace";
@@ -38,7 +38,7 @@ public class PerThreadLongLockHandler implements RecordedEventHandler {
 
   @Override
   public RecordedEventHandler init() {
-    var attr = Attributes.of(AttributeKey.stringKey(Constants.THREAD_NAME), threadName);
+    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
     var builder = otelMeter.histogramBuilder(HISTOGRAM_NAME);
     builder.setDescription(DESCRIPTION);
     builder.setUnit(Constants.MILLISECONDS);

@@ -50,10 +50,10 @@ public class Agent {
       if (meterProvider == null) {
         configureOpenTelemetry();
       }
-      startJfrService(agentArgs, inst);
+      enableJfr();
     }
 
-    public static void startJfrService(String agentArgs, Instrumentation inst) {
+    public static void enableJfr() {
         var jfrMonitorService = Executors.newSingleThreadExecutor();
         var toMetricRegistry = HandlerRegistry.createDefault(meterProvider);
 

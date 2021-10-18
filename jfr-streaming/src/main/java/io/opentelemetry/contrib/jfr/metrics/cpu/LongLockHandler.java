@@ -1,18 +1,11 @@
 package io.opentelemetry.contrib.jfr.metrics.cpu;
 
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.Constants;
 import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Optional;
 import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
-import io.opentelemetry.contrib.jfr.metrics.memory.PerThreadObjectAllocationInNewTLABHandler;
-import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordedThread;
 
 public class LongLockHandler extends AbstractThreadDispatchingHandler {
 

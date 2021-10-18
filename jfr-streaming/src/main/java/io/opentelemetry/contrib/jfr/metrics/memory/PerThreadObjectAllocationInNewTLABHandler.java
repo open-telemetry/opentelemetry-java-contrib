@@ -1,12 +1,13 @@
 package io.opentelemetry.contrib.jfr.metrics.memory;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 /** This class aggregates all TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationInNewTLABHandler implements RecordedEventHandler {
@@ -26,7 +27,7 @@ public final class PerThreadObjectAllocationInNewTLABHandler implements Recorded
   }
 
   public PerThreadObjectAllocationInNewTLABHandler init() {
-    var attr = Attributes.of(AttributeKey.stringKey(Constants.THREAD_NAME), threadName);
+    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
     var builder = otelMeter.histogramBuilder(HISTOGRAM_NAME);
     builder.setDescription(DESCRIPTION);
     builder.setUnit(Constants.KILOBYTES);

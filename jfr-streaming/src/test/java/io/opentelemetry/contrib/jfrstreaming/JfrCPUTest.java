@@ -3,7 +3,7 @@ package io.opentelemetry.contrib.jfrstreaming;
 import io.opentelemetry.contrib.jfr.metrics.AbstractMetricsTest;
 import org.junit.jupiter.api.Test;
 
-import static io.opentelemetry.contrib.jfr.Constants.*;
+import static io.opentelemetry.contrib.jfr.metrics.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class JfrCPUTest extends AbstractMetricsTest {

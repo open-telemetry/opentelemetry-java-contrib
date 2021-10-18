@@ -1,7 +1,7 @@
 package io.opentelemetry.contrib.jfr.metrics.cpu;
 
 import io.opentelemetry.api.metrics.*;
-import io.opentelemetry.contrib.jfr.Constants;
+import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
