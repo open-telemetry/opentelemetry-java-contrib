@@ -1,15 +1,18 @@
-package io.opentelemetry.contrib.jfr.metrics;
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import jdk.jfr.consumer.RecordedEvent;
+package io.opentelemetry.contrib.jfr.metrics;
 
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import jdk.jfr.consumer.RecordedEvent;
 
 /** Convenience/Tag interface for defining how JFR events should turn into metrics. */
-public interface RecordedEventHandler
-    extends Consumer<RecordedEvent>, Predicate<RecordedEvent> {
+public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate<RecordedEvent> {
 
   /**
    * JFR event name (e.g. jdk.ObjectAllocationInNewTLAB)
@@ -41,8 +44,8 @@ public interface RecordedEventHandler
   /**
    * Optionally returns a threshold length for JFR events, if present
    *
-   * @return {@link Optional} of {@link Duration} representing threshold; empty {@link
-   *     Optional} if no threshold
+   * @return {@link Optional} of {@link Duration} representing threshold; empty {@link Optional} if
+   *     no threshold
    */
   default Optional<Duration> getThreshold() {
     return Optional.empty();
@@ -53,5 +56,7 @@ public interface RecordedEventHandler
    *
    * @return
    */
-  default RecordedEventHandler init() { return this; }
+  default RecordedEventHandler init() {
+    return this;
+  }
 }

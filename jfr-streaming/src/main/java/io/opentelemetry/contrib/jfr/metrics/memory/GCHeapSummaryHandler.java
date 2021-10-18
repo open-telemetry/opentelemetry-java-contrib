@@ -1,19 +1,20 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import java.util.HashMap;
+import java.util.Map;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * This class handles GCHeapSummary JFR events. For GC purposes they come in
- * pairs.
- */
+/** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = GCHeapSummaryHandler.class.getSimpleName();
   public static final String JFR_GC_HEAP_SUMMARY_DURATION = "jfr.GCHeapSummary.duration";
@@ -46,15 +47,17 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     builder.setUnit(Constants.MILLISECONDS);
     gcHistogram = builder.build();
 
-    otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_USED)
-            .ofDoubles()
-            .setUnit(Constants.KILOBYTES)
-            .buildWithCallback(codm -> codm.observe(heapUsed));
+    otelMeter
+        .upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_HEAP_USED)
+        .ofDoubles()
+        .setUnit(Constants.KILOBYTES)
+        .buildWithCallback(codm -> codm.observe(heapUsed));
 
-    otelMeter.upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_COMMITTED)
-            .ofDoubles()
-            .setUnit(Constants.KILOBYTES)
-            .buildWithCallback(codm -> codm.observe(heapCommitted));
+    otelMeter
+        .upDownCounterBuilder(JFR_GC_HEAP_SUMMARY_COMMITTED)
+        .ofDoubles()
+        .setUnit(Constants.KILOBYTES)
+        .buildWithCallback(codm -> codm.observe(heapCommitted));
 
     return this;
   }

@@ -1,4 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.network;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -6,8 +13,6 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-
-import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 public class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private static final String DESCRIPTION_BYTES = "Bytes Read";
@@ -52,5 +57,4 @@ public class PerThreadNetworkReadHandler implements RecordedEventHandler {
     bytesHistogram.record(ev.getLong(BYTES_READ));
     durationHistogram.record(ev.getDuration().toMillis());
   }
-
 }

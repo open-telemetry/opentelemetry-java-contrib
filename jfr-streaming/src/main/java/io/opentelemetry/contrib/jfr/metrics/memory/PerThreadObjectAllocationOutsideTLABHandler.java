@@ -1,4 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.memory;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -6,8 +13,6 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
-
-import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 /** This class aggregates all non-TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationOutsideTLABHandler implements RecordedEventHandler {
@@ -45,5 +50,4 @@ public final class PerThreadObjectAllocationOutsideTLABHandler implements Record
     // Probably too high a cardinality
     // ev.getClass("objectClass").getName();
   }
-
 }

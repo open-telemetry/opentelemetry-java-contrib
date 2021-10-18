@@ -1,13 +1,17 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.cpu;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
-import jdk.jfr.consumer.RecordedEvent;
-
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import jdk.jfr.consumer.RecordedEvent;
 
 public class OverallCPULoadHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
@@ -30,24 +34,26 @@ public class OverallCPULoadHandler implements RecordedEventHandler {
   }
 
   public OverallCPULoadHandler init() {
-    otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_USER)
-            .ofDoubles()
-            .setUnit(Constants.PERCENTAGE)
-            .buildWithCallback(codm -> codm.observe(userValue));
+    otelMeter
+        .upDownCounterBuilder(JFR_CPU_LOAD_JVM_USER)
+        .ofDoubles()
+        .setUnit(Constants.PERCENTAGE)
+        .buildWithCallback(codm -> codm.observe(userValue));
 
-    otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_JVM_SYSTEM)
-            .ofDoubles()
-            .setUnit(Constants.PERCENTAGE)
-            .buildWithCallback(codm -> codm.observe(systemValue));
+    otelMeter
+        .upDownCounterBuilder(JFR_CPU_LOAD_JVM_SYSTEM)
+        .ofDoubles()
+        .setUnit(Constants.PERCENTAGE)
+        .buildWithCallback(codm -> codm.observe(systemValue));
 
-    otelMeter.upDownCounterBuilder(JFR_CPU_LOAD_MACHINE_TOTAL)
-            .ofDoubles()
-            .setUnit(Constants.PERCENTAGE)
-            .buildWithCallback(codm -> codm.observe(machineTotal));
+    otelMeter
+        .upDownCounterBuilder(JFR_CPU_LOAD_MACHINE_TOTAL)
+        .ofDoubles()
+        .setUnit(Constants.PERCENTAGE)
+        .buildWithCallback(codm -> codm.observe(machineTotal));
 
     return this;
   }
-
 
   @Override
   public void accept(RecordedEvent ev) {

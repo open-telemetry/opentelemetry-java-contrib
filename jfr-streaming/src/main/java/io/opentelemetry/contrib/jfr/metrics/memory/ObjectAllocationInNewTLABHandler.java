@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.Meter;
@@ -6,7 +11,8 @@ import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 
 /**
- * This class handles TLAB allocation JFR events, and delegates them to the actual per-thread aggregators
+ * This class handles TLAB allocation JFR events, and delegates them to the actual per-thread
+ * aggregators
  */
 public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispatchingHandler {
 

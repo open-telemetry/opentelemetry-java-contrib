@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.memory;
 
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -38,5 +43,4 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
     // FIXME Is this a getDuration, or is it named?
     gcHistogram.record(ev.getDuration().toMillis());
   }
-
 }

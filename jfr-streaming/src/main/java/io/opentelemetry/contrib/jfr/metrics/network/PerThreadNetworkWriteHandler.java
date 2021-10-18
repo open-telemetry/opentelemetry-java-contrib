@@ -1,4 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.jfr.metrics.network;
+
+import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -7,11 +14,8 @@ import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
-import static io.opentelemetry.contrib.jfr.metrics.Constants.ATTR_THREAD_NAME;
-
 public class PerThreadNetworkWriteHandler implements RecordedEventHandler {
-  public static final String SIMPLE_CLASS_NAME =
-      PerThreadNetworkWriteHandler.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = PerThreadNetworkWriteHandler.class.getSimpleName();
   public static final String BYTES_WRITTEN = "bytesWritten";
   public static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";
   public static final String JFR_SOCKET_WRITE_DURATION = "jfr.SocketWrite.duration";
@@ -55,5 +59,4 @@ public class PerThreadNetworkWriteHandler implements RecordedEventHandler {
     bytesHistogram.record(ev.getLong(BYTES_WRITTEN));
     durationHistogram.record(ev.getDuration().toMillis());
   }
-
 }

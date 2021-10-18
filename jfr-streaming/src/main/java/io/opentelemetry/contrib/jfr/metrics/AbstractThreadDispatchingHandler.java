@@ -1,10 +1,14 @@
-package io.opentelemetry.contrib.jfr.metrics;
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import jdk.jfr.consumer.RecordedEvent;
+package io.opentelemetry.contrib.jfr.metrics;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import jdk.jfr.consumer.RecordedEvent;
 
 public abstract class AbstractThreadDispatchingHandler implements RecordedEventHandler {
   // Will need pruning code for fast-cycling thread frameworks to prevent memory leaks
@@ -29,12 +33,9 @@ public abstract class AbstractThreadDispatchingHandler implements RecordedEventH
     possibleGroupedThreadName.ifPresent(
         groupedThreadName -> {
           if (perThread.get(groupedThreadName) == null) {
-            perThread.put(
-                groupedThreadName,
-                createPerThreadSummarizer(groupedThreadName));
+            perThread.put(groupedThreadName, createPerThreadSummarizer(groupedThreadName));
           }
           perThread.get(groupedThreadName).accept(ev);
         });
   }
-
 }

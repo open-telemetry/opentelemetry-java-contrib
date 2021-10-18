@@ -3,39 +3,38 @@ val slf4jVersion: String by project
 val otelVersion: String by project
 val otelAlphaVersion: String by project
 
-
 plugins {
-    id("com.github.johnrengelman.shadow")
-    id("java")
-    id("otel.java-conventions")
+  id("com.github.johnrengelman.shadow")
+  id("java")
+  id("otel.java-conventions")
 }
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+  mavenCentral()
+  mavenLocal()
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
 }
 
 dependencies {
-    implementation("io.opentelemetry:opentelemetry-api")
-    implementation("io.opentelemetry:opentelemetry-sdk")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    implementation("io.opentelemetry:opentelemetry-sdk-metrics")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
-    implementation("io.grpc:grpc-netty-shaded")
+  implementation("io.opentelemetry:opentelemetry-api")
+  implementation("io.opentelemetry:opentelemetry-sdk")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+  implementation("io.opentelemetry:opentelemetry-sdk-metrics")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
+  implementation("io.grpc:grpc-netty-shaded")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("org.assertj:assertj-core")
-    testImplementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
-    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine")
+  testImplementation("org.assertj:assertj-core")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-    testImplementation("org.awaitility:awaitility")
+  testImplementation("org.awaitility:awaitility")
 }
 
 tasks {

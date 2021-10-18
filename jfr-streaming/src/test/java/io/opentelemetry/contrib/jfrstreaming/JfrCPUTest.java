@@ -1,10 +1,15 @@
-package io.opentelemetry.contrib.jfrstreaming;
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import io.opentelemetry.contrib.jfr.metrics.AbstractMetricsTest;
-import org.junit.jupiter.api.Test;
+package io.opentelemetry.contrib.jfrstreaming;
 
 import static io.opentelemetry.contrib.jfr.metrics.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import io.opentelemetry.contrib.jfr.metrics.AbstractMetricsTest;
+import org.junit.jupiter.api.Test;
 
 public class JfrCPUTest extends AbstractMetricsTest {
 
@@ -22,13 +27,12 @@ public class JfrCPUTest extends AbstractMetricsTest {
                 .hasName("jfr.JavaMonitorWait.locktime")
                 .hasUnit(MILLISECONDS)
                 .hasDoubleHistogram(),
-          metric -> metric
+        metric ->
+            metric
                 .hasName("jfr.G1GarbageCollection.duration")
                 .hasUnit(MILLISECONDS)
                 .hasDoubleHistogram()
                 .points()
-                .anySatisfy(point -> assertThat(point.getCount() > 0))
-        );
+                .anySatisfy(point -> assertThat(point.getCount() > 0)));
   }
-
 }
