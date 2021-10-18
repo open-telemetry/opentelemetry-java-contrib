@@ -52,8 +52,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.range_slice.latency.count",
-                "Total token range read request latency",
-                "µs"),
+                "Number of token range read request operations",
+                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -88,8 +88,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.read.latency.count",
-                "Total standard read request latency",
-                "µs"),
+                "Number of standard read request operations",
+                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -124,8 +124,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "cassandra.client.request.write.latency.count",
-                "Total regular write request latency",
-                "µs"),
+                "Number of regular write request operations",
+                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -161,7 +161,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.storage.load.count",
                 "Size of the on disk data size this node manages",
-                "by"),
+                "by",
+                false),
         metric ->
             assertSum(
                 metric,
@@ -173,6 +174,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.storage.total_hints.in_progress.count",
                 "Number of hints attempting to be sent currently",
-                "1"));
+                "1",
+                false));
   }
 }

@@ -147,12 +147,18 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected void assertSum(Metric metric, String name, String description, String unit) {
+    assertSum(metric, name, description, unit, true);
+  }
+
+  protected void assertSum(
+      Metric metric, String name, String description, String unit, boolean isMonotonic) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasSum()).isTrue();
     assertThat(metric.getSum().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
   }
 
   protected void assertTypedGauge(
