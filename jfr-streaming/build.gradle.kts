@@ -22,23 +22,20 @@ java {
 }
 
 dependencies {
-//    implementation(platform("io.opentelemetry:opentelemetry-bom:${otelVersion}"))
     implementation("io.opentelemetry:opentelemetry-api")
     implementation("io.opentelemetry:opentelemetry-sdk")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.opentelemetry:opentelemetry-sdk-metrics")
-
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics:${otelAlphaVersion}")
-//    implementation(platform("io.grpc:grpc-bom:1.34.1"))
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
     implementation("io.grpc:grpc-netty-shaded")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.1")
-    testImplementation("org.assertj:assertj-core:3.21.0")
-    testImplementation("io.opentelemetry:opentelemetry-sdk-metrics-testing:${otelAlphaVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.assertj:assertj-core")
+    testImplementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-    testImplementation("org.awaitility:awaitility:3.0.0")
+    testImplementation("org.awaitility:awaitility")
 }
 
 tasks {
