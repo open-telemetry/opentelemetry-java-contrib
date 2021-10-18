@@ -103,7 +103,8 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     }
     if (after.hasField(HEAP_SPACE)) {
       after.getValue(HEAP_SPACE);
-      if (after.getValue(HEAP_SPACE) instanceof RecordedObject ro) {
+      if (after.getValue(HEAP_SPACE) instanceof RecordedObject) {
+        RecordedObject ro = after.getValue(HEAP_SPACE);
         heapCommitted = ro.getLong(COMMITTED_SIZE);
       }
     }
