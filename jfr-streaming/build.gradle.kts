@@ -1,5 +1,4 @@
 plugins {
-  id("com.github.johnrengelman.shadow")
   id("otel.java-conventions")
 }
 
@@ -31,21 +30,7 @@ tasks {
     }
   }
 
-  shadowJar {
-    archiveClassifier.set("")
-    manifest {
-      attributes(
-        "Implementation-Version" to project.version,
-        "Implementation-Vendor" to "Open Telemetry"
-      )
-    }
-  }
-
   test {
     useJUnitPlatform()
-  }
-
-  named("assemble") {
-    dependsOn("shadowJar")
   }
 }
