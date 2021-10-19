@@ -1,8 +1,3 @@
-val gsonVersion: String by project
-val slf4jVersion: String by project
-val otelVersion: String by project
-val otelAlphaVersion: String by project
-
 plugins {
   id("com.github.johnrengelman.shadow")
   id("java")
@@ -37,13 +32,15 @@ dependencies {
   testImplementation("org.awaitility:awaitility")
 }
 
-tasks {
-  test {
-    useJUnitPlatform()
-    dependsOn("shadowJar")
-    jvmArgs("-Djdk.attach.allowAttachSelf=true")
-  }
+class TestArgumentsProvider(
+  @InputFile
+  @PathSensitive(PathSensitivity.RELATIVE)
+  val agentShadowJar: File
+) : CommandLineArgumentProvider {
+  override fun asArguments(): Iterable<String> = listOf("-javaagent:${agentShadowJar.absolutePath}")
+}
 
+tasks {
   withType(JavaCompile::class) {
     options.release.set(17)
   }
@@ -64,6 +61,13 @@ tasks {
         "Implementation-Vendor" to "Open Telemetry"
       )
     }
+  }
+
+  test {
+    useJUnitPlatform()
+    dependsOn(shadowJar)
+
+    jvmArgumentProviders.add(TestArgumentsProvider(shadowJar.get().archiveFile.get().asFile))
   }
 
   named("assemble") {
