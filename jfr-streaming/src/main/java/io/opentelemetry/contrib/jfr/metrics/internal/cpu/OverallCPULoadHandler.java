@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics.cpu;
+package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.Constants;
-import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
+import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;

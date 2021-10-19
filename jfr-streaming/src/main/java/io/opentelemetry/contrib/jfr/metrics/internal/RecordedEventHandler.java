@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics;
+package io.opentelemetry.contrib.jfr.metrics.internal;
 
 import java.time.Duration;
 import java.util.Optional;

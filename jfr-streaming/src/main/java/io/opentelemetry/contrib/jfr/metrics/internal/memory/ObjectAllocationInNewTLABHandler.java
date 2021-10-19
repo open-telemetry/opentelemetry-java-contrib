@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics.memory;
+package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
-import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
-import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 
 /**
  * This class handles TLAB allocation JFR events, and delegates them to the actual per-thread

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics.container;
+package io.opentelemetry.contrib.jfr.metrics.internal.container;
 
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.Constants;
-import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
+import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContainerConfigurationHandler implements RecordedEventHandler {

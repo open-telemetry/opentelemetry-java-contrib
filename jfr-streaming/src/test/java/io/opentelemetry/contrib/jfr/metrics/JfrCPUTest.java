@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
-import static io.opentelemetry.contrib.jfr.metrics.Constants.*;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

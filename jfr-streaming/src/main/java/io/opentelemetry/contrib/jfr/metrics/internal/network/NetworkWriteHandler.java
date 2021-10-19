@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics.network;
+package io.opentelemetry.contrib.jfr.metrics.internal.network;
 
 // jdk.SocketWrite {
 //        startTime = 20:22:57.161
@@ -24,9 +24,9 @@ package io.opentelemetry.contrib.jfr.metrics.network;
 // }
 
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
-import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
-import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 
 public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   public static final String EVENT_NAME = "jdk.SocketWrite";

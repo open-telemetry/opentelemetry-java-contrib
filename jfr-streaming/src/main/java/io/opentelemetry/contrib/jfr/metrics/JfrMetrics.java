@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
