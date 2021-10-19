@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  implementation("io.opentelemetry:opentelemetry-api")
+  implementation("io.opentelemetry:opentelemetry-api-metrics")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
