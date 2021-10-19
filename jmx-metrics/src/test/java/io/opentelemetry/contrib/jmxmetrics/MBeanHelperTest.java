@@ -69,7 +69,8 @@ class MBeanHelperTest {
     String thingName = "io.opentelemetry.contrib.jmxmetrics:type=multiObjThing";
 
     registerThings(thingName);
-    MBeanHelper mBeanHelper = new MBeanHelper(jmxClient, Arrays.asList(thingName + ",thing=0", thingName + ",thing=1"));
+    MBeanHelper mBeanHelper =
+        new MBeanHelper(jmxClient, Arrays.asList(thingName + ",thing=0", thingName + ",thing=1"));
     mBeanHelper.fetch();
 
     assertThat(mBeanHelper.getAttribute("SomeAttribute"))
