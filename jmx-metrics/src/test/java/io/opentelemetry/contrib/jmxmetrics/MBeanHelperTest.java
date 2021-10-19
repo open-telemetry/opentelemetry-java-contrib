@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.jmxmetrics;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
@@ -61,6 +62,22 @@ class MBeanHelperTest {
       mbeanServer.unregisterMBean(bean.getObjectName());
     }
     registeredBeans.clear();
+  }
+
+  @Test
+  void multiObj() throws Exception {
+    String thingName = "io.opentelemetry.contrib.jmxmetrics:type=multiObjThing";
+
+    registerThings(thingName);
+    MBeanHelper mBeanHelper = new MBeanHelper(jmxClient, Arrays.asList(thingName + ",thing=0", thingName + ",thing=1"));
+    mBeanHelper.fetch();
+
+    assertThat(mBeanHelper.getAttribute("SomeAttribute"))
+        .hasSameElementsAs(
+            IntStream.range(0, 2).mapToObj(Integer::toString).collect(Collectors.toList()));
+    assertThat(mBeanHelper.getAttribute("MissingAttribute"))
+        .hasSameElementsAs(
+            IntStream.range(0, 2).mapToObj(unused -> null).collect(Collectors.toList()));
   }
 
   @Test
