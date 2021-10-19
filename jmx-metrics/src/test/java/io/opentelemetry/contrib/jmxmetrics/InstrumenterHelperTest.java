@@ -14,9 +14,11 @@ import groovy.util.Eval;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -279,6 +281,38 @@ class InstrumenterHelperTest {
     @ParameterizedTest
     @ValueSource(
         strings = {
+          "doubleCounter",
+          "doubleUpDownCounter",
+          "doubleCounterCallback",
+          "doubleUpDownCounterCallback"
+        })
+    void doubleSumMultipleMBeans(String instrumentMethod) throws Exception {
+      ArrayList<String> thingNames = new ArrayList<>();
+      for (int i = 0; i < 4; i++) {
+        thingNames.add("multiple:type=" + instrumentMethod + ".Thing,thing=" + i);
+      }
+      MBeanHelper mBeanHelper = registerMultipleThings(thingNames);
+
+      String instrumentName = "multiple." + instrumentMethod + ".counter";
+      String description = "multiple double counter description";
+
+      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
+
+      assertThat(meterProvider.collectAllMetrics())
+          .satisfiesExactly(
+              metric ->
+                  assertThat(metric)
+                      .hasName(instrumentName)
+                      .hasDescription(description)
+                      .hasUnit("1")
+                      .hasDoubleSum()
+                      .points()
+                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
           "longCounter",
           "longUpDownCounter",
           "longCounterCallback",
@@ -365,6 +399,32 @@ class InstrumenterHelperTest {
       String instrumentMethod = "doubleValueCallback";
       String thingName = "multiple:type=" + instrumentMethod + ".Thing";
       MBeanHelper mBeanHelper = registerThings(thingName);
+
+      String instrumentName = "multiple." + instrumentMethod + ".counter";
+      String description = "multiple double counter description";
+
+      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
+
+      assertThat(meterProvider.collectAllMetrics())
+          .satisfiesExactly(
+              metric ->
+                  assertThat(metric)
+                      .hasName(instrumentName)
+                      .hasDescription(description)
+                      .hasUnit("1")
+                      .hasDoubleGauge()
+                      .points()
+                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+    }
+
+    @Test
+    void doubleValueCallbackMultipleMBeans() throws Exception {
+      String instrumentMethod = "doubleValueCallback";
+      ArrayList<String> thingNames = new ArrayList<>();
+      for (int i = 0; i < 4; i++) {
+        thingNames.add("multiple:type=" + instrumentMethod + ".Thing,thing=" + i);
+      }
+      MBeanHelper mBeanHelper = registerMultipleThings(thingNames);
 
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
@@ -521,6 +581,17 @@ class InstrumenterHelperTest {
 
     MBeanHelper mBeanHelper =
         new MBeanHelper(jmxClient, thingName + ",*", thingName.startsWith("single:"));
+    mBeanHelper.fetch();
+    return mBeanHelper;
+  }
+
+  MBeanHelper registerMultipleThings(List<String> thingNames) throws Exception {
+    for (String thingName : thingNames) {
+      Thing thing = new Thing();
+      registeredBeans.add(mbeanServer.registerMBean(thing, new ObjectName(thingName)));
+    }
+
+    MBeanHelper mBeanHelper = new MBeanHelper(jmxClient, thingNames);
     mBeanHelper.fetch();
     return mBeanHelper;
   }
