@@ -3,17 +3,6 @@ plugins {
   id("otel.java-conventions")
 }
 
-repositories {
-  mavenCentral()
-  mavenLocal()
-}
-
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }
-}
-
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
