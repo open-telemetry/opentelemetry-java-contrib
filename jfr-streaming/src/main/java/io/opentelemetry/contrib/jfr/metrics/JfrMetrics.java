@@ -19,7 +19,7 @@ public final class JfrMetrics {
 
   private static final Logger logger = Logger.getLogger(JfrMetrics.class.getName());
 
-  public static void enableJfr(MeterProvider meterProvider) {
+  public static void enable(MeterProvider meterProvider) {
     var jfrMonitorService = Executors.newSingleThreadExecutor();
     var toMetricRegistry = HandlerRegistry.createDefault(meterProvider);
 

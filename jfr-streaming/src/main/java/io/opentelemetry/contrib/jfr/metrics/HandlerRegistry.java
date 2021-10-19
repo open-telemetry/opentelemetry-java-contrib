@@ -32,7 +32,7 @@ final class HandlerRegistry {
     this.mappers = new ArrayList<>(mappers);
   }
 
-  public static HandlerRegistry createDefault(MeterProvider meterProvider) {
+  static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var otelMeter = meterProvider.get(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION, null);
 
     var grouper = new ThreadGrouper();
@@ -54,7 +54,7 @@ final class HandlerRegistry {
   }
 
   /** @return a stream of all entries in this registry. */
-  public Stream<RecordedEventHandler> all() {
+  Stream<RecordedEventHandler> all() {
     return mappers.stream();
   }
 }

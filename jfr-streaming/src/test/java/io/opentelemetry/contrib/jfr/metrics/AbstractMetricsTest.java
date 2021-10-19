@@ -27,7 +27,7 @@ public class AbstractMetricsTest {
     metricReader = new InMemoryMetricReader();
     meterProvider =
         SdkMeterProvider.builder().registerMetricReader(metricReader).buildAndRegisterGlobal();
-    JfrMetrics.enableJfr(meterProvider);
+    JfrMetrics.enable(meterProvider);
   }
 
   protected void waitAndAssertMetrics(Consumer<MetricDataAssert>... assertions) {
