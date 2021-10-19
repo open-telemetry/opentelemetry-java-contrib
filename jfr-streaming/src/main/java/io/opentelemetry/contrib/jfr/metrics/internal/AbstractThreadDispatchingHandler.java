@@ -32,9 +32,7 @@ public abstract class AbstractThreadDispatchingHandler implements RecordedEventH
     final Optional<String> possibleGroupedThreadName = grouper.groupedName(ev);
     possibleGroupedThreadName.ifPresent(
         groupedThreadName -> {
-          if (perThread.get(groupedThreadName) == null) {
-            perThread.put(groupedThreadName, createPerThreadSummarizer(groupedThreadName));
-          }
+          perThread.computeIfAbsent(groupedThreadName, name -> createPerThreadSummarizer(name));
           perThread.get(groupedThreadName).accept(ev);
         });
   }

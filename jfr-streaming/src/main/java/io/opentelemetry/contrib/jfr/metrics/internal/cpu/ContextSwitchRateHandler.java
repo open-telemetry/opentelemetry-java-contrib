@@ -9,7 +9,6 @@ import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -43,6 +42,6 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
 
   @Override
   public Optional<Duration> getPollingDuration() {
-    return Optional.of(Duration.of(1, ChronoUnit.SECONDS));
+    return Optional.of(Duration.ofSeconds(1));
   }
 }
