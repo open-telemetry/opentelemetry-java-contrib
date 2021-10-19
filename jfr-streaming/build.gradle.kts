@@ -32,14 +32,6 @@ dependencies {
   testImplementation("org.awaitility:awaitility")
 }
 
-class TestArgumentsProvider(
-  @InputFile
-  @PathSensitive(PathSensitivity.RELATIVE)
-  val agentShadowJar: File
-) : CommandLineArgumentProvider {
-  override fun asArguments(): Iterable<String> = listOf("-javaagent:${agentShadowJar.absolutePath}")
-}
-
 tasks {
   withType(JavaCompile::class) {
     options.release.set(17)
@@ -55,8 +47,6 @@ tasks {
     archiveClassifier.set("")
     manifest {
       attributes(
-        "Premain-Class" to "io.opentelemetry.contrib.jfr.Agent",
-        "Agent-Class" to "io.opentelemetry.contrib.jfr.Agent",
         "Implementation-Version" to project.version,
         "Implementation-Vendor" to "Open Telemetry"
       )

@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import io.opentelemetry.contrib.jfr.JfrMetrics;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;

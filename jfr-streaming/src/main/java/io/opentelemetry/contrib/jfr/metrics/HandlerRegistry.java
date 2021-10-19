@@ -19,7 +19,7 @@ import io.opentelemetry.contrib.jfr.metrics.network.NetworkWriteHandler;
 import java.util.*;
 import java.util.stream.Stream;
 
-public final class HandlerRegistry {
+final class HandlerRegistry {
   private static final String SCHEMA_URL = "https://opentelemetry.io/schemas/1.6.1";
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
   private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
