@@ -10,7 +10,7 @@ import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class ContainerConfigurationHandler implements RecordedEventHandler {
+public final class ContainerConfigurationHandler implements RecordedEventHandler {
   public static final String EVENT_NAME = "jdk.ContainerConfiguration";
   public static final String JFR_CONTAINER_CONFIGURATION = "jfr.ContainerConfiguration";
 

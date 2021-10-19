@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class ContextSwitchRateHandler implements RecordedEventHandler {
+public final class ContextSwitchRateHandler implements RecordedEventHandler {
   public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
 
   private final Meter otelMeter;

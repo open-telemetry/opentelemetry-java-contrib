@@ -14,7 +14,7 @@ import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class PerThreadNetworkReadHandler implements RecordedEventHandler {
+public final class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private static final String DESCRIPTION_BYTES = "Bytes Read";
   private static final String DESCRIPTION_DURATION = "Read Duration";
   private final String threadName;

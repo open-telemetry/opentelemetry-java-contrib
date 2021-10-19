@@ -11,8 +11,6 @@ import static io.opentelemetry.sdk.metrics.data.AggregationTemporality.DELTA;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.MeterProvider;
-import io.opentelemetry.contrib.jfr.metrics.HandlerRegistry;
-import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
@@ -24,16 +22,8 @@ import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jdk.jfr.EventSettings;
-import jdk.jfr.consumer.RecordingStream;
 
-public class Agent {
-  private static final Logger logger = Logger.getLogger(Agent.class.getName());
-
+public final class Agent {
   private static final String OTLP_URL = "OTLP_URL";
   private static final String API_KEY = "API_KEY";
   private static final String SERVICE_NAME = "SERVICE_NAME";
@@ -54,32 +44,7 @@ public class Agent {
     if (meterProvider == null) {
       configureOpenTelemetry();
     }
-    enableJfr();
-  }
-
-  public static void enableJfr() {
-    var jfrMonitorService = Executors.newSingleThreadExecutor();
-    var toMetricRegistry = HandlerRegistry.createDefault(meterProvider);
-
-    jfrMonitorService.submit(
-        () -> {
-          try (var recordingStream = new RecordingStream()) {
-            var enableMappedEvent = eventEnablerFor(recordingStream);
-            toMetricRegistry.all().forEach(enableMappedEvent);
-            recordingStream.setReuse(false);
-            logger.log(Level.FINE, "Starting recording stream...");
-            recordingStream.start(); // run forever
-          }
-        });
-  }
-
-  private static Consumer<RecordedEventHandler> eventEnablerFor(RecordingStream recordingStream) {
-    return handler -> {
-      EventSettings eventSettings = recordingStream.enable(handler.getEventName());
-      handler.getPollingDuration().ifPresent(eventSettings::withPeriod);
-      handler.getThreshold().ifPresent(eventSettings::withThreshold);
-      recordingStream.onEvent(handler.getEventName(), handler);
-    };
+    JfrMetrics.enableJfr(meterProvider);
   }
 
   static void configureOpenTelemetry() {

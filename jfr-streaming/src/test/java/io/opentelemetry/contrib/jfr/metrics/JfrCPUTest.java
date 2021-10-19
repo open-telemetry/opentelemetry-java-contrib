@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfrstreaming;
+package io.opentelemetry.contrib.jfr.metrics;
 
 import static io.opentelemetry.contrib.jfr.metrics.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.contrib.jfr.metrics.AbstractMetricsTest;
 import org.junit.jupiter.api.Test;
 
 public class JfrCPUTest extends AbstractMetricsTest {

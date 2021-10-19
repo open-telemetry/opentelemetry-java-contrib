@@ -12,7 +12,7 @@ import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 import java.time.Duration;
 import java.util.Optional;
 
-public class LongLockHandler extends AbstractThreadDispatchingHandler {
+public final class LongLockHandler extends AbstractThreadDispatchingHandler {
 
   public static final String EVENT_NAME = "jdk.JavaMonitorWait";
   private final Meter otelMeter;

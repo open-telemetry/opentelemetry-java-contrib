@@ -14,7 +14,7 @@ import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class PerThreadLongLockHandler implements RecordedEventHandler {
+public final class PerThreadLongLockHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = PerThreadLongLockHandler.class.getSimpleName();
   public static final String MONITOR_CLASS = "monitorClass";
   public static final String CLASS = "class";

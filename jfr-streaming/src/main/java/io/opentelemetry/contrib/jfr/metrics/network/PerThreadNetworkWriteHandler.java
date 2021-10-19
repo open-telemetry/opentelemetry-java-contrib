@@ -14,7 +14,7 @@ import io.opentelemetry.contrib.jfr.metrics.Constants;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class PerThreadNetworkWriteHandler implements RecordedEventHandler {
+public final class PerThreadNetworkWriteHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = PerThreadNetworkWriteHandler.class.getSimpleName();
   public static final String BYTES_WRITTEN = "bytesWritten";
   public static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";

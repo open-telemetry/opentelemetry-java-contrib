@@ -10,7 +10,7 @@ import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 
-public class NetworkReadHandler extends AbstractThreadDispatchingHandler {
+public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
   public static final String EVENT_NAME = "jdk.SocketRead";
   private final Meter otelMeter;
 

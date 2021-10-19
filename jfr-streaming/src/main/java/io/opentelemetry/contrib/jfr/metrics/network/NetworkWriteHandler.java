@@ -28,7 +28,7 @@ import io.opentelemetry.contrib.jfr.metrics.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.ThreadGrouper;
 
-public class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
+public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   public static final String EVENT_NAME = "jdk.SocketWrite";
   private final Meter otelMeter;
 

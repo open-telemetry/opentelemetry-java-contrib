@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
-public class OverallCPULoadHandler implements RecordedEventHandler {
+public final class OverallCPULoadHandler implements RecordedEventHandler {
   public static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.CPULoad";
   public static final String JVM_USER = "jvmUser";

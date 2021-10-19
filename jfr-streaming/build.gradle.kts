@@ -65,9 +65,6 @@ tasks {
 
   test {
     useJUnitPlatform()
-    dependsOn(shadowJar)
-
-    jvmArgumentProviders.add(TestArgumentsProvider(shadowJar.get().archiveFile.get().asFile))
   }
 
   named("assemble") {
