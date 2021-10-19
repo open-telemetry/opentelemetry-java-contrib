@@ -15,15 +15,15 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class PerThreadLongLockHandler implements RecordedEventHandler {
-  public static final String SIMPLE_CLASS_NAME = PerThreadLongLockHandler.class.getSimpleName();
-  public static final String MONITOR_CLASS = "monitorClass";
-  public static final String CLASS = "class";
-  public static final String EVENT_THREAD = "eventThread";
-  public static final String DURATION = "duration";
-  public static final String STACK_TRACE = "stackTrace";
-  public static final String JFR_JAVA_MONITOR_WAIT = "JfrJavaMonitorWait";
+  private static final String SIMPLE_CLASS_NAME = PerThreadLongLockHandler.class.getSimpleName();
+  private static final String MONITOR_CLASS = "monitorClass";
+  private static final String CLASS = "class";
+  private static final String EVENT_THREAD = "eventThread";
+  private static final String DURATION = "duration";
+  private static final String STACK_TRACE = "stackTrace";
+  private static final String JFR_JAVA_MONITOR_WAIT = "JfrJavaMonitorWait";
 
-  public static final String HISTOGRAM_NAME = "jfr.JavaMonitorWait.locktime";
+  private static final String HISTOGRAM_NAME = "jfr.JavaMonitorWait.locktime";
   private static final String DESCRIPTION = "Long lock times";
 
   private final String threadName;

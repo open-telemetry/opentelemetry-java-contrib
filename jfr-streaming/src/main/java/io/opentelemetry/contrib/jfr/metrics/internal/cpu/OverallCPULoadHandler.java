@@ -14,14 +14,14 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
-  public static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
-  public static final String EVENT_NAME = "jdk.CPULoad";
-  public static final String JVM_USER = "jvmUser";
-  public static final String JVM_SYSTEM = "jvmSystem";
-  public static final String MACHINE_TOTAL = "machineTotal";
-  public static final String JFR_CPU_LOAD_JVM_USER = "jfr.CPULoad.jvmUser";
-  public static final String JFR_CPU_LOAD_JVM_SYSTEM = "jfr.CPULoad.jvmSystem";
-  public static final String JFR_CPU_LOAD_MACHINE_TOTAL = "jfr.CPULoad.machineTotal";
+  private static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
+  private static final String EVENT_NAME = "jdk.CPULoad";
+  private static final String JVM_USER = "jvmUser";
+  private static final String JVM_SYSTEM = "jvmSystem";
+  private static final String MACHINE_TOTAL = "machineTotal";
+  private static final String JFR_CPU_LOAD_JVM_USER = "jfr.CPULoad.jvmUser";
+  private static final String JFR_CPU_LOAD_JVM_SYSTEM = "jfr.CPULoad.jvmSystem";
+  private static final String JFR_CPU_LOAD_MACHINE_TOTAL = "jfr.CPULoad.machineTotal";
 
   private final Meter otelMeter;
 

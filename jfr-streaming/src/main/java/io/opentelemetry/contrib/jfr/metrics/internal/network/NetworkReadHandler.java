@@ -11,7 +11,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 
 public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
-  public static final String EVENT_NAME = "jdk.SocketRead";
+  static final String EVENT_NAME = "jdk.SocketRead";
   private final Meter otelMeter;
 
   public NetworkReadHandler(Meter otelMeter, ThreadGrouper nameNormalizer) {

@@ -15,10 +15,11 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class PerThreadNetworkWriteHandler implements RecordedEventHandler {
-  public static final String SIMPLE_CLASS_NAME = PerThreadNetworkWriteHandler.class.getSimpleName();
-  public static final String BYTES_WRITTEN = "bytesWritten";
-  public static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";
-  public static final String JFR_SOCKET_WRITE_DURATION = "jfr.SocketWrite.duration";
+  private static final String SIMPLE_CLASS_NAME =
+      PerThreadNetworkWriteHandler.class.getSimpleName();
+  private static final String BYTES_WRITTEN = "bytesWritten";
+  private static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";
+  private static final String JFR_SOCKET_WRITE_DURATION = "jfr.SocketWrite.duration";
   private static final String DESCRIPTION_BYTES = "Bytes Written";
   private static final String DESCRIPTION_DURATION = "Write Duration";
 

@@ -11,8 +11,8 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContainerConfigurationHandler implements RecordedEventHandler {
-  public static final String EVENT_NAME = "jdk.ContainerConfiguration";
-  public static final String JFR_CONTAINER_CONFIGURATION = "jfr.ContainerConfiguration";
+  private static final String EVENT_NAME = "jdk.ContainerConfiguration";
+  private static final String JFR_CONTAINER_CONFIGURATION = "jfr.ContainerConfiguration";
 
   private static final String EFFECTIVE_CPU_COUNT = "effectiveCpuCount";
 

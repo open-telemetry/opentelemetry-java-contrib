@@ -14,7 +14,7 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContextSwitchRateHandler implements RecordedEventHandler {
-  public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
+  private static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
 
   private final Meter otelMeter;
   private volatile double value = 0;

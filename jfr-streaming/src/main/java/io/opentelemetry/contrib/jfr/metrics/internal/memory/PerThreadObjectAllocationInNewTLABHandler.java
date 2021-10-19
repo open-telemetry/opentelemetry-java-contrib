@@ -16,9 +16,8 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates all TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationInNewTLABHandler implements RecordedEventHandler {
-
-  public static final String HISTOGRAM_NAME = "jfr.ObjectAllocationInNewTLAB.allocation";
-  public static final String TLAB_SIZE = "tlabSize";
+  private static final String HISTOGRAM_NAME = "jfr.ObjectAllocationInNewTLAB.allocation";
+  private static final String TLAB_SIZE = "tlabSize";
   private static final String DESCRIPTION = "TLAB Allocation";
 
   private final String threadName;

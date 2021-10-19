@@ -16,9 +16,9 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates all non-TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationOutsideTLABHandler implements RecordedEventHandler {
-  public static final String JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION =
+  private static final String JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION =
       "jfr.ObjectAllocationOutsideTLAB.allocation";
-  public static final String ALLOCATION_SIZE = "allocationSize";
+  private static final String ALLOCATION_SIZE = "allocationSize";
   private static final String DESCRIPTION = "Non-TLAB Allocation";
 
   private final String threadName;

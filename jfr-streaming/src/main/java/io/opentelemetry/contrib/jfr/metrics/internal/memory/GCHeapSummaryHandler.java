@@ -16,17 +16,17 @@ import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  public static final String SIMPLE_CLASS_NAME = GCHeapSummaryHandler.class.getSimpleName();
-  public static final String JFR_GC_HEAP_SUMMARY_DURATION = "jfr.GCHeapSummary.duration";
-  public static final String JFR_GC_HEAP_SUMMARY_HEAP_USED = "jfr.GCHeapSummary.heapUsed";
-  public static final String JFR_GC_HEAP_SUMMARY_COMMITTED = "jfr.GCHeapSummary.heapCommitted";
-  public static final String EVENT_NAME = "jdk.GCHeapSummary";
-  public static final String BEFORE = "Before GC";
-  public static final String AFTER = "After GC";
-  public static final String GC_ID = "gcId";
-  public static final String WHEN = "when";
-  public static final String HEAP_USED = "heapUsed";
-  public static final String HEAP_SPACE = "heapSpace";
+  private static final String SIMPLE_CLASS_NAME = GCHeapSummaryHandler.class.getSimpleName();
+  private static final String JFR_GC_HEAP_SUMMARY_DURATION = "jfr.GCHeapSummary.duration";
+  private static final String JFR_GC_HEAP_SUMMARY_HEAP_USED = "jfr.GCHeapSummary.heapUsed";
+  private static final String JFR_GC_HEAP_SUMMARY_COMMITTED = "jfr.GCHeapSummary.heapCommitted";
+  private static final String EVENT_NAME = "jdk.GCHeapSummary";
+  private static final String BEFORE = "Before GC";
+  private static final String AFTER = "After GC";
+  private static final String GC_ID = "gcId";
+  private static final String WHEN = "when";
+  private static final String HEAP_USED = "heapUsed";
+  private static final String HEAP_SPACE = "heapSpace";
   private static final String DESCRIPTION = "GC Duration";
   private static final String COMMITTED_SIZE = "committedSize";
 

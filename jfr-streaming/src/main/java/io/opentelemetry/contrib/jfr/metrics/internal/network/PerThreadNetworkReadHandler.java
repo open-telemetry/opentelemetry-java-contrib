@@ -19,9 +19,9 @@ public final class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private static final String DESCRIPTION_DURATION = "Read Duration";
   private final String threadName;
 
-  public static final String JFR_SOCKET_READ_DURATION = "jfr.SocketRead.duration";
-  public static final String JFR_SOCKET_READ_BYTES_READ = "jfr.SocketRead.bytesRead";
-  public static final String BYTES_READ = "bytesRead";
+  private static final String JFR_SOCKET_READ_DURATION = "jfr.SocketRead.duration";
+  private static final String JFR_SOCKET_READ_BYTES_READ = "jfr.SocketRead.bytesRead";
+  private static final String BYTES_READ = "bytesRead";
   private final Meter otelMeter;
   private BoundDoubleHistogram bytesHistogram;
   private BoundDoubleHistogram durationHistogram;

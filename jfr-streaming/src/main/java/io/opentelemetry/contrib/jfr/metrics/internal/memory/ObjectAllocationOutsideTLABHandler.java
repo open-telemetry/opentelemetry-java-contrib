@@ -15,8 +15,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
  * per-thread aggregators
  */
 public final class ObjectAllocationOutsideTLABHandler extends AbstractThreadDispatchingHandler {
-
-  public static final String EVENT_NAME = "jdk.ObjectAllocationOutsideTLAB";
+  static final String EVENT_NAME = "jdk.ObjectAllocationOutsideTLAB";
   private final Meter otelMeter;
 
   public ObjectAllocationOutsideTLABHandler(Meter otelMeter, ThreadGrouper grouper) {
