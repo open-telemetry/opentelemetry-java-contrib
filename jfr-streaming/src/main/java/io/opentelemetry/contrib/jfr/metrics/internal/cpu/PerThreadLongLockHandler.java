@@ -5,12 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
-
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -23,32 +18,17 @@ public final class PerThreadLongLockHandler implements RecordedEventHandler {
   private static final String STACK_TRACE = "stackTrace";
   private static final String JFR_JAVA_MONITOR_WAIT = "JfrJavaMonitorWait";
 
-  private static final String HISTOGRAM_NAME = "jfr.JavaMonitorWait.locktime";
-  private static final String DESCRIPTION = "Long lock times";
-
   private final String threadName;
-  private final Meter otelMeter;
+  private final BoundDoubleHistogram histogram;
 
-  private BoundDoubleHistogram histogram;
-
-  public PerThreadLongLockHandler(Meter otelMeter, String threadName) {
+  public PerThreadLongLockHandler(BoundDoubleHistogram histogram, String threadName) {
     this.threadName = threadName;
-    this.otelMeter = otelMeter;
+    this.histogram = histogram;
   }
 
   @Override
   public String getEventName() {
     return LongLockHandler.EVENT_NAME;
-  }
-
-  @Override
-  public RecordedEventHandler init() {
-    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
-    var builder = otelMeter.histogramBuilder(HISTOGRAM_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(Constants.MILLISECONDS);
-    histogram = builder.build().bind(attr);
-    return this;
   }
 
   @Override

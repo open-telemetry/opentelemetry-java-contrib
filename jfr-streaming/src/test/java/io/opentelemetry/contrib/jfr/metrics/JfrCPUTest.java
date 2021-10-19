@@ -22,13 +22,10 @@ public class JfrCPUTest extends AbstractMetricsTest {
 
     waitAndAssertMetrics(
         metric ->
-            metric
-                .hasName("jfr.JavaMonitorWait.locktime")
-                .hasUnit(MILLISECONDS)
-                .hasDoubleHistogram(),
+            metric.hasName("runtime.jvm.longlock.time").hasUnit(MILLISECONDS).hasDoubleHistogram(),
         metric ->
             metric
-                .hasName("jfr.G1GarbageCollection.duration")
+                .hasName("jvm.runtime.gc.time")
                 .hasUnit(MILLISECONDS)
                 .hasDoubleHistogram()
                 .points()

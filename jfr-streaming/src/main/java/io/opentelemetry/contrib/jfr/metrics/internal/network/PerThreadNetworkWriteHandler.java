@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.network;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_NETWORK_MODE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.WRITE;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -18,8 +20,9 @@ public final class PerThreadNetworkWriteHandler implements RecordedEventHandler 
   private static final String SIMPLE_CLASS_NAME =
       PerThreadNetworkWriteHandler.class.getSimpleName();
   private static final String BYTES_WRITTEN = "bytesWritten";
-  private static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";
-  private static final String JFR_SOCKET_WRITE_DURATION = "jfr.SocketWrite.duration";
+  private static final String DURATION_METRIC_NAME = "runtime.jvm.network.duration";
+  private static final String WRITE_METRIC_NAME = "runtime.jvm.network.io";
+
   private static final String DESCRIPTION_BYTES = "Bytes Written";
   private static final String DESCRIPTION_DURATION = "Write Duration";
 
@@ -35,14 +38,14 @@ public final class PerThreadNetworkWriteHandler implements RecordedEventHandler 
   }
 
   public PerThreadNetworkWriteHandler init() {
-    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
+    var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, WRITE);
 
-    var builder = otelMeter.histogramBuilder(JFR_SOCKET_WRITE_BYTES_WRITTEN);
+    var builder = otelMeter.histogramBuilder(WRITE_METRIC_NAME);
     builder.setDescription(DESCRIPTION_BYTES);
     builder.setUnit(Constants.KILOBYTES);
     bytesHistogram = builder.build().bind(attr);
 
-    builder = otelMeter.histogramBuilder(JFR_SOCKET_WRITE_DURATION);
+    builder = otelMeter.histogramBuilder(DURATION_METRIC_NAME);
     builder.setDescription(DESCRIPTION_DURATION);
     builder.setUnit(Constants.MILLISECONDS);
     durationHistogram = builder.build().bind(attr);
