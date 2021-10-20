@@ -301,7 +301,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
@@ -434,7 +434,7 @@ class InstrumenterHelperTest {
 
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
-      assertThat(meterProvider.collectAllMetrics())
+      assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
               metric ->
                   assertThat(metric)
