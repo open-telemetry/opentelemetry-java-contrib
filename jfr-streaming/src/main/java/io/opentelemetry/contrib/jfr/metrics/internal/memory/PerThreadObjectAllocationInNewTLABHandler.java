@@ -19,7 +19,7 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class PerThreadObjectAllocationInNewTLABHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.tlab.allocations";
   private static final String TLAB_SIZE = "tlabSize";
-  private static final String DESCRIPTION = "TLAB Allocation";
+  private static final String DESCRIPTION = "Allocation";
   private static final String TLAB = "TLAB";
 
   private final String threadName;

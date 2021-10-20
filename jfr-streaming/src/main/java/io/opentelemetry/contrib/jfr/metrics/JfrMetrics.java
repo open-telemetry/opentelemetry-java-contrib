@@ -14,9 +14,7 @@ import java.util.logging.Logger;
 import jdk.jfr.EventSettings;
 import jdk.jfr.consumer.RecordingStream;
 
-/**
- * The entry point class for the JFR-over-OpenTelemetry support.
- */
+/** The entry point class for the JFR-over-OpenTelemetry support. */
 public final class JfrMetrics {
   private JfrMetrics() {}
 
@@ -26,7 +24,8 @@ public final class JfrMetrics {
    * Enables and starts a JFR recording stream on a background thread. The thread converts a subset
    * of JFR events to OpenTelemetry metrics.
    *
-   * @param meterProvider - the OpenTelemetry metric provider that will harvest the generated metrics.
+   * @param meterProvider - the OpenTelemetry metric provider that will harvest the generated
+   *     metrics.
    */
   public static void enable(MeterProvider meterProvider) {
     var jfrMonitorService = Executors.newSingleThreadExecutor();
