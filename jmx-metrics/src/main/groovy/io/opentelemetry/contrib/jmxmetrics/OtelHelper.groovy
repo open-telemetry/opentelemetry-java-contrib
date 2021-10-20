@@ -59,6 +59,18 @@ class OtelHelper {
     }
 
     /**
+     * Returns a fetched, potentially multi-{@link GroovyMBean} {@link MBeanHelper} for a given object name String.
+     * @param objNameStr - the {@link String} representation of an object name or pattern, to be
+     * used as the argument to the basic {@link javax.management.ObjectName} constructor for the JmxClient query.
+     * @return a {@link MBeanHelper} that operates over all resulting {@link GroovyMBean} instances.
+     */
+    MBeanHelper mbeans(List<String> objNameStrs) {
+        def mbeanHelper = new MBeanHelper(jmxClient, objNameStrs)
+        mbeanHelper.fetch()
+        return mbeanHelper
+    }
+
+    /**
      * Returns a fetched, single {@link GroovyMBean} {@link MBeanHelper} for a given object name String.
      * @param objNameStr - the {@link String} representation of an object name or pattern, to be
      * used as the argument to the basic {@link javax.management.ObjectName} constructor for the JmxClient query.

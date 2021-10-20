@@ -33,14 +33,20 @@ class MBeanHelper {
 
     private final JmxClient jmxClient
     private final boolean isSingle
-    private final String objectName
+    private final List<String> objectNames
 
     private List<GroovyMBean> mbeans
 
     MBeanHelper(JmxClient jmxClient, String objectName, boolean isSingle) {
         this.jmxClient = jmxClient
-        this.objectName = objectName
+        this.objectNames = Collections.unmodifiableList([objectName])
         this.isSingle = isSingle
+    }
+
+    MBeanHelper(JmxClient jmxClient, List<String> objectNames) {
+        this.jmxClient = jmxClient
+        this.objectNames = Collections.unmodifiableList(objectNames)
+        this.isSingle = false
     }
 
     @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
@@ -54,11 +60,15 @@ class MBeanHelper {
     }
 
     void fetch() {
-        mbeans = queryJmx(jmxClient, objectName)
-        if (mbeans.size() == 0) {
-            logger.warning("Failed to fetch MBean ${objectName}.")
-        } else {
-            logger.fine("Fetched ${mbeans.size()} MBeans - ${mbeans}")
+        this.mbeans = []
+        for(objectName in objectNames){
+            def tmpMbeans = queryJmx(jmxClient, objectName)
+            if (tmpMbeans.size() == 0) {
+                logger.warning("Failed to fetch MBean ${objectName}.")
+            } else {
+                this.mbeans.addAll(tmpMbeans)
+                logger.fine("Fetched ${tmpMbeans.size()} MBeans - ${tmpMbeans}")
+            }
         }
     }
 
