@@ -22,7 +22,7 @@ repositories {
   mavenLocal()
 }
 
-val groovyVersion = "2.5.11"
+val groovyVersion = "3.0.8"
 
 testSets {
   create("integrationTest")
@@ -55,11 +55,8 @@ dependencies {
   testImplementation("io.grpc:grpc-protobuf")
   testImplementation("io.grpc:grpc-stub")
   testImplementation("io.grpc:grpc-testing")
-  testImplementation("org.codehaus.groovy:groovy-test")
   testImplementation("org.junit-pioneer:junit-pioneer")
-  testImplementation("io.rest-assured:rest-assured:4.2.0")
   testImplementation("org.awaitility:awaitility")
-  testImplementation("org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1")
   testImplementation("org.testcontainers:testcontainers")
   testImplementation("io.opentelemetry:opentelemetry-proto")
 

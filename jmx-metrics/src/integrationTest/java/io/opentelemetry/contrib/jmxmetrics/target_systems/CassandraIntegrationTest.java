@@ -161,7 +161,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.storage.load.count",
                 "Size of the on disk data size this node manages",
-                "by"),
+                "by",
+                false),
         metric ->
             assertSum(
                 metric,
@@ -173,6 +174,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.storage.total_hints.in_progress.count",
                 "Number of hints attempting to be sent currently",
-                "1"));
+                "1",
+                false));
   }
 }
