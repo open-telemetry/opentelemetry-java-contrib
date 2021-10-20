@@ -22,12 +22,9 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
-import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -36,9 +33,6 @@ public class GroovyMetricEnvironment {
 
   private final SdkMeterProvider meterProvider;
   private final Meter meter;
-
-  // will only be `inmemory` since otel-java autoconfigure sdk extension manages other exporters
-  private MetricExporter exporter;
 
   // Observer updaters can only be specified in the builder as of v0.13.0, so to work with our model
   // of running groovy scripts on an interval a reference to the desired updater should be held and
@@ -84,7 +78,6 @@ public class GroovyMetricEnvironment {
         break;
       default: // inmemory fallback
         meterProvider = SdkMeterProvider.builder().buildAndRegisterGlobal();
-        exporter = InMemoryMetricExporter.create();
     }
 
     meter = meterProvider.get(instrumentationName, instrumentationVersion, null);
@@ -109,11 +102,8 @@ public class GroovyMetricEnvironment {
   }
 
   /** Will collect all metrics from OpenTelemetrySdk and export via configured exporter. */
-  public void exportMetrics() {
-    if (exporter != null) {
-      Collection<MetricData> md = meterProvider.collectAllMetrics();
-      exporter.export(md);
-    }
+  public void flush() {
+    meterProvider.forceFlush().join(10, TimeUnit.SECONDS);
   }
 
   protected static Attributes mapToAttributes(@Nullable final Map<String, String> labelMap) {

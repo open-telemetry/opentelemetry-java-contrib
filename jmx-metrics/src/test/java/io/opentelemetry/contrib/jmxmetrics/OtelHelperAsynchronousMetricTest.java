@@ -11,6 +11,7 @@ import static io.opentelemetry.sdk.testing.assertj.metrics.MetricAssertions.asse
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
 import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,14 @@ class OtelHelperAsynchronousMetricTest {
 
   // Will eventually be replaced with Jupiter extension in sdk-testing
   private SdkMeterProvider meterProvider;
+  private InMemoryMetricReader metricReader;
 
   private OtelHelper otel;
 
   @BeforeEach
   void setUp() {
-    meterProvider = SdkMeterProvider.builder().build();
+    metricReader = new InMemoryMetricReader();
+    meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     otel = new OtelHelper(null, new GroovyMetricEnvironment(meterProvider, "otel.test"));
   }
 
@@ -55,7 +58,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -121,7 +124,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "double",
         result -> result.observe(20.2, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleCounterCallback(
         "dc",
@@ -131,7 +134,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "double",
         result -> result.observe(40.4, Attributes.builder().put("key4", "value4").build()));
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(
@@ -192,7 +195,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -258,7 +261,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(20, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longCounterCallback(
         "dc",
@@ -268,7 +271,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(
@@ -330,7 +333,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -396,7 +399,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "double",
         result -> result.observe(-20.2, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleUpDownCounterCallback(
         "dc",
@@ -406,7 +409,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "double",
         result -> result.observe(40.4, Attributes.builder().put("key4", "value4").build()));
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(
@@ -467,7 +470,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -533,7 +536,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(-20, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longUpDownCounterCallback(
         "dc",
@@ -543,7 +546,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(
@@ -605,7 +608,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -671,7 +674,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "double",
         result -> result.observe(20.2, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleValueCallback(
         "dc",
@@ -684,7 +687,7 @@ class OtelHelperAsynchronousMetricTest {
           result.observe(40.4, Attributes.builder().put("key4", "value4").build());
           result.observe(50.5, Attributes.builder().put("key2", "value2").build());
         });
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(
@@ -750,7 +753,7 @@ class OtelHelperAsynchronousMetricTest {
             result.observe(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
-    assertThat(meterProvider.collectAllMetrics())
+    assertThat(metricReader.collectAllMetrics())
         .satisfiesExactlyInAnyOrder(
             metric ->
                 assertThat(metric)
@@ -816,7 +819,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(20, Attributes.builder().put("key2", "value2").build()));
-    Collection<MetricData> firstMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longValueCallback(
         "dc",
@@ -826,7 +829,7 @@ class OtelHelperAsynchronousMetricTest {
         "dc",
         "long",
         result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
-    Collection<MetricData> secondMetrics = meterProvider.collectAllMetrics();
+    Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
         .satisfiesExactly(

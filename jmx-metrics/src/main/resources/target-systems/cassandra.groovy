@@ -30,7 +30,7 @@ otel.instrument(clientRequestRangeSliceLatency,
 
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.count",
-        "Total token range read request latency", "µs", "Count",
+        "Number of token range read request operations", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestRangeSliceLatency,
@@ -64,7 +64,7 @@ otel.instrument(clientRequestReadLatency,
 
 otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.count",
-        "Total standard read request latency", "µs", "Count",
+        "Number of standard read request operations", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestReadLatency,
@@ -98,7 +98,7 @@ otel.instrument(clientRequestWriteLatency,
 
 otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.count",
-        "Total regular write request latency", "µs", "Count",
+        "Number of regular write request operations", "1", "Count",
         otel.&longCounterCallback)
 
 otel.instrument(clientRequestWriteLatency,
@@ -123,7 +123,7 @@ def storageLoad = otel.mbean("${storage},name=Load")
 otel.instrument(storageLoad,
         "cassandra.storage.load.count",
         "Size of the on disk data size this node manages", "by", "Count",
-        otel.&longCounterCallback)
+        otel.&longUpDownCounterCallback)
 
 def storageTotalHints = otel.mbean("${storage},name=TotalHints")
 otel.instrument(storageTotalHints,
@@ -135,7 +135,7 @@ def storageTotalHintsInProgress = otel.mbean("${storage},name=TotalHintsInProgre
 otel.instrument(storageTotalHintsInProgress,
         "cassandra.storage.total_hints.in_progress.count",
         "Number of hints attempting to be sent currently", "1", "Count",
-        otel.&longCounterCallback)
+        otel.&longUpDownCounterCallback)
 
 def compaction = "${cassandraMetrics}:type=Compaction"
 def compactionPendingTasks = otel.mbean("${compaction},name=PendingTasks")
