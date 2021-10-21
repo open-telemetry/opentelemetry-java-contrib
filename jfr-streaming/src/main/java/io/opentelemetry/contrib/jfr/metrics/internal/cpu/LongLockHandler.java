@@ -19,7 +19,7 @@ import java.util.Optional;
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   static final String EVENT_NAME = "jdk.JavaMonitorWait";
   private final Meter otelMeter;
-  private static final String HISTOGRAM_NAME = "runtime.jvm.longlock.time";
+  private static final String METRIC_NAME = "runtime.jvm.longlock.time";
   private static final String DESCRIPTION = "Long lock times";
 
   public LongLockHandler(Meter otelMeter, ThreadGrouper grouper) {
@@ -35,7 +35,7 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   @Override
   public RecordedEventHandler createPerThreadSummarizer(String threadName) {
     var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
-    var builder = otelMeter.histogramBuilder(HISTOGRAM_NAME);
+    var builder = otelMeter.histogramBuilder(METRIC_NAME);
     builder.setDescription(DESCRIPTION);
     builder.setUnit(Constants.MILLISECONDS);
     var histogram = builder.build().bind(attr);

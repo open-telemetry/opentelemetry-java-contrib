@@ -21,7 +21,7 @@ public final class PerThreadNetworkReadHandler implements RecordedEventHandler {
   private static final String DESCRIPTION_DURATION = "Read Duration";
   private final String threadName;
 
-  private static final String DURATION_METRIC_NAME = "runtime.jvm.network.duration";
+  private static final String METRIC_NAME_DURATION = "runtime.jvm.network.duration";
   private static final String METRIC_NAME = "runtime.jvm.network.io";
   private static final String BYTES_READ = "bytesRead";
   private final Meter otelMeter;
@@ -41,7 +41,7 @@ public final class PerThreadNetworkReadHandler implements RecordedEventHandler {
     builder.setUnit(Constants.KILOBYTES);
     bytesHistogram = builder.build().bind(attr);
 
-    builder = otelMeter.histogramBuilder(DURATION_METRIC_NAME);
+    builder = otelMeter.histogramBuilder(METRIC_NAME_DURATION);
     builder.setDescription(DESCRIPTION_DURATION);
     builder.setUnit(Constants.MILLISECONDS);
     durationHistogram = builder.build().bind(attr);
