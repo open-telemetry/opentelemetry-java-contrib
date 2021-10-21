@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -201,51 +202,39 @@ public abstract class AbstractIntegrationTest {
     return version;
   }
 
-  @SuppressWarnings("unchecked")
   private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
-    assertThat(points)
-        .satisfiesExactlyInAnyOrder(
-            types.stream()
-                .map(
-                    type ->
-                        (Consumer<NumberDataPoint>)
-                            point ->
-                                assertThat(point.getAttributesList())
-                                    .singleElement()
-                                    .satisfies(
-                                        attribute -> {
-                                          assertThat(attribute.getKey()).isEqualTo("name");
-                                          assertThat(attribute.getValue().getStringValue())
-                                              .isEqualTo(type);
-                                        }))
-                .toArray(Consumer[]::new));
+    List<Map<String, String>> expectedAttributes =
+        types.stream()
+            .map(
+                type ->
+                    new HashMap<String, String>() {
+                      {
+                        put("name", type);
+                      }
+                    })
+            .collect(Collectors.toList());
+
+    assertAttributedPoints(points, expectedAttributes);
   }
 
   @SuppressWarnings("unchecked")
   private static void assertAttributedPoints(
       List<NumberDataPoint> points, List<Map<String, String>> attributeGroups) {
     assertThat(points)
+        .extracting(
+            numberDataPoint ->
+                numberDataPoint.getAttributesList().stream()
+                    .collect(
+                        Collectors.toMap(
+                            KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
         .satisfiesExactlyInAnyOrder(
             attributeGroups.stream()
                 .map(
-                    attributeGroup ->
-                        (Consumer<NumberDataPoint>)
-                            point ->
-                                assertThat(point.getAttributesList())
-                                    .satisfies(
-                                        list -> {
-                                          Map<String, String> pointAttributes =
-                                              list.stream()
-                                                  .collect(
-                                                      Collectors.toMap(
-                                                          KeyValue::getKey,
-                                                          keyValue ->
-                                                              keyValue
-                                                                  .getValue()
-                                                                  .getStringValue()));
-                                          assertThat(pointAttributes)
-                                              .containsExactlyInAnyOrderEntriesOf(attributeGroup);
-                                        }))
+                    expected ->
+                        (Consumer<Map<String, String>>)
+                            pointAttributes ->
+                                assertThat(pointAttributes)
+                                    .containsExactlyInAnyOrderEntriesOf(expected))
                 .toArray(Consumer[]::new));
   }
 
