@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -134,8 +133,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "cassandra.client.request.count",
                 "Number of requests",
                 "1",
-                getRequestCountAttributes()
-            ));
+                getRequestCountAttributes()));
   }
 
   private List<Map<String, String>> getRequestCountAttributes() {
@@ -143,11 +141,17 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
     List<String> statuses = Arrays.asList("All", "Timeout", "Failure", "Unavailable");
 
     return operations.stream()
-          .flatMap(op -> statuses.stream().map(st ->
-              new HashMap<String, String>() {{
-                  put("operation", op);
-                  put("status", st);
-              }}
-          )).collect(Collectors.toList());
+        .flatMap(
+            op ->
+                statuses.stream()
+                    .map(
+                        st ->
+                            new HashMap<String, String>() {
+                              {
+                                put("operation", op);
+                                put("status", st);
+                              }
+                            }))
+        .collect(Collectors.toList());
   }
 }

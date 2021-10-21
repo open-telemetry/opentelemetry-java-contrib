@@ -182,7 +182,11 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected void assertSumWithAttributes(
-      Metric metric, String name, String description, String unit, List<Map<String, String>> attributeGroups) {
+      Metric metric,
+      String name,
+      String description,
+      String unit,
+      List<Map<String, String>> attributeGroups) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
@@ -218,7 +222,8 @@ public abstract class AbstractIntegrationTest {
   }
 
   @SuppressWarnings("unchecked")
-  private static void assertAttributedPoints(List<NumberDataPoint> points, List<Map<String, String>> attributeGroups) {
+  private static void assertAttributedPoints(
+      List<NumberDataPoint> points, List<Map<String, String>> attributeGroups) {
     assertThat(points)
         .satisfiesExactlyInAnyOrder(
             attributeGroups.stream()
@@ -229,8 +234,17 @@ public abstract class AbstractIntegrationTest {
                                 assertThat(point.getAttributesList())
                                     .satisfies(
                                         list -> {
-                                          Map<String, String> pointAttributes = list.stream().collect(Collectors.toMap(KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue()));
-                                          assertThat(pointAttributes).containsExactlyInAnyOrderEntriesOf(attributeGroup);
+                                          Map<String, String> pointAttributes =
+                                              list.stream()
+                                                  .collect(
+                                                      Collectors.toMap(
+                                                          KeyValue::getKey,
+                                                          keyValue ->
+                                                              keyValue
+                                                                  .getValue()
+                                                                  .getStringValue()));
+                                          assertThat(pointAttributes)
+                                              .containsExactlyInAnyOrderEntriesOf(attributeGroup);
                                         }))
                 .toArray(Consumer[]::new));
   }
