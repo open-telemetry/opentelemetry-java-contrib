@@ -27,8 +27,6 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
   private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
 
-  //  private static final String JFR_GC_HEAP_SUMMARY_HEAP_USED = "jfr.GCHeapSummary.heapUsed";
-  //  private static final String JFR_GC_HEAP_SUMMARY_COMMITTED = "jfr.GCHeapSummary.heapCommitted";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
