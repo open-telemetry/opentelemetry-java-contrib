@@ -18,8 +18,8 @@ import jdk.jfr.consumer.RecordedEvent;
 /** This class aggregates the duration of G1 Garbage Collection JFR events */
 public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   private static final String EVENT_NAME = "jdk.G1GarbageCollection";
-  private static final String METRIC_NAME = "jvm.runtime.gc.time";
-  private static final String DESCRIPTION = "G1 GC Duration";
+  private static final String METRIC_NAME = "runtime.jvm.gc.duration";
+  private static final String DESCRIPTION = "GC Duration";
 
   private final Meter otelMeter;
   private BoundDoubleHistogram gcHistogram;

@@ -19,7 +19,7 @@ import java.util.Optional;
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   static final String EVENT_NAME = "jdk.JavaMonitorWait";
   private final Meter otelMeter;
-  private static final String METRIC_NAME = "runtime.jvm.longlock.time";
+  private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
   private static final String DESCRIPTION = "Long lock times";
 
   public LongLockHandler(Meter otelMeter, ThreadGrouper grouper) {
