@@ -126,7 +126,7 @@ otel.instrument(clientRequests,
     "status" : {
       mbean -> switch(mbean.name().getKeyProperty("name")) {
         case "Latency":
-          return "All"
+          return "Ok"
           break
         case "Unavailables":
           return "Unavailable"

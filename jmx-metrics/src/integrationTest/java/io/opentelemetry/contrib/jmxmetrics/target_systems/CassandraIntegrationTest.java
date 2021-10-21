@@ -138,7 +138,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
 
   private List<Map<String, String>> getRequestCountAttributes() {
     List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
-    List<String> statuses = Arrays.asList("All", "Timeout", "Failure", "Unavailable");
+    List<String> statuses = Arrays.asList("Ok", "Timeout", "Failure", "Unavailable");
 
     return operations.stream()
         .flatMap(
