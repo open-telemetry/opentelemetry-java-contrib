@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_ARENA_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_ALLOCATION;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -17,7 +18,6 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates all non-TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationOutsideTLABHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME = "runtime.jvm.tlab.allocations";
   private static final String ALLOCATION_SIZE = "allocationSize";
   private static final String DESCRIPTION = "Allocation";
   private static final String MAIN = "Main";
@@ -33,7 +33,7 @@ public final class PerThreadObjectAllocationOutsideTLABHandler implements Record
 
   public PerThreadObjectAllocationOutsideTLABHandler init() {
     var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_ARENA_NAME, MAIN);
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
+    var builder = otelMeter.histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION);
     builder.setDescription(DESCRIPTION);
     builder.setUnit(Constants.KILOBYTES);
     histogram = builder.build().bind(attr);

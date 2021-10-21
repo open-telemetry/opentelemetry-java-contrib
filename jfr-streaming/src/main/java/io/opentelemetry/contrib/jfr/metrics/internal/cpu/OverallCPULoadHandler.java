@@ -5,8 +5,15 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_CPU_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ONE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SYSTEM;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
@@ -18,38 +25,38 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
   private static final String MACHINE_TOTAL = "machineTotal";
-  private static final String JFR_CPU_LOAD_JVM_USER = "jfr.CPULoad.jvmUser";
-  private static final String JFR_CPU_LOAD_JVM_SYSTEM = "jfr.CPULoad.jvmSystem";
-  private static final String JFR_CPU_LOAD_MACHINE_TOTAL = "jfr.CPULoad.machineTotal";
+
+  private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
+  private static final String DESCRIPTION = "CPU Utilization";
 
   private final Meter otelMeter;
-
-  private volatile double userValue = 0;
-  private volatile double systemValue = 0;
-  private volatile double machineTotal = 0;
+  private BoundDoubleHistogram userHistogram;
+  private BoundDoubleHistogram systemHistogram;
+  private BoundDoubleHistogram machineHistogram;
 
   public OverallCPULoadHandler(Meter otelMeter) {
     this.otelMeter = otelMeter;
   }
 
+  @Override
   public OverallCPULoadHandler init() {
-    otelMeter
-        .upDownCounterBuilder(JFR_CPU_LOAD_JVM_USER)
-        .ofDoubles()
-        .setUnit(Constants.PERCENTAGE)
-        .buildWithCallback(codm -> codm.observe(userValue));
+    var attr = Attributes.of(ATTR_CPU_USAGE, USER);
+    var builder = otelMeter.histogramBuilder(METRIC_NAME);
+    builder.setDescription(DESCRIPTION);
+    builder.setUnit(ONE);
+    userHistogram = builder.build().bind(attr);
 
-    otelMeter
-        .upDownCounterBuilder(JFR_CPU_LOAD_JVM_SYSTEM)
-        .ofDoubles()
-        .setUnit(Constants.PERCENTAGE)
-        .buildWithCallback(codm -> codm.observe(systemValue));
+    attr = Attributes.of(ATTR_CPU_USAGE, SYSTEM);
+    builder = otelMeter.histogramBuilder(METRIC_NAME);
+    builder.setDescription(DESCRIPTION);
+    builder.setUnit(ONE);
+    systemHistogram = builder.build().bind(attr);
 
-    otelMeter
-        .upDownCounterBuilder(JFR_CPU_LOAD_MACHINE_TOTAL)
-        .ofDoubles()
-        .setUnit(Constants.PERCENTAGE)
-        .buildWithCallback(codm -> codm.observe(machineTotal));
+    attr = Attributes.of(ATTR_CPU_USAGE, MACHINE);
+    builder = otelMeter.histogramBuilder(METRIC_NAME);
+    builder.setDescription(DESCRIPTION);
+    builder.setUnit(ONE);
+    machineHistogram = builder.build().bind(attr);
 
     return this;
   }
@@ -57,13 +64,13 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   @Override
   public void accept(RecordedEvent ev) {
     if (ev.hasField(JVM_USER)) {
-      userValue = ev.getDouble(JVM_USER);
+      userHistogram.record(ev.getDouble(JVM_USER));
     }
     if (ev.hasField(JVM_SYSTEM)) {
-      systemValue = ev.getDouble(JVM_SYSTEM);
+      systemHistogram.record(ev.getDouble(JVM_SYSTEM));
     }
     if (ev.hasField(MACHINE_TOTAL)) {
-      machineTotal = ev.getDouble(MACHINE_TOTAL);
+      machineHistogram.record(ev.getDouble(MACHINE_TOTAL));
     }
   }
 
