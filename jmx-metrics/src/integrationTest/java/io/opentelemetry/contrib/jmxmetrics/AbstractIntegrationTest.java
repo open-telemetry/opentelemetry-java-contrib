@@ -16,6 +16,7 @@ import io.grpc.stub.StreamObserver;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
@@ -23,7 +24,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
@@ -179,6 +182,19 @@ public abstract class AbstractIntegrationTest {
     assertTypedPoints(metric.getSum().getDataPointsList(), types);
   }
 
+  protected void assertSumWithAttributes(
+      Metric metric,
+      String name,
+      String description,
+      String unit,
+      List<Map<String, String>> attributeGroups) {
+    assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getDescription()).isEqualTo(description);
+    assertThat(metric.getUnit()).isEqualTo(unit);
+    assertThat(metric.hasSum()).isTrue();
+    assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroups);
+  }
+
   private static final String expectedMeterVersion() {
     // Automatically set by gradle when running the tests
     String version = System.getProperty("gradle.project.version");
@@ -186,23 +202,39 @@ public abstract class AbstractIntegrationTest {
     return version;
   }
 
-  @SuppressWarnings("unchecked")
   private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
+    List<Map<String, String>> expectedAttributes =
+        types.stream()
+            .map(
+                type ->
+                    new HashMap<String, String>() {
+                      {
+                        put("name", type);
+                      }
+                    })
+            .collect(Collectors.toList());
+
+    assertAttributedPoints(points, expectedAttributes);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void assertAttributedPoints(
+      List<NumberDataPoint> points, List<Map<String, String>> attributeGroups) {
     assertThat(points)
+        .extracting(
+            numberDataPoint ->
+                numberDataPoint.getAttributesList().stream()
+                    .collect(
+                        Collectors.toMap(
+                            KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
         .satisfiesExactlyInAnyOrder(
-            types.stream()
+            attributeGroups.stream()
                 .map(
-                    type ->
-                        (Consumer<NumberDataPoint>)
-                            point ->
-                                assertThat(point.getAttributesList())
-                                    .singleElement()
-                                    .satisfies(
-                                        attribute -> {
-                                          assertThat(attribute.getKey()).isEqualTo("name");
-                                          assertThat(attribute.getValue().getStringValue())
-                                              .isEqualTo(type);
-                                        }))
+                    expected ->
+                        (Consumer<Map<String, String>>)
+                            pointAttributes ->
+                                assertThat(pointAttributes)
+                                    .containsExactlyInAnyOrderEntriesOf(expected))
                 .toArray(Consumer[]::new));
   }
 
