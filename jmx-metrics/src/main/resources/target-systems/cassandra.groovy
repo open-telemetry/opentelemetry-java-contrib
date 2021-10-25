@@ -104,30 +104,39 @@ otel.instrument(compactionCompletedTasks,
 
 def clientRequests = otel.mbeans([
   "${clientRequestRangeSlice},name=Latency",
+  "${clientRequestRead},name=Latency",
+  "${clientRequestWrite},name=Latency",
+])
+
+otel.instrument(clientRequests,
+  "cassandra.client.request.count",
+  "Number of requests by operation",
+  "1",
+  [
+    "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
+  ],
+  "Count", otel.&longCounterCallback)
+
+def clientRequestErrors = otel.mbeans([
   "${clientRequestRangeSlice},name=Unavailables",
   "${clientRequestRangeSlice},name=Timeouts",
   "${clientRequestRangeSlice},name=Failures",
-  "${clientRequestRead},name=Latency",
   "${clientRequestRead},name=Unavailables",
   "${clientRequestRead},name=Timeouts",
   "${clientRequestRead},name=Failures",
-  "${clientRequestWrite},name=Latency",
   "${clientRequestWrite},name=Unavailables",
   "${clientRequestWrite},name=Timeouts",
   "${clientRequestWrite},name=Failures",
 ])
 
-otel.instrument(clientRequests,
-  "cassandra.client.request.count",
-  "Number of requests",
+otel.instrument(clientRequestErrors,
+  "cassandra.client.request.error.count",
+  "Number of request errors by operation",
   "1",
   [
     "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
     "status" : {
       mbean -> switch(mbean.name().getKeyProperty("name")) {
-        case "Latency":
-          return "Ok"
-          break
         case "Unavailables":
           return "Unavailable"
           break

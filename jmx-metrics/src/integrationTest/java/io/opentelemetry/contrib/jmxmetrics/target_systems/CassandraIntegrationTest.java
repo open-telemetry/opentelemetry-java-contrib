@@ -131,14 +131,35 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
             assertSumWithAttributes(
                 metric,
                 "cassandra.client.request.count",
-                "Number of requests",
+                "Number of requests by operation",
                 "1",
-                getRequestCountAttributes()));
+                getRequestCountAttributes()),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "cassandra.client.request.error.count",
+                "Number of request errors by operation",
+                "1",
+                getRequestErrorCountAttributes()));
   }
 
   private List<Map<String, String>> getRequestCountAttributes() {
     List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
-    List<String> statuses = Arrays.asList("Ok", "Timeout", "Failure", "Unavailable");
+
+    return operations.stream()
+        .map(
+            op ->
+                new HashMap<String, String>() {
+                  {
+                    put("operation", op);
+                  }
+                })
+        .collect(Collectors.toList());
+  }
+
+  private List<Map<String, String>> getRequestErrorCountAttributes() {
+    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
+    List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
 
     return operations.stream()
         .flatMap(
