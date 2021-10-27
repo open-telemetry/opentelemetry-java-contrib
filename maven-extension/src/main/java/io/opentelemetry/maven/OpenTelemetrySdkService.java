@@ -15,6 +15,8 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.codehaus.plexus.component.annotations.Component;
@@ -82,12 +84,30 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
     AutoConfiguredOpenTelemetrySdkBuilder autoConfiguredSdkBuilder =
         AutoConfiguredOpenTelemetrySdk.builder();
+
+    // SDK CONFIGURATION PROPERTIES
+    autoConfiguredSdkBuilder.addPropertiesSupplier(
+        () -> {
+          Map<String, String> properties = new HashMap<>();
+          if ((OtelUtils.getSysPropOrEnvVar("otel.traces.exporter") == null)
+              && (OtelUtils.getSysPropOrEnvVar("otel.exporter.otlp.endpoint") == null)
+              && (OtelUtils.getSysPropOrEnvVar("otel.exporter.otlp.traces.endpoint") == null)) {
+            // Change default of "otel.traces.exporter" from "otlp" to "none" unless
+            // "otel.exporter.otlp.endpoint" or "otel.exporter.otlp.traces.endpoint" is defined
+            properties.put("otel.traces.exporter", "none");
+          }
+          return properties;
+        });
+
+    // SDK RESOURCE
     autoConfiguredSdkBuilder.addResourceCustomizer(
         (resource, configProperties) ->
             Resource.builder()
                 .putAll(resource)
                 .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
                 .build());
+
+    // BUILD SDK
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         autoConfiguredSdkBuilder.build();
     logger.debug(

@@ -11,8 +11,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class OtelUtils {
   protected static String prettyPrintSdkConfiguration(
@@ -46,5 +48,15 @@ final class OtelUtils {
             .collect(Collectors.joining(", "))
         + ", Resource: "
         + sdkResource.getAttributes();
+  }
+
+  @Nullable
+  public static String getSysPropOrEnvVar(String systemPropertyName) {
+    String systemPropertyValue = System.getProperty(systemPropertyName);
+    if (systemPropertyValue != null) {
+      return systemPropertyValue;
+    }
+    String environmentVariableName = systemPropertyName.replace('.', '_').toLowerCase(Locale.ROOT);
+    return System.getenv().get(environmentVariableName);
   }
 }
