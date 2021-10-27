@@ -27,13 +27,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Service to configure the {@link OpenTelemetry} instance.
- *
- * <p>Rely on the OpenTelemetry SDK AutoConfiguration extension. Parameters are passed as system
- * properties.
- *
- * <p>TODO: verify how we could use a composite {@link
- * io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties} combining the config passed by JVM
- * system properties and environment variables with overrides injected by the Otel Maven Extension
  */
 @Component(role = OpenTelemetrySdkService.class, hint = "opentelemetry-service")
 public final class OpenTelemetrySdkService implements Initializable, Disposable {
