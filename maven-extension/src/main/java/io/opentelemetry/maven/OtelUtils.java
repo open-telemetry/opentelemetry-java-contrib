@@ -5,64 +5,46 @@
 
 package io.opentelemetry.maven;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.HashMap;
+import com.google.common.collect.Lists;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 final class OtelUtils {
+  protected static String prettyPrintSdkConfiguration(
+      AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
+    List<String> configAttributeNames =
+        Lists.newArrayList(
+            "otel.traces.exporter",
+            "otel.metrics.exporter",
+            "otel.exporter.otlp.endpoint",
+            "otel.exporter.otlp.traces.endpoint",
+            "otel.exporter.otlp.metrics.endpoint",
+            "otel.exporter.jaeger.endpoint",
+            "otel.exporter.prometheus.port",
+            "otel.resource.attributes",
+            "otel.service.name");
 
-  public static String getCommaSeparatedString(Map<String, String> keyValuePairs) {
-    return keyValuePairs.entrySet().stream()
-        .map(keyValuePair -> keyValuePair.getKey() + "=" + keyValuePair.getValue())
-        .collect(Collectors.joining(","));
-  }
-
-  public static Map<String, String> getCommaSeparatedMap(String commaSeparatedKeyValuePairs) {
-    if (StringUtils.isBlank(commaSeparatedKeyValuePairs)) {
-      return new HashMap<>();
+    ConfigProperties sdkConfig = autoConfiguredOpenTelemetrySdk.getConfig();
+    Map<String, String> configurationAttributes = new LinkedHashMap<>();
+    for (String attributeName : configAttributeNames) {
+      final String attributeValue = sdkConfig.getString(attributeName);
+      if (attributeValue != null) {
+        configurationAttributes.put(attributeName, attributeValue);
+      }
     }
-    return filterBlanksAndNulls(commaSeparatedKeyValuePairs.split(",")).stream()
-        .map(keyValuePair -> filterBlanksAndNulls(keyValuePair.split("=", 2)))
-        .map(
-            splitKeyValuePairs -> {
-              if (splitKeyValuePairs.size() != 2) {
-                throw new RuntimeException(
-                    "Invalid key-value pair: " + commaSeparatedKeyValuePairs);
-              }
-              return new AbstractMap.SimpleImmutableEntry<>(
-                  splitKeyValuePairs.get(0), splitKeyValuePairs.get(1));
-            })
-        // If duplicate keys, prioritize later ones similar to duplicate system properties on a
-        // Java command line.
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (first, next) -> next, LinkedHashMap::new));
-  }
 
-  private static List<String> filterBlanksAndNulls(String[] values) {
-    return Arrays.stream(values)
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .collect(Collectors.toList());
-  }
+    Resource sdkResource = autoConfiguredOpenTelemetrySdk.getResource();
 
-  @CheckForNull
-  public static String getSystemPropertyOrEnvironmentVariable(
-      String systemPropertyName, String environmentVariableName, @Nullable String defaultValue) {
-    String systemProperty = System.getProperty(systemPropertyName);
-    if (StringUtils.isNotBlank(systemProperty)) {
-      return systemProperty;
-    }
-    String environmentVariable = System.getenv(environmentVariableName);
-    if (StringUtils.isNotBlank(environmentVariable)) {
-      return environmentVariable;
-    }
-    return defaultValue;
+    return "Configuration: "
+        + configurationAttributes.entrySet().stream()
+            .map(entry -> entry.getKey() + "=" + entry.getValue())
+            .collect(Collectors.joining(", "))
+        + ", Resource: "
+        + sdkResource.getAttributes();
   }
 }
