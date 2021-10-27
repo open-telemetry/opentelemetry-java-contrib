@@ -25,9 +25,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Service to configure the {@link OpenTelemetry} instance.
- */
+/** Service to configure the {@link OpenTelemetry} instance. */
 @Component(role = OpenTelemetrySdkService.class, hint = "opentelemetry-service")
 public final class OpenTelemetrySdkService implements Initializable, Disposable {
 
@@ -82,7 +80,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   @Override
   public void initialize() throws InitializationException {
     logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
-    final AutoConfiguredOpenTelemetrySdkBuilder autoConfiguredSdkBuilder =
+    AutoConfiguredOpenTelemetrySdkBuilder autoConfiguredSdkBuilder =
         AutoConfiguredOpenTelemetrySdk.builder();
     autoConfiguredSdkBuilder.addResourceCustomizer(
         (resource, configProperties) ->
