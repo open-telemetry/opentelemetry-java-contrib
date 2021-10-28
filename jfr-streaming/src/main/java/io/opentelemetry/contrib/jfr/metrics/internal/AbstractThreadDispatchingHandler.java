@@ -7,33 +7,30 @@ package io.opentelemetry.contrib.jfr.metrics.internal;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
 
 public abstract class AbstractThreadDispatchingHandler implements RecordedEventHandler {
   // Will need pruning code for fast-cycling thread frameworks to prevent memory leaks
-  protected final Map<String, RecordedEventHandler> perThread = new HashMap<>();
-  protected final ThreadGrouper grouper;
+  private final Map<String, Consumer<RecordedEvent>> perThread = new HashMap<>();
+  private final ThreadGrouper grouper;
 
   public AbstractThreadDispatchingHandler(ThreadGrouper grouper) {
     this.grouper = grouper;
   }
 
-  public void reset() {
-    perThread.clear();
-  }
-
   public abstract String getEventName();
 
-  public abstract RecordedEventHandler createPerThreadSummarizer(String threadName);
+  public abstract Consumer<RecordedEvent> createPerThreadSummarizer(String threadName);
 
   @Override
   public void accept(RecordedEvent ev) {
-    final Optional<String> possibleGroupedThreadName = grouper.groupedName(ev);
-    possibleGroupedThreadName.ifPresent(
-        groupedThreadName -> {
-          perThread.computeIfAbsent(groupedThreadName, name -> createPerThreadSummarizer(name));
-          perThread.get(groupedThreadName).accept(ev);
-        });
+    grouper
+        .groupedName(ev)
+        .ifPresent(
+            groupedThreadName ->
+                perThread
+                    .computeIfAbsent(groupedThreadName, this::createPerThreadSummarizer)
+                    .accept(ev));
   }
 }

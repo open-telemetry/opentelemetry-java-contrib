@@ -20,7 +20,6 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
-  private static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
   private static final String EVENT_NAME = "jdk.CPULoad";
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
@@ -29,36 +28,32 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
   private static final String DESCRIPTION = "CPU Utilization";
 
-  private final Meter otelMeter;
-  private BoundDoubleHistogram userHistogram;
-  private BoundDoubleHistogram systemHistogram;
-  private BoundDoubleHistogram machineHistogram;
+  private final BoundDoubleHistogram userHistogram;
+  private final BoundDoubleHistogram systemHistogram;
+  private final BoundDoubleHistogram machineHistogram;
 
   public OverallCPULoadHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
-  }
-
-  @Override
-  public OverallCPULoadHandler init() {
-    var attr = Attributes.of(ATTR_CPU_USAGE, USER);
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(ONE);
-    userHistogram = builder.build().bind(attr);
-
-    attr = Attributes.of(ATTR_CPU_USAGE, SYSTEM);
-    builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(ONE);
-    systemHistogram = builder.build().bind(attr);
-
-    attr = Attributes.of(ATTR_CPU_USAGE, MACHINE);
-    builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(ONE);
-    machineHistogram = builder.build().bind(attr);
-
-    return this;
+    userHistogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(ONE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, USER));
+    systemHistogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(ONE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, SYSTEM));
+    machineHistogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(ONE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, MACHINE));
   }
 
   @Override

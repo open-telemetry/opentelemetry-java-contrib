@@ -8,10 +8,8 @@ package io.opentelemetry.contrib.jfr.metrics;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.jfr.EventSettings;
 import jdk.jfr.consumer.RecordingStream;
 
 /** The entry point class for the JFR-over-OpenTelemetry support. */
@@ -34,8 +32,7 @@ public final class JfrMetrics {
     jfrMonitorService.submit(
         () -> {
           try (var recordingStream = new RecordingStream()) {
-            var enableMappedEvent = eventEnablerFor(recordingStream);
-            toMetricRegistry.all().forEach(enableMappedEvent);
+            toMetricRegistry.all().forEach(handler -> enableHandler(recordingStream, handler));
             recordingStream.setReuse(false);
             logger.log(Level.FINE, "Starting recording stream...");
             recordingStream.start(); // run forever
@@ -43,12 +40,10 @@ public final class JfrMetrics {
         });
   }
 
-  private static Consumer<RecordedEventHandler> eventEnablerFor(RecordingStream recordingStream) {
-    return handler -> {
-      EventSettings eventSettings = recordingStream.enable(handler.getEventName());
-      handler.getPollingDuration().ifPresent(eventSettings::withPeriod);
-      handler.getThreshold().ifPresent(eventSettings::withThreshold);
-      recordingStream.onEvent(handler.getEventName(), handler);
-    };
+  private static void enableHandler(RecordingStream recordingStream, RecordedEventHandler handler) {
+    var eventSettings = recordingStream.enable(handler.getEventName());
+    handler.getPollingDuration().ifPresent(eventSettings::withPeriod);
+    handler.getThreshold().ifPresent(eventSettings::withThreshold);
+    recordingStream.onEvent(handler.getEventName(), handler);
   }
 }

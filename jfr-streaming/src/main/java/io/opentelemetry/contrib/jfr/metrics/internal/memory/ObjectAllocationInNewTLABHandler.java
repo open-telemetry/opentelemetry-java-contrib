@@ -5,22 +5,37 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_ARENA_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_ALLOCATION;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.BoundDoubleHistogram;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
+import java.util.function.Consumer;
+import jdk.jfr.consumer.RecordedEvent;
 
 /**
  * This class handles TLAB allocation JFR events, and delegates them to the actual per-thread
  * aggregators
  */
 public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispatchingHandler {
-  static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
-  private final Meter otelMeter;
+  private static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
+  private static final String DESCRIPTION = "Allocation";
+  private final DoubleHistogram histogram;
 
   public ObjectAllocationInNewTLABHandler(Meter otelMeter, ThreadGrouper grouper) {
     super(grouper);
-    this.otelMeter = otelMeter;
+    histogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)
+            .setDescription(DESCRIPTION)
+            .setUnit(KILOBYTES)
+            .build();
   }
 
   @Override
@@ -29,8 +44,28 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
   }
 
   @Override
-  public RecordedEventHandler createPerThreadSummarizer(String threadName) {
-    var ret = new PerThreadObjectAllocationInNewTLABHandler(otelMeter, threadName);
-    return ret.init();
+  public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
+    return new PerThreadObjectAllocationInNewTLABHandler(histogram, threadName);
+  }
+
+  /** This class aggregates all TLAB allocation JFR events for a single thread */
+  private static class PerThreadObjectAllocationInNewTLABHandler
+      implements Consumer<RecordedEvent> {
+    private static final String TLAB_SIZE = "tlabSize";
+    private static final String TLAB = "TLAB";
+
+    private final BoundDoubleHistogram boundHistogram;
+
+    public PerThreadObjectAllocationInNewTLABHandler(DoubleHistogram histogram, String threadName) {
+      boundHistogram =
+          histogram.bind(Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_ARENA_NAME, TLAB));
+    }
+
+    @Override
+    public void accept(RecordedEvent ev) {
+      boundHistogram.record(ev.getLong(TLAB_SIZE));
+      // Probably too high a cardinality
+      // ev.getClass("objectClass").getName();
+    }
   }
 }

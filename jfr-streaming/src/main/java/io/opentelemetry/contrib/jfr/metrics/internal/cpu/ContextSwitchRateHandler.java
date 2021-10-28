@@ -17,20 +17,14 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
   private static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
   private static final String METRIC_NAME = "runtime.jvm.cpu.context_switch";
 
-  private final Meter otelMeter;
   private volatile double value = 0;
 
   public ContextSwitchRateHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
-  }
-
-  public ContextSwitchRateHandler init() {
     otelMeter
         .upDownCounterBuilder(METRIC_NAME)
         .ofDoubles()
         .setUnit(ONE)
         .buildWithCallback(codm -> codm.observe(value));
-    return this;
   }
 
   @Override

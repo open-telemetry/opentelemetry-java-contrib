@@ -8,23 +8,32 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.BoundDoubleHistogram;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
-import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Consumer;
+import jdk.jfr.consumer.RecordedEvent;
 
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
-  static final String EVENT_NAME = "jdk.JavaMonitorWait";
-  private final Meter otelMeter;
+  private static final String EVENT_NAME = "jdk.JavaMonitorWait";
   private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
   private static final String DESCRIPTION = "Long lock times";
 
+  private final DoubleHistogram histogram;
+
   public LongLockHandler(Meter otelMeter, ThreadGrouper grouper) {
     super(grouper);
-    this.otelMeter = otelMeter;
+    histogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(Constants.MILLISECONDS)
+            .build();
   }
 
   @Override
@@ -33,18 +42,32 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   }
 
   @Override
-  public RecordedEventHandler createPerThreadSummarizer(String threadName) {
-    var attr = Attributes.of(ATTR_THREAD_NAME, threadName);
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(Constants.MILLISECONDS);
-    var histogram = builder.build().bind(attr);
-    var ret = new PerThreadLongLockHandler(histogram, threadName);
-    return ret.init();
+  public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
+    return new PerThreadLongLockHandler(histogram, threadName);
   }
 
   @Override
   public Optional<Duration> getThreshold() {
     return Optional.empty();
+  }
+
+  private static class PerThreadLongLockHandler implements Consumer<RecordedEvent> {
+    private static final String EVENT_THREAD = "eventThread";
+
+    private final BoundDoubleHistogram boundHistogram;
+
+    public PerThreadLongLockHandler(DoubleHistogram histogram, String threadName) {
+      this.boundHistogram = histogram.bind(Attributes.of(ATTR_THREAD_NAME, threadName));
+    }
+
+    @Override
+    public void accept(RecordedEvent recordedEvent) {
+      if (recordedEvent.hasField(EVENT_THREAD)) {
+        boundHistogram.record(recordedEvent.getDuration().toMillis());
+      }
+      // What about the class name in MONITOR_CLASS ?
+      // We can get a stack trace from the thread on the event
+      // var eventThread = recordedEvent.getThread(EVENT_THREAD);
+    }
   }
 }

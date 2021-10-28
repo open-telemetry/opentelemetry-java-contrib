@@ -21,20 +21,16 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.gc.duration";
   private static final String DESCRIPTION = "GC Duration";
 
-  private final Meter otelMeter;
-  private BoundDoubleHistogram gcHistogram;
+  private final BoundDoubleHistogram gcHistogram;
 
   public G1GarbageCollectionHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
-  }
-
-  public G1GarbageCollectionHandler init() {
-    var attr = Attributes.of(ATTR_GC_COLLECTOR, G1);
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(Constants.MILLISECONDS);
-    gcHistogram = builder.build().bind(attr);
-    return this;
+    gcHistogram =
+        otelMeter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(Constants.MILLISECONDS)
+            .build()
+            .bind(Attributes.of(ATTR_GC_COLLECTOR, G1));
   }
 
   @Override

@@ -17,21 +17,14 @@ public final class ContainerConfigurationHandler implements RecordedEventHandler
 
   private static final String EFFECTIVE_CPU_COUNT = "effectiveCpuCount";
 
-  private final Meter otelMeter;
   private volatile long value = 0L;
 
   public ContainerConfigurationHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
-  }
-
-  public ContainerConfigurationHandler init() {
     otelMeter
         .upDownCounterBuilder(METRIC_NAME)
         .ofDoubles()
         .setUnit(ONE)
         .buildWithCallback(codm -> codm.observe(value));
-
-    return this;
   }
 
   @Override

@@ -13,7 +13,6 @@ public final class Constants {
   public static final String ONE = "1";
   public static final String KILOBYTES = "kb";
   public static final String MILLISECONDS = "ms";
-  public static final String PERCENTAGE = "%age";
   public static final String READ = "read";
   public static final String WRITE = "write";
   public static final String USER = "user";

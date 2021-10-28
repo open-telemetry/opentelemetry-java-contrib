@@ -50,13 +50,4 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
   default Optional<Duration> getThreshold() {
     return Optional.empty();
   }
-
-  /**
-   * Initialize the handler. Default implementation is a no-op
-   *
-   * @return
-   */
-  default RecordedEventHandler init() {
-    return this;
-  }
 }

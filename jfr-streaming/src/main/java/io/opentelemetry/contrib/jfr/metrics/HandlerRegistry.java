@@ -19,10 +19,8 @@ import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOuts
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler;
 import java.util.*;
-import java.util.stream.Stream;
 
 final class HandlerRegistry {
-  private static final String SCHEMA_URL = "https://opentelemetry.io/schemas/1.6.1";
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
   private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
 
@@ -33,10 +31,13 @@ final class HandlerRegistry {
   }
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
-    var otelMeter = meterProvider.get(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION, null);
-
+    var otelMeter =
+        meterProvider
+            .meterBuilder(INSTRUMENTATION_NAME)
+            .setInstrumentationVersion(INSTRUMENTATION_VERSION)
+            .build();
     var grouper = new ThreadGrouper();
-    var filtered =
+    return new HandlerRegistry(
         List.of(
             new ObjectAllocationInNewTLABHandler(otelMeter, grouper),
             new ObjectAllocationOutsideTLABHandler(otelMeter, grouper),
@@ -47,14 +48,11 @@ final class HandlerRegistry {
             new ContextSwitchRateHandler(otelMeter),
             new OverallCPULoadHandler(otelMeter),
             new ContainerConfigurationHandler(otelMeter),
-            new LongLockHandler(otelMeter, grouper));
-    filtered.forEach(RecordedEventHandler::init);
-
-    return new HandlerRegistry(filtered);
+            new LongLockHandler(otelMeter, grouper)));
   }
 
-  /** @return a stream of all entries in this registry. */
-  Stream<RecordedEventHandler> all() {
-    return mappers.stream();
+  /** @return all entries in this registry. */
+  List<RecordedEventHandler> all() {
+    return mappers;
   }
 }
