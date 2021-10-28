@@ -21,7 +21,7 @@ public final class PerThreadNetworkWriteHandler implements RecordedEventHandler 
       PerThreadNetworkWriteHandler.class.getSimpleName();
   private static final String BYTES_WRITTEN = "bytesWritten";
   private static final String METRIC_NAME_DURATION = "runtime.jvm.network.duration";
-  private static final String METRIC_NAME = "runtime.jvm.network.io";
+  private static final String METRIC_NAME_BYTES = "runtime.jvm.network.io";
 
   private static final String DESCRIPTION_BYTES = "Bytes Written";
   private static final String DESCRIPTION_DURATION = "Write Duration";
@@ -40,7 +40,7 @@ public final class PerThreadNetworkWriteHandler implements RecordedEventHandler 
   public PerThreadNetworkWriteHandler init() {
     var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, WRITE);
 
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
+    var builder = otelMeter.histogramBuilder(METRIC_NAME_BYTES);
     builder.setDescription(DESCRIPTION_BYTES);
     builder.setUnit(Constants.KILOBYTES);
     bytesHistogram = builder.build().bind(attr);
