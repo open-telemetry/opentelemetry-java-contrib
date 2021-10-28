@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+* [`opentelemetry-maven-extension`](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/maven-extension)
+  * Support disabling the creation of mojo execution spans [#108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/108)
+  * Use the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) to support more configuration setting [#112](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/112). All the settings of the OTLP exporter are supported.
+  * Fix failure to load the extension declaring it in pom.xml [#86](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/86)
+  * Fix exception if OTLP exporter is not configured properly [#93](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/93).
+
 ## Version 1.6.0 - 2021-09-22
 
 * All libraries updated to OpenTelemetry SDK 1.6.0.
