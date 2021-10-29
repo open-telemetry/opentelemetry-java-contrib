@@ -42,6 +42,7 @@ can be helpful to ensure this is the correct place and that active or conflictin
 
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
+- [John Watson](https://github.com/jkwatson), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
 - [Pablo Collins](https://github.com/pmcollins), Splunk
 
