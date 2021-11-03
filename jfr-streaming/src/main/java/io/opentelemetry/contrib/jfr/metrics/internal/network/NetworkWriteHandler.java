@@ -9,7 +9,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_NETWO
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.WRITE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_BYTES_DESCRIPTION;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_BYTES_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_DESCRIPTION;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_MODE_WRITE;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
@@ -40,10 +44,6 @@ import jdk.jfr.consumer.RecordedEvent;
 
 public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.SocketWrite";
-  private static final String METRIC_NAME_DURATION = "runtime.jvm.network.write.duration";
-  private static final String METRIC_NAME_BYTES = "runtime.jvm.network.write.io";
-  private static final String DESCRIPTION_BYTES = "Bytes Written";
-  private static final String DESCRIPTION_DURATION = "Write Duration";
 
   private final DoubleHistogram bytesHistogram;
   private final DoubleHistogram durationHistogram;
@@ -52,14 +52,14 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
     super(nameNormalizer);
     bytesHistogram =
         otelMeter
-            .histogramBuilder(METRIC_NAME_BYTES)
-            .setDescription(DESCRIPTION_BYTES)
+            .histogramBuilder(NETWORK_BYTES_NAME)
+            .setDescription(NETWORK_BYTES_DESCRIPTION)
             .setUnit(KILOBYTES)
             .build();
     durationHistogram =
         otelMeter
-            .histogramBuilder(METRIC_NAME_DURATION)
-            .setDescription(DESCRIPTION_DURATION)
+            .histogramBuilder(NETWORK_DURATION_NAME)
+            .setDescription(NETWORK_DURATION_DESCRIPTION)
             .setUnit(MILLISECONDS)
             .build();
   }
@@ -82,7 +82,7 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
 
     private PerThreadNetworkWriteHandler(
         DoubleHistogram bytesHistogram, DoubleHistogram durationHistogram, String threadName) {
-      var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, WRITE);
+      var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, NETWORK_MODE_WRITE);
       boundBytesHistogram = bytesHistogram.bind(attr);
       boundDurationHistogram = durationHistogram.bind(attr);
     }
