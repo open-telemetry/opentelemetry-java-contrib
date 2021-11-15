@@ -49,6 +49,9 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   implementation("org.slf4j:slf4j-simple")
 
+  annotationProcessor("com.google.auto.value:auto-value")
+  compileOnly("com.google.auto.value:auto-value-annotations")
+
   runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
 
   testImplementation("io.grpc:grpc-api")
@@ -58,7 +61,7 @@ dependencies {
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("org.awaitility:awaitility")
   testImplementation("org.testcontainers:testcontainers")
-  testImplementation("io.opentelemetry:opentelemetry-proto")
+  testImplementation("io.opentelemetry.proto:opentelemetry-proto:0.11.0-alpha")
 
   add("integrationTestImplementation", "com.linecorp.armeria:armeria-grpc")
   add("integrationTestImplementation", "com.linecorp.armeria:armeria-junit5")
