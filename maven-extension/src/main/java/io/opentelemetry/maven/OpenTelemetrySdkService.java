@@ -8,6 +8,7 @@ package io.opentelemetry.maven;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.maven.semconv.MavenSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
@@ -100,11 +101,14 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
         });
 
     // SDK RESOURCE
+    // don't use the `io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider` framework because we
+    // need to get the `RuntimeInformation` component injected by Plexus
     autoConfiguredSdkBuilder.addResourceCustomizer(
         (resource, configProperties) ->
             Resource.builder()
                 .putAll(resource)
                 .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
+                .put(ResourceAttributes.SERVICE_NAME, MavenSemanticAttributes.SERVICE_NAME_VALUE)
                 .build());
 
     // BUILD SDK

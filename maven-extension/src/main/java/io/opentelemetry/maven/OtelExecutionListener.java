@@ -11,7 +11,7 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import io.opentelemetry.maven.semconv.MavenSemanticAttributes;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.maven.execution.AbstractExecutionListener;
@@ -103,10 +103,10 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             .getTracer()
             .spanBuilder(spanName)
             .setParent(context)
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_PROJECT_GROUP_ID, project.getGroupId())
+            .setAttribute(MavenSemanticAttributes.MAVEN_PROJECT_GROUP_ID, project.getGroupId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID, project.getArtifactId())
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_PROJECT_VERSION, project.getVersion())
+                MavenSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID, project.getArtifactId())
+            .setAttribute(MavenSemanticAttributes.MAVEN_PROJECT_VERSION, project.getVersion())
             .setSpanKind(SpanKind.SERVER)
             .startSpan();
     spanRegistry.setRootSpan(sessionSpan);
@@ -123,10 +123,10 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
         tracer
             .spanBuilder(spanName)
             .setParent(Context.current().with(Span.wrap(rootSpan.getSpanContext())))
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_PROJECT_GROUP_ID, project.getGroupId())
+            .setAttribute(MavenSemanticAttributes.MAVEN_PROJECT_GROUP_ID, project.getGroupId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID, project.getArtifactId())
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_PROJECT_VERSION, project.getVersion())
+                MavenSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID, project.getArtifactId())
+            .setAttribute(MavenSemanticAttributes.MAVEN_PROJECT_VERSION, project.getVersion())
             .startSpan();
     spanRegistry.putSpan(projectSpan, project);
   }
@@ -178,28 +178,28 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             .spanBuilder(spanName)
             .setParent(Context.current().with(Span.wrap(rootSpan.getSpanContext())))
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PROJECT_GROUP_ID,
+                MavenSemanticAttributes.MAVEN_PROJECT_GROUP_ID,
                 executionEvent.getProject().getGroupId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID,
+                MavenSemanticAttributes.MAVEN_PROJECT_ARTIFACT_ID,
                 executionEvent.getProject().getArtifactId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PROJECT_VERSION,
+                MavenSemanticAttributes.MAVEN_PROJECT_VERSION,
                 executionEvent.getProject().getVersion())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PLUGIN_GROUP_ID,
+                MavenSemanticAttributes.MAVEN_PLUGIN_GROUP_ID,
                 mojoExecution.getPlugin().getGroupId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PLUGIN_ARTIFACT_ID,
+                MavenSemanticAttributes.MAVEN_PLUGIN_ARTIFACT_ID,
                 mojoExecution.getPlugin().getArtifactId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_PLUGIN_VERSION,
+                MavenSemanticAttributes.MAVEN_PLUGIN_VERSION,
                 mojoExecution.getPlugin().getVersion())
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_EXECUTION_GOAL, mojoExecution.getGoal())
+            .setAttribute(MavenSemanticAttributes.MAVEN_EXECUTION_GOAL, mojoExecution.getGoal())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_EXECUTION_ID, mojoExecution.getExecutionId())
+                MavenSemanticAttributes.MAVEN_EXECUTION_ID, mojoExecution.getExecutionId())
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
+                MavenSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
                 mojoExecution.getLifecyclePhase())
             .startSpan();
     spanRegistry.putSpan(span, mojoExecution);
