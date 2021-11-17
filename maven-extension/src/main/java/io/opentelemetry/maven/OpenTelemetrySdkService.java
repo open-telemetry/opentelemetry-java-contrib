@@ -108,7 +108,8 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
             Resource.builder()
                 .putAll(resource)
                 .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
-                .put(ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
+                .put(
+                    ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
                 .build());
 
     // BUILD SDK
