@@ -56,7 +56,7 @@ final class OtelUtils {
     if (systemPropertyValue != null) {
       return systemPropertyValue;
     }
-    String environmentVariableName = systemPropertyName.replace('.', '_').toLowerCase(Locale.ROOT);
+    String environmentVariableName = systemPropertyName.replace('.', '_').toUpperCase(Locale.ROOT);
     return System.getenv().get(environmentVariableName);
   }
 }
