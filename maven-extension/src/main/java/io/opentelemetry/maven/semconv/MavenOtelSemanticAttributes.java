@@ -13,7 +13,7 @@ import io.opentelemetry.api.common.AttributeKey;
  * @see io.opentelemetry.api.common.Attributes
  * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
  */
-public class MavenSemanticAttributes {
+public class MavenOtelSemanticAttributes {
   public static final AttributeKey<String> MAVEN_EXECUTION_ID = stringKey("maven.execution.id");
   public static final AttributeKey<String> MAVEN_PROJECT_ARTIFACT_ID =
       stringKey("maven.project.artifactId");

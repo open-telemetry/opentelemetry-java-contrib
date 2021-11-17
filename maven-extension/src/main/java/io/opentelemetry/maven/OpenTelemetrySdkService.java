@@ -8,7 +8,7 @@ package io.opentelemetry.maven;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.maven.semconv.MavenSemanticAttributes;
+import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
@@ -108,7 +108,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
             Resource.builder()
                 .putAll(resource)
                 .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
-                .put(ResourceAttributes.SERVICE_NAME, MavenSemanticAttributes.SERVICE_NAME_VALUE)
+                .put(ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
                 .build());
 
     // BUILD SDK
