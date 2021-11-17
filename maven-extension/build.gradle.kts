@@ -23,7 +23,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-trace")
 
-  implementation("io.grpc:grpc-netty-shaded")
+  implementation("com.google.guava:guava")
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
