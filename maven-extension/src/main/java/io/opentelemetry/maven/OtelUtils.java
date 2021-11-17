@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.CheckForNull;
 
 final class OtelUtils {
   protected static String prettyPrintSdkConfiguration(
@@ -50,7 +50,7 @@ final class OtelUtils {
         + sdkResource.getAttributes();
   }
 
-  @Nullable
+  @CheckForNull
   public static String getSysPropOrEnvVar(String systemPropertyName) {
     String systemPropertyValue = System.getProperty(systemPropertyName);
     if (systemPropertyValue != null) {
