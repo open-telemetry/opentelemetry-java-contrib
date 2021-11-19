@@ -16,6 +16,7 @@ import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import javax.management.Attribute;
 import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -432,7 +434,7 @@ class InstrumenterHelperTest {
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
+      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description,  Arrays.asList("Double","Long"));
 
       assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
@@ -588,6 +590,20 @@ class InstrumenterHelperTest {
     return mBeanHelper;
   }
 
+  MBeanHelper registerThingsOnOneObject(String thingName) throws Exception {
+    Thing thing = new Thing();
+    registeredBeans.add(mbeanServer.registerMBean(thing, new ObjectName(thingName)));
+    for (int i = 0; i < 4; i++) {
+      String name = thingName + ",thing=" + i;
+      mbeanServer.setAttribute(new ObjectName(thingName),new Attribute("thing", i));
+    }
+
+    MBeanHelper mBeanHelper =
+        new MBeanHelper(jmxClient, thingName, thingName.startsWith("single:"));
+    mBeanHelper.fetch();
+    return mBeanHelper;
+  }
+
   MBeanHelper registerMultipleThings(List<String> thingNames) throws Exception {
     for (String thingName : thingNames) {
       Thing thing = new Thing();
@@ -612,7 +628,25 @@ class InstrumenterHelperTest {
         "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
-            mBeanHelper, instrumentName, description, "1", labelFuncs, attribute, instrument);
+            mBeanHelper, instrumentName, description, "1", labelFuncs,
+            Collections.singletonList(attribute), instrument);
+    instrumentHelper.update();
+  }
+  void updateWithHelper(
+    MBeanHelper mBeanHelper,
+    String instrumentMethod,
+    String instrumentName,
+    String description,
+    List<String> attribute) {
+    Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
+    Map<String, Closure> labelFuncs = new HashMap<>();
+    labelFuncs.put("labelOne", (Closure<?>) Eval.me("{ unused -> 'labelOneValue' }"));
+    labelFuncs.put(
+        "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
+    InstrumentHelper instrumentHelper =
+        new InstrumentHelper(
+            mBeanHelper, instrumentName, description, "1", labelFuncs,
+            attribute, instrument);
     instrumentHelper.update();
   }
 

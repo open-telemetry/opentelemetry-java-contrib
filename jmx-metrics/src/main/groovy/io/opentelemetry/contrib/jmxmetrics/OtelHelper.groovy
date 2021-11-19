@@ -86,22 +86,40 @@ class OtelHelper {
      * Returns an updated @{link InstrumentHelper} associated with the provided {@link MBeanHelper} and its specified
      * attribute value(s).  The parameters map to the InstrumentHelper constructor.
      */
-    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure otelInstrument) {
-        def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, attribute, otelInstrument)
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, List<String> attributes, Closure otelInstrument) {
+        def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, attributes, otelInstrument)
         instrumentHelper.update()
         return instrumentHelper
     }
 
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure otelInstrument) {
+      def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, [attribute], otelInstrument)
+      instrumentHelper.update()
+      return instrumentHelper
+    }
+
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, String attribute, Closure otelInstrument) {
-        return instrument(mBeanHelper, instrumentName, description, unit, [:] as Map<String, Closure>, attribute, otelInstrument)
+        return instrument(mBeanHelper, instrumentName, description, unit, [:] as Map<String, Closure>, [attribute], otelInstrument)
+    }
+
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, List<String> attributes, Closure otelInstrument) {
+      return instrument(mBeanHelper, instrumentName, description, unit, [:] as Map<String, Closure>, attributes, otelInstrument)
     }
 
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String attribute, Closure otelInstrument) {
         return instrument(mBeanHelper, instrumentName, description, OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
     }
 
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, List<String> attributes, Closure otelInstrument) {
+      return instrument(mBeanHelper, instrumentName, description, OtelHelper.SCALAR, [:] as Map<String, Closure>, attributes, otelInstrument)
+    }
+
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String attribute, Closure otelInstrument) {
         return instrument(mBeanHelper, instrumentName, "", OtelHelper.SCALAR, [:] as Map<String, Closure>, attribute, otelInstrument)
+    }
+
+    InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, List<String> attributes, Closure otelInstrument) {
+      return instrument(mBeanHelper, instrumentName, "", OtelHelper.SCALAR, [:] as Map<String, Closure>, attributes, otelInstrument)
     }
 
     DoubleCounter doubleCounter(String name, String description, String unit) {

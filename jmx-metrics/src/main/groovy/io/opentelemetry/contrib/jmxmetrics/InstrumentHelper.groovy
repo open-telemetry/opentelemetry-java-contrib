@@ -37,7 +37,7 @@ class InstrumentHelper {
     private final String instrumentName
     private final String description
     private final String unit
-    private final String attribute
+    private final List<String> attributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
 
@@ -57,21 +57,26 @@ class InstrumentHelper {
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, List<String> attributes, Closure instrument) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
         this.unit = unit
         this.labelFuncs = labelFuncs
-        this.attribute = attribute
+        this.attributes = attributes
         this.instrument = instrument
     }
 
     void update() {
         def mbeans = mBeanHelper.getMBeans()
-        def values = mBeanHelper.getAttribute(attribute)
+        List<Object> values = mBeanHelper.getAttribute(attributes[0])
+        attributes.eachWithIndex{ String entry, int i ->
+          if (i != 0) {
+            values.addAll(mBeanHelper.getAttribute(entry))
+          }
+        }
         if (values.size() == 0) {
-            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${attribute}")
+            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${attributes}")
             return
         }
 
@@ -82,7 +87,8 @@ class InstrumentHelper {
         // will create multiple datapoints from the same instrument identifiers.
         def tupleToUpdates = [:] // tuple is of form (instrument, instrumentName, description, unit)
 
-        [mbeans, values].transpose().each { mbean, value ->
+        def transposedvals = [mbeans, values].transpose()
+        transposedvals.each { mbean, value ->
             if (value instanceof CompositeData) {
                 value.getCompositeType().keySet().each { key ->
                     def val = value.get(key)
