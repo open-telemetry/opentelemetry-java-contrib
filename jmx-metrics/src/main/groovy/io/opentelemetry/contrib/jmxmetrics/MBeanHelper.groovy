@@ -95,4 +95,21 @@ class MBeanHelper {
             }
         }
     }
+
+    @PackageScope List<Tuple3<GroovyMBean, String, Object>> getAttributes(Set<String> attributes) {
+        if (mbeans == null || mbeans.size() == 0) {
+            return []
+        }
+
+        def ofInterest = isSingle ? [mbeans[0]]: mbeans
+        return [ofInterest, attributes].combinations().collect { pair ->
+            def (bean, attribute) = pair
+            try {
+                new Tuple3(bean, attribute, bean.getProperty(attribute))
+            } catch (AttributeNotFoundException e) {
+                logger.warning("Expected attribute ${attribute} not found in mbean ${bean.name()}")
+                new Tuple3(bean, attribute, null)
+            }
+        }
+    }
 }

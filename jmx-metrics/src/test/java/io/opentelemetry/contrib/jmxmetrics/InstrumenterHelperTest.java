@@ -434,7 +434,7 @@ class InstrumenterHelperTest {
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description,  Arrays.asList("Double","Long"));
+      updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
@@ -629,24 +629,7 @@ class InstrumenterHelperTest {
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
             mBeanHelper, instrumentName, description, "1", labelFuncs,
-            Collections.singletonList(attribute), instrument);
-    instrumentHelper.update();
-  }
-  void updateWithHelper(
-    MBeanHelper mBeanHelper,
-    String instrumentMethod,
-    String instrumentName,
-    String description,
-    List<String> attribute) {
-    Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
-    Map<String, Closure> labelFuncs = new HashMap<>();
-    labelFuncs.put("labelOne", (Closure<?>) Eval.me("{ unused -> 'labelOneValue' }"));
-    labelFuncs.put(
-        "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
-    InstrumentHelper instrumentHelper =
-        new InstrumentHelper(
-            mBeanHelper, instrumentName, description, "1", labelFuncs,
-            attribute, instrument);
+            Collections.singletonMap(attribute, null), instrument);
     instrumentHelper.update();
   }
 
