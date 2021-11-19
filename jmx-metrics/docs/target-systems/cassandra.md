@@ -17,25 +17,10 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
 
-* Name: `cassandra.client.request.range_slice.latency.count`
-* Description: Number of token range read request operations
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
 * Name: `cassandra.client.request.range_slice.latency.max`
 * Description: Maximum token range read request latency
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
-
-* Name: `cassandra.client.request.range_slice.timeout.count`
-* Description: Number of token range read request timeouts encountered
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
-* Name: `cassandra.client.request.range_slice.unavailable.count`
-* Description: Number of token range read request unavailable exceptions encountered
-* Unit: `1`
-* Instrument Type: LongSumObserver
 
 * Name: `cassandra.client.request.read.latency.50p`
 * Description: Standard read request latency - 50th percentile
@@ -47,25 +32,10 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
 
-* Name: `cassandra.client.request.read.latency.count`
-* Description: Number of standard read request operations
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
 * Name: `cassandra.client.request.read.latency.max`
 * Description: Maximum standard read request latency
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
-
-* Name: `cassandra.client.request.read.timeout.count`
-* Description: Number of standard read request timeouts encountered
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
-* Name: `cassandra.client.request.read.unavailable.count`
-* Description: Number of standard read request unavailable exceptions encountered
-* Unit: `1`
-* Instrument Type: LongSumObserver
 
 * Name: `cassandra.client.request.write.latency.50p`
 * Description: Regular write request latency - 50th percentile
@@ -77,23 +47,20 @@ These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each n
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
 
-* Name: `cassandra.client.request.write.latency.count`
-* Description: Number of regular write request operations
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
 * Name: `cassandra.client.request.write.latency.max`
 * Description: Maximum regular write request latency
 * Unit: `µs`
 * Instrument Type: DoubleValueObserver
 
-* Name: `cassandra.client.request.write.timeout.count`
-* Description: Number of regular write request timeouts encountered
+* Name: `cassandra.client.request.count`
+* Description: Number of requests by operation
+* Labels: `operation`
 * Unit: `1`
 * Instrument Type: LongSumObserver
 
-* Name: `cassandra.client.request.write.unavailable.count`
-* Description: Number of regular write request unavailable exceptions encountered
+* Name: `cassandra.client.request.error.count`
+* Description: Number of request errors by operation
+* Labels: `operation`, `status`
 * Unit: `1`
 * Instrument Type: LongSumObserver
 

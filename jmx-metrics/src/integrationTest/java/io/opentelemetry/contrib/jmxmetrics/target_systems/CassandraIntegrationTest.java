@@ -7,6 +7,11 @@ package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -49,29 +54,11 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "Token range read request latency - 99th percentile",
                 "µs"),
         metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.range_slice.latency.count",
-                "Number of token range read request operations",
-                "1"),
-        metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.max",
                 "Maximum token range read request latency",
                 "µs"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.range_slice.timeout.count",
-                "Number of token range read request timeouts encountered",
-                "1"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.range_slice.unavailable.count",
-                "Number of token range read request unavailable exceptions encountered",
-                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -85,29 +72,11 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "Standard read request latency - 99th percentile",
                 "µs"),
         metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.read.latency.count",
-                "Number of standard read request operations",
-                "1"),
-        metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.max",
                 "Maximum standard read request latency",
                 "µs"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.read.timeout.count",
-                "Number of standard read request timeouts encountered",
-                "1"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.read.unavailable.count",
-                "Number of standard read request unavailable exceptions encountered",
-                "1"),
         metric ->
             assertGauge(
                 metric,
@@ -121,29 +90,11 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "Regular write request latency - 99th percentile",
                 "µs"),
         metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.write.latency.count",
-                "Number of regular write request operations",
-                "1"),
-        metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.max",
                 "Maximum regular write request latency",
                 "µs"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.write.timeout.count",
-                "Number of regular write request timeouts encountered",
-                "1"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.client.request.write.unavailable.count",
-                "Number of regular write request unavailable exceptions encountered",
-                "1"),
         metric ->
             assertSum(
                 metric,
@@ -175,6 +126,53 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "cassandra.storage.total_hints.in_progress.count",
                 "Number of hints attempting to be sent currently",
                 "1",
-                false));
+                false),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "cassandra.client.request.count",
+                "Number of requests by operation",
+                "1",
+                getRequestCountAttributes()),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "cassandra.client.request.error.count",
+                "Number of request errors by operation",
+                "1",
+                getRequestErrorCountAttributes()));
+  }
+
+  private List<Map<String, String>> getRequestCountAttributes() {
+    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
+
+    return operations.stream()
+        .map(
+            op ->
+                new HashMap<String, String>() {
+                  {
+                    put("operation", op);
+                  }
+                })
+        .collect(Collectors.toList());
+  }
+
+  private List<Map<String, String>> getRequestErrorCountAttributes() {
+    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
+    List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
+
+    return operations.stream()
+        .flatMap(
+            op ->
+                statuses.stream()
+                    .map(
+                        st ->
+                            new HashMap<String, String>() {
+                              {
+                                put("operation", op);
+                                put("status", st);
+                              }
+                            }))
+        .collect(Collectors.toList());
   }
 }

@@ -17,6 +17,7 @@
 def cassandraMetrics = "org.apache.cassandra.metrics"
 def clientRequest = "${cassandraMetrics}:type=ClientRequest"
 def clientRequestRangeSlice = "${clientRequest},scope=RangeSlice"
+
 def clientRequestRangeSliceLatency = otel.mbean("${clientRequestRangeSlice},name=Latency")
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.50p",
@@ -29,26 +30,9 @@ otel.instrument(clientRequestRangeSliceLatency,
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestRangeSliceLatency,
-        "cassandra.client.request.range_slice.latency.count",
-        "Number of token range read request operations", "1", "Count",
-        otel.&longCounterCallback)
-
-otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.max",
         "Maximum token range read request latency", "µs", "Max",
         otel.&doubleValueCallback)
-
-def clientRequestRangeSliceTimeouts = otel.mbean("${clientRequestRangeSlice},name=Timeouts")
-otel.instrument(clientRequestRangeSliceTimeouts,
-        "cassandra.client.request.range_slice.timeout.count",
-        "Number of token range read request timeouts encountered", "1", "Count",
-        otel.&longCounterCallback)
-
-def clientRequestRangeSliceUnavailables = otel.mbean("${clientRequestRangeSlice},name=Unavailables")
-otel.instrument(clientRequestRangeSliceUnavailables,
-        "cassandra.client.request.range_slice.unavailable.count",
-        "Number of token range read request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounterCallback)
 
 def clientRequestRead = "${clientRequest},scope=Read"
 def clientRequestReadLatency = otel.mbean("${clientRequestRead},name=Latency")
@@ -63,26 +47,9 @@ otel.instrument(clientRequestReadLatency,
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestReadLatency,
-        "cassandra.client.request.read.latency.count",
-        "Number of standard read request operations", "1", "Count",
-        otel.&longCounterCallback)
-
-otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.max",
         "Maximum standard read request latency", "µs", "Max",
         otel.&doubleValueCallback)
-
-def clientRequestReadTimeouts = otel.mbean("${clientRequestRead},name=Timeouts")
-otel.instrument(clientRequestReadTimeouts,
-        "cassandra.client.request.read.timeout.count",
-        "Number of standard read request timeouts encountered", "1", "Count",
-        otel.&longCounterCallback)
-
-def clientRequestReadUnavailables = otel.mbean("${clientRequestRead},name=Unavailables")
-otel.instrument(clientRequestReadUnavailables,
-        "cassandra.client.request.read.unavailable.count",
-        "Number of standard read request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounterCallback)
 
 def clientRequestWrite = "${clientRequest},scope=Write"
 def clientRequestWriteLatency = otel.mbean("${clientRequestWrite},name=Latency")
@@ -97,26 +64,9 @@ otel.instrument(clientRequestWriteLatency,
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestWriteLatency,
-        "cassandra.client.request.write.latency.count",
-        "Number of regular write request operations", "1", "Count",
-        otel.&longCounterCallback)
-
-otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.max",
         "Maximum regular write request latency", "µs", "Max",
         otel.&doubleValueCallback)
-
-def clientRequestWriteTimeouts = otel.mbean("${clientRequestWrite},name=Timeouts")
-otel.instrument(clientRequestWriteTimeouts,
-        "cassandra.client.request.write.timeout.count",
-        "Number of regular write request timeouts encountered", "1", "Count",
-        otel.&longCounterCallback)
-
-def clientRequestWriteUnavailables = otel.mbean("${clientRequestWrite},name=Unavailables")
-otel.instrument(clientRequestWriteUnavailables,
-        "cassandra.client.request.write.unavailable.count",
-        "Number of regular write request unavailable exceptions encountered", "1", "Count",
-        otel.&longCounterCallback)
 
 def storage = "${cassandraMetrics}:type=Storage"
 def storageLoad = otel.mbean("${storage},name=Load")
@@ -137,6 +87,7 @@ otel.instrument(storageTotalHintsInProgress,
         "Number of hints attempting to be sent currently", "1", "Count",
         otel.&longUpDownCounterCallback)
 
+
 def compaction = "${cassandraMetrics}:type=Compaction"
 def compactionPendingTasks = otel.mbean("${compaction},name=PendingTasks")
 otel.instrument(compactionPendingTasks,
@@ -149,3 +100,53 @@ otel.instrument(compactionCompletedTasks,
         "cassandra.compaction.tasks.completed",
         "Number of completed compactions since server [re]start", "1", "Value",
         otel.&longCounterCallback)
+
+
+def clientRequests = otel.mbeans([
+  "${clientRequestRangeSlice},name=Latency",
+  "${clientRequestRead},name=Latency",
+  "${clientRequestWrite},name=Latency",
+])
+
+otel.instrument(clientRequests,
+  "cassandra.client.request.count",
+  "Number of requests by operation",
+  "1",
+  [
+    "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
+  ],
+  "Count", otel.&longCounterCallback)
+
+def clientRequestErrors = otel.mbeans([
+  "${clientRequestRangeSlice},name=Unavailables",
+  "${clientRequestRangeSlice},name=Timeouts",
+  "${clientRequestRangeSlice},name=Failures",
+  "${clientRequestRead},name=Unavailables",
+  "${clientRequestRead},name=Timeouts",
+  "${clientRequestRead},name=Failures",
+  "${clientRequestWrite},name=Unavailables",
+  "${clientRequestWrite},name=Timeouts",
+  "${clientRequestWrite},name=Failures",
+])
+
+otel.instrument(clientRequestErrors,
+  "cassandra.client.request.error.count",
+  "Number of request errors by operation",
+  "1",
+  [
+    "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
+    "status" : {
+      mbean -> switch(mbean.name().getKeyProperty("name")) {
+        case "Unavailables":
+          return "Unavailable"
+          break
+        case "Timeouts":
+          return "Timeout"
+          break
+        case "Failures":
+          return "Failure"
+          break
+      }
+    }
+  ],
+  "Count", otel.&longCounterCallback)
