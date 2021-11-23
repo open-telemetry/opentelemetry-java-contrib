@@ -52,6 +52,7 @@ val DEPENDENCY_SETS = listOf(
 )
 
 val DEPENDENCIES = listOf(
+    "com.squareup.okhttp3:okhttp:3.14.9",
     "org.assertj:assertj-core:3.21.0",
     "org.awaitility:awaitility:4.1.0",
     "org.checkerframework:checker-qual:3.15.0",
