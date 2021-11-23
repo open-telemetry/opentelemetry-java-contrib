@@ -17,6 +17,7 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
+  implementation("com.squareup.okhttp3:okhttp")
   implementation("io.opentelemetry:opentelemetry-semconv")
 
   compileOnly("org.checkerframework:checker-qual")
