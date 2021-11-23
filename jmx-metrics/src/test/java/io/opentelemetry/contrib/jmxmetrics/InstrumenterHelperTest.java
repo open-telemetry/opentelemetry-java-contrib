@@ -449,28 +449,48 @@ class InstrumenterHelperTest {
     @Test
     void doubleValueCallbackMultipleAttributes() throws Exception {
       String instrumentMethod = "doubleValueCallback";
-      MBeanHelper mBeanHelper = registerThingsOnOneObject("multiple:type=" + instrumentMethod + ".Thing,multi=1");
+      MBeanHelper mBeanHelper =
+          registerThingsOnOneObject("multiple:type=" + instrumentMethod + ".Thing,multi=1");
 
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      Map<String, Map<String, String>> attributes = new HashMap<String, Map<String, String>>() {{
-        put("FirstAttribute", new HashMap<String, String>() {{
-          put("Thing", "1");
-        }});
-        put("SecondAttribute", new HashMap<String, String>() {{
-          put("Thing", "2");
-        }});
-        put("ThirdAttribute", new HashMap<String, String>() {{
-          put("Thing", "3");
-        }});
-        put("FourthAttribute", new HashMap<String, String>() {{
-          put("Thing", "4");
-        }});
-      }};
+      Map<String, Map<String, String>> attributes =
+          new HashMap<String, Map<String, String>>() {
+            {
+              put(
+                  "FirstAttribute",
+                  new HashMap<String, String>() {
+                    {
+                      put("Thing", "1");
+                    }
+                  });
+              put(
+                  "SecondAttribute",
+                  new HashMap<String, String>() {
+                    {
+                      put("Thing", "2");
+                    }
+                  });
+              put(
+                  "ThirdAttribute",
+                  new HashMap<String, String>() {
+                    {
+                      put("Thing", "3");
+                    }
+                  });
+              put(
+                  "FourthAttribute",
+                  new HashMap<String, String>() {
+                    {
+                      put("Thing", "4");
+                    }
+                  });
+            }
+          };
 
-
-      updateWithHelperMultiAttribute(mBeanHelper, instrumentMethod, instrumentName, description, attributes);
+      updateWithHelperMultiAttribute(
+          mBeanHelper, instrumentMethod, instrumentName, description, attributes);
 
       assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
@@ -547,26 +567,22 @@ class InstrumenterHelperTest {
                   assertThat(point)
                       .hasValue(11.0)
                       .attributes()
-                      .containsOnly(
-                          attributeEntry("Thing", "1")),
+                      .containsOnly(attributeEntry("Thing", "1")),
               point ->
                   assertThat(point)
                       .hasValue(10.0)
                       .attributes()
-                      .containsOnly(
-                          attributeEntry("Thing", "2")),
+                      .containsOnly(attributeEntry("Thing", "2")),
               point ->
                   assertThat(point)
                       .hasValue(9.0)
                       .attributes()
-                      .containsOnly(
-                          attributeEntry("Thing", "3")),
+                      .containsOnly(attributeEntry("Thing", "3")),
               point ->
                   assertThat(point)
                       .hasValue(8.0)
                       .attributes()
-                      .containsOnly(
-                          attributeEntry("Thing", "4")))
+                      .containsOnly(attributeEntry("Thing", "4")))
           .toArray(Consumer[]::new);
     }
 
@@ -659,8 +675,7 @@ class InstrumenterHelperTest {
     SystemStatus thing = new SystemStatus();
     registeredBeans.add(mbeanServer.registerMBean(thing, new ObjectName(thingName)));
 
-    MBeanHelper mBeanHelper =
-        new MBeanHelper(jmxClient, thingName, false);
+    MBeanHelper mBeanHelper = new MBeanHelper(jmxClient, thingName, false);
     mBeanHelper.fetch();
     return mBeanHelper;
   }
@@ -689,8 +704,13 @@ class InstrumenterHelperTest {
         "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
-            mBeanHelper, instrumentName, description, "1", labelFuncs,
-            Collections.singletonMap(attribute, null), instrument);
+            mBeanHelper,
+            instrumentName,
+            description,
+            "1",
+            labelFuncs,
+            Collections.singletonMap(attribute, null),
+            instrument);
     instrumentHelper.update();
   }
 
@@ -699,13 +719,12 @@ class InstrumenterHelperTest {
       String instrumentMethod,
       String instrumentName,
       String description,
-      Map<String, Map<String, String>>  attributes) {
+      Map<String, Map<String, String>> attributes) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
     Map<String, Closure> labelFuncs = new HashMap<>();
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
-            mBeanHelper, instrumentName, description, "1", labelFuncs,
-            attributes, instrument);
+            mBeanHelper, instrumentName, description, "1", labelFuncs, attributes, instrument);
     instrumentHelper.update();
   }
 
@@ -729,13 +748,15 @@ class InstrumenterHelperTest {
 
   public interface SystemStatusMBean {
     Double getFirstAttribute();
+
     Double getSecondAttribute();
+
     Double getThirdAttribute();
+
     Double getFourthAttribute();
   }
 
   public class SystemStatus implements SystemStatusMBean {
-
     @Override
     public Double getFirstAttribute() {
       return 11.0;
