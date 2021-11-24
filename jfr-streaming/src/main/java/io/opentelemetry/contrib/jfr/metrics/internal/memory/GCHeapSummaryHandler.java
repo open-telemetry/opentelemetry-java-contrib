@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMORY_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MEGABYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 
 import io.opentelemetry.api.common.Attributes;
@@ -57,13 +57,13 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     var attr = Attributes.of(ATTR_MEMORY_USAGE, USED);
     builder = otelMeter.histogramBuilder(METRIC_NAME_MEMORY);
     builder.setDescription(DESCRIPTION);
-    builder.setUnit(KILOBYTES);
+    builder.setUnit(MEGABYTES);
     usedHistogram = builder.build().bind(attr);
 
     attr = Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
     builder = otelMeter.histogramBuilder(METRIC_NAME_MEMORY);
     builder.setDescription(DESCRIPTION);
-    builder.setUnit(KILOBYTES);
+    builder.setUnit(MEGABYTES);
     committedHistogram = builder.build().bind(attr);
 
     return this;
