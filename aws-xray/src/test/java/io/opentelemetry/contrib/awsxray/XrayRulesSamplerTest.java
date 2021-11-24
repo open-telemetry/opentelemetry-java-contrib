@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.awsxray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
@@ -36,7 +37,7 @@ class XrayRulesSamplerTest {
   void updateTargets() {
     SamplingRule rule1 =
         SamplingRule.create(
-            Collections.emptyMap(),
+            Collections.singletonMap("test", "cat-service"),
             1.0,
             "*",
             "*",
@@ -45,13 +46,13 @@ class XrayRulesSamplerTest {
             "*",
             "*",
             "cat-rule",
-            "cat-service",
+            "*",
             "*",
             "*",
             1);
     SamplingRule rule2 =
         SamplingRule.create(
-            Collections.emptyMap(),
+            Collections.singletonMap("test", "dog-service"),
             0.0,
             "*",
             "*",
@@ -60,13 +61,13 @@ class XrayRulesSamplerTest {
             "*",
             "*",
             "dog-rule",
-            "dog-service",
+            "*",
             "*",
             "*",
             1);
     SamplingRule rule3 =
         SamplingRule.create(
-            Collections.emptyMap(),
+            Collections.singletonMap("test", "*-service"),
             1.0,
             "*",
             "*",
@@ -75,7 +76,7 @@ class XrayRulesSamplerTest {
             "*",
             "*",
             "bat-rule",
-            "*-service",
+            "*",
             "*",
             "*",
             1);
@@ -174,7 +175,7 @@ class XrayRulesSamplerTest {
         TraceId.fromLongs(1, 2),
         name,
         SpanKind.CLIENT,
-        Attributes.empty(),
+        Attributes.of(AttributeKey.stringKey("test"), name),
         Collections.emptyList());
   }
 }
