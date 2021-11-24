@@ -6,61 +6,77 @@
 package io.opentelemetry.contrib.awsxray;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.type;
-import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
-import java.util.Collections;
-import java.util.ServiceLoader;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AwsXrayRemoteSamplerProviderTest {
 
-  @Mock private ConfigProperties config;
-
   @Test
-  void serviceProvider() {
-    ServiceLoader<ConfigurableSamplerProvider> samplerProviders =
-        ServiceLoader.load(ConfigurableSamplerProvider.class);
-    assertThat(samplerProviders)
-        .singleElement(type(AwsXrayRemoteSamplerProvider.class))
-        .satisfies(
-            provider -> {
-              assertThat(provider.getName()).isEqualTo("xray");
-            });
-  }
-
-  @Test
-  void emptyConfig() {
-    try (AwsXrayRemoteSampler sampler =
-        (AwsXrayRemoteSampler) new AwsXrayRemoteSamplerProvider().createSampler(config)) {
+  void serviceNameOnly() {
+    Map<String, String> props = new HashMap<>();
+    props.put("otel.traces.sampler", "xray");
+    props.put("otel.service.name", "cat-service");
+    props.put("otel.traces.exporter", "none");
+    props.put("otel.metrics.exporter", "none");
+    try (SdkTracerProvider tracerProvider =
+        AutoConfiguredOpenTelemetrySdk.builder()
+            .addPropertiesSupplier(() -> props)
+            .setResultAsGlobal(false)
+            .build()
+            .getOpenTelemetrySdk()
+            .getSdkTracerProvider()) {
       // Inspect implementation details for simplicity, otherwise we'd probably need to make a
       // test HTTP server that records requests.
-      assertThat(sampler)
-          .extracting("client")
-          .extracting("getSamplingRulesEndpoint", type(String.class))
-          .isEqualTo("http://localhost:2000/GetSamplingRules");
+      assertThat(tracerProvider)
+          .extracting("sharedState")
+          .extracting("sampler")
+          .isInstanceOfSatisfying(
+              AwsXrayRemoteSampler.class,
+              sampler -> {
+                assertThat(sampler.getClient().getSamplingRulesEndpoint())
+                    .isEqualTo("http://localhost:2000/GetSamplingRules");
+                assertThat(sampler.getResource().getAttribute(ResourceAttributes.SERVICE_NAME))
+                    .isEqualTo("cat-service");
+              });
     }
   }
 
   @Test
   void setEndpoint() {
-    when(config.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
-    when(config.getMap("otel.traces.sampler.arg"))
-        .thenReturn(Collections.singletonMap("endpoint", "http://localhost:3000"));
-    try (AwsXrayRemoteSampler sampler =
-        (AwsXrayRemoteSampler) new AwsXrayRemoteSamplerProvider().createSampler(config)) {
+    Map<String, String> props = new HashMap<>();
+    props.put("otel.traces.sampler", "xray");
+    props.put("otel.traces.sampler.arg", "endpoint=http://localhost:3000");
+    props.put("otel.service.name", "cat-service");
+    props.put("otel.traces.exporter", "none");
+    props.put("otel.metrics.exporter", "none");
+    try (SdkTracerProvider tracerProvider =
+        AutoConfiguredOpenTelemetrySdk.builder()
+            .addPropertiesSupplier(() -> props)
+            .setResultAsGlobal(false)
+            .build()
+            .getOpenTelemetrySdk()
+            .getSdkTracerProvider()) {
       // Inspect implementation details for simplicity, otherwise we'd probably need to make a
       // test HTTP server that records requests.
-      assertThat(sampler)
-          .extracting("client")
-          .extracting("getSamplingRulesEndpoint", type(String.class))
-          .isEqualTo("http://localhost:3000/GetSamplingRules");
+      assertThat(tracerProvider)
+          .extracting("sharedState")
+          .extracting("sampler")
+          .isInstanceOfSatisfying(
+              AwsXrayRemoteSampler.class,
+              sampler -> {
+                assertThat(sampler.getClient().getSamplingRulesEndpoint())
+                    .isEqualTo("http://localhost:3000/GetSamplingRules");
+                assertThat(sampler.getResource().getAttribute(ResourceAttributes.SERVICE_NAME))
+                    .isEqualTo("cat-service");
+              });
     }
   }
 }

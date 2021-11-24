@@ -131,6 +131,11 @@ final class XraySamplerClient {
     return "";
   }
 
+  // Visible for testing
+  String getSamplingRulesEndpoint() {
+    return getSamplingRulesEndpoint;
+  }
+
   @SuppressWarnings("JavaUtilDate")
   private static class FloatDateDeserializer extends StdDeserializer<Date> {
 

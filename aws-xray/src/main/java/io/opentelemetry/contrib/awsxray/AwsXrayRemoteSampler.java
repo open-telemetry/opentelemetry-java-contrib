@@ -204,4 +204,14 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     }
     return new String(clientIdChars);
   }
+
+  // Visible for testing
+  XraySamplerClient getClient() {
+    return client;
+  }
+
+  // Visible for testing
+  Resource getResource() {
+    return resource;
+  }
 }
