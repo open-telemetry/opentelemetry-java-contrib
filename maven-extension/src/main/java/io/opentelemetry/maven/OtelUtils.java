@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
 
 final class OtelUtils {
   protected static String prettyPrintSdkConfiguration(
@@ -50,13 +50,25 @@ final class OtelUtils {
         + sdkResource.getAttributes();
   }
 
-  @CheckForNull
-  public static String getSysPropOrEnvVar(String systemPropertyName) {
+  public static Optional<String> getSysPropOrEnvVar(String systemPropertyName) {
     String systemPropertyValue = System.getProperty(systemPropertyName);
     if (systemPropertyValue != null) {
-      return systemPropertyValue;
+      return Optional.of(systemPropertyValue);
     }
     String environmentVariableName = systemPropertyName.replace('.', '_').toUpperCase(Locale.ROOT);
-    return System.getenv().get(environmentVariableName);
+    String environmentVariable = System.getenv().get(environmentVariableName);
+    if (environmentVariable != null) {
+      return Optional.of(environmentVariable);
+    }
+    return Optional.empty();
+  }
+
+  public static Optional<Boolean> getBooleanSysPropOrEnvVar(String systemPropertyName) {
+    Optional<String> valueAsString = getSysPropOrEnvVar(systemPropertyName);
+    if (valueAsString.isPresent()) {
+      return Optional.of(Boolean.parseBoolean(valueAsString.get()));
+    } else {
+      return Optional.empty();
+    }
   }
 }

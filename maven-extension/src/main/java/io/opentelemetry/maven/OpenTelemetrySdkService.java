@@ -16,8 +16,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.codehaus.plexus.component.annotations.Component;
@@ -89,45 +88,41 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     // SDK CONFIGURATION PROPERTIES
     autoConfiguredSdkBuilder.addPropertiesSupplier(
         () -> {
-          Map<String, String> properties = new HashMap<>();
-          if ((OtelUtils.getSysPropOrEnvVar("otel.traces.exporter") == null)
-              && (OtelUtils.getSysPropOrEnvVar("otel.exporter.otlp.endpoint") == null)
-              && (OtelUtils.getSysPropOrEnvVar("otel.exporter.otlp.traces.endpoint") == null)) {
-            // Change default of "otel.traces.exporter" from "otlp" to "none" unless
-            // "otel.exporter.otlp.endpoint" or "otel.exporter.otlp.traces.endpoint" is defined
-            properties.put("otel.traces.exporter", "none");
-          }
-          return properties;
+          // Change default of "otel.traces.exporter" from "otlp" to "none"
+          // The impacts are
+          // * If no otel exporter settings are passed, then the Maven extension will not export
+          //   rather than exporting on OTLP GRPC to http://localhost:4317
+          // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_TRACES_EXPORTER is not, then don't
+          //   export
+          return Collections.singletonMap("otel.traces.exporter", "none");
         });
 
     // SDK RESOURCE
-    // don't use the `io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider` framework because we
+    // Don't use the `io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider` framework because we
     // need to get the `RuntimeInformation` component injected by Plexus
     autoConfiguredSdkBuilder.addResourceCustomizer(
         (resource, configProperties) ->
             Resource.builder()
                 .putAll(resource)
-                .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
                 .put(
                     ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
+                .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
                 .build());
 
     // BUILD SDK
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         autoConfiguredSdkBuilder.build();
-    logger.debug(
-        "OpenTelemetry: OpenTelemetry SDK initialized with  "
-            + OtelUtils.prettyPrintSdkConfiguration(autoConfiguredOpenTelemetrySdk));
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "OpenTelemetry: OpenTelemetry SDK initialized with  "
+              + OtelUtils.prettyPrintSdkConfiguration(autoConfiguredOpenTelemetrySdk));
+    }
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
     this.openTelemetry = this.openTelemetrySdk;
 
-    String mojosInstrumentationEnabledAsString =
-        System.getProperty(
-            "otel.instrumentation.maven.mojo.enabled",
-            System.getenv("OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED"));
     this.mojosInstrumentationEnabled =
-        Boolean.parseBoolean(
-            StringUtils.defaultIfBlank(mojosInstrumentationEnabledAsString, "true"));
+        OtelUtils.getBooleanSysPropOrEnvVar("otel.instrumentation.maven.mojo.enabled")
+            .orElse(Boolean.TRUE);
 
     this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
   }

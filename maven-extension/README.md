@@ -18,7 +18,8 @@ Add the Maven OpenTelemetry Extension to `${maven.home}/lib/ext` or to the class
 ```
 mvn dependency:copy -Dartifact=io.opentelemetry.contrib:opentelemetry-maven-extension:1.7.0-alpha
 
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel.example.com:4317"
 
 mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-1.7.0-alpha.jar verify
 ```
@@ -44,25 +45,32 @@ Add the Maven OpenTelemetry Extension in the `pom.xml` file:
 ```
 
 ```
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel.example.com:4317"
 
 mvn verify
 ```
 
 ## Configuration
 
+❕ The setting `-Dotel.traces.exporter` / `OTEL_TRACES_EXPORTER` MUST be defined for the Maven OpenTelemetry Extension to export traces. 
+
+Without this setting, the traces won't be exported and the OpenTelemetry Maven Extension will behave as a NoOp extension. `otlp` is currently the only supported exporter.
+
 The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry auto configuration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-| System property              | Environment variable        | Description                                                               |
-|------------------------------|-----------------------------|---------------------------------------------------------------------------|
-| otel.exporter.otlp.endpoint  | OTEL_EXPORTER_OTLP_ENDPOINT | The OTLP traces and metrics endpoint to connect to. Must be a URL with a scheme of either `http` or `https` based on the use of TLS. Example `http://localhost:4317`.            |
-| otel.exporter.otlp.headers   | OTEL_EXPORTER_OTLP_HEADERS  | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests.        |
-| otel.exporter.otlp.timeout   | OTEL_EXPORTER_OTLP_TIMEOUT  | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch. Default is `10000`.  |
-| otel.resource.attributes | OTEL_RESOURCE_ATTRIBUTES | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3 |
-| otel.instrumentation.maven.mojo.enabled | OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds. Default value: `true` |
+
+| System property              | Environment variable        | Default value           | Description                                                               |
+|------------------------------|-----------------------------|-------------------------|---------------------------------------------------------------------------|
+| otel.traces.exporter         | OTEL_TRACES_EXPORTER        |  `none`          | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
+| otel.exporter.otlp.endpoint  | OTEL_EXPORTER_OTLP_ENDPOINT | `http://localhost:4317` | The OTLP traces and metrics endpoint to connect to. Must be a URL with a scheme of either `http` or `https` based on the use of TLS. |
+| otel.exporter.otlp.headers   | OTEL_EXPORTER_OTLP_HEADERS  |                         | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests. |
+| otel.exporter.otlp.timeout   | OTEL_EXPORTER_OTLP_TIMEOUT  | `10000`                 | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch. |
+| otel.resource.attributes     | OTEL_RESOURCE_ATTRIBUTES    |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3 |
+| otel.instrumentation.maven.mojo.enabled | OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED | `true` | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds. |
 
 
-ℹ️ The `service.name` is set by default to `maven`, it can be overwritten specifying resource attributes.
+ℹ️ The `service.name` is set to `maven` and the `service.version` to the version of the Maven runtime in use.
 
 
 ## Examples
