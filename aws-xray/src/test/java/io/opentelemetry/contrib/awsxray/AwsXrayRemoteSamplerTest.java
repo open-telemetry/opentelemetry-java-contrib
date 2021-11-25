@@ -9,13 +9,13 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.linecorp.armeria.common.HttpResponse;
 import com.linecorp.armeria.common.HttpStatus;
 import com.linecorp.armeria.common.MediaType;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 class AwsXrayRemoteSamplerTest {
-
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final byte[] RULE_RESPONSE_1;
   private static final byte[] RULE_RESPONSE_2;
@@ -121,28 +119,8 @@ class AwsXrayRemoteSamplerTest {
   @Test
   void getAndUpdate() throws Exception {
     // Initial Sampler allows all.
-    assertThat(
-            sampler
-                .shouldSample(
-                    Context.root(),
-                    TRACE_ID,
-                    "cat-service",
-                    SpanKind.SERVER,
-                    Attributes.empty(),
-                    Collections.emptyList())
-                .getDecision())
-        .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-    assertThat(
-            sampler
-                .shouldSample(
-                    Context.root(),
-                    TRACE_ID,
-                    "dog-service",
-                    SpanKind.SERVER,
-                    Attributes.empty(),
-                    Collections.emptyList())
-                .getDecision())
-        .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+    assertThat(doSample(sampler, "cat-service")).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+    assertThat(doSample(sampler, "dog-service")).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
 
     rulesResponse.set(RULE_RESPONSE_1);
 
@@ -150,28 +128,9 @@ class AwsXrayRemoteSamplerTest {
     await()
         .untilAsserted(
             () -> {
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "cat-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
+              assertThat(doSample(sampler, "cat-service"))
                   .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "dog-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
-                  .isEqualTo(SamplingDecision.DROP);
+              assertThat(doSample(sampler, "dog-service")).isEqualTo(SamplingDecision.DROP);
             });
 
     rulesResponse.set(RULE_RESPONSE_2);
@@ -180,27 +139,8 @@ class AwsXrayRemoteSamplerTest {
     await()
         .untilAsserted(
             () -> {
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "cat-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
-                  .isEqualTo(SamplingDecision.DROP);
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "dog-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
+              assertThat(doSample(sampler, "cat-service")).isEqualTo(SamplingDecision.DROP);
+              assertThat(doSample(sampler, "dog-service"))
                   .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
             });
 
@@ -210,27 +150,9 @@ class AwsXrayRemoteSamplerTest {
     await()
         .untilAsserted(
             () -> {
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "cat-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
+              assertThat(doSample(sampler, "cat-service"))
                   .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-              assertThat(
-                      sampler
-                          .shouldSample(
-                              Context.root(),
-                              TRACE_ID,
-                              "dog-service",
-                              SpanKind.SERVER,
-                              Attributes.empty(),
-                              Collections.emptyList())
-                          .getDecision())
+              assertThat(doSample(sampler, "dog-service"))
                   .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
             });
   }
@@ -244,5 +166,17 @@ class AwsXrayRemoteSamplerTest {
                   + "ParentBased{root:OrElse{"
                   + "first:RateLimitingSampler{1}, second:TraceIdRatioBased{0.050000}");
     }
+  }
+
+  private static SamplingDecision doSample(Sampler sampler, String name) {
+    return sampler
+        .shouldSample(
+            Context.root(),
+            TRACE_ID,
+            "span",
+            SpanKind.SERVER,
+            Attributes.of(AttributeKey.stringKey("test"), name),
+            Collections.emptyList())
+        .getDecision();
   }
 }

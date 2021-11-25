@@ -144,7 +144,7 @@ final class SamplingRuleApplier {
     this.nextSnapshotTimeNanos = nextSnapshotTimeNanos;
   }
 
-  boolean matches(String name, Attributes attributes, Resource resource) {
+  boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
     String httpTarget = null;
     String httpMethod = null;
@@ -175,7 +175,7 @@ final class SamplingRuleApplier {
     }
 
     return urlPathMatcher.matches(httpTarget)
-        && serviceNameMatcher.matches(name)
+        && serviceNameMatcher.matches(resource.getAttribute(ResourceAttributes.SERVICE_NAME))
         && httpMethodMatcher.matches(httpMethod)
         && hostMatcher.matches(host)
         && serviceTypeMatcher.matches(getServiceType(resource))
