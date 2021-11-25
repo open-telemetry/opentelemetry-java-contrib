@@ -147,12 +147,15 @@ final class SamplingRuleApplier {
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
     String httpTarget = null;
+    String httpUrl = null;
     String httpMethod = null;
     String host = null;
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
       if (entry.getKey().equals(SemanticAttributes.HTTP_TARGET)) {
         httpTarget = (String) entry.getValue();
+      } else if (entry.getKey().equals(SemanticAttributes.HTTP_URL)) {
+        httpUrl = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_METHOD)) {
         httpMethod = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_HOST)) {
@@ -172,6 +175,22 @@ final class SamplingRuleApplier {
     // All attributes in the matched attributes must have been present in the span to be a match.
     if (matchedAttributes != attributeMatchers.size()) {
       return false;
+    }
+
+    // URL Path may be in either http.target or http.url
+    if (httpTarget == null && httpUrl != null) {
+      int schemeEndIndex = httpUrl.indexOf("://");
+      // Per spec, http.url is always populated with scheme://host/target. If scheme doesn't
+      // match, assume it's bad instrumentation and ignore.
+      if (schemeEndIndex > 0) {
+        int pathIndex = httpUrl.indexOf('/', schemeEndIndex + "://".length());
+        if (pathIndex < 0) {
+          // No path, equivalent to root path.
+          httpTarget = "/";
+        } else {
+          httpTarget = httpUrl.substring(pathIndex);
+        }
+      }
     }
 
     return urlPathMatcher.matches(httpTarget)
