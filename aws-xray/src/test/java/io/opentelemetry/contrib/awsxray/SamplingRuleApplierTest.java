@@ -104,6 +104,16 @@ class SamplingRuleApplierTest {
     @Test
     void matches() {
       assertThat(applier.matches(attributes, resource)).isTrue();
+
+      // http.url works too
+      assertThat(
+              applier.matches(
+                  attributes.toBuilder()
+                      .remove(SemanticAttributes.HTTP_TARGET)
+                      .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-me")
+                      .build(),
+                  resource))
+          .isTrue();
     }
 
     @Test
@@ -141,6 +151,27 @@ class SamplingRuleApplierTest {
       Attributes attributes =
           this.attributes.toBuilder()
               .put(SemanticAttributes.HTTP_TARGET, "/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.attributes.toBuilder()
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.attributes.toBuilder()
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "scheme://host:port")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+
+      // Correct path, but we ignore anyways since the URL is malformed per spec, scheme is always
+      // present.
+      attributes =
+          this.attributes.toBuilder()
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "host:port/instrument-me")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
