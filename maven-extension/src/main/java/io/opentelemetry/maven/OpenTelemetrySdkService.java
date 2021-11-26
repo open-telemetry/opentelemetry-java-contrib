@@ -120,9 +120,11 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
     this.openTelemetry = this.openTelemetrySdk;
 
-    this.mojosInstrumentationEnabled =
-        OtelUtils.getBooleanSysPropOrEnvVar("otel.instrumentation.maven.mojo.enabled")
-            .orElse(Boolean.TRUE);
+    Boolean mojoSpansEnabled =
+        autoConfiguredOpenTelemetrySdk
+            .getConfig()
+            .getBoolean("otel.instrumentation.maven.mojo.enabled");
+    this.mojosInstrumentationEnabled = mojoSpansEnabled == null ? true : mojoSpansEnabled;
 
     this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
   }
