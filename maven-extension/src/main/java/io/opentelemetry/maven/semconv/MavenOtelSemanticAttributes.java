@@ -30,9 +30,5 @@ public class MavenOtelSemanticAttributes {
   public static final AttributeKey<String> MAVEN_EXECUTION_LIFECYCLE_PHASE =
       stringKey("maven.execution.lifecyclePhase");
 
-  public static final class ServiceNameValues {
-    public static final String SERVICE_NAME_VALUE = "maven";
-
-    private ServiceNameValues() {}
-  }
+  public static final String SERVICE_NAME_VALUE = "maven";
 }
