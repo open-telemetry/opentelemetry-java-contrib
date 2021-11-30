@@ -13,8 +13,6 @@ public final class Constants {
   public static final String ONE = "1";
   public static final String HERTZ = "Hz";
   public static final String BYTES = "B";
-  public static final String KILOBYTES = "kB";
-  public static final String MEGABYTES = "MB";
   public static final String MILLISECONDS = "ms";
   public static final String PERCENTAGE = "%age";
   public static final String READ = "read";
