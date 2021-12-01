@@ -42,7 +42,7 @@ public final class PerThreadNetworkWriteHandler implements RecordedEventHandler 
 
     var builder = otelMeter.histogramBuilder(METRIC_NAME_BYTES);
     builder.setDescription(DESCRIPTION_BYTES);
-    builder.setUnit(Constants.KILOBYTES);
+    builder.setUnit(Constants.BYTES);
     bytesHistogram = builder.build().bind(attr);
 
     builder = otelMeter.histogramBuilder(METRIC_NAME_DURATION);
