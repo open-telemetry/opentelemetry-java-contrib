@@ -37,7 +37,7 @@ class InstrumentHelper {
     private final String instrumentName
     private final String description
     private final String unit
-    private final Map<String, Map<String, String>> attributes
+    private final Map<String, Map<String, Closure>> MBeanAttributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
 
@@ -57,23 +57,23 @@ class InstrumentHelper {
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, String>> attributes, Closure instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> MBeanAttributes, Closure instrument) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
         this.unit = unit
         this.labelFuncs = labelFuncs
-        this.attributes = attributes
+        this.MBeanAttributes = MBeanAttributes
         this.instrument = instrument
     }
 
     void update() {
         // Tuples of the form (mbean, attribute, value)
-        def values = mBeanHelper.getAttributes(attributes.keySet())
+        def values = mBeanHelper.getAttributes(MBeanAttributes.keySet())
 
         // If there are no tuples with non-null value, return early
         if (values.find {it.getV3() != null } == null) {
-            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${attributes.keySet().join(",")}")
+            logger.info("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${MBeanAttributes.keySet().join(",")}")
             return
         }
 
@@ -92,7 +92,7 @@ class InstrumentHelper {
                 value.getCompositeType().keySet().each { key ->
                     def val = value.get(key)
                     def updatedInstrumentName = "${instrumentName}.${key}"
-                    def labels = getLabels(mbean, labelFuncs, attributes[attribute])
+                    def labels = getLabels(mbean, labelFuncs, MBeanAttributes[attribute])
                     def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
                     logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
                     if (!tupleToUpdates.containsKey(tuple)) {
@@ -101,7 +101,7 @@ class InstrumentHelper {
                     tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
                 }
             } else if (value != null) {
-                def labels = getLabels(mbean, labelFuncs, attributes[attribute])
+                def labels = getLabels(mbean, labelFuncs, MBeanAttributes[attribute])
                 def tuple = new Tuple(instrument, instrumentName, description, unit)
                 logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
                 if (!tupleToUpdates.containsKey(tuple)) {
@@ -135,10 +135,10 @@ class InstrumentHelper {
         }
     }
 
-    private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, String> additionalLabels) {
+    private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
         def labels = [:]
-        additionalLabels.each {entry ->
-            labels[entry.key] = entry.value
+        additionalLabels.each {label, labelFunc ->
+            labels[label] = labelFunc(mbean) as String
         }
         labelFuncs.each { label, labelFunc ->
             labels[label] = labelFunc(mbean) as String

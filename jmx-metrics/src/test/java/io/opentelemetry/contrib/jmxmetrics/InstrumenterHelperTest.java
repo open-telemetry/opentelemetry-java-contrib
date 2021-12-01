@@ -455,35 +455,42 @@ class InstrumenterHelperTest {
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      Map<String, Map<String, String>> attributes =
-          new HashMap<String, Map<String, String>>() {
+      Map<String, Map<String, Closure>> attributes =
+          new HashMap<String, Map<String, Closure>>() {
             {
               put(
                   "FirstAttribute",
-                  new HashMap<String, String>() {
+                  new HashMap<String, Closure>() {
                     {
-                      put("Thing", "1");
+                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 1 }"));
                     }
                   });
               put(
                   "SecondAttribute",
-                  new HashMap<String, String>() {
+                  new HashMap<String, Closure>() {
                     {
-                      put("Thing", "2");
+                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 2 }"));
                     }
                   });
               put(
                   "ThirdAttribute",
-                  new HashMap<String, String>() {
+                  new HashMap<String, Closure>() {
                     {
-                      put("Thing", "3");
+                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 3 }"));
                     }
                   });
               put(
                   "FourthAttribute",
-                  new HashMap<String, String>() {
+                  new HashMap<String, Closure>() {
                     {
-                      put("Thing", "4");
+                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 4 }"));
+                    }
+                  });
+              put(
+                  "nonExsistentAttribute",
+                  new HashMap<String, Closure>() {
+                    {
+                      put("unused", (Closure<?>) Eval.me("{ mbean -> unused }"));
                     }
                   });
             }
@@ -719,7 +726,7 @@ class InstrumenterHelperTest {
       String instrumentMethod,
       String instrumentName,
       String description,
-      Map<String, Map<String, String>> attributes) {
+      Map<String, Map<String, Closure>> attributes) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
     Map<String, Closure> labelFuncs = new HashMap<>();
     InstrumentHelper instrumentHelper =
