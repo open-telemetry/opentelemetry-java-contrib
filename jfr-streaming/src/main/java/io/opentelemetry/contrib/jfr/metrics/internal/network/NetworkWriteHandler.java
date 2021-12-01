@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.network;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_NETWORK_MODE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_BYTES_DESCRIPTION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_BYTES_NAME;
@@ -54,7 +54,7 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
         otelMeter
             .histogramBuilder(NETWORK_BYTES_NAME)
             .setDescription(NETWORK_BYTES_DESCRIPTION)
-            .setUnit(KILOBYTES)
+            .setUnit(BYTES)
             .build();
     durationHistogram =
         otelMeter

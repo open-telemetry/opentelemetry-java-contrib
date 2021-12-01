@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_ARENA_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_ALLOCATION;
 
 import io.opentelemetry.api.common.Attributes;
@@ -34,7 +34,7 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
         otelMeter
             .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)
             .setDescription(DESCRIPTION)
-            .setUnit(KILOBYTES)
+            .setUnit(BYTES)
             .build();
   }
 

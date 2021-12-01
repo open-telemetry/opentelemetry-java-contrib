@@ -36,9 +36,16 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 final class XraySamplerClient {
 
@@ -51,18 +58,19 @@ final class XraySamplerClient {
           // In case API is extended with new fields.
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, /* state= */ false);
 
-  private static final Map<String, String> JSON_CONTENT_TYPE =
-      Collections.singletonMap("Content-Type", "application/json");
+  private static final MediaType JSON_CONTENT_TYPE = MediaType.get("application/json");
+
+  private static final Logger logger = Logger.getLogger(XraySamplerClient.class.getName());
 
   private final String getSamplingRulesEndpoint;
   private final String getSamplingTargetsEndpoint;
-  private final JdkHttpClient httpClient;
+  private final Call.Factory httpClient;
 
   XraySamplerClient(String host) {
     this.getSamplingRulesEndpoint = host + "/GetSamplingRules";
     // Lack of Get may look wrong but is correct.
     this.getSamplingTargetsEndpoint = host + "/SamplingTargets";
-    httpClient = new JdkHttpClient();
+    httpClient = new OkHttpClient();
   }
 
   GetSamplingRulesResponse getSamplingRules(GetSamplingRulesRequest request) {
@@ -82,14 +90,50 @@ final class XraySamplerClient {
       throw new UncheckedIOException("Failed to serialize request.", e);
     }
 
-    String response =
-        httpClient.fetchString("POST", endpoint, JSON_CONTENT_TYPE, null, requestBody);
+    Call call =
+        httpClient.newCall(
+            new Request.Builder()
+                .url(endpoint)
+                .post(RequestBody.create(JSON_CONTENT_TYPE, requestBody))
+                .build());
+
+    final String response;
+    try (Response httpResponse = call.execute()) {
+      response = readResponse(httpResponse, endpoint);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Failed to execute sampling request.", e);
+    }
 
     try {
       return OBJECT_MAPPER.readValue(response, responseType);
     } catch (JsonProcessingException e) {
       throw new UncheckedIOException("Failed to deserialize response.", e);
     }
+  }
+
+  private static String readResponse(Response response, String endpoint) throws IOException {
+    if (!response.isSuccessful()) {
+      logger.log(
+          Level.FINE,
+          "Error response from "
+              + endpoint
+              + " code ("
+              + response.code()
+              + ") text "
+              + response.message());
+      return "";
+    }
+
+    ResponseBody body = response.body();
+    if (body != null) {
+      return body.string();
+    }
+    return "";
+  }
+
+  // Visible for testing
+  String getSamplingRulesEndpoint() {
+    return getSamplingRulesEndpoint;
   }
 
   @SuppressWarnings("JavaUtilDate")

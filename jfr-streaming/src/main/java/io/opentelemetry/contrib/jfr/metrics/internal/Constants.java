@@ -11,8 +11,10 @@ public final class Constants {
   private Constants() {}
 
   public static final String ONE = "1";
-  public static final String KILOBYTES = "kb";
+  public static final String HERTZ = "Hz";
+  public static final String BYTES = "B";
   public static final String MILLISECONDS = "ms";
+  public static final String PERCENTAGE = "%age";
   public static final String USER = "user";
   public static final String SYSTEM = "system";
   public static final String MACHINE = "machine.total";

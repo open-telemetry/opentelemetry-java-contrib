@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ONE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HERTZ;
 
 import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
@@ -23,7 +23,7 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
     otelMeter
         .upDownCounterBuilder(METRIC_NAME)
         .ofDoubles()
-        .setUnit(ONE)
+        .setUnit(HERTZ)
         .buildWithCallback(codm -> codm.observe(value));
   }
 

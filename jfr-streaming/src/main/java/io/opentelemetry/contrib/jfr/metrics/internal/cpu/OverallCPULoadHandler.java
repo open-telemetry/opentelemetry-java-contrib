@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_CPU_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ONE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.PERCENTAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SYSTEM;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
 
@@ -37,7 +38,7 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
         otelMeter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
-            .setUnit(ONE)
+            .setUnit(PERCENTAGE)
             .build()
             .bind(Attributes.of(ATTR_CPU_USAGE, USER));
     systemHistogram =
