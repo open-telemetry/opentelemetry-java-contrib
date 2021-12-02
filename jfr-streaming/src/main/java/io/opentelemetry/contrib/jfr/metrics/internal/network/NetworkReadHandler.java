@@ -19,6 +19,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -26,19 +27,25 @@ import jdk.jfr.consumer.RecordedEvent;
 
 public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.SocketRead";
-  private final DoubleHistogram bytesHistogram;
-  private final DoubleHistogram durationHistogram;
 
-  public NetworkReadHandler(Meter otelMeter, ThreadGrouper nameNormalizer) {
+  private DoubleHistogram bytesHistogram;
+  private DoubleHistogram durationHistogram;
+
+  public NetworkReadHandler(ThreadGrouper nameNormalizer) {
     super(nameNormalizer);
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     bytesHistogram =
-        otelMeter
+        meter
             .histogramBuilder(NETWORK_BYTES_NAME)
             .setDescription(NETWORK_BYTES_DESCRIPTION)
             .setUnit(BYTES)
             .build();
     durationHistogram =
-        otelMeter
+        meter
             .histogramBuilder(NETWORK_DURATION_NAME)
             .setDescription(NETWORK_DURATION_DESCRIPTION)
             .setUnit(MILLISECONDS)

@@ -14,6 +14,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,19 +38,24 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private final DoubleHistogram durationHistogram;
-  private final BoundDoubleHistogram usedHistogram;
-  private final BoundDoubleHistogram committedHistogram;
+  private DoubleHistogram durationHistogram;
+  private BoundDoubleHistogram usedHistogram;
+  private BoundDoubleHistogram committedHistogram;
 
-  public GCHeapSummaryHandler(Meter otelMeter) {
+  public GCHeapSummaryHandler() {
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     durationHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME_DURATION)
             .setDescription(DESCRIPTION)
             .setUnit(BYTES)
             .build();
     var memoryHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME_MEMORY)
             .setDescription(DESCRIPTION)
             .setUnit(BYTES)

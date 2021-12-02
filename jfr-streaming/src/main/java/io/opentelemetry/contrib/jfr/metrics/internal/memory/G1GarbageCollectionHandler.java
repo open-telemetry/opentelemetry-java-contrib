@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.G1;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
@@ -21,11 +22,16 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.gc.duration";
   private static final String DESCRIPTION = "GC Duration";
 
-  private final BoundDoubleHistogram gcHistogram;
+  private BoundDoubleHistogram gcHistogram;
 
-  public G1GarbageCollectionHandler(Meter otelMeter) {
+  public G1GarbageCollectionHandler() {
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     gcHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
             .setUnit(Constants.MILLISECONDS)

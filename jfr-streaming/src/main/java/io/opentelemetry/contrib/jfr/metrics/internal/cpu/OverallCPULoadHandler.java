@@ -15,6 +15,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
@@ -29,27 +30,32 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
   private static final String DESCRIPTION = "CPU Utilization";
 
-  private final BoundDoubleHistogram userHistogram;
-  private final BoundDoubleHistogram systemHistogram;
-  private final BoundDoubleHistogram machineHistogram;
+  private BoundDoubleHistogram userHistogram;
+  private BoundDoubleHistogram systemHistogram;
+  private BoundDoubleHistogram machineHistogram;
 
-  public OverallCPULoadHandler(Meter otelMeter) {
+  public OverallCPULoadHandler() {
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     userHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
             .setUnit(PERCENTAGE)
             .build()
             .bind(Attributes.of(ATTR_CPU_USAGE, USER));
     systemHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
             .setUnit(ONE)
             .build()
             .bind(Attributes.of(ATTR_CPU_USAGE, SYSTEM));
     machineHistogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
             .setUnit(ONE)

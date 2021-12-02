@@ -11,6 +11,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
@@ -24,12 +25,17 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
   private static final String DESCRIPTION = "Long lock times";
 
-  private final DoubleHistogram histogram;
+  private DoubleHistogram histogram;
 
-  public LongLockHandler(Meter otelMeter, ThreadGrouper grouper) {
+  public LongLockHandler(ThreadGrouper grouper) {
     super(grouper);
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     histogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME)
             .setDescription(DESCRIPTION)
             .setUnit(Constants.MILLISECONDS)

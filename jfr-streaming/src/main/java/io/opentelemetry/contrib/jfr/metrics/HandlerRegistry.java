@@ -31,24 +31,27 @@ final class HandlerRegistry {
   }
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
-    var otelMeter =
+    var meter =
         meterProvider
             .meterBuilder(INSTRUMENTATION_NAME)
             .setInstrumentationVersion(INSTRUMENTATION_VERSION)
             .build();
     var grouper = new ThreadGrouper();
-    return new HandlerRegistry(
+    var handlers =
         List.of(
-            new ObjectAllocationInNewTLABHandler(otelMeter, grouper),
-            new ObjectAllocationOutsideTLABHandler(otelMeter, grouper),
-            new NetworkReadHandler(otelMeter, grouper),
-            new NetworkWriteHandler(otelMeter, grouper),
-            new G1GarbageCollectionHandler(otelMeter),
-            new GCHeapSummaryHandler(otelMeter),
-            new ContextSwitchRateHandler(otelMeter),
-            new OverallCPULoadHandler(otelMeter),
-            new ContainerConfigurationHandler(otelMeter),
-            new LongLockHandler(otelMeter, grouper)));
+            new ObjectAllocationInNewTLABHandler(grouper),
+            new ObjectAllocationOutsideTLABHandler(grouper),
+            new NetworkReadHandler(grouper),
+            new NetworkWriteHandler(grouper),
+            new G1GarbageCollectionHandler(),
+            new GCHeapSummaryHandler(),
+            new ContextSwitchRateHandler(),
+            new OverallCPULoadHandler(),
+            new ContainerConfigurationHandler(),
+            new LongLockHandler(grouper));
+    handlers.forEach(handler -> handler.initializeMeter(meter));
+
+    return new HandlerRegistry(handlers);
   }
 
   /** @return all entries in this registry. */

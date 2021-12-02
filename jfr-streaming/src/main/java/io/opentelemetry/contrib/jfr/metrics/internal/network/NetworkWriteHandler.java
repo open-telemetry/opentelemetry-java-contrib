@@ -19,6 +19,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -45,28 +46,33 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.SocketWrite";
 
-  private final DoubleHistogram bytesHistogram;
-  private final DoubleHistogram durationHistogram;
+  private DoubleHistogram bytesHistogram;
+  private DoubleHistogram durationHistogram;
 
-  public NetworkWriteHandler(Meter otelMeter, ThreadGrouper nameNormalizer) {
+  public NetworkWriteHandler(ThreadGrouper nameNormalizer) {
     super(nameNormalizer);
-    bytesHistogram =
-        otelMeter
-            .histogramBuilder(NETWORK_BYTES_NAME)
-            .setDescription(NETWORK_BYTES_DESCRIPTION)
-            .setUnit(BYTES)
-            .build();
-    durationHistogram =
-        otelMeter
-            .histogramBuilder(NETWORK_DURATION_NAME)
-            .setDescription(NETWORK_DURATION_DESCRIPTION)
-            .setUnit(MILLISECONDS)
-            .build();
+    initializeMeter(NoopMeter.getInstance());
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
+    bytesHistogram =
+        meter
+            .histogramBuilder(NETWORK_BYTES_NAME)
+            .setDescription(NETWORK_BYTES_DESCRIPTION)
+            .setUnit(BYTES)
+            .build();
+    durationHistogram =
+        meter
+            .histogramBuilder(NETWORK_DURATION_NAME)
+            .setDescription(NETWORK_DURATION_DESCRIPTION)
+            .setUnit(MILLISECONDS)
+            .build();
   }
 
   @Override

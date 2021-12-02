@@ -14,6 +14,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -26,12 +27,18 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
   private static final String DESCRIPTION = "Allocation";
-  private final DoubleHistogram histogram;
 
-  public ObjectAllocationInNewTLABHandler(Meter otelMeter, ThreadGrouper grouper) {
+  private DoubleHistogram histogram;
+
+  public ObjectAllocationInNewTLABHandler(ThreadGrouper grouper) {
     super(grouper);
+    initializeMeter(NoopMeter.getInstance());
+  }
+
+  @Override
+  public void initializeMeter(Meter meter) {
     histogram =
-        otelMeter
+        meter
             .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)
             .setDescription(DESCRIPTION)
             .setUnit(BYTES)
