@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal;
 
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -32,6 +34,14 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
   }
 
   /**
+   * Set the OpenTelemetry {@link Meter} after the SDK has been initialized. Until called,
+   * implementations should use instruments from {@link NoopMeter}.
+   *
+   * @param meter the meter
+   */
+  void initializeMeter(Meter meter);
+
+  /**
    * Optionally returns a polling duration for JFR events, if present
    *
    * @return {@link Optional} of {@link Duration} representing polling duration; empty {@link
@@ -49,14 +59,5 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
    */
   default Optional<Duration> getThreshold() {
     return Optional.empty();
-  }
-
-  /**
-   * Initialize the handler. Default implementation is a no-op
-   *
-   * @return
-   */
-  default RecordedEventHandler init() {
-    return this;
   }
 }

@@ -15,13 +15,13 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
-  private static final String SIMPLE_CLASS_NAME = OverallCPULoadHandler.class.getSimpleName();
   private static final String EVENT_NAME = "jdk.CPULoad";
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
@@ -30,36 +30,37 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
   private static final String DESCRIPTION = "CPU Utilization";
 
-  private final Meter otelMeter;
   private BoundDoubleHistogram userHistogram;
   private BoundDoubleHistogram systemHistogram;
   private BoundDoubleHistogram machineHistogram;
 
-  public OverallCPULoadHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
+  public OverallCPULoadHandler() {
+    initializeMeter(NoopMeter.getInstance());
   }
 
   @Override
-  public OverallCPULoadHandler init() {
-    var attr = Attributes.of(ATTR_CPU_USAGE, USER);
-    var builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(PERCENTAGE);
-    userHistogram = builder.build().bind(attr);
-
-    attr = Attributes.of(ATTR_CPU_USAGE, SYSTEM);
-    builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(ONE);
-    systemHistogram = builder.build().bind(attr);
-
-    attr = Attributes.of(ATTR_CPU_USAGE, MACHINE);
-    builder = otelMeter.histogramBuilder(METRIC_NAME);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(ONE);
-    machineHistogram = builder.build().bind(attr);
-
-    return this;
+  public void initializeMeter(Meter meter) {
+    userHistogram =
+        meter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(PERCENTAGE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, USER));
+    systemHistogram =
+        meter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(ONE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, SYSTEM));
+    machineHistogram =
+        meter
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(DESCRIPTION)
+            .setUnit(ONE)
+            .build()
+            .bind(Attributes.of(ATTR_CPU_USAGE, MACHINE));
   }
 
   @Override
