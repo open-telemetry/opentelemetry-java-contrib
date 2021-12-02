@@ -233,8 +233,7 @@ final class SamplingRuleApplier {
     return result;
   }
 
-  @Nullable
-  SamplingStatisticsDocument snapshot(Date now) {
+  @Nullable SamplingStatisticsDocument snapshot(Date now) {
     if (clock.nanoTime() < nextSnapshotTimeNanos) {
       return null;
     }
