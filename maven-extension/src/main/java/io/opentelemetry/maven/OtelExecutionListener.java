@@ -6,14 +6,21 @@
 package io.opentelemetry.maven;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.maven.handler.DeployDeployHandler;
+import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
+import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -172,7 +179,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             + " @ "
             + executionEvent.getProject().getArtifactId();
     logger.debug("OpenTelemetry: Start mojo execution: span {}", spanName);
-    Span span =
+    SpanBuilder spanBuilder =
         this.openTelemetrySdkService
             .getTracer()
             .spanBuilder(spanName)
@@ -200,9 +207,25 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_ID, mojoExecution.getExecutionId())
             .setAttribute(
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
-                mojoExecution.getLifecyclePhase())
-            .startSpan();
+                mojoExecution.getLifecyclePhase());
+    //  enrich spans
+    List<MojoGoalExecutionHandler> handlers = getMojoGoalExecutionHandlers();
+    Optional<MojoGoalExecutionHandler> handler =
+        handlers.stream().filter(h -> h.supports(executionEvent)).findFirst();
+    logger.debug("OpenTelemetry: {} handler {}", executionEvent, handler);
+    handler.ifPresent(h -> h.enrichSpan(spanBuilder, executionEvent));
+
+    Span span = spanBuilder.startSpan();
     spanRegistry.putSpan(span, mojoExecution);
+  }
+
+  /**
+   * TODO should we have a more generic and extensible mechanism to load handlers?
+   */
+  private List<MojoGoalExecutionHandler> getMojoGoalExecutionHandlers() {
+    List<MojoGoalExecutionHandler> handlers =
+        Arrays.asList(new DeployDeployHandler(), new SpringBootBuildImageHandler());
+    return handlers;
   }
 
   @Override
