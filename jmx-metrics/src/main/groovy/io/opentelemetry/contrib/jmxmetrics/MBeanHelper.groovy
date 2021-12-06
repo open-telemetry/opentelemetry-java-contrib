@@ -107,7 +107,7 @@ class MBeanHelper {
             try {
                 new Tuple3(bean, attribute, bean.getProperty(attribute))
             } catch (AttributeNotFoundException e) {
-                logger.warning("Expected attribute ${attribute} not found in mbean ${bean.name()}")
+                logger.info("Expected attribute ${attribute} not found in mbean ${bean.name()}")
                 new Tuple3(bean, attribute, null)
             }
         }

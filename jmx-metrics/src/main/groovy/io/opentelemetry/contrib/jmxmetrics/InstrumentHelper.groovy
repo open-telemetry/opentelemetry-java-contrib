@@ -37,7 +37,7 @@ class InstrumentHelper {
     private final String instrumentName
     private final String description
     private final String unit
-    private final Map<String, Map<String, Closure>> MBeanAttributes
+    private final Map<String, Map<String, Closure>> mBeanAttributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
 
@@ -63,17 +63,17 @@ class InstrumentHelper {
         this.description = description
         this.unit = unit
         this.labelFuncs = labelFuncs
-        this.MBeanAttributes = MBeanAttributes
+        this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
     }
 
     void update() {
         // Tuples of the form (mbean, attribute, value)
-        def values = mBeanHelper.getAttributes(MBeanAttributes.keySet())
+        def values = mBeanHelper.getAttributes(mBeanAttributes.keySet())
 
         // If there are no tuples with non-null value, return early
         if (values.find {it.getV3() != null } == null) {
-            logger.info("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${MBeanAttributes.keySet().join(",")}")
+            logger.info("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
             return
         }
 
@@ -101,7 +101,7 @@ class InstrumentHelper {
                     tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
                 }
             } else if (value != null) {
-                def labels = getLabels(mbean, labelFuncs, MBeanAttributes[attribute])
+                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
                 def tuple = new Tuple(instrument, instrumentName, description, unit)
                 logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
                 if (!tupleToUpdates.containsKey(tuple)) {
@@ -137,10 +137,10 @@ class InstrumentHelper {
 
     private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
         def labels = [:]
-        additionalLabels.each {label, labelFunc ->
-            labels[label] = labelFunc(mbean) as String
-        }
         labelFuncs.each { label, labelFunc ->
+          labels[label] = labelFunc(mbean) as String
+        }
+        additionalLabels.each {label, labelFunc ->
             labels[label] = labelFunc(mbean) as String
         }
         return labels
