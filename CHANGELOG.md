@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## Version 1.9.0
+
+* `opentelemetry-maven-extension`
+  * [Maven Extension] Update README, bump version to 1.7.0-alpha by @cyrille-leclerc in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/129
+  * [Maven-Extension] Use Auto Configure Otel SDK Builder by @cyrille-leclerc in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/132
+* `opentelemetry-aws-xray`
+  * Use OkHttp for xray sampling requests. by @anuraaga in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/135
+  * Use service.name resource attribute instead of span name for service … by @anuraaga in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/138
+  * X-Ray Sampler: Match rule's HTTP path against http.url attribute if t… by @anuraaga in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/141
+* `opentelemetry-jfr-streaming`
+  * Fix units for some metrics by @kittylyst in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/140
+  * Tidy up jfr-streaming by @jack-berg in https://github.com/open-telemetry/opentelemetry-java-contrib/pull/127
+
 ## Version 1.7.0
 
 * All libraries updated to OpenTelemetry SDK 1.7.0.
