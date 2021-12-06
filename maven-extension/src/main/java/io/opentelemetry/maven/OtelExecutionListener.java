@@ -219,9 +219,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     spanRegistry.putSpan(span, mojoExecution);
   }
 
-  /**
-   * TODO should we have a more generic and extensible mechanism to load handlers?
-   */
+  /** TODO should we have a more generic and extensible mechanism to load handlers? */
   private List<MojoGoalExecutionHandler> getMojoGoalExecutionHandlers() {
     List<MojoGoalExecutionHandler> handlers =
         Arrays.asList(new DeployDeployHandler(), new SpringBootBuildImageHandler());
