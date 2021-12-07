@@ -73,7 +73,7 @@ class InstrumentHelper {
 
         // If there are no tuples with non-null value, return early
         if (values.find {it.getV3() != null } == null) {
-            logger.info("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
+            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
             return
         }
 

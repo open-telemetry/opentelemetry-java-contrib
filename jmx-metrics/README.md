@@ -127,6 +127,25 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 - `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
 - `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map.
 
+In cases where you'd like to share instrument names while creating datapoints for multiple MBean attributes:
+
+- `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
+
+- An example of this would be with tomcat, To be able to consolidate different thread types into one metric:
+  
+  ```groovy
+    otel.instrument(beantomcatconnectors, "tomcat.threads", "description", "1",
+    ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
+    ["currentThreadCount": ["Thread Type": {mbean -> "current"}],
+    "currentThreadsBusy": ["Thread Type": {mbean -> "busy"}]],
+    otel.&doubleValueObserver)
+  ```
+
+`otel.instrument()` provides additional signatures to allow this more expressive MBean attribute access:
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `labelFuncs` are empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map
+
 ### OpenTelemetry Synchronous Instrument Helpers
 
 - `otel.doubleCounter(String name, String description, String unit)`
