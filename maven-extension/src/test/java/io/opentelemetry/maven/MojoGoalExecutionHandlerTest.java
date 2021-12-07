@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.maven.handler.DeployDeployHandler;
+import io.opentelemetry.maven.handler.MavenDeployDeployHandler;
 import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -57,16 +57,16 @@ public class MojoGoalExecutionHandlerTest {
     ExecutionEvent executionEvent =
         newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
 
-    DeployDeployHandler deployDeployHandler = new DeployDeployHandler();
+    MavenDeployDeployHandler mavenDeployDeployHandler = new MavenDeployDeployHandler();
 
-    boolean actual = deployDeployHandler.supports(executionEvent);
+    boolean actual = mavenDeployDeployHandler.supports(executionEvent);
     assertThat(actual).isEqualTo(true);
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test").build().spanBuilder("deploy");
 
-      deployDeployHandler.enrichSpan(spanBuilder, executionEvent);
+      mavenDeployDeployHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
 
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_REPOSITORY_ID))

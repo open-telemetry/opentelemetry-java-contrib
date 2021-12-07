@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
  * achieve this instrumenting the <a
  * href="https://projects.eclipse.org/projects/technology.aether">Aether library</a>
  */
-public class DeployDeployHandler extends AbstractMojoGoalExecutionHandler
+public class MavenDeployDeployHandler extends AbstractMojoGoalExecutionHandler
     implements MojoGoalExecutionHandler {
-  private static final Logger logger = LoggerFactory.getLogger(DeployDeployHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(MavenDeployDeployHandler.class);
 
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent execution) {

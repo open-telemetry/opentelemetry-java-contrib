@@ -12,7 +12,7 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import io.opentelemetry.maven.handler.DeployDeployHandler;
+import io.opentelemetry.maven.handler.MavenDeployDeployHandler;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
 import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
@@ -219,10 +219,19 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     spanRegistry.putSpan(span, mojoExecution);
   }
 
-  /** TODO should we have a more generic and extensible mechanism to load handlers? */
+  /**
+   * TODO should we have a more generic and extensible mechanism to load {@link
+   * MojoGoalExecutionHandler}s? Would it be using:
+   *
+   * <ul>
+   *   <li>An SPI model relying on {@link java.util.ServiceLoader#load(Class)} similarly to {@link
+   *       io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider}?
+   *   <li>Maven Plexus container?
+   * </ul>
+   */
   private List<MojoGoalExecutionHandler> getMojoGoalExecutionHandlers() {
     List<MojoGoalExecutionHandler> handlers =
-        Arrays.asList(new DeployDeployHandler(), new SpringBootBuildImageHandler());
+        Arrays.asList(new MavenDeployDeployHandler(), new SpringBootBuildImageHandler());
     return handlers;
   }
 
