@@ -131,10 +131,10 @@ In cases where you'd like to share instrument names while creating datapoints fo
 
 - `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
 
-- An example of this would be with tomcat, To be able to consolidate different thread types into one metric:
+- An example of this in Tomcat is to consolidate different thread types into one `"tomcat.threads"` metric using both `currentThreadCount` and `currentThreadsBusy` MBean attributes, labeling with their applicable `"Thread Type"`:
 
   ```groovy
-    otel.instrument(beantomcatconnectors, "tomcat.threads", "description", "1",
+    otel.instrument(otel.mbean("Catalina:type=ThreadPool,name=*"), "tomcat.threads", "description", "1",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     ["currentThreadCount": ["Thread Type": {mbean -> "current"}],
     "currentThreadsBusy": ["Thread Type": {mbean -> "busy"}]],
