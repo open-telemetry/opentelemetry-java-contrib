@@ -12,50 +12,51 @@ val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
 val DEPENDENCY_BOMS = listOf(
-    "com.fasterxml.jackson:jackson-bom:2.12.3",
-    "com.google.guava:guava-bom:30.1.1-jre",
-    "com.linecorp.armeria:armeria-bom:1.11.0",
-    "org.junit:junit-bom:5.7.2",
+    "com.fasterxml.jackson:jackson-bom:2.13.0",
+    "com.google.guava:guava-bom:31.0.1-jre",
+    "com.linecorp.armeria:armeria-bom:1.13.3",
+    "org.junit:junit-bom:5.8.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
-    "io.grpc:grpc-bom:1.39.0",
-    "io.opentelemetry:opentelemetry-bom:1.9.0",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.9.0-alpha",
-    "org.testcontainers:testcontainers-bom:1.16.0"
+    "io.grpc:grpc-bom:1.42.1",
+    "io.opentelemetry:opentelemetry-bom:1.9.1",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.9.1-alpha",
+    "org.testcontainers:testcontainers-bom:1.16.2"
 )
 
 val DEPENDENCY_SETS = listOf(
     DependencySet(
         "com.google.auto.service",
-        "1.0",
+        "1.0.1",
         listOf("auto-service", "auto-service-annotations")
     ),
     DependencySet(
         "com.google.auto.value",
-        "1.8.1",
+        "1.8.2",
         listOf("auto-value", "auto-value-annotations")
     ),
     DependencySet(
         "io.prometheus",
-        "0.11.0",
+        "0.12.0",
         listOf("simpleclient", "simpleclient_common", "simpleclient_httpserver")
     ),
     DependencySet(
         "org.mockito",
-        "3.11.1",
+        "4.1.0",
         listOf("mockito-core", "mockito-junit-jupiter")
     ),
     DependencySet(
         "org.slf4j",
-        "1.7.30",
+        "1.7.32",
         listOf("slf4j-api", "slf4j-simple", "log4j-over-slf4j", "jcl-over-slf4j", "jul-to-slf4j")
     )
 )
 
 val DEPENDENCIES = listOf(
+    "com.squareup.okhttp3:okhttp:3.14.9",
     "org.assertj:assertj-core:3.21.0",
-    "org.awaitility:awaitility:4.1.0",
-    "org.checkerframework:checker-qual:3.15.0",
-    "org.junit-pioneer:junit-pioneer:1.4.2",
+    "org.awaitility:awaitility:4.1.1",
+    "org.checkerframework:checker-qual:3.19.0",
+    "org.junit-pioneer:junit-pioneer:1.5.0",
     "org.skyscreamer:jsonassert:1.5.0"
 )
 

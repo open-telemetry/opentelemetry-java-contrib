@@ -6,15 +6,15 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMORY_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.KILOBYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.internal.Constants;
+import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,6 @@ import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String SIMPLE_CLASS_NAME = GCHeapSummaryHandler.class.getSimpleName();
   private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
   private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
 
@@ -39,34 +38,30 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private final Meter otelMeter;
   private DoubleHistogram durationHistogram;
   private BoundDoubleHistogram usedHistogram;
   private BoundDoubleHistogram committedHistogram;
 
-  public GCHeapSummaryHandler(Meter otelMeter) {
-    this.otelMeter = otelMeter;
+  public GCHeapSummaryHandler() {
+    initializeMeter(NoopMeter.getInstance());
   }
 
-  public GCHeapSummaryHandler init() {
-    var builder = otelMeter.histogramBuilder(METRIC_NAME_DURATION);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(Constants.MILLISECONDS);
-    durationHistogram = builder.build();
-
-    var attr = Attributes.of(ATTR_MEMORY_USAGE, USED);
-    builder = otelMeter.histogramBuilder(METRIC_NAME_MEMORY);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(KILOBYTES);
-    usedHistogram = builder.build().bind(attr);
-
-    attr = Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
-    builder = otelMeter.histogramBuilder(METRIC_NAME_MEMORY);
-    builder.setDescription(DESCRIPTION);
-    builder.setUnit(KILOBYTES);
-    committedHistogram = builder.build().bind(attr);
-
-    return this;
+  @Override
+  public void initializeMeter(Meter meter) {
+    durationHistogram =
+        meter
+            .histogramBuilder(METRIC_NAME_DURATION)
+            .setDescription(DESCRIPTION)
+            .setUnit(BYTES)
+            .build();
+    var memoryHistogram =
+        meter
+            .histogramBuilder(METRIC_NAME_MEMORY)
+            .setDescription(DESCRIPTION)
+            .setUnit(BYTES)
+            .build();
+    usedHistogram = memoryHistogram.bind(Attributes.of(ATTR_MEMORY_USAGE, USED));
+    committedHistogram = memoryHistogram.bind(Attributes.of(ATTR_MEMORY_USAGE, COMMITTED));
   }
 
   @Override
@@ -86,12 +81,10 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
       }
     }
 
-    long gcId = 0;
-    if (ev.hasField(GC_ID)) {
-      gcId = ev.getLong(GC_ID);
-    } else {
+    if (!ev.hasField(GC_ID)) {
       return;
     }
+    long gcId = ev.getLong(GC_ID);
 
     var pair = awaitingPairs.get(gcId);
     if (pair == null) {

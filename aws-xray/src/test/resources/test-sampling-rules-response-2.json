@@ -8,13 +8,13 @@
         "Priority": 1,
         "FixedRate": 0.0,
         "ReservoirSize": 1,
-        "ServiceName": "cat-service",
+        "ServiceName": "*",
         "ServiceType": "*",
         "Host": "*",
         "HTTPMethod": "*",
         "URLPath": "*",
         "Version": 1,
-        "Attributes": {}
+        "Attributes": { "test":  "cat-service" }
       },
       "CreatedAt": "2021-06-18T17:28:15+09:00",
       "ModifiedAt": "2021-06-18T17:28:15+09:00"

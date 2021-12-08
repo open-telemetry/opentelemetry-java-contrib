@@ -144,15 +144,18 @@ final class SamplingRuleApplier {
     this.nextSnapshotTimeNanos = nextSnapshotTimeNanos;
   }
 
-  boolean matches(String name, Attributes attributes, Resource resource) {
+  boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
     String httpTarget = null;
+    String httpUrl = null;
     String httpMethod = null;
     String host = null;
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
       if (entry.getKey().equals(SemanticAttributes.HTTP_TARGET)) {
         httpTarget = (String) entry.getValue();
+      } else if (entry.getKey().equals(SemanticAttributes.HTTP_URL)) {
+        httpUrl = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_METHOD)) {
         httpMethod = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_HOST)) {
@@ -174,8 +177,24 @@ final class SamplingRuleApplier {
       return false;
     }
 
+    // URL Path may be in either http.target or http.url
+    if (httpTarget == null && httpUrl != null) {
+      int schemeEndIndex = httpUrl.indexOf("://");
+      // Per spec, http.url is always populated with scheme://host/target. If scheme doesn't
+      // match, assume it's bad instrumentation and ignore.
+      if (schemeEndIndex > 0) {
+        int pathIndex = httpUrl.indexOf('/', schemeEndIndex + "://".length());
+        if (pathIndex < 0) {
+          // No path, equivalent to root path.
+          httpTarget = "/";
+        } else {
+          httpTarget = httpUrl.substring(pathIndex);
+        }
+      }
+    }
+
     return urlPathMatcher.matches(httpTarget)
-        && serviceNameMatcher.matches(name)
+        && serviceNameMatcher.matches(resource.getAttribute(ResourceAttributes.SERVICE_NAME))
         && httpMethodMatcher.matches(httpMethod)
         && hostMatcher.matches(host)
         && serviceTypeMatcher.matches(getServiceType(resource))
@@ -214,8 +233,7 @@ final class SamplingRuleApplier {
     return result;
   }
 
-  @Nullable
-  SamplingStatisticsDocument snapshot(Date now) {
+  @Nullable SamplingStatisticsDocument snapshot(Date now) {
     if (clock.nanoTime() < nextSnapshotTimeNanos) {
       return null;
     }

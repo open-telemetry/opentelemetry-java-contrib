@@ -76,7 +76,7 @@ final class XrayRulesSampler implements Sampler {
       Attributes attributes,
       List<LinkData> parentLinks) {
     for (SamplingRuleApplier applier : ruleAppliers) {
-      if (applier.matches(name, attributes, resource)) {
+      if (applier.matches(attributes, resource)) {
         return applier.shouldSample(
             parentContext, traceId, name, spanKind, attributes, parentLinks);
       }

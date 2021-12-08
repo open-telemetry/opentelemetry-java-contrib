@@ -5,7 +5,7 @@
   "Priority": 1,
   "FixedRate": 1.0,
   "ReservoirSize": 1000,
-  "ServiceName": "test-service-foo-bar",
+  "ServiceName": "*",
   "ServiceType": "AWS::Lambda::Function",
   "Host": "opentelemetry.io",
   "HTTPMethod": "GET",

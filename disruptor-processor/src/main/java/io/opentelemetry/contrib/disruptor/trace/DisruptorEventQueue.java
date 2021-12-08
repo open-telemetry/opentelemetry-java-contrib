@@ -144,13 +144,11 @@ final class DisruptorEventQueue {
       this.result = result;
     }
 
-    @Nullable
-    Object getEventArgs() {
+    @Nullable Object getEventArgs() {
       return eventArgs;
     }
 
-    @Nullable
-    EventType getEventType() {
+    @Nullable EventType getEventType() {
       return eventType;
     }
 
