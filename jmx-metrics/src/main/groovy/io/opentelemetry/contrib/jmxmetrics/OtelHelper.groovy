@@ -93,7 +93,7 @@ class OtelHelper {
     }
 
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure otelInstrument) {
-      instrument(mBeanHelper, instrumentName, description, unit, labelFuncs, [(attribute): null], otelInstrument)
+      instrument(mBeanHelper, instrumentName, description, unit, labelFuncs, [(attribute): [:] as Map<String, Closure>], otelInstrument)
     }
 
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, String attribute, Closure otelInstrument) {
