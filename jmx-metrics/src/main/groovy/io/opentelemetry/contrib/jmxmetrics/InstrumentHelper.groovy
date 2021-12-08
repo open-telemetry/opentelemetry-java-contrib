@@ -92,7 +92,7 @@ class InstrumentHelper {
                 value.getCompositeType().keySet().each { key ->
                     def val = value.get(key)
                     def updatedInstrumentName = "${instrumentName}.${key}"
-                    def labels = getLabels(mbean, labelFuncs, MBeanAttributes[attribute])
+                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
                     def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
                     logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
                     if (!tupleToUpdates.containsKey(tuple)) {
