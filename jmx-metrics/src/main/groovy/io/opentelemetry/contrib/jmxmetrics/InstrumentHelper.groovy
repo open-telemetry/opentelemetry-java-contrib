@@ -37,7 +37,7 @@ class InstrumentHelper {
     private final String instrumentName
     private final String description
     private final String unit
-    private final String attribute
+    private final Map<String, Map<String, Closure>> mBeanAttributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
 
@@ -57,21 +57,23 @@ class InstrumentHelper {
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> MBeanAttributes, Closure instrument) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
         this.unit = unit
         this.labelFuncs = labelFuncs
-        this.attribute = attribute
+        this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
     }
 
     void update() {
-        def mbeans = mBeanHelper.getMBeans()
-        def values = mBeanHelper.getAttribute(attribute)
-        if (values.size() == 0) {
-            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${attribute}")
+        // Tuples of the form (mbean, attribute, value)
+        def values = mBeanHelper.getAttributes(mBeanAttributes.keySet())
+
+        // If there are no tuples with non-null value, return early
+        if (values.find {it.getV3() != null } == null) {
+            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
             return
         }
 
@@ -82,12 +84,15 @@ class InstrumentHelper {
         // will create multiple datapoints from the same instrument identifiers.
         def tupleToUpdates = [:] // tuple is of form (instrument, instrumentName, description, unit)
 
-        [mbeans, values].transpose().each { mbean, value ->
+        values.each { collectedValue ->
+            def mbean = collectedValue.getV1()
+            def attribute = collectedValue.getV2()
+            def value = collectedValue.getV3()
             if (value instanceof CompositeData) {
                 value.getCompositeType().keySet().each { key ->
                     def val = value.get(key)
                     def updatedInstrumentName = "${instrumentName}.${key}"
-                    def labels = getLabels(mbean, labelFuncs)
+                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
                     def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
                     logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
                     if (!tupleToUpdates.containsKey(tuple)) {
@@ -96,7 +101,7 @@ class InstrumentHelper {
                     tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
                 }
             } else if (value != null) {
-                def labels = getLabels(mbean, labelFuncs)
+                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
                 def tuple = new Tuple(instrument, instrumentName, description, unit)
                 logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
                 if (!tupleToUpdates.containsKey(tuple)) {
@@ -130,9 +135,12 @@ class InstrumentHelper {
         }
     }
 
-    private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs) {
+    private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
         def labels = [:]
         labelFuncs.each { label, labelFunc ->
+          labels[label] = labelFunc(mbean) as String
+        }
+        additionalLabels.each {label, labelFunc ->
             labels[label] = labelFunc(mbean) as String
         }
         return labels
