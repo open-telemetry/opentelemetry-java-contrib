@@ -5,6 +5,7 @@
 
 package io.opentelemetry.maven;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
@@ -12,15 +13,14 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import io.opentelemetry.maven.handler.MavenDeployDeployHandler;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
-import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Close the OpenTelemetry SDK (see {@link OpenTelemetrySdkService#dispose()} on the end of
+ * Close the OpenTelemetry SDK (see {@link OpenTelemetrySdkService#dispose()}) on the end of
  * execution of the last project ({@link #projectSucceeded(ExecutionEvent)} and {@link
  * #projectFailed(ExecutionEvent)}) rather than on the end of the Maven session {@link
  * #sessionEnded(ExecutionEvent)} because OpenTelemetry and GRPC classes are unloaded by the Maven
@@ -48,6 +48,25 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   @Requirement private SpanRegistry spanRegistry;
 
   @Requirement private OpenTelemetrySdkService openTelemetrySdkService;
+
+  @VisibleForTesting
+  protected final ServiceLoader<MojoGoalExecutionHandler> mojoGoalExecutionHandlers;
+
+  public OtelExecutionListener() {
+    // Must use the classloader of the class rather the default ThreadContextClassloader to prevent
+    // java.util.ServiceConfigurationError:
+    //    io.opentelemetry.maven.handler.MojoGoalExecutionHandler:
+    //    io.opentelemetry.maven.handler.SpringBootBuildImageHandler not a subtype
+    this.mojoGoalExecutionHandlers =
+        ServiceLoader.load(MojoGoalExecutionHandler.class, getClass().getClassLoader());
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "OpenTelemetry: mojoGoalExecutionHandlers: "
+              + StreamSupport.stream(mojoGoalExecutionHandlers.spliterator(), false)
+                  .map(h -> h.toString())
+                  .collect(Collectors.joining(", ")));
+    }
+  }
 
   /**
    * Register in given {@link OtelExecutionListener} to the lifecycle of the given {@link
@@ -208,31 +227,16 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             .setAttribute(
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
                 mojoExecution.getLifecyclePhase());
-    //  enrich spans
-    List<MojoGoalExecutionHandler> handlers = getMojoGoalExecutionHandlers();
+    //  enrich spans with MojoGoalExecutionHandler
     Optional<MojoGoalExecutionHandler> handler =
-        handlers.stream().filter(h -> h.supports(executionEvent)).findFirst();
+        StreamSupport.stream(this.mojoGoalExecutionHandlers.spliterator(), true)
+            .filter(h -> h.supports(executionEvent))
+            .findFirst();
     logger.debug("OpenTelemetry: {} handler {}", executionEvent, handler);
     handler.ifPresent(h -> h.enrichSpan(spanBuilder, executionEvent));
 
     Span span = spanBuilder.startSpan();
     spanRegistry.putSpan(span, mojoExecution);
-  }
-
-  /**
-   * TODO should we have a more generic and extensible mechanism to load {@link
-   * MojoGoalExecutionHandler}s? Would it be using:
-   *
-   * <ul>
-   *   <li>An SPI model relying on {@link java.util.ServiceLoader#load(Class)} similarly to {@link
-   *       io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider}?
-   *   <li>Maven Plexus container?
-   * </ul>
-   */
-  private List<MojoGoalExecutionHandler> getMojoGoalExecutionHandlers() {
-    List<MojoGoalExecutionHandler> handlers =
-        Arrays.asList(new MavenDeployDeployHandler(), new SpringBootBuildImageHandler());
-    return handlers;
   }
 
   @Override

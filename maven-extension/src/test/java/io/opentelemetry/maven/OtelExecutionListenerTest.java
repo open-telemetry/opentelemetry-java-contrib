@@ -7,6 +7,10 @@ package io.opentelemetry.maven;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 
 public class OtelExecutionListenerTest {
@@ -25,5 +29,15 @@ public class OtelExecutionListenerTest {
     String actual = otelEventSpy.getPluginArtifactIdShortName("spotbugs-maven-plugin");
     String expected = "spotbugs";
     assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  public void mojoGoalExecutionHandlers() {
+    OtelExecutionListener otelExecutionListener = new OtelExecutionListener();
+
+    List<MojoGoalExecutionHandler> actual =
+        StreamSupport.stream(otelExecutionListener.mojoGoalExecutionHandlers.spliterator(), false)
+            .collect(Collectors.toList());
+    assertThat(actual.size()).isEqualTo(2);
   }
 }
