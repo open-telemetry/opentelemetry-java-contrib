@@ -115,6 +115,32 @@ In addition to the span attributes captured on  every Maven plugin goal executio
 
 The `span.kind` is set to `client`
 
+### `snyk:monitor`
+
+See https://github.com/snyk/snyk-maven-plugin
+
+| Span attribute | Description                                                                                    |
+|----------------|------------------------------------------------------------------------------------------------|
+| `http.url`     | `https://snyk.io/api/v1/monitor/maven`                                                         |
+| `rpc.method`   | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin                         |
+| `http.url`     | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin |
+|
+
+The `span.kind` is set to `client`
+
+### `snyk:test`
+
+See https://github.com/snyk/snyk-maven-plugin
+
+| Span attribute | Description                                                                                    |
+|----------------|------------------------------------------------------------------------------------------------|
+| `http.url`     | `https://snyk.io/api/v1/test-dep-graph`                                                        |
+| `rpc.method`   | `test`, the underlying Snyk CLI command invoked by the Maven plugin                            |
+| `http.url`     | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin |
+|
+
+The `span.kind` is set to `client`
+
 ### `spring-boot:build-image`
 
 | Span attribute                | Description                                                                                                                                                                              |

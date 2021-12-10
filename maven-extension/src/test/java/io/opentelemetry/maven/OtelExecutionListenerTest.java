@@ -19,6 +19,6 @@ public class OtelExecutionListenerTest {
 
     Collection<MojoGoalExecutionHandler> actual =
         otelExecutionListener.mojoGoalExecutionHandlers.values();
-    assertThat(actual.size()).isEqualTo(2);
+    assertThat(actual.size()).isEqualTo(4);
   }
 }
