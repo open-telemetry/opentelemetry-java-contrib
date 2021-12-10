@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 final class OtelUtils {
+  private OtelUtils() {}
+
   protected static String prettyPrintSdkConfiguration(
       AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
     List<String> configAttributeNames =

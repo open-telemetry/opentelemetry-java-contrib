@@ -6,20 +6,13 @@
 package io.opentelemetry.maven.handler;
 
 import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.maven.MavenGoal;
+import java.util.List;
 import org.apache.maven.execution.ExecutionEvent;
 
-public interface MojoGoalExecutionHandler extends Comparable<MojoGoalExecutionHandler> {
+public interface MojoGoalExecutionHandler {
 
   default void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {}
 
-  boolean supports(ExecutionEvent executionEvent);
-
-  default int ordinal() {
-    return 0;
-  }
-
-  @Override
-  default int compareTo(MojoGoalExecutionHandler other) {
-    return Integer.compare(this.ordinal(), other.ordinal());
-  }
+  List<MavenGoal> getSupportedGoals();
 }

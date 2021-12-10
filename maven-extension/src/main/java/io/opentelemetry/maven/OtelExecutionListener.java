@@ -15,12 +15,12 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -50,20 +50,39 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   @Requirement private OpenTelemetrySdkService openTelemetrySdkService;
 
   @VisibleForTesting
-  protected final ServiceLoader<MojoGoalExecutionHandler> mojoGoalExecutionHandlers;
+  Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
 
   public OtelExecutionListener() {
     // Must use the classloader of the class rather the default ThreadContextClassloader to prevent
     // java.util.ServiceConfigurationError:
     //    io.opentelemetry.maven.handler.MojoGoalExecutionHandler:
     //    io.opentelemetry.maven.handler.SpringBootBuildImageHandler not a subtype
-    this.mojoGoalExecutionHandlers =
-        ServiceLoader.load(MojoGoalExecutionHandler.class, getClass().getClassLoader());
+
+    ServiceLoader.load(MojoGoalExecutionHandler.class, getClass().getClassLoader())
+        .forEach(
+            handler ->
+                handler
+                    .getSupportedGoals()
+                    .forEach(
+                        goal -> {
+                          MojoGoalExecutionHandler previousHandler =
+                              mojoGoalExecutionHandlers.put(goal, handler);
+                          if (previousHandler != null) {
+                            throw new IllegalStateException(
+                                "More than one handler found for maven goal "
+                                    + goal
+                                    + ": "
+                                    + previousHandler
+                                    + ", "
+                                    + handler);
+                          }
+                        }));
+
     if (logger.isDebugEnabled()) {
       logger.debug(
           "OpenTelemetry: mojoGoalExecutionHandlers: "
-              + StreamSupport.stream(mojoGoalExecutionHandlers.spliterator(), false)
-                  .map(h -> h.toString())
+              + mojoGoalExecutionHandlers.entrySet().stream()
+                  .map(entry -> entry.getKey().toString() + ": " + entry.getValue().toString())
                   .collect(Collectors.joining(", ")));
     }
   }
@@ -189,11 +208,11 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     Span rootSpan = spanRegistry.getSpan(executionEvent.getProject());
 
     final String spanName =
-        getPluginArtifactIdShortName(mojoExecution.getArtifactId())
+        MavenUtils.getPluginArtifactIdShortName(mojoExecution.getArtifactId())
             + ":"
             + mojoExecution.getGoal()
             + " ("
-            + executionEvent.getMojoExecution().getExecutionId()
+            + mojoExecution.getExecutionId()
             + ")"
             + " @ "
             + executionEvent.getProject().getArtifactId();
@@ -229,9 +248,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
                 mojoExecution.getLifecyclePhase());
     //  enrich spans with MojoGoalExecutionHandler
     Optional<MojoGoalExecutionHandler> handler =
-        StreamSupport.stream(this.mojoGoalExecutionHandlers.spliterator(), true)
-            .filter(h -> h.supports(executionEvent))
-            .findFirst();
+        Optional.ofNullable(this.mojoGoalExecutionHandlers.get(MavenGoal.create(mojoExecution)));
     logger.debug("OpenTelemetry: {} handler {}", executionEvent, handler);
     handler.ifPresent(h -> h.enrichSpan(spanBuilder, executionEvent));
 
@@ -261,6 +278,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     logger.debug("OpenTelemetry: End failed mojo execution span: {}", mojoExecution);
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
     mojoExecutionSpan.setStatus(StatusCode.ERROR, "Mojo Failed"); // TODO verify description
+    mojoExecutionSpan.recordException(executionEvent.getException());
     mojoExecutionSpan.end();
   }
 
@@ -268,31 +286,6 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   public void sessionEnded(ExecutionEvent event) {
     logger.debug("OpenTelemetry: Maven session ended");
     spanRegistry.removeRootSpan().end();
-  }
-
-  /**
-   * Shorten plugin identifiers.
-   *
-   * <p>Examples:
-   *
-   * <ul>
-   *   <li>maven-clean-plugin -&gt; clean
-   *   <li>sisu-maven-plugin -&gt; sisu
-   *   <li>spotbugs-maven-plugin -&gt; spotbugs
-   * </ul>
-   *
-   * @param pluginArtifactId the artifact ID of the mojo {@link MojoExecution#getArtifactId()}
-   * @return shortened name
-   */
-  protected String getPluginArtifactIdShortName(String pluginArtifactId) {
-    if (pluginArtifactId.endsWith("-maven-plugin")) {
-      return pluginArtifactId.substring(0, pluginArtifactId.length() - "-maven-plugin".length());
-    } else if (pluginArtifactId.startsWith("maven-") && pluginArtifactId.endsWith("-plugin")) {
-      return pluginArtifactId.substring(
-          "maven-".length(), pluginArtifactId.length() - "-plugin".length());
-    } else {
-      return pluginArtifactId;
-    }
   }
 
   private static class ToUpperCaseTextMapGetter implements TextMapGetter<Map<String, String>> {

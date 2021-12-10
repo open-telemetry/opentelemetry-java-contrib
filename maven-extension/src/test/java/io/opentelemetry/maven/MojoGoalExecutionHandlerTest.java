@@ -18,6 +18,8 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.bridge.MavenRepositorySystem;
@@ -59,8 +61,9 @@ public class MojoGoalExecutionHandlerTest {
 
     MavenDeployHandler mavenDeployHandler = new MavenDeployHandler();
 
-    boolean actual = mavenDeployHandler.supports(executionEvent);
-    assertThat(actual).isEqualTo(true);
+    List<MavenGoal> supportedGoals = mavenDeployHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
@@ -98,8 +101,9 @@ public class MojoGoalExecutionHandlerTest {
 
     SpringBootBuildImageHandler buildImageHandler = new SpringBootBuildImageHandler();
 
-    boolean actual = buildImageHandler.supports(executionEvent);
-    assertThat(actual).isEqualTo(true);
+    List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =

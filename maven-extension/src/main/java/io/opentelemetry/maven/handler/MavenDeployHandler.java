@@ -7,6 +7,7 @@ package io.opentelemetry.maven.handler;
 
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.net.MalformedURLException;

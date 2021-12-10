@@ -7,6 +7,8 @@ package io.opentelemetry.maven.handler;
 
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.maven.MavenGoal;
+import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.net.MalformedURLException;
@@ -24,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li><a
  *       href="https://docs.spring.io/spring-boot/docs/2.6.1/maven-plugin/reference/htmlsingle/">Spring
- *       Boot MAven Plugin</a>
+ *       Boot Maven Plugin</a>
  *   <li><a
  *       href="https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin">GitHub
  *       : spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/</a>
@@ -34,7 +36,7 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
   private static final Logger logger = LoggerFactory.getLogger(SpringBootBuildImageHandler.class);
 
   @Override
-  protected List<MavenGoal> getSupportedGoals() {
+  public List<MavenGoal> getSupportedGoals() {
     return Collections.singletonList(
         MavenGoal.create("org.springframework.boot", "spring-boot-maven-plugin", "build-image"));
   }
@@ -74,21 +76,32 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
         && Boolean.parseBoolean(pluginCfg.getChild("publish").getValue())) {
       Xpp3Dom dockerCfg = pluginCfg.getChild("docker");
       Xpp3Dom publishRegistryCfg = dockerCfg == null ? null : dockerCfg.getChild("publishRegistry");
-      Xpp3Dom urlCfg = publishRegistryCfg == null ? null : publishRegistryCfg.getChild("url");
 
-      String url = urlCfg == null ? null : urlCfg.getValue();
-      if (url.startsWith("http://") || url.startsWith("https://")) {
+      // REGISTRY URL
+      Xpp3Dom registryUrlCfg = publishRegistryCfg == null ? null : publishRegistryCfg.getChild("url");
+
+      String url = registryUrlCfg == null ? null : registryUrlCfg.getValue();
+      if (url == null) {
+      } else if (url.startsWith("http://") || url.startsWith("https://")) {
         try {
           URL containerRegistryUrl = new URL(url);
-          // setting the net_peer_service helps visualization on Jaeger but
-          // doesn't fully comply with the spec
+          // Note that setting the net_peer_service helps visualization but
+          // doesn't fully comply with the Otel spec
           spanBuilder.setAttribute(SemanticAttributes.PEER_SERVICE, containerRegistryUrl.getHost());
         } catch (MalformedURLException e) {
           logger.debug("Ignore exception parsing container registry URL", e);
         }
+
+        spanBuilder.setAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL, url);
         spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, url);
         spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
       }
+      // REGISTRY USERNAME
+      Xpp3Dom registryUsernameCfg = publishRegistryCfg == null ? null : publishRegistryCfg.getChild("username");
+      if (registryUsernameCfg != null) {
+        spanBuilder.setAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME, registryUsernameCfg.getValue());
+      }
+
     }
   }
 }
