@@ -14,8 +14,10 @@ import io.opentelemetry.api.common.AttributeKey;
  * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
  */
 public class MavenOtelSemanticAttributes {
-  public static final AttributeKey<String> CONTAINER_REGISTRY_URL = stringKey("container.registry.url");
-  public static final AttributeKey<String> CONTAINER_REGISTRY_USERNAME = stringKey("container.registry.username");
+  public static final AttributeKey<String> CONTAINER_REGISTRY_URL =
+      stringKey("container.registry.url");
+  public static final AttributeKey<String> CONTAINER_REGISTRY_USERNAME =
+      stringKey("container.registry.username");
 
   public static final AttributeKey<String> MAVEN_EXECUTION_ID = stringKey("maven.execution.id");
   public static final AttributeKey<String> MAVEN_PROJECT_ARTIFACT_ID =

@@ -78,7 +78,8 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
       Xpp3Dom publishRegistryCfg = dockerCfg == null ? null : dockerCfg.getChild("publishRegistry");
 
       // REGISTRY URL
-      Xpp3Dom registryUrlCfg = publishRegistryCfg == null ? null : publishRegistryCfg.getChild("url");
+      Xpp3Dom registryUrlCfg =
+          publishRegistryCfg == null ? null : publishRegistryCfg.getChild("url");
 
       String url = registryUrlCfg == null ? null : registryUrlCfg.getValue();
       if (url == null) {
@@ -97,11 +98,13 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
         spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
       }
       // REGISTRY USERNAME
-      Xpp3Dom registryUsernameCfg = publishRegistryCfg == null ? null : publishRegistryCfg.getChild("username");
+      Xpp3Dom registryUsernameCfg =
+          publishRegistryCfg == null ? null : publishRegistryCfg.getChild("username");
       if (registryUsernameCfg != null) {
-        spanBuilder.setAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME, registryUsernameCfg.getValue());
+        spanBuilder.setAttribute(
+            MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME,
+            registryUsernameCfg.getValue());
       }
-
     }
   }
 }
