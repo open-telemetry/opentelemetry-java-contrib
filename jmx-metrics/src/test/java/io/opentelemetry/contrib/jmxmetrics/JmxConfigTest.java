@@ -114,6 +114,6 @@ class JmxConfigTest {
         .isInstanceOf(ConfigurationException.class)
         .hasMessage(
             "[jvm, unavailabletargetsystem] must specify targets from "
-                + "[cassandra, jvm, kafka, kafka-consumer, kafka-producer]");
+                + "[cassandra, jvm, kafka, kafka-consumer, kafka-producer, tomcat]");
   }
 }
