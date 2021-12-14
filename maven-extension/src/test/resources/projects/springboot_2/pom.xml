@@ -10,7 +10,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>io.opentelemetry.contrib.maven.test</groupId>
-  <artifactId>springboot-test</artifactId>
+  <artifactId>springboot-test-2</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>springboot-test</name>
   <description>Demo project for Spring Boot</description>
@@ -36,7 +36,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <image>
-            <name>docker.io/john/${project.artifactId}</name>
+            <name>docker.io/john/${project.artifactId}:${project.version}</name>
           </image>
           <publish>true</publish>
           <docker>

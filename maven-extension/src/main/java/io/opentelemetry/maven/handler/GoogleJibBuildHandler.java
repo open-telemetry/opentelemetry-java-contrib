@@ -57,6 +57,9 @@ public class GoogleJibBuildHandler extends AbstractMojoGoalExecutionHandler {
       tagNodes.ifPresent(
           tags -> Arrays.stream(tags).map(Xpp3Dom::getValue).forEach(imageTags::add));
 
+      if (imageTags.isEmpty()) {
+        imageTags.add(executionEvent.getProject().getVersion());
+      }
       spanBuilder.setAttribute(
           MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME, imageName);
       spanBuilder.setAttribute(

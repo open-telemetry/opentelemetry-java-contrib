@@ -75,6 +75,7 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
     }
 
     // FIXME handle use cases when additional additional `tags` are provided
+    // cyrille didn't understand yet from the Spring docs how to define multiple tags
     spanBuilder.setAttribute(
         MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME, imageName);
     spanBuilder.setAttribute(

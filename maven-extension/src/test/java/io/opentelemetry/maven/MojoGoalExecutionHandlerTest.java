@@ -9,12 +9,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.maven.handler.GoogleJibBuildHandler;
 import io.opentelemetry.maven.handler.MavenDeployHandler;
+import io.opentelemetry.maven.handler.SnykMonitorHandler;
+import io.opentelemetry.maven.handler.SnykTestHandler;
 import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +49,7 @@ import org.junit.jupiter.api.Test;
 public class MojoGoalExecutionHandlerTest {
 
   @Test
-  public void testDeployDeploy() throws Exception {
+  public void testMavenDeploy() throws Exception {
 
     String pomXmlPath = "projects/jar/pom.xml";
     String mojoGroupId = "org.apache.maven.plugins";
@@ -87,9 +89,9 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testSpringBootBuildImage() throws Exception {
+  public void testSpringBootBuildImage_springboot_1() throws Exception {
 
-    String pomXmlPath = "projects/springboot/pom.xml";
+    String pomXmlPath = "projects/springboot_1/pom.xml";
     String mojoGroupId = "org.springframework.boot";
     String mojoArtifactId = "spring-boot-maven-plugin";
     String mojoVersion = "2.5.6";
@@ -112,13 +114,215 @@ public class MojoGoalExecutionHandlerTest {
       buildImageHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
 
-      // FIXME need better initialization of the MavenExecutionEvent to test this
-      // assertThat(span.getAttribute(ResourceAttributes.CONTAINER_IMAGE_NAME))
-      //    .isEqualTo("docker.io/john/springboot-test");
-      assertThat(span.getAttribute(ResourceAttributes.CONTAINER_IMAGE_TAG)).isEqualTo("latest");
+      // TODO improve the Maven test harness that interpolates the maven properties like
+      // ${project.artifactId}
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
+          .isEqualTo("docker.io/john/${project.artifactId}");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
+          .isEqualTo(Arrays.asList("latest"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+          .isEqualTo("https://docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+          .isEqualTo("john");
+    }
+  }
+
+  @Test
+  public void testSpringBootBuildImage_springboot_2() throws Exception {
+
+    String pomXmlPath = "projects/springboot_2/pom.xml";
+    String mojoGroupId = "org.springframework.boot";
+    String mojoArtifactId = "spring-boot-maven-plugin";
+    String mojoVersion = "2.5.6";
+    String mojoGoal = "build-image";
+
+    MavenProject project = newMavenProject(pomXmlPath);
+    ExecutionEvent executionEvent =
+        newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
+
+    SpringBootBuildImageHandler buildImageHandler = new SpringBootBuildImageHandler();
+
+    List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+
+    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+      SpanBuilder spanBuilder =
+          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("spring-boot:build-image");
+
+      buildImageHandler.enrichSpan(spanBuilder, executionEvent);
+      ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
+
+      // TODO improve the Maven test harness that interpolates the maven properties like
+      // ${project.artifactId}
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
+          .isEqualTo("docker.io/john/${project.artifactId}");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
+          .isEqualTo(Arrays.asList("${project.version}"));
+
+      assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+          .isEqualTo("https://docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+          .isEqualTo("john");
+    }
+  }
+
+  @Test
+  public void testGoogleJibBuild_jib_1() throws Exception {
+
+    String pomXmlPath = "projects/jib_1/pom.xml";
+    String mojoGroupId = "com.google.cloud.tools";
+    String mojoArtifactId = "jib-maven-plugin";
+    String mojoVersion = "3.1.4";
+    String mojoGoal = "build";
+
+    MavenProject project = newMavenProject(pomXmlPath);
+    ExecutionEvent executionEvent =
+        newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
+
+    GoogleJibBuildHandler buildImageHandler = new GoogleJibBuildHandler();
+
+    List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+
+    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+      SpanBuilder spanBuilder =
+          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("jib:build");
+
+      buildImageHandler.enrichSpan(spanBuilder, executionEvent);
+      ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
+
+      // TODO improve the Maven test harness that interpolates the maven properties like
+      // ${project.artifactId}
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
+          .isEqualTo("docker.io/john/${project.artifactId}");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
+          .isEqualTo(Arrays.asList("latest", "${project.version}"));
+
+      assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+          .isEqualTo("https://docker.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+          .isEqualTo("john");
+    }
+  }
+
+  @Test
+  public void testGoogleJibBuild_jib_2() throws Exception {
+
+    String pomXmlPath = "projects/jib_2/pom.xml";
+    String mojoGroupId = "com.google.cloud.tools";
+    String mojoArtifactId = "jib-maven-plugin";
+    String mojoVersion = "3.1.4";
+    String mojoGoal = "build";
+
+    MavenProject project = newMavenProject(pomXmlPath);
+    ExecutionEvent executionEvent =
+        newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
+
+    GoogleJibBuildHandler buildImageHandler = new GoogleJibBuildHandler();
+
+    List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+
+    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+      SpanBuilder spanBuilder =
+          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("jib:build");
+
+      buildImageHandler.enrichSpan(spanBuilder, executionEvent);
+      ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
+
+      // TODO improve the Maven test harness that interpolates the maven properties like
+      // ${project.artifactId}
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
+          .isEqualTo("gcr.io/my-gcp-project/my-app");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
+          .isEqualTo(Arrays.asList("1.0-SNAPSHOT"));
+
+      assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://gcr.io");
+      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("gcr.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+          .isEqualTo("https://gcr.io");
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+          .isNull();
+    }
+  }
+
+  @Test
+  public void testSnykTest_snyk_1() throws Exception {
+
+    String pomXmlPath = "projects/snyk_1/pom.xml";
+    String mojoGroupId = "io.snyk";
+    String mojoArtifactId = "snyk-maven-plugin";
+    String mojoVersion = "2.0.0";
+    String mojoGoal = "test";
+
+    MavenProject project = newMavenProject(pomXmlPath);
+    ExecutionEvent executionEvent =
+        newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
+
+    SnykTestHandler snykTestHandler = new SnykTestHandler();
+
+    List<MavenGoal> supportedGoals = snykTestHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+
+    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+      SpanBuilder spanBuilder =
+          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("snyk:test");
+
+      snykTestHandler.enrichSpan(spanBuilder, executionEvent);
+      ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
+
+      assertThat(span.getKind()).isEqualTo(SpanKind.CLIENT);
+
+      assertThat(span.getAttribute(SemanticAttributes.HTTP_URL))
+          .isEqualTo("https://snyk.io/api/v1/test-dep-graph");
+      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("snyk.io");
+      assertThat(span.getAttribute(SemanticAttributes.RPC_METHOD)).isEqualTo("test");
+    }
+  }
+
+  @Test
+  public void testSnykMonitor_snyk_1() throws Exception {
+
+    String pomXmlPath = "projects/snyk_1/pom.xml";
+    String mojoGroupId = "io.snyk";
+    String mojoArtifactId = "snyk-maven-plugin";
+    String mojoVersion = "2.0.0";
+    String mojoGoal = "monitor";
+
+    MavenProject project = newMavenProject(pomXmlPath);
+    ExecutionEvent executionEvent =
+        newMojoStartedExecutionEvent(project, mojoGroupId, mojoArtifactId, mojoVersion, mojoGoal);
+
+    SnykMonitorHandler snykTestHandler = new SnykMonitorHandler();
+
+    List<MavenGoal> supportedGoals = snykTestHandler.getSupportedGoals();
+    assertThat(supportedGoals)
+        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+
+    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+      SpanBuilder spanBuilder =
+          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("snyk:monitor");
+
+      snykTestHandler.enrichSpan(spanBuilder, executionEvent);
+      ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
+
+      assertThat(span.getKind()).isEqualTo(SpanKind.CLIENT);
+
+      assertThat(span.getAttribute(SemanticAttributes.HTTP_URL))
+          .isEqualTo("https://snyk.io/api/v1/monitor/maven");
+      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("snyk.io");
+      assertThat(span.getAttribute(SemanticAttributes.RPC_METHOD)).isEqualTo("monitor");
     }
   }
 
