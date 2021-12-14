@@ -1,4 +1,5 @@
-io.opentelemetry.maven.handler.SpringBootBuildImageHandler
+io.opentelemetry.maven.handler.GoogleJibBuildHandler
 io.opentelemetry.maven.handler.MavenDeployHandler
 io.opentelemetry.maven.handler.SnykMonitorHandler
 io.opentelemetry.maven.handler.SnykTestHandler
+io.opentelemetry.maven.handler.SpringBootBuildImageHandler

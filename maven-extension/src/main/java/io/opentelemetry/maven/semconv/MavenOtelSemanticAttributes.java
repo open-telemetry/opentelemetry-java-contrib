@@ -5,9 +5,12 @@
 
 package io.opentelemetry.maven.semconv;
 
+import static io.opentelemetry.api.common.AttributeKey.stringArrayKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import java.util.List;
 
 /**
  * @see io.opentelemetry.api.common.Attributes
@@ -39,5 +42,9 @@ public class MavenOtelSemanticAttributes {
   public static final AttributeKey<String> MAVEN_REPOSITORY_USERNAME =
       stringKey("maven.repository.authentication.username");
 
+  public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_IMAGE_NAME =
+      stringKey("maven.build." + ResourceAttributes.CONTAINER_IMAGE_NAME.getKey());
+  public static final AttributeKey<List<String>> MAVEN_BUILD_CONTAINER_IMAGE_TAGS =
+      stringArrayKey("maven.build." + ResourceAttributes.CONTAINER_IMAGE_TAG.getKey() + "s");
   public static final String SERVICE_NAME_VALUE = "maven";
 }
