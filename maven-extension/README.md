@@ -60,14 +60,14 @@ Without this setting, the traces won't be exported and the OpenTelemetry Maven E
 The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoconfiguration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
 
-| System property                         | Environment variable                    | Default value           | Description                                                                                                                                     |
-|-----------------------------------------|-----------------------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| otel.traces.exporter                    | OTEL_TRACES_EXPORTER                    | `none`                  | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
-| otel.exporter.otlp.endpoint             | OTEL_EXPORTER_OTLP_ENDPOINT             | `http://localhost:4317` | The OTLP traces and metrics endpoint to connect to. Must be a URL with a scheme of either `http` or `https` based on the use of TLS.            |
-| otel.exporter.otlp.headers              | OTEL_EXPORTER_OTLP_HEADERS              |                         | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests.                                              |
-| otel.exporter.otlp.timeout              | OTEL_EXPORTER_OTLP_TIMEOUT              | `10000`                 | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch.                                                    |
-| otel.resource.attributes                | OTEL_RESOURCE_ATTRIBUTES                |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3                                                              |
-| otel.instrumentation.maven.mojo.enabled | OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED | `true`                  | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds.  |
+| System property                           <br /> Environment variable                      | Default value           | Description                                                                                                                                     |
+|--------------------------------------------------------------------------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `otel.traces.exporter`                    <br /> `OTEL_TRACES_EXPORTER`                    | `none`                  | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
+| `otel.exporter.otlp.endpoint`             <br /> `OTEL_EXPORTER_OTLP_ENDPOINT`             | `http://localhost:4317` | The OTLP traces and metrics endpoint to connect to. Must be a URL with a scheme of either `http` or `https` based on the use of TLS.            |
+| `otel.exporter.otlp.headers`              <br /> `OTEL_EXPORTER_OTLP_HEADERS`              |                         | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests.                                              |
+| `otel.exporter.otlp.timeout`              <br /> `OTEL_EXPORTER_OTLP_TIMEOUT`              | `10000`                 | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch.                                                    |
+| `otel.resource.attributes`                <br /> `OTEL_RESOURCE_ATTRIBUTES`                |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3                                                              |
+| `otel.instrumentation.maven.mojo.enabled` <br /> `OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED` | `true`                  | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds.  |
 
 
 ℹ️ The `service.name` is set to `maven` and the `service.version` to the version of the Maven runtime in use.
@@ -88,44 +88,44 @@ Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with
 
 ### Span attributes captured for every Maven plugin goal execution
 
-| Span attribute                   | Description                                                          |
-|----------------------------------|----------------------------------------------------------------------|
-| `maven.project.groupId`          | Group ID of the Maven project on which the Maven goal is executed    |
-| `maven.project.artifactId`       | Artifact ID of the Maven project on which the Maven goal is executed |
-| `maven.project.version`          | Version of the Maven project on which the Maven goal is executed     |
-| `maven.plugin.groupId`           | Group ID of the Maven plugin on which the Maven goal is executed     |
-| `maven.plugin.artifactId`        | Artifact ID of the Maven plugin on which the Maven goal is executed  |
-| `maven.plugin.version`           | Version of the Maven plugin on which the Maven goal is executed      |
-| `maven.execution.goal`           | Goal that is being executed                                          |
-| `maven.execution.id`             | ID of the execution                                                  |
-| `maven.execution.lifecyclePhase` | Lifecycle phase to which belong the execution                        |
+| Span attribute                   |  Type  | Description                                                          |
+|----------------------------------|--------|----------------------------------------------------------------------|
+| `maven.project.groupId`          | string | Group ID of the Maven project on which the Maven goal is executed    |
+| `maven.project.artifactId`       | string | Artifact ID of the Maven project on which the Maven goal is executed |
+| `maven.project.version`          | string | Version of the Maven project on which the Maven goal is executed     |
+| `maven.plugin.groupId`           | string | Group ID of the Maven plugin on which the Maven goal is executed     |
+| `maven.plugin.artifactId`        | string | Artifact ID of the Maven plugin on which the Maven goal is executed  |
+| `maven.plugin.version`           | string | Version of the Maven plugin on which the Maven goal is executed      |
+| `maven.execution.goal`           | string | Goal that is being executed                                          |
+| `maven.execution.id`             | string | ID of the execution                                                  |
+| `maven.execution.lifecyclePhase` | string | Lifecycle phase to which belong the execution                        |
 
 ### `deploy:deploy`
 
 In addition to the span attributes captured on  every Maven plugin goal execution as described above:
 
-| Span attribute              | Description                                                                                                                                         |
-|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `http.method`               | `POST`                                                                                                                                              |
-| `http.url`                  | Base URL of the uploaded artifact `${repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`         |
-| `maven.repository.id`       | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)  |
-| `maven.repository.url`      | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository) |
-| `maven.repository.username` | Username used to upload artifacts to the Maven repository. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)     |
-| `peer.service`              | Maven repository hostname deduced from the Repository URL                                                                                           |
+| Span attribute              |  Type  | Description                                                                                                                                         |
+|-----------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `http.method`               | string | `POST`                                                                                                                                              |
+| `http.url`                  | string | Base URL of the uploaded artifact `${repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`         |
+| `maven.repository.id`       | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)  |
+| `maven.repository.url`      | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository) |
+| `maven.repository.username` | string | Username used to upload artifacts to the Maven repository. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)     |
+| `peer.service`              | string | Maven repository hostname deduced from the Repository URL                                                                                           |
 
 The `span.kind` is set to `client`
 
 ### `jib:build`
 
-| Span attribute                      | Description                                                                                                |
-|-------------------------------------|------------------------------------------------------------------------------------------------------------|
-| `container.registry.url`            | URL of the container registry to which this image is uploaded.                                             |
-| `container.registry.username`       | Username used to upload the image to the container registry.                                               |
-| `http.method`                       | `POST`                                                                                                     |
-| `http.url`                          | URL on the Docker registry deduced from the Docker image specified in the `build` goal configuration.      |
-| `maven.build.container.image.name`  | Docker image specified in the `build` goal configuration                                                   |
-| `maven.build.container.image.tags`  | Docker image tags specified in the `build` goal configuration                                              |
-| `peer.service`                      | Docker Registry hostname.                                                                                  |
+| Span attribute                      |  Type    | Description                                                                                                |
+|-------------------------------------|----------|------------------------------------------------------------------------------------------------------------|
+| `container.registry.url`            | string   | URL of the container registry to which this image is uploaded.                                             |
+| `container.registry.username`       | string   | Username used to upload the image to the container registry.                                               |
+| `http.method`                       | string   | `POST`                                                                                                     |
+| `http.url`                          | string   | URL on the Docker registry deduced from the Docker image specified in the `build` goal configuration.      |
+| `maven.build.container.image.name`  | string   | Name of the produced Docker image                                                                          |
+| `maven.build.container.image.tags`  | string[] | Tags of the produced Docker image                                                                          |
+| `peer.service`                      | string   | Docker Registry hostname.                                                                                  |
 
 The `span.kind` is set to `client`
 
@@ -134,12 +134,12 @@ The `span.kind` is set to `client`
 
 See https://github.com/snyk/snyk-maven-plugin
 
-| Span attribute | Description                                                                                    |
-|----------------|------------------------------------------------------------------------------------------------|
-| `http.method`  | `POST`                                                               |
-| `http.url`     | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin.|
-| `rpc.method`   | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.|
-| `peer.service` | `snyk.io`                                                            |
+| Span attribute |  Type  | Description                                                                                    |
+|----------------|--------|------------------------------------------------------------------------------------------------|
+| `http.method`  | string | `POST`                                                               |
+| `http.url`     | string | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin.|
+| `rpc.method`   | string | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.|
+| `peer.service` | string | `snyk.io`                                                            |
 
 The `span.kind` is set to `client`
 
@@ -147,27 +147,27 @@ The `span.kind` is set to `client`
 
 See https://github.com/snyk/snyk-maven-plugin
 
-| Span attribute | Description                                                          |
-|----------------|----------------------------------------------------------------------|
-| `http.method`  | `POST`                                                               |
-| `http.url`     | `https://snyk.io/api/v1/test-dep-graph`                              |
-| `rpc.method`   | `test`, the underlying Snyk CLI command invoked by the Maven plugin. |
-| `peer.service` | `snyk.io`                                                            |
+| Span attribute |  Type  | Description                                                          |
+|----------------|--------|----------------------------------------------------------------------|
+| `http.method`  | string | `POST`                                                               |
+| `http.url`     | string | `https://snyk.io/api/v1/test-dep-graph`                              |
+| `rpc.method`   | string | `test`, the underlying Snyk CLI command invoked by the Maven plugin. |
+| `peer.service` | string | `snyk.io`                                                            |
 
 
 The `span.kind` is set to `client`
 
 ### `spring-boot:build-image`
 
-| Span attribute                | Description                                                                                                                                                                              |
-|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `container.registry.url`      | URL of the container registry to which this image is uploaded.  Attribute only added when the `build-image` goal publishes the Docker image.                                             |
-| `container.registry.username` | Username used to upload the image to the container registry.  Attribute only added when the `build-image` goal publishes the Docker image.                                               |
-| `http.method`                 | `POST`. Attribute only added when the `build-image` goal publishes the Docker image.                                                                                                     |
-| `http.url`                    | URL on the Docker registry deduced from the Docker image specified in the `build-image` goal configuration. Attribute only added when the `build-image` goal publishes the Docker image. |
-| `maven.build.container.image.name`        | Docker image specified in the `build-image` goal configuration                                                                                                               |
-| `maven.build.container.image.tags`         | Docker image tags specified in the `build-image` goal configuration                                                                                                         |
-| `peer.service`                | Docker Registry hostname. Attribute only added when the `build-image` goal publishes the Docker image.                                                                                   |
+| Span attribute                     |  Type    | Description                                                                                                                                 |
+|------------------------------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `container.registry.url`           | string   | URL of the container registry to which this image is uploaded.  Attribute only added when the `build-image` goal publishes the Docker image.|
+| `container.registry.username`      | string   | Username used to upload the image to the container registry.  Attribute only added when the `build-image` goal publishes the Docker image.  |
+| `http.method`                      | string   | `POST`. Attribute only added when the `build-image` goal publishes the Docker image.                                                        |
+| `http.url`                         | string   | URL on the Docker registry, deduced from the Docker image. Attribute only added when the `build-image` goal publishes the Docker image.     |
+| `maven.build.container.image.name` | string   | Name of the produced Docker image. Attribute only added when the `build-image` goal publishes the Docker image.                             |
+| `maven.build.container.image.tags` | string[] | Tags of the produced Docker image. Attribute only added when the `build-image` goal publishes the Docker image.                             |
+| `peer.service`                     | string   | Docker Registry hostname. Attribute only added when the `build-image` goal publishes the Docker image.                                      |
 
 The `span.kind` is set to `client`
 
