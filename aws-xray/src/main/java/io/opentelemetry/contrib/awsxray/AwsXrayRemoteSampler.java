@@ -175,7 +175,9 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
           xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
     } catch (Throwable t) {
       // Might be a transient API failure, try again after a default interval.
-      executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+      fetchTargetsFuture =
+          executor.schedule(
+              this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
       return;
     }
 

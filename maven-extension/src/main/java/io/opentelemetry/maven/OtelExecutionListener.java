@@ -14,6 +14,7 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import java.util.Locale;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -38,9 +39,13 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);
 
-  @Requirement private SpanRegistry spanRegistry;
+  @SuppressWarnings("NullAway") // Automatically initialized by DI
+  @Requirement
+  private SpanRegistry spanRegistry;
 
-  @Requirement private OpenTelemetrySdkService openTelemetrySdkService;
+  @SuppressWarnings("NullAway") // Automatically initialized by DI
+  @Requirement
+  private OpenTelemetrySdkService openTelemetrySdkService;
 
   /**
    * Register in given {@link OtelExecutionListener} to the lifecycle of the given {@link
@@ -250,7 +255,8 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
    * @param pluginArtifactId the artifact ID of the mojo {@link MojoExecution#getArtifactId()}
    * @return shortened name
    */
-  protected String getPluginArtifactIdShortName(String pluginArtifactId) {
+  // Visible for testing
+  String getPluginArtifactIdShortName(String pluginArtifactId) {
     if (pluginArtifactId.endsWith("-maven-plugin")) {
       return pluginArtifactId.substring(0, pluginArtifactId.length() - "-maven-plugin".length());
     } else if (pluginArtifactId.startsWith("maven-") && pluginArtifactId.endsWith("-plugin")) {
@@ -268,7 +274,8 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     }
 
     @Override
-    public String get(Map<String, String> environmentVariables, String key) {
+    @Nullable
+    public String get(@Nullable Map<String, String> environmentVariables, String key) {
       return environmentVariables == null
           ? null
           : environmentVariables.get(key.toUpperCase(Locale.ROOT));

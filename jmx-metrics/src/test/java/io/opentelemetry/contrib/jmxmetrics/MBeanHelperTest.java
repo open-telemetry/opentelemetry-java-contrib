@@ -107,7 +107,7 @@ class MBeanHelperTest {
             IntStream.range(0, 100).mapToObj(unused -> null).collect(Collectors.toList()));
   }
 
-  private void registerThings(String thingName) throws Exception {
+  private static void registerThings(String thingName) throws Exception {
     for (int i = 0; i < 100; i++) {
       Thing thing = new Thing(Integer.toString(i));
       String name = thingName + ",thing=" + i;
