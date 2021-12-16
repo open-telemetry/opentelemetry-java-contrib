@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.awsxray;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.awsxray.GetSamplingRulesResponse.SamplingRule;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
@@ -41,7 +40,7 @@ final class XrayRulesSampler implements Sampler {
       Resource resource,
       Clock clock,
       Sampler fallbackSampler,
-      List<SamplingRule> rules) {
+      List<GetSamplingRulesResponse.SamplingRule> rules) {
     this(
         clientId,
         resource,

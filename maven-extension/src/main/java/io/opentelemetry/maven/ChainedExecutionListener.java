@@ -10,14 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Util class to chain multiple {@link ExecutionListener} as Maven APIs don't offer this capability.
  */
 final class ChainedExecutionListener implements ExecutionListener {
-  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final List<ExecutionListener> listeners;
 

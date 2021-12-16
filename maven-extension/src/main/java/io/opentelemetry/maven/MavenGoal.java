@@ -26,7 +26,7 @@ public abstract class MavenGoal {
   abstract String goal();
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "MavenGoal{ "
         + groupId()
         + ":"

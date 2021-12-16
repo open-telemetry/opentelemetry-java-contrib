@@ -126,7 +126,7 @@ class OtelHelperJmxTest {
     return new OtelHelper(new JmxClient(config), new GroovyMetricEnvironment(config));
   }
 
-  private void verifyClient(Properties props) throws Exception {
+  private static void verifyClient(Properties props) throws Exception {
     props.setProperty(JmxConfig.GROOVY_SCRIPT, "myscript.groovy");
     JmxConfig config = new JmxConfig(props);
     config.validate();

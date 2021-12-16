@@ -6,7 +6,6 @@
 package io.opentelemetry.maven;
 
 import org.apache.maven.AbstractMavenLifecycleParticipant;
-import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.component.annotations.Component;
@@ -20,6 +19,7 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
 
   private static final Logger logger = LoggerFactory.getLogger(OtelLifecycleParticipant.class);
 
+  @SuppressWarnings("NullAway") // Automatically initialized by DI
   @Requirement(role = ExecutionListener.class, hint = "otel-execution-listener")
   private OtelExecutionListener otelExecutionListener;
 
@@ -28,19 +28,19 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
    * declared as an extension in pom.xml but {@link #afterSessionStart(MavenSession)} is not invoked
    */
   @Override
-  public void afterProjectsRead(MavenSession session) throws MavenExecutionException {
+  public void afterProjectsRead(MavenSession session) {
     OtelExecutionListener.registerOtelExecutionListener(session, this.otelExecutionListener);
     logger.debug("OpenTelemetry: afterProjectsRead");
   }
 
   @Override
-  public void afterSessionStart(MavenSession session) throws MavenExecutionException {
+  public void afterSessionStart(MavenSession session) {
     OtelExecutionListener.registerOtelExecutionListener(session, this.otelExecutionListener);
     logger.debug("OpenTelemetry: afterSessionStart");
   }
 
   @Override
-  public void afterSessionEnd(MavenSession session) throws MavenExecutionException {
+  public void afterSessionEnd(MavenSession session) {
     logger.debug("OpenTelemetry: afterSessionEnd");
   }
 }

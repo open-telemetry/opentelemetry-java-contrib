@@ -21,6 +21,7 @@ import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.maven.artifact.InvalidRepositoryException;
@@ -46,6 +47,7 @@ import org.junit.jupiter.api.Test;
  * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. See
  * https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java
  */
+@SuppressWarnings("DeduplicateConstants")
 public class MojoGoalExecutionHandlerTest {
 
   @Test
@@ -65,11 +67,12 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = mavenDeployHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("deploy");
+          sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("deploy");
 
       mavenDeployHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -105,11 +108,15 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("spring-boot:build-image");
+          sdkTracerProvider
+              .tracerBuilder("test-tracer")
+              .build()
+              .spanBuilder("spring-boot:build-image");
 
       buildImageHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -119,7 +126,7 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
           .isEqualTo("docker.io/john/${project.artifactId}");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
-          .isEqualTo(Arrays.asList("latest"));
+          .isEqualTo(Collections.singletonList("latest"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
@@ -149,11 +156,15 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("spring-boot:build-image");
+          sdkTracerProvider
+              .tracerBuilder("test-tracer")
+              .build()
+              .spanBuilder("spring-boot:build-image");
 
       buildImageHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -163,7 +174,7 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
           .isEqualTo("docker.io/john/${project.artifactId}");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
-          .isEqualTo(Arrays.asList("${project.version}"));
+          .isEqualTo(Collections.singletonList("${project.version}"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
@@ -193,11 +204,12 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("jib:build");
+          sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("jib:build");
 
       buildImageHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -237,11 +249,12 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = buildImageHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("jib:build");
+          sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("jib:build");
 
       buildImageHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -251,7 +264,7 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_NAME))
           .isEqualTo("gcr.io/my-gcp-project/my-app");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_IMAGE_TAGS))
-          .isEqualTo(Arrays.asList("1.0-SNAPSHOT"));
+          .isEqualTo(Collections.singletonList("1.0-SNAPSHOT"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://gcr.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("gcr.io");
@@ -281,11 +294,12 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = snykTestHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("snyk:test");
+          sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("snyk:test");
 
       snykTestHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -316,11 +330,12 @@ public class MojoGoalExecutionHandlerTest {
 
     List<MavenGoal> supportedGoals = snykTestHandler.getSupportedGoals();
     assertThat(supportedGoals)
-        .isEqualTo(Arrays.asList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
+        .isEqualTo(
+            Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
     try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
       SpanBuilder spanBuilder =
-          sdkTracerProvider.tracerBuilder("test").build().spanBuilder("snyk:monitor");
+          sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("snyk:monitor");
 
       snykTestHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
@@ -398,13 +413,16 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   static class MockExecutionEvent implements ExecutionEvent {
-    Type type;
+    ExecutionEvent.Type type;
     MavenProject project;
     MavenSession session;
     MojoExecution mojoExecution;
 
     public MockExecutionEvent(
-        Type type, MavenProject project, MavenSession session, MojoExecution mojoExecution) {
+        ExecutionEvent.Type type,
+        MavenProject project,
+        MavenSession session,
+        MojoExecution mojoExecution) {
       this.type = type;
       this.project = project;
       this.session = session;
@@ -412,7 +430,7 @@ public class MojoGoalExecutionHandlerTest {
     }
 
     @Override
-    public Type getType() {
+    public ExecutionEvent.Type getType() {
       return type;
     }
 

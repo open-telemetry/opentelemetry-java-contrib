@@ -14,16 +14,15 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Disposable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +32,14 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   private static final Logger logger = LoggerFactory.getLogger(OpenTelemetrySdkService.class);
 
-  @Requirement private RuntimeInformation runtimeInformation;
+  @SuppressWarnings("NullAway") // Injected automatically to non-null
+  @Requirement
+  private RuntimeInformation runtimeInformation;
 
   private OpenTelemetry openTelemetry = OpenTelemetry.noop();
-  private OpenTelemetrySdk openTelemetrySdk;
+  @Nullable private OpenTelemetrySdk openTelemetrySdk;
 
-  private Tracer tracer;
-
-  private SpanExporter spanExporter;
+  @Nullable private Tracer tracer;
 
   private boolean mojosInstrumentationEnabled;
 
@@ -59,10 +58,11 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   @Override
   public synchronized void dispose() {
     logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
-    if (this.openTelemetrySdk != null) {
+    OpenTelemetrySdk openTelemetrySdk = this.openTelemetrySdk;
+    if (openTelemetrySdk != null) {
       logger.debug("OpenTelemetry: Shutdown SDK Trace Provider...");
       final CompletableResultCode sdkProviderShutdown =
-          this.openTelemetrySdk.getSdkTracerProvider().shutdown();
+          openTelemetrySdk.getSdkTracerProvider().shutdown();
       sdkProviderShutdown.join(10, TimeUnit.SECONDS);
       if (sdkProviderShutdown.isSuccess()) {
         logger.debug("OpenTelemetry: SDK Trace Provider shut down");
@@ -74,13 +74,13 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
       }
       this.openTelemetrySdk = null;
     }
-    this.openTelemetry = null;
+    this.openTelemetry = OpenTelemetry.noop();
 
     logger.debug("OpenTelemetry: OpenTelemetrySdkService disposed");
   }
 
   @Override
-  public void initialize() throws InitializationException {
+  public void initialize() {
     logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
     AutoConfiguredOpenTelemetrySdkBuilder autoConfiguredSdkBuilder =
         AutoConfiguredOpenTelemetrySdk.builder();
@@ -130,6 +130,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   }
 
   public Tracer getTracer() {
+    Tracer tracer = this.tracer;
     if (tracer == null) {
       throw new IllegalStateException("Not initialized");
     }

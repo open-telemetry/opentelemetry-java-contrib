@@ -25,6 +25,8 @@ public final class JfrMetrics {
    * @param meterProvider - the OpenTelemetry metric provider that will harvest the generated
    *     metrics.
    */
+  // TOO(anuraaga): Verify whether there should be a way to cancel the future
+  @SuppressWarnings("FutureReturnValueIgnored")
   public static void enable(MeterProvider meterProvider) {
     var jfrMonitorService = Executors.newSingleThreadExecutor();
     var toMetricRegistry = HandlerRegistry.createDefault(meterProvider);

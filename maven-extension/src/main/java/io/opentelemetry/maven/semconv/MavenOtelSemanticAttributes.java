@@ -13,6 +13,8 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.List;
 
 /**
+ * Semantic attributes for Maven executions.
+ *
  * @see io.opentelemetry.api.common.Attributes
  * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
  */
@@ -36,6 +38,7 @@ public class MavenOtelSemanticAttributes {
   public static final AttributeKey<String> MAVEN_BUILD_REPOSITORY_URL =
       stringKey("maven.build.repository.url");
   public static final AttributeKey<String> MAVEN_EXECUTION_GOAL = stringKey("maven.execution.goal");
+
   public static final AttributeKey<String> MAVEN_EXECUTION_ID = stringKey("maven.execution.id");
   public static final AttributeKey<String> MAVEN_EXECUTION_LIFECYCLE_PHASE =
       stringKey("maven.execution.lifecyclePhase");
@@ -52,4 +55,6 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.project.version");
 
   public static final String SERVICE_NAME_VALUE = "maven";
+
+  private MavenOtelSemanticAttributes() {}
 }

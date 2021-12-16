@@ -18,7 +18,8 @@ import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNe
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";

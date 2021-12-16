@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -44,9 +45,13 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);
 
-  @Requirement private SpanRegistry spanRegistry;
+  @SuppressWarnings("NullAway") // Automatically initialized by DI
+  @Requirement
+  private SpanRegistry spanRegistry;
 
-  @Requirement private OpenTelemetrySdkService openTelemetrySdkService;
+  @SuppressWarnings("NullAway") // Automatically initialized by DI
+  @Requirement
+  private OpenTelemetrySdkService openTelemetrySdkService;
 
   // Visible for testing
   Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
@@ -56,7 +61,6 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     // java.util.ServiceConfigurationError:
     //    io.opentelemetry.maven.handler.MojoGoalExecutionHandler:
     //    io.opentelemetry.maven.handler.SpringBootBuildImageHandler not a subtype
-
     ServiceLoader.load(MojoGoalExecutionHandler.class, getClass().getClassLoader())
         .forEach(
             handler ->
@@ -294,7 +298,8 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     }
 
     @Override
-    public String get(Map<String, String> environmentVariables, String key) {
+    @Nullable
+    public String get(@Nullable Map<String, String> environmentVariables, String key) {
       return environmentVariables == null
           ? null
           : environmentVariables.get(key.toUpperCase(Locale.ROOT));
