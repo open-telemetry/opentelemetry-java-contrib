@@ -24,7 +24,7 @@ final class MavenUtils {
    * @param pluginArtifactId the artifact ID of the mojo {@link MojoExecution#getArtifactId()}
    * @return shortened name
    */
-  public static String getPluginArtifactIdShortName(String pluginArtifactId) {
+  static String getPluginArtifactIdShortName(String pluginArtifactId) {
     if (pluginArtifactId.endsWith("-maven-plugin")) {
       return pluginArtifactId.substring(0, pluginArtifactId.length() - "-maven-plugin".length());
     } else if (pluginArtifactId.startsWith("maven-") && pluginArtifactId.endsWith("-plugin")) {

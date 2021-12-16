@@ -5,7 +5,6 @@
 
 package io.opentelemetry.maven;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
@@ -49,7 +48,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   @Requirement private OpenTelemetrySdkService openTelemetrySdkService;
 
-  @VisibleForTesting
+  // Visible for testing
   Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
 
   public OtelExecutionListener() {

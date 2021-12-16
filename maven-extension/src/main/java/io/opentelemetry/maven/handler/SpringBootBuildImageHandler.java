@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *       : spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/</a>
  * </ul>
  */
-public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandler {
+public class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(SpringBootBuildImageHandler.class);
 
   @Override
@@ -43,7 +43,6 @@ public class SpringBootBuildImageHandler extends AbstractMojoGoalExecutionHandle
 
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
-    super.enrichSpan(spanBuilder, executionEvent);
 
     spanBuilder.setSpanKind(SpanKind.CLIENT);
 
