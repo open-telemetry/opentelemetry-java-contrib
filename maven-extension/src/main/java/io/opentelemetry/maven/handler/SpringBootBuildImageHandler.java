@@ -98,7 +98,8 @@ public class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
           .filter(url -> url.startsWith("http://") || url.startsWith("https://"))
           .ifPresent(
               url -> {
-                spanBuilder.setAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL, url);
+                spanBuilder.setAttribute(
+                    MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL, url);
                 spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, url);
                 spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
                 try {
@@ -118,7 +119,8 @@ public class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
       usernameValue.ifPresent(
           username ->
               spanBuilder.setAttribute(
-                  MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME, username));
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME,
+                  username));
     }
   }
 }

@@ -72,7 +72,8 @@ public class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
               : imageName.substring(0, imageName.indexOf('/'));
 
       spanBuilder.setAttribute(
-          MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL, "https://" + registryHostname);
+          MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL,
+          "https://" + registryHostname);
       spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://" + registryHostname);
       spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
       spanBuilder.setAttribute(SemanticAttributes.PEER_SERVICE, registryHostname);
@@ -85,7 +86,8 @@ public class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
       usernameValue.ifPresent(
           username ->
               spanBuilder.setAttribute(
-                  MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME, username));
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME,
+                  username));
     } else {
       logger.info(
           "OpenTelemetry: missing element: " + "plugin: " + pluginNode + ", image: " + toNode);

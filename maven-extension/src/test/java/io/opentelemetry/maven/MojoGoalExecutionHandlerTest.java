@@ -74,13 +74,13 @@ public class MojoGoalExecutionHandlerTest {
       mavenDeployHandler.enrichSpan(spanBuilder, executionEvent);
       ReadableSpan span = (ReadableSpan) spanBuilder.startSpan();
 
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_REPOSITORY_ID))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_ID))
           .isEqualTo("snapshots");
       assertThat(span.getAttribute(SemanticAttributes.HTTP_METHOD)).isEqualTo("POST");
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL))
           .isEqualTo(
               "https://maven.example.com/repository/maven-snapshots/io/opentelemetry/contrib/maven/test-jar/1.0-SNAPSHOT");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_REPOSITORY_URL))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL))
           .isEqualTo("https://maven.example.com/repository/maven-snapshots/");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("maven.example.com");
 
@@ -123,9 +123,11 @@ public class MojoGoalExecutionHandlerTest {
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+      assertThat(
+              span.getAttribute(
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
           .isEqualTo("john");
     }
   }
@@ -165,9 +167,11 @@ public class MojoGoalExecutionHandlerTest {
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+      assertThat(
+              span.getAttribute(
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
           .isEqualTo("john");
     }
   }
@@ -207,9 +211,11 @@ public class MojoGoalExecutionHandlerTest {
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+      assertThat(
+              span.getAttribute(
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
           .isEqualTo("john");
     }
   }
@@ -249,9 +255,11 @@ public class MojoGoalExecutionHandlerTest {
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://gcr.io");
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("gcr.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_URL))
+      assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://gcr.io");
-      assertThat(span.getAttribute(MavenOtelSemanticAttributes.CONTAINER_REGISTRY_USERNAME))
+      assertThat(
+              span.getAttribute(
+                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
           .isNull();
     }
   }

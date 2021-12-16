@@ -42,17 +42,17 @@ public class MavenDeployHandler implements MojoGoalExecutionHandler {
     optRepository.ifPresent(
         repository -> {
           spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_REPOSITORY_ID, repository.getId());
+              MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_ID, repository.getId());
           spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_REPOSITORY_URL, repository.getUrl());
+              MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL, repository.getUrl());
           Optional<Authentication> optAuthentication =
               Optional.ofNullable(repository.getAuthentication());
           optAuthentication.ifPresent(
               authentication -> {
-                // FIXME is there ia security question here?
+                // FIXME is there a security question here?
                 // cyrille-leclerc: no because it's just the username
                 spanBuilder.setAttribute(
-                    MavenOtelSemanticAttributes.MAVEN_REPOSITORY_USERNAME,
+                    MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_AUTH_USERNAME,
                     authentication.getUsername());
               });
 
