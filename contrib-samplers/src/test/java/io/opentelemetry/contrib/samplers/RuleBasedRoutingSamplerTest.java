@@ -172,7 +172,7 @@ class RuleBasedRoutingSamplerTest {
         parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
   }
 
-  private RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
+  private static RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
     return builder.drop(HTTP_URL, ".*/healthcheck").drop(HTTP_TARGET, "/actuator");
   }
 }

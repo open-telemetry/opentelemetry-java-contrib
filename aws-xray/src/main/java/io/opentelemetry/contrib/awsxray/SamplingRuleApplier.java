@@ -71,7 +71,16 @@ final class SamplingRuleApplier {
   SamplingRuleApplier(String clientId, GetSamplingRulesResponse.SamplingRule rule, Clock clock) {
     this.clientId = clientId;
     this.clock = clock;
-    ruleName = rule.getRuleName();
+    String ruleName = rule.getRuleName();
+    if (ruleName == null) {
+      // The AWS API docs mark this as an optional field but in practice it seems to always be
+      // present, and sampling
+      // targets could not be computed without it. For now provide an arbitrary fallback just in
+      // case the AWS API docs
+      // are correct.
+      ruleName = "default";
+    }
+    this.ruleName = ruleName;
 
     // We don't have a SamplingTarget so are ready to report a snapshot right away.
     nextSnapshotTimeNanos = clock.nanoTime();
@@ -453,7 +462,7 @@ final class SamplingRuleApplier {
     return Sampler.parentBased(new RateLimitingSampler(numPerSecond, clock));
   }
 
-  private Sampler createFixedRate(double rate) {
+  private static Sampler createFixedRate(double rate) {
     return Sampler.parentBased(Sampler.traceIdRatioBased(rate));
   }
 

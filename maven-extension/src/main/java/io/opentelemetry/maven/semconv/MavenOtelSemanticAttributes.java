@@ -10,10 +10,12 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import io.opentelemetry.api.common.AttributeKey;
 
 /**
+ * Semantic attributes for Maven executions.
+ *
  * @see io.opentelemetry.api.common.Attributes
  * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
  */
-public class MavenOtelSemanticAttributes {
+public final class MavenOtelSemanticAttributes {
   public static final AttributeKey<String> MAVEN_EXECUTION_ID = stringKey("maven.execution.id");
   public static final AttributeKey<String> MAVEN_PROJECT_ARTIFACT_ID =
       stringKey("maven.project.artifactId");
@@ -31,4 +33,6 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.execution.lifecyclePhase");
 
   public static final String SERVICE_NAME_VALUE = "maven";
+
+  private MavenOtelSemanticAttributes() {}
 }

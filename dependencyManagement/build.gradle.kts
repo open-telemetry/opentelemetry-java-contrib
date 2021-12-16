@@ -35,6 +35,11 @@ val DEPENDENCY_SETS = listOf(
         listOf("auto-value", "auto-value-annotations")
     ),
     DependencySet(
+        "com.google.errorprone",
+        "2.9.0",
+        listOf("error_prone_annotations", "error_prone_core")
+    ),
+    DependencySet(
         "io.prometheus",
         "0.12.0",
         listOf("simpleclient", "simpleclient_common", "simpleclient_httpserver")
@@ -53,6 +58,7 @@ val DEPENDENCY_SETS = listOf(
 
 val DEPENDENCIES = listOf(
     "com.squareup.okhttp3:okhttp:3.14.9",
+    "com.uber.nullaway:nullaway:0.9.2",
     "org.assertj:assertj-core:3.21.0",
     "org.awaitility:awaitility:4.1.1",
     "org.checkerframework:checker-qual:3.19.0",
