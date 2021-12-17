@@ -36,13 +36,18 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                               .add(
                                   "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
                                   "/usr/local/tomcat/webapps/ROOT.war")
-                              .env(new HashMap<String, String>() {{
-                                put("CATALINA_OPTS", "-Dcom.sun.management.jmxremote.local.only=false "
-                                    + "-Dcom.sun.management.jmxremote.authenticate=false "
-                                    + "-Dcom.sun.management.jmxremote.ssl=false "
-                                    + "-Dcom.sun.management.jmxremote.port=9010 "
-                                    + "-Dcom.sun.management.jmxremote.rmi.port=9010");
-                              }})
+                              .env(
+                                  new HashMap<String, String>() {
+                                    {
+                                      put(
+                                          "CATALINA_OPTS",
+                                          "-Dcom.sun.management.jmxremote.local.only=false "
+                                              + "-Dcom.sun.management.jmxremote.authenticate=false "
+                                              + "-Dcom.sun.management.jmxremote.ssl=false "
+                                              + "-Dcom.sun.management.jmxremote.port=9010 "
+                                              + "-Dcom.sun.management.jmxremote.rmi.port=9010");
+                                    }
+                                  })
                               .build()))
           .withNetwork(Network.SHARED)
           .withEnv("LOCAL_JMX", "no")
@@ -55,63 +60,78 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
   void endToEnd() {
     waitAndAssertMetrics(
         metric ->
-            assertGauge(
-                metric,
-                "tomcat.sessions",
-                "The number of active sessions.",
-                "sessions"),
+            assertGauge(metric, "tomcat.sessions", "The number of active sessions.", "sessions"),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "tomcat.errors",
                 "The number of errors encountered.",
                 "errors",
-                Collections.singletonList(new HashMap<String, String>() {{
-                  put("proto_handler", "\"http-nio-8080\"");
-                }})),
+                Collections.singletonList(
+                    new HashMap<String, String>() {
+                      {
+                        put("proto_handler", "\"http-nio-8080\"");
+                      }
+                    })),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "tomcat.processing_time",
                 "The total processing time.",
                 "ms",
-                Collections.singletonList(new HashMap<String, String>() {{
-                  put("proto_handler", "\"http-nio-8080\"");
-                }})),
+                Collections.singletonList(
+                    new HashMap<String, String>() {
+                      {
+                        put("proto_handler", "\"http-nio-8080\"");
+                      }
+                    })),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "tomcat.traffic",
                 "The number of bytes transmitted and received.",
                 "by",
-                new ArrayList<Map<String, String>>() {{
-                  add(new HashMap<String, String>() {{
-                    put("proto_handler", "\"http-nio-8080\"");
-                    put("direction", "sent");
-                  }});
-                  add(new HashMap<String, String>() {{
-                    put("proto_handler", "\"http-nio-8080\"");
-                    put("direction", "received");
-                  }});
-                }}
-            ),
+                new ArrayList<Map<String, String>>() {
+                  {
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                            put("direction", "sent");
+                          }
+                        });
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                            put("direction", "received");
+                          }
+                        });
+                  }
+                }),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "tomcat.threads",
                 "The number of threads",
                 "threads",
-                new ArrayList<Map<String, String>>() {{
-                  add(new HashMap<String, String>() {{
-                    put("proto_handler", "\"http-nio-8080\"");
-                    put("state", "idle");
-                  }});
-                  add(new HashMap<String, String>() {{
-                    put("proto_handler", "\"http-nio-8080\"");
-                    put("state", "busy");
-                  }});
-                }}
-            )
-    );
+                new ArrayList<Map<String, String>>() {
+                  {
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                            put("state", "idle");
+                          }
+                        });
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                            put("state", "busy");
+                          }
+                        });
+                  }
+                }));
   }
 }
