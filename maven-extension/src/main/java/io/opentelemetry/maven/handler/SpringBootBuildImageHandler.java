@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *       : spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/</a>
  * </ul>
  */
-public class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
+final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(SpringBootBuildImageHandler.class);
 
   @Override

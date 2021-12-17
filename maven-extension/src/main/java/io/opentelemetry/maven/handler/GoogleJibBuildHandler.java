@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** See https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin */
-public class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
+final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GoogleJibBuildHandler.class);
 
   @Override

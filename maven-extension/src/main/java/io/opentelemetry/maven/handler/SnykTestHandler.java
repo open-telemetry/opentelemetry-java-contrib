@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.maven.execution.ExecutionEvent;
 
 /** See https://github.com/snyk/snyk-maven-plugin */
-public class SnykTestHandler implements MojoGoalExecutionHandler {
+final class SnykTestHandler implements MojoGoalExecutionHandler {
 
   /**
    * Snyk command "reversed engineered" invoking the Snyk CLI on a Maven project with the `-d` debug

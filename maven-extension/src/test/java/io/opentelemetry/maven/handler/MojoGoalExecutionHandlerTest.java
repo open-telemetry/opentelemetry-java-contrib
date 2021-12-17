@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.maven;
+package io.opentelemetry.maven.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.maven.handler.GoogleJibBuildHandler;
-import io.opentelemetry.maven.handler.MavenDeployHandler;
-import io.opentelemetry.maven.handler.SnykMonitorHandler;
-import io.opentelemetry.maven.handler.SnykTestHandler;
-import io.opentelemetry.maven.handler.SpringBootBuildImageHandler;
+import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
