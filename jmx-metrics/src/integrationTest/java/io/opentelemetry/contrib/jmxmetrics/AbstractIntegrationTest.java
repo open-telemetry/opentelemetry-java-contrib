@@ -195,6 +195,19 @@ public abstract class AbstractIntegrationTest {
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroups);
   }
 
+  protected void assertGaugeWithAttributes(
+      Metric metric,
+      String name,
+      String description,
+      String unit,
+      List<Map<String, String>> attributeGroups) {
+    assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getDescription()).isEqualTo(description);
+    assertThat(metric.getUnit()).isEqualTo(unit);
+    assertThat(metric.hasGauge()).isTrue();
+    assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroups);
+  }
+
   private static final String expectedMeterVersion() {
     // Automatically set by gradle when running the tests
     String version = System.getProperty("gradle.project.version");
