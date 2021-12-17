@@ -110,7 +110,7 @@ public abstract class AbstractIntegrationTest {
 
   protected void waitAndAssertMetrics(Consumer<Metric>... assertions) {
     await()
-        .atMost(Duration.ofSeconds(200))
+        .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
               List<Metric> metrics =
