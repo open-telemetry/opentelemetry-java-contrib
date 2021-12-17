@@ -6,19 +6,17 @@
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.MountableFile;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 class TomcatIntegrationTest extends AbstractIntegrationTest {
 
@@ -28,16 +26,27 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
 
   @Container
   GenericContainer<?> tomcat =
-      new GenericContainer<>(new ImageFromDockerfile()
-          .withDockerfileFromBuilder(builder ->
-              builder
-                  .from("tomcat:9.0.46-jdk11-openjdk-buster")
-                  .add("https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war","/usr/local/tomcat/webapps/ROOT.war")
-                  .build()))
+      new GenericContainer<>(
+              new ImageFromDockerfile()
+                  .withDockerfileFromBuilder(
+                      builder ->
+                          builder
+                              .from("tomcat:9.0")
+                              .run("rm", "-fr", "/usr/local/tomcat/webapps/ROOT")
+                              .add(
+                                  "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
+                                  "/usr/local/tomcat/webapps/ROOT.war")
+                              .env(new HashMap<String, String>() {{
+                                put("CATALINA_OPTS", "-Dcom.sun.management.jmxremote.local.only=false "
+                                    + "-Dcom.sun.management.jmxremote.authenticate=false "
+                                    + "-Dcom.sun.management.jmxremote.ssl=false "
+                                    + "-Dcom.sun.management.jmxremote.port=9010 "
+                                    + "-Dcom.sun.management.jmxremote.rmi.port=9010");
+                              }})
+                              .build()))
           .withNetwork(Network.SHARED)
           .withEnv("LOCAL_JMX", "no")
           .withNetworkAliases("tomcat")
-          .withEnv("CATALINA_OPTS", "-Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 ")
           .withExposedPorts(9010)
           .withStartupTimeout(Duration.ofSeconds(120))
           .waitingFor(Wait.forListeningPort());
@@ -48,8 +57,61 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGauge(
                 metric,
-                "cassandra.client.request.range_slice.latency.50p",
-                "Token range read request latency - 50th percentile",
-                "µs"));
+                "tomcat.sessions",
+                "The number of active sessions.",
+                "sessions"),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.errors",
+                "The number of errors encountered.",
+                "errors",
+                Collections.singletonList(new HashMap<String, String>() {{
+                  put("proto_handler", "\"http-nio-8080\"");
+                }})),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.processing_time",
+                "The total processing time.",
+                "ms",
+                Collections.singletonList(new HashMap<String, String>() {{
+                  put("proto_handler", "\"http-nio-8080\"");
+                }})),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.traffic",
+                "The number of bytes transmitted and received.",
+                "by",
+                new ArrayList<Map<String, String>>() {{
+                  add(new HashMap<String, String>() {{
+                    put("proto_handler", "\"http-nio-8080\"");
+                    put("direction", "sent");
+                  }});
+                  add(new HashMap<String, String>() {{
+                    put("proto_handler", "\"http-nio-8080\"");
+                    put("direction", "received");
+                  }});
+                }}
+            ),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "tomcat.threads",
+                "The number of threads",
+                "threads",
+                new ArrayList<Map<String, String>>() {{
+                  add(new HashMap<String, String>() {{
+                    put("proto_handler", "\"http-nio-8080\"");
+                    put("state", "idle");
+                  }});
+                  add(new HashMap<String, String>() {{
+                    put("proto_handler", "\"http-nio-8080\"");
+                    put("state", "busy");
+                  }});
+                }}
+            )
+    );
   }
 }

@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-def beantomcatmanager = otel.mbean("Catalina:type=Manager,context=*,host=*")
-otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions", "sessions", "activeSessions", otel.&doubleValueObserver)
+
+def beantomcatmanager = otel.mbean("Catalina:type=Manager,host=localhost,context=*")
+otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&doubleValueCallback)
 
 def beantomcatrequestProcessor = otel.mbean("Catalina:type=GlobalRequestProcessor,name=*")
-otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "1",
+otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-  "errorCount", otel.&longSumObserver)
+  "errorCount", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.processing_time", "The total processing time.", "ms",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-  "processingTime", otel.&longSumObserver)
+  "processingTime", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.traffic",
   "The number of bytes transmitted and received.", "by",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name")}],
-  ["bytesReceived":["direction" : {"recieved"}], "bytesSent": ["direction" : {"sent"}]],
-  otel.&longSumObserver)
+  ["bytesReceived":["direction" : {"received"}], "bytesSent": ["direction" : {"sent"}]],
+  otel.&longCounterCallback)
 
 def beantomcatconnectors = otel.mbean("Catalina:type=ThreadPool,name=*")
-otel.instrument(beantomcatconnectors, "tomcat.threads.idle", "description", "1",
+otel.instrument(beantomcatconnectors, "tomcat.threads", "The number of threads", "threads",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-  ["currentThreadCount":["state":"idle"],"currentThreadsBusy":["state":"busy"]], otel.&doubleValueObserver)
+  ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)
 

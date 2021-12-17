@@ -16,7 +16,7 @@ class JmxConfigTest {
   @Test
   void staticValues() {
     assertThat(JmxConfig.AVAILABLE_TARGET_SYSTEMS)
-        .containsOnly("cassandra", "jvm", "kafka", "kafka-consumer", "kafka-producer");
+        .containsOnly("cassandra", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
   }
 
   @Test
