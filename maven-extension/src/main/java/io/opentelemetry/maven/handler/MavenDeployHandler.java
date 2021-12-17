@@ -14,7 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.Authentication;
@@ -36,56 +35,52 @@ public class MavenDeployHandler implements MojoGoalExecutionHandler {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
 
     MavenProject project = execution.getProject();
-    Optional<ArtifactRepository> optRepository =
-        Optional.ofNullable(project.getDistributionManagementArtifactRepository());
+    ArtifactRepository optRepository = project.getDistributionManagementArtifactRepository();
 
-    optRepository.ifPresent(
-        repository -> {
-          spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_ID, repository.getId());
-          spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL, repository.getUrl());
-          Optional<Authentication> optAuthentication =
-              Optional.ofNullable(repository.getAuthentication());
-          optAuthentication.ifPresent(
-              authentication -> {
-                // FIXME is there a security question here?
-                // cyrille-leclerc: no because it's just the username
-                spanBuilder.setAttribute(
-                    MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_AUTH_USERNAME,
-                    authentication.getUsername());
-              });
+    if (optRepository == null) {
+      return;
+    }
+    spanBuilder.setAttribute(
+        MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_ID, optRepository.getId());
+    spanBuilder.setAttribute(
+        MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL, optRepository.getUrl());
 
-          Optional<String> optArtifactRepositoryUrl = Optional.ofNullable(repository.getUrl());
-          optArtifactRepositoryUrl.ifPresent(
-              artifactRepositoryUrl -> {
-                if (artifactRepositoryUrl.startsWith("https://")
-                    || artifactRepositoryUrl.startsWith("http://")) {
-                  try {
-                    URL repositoryUrl = new URL(artifactRepositoryUrl);
-                    // setting the net_peer_service helps visualization on Jaeger but
-                    // doesn't fully comply with the spec
-                    spanBuilder.setAttribute(
-                        SemanticAttributes.PEER_SERVICE, repositoryUrl.getHost());
-                  } catch (MalformedURLException e) {
-                    logger.debug("Ignore exception parsing artifact repository URL", e);
-                  }
-                  Artifact generatedArtifact = project.getArtifact();
-                  String artifactRootUrl = artifactRepositoryUrl;
-                  if (!artifactRootUrl.endsWith("/")) {
-                    artifactRootUrl += '/';
-                  }
-                  artifactRootUrl +=
-                      generatedArtifact.getGroupId().replace('.', '/')
-                          + '/'
-                          + generatedArtifact.getArtifactId()
-                          + '/'
-                          + generatedArtifact.getVersion();
-                  spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl);
-                  spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
-                }
-              });
-        });
+    Authentication authentication = optRepository.getAuthentication();
+    if (authentication != null) {
+      // FIXME is there a security question here?
+      // cyrille-leclerc: no because it's just the username
+      spanBuilder.setAttribute(
+          MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_AUTH_USERNAME,
+          authentication.getUsername());
+    }
+
+    String artifactRepositoryUrl = optRepository.getUrl();
+    if (artifactRepositoryUrl != null
+        && (artifactRepositoryUrl.startsWith("https://")
+            || artifactRepositoryUrl.startsWith("http://"))) {
+      try {
+        // Note: setting the "peer.service" helps visualization on Jaeger but
+        // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
+        // service will be instrumented and what it "service.name" would be
+        spanBuilder.setAttribute(
+            SemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
+      } catch (MalformedURLException e) {
+        logger.debug("Ignore exception parsing artifact repository URL", e);
+      }
+      Artifact artifact = project.getArtifact();
+      String artifactRootUrl = artifactRepositoryUrl;
+      if (!artifactRootUrl.endsWith("/")) {
+        artifactRootUrl += '/';
+      }
+      artifactRootUrl +=
+          artifact.getGroupId().replace('.', '/')
+              + '/'
+              + artifact.getArtifactId()
+              + '/'
+              + artifact.getVersion();
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+    }
   }
 
   @Override

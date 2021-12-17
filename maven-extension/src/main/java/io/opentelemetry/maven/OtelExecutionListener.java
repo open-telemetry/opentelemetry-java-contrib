@@ -17,7 +17,6 @@ import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -25,6 +24,7 @@ import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
@@ -250,10 +250,12 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
                 mojoExecution.getLifecyclePhase());
     //  enrich spans with MojoGoalExecutionHandler
-    Optional<MojoGoalExecutionHandler> handler =
-        Optional.ofNullable(this.mojoGoalExecutionHandlers.get(MavenGoal.create(mojoExecution)));
+    MojoGoalExecutionHandler handler =
+        this.mojoGoalExecutionHandlers.get(MavenGoal.create(mojoExecution));
     logger.debug("OpenTelemetry: {} handler {}", executionEvent, handler);
-    handler.ifPresent(h -> h.enrichSpan(spanBuilder, executionEvent));
+    if (handler != null) {
+      handler.enrichSpan(spanBuilder, executionEvent);
+    }
 
     Span span = spanBuilder.startSpan();
     spanRegistry.putSpan(span, mojoExecution);
@@ -281,7 +283,13 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     logger.debug("OpenTelemetry: End failed mojo execution span: {}", mojoExecution);
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
     mojoExecutionSpan.setStatus(StatusCode.ERROR, "Mojo Failed"); // TODO verify description
-    mojoExecutionSpan.recordException(executionEvent.getException());
+    Throwable exception = executionEvent.getException();
+    if (exception instanceof LifecycleExecutionException) {
+      LifecycleExecutionException executionException = (LifecycleExecutionException) exception;
+      // we already capture the context, no need to capture it again
+      exception = executionException.getCause();
+    }
+    mojoExecutionSpan.recordException(exception);
     mojoExecutionSpan.end();
   }
 
