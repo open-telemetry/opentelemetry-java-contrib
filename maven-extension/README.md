@@ -110,7 +110,6 @@ In addition to the span attributes captured on  every Maven plugin goal executio
 | `http.url`                             | string | Base URL of the uploaded artifact `${maven.build.repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`         |
 | `maven.build.repository.id`            | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)  |
 | `maven.build.repository.url`           | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository) |
-| `maven.build.repository.auth.username` | string | Username used to upload artifacts to the Maven repository. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)     |
 | `peer.service`                         | string | Maven repository hostname deduced from the Repository URL                                                                                           |
 
 The `span.kind` is set to `client`
@@ -124,7 +123,6 @@ The `span.kind` is set to `client`
 | `maven.build.container.image.name`              | string   | Name of the produced Docker image                                                                          |
 | `maven.build.container.image.tags`              | string[] | Tags of the produced Docker image                                                                          |
 | `maven.build.container.registry.url`            | string   | URL of the container registry to which this image is uploaded.                                             |
-| `maven.build.container.registry.auth.username`  | string   | Username used to upload the image to the container registry.                                               |
 | `peer.service`                                  | string   | Docker Registry hostname.                                                                                  |
 
 The `span.kind` is set to `client`
@@ -166,7 +164,6 @@ The `span.kind` is set to `client`
 | `maven.build.container.image.name`             | string   | Name of the produced Docker image. Attribute only added when the `build-image` goal publishes the Docker image.                             |
 | `maven.build.container.image.tags`             | string[] | Tags of the produced Docker image. Attribute only added when the `build-image` goal publishes the Docker image.                             |
 | `maven.build.container.registry.url`           | string   | URL of the container registry to which this image is uploaded.  Attribute only added when the `build-image` goal publishes the Docker image.|
-| `maven.build.container.registry.auth.username` | string   | Username used to upload the image to the container registry.  Attribute only added when the `build-image` goal publishes the Docker image.  |
 | `peer.service`                                 | string   | Docker Registry hostname. Attribute only added when the `build-image` goal publishes the Docker image.                                      |
 
 The `span.kind` is set to `client`

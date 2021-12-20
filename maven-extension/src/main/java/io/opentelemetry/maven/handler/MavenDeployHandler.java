@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.Authentication;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
@@ -44,15 +43,6 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
         MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_ID, optRepository.getId());
     spanBuilder.setAttribute(
         MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL, optRepository.getUrl());
-
-    Authentication authentication = optRepository.getAuthentication();
-    if (authentication != null) {
-      // FIXME is there a security question here?
-      // cyrille-leclerc: no because it's just the username
-      spanBuilder.setAttribute(
-          MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_AUTH_USERNAME,
-          authentication.getUsername());
-    }
 
     String artifactRepositoryUrl = optRepository.getUrl();
     if (artifactRepositoryUrl != null

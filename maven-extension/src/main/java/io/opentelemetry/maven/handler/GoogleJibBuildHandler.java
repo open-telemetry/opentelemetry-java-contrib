@@ -92,20 +92,5 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
     // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
     // service will be instrumented and what it "service.name" would be
     spanBuilder.setAttribute(SemanticAttributes.PEER_SERVICE, registryHostname);
-
-    // REGISTRY USERNAME
-    Xpp3Dom authNode = toNode.getChild("auth");
-    if (authNode != null) {
-
-      final Xpp3Dom usernameNode = authNode.getChild("username");
-      if (usernameNode != null) {
-        String usernameValue = usernameNode.getValue();
-        if (usernameValue != null) {
-          spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME,
-              usernameValue);
-        }
-      }
-    }
   }
 }

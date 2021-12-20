@@ -29,10 +29,6 @@ public class MavenOtelSemanticAttributes {
 
   public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_REGISTRY_URL =
       stringKey("maven.build.container.registry.url");
-  public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME =
-      stringKey("maven.build.container.registry.auth.username");
-  public static final AttributeKey<String> MAVEN_BUILD_REPOSITORY_AUTH_USERNAME =
-      stringKey("maven.build.repository.auth.username");
   public static final AttributeKey<String> MAVEN_BUILD_REPOSITORY_ID =
       stringKey("maven.build.repository.id");
   public static final AttributeKey<String> MAVEN_BUILD_REPOSITORY_URL =

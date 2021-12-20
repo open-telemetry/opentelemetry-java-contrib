@@ -111,13 +111,6 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
             logger.debug("Ignore exception parsing container registry URL", e);
           }
         }
-        // REGISTRY USERNAME
-        Xpp3Dom usernameNode = registryNode.getChild("username");
-        if (usernameNode != null) {
-          String username = usernameNode.getValue();
-          spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME, username);
-        }
       }
     }
   }

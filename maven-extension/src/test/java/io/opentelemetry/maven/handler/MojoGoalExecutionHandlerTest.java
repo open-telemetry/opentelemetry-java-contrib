@@ -128,10 +128,6 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(
-              span.getAttribute(
-                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
-          .isEqualTo("john");
     }
   }
 
@@ -176,10 +172,6 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(
-              span.getAttribute(
-                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
-          .isEqualTo("john");
     }
   }
 
@@ -221,10 +213,6 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
-      assertThat(
-              span.getAttribute(
-                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
-          .isEqualTo("john");
     }
   }
 
@@ -266,10 +254,6 @@ public class MojoGoalExecutionHandlerTest {
       assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("gcr.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://gcr.io");
-      assertThat(
-              span.getAttribute(
-                  MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_AUTH_USERNAME))
-          .isNull();
     }
   }
 
