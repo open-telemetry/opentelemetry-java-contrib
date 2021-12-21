@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class MavenOtelSemanticAttributes {
 
-  /** @see ResourceAttributes#CONTAINER_IMAGE_NAME */
+  /** See {@link ResourceAttributes#CONTAINER_IMAGE_NAME} */
   public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_IMAGE_NAME =
       stringKey("maven.build.container.image.name");
-  /** @see ResourceAttributes#CONTAINER_IMAGE_TAG */
+  /** See {@link ResourceAttributes#CONTAINER_IMAGE_TAG} */
   public static final AttributeKey<List<String>> MAVEN_BUILD_CONTAINER_IMAGE_TAGS =
       stringArrayKey("maven.build.container.image.tags");
 
