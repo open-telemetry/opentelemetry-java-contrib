@@ -20,7 +20,7 @@ public class MojoGoalExecutionHandlerConfiguration {
       ClassLoader classLoader) {
 
     // built-in handlers
-    List<MojoGoalExecutionHandler> buildInHandlers =
+    List<MojoGoalExecutionHandler> builtInHandlers =
         Arrays.asList(
             new GoogleJibBuildHandler(),
             new MavenDeployHandler(),
@@ -38,7 +38,7 @@ public class MojoGoalExecutionHandlerConfiguration {
 
     Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
 
-    Stream.concat(buildInHandlers.stream(), spiHandlers.stream())
+    Stream.concat(builtInHandlers.stream(), spiHandlers.stream())
         .forEach(
             handler ->
                 handler
