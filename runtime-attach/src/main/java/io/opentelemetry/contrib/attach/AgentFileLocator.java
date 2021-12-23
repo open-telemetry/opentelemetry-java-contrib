@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 
-class AgentFileLocator {
+final class AgentFileLocator {
 
   static File locateAgentFile() {
     CodeSource codeSource = OpenTelemetryAgent.class.getProtectionDomain().getCodeSource();
@@ -33,4 +33,6 @@ class AgentFileLocator {
     throw new IllegalStateException(
         "agent jar location doesn't appear to be a file: " + codeSourceLocation);
   }
+
+  private AgentFileLocator() {}
 }

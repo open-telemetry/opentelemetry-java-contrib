@@ -37,8 +37,12 @@ class SamplingRule {
 
   @Override
   public boolean equals(@Nullable Object o) {
-    if (this == o) return true;
-    if (!(o instanceof SamplingRule)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof SamplingRule)) {
+      return false;
+    }
     SamplingRule that = (SamplingRule) o;
     return attributeKey.equals(that.attributeKey) && pattern.equals(that.pattern);
   }
