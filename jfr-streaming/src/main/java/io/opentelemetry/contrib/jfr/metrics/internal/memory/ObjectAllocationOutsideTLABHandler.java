@@ -50,6 +50,7 @@ public final class ObjectAllocationOutsideTLABHandler extends AbstractThreadDisp
     return EVENT_NAME;
   }
 
+  @Override
   public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
     return new PerThreadObjectAllocationOutsideTLABHandler(histogram, threadName);
   }

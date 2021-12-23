@@ -15,10 +15,11 @@ public abstract class AbstractThreadDispatchingHandler implements RecordedEventH
   private final Map<String, Consumer<RecordedEvent>> perThread = new HashMap<>();
   private final ThreadGrouper grouper;
 
-  public AbstractThreadDispatchingHandler(ThreadGrouper grouper) {
+  protected AbstractThreadDispatchingHandler(ThreadGrouper grouper) {
     this.grouper = grouper;
   }
 
+  @Override
   public abstract String getEventName();
 
   public abstract Consumer<RecordedEvent> createPerThreadSummarizer(String threadName);

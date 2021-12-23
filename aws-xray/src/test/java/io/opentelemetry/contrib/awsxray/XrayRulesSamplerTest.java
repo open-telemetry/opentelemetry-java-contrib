@@ -169,7 +169,7 @@ class XrayRulesSamplerTest {
     assertThat(sampler.snapshot(Date.from(now))).hasSize(4);
   }
 
-  private SamplingResult doSample(Sampler sampler, String name) {
+  private static SamplingResult doSample(Sampler sampler, String name) {
     return sampler.shouldSample(
         Context.current(),
         TraceId.fromLongs(1, 2),
