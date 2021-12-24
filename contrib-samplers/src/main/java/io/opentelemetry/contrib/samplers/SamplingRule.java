@@ -7,9 +7,9 @@ package io.opentelemetry.contrib.samplers;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /** @see RuleBasedRoutingSampler */
 class SamplingRule {
