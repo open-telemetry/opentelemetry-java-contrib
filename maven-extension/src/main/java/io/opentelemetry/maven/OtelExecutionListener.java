@@ -207,7 +207,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
                 mojoExecution.getLifecyclePhase())
             .startSpan();
-    spanRegistry.putSpan(span, mojoExecution);
+    spanRegistry.putSpan(span, mojoExecution, executionEvent.getProject());
   }
 
   @Override
@@ -216,8 +216,11 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
       return;
     }
     MojoExecution mojoExecution = executionEvent.getMojoExecution();
-    logger.debug("OpenTelemetry: End succeeded mojo execution span: {}", mojoExecution);
-    Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
+    logger.debug(
+        "OpenTelemetry: End succeeded mojo execution span: {}, {}",
+        mojoExecution,
+        executionEvent.getProject());
+    Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution, executionEvent.getProject());
     mojoExecutionSpan.setStatus(StatusCode.OK);
 
     mojoExecutionSpan.end();
@@ -229,8 +232,11 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
       return;
     }
     MojoExecution mojoExecution = executionEvent.getMojoExecution();
-    logger.debug("OpenTelemetry: End failed mojo execution span: {}", mojoExecution);
-    Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution);
+    logger.debug(
+        "OpenTelemetry: End failed mojo execution span: {}, {}",
+        mojoExecution,
+        executionEvent.getProject());
+    Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution, executionEvent.getProject());
     mojoExecutionSpan.setStatus(StatusCode.ERROR, "Mojo Failed"); // TODO verify description
     mojoExecutionSpan.end();
   }
