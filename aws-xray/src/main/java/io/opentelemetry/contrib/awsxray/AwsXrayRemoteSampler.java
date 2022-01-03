@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 /** Remote sampler that gets sampling configuration from AWS X-Ray. */
 public final class AwsXrayRemoteSampler implements Sampler, Closeable {

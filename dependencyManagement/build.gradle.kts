@@ -57,11 +57,11 @@ val DEPENDENCY_SETS = listOf(
 )
 
 val DEPENDENCIES = listOf(
+    "com.google.code.findbugs:jsr305:3.0.2",
     "com.squareup.okhttp3:okhttp:3.14.9",
     "com.uber.nullaway:nullaway:0.9.2",
     "org.assertj:assertj-core:3.21.0",
     "org.awaitility:awaitility:4.1.1",
-    "org.checkerframework:checker-qual:3.19.0",
     "org.junit-pioneer:junit-pioneer:1.5.0",
     "org.skyscreamer:jsonassert:1.5.0"
 )

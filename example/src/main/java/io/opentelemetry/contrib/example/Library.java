@@ -11,6 +11,7 @@ public class Library {
     return true;
   }
 
+  @SuppressWarnings("SystemOut")
   public static void main(String... args) {
     System.out.println("ExampleLibrary.main");
   }

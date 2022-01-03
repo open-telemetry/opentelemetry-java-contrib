@@ -701,7 +701,7 @@ class SamplingRuleApplierTest {
     assertThat(doSample(applier)).isEqualTo(SamplingResult.create(SamplingDecision.DROP));
   }
 
-  private SamplingResult doSample(SamplingRuleApplier applier) {
+  private static SamplingResult doSample(SamplingRuleApplier applier) {
     return applier.shouldSample(
         Context.current(),
         TraceId.fromLongs(1, 2),
