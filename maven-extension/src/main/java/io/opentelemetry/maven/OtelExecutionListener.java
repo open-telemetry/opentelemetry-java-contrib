@@ -6,19 +6,25 @@
 package io.opentelemetry.maven;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
+import io.opentelemetry.maven.handler.MojoGoalExecutionHandlerConfiguration;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
@@ -27,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Close the OpenTelemetry SDK (see {@link OpenTelemetrySdkService#dispose()} on the end of
+ * Close the OpenTelemetry SDK (see {@link OpenTelemetrySdkService#dispose()}) on the end of
  * execution of the last project ({@link #projectSucceeded(ExecutionEvent)} and {@link
  * #projectFailed(ExecutionEvent)}) rather than on the end of the Maven session {@link
  * #sessionEnded(ExecutionEvent)} because OpenTelemetry and GRPC classes are unloaded by the Maven
@@ -46,6 +52,22 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   @SuppressWarnings("NullAway") // Automatically initialized by DI
   @Requirement
   private OpenTelemetrySdkService openTelemetrySdkService;
+
+  private Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
+
+  public OtelExecutionListener() {
+    this.mojoGoalExecutionHandlers =
+        MojoGoalExecutionHandlerConfiguration.loadMojoGoalExecutionHandler(
+            OtelExecutionListener.class.getClassLoader());
+
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "OpenTelemetry: mojoGoalExecutionHandlers: "
+              + mojoGoalExecutionHandlers.entrySet().stream()
+                  .map(entry -> entry.getKey().toString() + ": " + entry.getValue().toString())
+                  .collect(Collectors.joining(", ")));
+    }
+  }
 
   /**
    * Register in given {@link OtelExecutionListener} to the lifecycle of the given {@link
@@ -168,16 +190,16 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     Span rootSpan = spanRegistry.getSpan(executionEvent.getProject());
 
     final String spanName =
-        getPluginArtifactIdShortName(mojoExecution.getArtifactId())
+        MavenUtils.getPluginArtifactIdShortName(mojoExecution.getArtifactId())
             + ":"
             + mojoExecution.getGoal()
             + " ("
-            + executionEvent.getMojoExecution().getExecutionId()
+            + mojoExecution.getExecutionId()
             + ")"
             + " @ "
             + executionEvent.getProject().getArtifactId();
     logger.debug("OpenTelemetry: Start mojo execution: span {}", spanName);
-    Span span =
+    SpanBuilder spanBuilder =
         this.openTelemetrySdkService
             .getTracer()
             .spanBuilder(spanName)
@@ -205,8 +227,16 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_ID, mojoExecution.getExecutionId())
             .setAttribute(
                 MavenOtelSemanticAttributes.MAVEN_EXECUTION_LIFECYCLE_PHASE,
-                mojoExecution.getLifecyclePhase())
-            .startSpan();
+                mojoExecution.getLifecyclePhase());
+    //  enrich spans with MojoGoalExecutionHandler
+    MojoGoalExecutionHandler handler =
+        this.mojoGoalExecutionHandlers.get(MavenGoal.create(mojoExecution));
+    logger.debug("OpenTelemetry: {} handler {}", executionEvent, handler);
+    if (handler != null) {
+      handler.enrichSpan(spanBuilder, executionEvent);
+    }
+
+    Span span = spanBuilder.startSpan();
     spanRegistry.putSpan(span, mojoExecution, executionEvent.getProject());
   }
 
@@ -238,6 +268,13 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
         executionEvent.getProject());
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution, executionEvent.getProject());
     mojoExecutionSpan.setStatus(StatusCode.ERROR, "Mojo Failed"); // TODO verify description
+    Throwable exception = executionEvent.getException();
+    if (exception instanceof LifecycleExecutionException) {
+      LifecycleExecutionException executionException = (LifecycleExecutionException) exception;
+      // we already capture the context, no need to capture it again
+      exception = executionException.getCause();
+    }
+    mojoExecutionSpan.recordException(exception);
     mojoExecutionSpan.end();
   }
 
@@ -245,32 +282,6 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   public void sessionEnded(ExecutionEvent event) {
     logger.debug("OpenTelemetry: Maven session ended");
     spanRegistry.removeRootSpan().end();
-  }
-
-  /**
-   * Shorten plugin identifiers.
-   *
-   * <p>Examples:
-   *
-   * <ul>
-   *   <li>maven-clean-plugin -&gt; clean
-   *   <li>sisu-maven-plugin -&gt; sisu
-   *   <li>spotbugs-maven-plugin -&gt; spotbugs
-   * </ul>
-   *
-   * @param pluginArtifactId the artifact ID of the mojo {@link MojoExecution#getArtifactId()}
-   * @return shortened name
-   */
-  // Visible for testing
-  String getPluginArtifactIdShortName(String pluginArtifactId) {
-    if (pluginArtifactId.endsWith("-maven-plugin")) {
-      return pluginArtifactId.substring(0, pluginArtifactId.length() - "-maven-plugin".length());
-    } else if (pluginArtifactId.startsWith("maven-") && pluginArtifactId.endsWith("-plugin")) {
-      return pluginArtifactId.substring(
-          "maven-".length(), pluginArtifactId.length() - "-plugin".length());
-    } else {
-      return pluginArtifactId;
-    }
   }
 
   private static class ToUpperCaseTextMapGetter implements TextMapGetter<Map<String, String>> {
