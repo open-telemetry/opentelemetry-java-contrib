@@ -72,6 +72,8 @@ dependencies {
         }
     }
 
+    compileOnly("com.google.code.findbugs:jsr305")
+
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.awaitility:awaitility")
     testImplementation("org.junit.jupiter:junit-jupiter-api")

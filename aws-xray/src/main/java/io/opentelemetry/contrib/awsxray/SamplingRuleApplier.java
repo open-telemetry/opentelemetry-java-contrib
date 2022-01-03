@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 final class SamplingRuleApplier {
 
@@ -242,7 +242,8 @@ final class SamplingRuleApplier {
     return result;
   }
 
-  @Nullable SamplingStatisticsDocument snapshot(Date now) {
+  @Nullable
+  SamplingStatisticsDocument snapshot(Date now) {
     if (clock.nanoTime() < nextSnapshotTimeNanos) {
       return null;
     }

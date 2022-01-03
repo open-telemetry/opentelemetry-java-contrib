@@ -9,6 +9,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /** @see RuleBasedRoutingSampler */
 class SamplingRule {
@@ -35,7 +36,7 @@ class SamplingRule {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

@@ -4,11 +4,7 @@
  */
 
 /** Provides implementations of SDK interfaces for AWS X-Ray users. */
-@DefaultQualifier(value = NonNull.class, locations = TypeUseLocation.FIELD)
-@DefaultQualifier(value = NonNull.class, locations = TypeUseLocation.PARAMETER)
-@DefaultQualifier(value = NonNull.class, locations = TypeUseLocation.RETURN)
+@ParametersAreNonnullByDefault
 package io.opentelemetry.contrib.awsxray;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.framework.qual.DefaultQualifier;
-import org.checkerframework.framework.qual.TypeUseLocation;
+import javax.annotation.ParametersAreNonnullByDefault;
