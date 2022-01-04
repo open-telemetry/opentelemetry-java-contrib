@@ -79,7 +79,7 @@ public final class SpanRegistry {
   }
 
   public void putSpan(Span span, MavenProject mavenProject) {
-    logger.debug("OpenTelemetry: putSpan({}, {})", mavenProject, Thread.currentThread());
+    logger.debug("OpenTelemetry: putSpan({})", mavenProject);
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span previousSpanForKey = mavenProjectKeySpanMap.put(key, span);
     if (previousSpanForKey != null) {
@@ -88,8 +88,7 @@ public final class SpanRegistry {
   }
 
   public void putSpan(Span span, MojoExecution mojoExecution, MavenProject project) {
-    logger.debug(
-        "OpenTelemetry: putSpan({}, {}, {})", mojoExecution, project, Thread.currentThread());
+    logger.debug("OpenTelemetry: putSpan({}, {})", mojoExecution, project);
     MojoExecutionKey key = MojoExecutionKey.fromMojoExecution(mojoExecution, project);
     Span previousSpanForKey = mojoExecutionKeySpanMap.put(key, span);
     if (previousSpanForKey != null) {
@@ -99,7 +98,7 @@ public final class SpanRegistry {
   }
 
   public Span removeSpan(MavenProject mavenProject) {
-    logger.debug("OpenTelemetry: removeSpan({}, {})", mavenProject, Thread.currentThread());
+    logger.debug("OpenTelemetry: removeSpan({})", mavenProject);
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span span = mavenProjectKeySpanMap.remove(key);
     if (span == null) {
@@ -110,8 +109,7 @@ public final class SpanRegistry {
 
   @Nonnull
   public Span removeSpan(MojoExecution mojoExecution, MavenProject project) {
-    logger.debug(
-        "OpenTelemetry: removeSpan({}, {}, {})", mojoExecution, project, Thread.currentThread());
+    logger.debug("OpenTelemetry: removeSpan({}, {})", mojoExecution, project);
     MojoExecutionKey key = MojoExecutionKey.fromMojoExecution(mojoExecution, project);
     Span span = mojoExecutionKeySpanMap.remove(key);
     if (span == null) {
