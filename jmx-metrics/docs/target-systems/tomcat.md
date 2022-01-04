@@ -1,8 +1,7 @@
-# Casandra Metrics
+# Tomcat Metrics
 
 The JMX Metric Gatherer provides built in Tomcat metric gathering capabilities.
 These metrics are sourced from: https://docs.oracle.com/cd/E11857_01/em.111/e10115/middleware_apache_tomcat.htm
-## Metrics
 
 ### Metrics
 
