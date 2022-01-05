@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 /** Remote sampler that gets sampling configuration from AWS X-Ray. */
 public final class AwsXrayRemoteSampler implements Sampler, Closeable {
@@ -175,7 +175,9 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
           xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
     } catch (Throwable t) {
       // Might be a transient API failure, try again after a default interval.
-      executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+      fetchTargetsFuture =
+          executor.schedule(
+              this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
       return;
     }
 

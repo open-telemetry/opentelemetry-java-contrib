@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 /** A builder for {@link AwsXrayRemoteSampler}. */
 public final class AwsXrayRemoteSamplerBuilder {

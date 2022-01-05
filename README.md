@@ -40,6 +40,12 @@ domain we would be very interested in supporting it.  Please
 suggestion.  PRs are always welcome and greatly appreciated, but for larger functional changes a pre-coding introduction
 can be helpful to ensure this is the correct place and that active or conflicting efforts don't exist.
 
+Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-telemetry/teams/java-contrib-triagers)):
+
+- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Elastic
+- [Ken Finnigan](https://github.com/kenfinnigan), Workday
+- [William Armiros](https://github.com/willarmiros), AWS
+
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
 - [John Watson](https://github.com/jkwatson), Splunk

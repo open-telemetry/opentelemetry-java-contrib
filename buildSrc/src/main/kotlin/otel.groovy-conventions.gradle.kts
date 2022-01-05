@@ -1,13 +1,13 @@
 plugins {
-    groovy
+  groovy
 
-    id("otel.java-conventions")
-    id("otel.spotless-conventions")
+  id("otel.java-conventions")
+  id("otel.spotless-conventions")
 }
 
 tasks {
-    withType<GroovyCompile> {
-        sourceCompatibility = "8"
-        targetCompatibility = "8"
-    }
+  withType<GroovyCompile> {
+    sourceCompatibility = "8"
+    targetCompatibility = "8"
+  }
 }

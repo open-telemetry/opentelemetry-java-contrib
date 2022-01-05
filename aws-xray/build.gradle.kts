@@ -20,8 +20,6 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp")
   implementation("io.opentelemetry:opentelemetry-semconv")
 
-  compileOnly("org.checkerframework:checker-qual")
-
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
 

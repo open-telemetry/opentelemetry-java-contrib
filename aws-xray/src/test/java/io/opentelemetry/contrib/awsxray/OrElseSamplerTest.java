@@ -36,7 +36,7 @@ class OrElseSamplerTest {
     assertThat(doSample(sampler).getDecision()).isEqualTo(SamplingDecision.DROP);
   }
 
-  private SamplingResult doSample(Sampler sampler) {
+  private static SamplingResult doSample(Sampler sampler) {
     return sampler.shouldSample(
         Context.current(),
         TraceId.fromLongs(1, 2),

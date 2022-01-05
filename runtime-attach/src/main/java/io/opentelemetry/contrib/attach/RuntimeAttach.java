@@ -9,7 +9,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
-public class RuntimeAttach {
+public final class RuntimeAttach {
 
   public static void attachJavaagentToCurrentJVM() {
     if (agentIsDisabled()) {
@@ -28,4 +28,6 @@ public class RuntimeAttach {
   private static String getPid() {
     return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
   }
+
+  private RuntimeAttach() {}
 }

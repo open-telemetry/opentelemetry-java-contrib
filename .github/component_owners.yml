@@ -1,0 +1,7 @@
+# this file is used by .github/workflows/component-codeowners.yml
+components:
+  aws-xray:
+    - willarmiros
+  maven-extension:
+    - cyrille-leclerc
+    - kenfinnigan

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.opentelemetry.contrib.maven</groupId>
+  <artifactId>test-jar</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>releases</id>
+      <url>https://maven.example.com/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <url>https://maven.example.com/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>

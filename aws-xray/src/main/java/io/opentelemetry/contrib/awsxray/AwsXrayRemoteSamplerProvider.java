@@ -13,7 +13,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 @AutoService(ConfigurableSamplerProvider.class)
 public class AwsXrayRemoteSamplerProvider implements ConfigurableSamplerProvider {

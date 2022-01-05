@@ -22,7 +22,7 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 
 /**
  * A low-latency event queue for background updating of (possibly contended) objects. This is
@@ -144,11 +144,13 @@ final class DisruptorEventQueue {
       this.result = result;
     }
 
-    @Nullable Object getEventArgs() {
+    @Nullable
+    Object getEventArgs() {
       return eventArgs;
     }
 
-    @Nullable EventType getEventType() {
+    @Nullable
+    EventType getEventType() {
       return eventType;
     }
 

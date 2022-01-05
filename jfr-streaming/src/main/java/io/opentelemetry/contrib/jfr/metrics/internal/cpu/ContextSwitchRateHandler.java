@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HERTZ;
 
-import io.opentelemetry.api.metrics.*;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
@@ -29,6 +29,7 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
     value = ev.getDouble("switchRate");
   }
 
+  @Override
   public String getEventName() {
     return EVENT_NAME;
   }

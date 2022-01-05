@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.opentelemetry.contrib.maven</groupId>
+  <artifactId>test-jib-2</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>3.1.4</version>
+        <configuration>
+          <to>
+            <image>gcr.io/my-gcp-project/my-app</image>
+            <credHelper>gcr</credHelper>
+          </to>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <distributionManagement>
+    <repository>
+      <id>releases</id>
+      <url>https://maven.example.com/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <url>https://maven.example.com/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>

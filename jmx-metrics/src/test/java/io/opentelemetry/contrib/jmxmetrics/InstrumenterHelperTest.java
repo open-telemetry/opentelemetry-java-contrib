@@ -455,46 +455,22 @@ class InstrumenterHelperTest {
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      Map<String, Map<String, Closure>> attributes =
-          new HashMap<String, Map<String, Closure>>() {
-            {
-              put(
-                  "FirstAttribute",
-                  new HashMap<String, Closure>() {
-                    {
-                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 1 }"));
-                    }
-                  });
-              put(
-                  "SecondAttribute",
-                  new HashMap<String, Closure>() {
-                    {
-                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 2 }"));
-                    }
-                  });
-              put(
-                  "ThirdAttribute",
-                  new HashMap<String, Closure>() {
-                    {
-                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 3 }"));
-                    }
-                  });
-              put(
-                  "FourthAttribute",
-                  new HashMap<String, Closure>() {
-                    {
-                      put("Thing", (Closure<?>) Eval.me("{ mbean -> 4 }"));
-                    }
-                  });
-              put(
-                  "nonExsistentAttribute",
-                  new HashMap<String, Closure>() {
-                    {
-                      put("unused", (Closure<?>) Eval.me("{ mbean -> unused }"));
-                    }
-                  });
-            }
-          };
+      Map<String, Map<String, Closure>> attributes = new HashMap<>();
+      attributes.put(
+          "FirstAttribute",
+          Collections.singletonMap("Thing", (Closure<?>) Eval.me("{ mbean -> 1 }")));
+      attributes.put(
+          "SecondAttribute",
+          Collections.singletonMap("Thing", (Closure<?>) Eval.me("{ mbean -> 2 }")));
+      attributes.put(
+          "ThirdAttribute",
+          Collections.singletonMap("Thing", (Closure<?>) Eval.me("{ mbean -> 3 }")));
+      attributes.put(
+          "FourthAttribute",
+          Collections.singletonMap("Thing", (Closure<?>) Eval.me("{ mbean -> 4 }")));
+      attributes.put(
+          "nonExsistentAttribute",
+          Collections.singletonMap("unused", (Closure<?>) Eval.me("{ mbean -> unused }")));
 
       updateWithHelperMultiAttribute(
           mBeanHelper, instrumentMethod, instrumentName, description, attributes);
@@ -763,7 +739,7 @@ class InstrumenterHelperTest {
     Double getFourthAttribute();
   }
 
-  public class SystemStatus implements SystemStatusMBean {
+  public static class SystemStatus implements SystemStatusMBean {
     @Override
     public Double getFirstAttribute() {
       return 11.0;
