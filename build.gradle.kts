@@ -2,9 +2,10 @@ import nebula.plugin.release.git.opinion.Strategies
 import java.time.Duration
 
 plugins {
+    id("otel.spotless-conventions")
+
     id("idea")
 
-    id("com.diffplug.spotless")
     id("com.github.ben-manes.versions")
     id("io.github.gradle-nexus.publish-plugin")
     id("nebula.release")
