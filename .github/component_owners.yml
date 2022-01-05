@@ -1,0 +1,6 @@
+components:
+  aws-xray:
+    - willarmiros
+  maven-extension:
+    - cyrille-leclerc
+    - kenfinnigan
