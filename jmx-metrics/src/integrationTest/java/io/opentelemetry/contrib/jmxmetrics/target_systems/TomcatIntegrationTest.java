@@ -132,6 +132,39 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                           }
                         });
                   }
-                }));
+                }),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.max_time",
+                "Maximum time to process a request.",
+                "ms",
+                new ArrayList<Map<String, String>>() {
+                  {
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                          }
+                        });
+                  }
+                }),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.request_count",
+                "The total requests.",
+                "requests",
+                new ArrayList<Map<String, String>>() {
+                  {
+                    add(
+                        new HashMap<String, String>() {
+                          {
+                            put("proto_handler", "\"http-nio-8080\"");
+                          }
+                        });
+                  }
+                })
+    );
   }
 }

@@ -22,6 +22,12 @@ def beantomcatrequestProcessor = otel.mbean("Catalina:type=GlobalRequestProcesso
 otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "errorCount", otel.&longCounterCallback)
+otel.instrument(beantomcatrequestProcessor, "tomcat.request_count", "The total requests.", "requests",
+  ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
+  "requestCount", otel.&longCounterCallback)
+otel.instrument(beantomcatrequestProcessor, "tomcat.max_time", "Maximum time to process a request.", "ms",
+  ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
+  "maxTime", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.processing_time", "The total processing time.", "ms",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "processingTime", otel.&longCounterCallback)
