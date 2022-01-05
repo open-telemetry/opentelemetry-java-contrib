@@ -10,8 +10,8 @@ plugins {
 val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean() ?: false
 
 dependencies {
-    errorprone("com.google.errorprone:error_prone_core")
-    errorprone("com.uber.nullaway:nullaway")
+  errorprone("com.google.errorprone:error_prone_core")
+  errorprone("com.uber.nullaway:nullaway")
 }
 
 tasks {
@@ -47,10 +47,10 @@ tasks {
 
         disable("Java7ApiChecker")
         disable("AndroidJdkLibsChecker")
-        //apparently disabling android doesn't disable this
+        // apparently disabling android doesn't disable this
         disable("StaticOrDefaultInterfaceMethod")
 
-        //until we have everything converted, we need these
+        // until we have everything converted, we need these
         disable("JdkObsolete")
         disable("UnnecessaryAnonymousClass")
 

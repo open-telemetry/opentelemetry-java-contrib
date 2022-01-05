@@ -20,5 +20,6 @@ dependencies {
 spotless {
   kotlinGradle {
     ktlint().userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2", "disabled_rules" to "no-wildcard-imports"))
+    target("**/*.gradle.kts")
   }
 }
