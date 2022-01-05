@@ -180,3 +180,10 @@ The [Jenkins OpenTelemetry Plugin](https://plugins.jenkins.io/opentelemetry/) ex
 ### Otel CLI
 
 The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wrapper to observe the execution of a shell command as an OpenTelemetry trace.
+
+## Component owners
+
+[Component owners](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/component_owners.yml) for the Maven OpenTelemetry extension:
+
+- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Elastic
+- [Ken Finnigan](https://github.com/kenfinnigan), Workday
