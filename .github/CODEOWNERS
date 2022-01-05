@@ -1,8 +1,3 @@
-#####################################################
-#
-# List of approvers for OpenTelemetry Java Contrib
-#
-#####################################################
 #
 # Learn about membership in OpenTelemetry community:
 #  https://github.com/open-telemetry/community/blob/main/community-membership.md
@@ -12,8 +7,4 @@
 #  https://help.github.com/en/articles/about-code-owners
 #
 
-# Global Owners
 * @open-telemetry/java-contrib-approvers
-
-aws-xray/ @open-telemetry/java-contrib-approvers @willarmiros
-maven-extension/ @open-telemetry/java-contrib-approvers @cyrille-leclerc @kenfinnigan
