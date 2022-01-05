@@ -164,7 +164,6 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                           }
                         });
                   }
-                })
-    );
+                }));
   }
 }
