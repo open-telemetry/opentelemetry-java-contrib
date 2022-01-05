@@ -16,3 +16,9 @@ dependencies {
     implementation("net.ltgt.gradle:gradle-errorprone-plugin:2.0.2")
     implementation("net.ltgt.gradle:gradle-nullaway-plugin:1.2.0")
 }
+
+spotless {
+    kotlinGradle {
+        ktlint().userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2", "disabled_rules" to "no-wildcard-imports"))
+    }
+}
