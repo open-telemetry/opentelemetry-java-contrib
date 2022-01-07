@@ -45,7 +45,7 @@ class RateLimiterTest {
 
     // move time 5s forward, enough to accumulate credits for 10 messages, but it should still be
     // capped at 2
-    clock.advance(Duration.ofMillis(5000));
+    clock.advance(Duration.ofSeconds(5));
 
     assertThat(limiter.trySpend(1.0)).isTrue();
     assertThat(limiter.trySpend(1.0)).isTrue();

@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import groovy.util.GroovyMBean;
+import groovy.jmx.GroovyMBean;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

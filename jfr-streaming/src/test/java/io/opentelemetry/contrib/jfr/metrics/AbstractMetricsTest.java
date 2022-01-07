@@ -24,13 +24,14 @@ public class AbstractMetricsTest {
 
   @BeforeAll
   static void initializeOpenTelemetry() {
-    metricReader = new InMemoryMetricReader();
+    metricReader = InMemoryMetricReader.create();
     meterProvider =
         SdkMeterProvider.builder().registerMetricReader(metricReader).buildAndRegisterGlobal();
     JfrMetrics.enable(meterProvider);
   }
 
-  protected void waitAndAssertMetrics(Consumer<MetricDataAssert>... assertions) {
+  @SafeVarargs
+  protected final void waitAndAssertMetrics(Consumer<MetricDataAssert>... assertions) {
     await()
         .untilAsserted(
             () -> {

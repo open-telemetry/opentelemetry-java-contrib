@@ -32,7 +32,7 @@ abstract class OtlpIntegrationTest extends AbstractIntegrationTest {
               "/etc/cassandra/jmxremote.password")
           .withNetworkAliases("cassandra")
           .withExposedPorts(7199)
-          .withStartupTimeout(Duration.ofSeconds(120))
+          .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort());
 
   @Test

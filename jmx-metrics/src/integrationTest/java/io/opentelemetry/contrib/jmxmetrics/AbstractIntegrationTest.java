@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Awaitility.await;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
@@ -24,13 +25,13 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,12 +94,14 @@ public abstract class AbstractIntegrationTest {
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource(configName), "/app/" + configName)
             .withCommand(scraperCommand.toArray(new String[0]))
-            .withStartupTimeout(Duration.ofSeconds(120))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1));
     scraper.start();
   }
 
   @AfterAll
+  // No need to block other tests waiting on return.
+  @SuppressWarnings("FutureReturnValueIgnored")
   void afterAll() {
     otlpServer.stop();
   }
@@ -108,7 +111,8 @@ public abstract class AbstractIntegrationTest {
     otlpServer.reset();
   }
 
-  protected void waitAndAssertMetrics(Consumer<Metric>... assertions) {
+  @SafeVarargs
+  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
     await()
         .atMost(Duration.ofSeconds(30))
         .untilAsserted(
@@ -150,7 +154,7 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected void assertSum(Metric metric, String name, String description, String unit) {
-    assertSum(metric, name, description, unit, true);
+    assertSum(metric, name, description, unit, /* isMonotonic= */ true);
   }
 
   protected void assertSum(
@@ -182,57 +186,62 @@ public abstract class AbstractIntegrationTest {
     assertTypedPoints(metric.getSum().getDataPointsList(), types);
   }
 
-  protected void assertSumWithAttributes(
+  @SafeVarargs
+  protected final void assertSumWithAttributes(
       Metric metric,
       String name,
       String description,
       String unit,
-      List<Map<String, String>> attributeGroups) {
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasSum()).isTrue();
-    assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroups);
+    assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
-  protected void assertGaugeWithAttributes(
+  @SafeVarargs
+  protected final void assertGaugeWithAttributes(
       Metric metric,
       String name,
       String description,
       String unit,
-      List<Map<String, String>> attributeGroups) {
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasGauge()).isTrue();
-    assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroups);
+    assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
   }
 
-  private static final String expectedMeterVersion() {
+  private static String expectedMeterVersion() {
     // Automatically set by gradle when running the tests
     String version = System.getProperty("gradle.project.version");
-    assert version != null && !version.isEmpty();
+    assertThat(version).isNotBlank();
     return version;
   }
 
+  @SuppressWarnings("unchecked")
   private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
-    List<Map<String, String>> expectedAttributes =
+    Consumer<MapAssert<String, String>>[] assertions =
         types.stream()
             .map(
                 type ->
-                    new HashMap<String, String>() {
-                      {
-                        put("name", type);
-                      }
-                    })
-            .collect(Collectors.toList());
+                    (Consumer<MapAssert<String, String>>)
+                        attrs -> attrs.containsOnly(entry("name", type)))
+            .toArray(Consumer[]::new);
 
-    assertAttributedPoints(points, expectedAttributes);
+    assertAttributedPoints(points, assertions);
   }
 
   @SuppressWarnings("unchecked")
   private static void assertAttributedPoints(
-      List<NumberDataPoint> points, List<Map<String, String>> attributeGroups) {
+      List<NumberDataPoint> points,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    Consumer<Map<String, String>>[] assertions =
+        Arrays.stream(attributeGroupAssertions)
+            .map(assertion -> (Consumer<Map<String, String>>) m -> assertion.accept(assertThat(m)))
+            .toArray(Consumer[]::new);
     assertThat(points)
         .extracting(
             numberDataPoint ->
@@ -240,15 +249,7 @@ public abstract class AbstractIntegrationTest {
                     .collect(
                         Collectors.toMap(
                             KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
-        .satisfiesExactlyInAnyOrder(
-            attributeGroups.stream()
-                .map(
-                    expected ->
-                        (Consumer<Map<String, String>>)
-                            pointAttributes ->
-                                assertThat(pointAttributes)
-                                    .containsExactlyInAnyOrderEntriesOf(expected))
-                .toArray(Consumer[]::new));
+        .satisfiesExactlyInAnyOrder(assertions);
   }
 
   private static class OtlpGrpcServer extends ServerExtension {

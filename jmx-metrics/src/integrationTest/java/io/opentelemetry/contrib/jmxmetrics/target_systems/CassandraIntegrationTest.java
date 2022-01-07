@@ -5,13 +5,14 @@
 
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
+import static org.assertj.core.api.Assertions.entry;
+
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -22,7 +23,7 @@ import org.testcontainers.utility.MountableFile;
 class CassandraIntegrationTest extends AbstractIntegrationTest {
 
   CassandraIntegrationTest() {
-    super(false, "target-systems/cassandra.properties");
+    super(/* configFromStdin= */ false, "target-systems/cassandra.properties");
   }
 
   @Container
@@ -35,7 +36,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
               "/etc/cassandra/jmxremote.password")
           .withNetworkAliases("cassandra")
           .withExposedPorts(7199)
-          .withStartupTimeout(Duration.ofSeconds(120))
+          .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort());
 
   @Test
@@ -113,7 +114,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "cassandra.storage.load.count",
                 "Size of the on disk data size this node manages",
                 "by",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
@@ -126,14 +127,16 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 "cassandra.storage.total_hints.in_progress.count",
                 "Number of hints attempting to be sent currently",
                 "1",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "cassandra.client.request.count",
                 "Number of requests by operation",
                 "1",
-                getRequestCountAttributes()),
+                attrs -> attrs.containsOnly(entry("operation", "RangeSlice")),
+                attrs -> attrs.containsOnly(entry("operation", "Read")),
+                attrs -> attrs.containsOnly(entry("operation", "Write"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -143,21 +146,8 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 getRequestErrorCountAttributes()));
   }
 
-  private List<Map<String, String>> getRequestCountAttributes() {
-    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
-
-    return operations.stream()
-        .map(
-            op ->
-                new HashMap<String, String>() {
-                  {
-                    put("operation", op);
-                  }
-                })
-        .collect(Collectors.toList());
-  }
-
-  private List<Map<String, String>> getRequestErrorCountAttributes() {
+  @SuppressWarnings("unchecked")
+  private static Consumer<MapAssert<String, String>>[] getRequestErrorCountAttributes() {
     List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
     List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
 
@@ -167,12 +157,10 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 statuses.stream()
                     .map(
                         st ->
-                            new HashMap<String, String>() {
-                              {
-                                put("operation", op);
-                                put("status", st);
-                              }
-                            }))
-        .collect(Collectors.toList());
+                            (Consumer<MapAssert<String, String>>)
+                                attrs ->
+                                    attrs.containsOnly(
+                                        entry("operation", op), entry("status", st))))
+        .toArray(Consumer[]::new);
   }
 }

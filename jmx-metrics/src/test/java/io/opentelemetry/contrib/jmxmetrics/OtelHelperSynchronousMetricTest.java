@@ -30,7 +30,7 @@ class OtelHelperSynchronousMetricTest {
 
   @BeforeEach
   void setUp() {
-    metricReader = new InMemoryMetricReader();
+    metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     otel = new OtelHelper(null, new GroovyMetricEnvironment(meterProvider, "otel.test"));
   }

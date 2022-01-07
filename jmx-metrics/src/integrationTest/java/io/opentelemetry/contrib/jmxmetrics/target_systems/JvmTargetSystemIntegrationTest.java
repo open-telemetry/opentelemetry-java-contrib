@@ -19,7 +19,7 @@ import org.testcontainers.utility.MountableFile;
 class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
 
   JvmTargetSystemIntegrationTest() {
-    super(false, "target-systems/jvm.properties");
+    super(/* configFromStdin= */ false, "target-systems/jvm.properties");
   }
 
   @Container
@@ -32,7 +32,7 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
               "/etc/cassandra/jmxremote.password")
           .withNetworkAliases("cassandra")
           .withExposedPorts(7199)
-          .withStartupTimeout(Duration.ofSeconds(120))
+          .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort());
 
   @Test

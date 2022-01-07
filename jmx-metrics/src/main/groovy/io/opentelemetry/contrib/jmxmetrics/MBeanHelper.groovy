@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import groovy.jmx.GroovyMBean
 import groovy.transform.PackageScope
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName

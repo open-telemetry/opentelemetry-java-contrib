@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
  * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. See
  * https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java
  */
-@SuppressWarnings("DeduplicateConstants")
+@SuppressWarnings({"DeduplicateConstants", "deprecation"})
 public class MojoGoalExecutionHandlerTest {
 
   @Test

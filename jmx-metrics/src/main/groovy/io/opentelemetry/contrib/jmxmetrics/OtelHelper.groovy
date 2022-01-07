@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import groovy.jmx.GroovyMBean
 import io.opentelemetry.api.metrics.DoubleCounter
 import io.opentelemetry.api.metrics.DoubleHistogram
 import io.opentelemetry.api.metrics.DoubleUpDownCounter
