@@ -19,7 +19,13 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Hold the state of the spans in progress */
+/**
+ * Hold the state of the spans in progress.
+ *
+ * <p>As Maven processes, including the <a href="https://github.com/apache/maven-mvnd">Maven
+ * Daemon</a>, can't execute multiple builds concurrently, there is no need to differentiate spans
+ * per {@link org.apache.maven.execution.MavenSession}.
+ */
 @Component(role = SpanRegistry.class)
 public final class SpanRegistry {
 
@@ -75,6 +81,7 @@ public final class SpanRegistry {
                   .map(MojoExecutionKey::toString)
                   .collect(Collectors.joining(", ")));
     }
+    this.rootSpan = null;
     return rootSpan;
   }
 
