@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics
 
+import groovy.jmx.GroovyMBean
 import groovy.transform.PackageScope
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
@@ -57,7 +58,7 @@ class InstrumentHelper {
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> MBeanAttributes, Closure instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description

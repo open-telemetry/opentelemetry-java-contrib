@@ -80,7 +80,7 @@ class InstrumenterHelperTest {
 
   @BeforeEach
   void setupOtel() {
-    metricReader = new InMemoryMetricReader();
+    metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
 
     otel = new OtelHelper(jmxClient, new GroovyMetricEnvironment(meterProvider, "otel.test"));
@@ -455,7 +455,7 @@ class InstrumenterHelperTest {
       String instrumentName = "multiple." + instrumentMethod + ".counter";
       String description = "multiple double counter description";
 
-      Map<String, Map<String, Closure>> attributes = new HashMap<>();
+      Map<String, Map<String, Closure<?>>> attributes = new HashMap<>();
       attributes.put(
           "FirstAttribute",
           Collections.singletonMap("Thing", (Closure<?>) Eval.me("{ mbean -> 1 }")));
@@ -544,6 +544,7 @@ class InstrumenterHelperTest {
           .toArray(Consumer[]::new);
     }
 
+    @SuppressWarnings("unchecked")
     private Consumer<DoublePointData>[] assertAttributeDoublePoints() {
       return Stream.<Consumer<DoublePointData>>of(
               point ->
@@ -681,7 +682,7 @@ class InstrumenterHelperTest {
       String description,
       String attribute) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
-    Map<String, Closure> labelFuncs = new HashMap<>();
+    Map<String, Closure<?>> labelFuncs = new HashMap<>();
     labelFuncs.put("labelOne", (Closure<?>) Eval.me("{ unused -> 'labelOneValue' }"));
     labelFuncs.put(
         "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
@@ -702,9 +703,9 @@ class InstrumenterHelperTest {
       String instrumentMethod,
       String instrumentName,
       String description,
-      Map<String, Map<String, Closure>> attributes) {
+      Map<String, Map<String, Closure<?>>> attributes) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
-    Map<String, Closure> labelFuncs = new HashMap<>();
+    Map<String, Closure<?>> labelFuncs = new HashMap<>();
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
             mBeanHelper, instrumentName, description, "1", labelFuncs, attributes, instrument);

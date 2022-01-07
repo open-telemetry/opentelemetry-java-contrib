@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +29,7 @@ import org.testcontainers.utility.MountableFile;
 
 abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
   protected KafkaIntegrationTest(String configName) {
-    super(false, configName);
+    super(/* configFromStdin= */ false, configName);
   }
 
   @Container
@@ -36,7 +37,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
       new GenericContainer<>("zookeeper:3.5")
           .withNetwork(Network.SHARED)
           .withNetworkAliases("zookeeper")
-          .withStartupTimeout(Duration.ofSeconds(120))
+          .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort());
 
   @Container
@@ -48,7 +49,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
           .withEnv("JMX_PORT", "7199")
           .withNetworkAliases("kafka")
           .withExposedPorts(7199)
-          .withStartupTimeout(Duration.ofSeconds(120))
+          .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort())
           .dependsOn(zookeeper);
 
@@ -61,7 +62,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "sh",
                 "-c",
                 "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-$i; done");
-          } catch (Exception e) {
+          } catch (IOException | InterruptedException e) {
             throw new AssertionError(e);
           }
         }
@@ -198,7 +199,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "test-topic-.*",
                 "--max-messages",
                 "100")
-            .withStartupTimeout(Duration.ofSeconds(120))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .waitingFor(Wait.forListeningPort())
             .dependsOn(createTopics);
 
@@ -278,7 +279,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 MountableFile.forClasspathResource("target-systems/kafka-producer.sh"),
                 "/usr/bin/kafka-producer.sh")
             .withCommand("kafka-producer.sh")
-            .withStartupTimeout(Duration.ofSeconds(120))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
             .waitingFor(Wait.forListeningPort())
             .dependsOn(createTopics);

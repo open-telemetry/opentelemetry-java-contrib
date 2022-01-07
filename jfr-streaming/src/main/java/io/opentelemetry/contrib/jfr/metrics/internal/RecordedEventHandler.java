@@ -29,6 +29,7 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
    * @param event - event instance to see if we're interested
    * @return true if event is interesting, false otherwise
    */
+  @Override
   default boolean test(RecordedEvent event) {
     return event.getEventType().getName().equalsIgnoreCase(getEventName());
   }

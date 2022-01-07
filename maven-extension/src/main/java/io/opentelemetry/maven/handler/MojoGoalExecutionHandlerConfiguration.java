@@ -28,13 +28,12 @@ public class MojoGoalExecutionHandlerConfiguration {
             new SnykTestHandler(),
             new SpringBootBuildImageHandler());
 
-    List<MojoGoalExecutionHandler> spiHandlers = new ArrayList();
+    List<MojoGoalExecutionHandler> spiHandlers = new ArrayList<>();
     // Must use the classloader of the class rather the default ThreadContextClassloader to prevent
     // java.util.ServiceConfigurationError:
     //    io.opentelemetry.maven.handler.MojoGoalExecutionHandler:
     //    io.opentelemetry.maven.handler.SpringBootBuildImageHandler not a subtype
-    ServiceLoader.load(MojoGoalExecutionHandler.class, classLoader)
-        .forEach(handler -> spiHandlers.add(handler));
+    ServiceLoader.load(MojoGoalExecutionHandler.class, classLoader).forEach(spiHandlers::add);
 
     Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
 

@@ -56,7 +56,8 @@ val DEPENDENCY_SETS = listOf(
     )
 )
 
-val DEPENDENCIES = listOf(
+val DEPENDENCIES = listOf("com.google.code.findbugs:annotations:3.0.1u2",
+    "com.google.code.findbugs:annotations:3.0.1u2",
     "com.google.code.findbugs:jsr305:3.0.2",
     "com.squareup.okhttp3:okhttp:3.14.9",
     "com.uber.nullaway:nullaway:0.9.2",
