@@ -42,7 +42,7 @@ can be helpful to ensure this is the correct place and that active or conflictin
 
 Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-telemetry/teams/java-contrib-triagers)):
 
-All [component owners](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/component_owners.yml) are given Triager permissions to this repository.
+- All [component owners](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/component_owners.yml) are given Triager permissions to this repository.
 
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
