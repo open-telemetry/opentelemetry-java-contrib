@@ -83,7 +83,7 @@ final class XraySamplerClient {
   }
 
   private <T> T executeJsonRequest(String endpoint, Object request, Class<T> responseType) {
-    final byte[] requestBody;
+    byte[] requestBody;
     try {
       requestBody = OBJECT_MAPPER.writeValueAsBytes(request);
     } catch (JsonProcessingException e) {
@@ -97,7 +97,7 @@ final class XraySamplerClient {
                 .post(RequestBody.create(JSON_CONTENT_TYPE, requestBody))
                 .build());
 
-    final String response;
+    String response;
     try (Response httpResponse = call.execute()) {
       response = readResponse(httpResponse, endpoint);
     } catch (IOException e) {

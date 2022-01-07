@@ -385,7 +385,7 @@ public class MojoGoalExecutionHandlerTest {
     plugin.setArtifactId(artifactId);
     plugin.setVersion(version);
 
-    final Plugin configuredPlugin = project.getPlugin(plugin.getKey());
+    Plugin configuredPlugin = project.getPlugin(plugin.getKey());
     if (configuredPlugin != null) {
       mojoExecution.setConfiguration((Xpp3Dom) configuredPlugin.getConfiguration());
     }

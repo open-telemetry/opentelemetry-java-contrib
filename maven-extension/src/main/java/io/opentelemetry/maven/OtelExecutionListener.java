@@ -117,7 +117,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     // - start with an operation name: "Build"
     // - identify the build with a popular identifier of what is being built, in the java culture,
     //   it's the artifact identifier
-    final String spanName =
+    String spanName =
         "Build: "
             + project.getGroupId()
             + ":"
@@ -145,7 +145,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     String spanName = project.getGroupId() + ":" + project.getArtifactId();
     logger.debug("OpenTelemetry: Start project span: {}", spanName);
     Span rootSpan = spanRegistry.getRootSpanNotNull();
-    final Tracer tracer = this.openTelemetrySdkService.getTracer();
+    Tracer tracer = this.openTelemetrySdkService.getTracer();
     Span projectSpan =
         tracer
             .spanBuilder(spanName)
@@ -173,7 +173,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
         "OpenTelemetry: End failed project span: {}:{}",
         executionEvent.getProject().getArtifactId(),
         executionEvent.getProject().getArtifactId());
-    final Span span = spanRegistry.removeSpan(executionEvent.getProject());
+    Span span = spanRegistry.removeSpan(executionEvent.getProject());
     span.setStatus(StatusCode.ERROR);
     span.recordException(executionEvent.getException());
     span.end();
@@ -189,7 +189,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
     Span rootSpan = spanRegistry.getSpan(executionEvent.getProject());
 
-    final String spanName =
+    String spanName =
         MavenUtils.getPluginArtifactIdShortName(mojoExecution.getArtifactId())
             + ":"
             + mojoExecution.getGoal()

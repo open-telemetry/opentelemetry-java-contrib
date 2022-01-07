@@ -16,8 +16,7 @@ public class MojoGoalExecutionHandlerConfigurationTest {
 
   @Test
   public void mojoGoalExecutionHandlers() {
-
-    final Map<MavenGoal, MojoGoalExecutionHandler> actual =
+    Map<MavenGoal, MojoGoalExecutionHandler> actual =
         MojoGoalExecutionHandlerConfiguration.loadMojoGoalExecutionHandler(
             OtelExecutionListener.class.getClassLoader());
     assertThat(actual.size()).isEqualTo(5);

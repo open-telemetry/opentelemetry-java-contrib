@@ -196,7 +196,7 @@ class DisruptorSpanProcessorTest {
 
   @Test
   void incrementTenK() {
-    final int tenK = 10000;
+    int tenK = 10000;
     IncrementSpanProcessor incrementSpanProcessor = new IncrementSpanProcessor(REQUIRED, REQUIRED);
     DisruptorSpanProcessor disruptorSpanProcessor =
         DisruptorSpanProcessor.builder(incrementSpanProcessor).build();
@@ -238,7 +238,7 @@ class DisruptorSpanProcessorTest {
 
   @Test
   void multipleForceFlush() {
-    final int tenK = 10000;
+    int tenK = 10000;
     IncrementSpanProcessor incrementSpanProcessor = new IncrementSpanProcessor(REQUIRED, REQUIRED);
     DisruptorSpanProcessor disruptorSpanProcessor =
         DisruptorSpanProcessor.builder(incrementSpanProcessor).build();
