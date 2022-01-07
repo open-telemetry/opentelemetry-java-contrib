@@ -1,7 +1,19 @@
 # this file is used by .github/workflows/component-codeowners.yml
 components:
   aws-xray:
+    - anuraaga
     - willarmiros
+  contrib-samplers:
+    - iNikem
+  jfr-streaming:
+    - breedx-splk
+    - jack-berg
+    - kittylyst
+  jmx-metrics:
+    - rmfitzpatrick
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
+  runtime-attach:
+    - iNikem
+    - trask
