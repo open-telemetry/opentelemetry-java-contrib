@@ -1,7 +1,22 @@
 # this file is used by .github/workflows/component-codeowners.yml
 components:
   aws-xray:
+    - anuraaga
     - willarmiros
+  contrib-samplers:
+    - iNikem
+  jfr-streaming:
+    - breedx-splk
+    - jack-berg
+    # TODO (trask) uncomment once kittylyst joins the OTel github org
+    #  (the component owners GitHub action fails if component owners aren't in the OTel github org
+    #  because they can't be assigned as reviewers)
+    # - kittylyst
+  jmx-metrics:
+    - rmfitzpatrick
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
+  runtime-attach:
+    - iNikem
+    - trask

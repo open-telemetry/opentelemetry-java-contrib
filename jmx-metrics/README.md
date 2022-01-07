@@ -234,3 +234,9 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | `javax.net.ssl.keyStoreType` | no | The key store type. |
 | `javax.net.ssl.trustStore` | no | The trusted store path if the TLS profile is required. |
 | `javax.net.ssl.trustStorePassword` | no | The trust store file password if required. |
+
+## Component owners
+
+- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
+
+Learn more about component owners in [component-owners.yml](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/workflows/component-owners.yml).
