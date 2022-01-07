@@ -61,7 +61,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     OpenTelemetrySdk openTelemetrySdk = this.openTelemetrySdk;
     if (openTelemetrySdk != null) {
       logger.debug("OpenTelemetry: Shutdown SDK Trace Provider...");
-      final CompletableResultCode sdkProviderShutdown =
+      CompletableResultCode sdkProviderShutdown =
           openTelemetrySdk.getSdkTracerProvider().shutdown();
       sdkProviderShutdown.join(10, TimeUnit.SECONDS);
       if (sdkProviderShutdown.isSuccess()) {

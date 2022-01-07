@@ -49,8 +49,8 @@ public final class SpanRegistry {
 
   public Span getSpan(MavenProject mavenProject) {
     logger.debug("OpenTelemetry: getSpan({}, {})", mavenProject, Thread.currentThread());
-    final MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
-    final Span span = this.mavenProjectKeySpanMap.get(key);
+    MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
+    Span span = this.mavenProjectKeySpanMap.get(key);
     if (span == null) {
       throw new IllegalStateException(
           "Span not started for project "

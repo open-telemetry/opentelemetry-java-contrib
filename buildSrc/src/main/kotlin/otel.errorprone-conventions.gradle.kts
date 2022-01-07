@@ -46,9 +46,14 @@ tasks {
         excludedPaths.set(".*generated.*|.*internal.shaded.*")
 
         disable("Java7ApiChecker")
+        disable("Java8ApiChecker")
         disable("AndroidJdkLibsChecker")
+
         // apparently disabling android doesn't disable this
         disable("StaticOrDefaultInterfaceMethod")
+
+        // Prevents defensive null checks and we have nullaway
+        disable("ParameterMissingNullable")
 
         // until we have everything converted, we need these
         disable("JdkObsolete")
