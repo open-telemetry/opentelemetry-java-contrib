@@ -8,7 +8,7 @@ The main entry point is the `JfrMetrics` class in the package `io.opentelemetry.
 
 ## Component owners
 
-- [Ben Evans](https://github.com/breedx-splk), Red Hat
+- [Ben Evans](https://github.com/kittylyst), Red Hat
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
 
