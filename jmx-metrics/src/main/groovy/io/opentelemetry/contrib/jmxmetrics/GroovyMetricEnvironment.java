@@ -5,19 +5,18 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -70,16 +69,24 @@ public class GroovyMetricEnvironment {
                 System.setProperty(key, value.toString());
               }
             });
-        // this call will dynamically load the autoconfigure extension
-        // and take care of provider and exporter creation for us based on system properties.
-        GlobalOpenTelemetry.get();
-        meterProvider = (SdkMeterProvider) GlobalMeterProvider.get();
+        // call the autoconfigure extension and take care of provider and exporter creation for us
+        // based on system properties.
+        meterProvider =
+            AutoConfiguredOpenTelemetrySdk.builder()
+                .setResultAsGlobal(false)
+                .build()
+                .getOpenTelemetrySdk()
+                .getSdkMeterProvider();
         break;
       default: // inmemory fallback
-        meterProvider = SdkMeterProvider.builder().buildAndRegisterGlobal();
+        meterProvider = SdkMeterProvider.builder().build();
     }
 
-    meter = meterProvider.get(instrumentationName, instrumentationVersion, null);
+    meter =
+        meterProvider
+            .meterBuilder(instrumentationName)
+            .setInstrumentationVersion(instrumentationVersion)
+            .build();
   }
 
   // Visible for testing

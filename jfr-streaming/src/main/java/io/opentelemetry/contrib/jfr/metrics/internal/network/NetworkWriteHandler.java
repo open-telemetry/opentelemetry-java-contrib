@@ -14,12 +14,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_BY
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_DESCRIPTION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_MODE_WRITE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -51,7 +50,7 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
 
   public NetworkWriteHandler(ThreadGrouper nameNormalizer) {
     super(nameNormalizer);
-    initializeMeter(NoopMeter.getInstance());
+    initializeMeter(defaultMeter());
   }
 
   @Override
@@ -83,20 +82,22 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
   private static final class PerThreadNetworkWriteHandler implements Consumer<RecordedEvent> {
     private static final String BYTES_WRITTEN = "bytesWritten";
 
-    private final BoundDoubleHistogram boundBytesHistogram;
-    private final BoundDoubleHistogram boundDurationHistogram;
+    private final DoubleHistogram bytesHistogram;
+    private final DoubleHistogram durationHistogram;
+    private final Attributes attributes;
 
     private PerThreadNetworkWriteHandler(
         DoubleHistogram bytesHistogram, DoubleHistogram durationHistogram, String threadName) {
-      var attr = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, NETWORK_MODE_WRITE);
-      boundBytesHistogram = bytesHistogram.bind(attr);
-      boundDurationHistogram = durationHistogram.bind(attr);
+      this.bytesHistogram = bytesHistogram;
+      this.durationHistogram = durationHistogram;
+      this.attributes =
+          Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_NETWORK_MODE, NETWORK_MODE_WRITE);
     }
 
     @Override
     public void accept(RecordedEvent ev) {
-      boundBytesHistogram.record(ev.getLong(BYTES_WRITTEN));
-      boundDurationHistogram.record(ev.getDuration().toMillis());
+      bytesHistogram.record(ev.getLong(BYTES_WRITTEN), attributes);
+      durationHistogram.record(ev.getDuration().toMillis(), attributes);
     }
   }
 }

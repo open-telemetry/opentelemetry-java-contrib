@@ -5,13 +5,13 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import static io.opentelemetry.sdk.testing.assertj.MetricAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.attributeEntry;
-import static io.opentelemetry.sdk.testing.assertj.metrics.MetricAssertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,25 +37,24 @@ class OtelHelperAsynchronousMetricTest {
         "double-counter",
         "a double counter",
         "ms",
-        result -> result.observe(123.456, Attributes.builder().put("key", "value").build()));
+        result -> result.record(123.456, Attributes.builder().put("key", "value").build()));
 
     otel.doubleCounterCallback(
         "my-double-counter",
         "another double counter",
         "µs",
-        result -> result.observe(234.567, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(234.567, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.doubleCounterCallback(
         "another-double-counter",
         "double counter",
         result ->
-            result.observe(
-                345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.doubleCounterCallback(
         "yet-another-double-counter",
         result ->
-            result.observe(
+            result.record(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -119,21 +118,21 @@ class OtelHelperAsynchronousMetricTest {
     otel.doubleCounterCallback(
         "dc",
         "double",
-        result -> result.observe(10.1, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(10.1, Attributes.builder().put("key1", "value1").build()));
     otel.doubleCounterCallback(
         "dc",
         "double",
-        result -> result.observe(20.2, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(20.2, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleCounterCallback(
         "dc",
         "double",
-        result -> result.observe(30.3, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30.3, Attributes.builder().put("key3", "value3").build()));
     otel.doubleCounterCallback(
         "dc",
         "double",
-        result -> result.observe(40.4, Attributes.builder().put("key4", "value4").build()));
+        result -> result.record(40.4, Attributes.builder().put("key4", "value4").build()));
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
@@ -175,24 +174,24 @@ class OtelHelperAsynchronousMetricTest {
         "long-counter",
         "a long counter",
         "ms",
-        result -> result.observe(123, Attributes.builder().put("key", "value").build()));
+        result -> result.record(123, Attributes.builder().put("key", "value").build()));
 
     otel.longCounterCallback(
         "my-long-counter",
         "another long counter",
         "µs",
-        result -> result.observe(234, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(234, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.longCounterCallback(
         "another-long-counter",
         "long counter",
         result ->
-            result.observe(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.longCounterCallback(
         "yet-another-long-counter",
         result ->
-            result.observe(
+            result.record(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -256,21 +255,21 @@ class OtelHelperAsynchronousMetricTest {
     otel.longCounterCallback(
         "dc",
         "long",
-        result -> result.observe(10, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(10, Attributes.builder().put("key1", "value1").build()));
     otel.longCounterCallback(
         "dc",
         "long",
-        result -> result.observe(20, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(20, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longCounterCallback(
         "dc",
         "long",
-        result -> result.observe(30, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30, Attributes.builder().put("key3", "value3").build()));
     otel.longCounterCallback(
         "dc",
         "long",
-        result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
+        result -> result.record(40, Attributes.builder().put("key4", "value4").build()));
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
@@ -312,25 +311,24 @@ class OtelHelperAsynchronousMetricTest {
         "double-counter",
         "a double counter",
         "ms",
-        result -> result.observe(-123.456, Attributes.builder().put("key", "value").build()));
+        result -> result.record(-123.456, Attributes.builder().put("key", "value").build()));
 
     otel.doubleUpDownCounterCallback(
         "my-double-counter",
         "another double counter",
         "µs",
-        result -> result.observe(-234.567, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(-234.567, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.doubleUpDownCounterCallback(
         "another-double-counter",
         "double counter",
         result ->
-            result.observe(
-                345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.doubleUpDownCounterCallback(
         "yet-another-double-counter",
         result ->
-            result.observe(
+            result.record(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -394,21 +392,21 @@ class OtelHelperAsynchronousMetricTest {
     otel.doubleUpDownCounterCallback(
         "dc",
         "double",
-        result -> result.observe(-10.1, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(-10.1, Attributes.builder().put("key1", "value1").build()));
     otel.doubleUpDownCounterCallback(
         "dc",
         "double",
-        result -> result.observe(-20.2, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(-20.2, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleUpDownCounterCallback(
         "dc",
         "double",
-        result -> result.observe(30.3, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30.3, Attributes.builder().put("key3", "value3").build()));
     otel.doubleUpDownCounterCallback(
         "dc",
         "double",
-        result -> result.observe(40.4, Attributes.builder().put("key4", "value4").build()));
+        result -> result.record(40.4, Attributes.builder().put("key4", "value4").build()));
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
@@ -450,24 +448,24 @@ class OtelHelperAsynchronousMetricTest {
         "long-counter",
         "a long counter",
         "ms",
-        result -> result.observe(-123, Attributes.builder().put("key", "value").build()));
+        result -> result.record(-123, Attributes.builder().put("key", "value").build()));
 
     otel.longUpDownCounterCallback(
         "my-long-counter",
         "another long counter",
         "µs",
-        result -> result.observe(-234, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(-234, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.longUpDownCounterCallback(
         "another-long-counter",
         "long counter",
         result ->
-            result.observe(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.longUpDownCounterCallback(
         "yet-another-long-counter",
         result ->
-            result.observe(
+            result.record(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -531,21 +529,21 @@ class OtelHelperAsynchronousMetricTest {
     otel.longUpDownCounterCallback(
         "dc",
         "long",
-        result -> result.observe(-10, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(-10, Attributes.builder().put("key1", "value1").build()));
     otel.longUpDownCounterCallback(
         "dc",
         "long",
-        result -> result.observe(-20, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(-20, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longUpDownCounterCallback(
         "dc",
         "long",
-        result -> result.observe(30, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30, Attributes.builder().put("key3", "value3").build()));
     otel.longUpDownCounterCallback(
         "dc",
         "long",
-        result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
+        result -> result.record(40, Attributes.builder().put("key4", "value4").build()));
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
@@ -587,25 +585,24 @@ class OtelHelperAsynchronousMetricTest {
         "double-value",
         "a double value",
         "ms",
-        result -> result.observe(123.456, Attributes.builder().put("key", "value").build()));
+        result -> result.record(123.456, Attributes.builder().put("key", "value").build()));
 
     otel.doubleValueCallback(
         "my-double-value",
         "another double value",
         "µs",
-        result -> result.observe(234.567, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(234.567, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.doubleValueCallback(
         "another-double-value",
         "double value",
         result ->
-            result.observe(
-                345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345.678, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.doubleValueCallback(
         "yet-another-double-value",
         result ->
-            result.observe(
+            result.record(
                 456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -669,23 +666,23 @@ class OtelHelperAsynchronousMetricTest {
     otel.doubleValueCallback(
         "dc",
         "double",
-        result -> result.observe(10.1, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(10.1, Attributes.builder().put("key1", "value1").build()));
     otel.doubleValueCallback(
         "dc",
         "double",
-        result -> result.observe(20.2, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(20.2, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.doubleValueCallback(
         "dc",
         "double",
-        result -> result.observe(30.3, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30.3, Attributes.builder().put("key3", "value3").build()));
     otel.doubleValueCallback(
         "dc",
         "double",
         result -> {
-          result.observe(40.4, Attributes.builder().put("key4", "value4").build());
-          result.observe(50.5, Attributes.builder().put("key2", "value2").build());
+          result.record(40.4, Attributes.builder().put("key4", "value4").build());
+          result.record(50.5, Attributes.builder().put("key2", "value2").build());
         });
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
@@ -733,24 +730,24 @@ class OtelHelperAsynchronousMetricTest {
         "long-value",
         "a long value",
         "ms",
-        result -> result.observe(123, Attributes.builder().put("key", "value").build()));
+        result -> result.record(123, Attributes.builder().put("key", "value").build()));
 
     otel.longValueCallback(
         "my-long-value",
         "another long value",
         "µs",
-        result -> result.observe(234, Attributes.builder().put("myKey", "myValue").build()));
+        result -> result.record(234, Attributes.builder().put("myKey", "myValue").build()));
 
     otel.longValueCallback(
         "another-long-value",
         "long value",
         result ->
-            result.observe(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
+            result.record(345, Attributes.builder().put("anotherKey", "anotherValue").build()));
 
     otel.longValueCallback(
         "yet-another-long-value",
         result ->
-            result.observe(
+            result.record(
                 456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build()));
 
     assertThat(metricReader.collectAllMetrics())
@@ -814,21 +811,21 @@ class OtelHelperAsynchronousMetricTest {
     otel.longValueCallback(
         "dc",
         "long",
-        result -> result.observe(10, Attributes.builder().put("key1", "value1").build()));
+        result -> result.record(10, Attributes.builder().put("key1", "value1").build()));
     otel.longValueCallback(
         "dc",
         "long",
-        result -> result.observe(20, Attributes.builder().put("key2", "value2").build()));
+        result -> result.record(20, Attributes.builder().put("key2", "value2").build()));
     Collection<MetricData> firstMetrics = metricReader.collectAllMetrics();
 
     otel.longValueCallback(
         "dc",
         "long",
-        result -> result.observe(30, Attributes.builder().put("key3", "value3").build()));
+        result -> result.record(30, Attributes.builder().put("key3", "value3").build()));
     otel.longValueCallback(
         "dc",
         "long",
-        result -> result.observe(40, Attributes.builder().put("key4", "value4").build()));
+        result -> result.record(40, Attributes.builder().put("key4", "value4").build()));
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)

@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import static io.opentelemetry.sdk.testing.assertj.MetricAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.attributeEntry;
-import static io.opentelemetry.sdk.testing.assertj.metrics.MetricAssertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleCounter;
@@ -16,7 +16,7 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.testing.InMemoryMetricReader;
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -322,10 +322,10 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void doubleHistogram() {
     DoubleHistogram dh = otel.doubleHistogram("double-histogram", "a double histogram", "ms");
-    dh.record(-234.567, Attributes.builder().put("key", "value").build());
+    dh.record(234.567, Attributes.builder().put("key", "value").build());
 
     dh = otel.doubleHistogram("my-double-histogram", "another double histogram", "µs");
-    dh.record(-123.456, Attributes.builder().put("myKey", "myValue").build());
+    dh.record(123.456, Attributes.builder().put("myKey", "myValue").build());
 
     dh = otel.doubleHistogram("another-double-histogram", "double histogram");
     dh.record(345.678, Attributes.builder().put("anotherKey", "anotherValue").build());
@@ -345,7 +345,7 @@ class OtelHelperSynchronousMetricTest {
                     .satisfiesExactly(
                         point ->
                             assertThat(point)
-                                .hasSum(-234.567)
+                                .hasSum(234.567)
                                 .hasCount(1)
                                 .attributes()
                                 .containsOnly(attributeEntry("key", "value"))),
@@ -359,7 +359,7 @@ class OtelHelperSynchronousMetricTest {
                     .satisfiesExactly(
                         point ->
                             assertThat(point)
-                                .hasSum(-123.456)
+                                .hasSum(123.456)
                                 .hasCount(1)
                                 .attributes()
                                 .containsOnly(attributeEntry("myKey", "myValue"))),
@@ -396,10 +396,10 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void longHistogram() {
     LongHistogram lh = otel.longHistogram("long-histogram", "a long histogram", "ms");
-    lh.record(-234, Attributes.builder().put("key", "value").build());
+    lh.record(234, Attributes.builder().put("key", "value").build());
 
     lh = otel.longHistogram("my-long-histogram", "another long histogram", "µs");
-    lh.record(-123, Attributes.builder().put("myKey", "myValue").build());
+    lh.record(123, Attributes.builder().put("myKey", "myValue").build());
 
     lh = otel.longHistogram("another-long-histogram", "long histogram");
     lh.record(345, Attributes.builder().put("anotherKey", "anotherValue").build());
@@ -419,7 +419,7 @@ class OtelHelperSynchronousMetricTest {
                     .satisfiesExactly(
                         point ->
                             assertThat(point)
-                                .hasSum(-234)
+                                .hasSum(234)
                                 .hasCount(1)
                                 .attributes()
                                 .containsOnly(attributeEntry("key", "value"))),
@@ -433,7 +433,7 @@ class OtelHelperSynchronousMetricTest {
                     .satisfiesExactly(
                         point ->
                             assertThat(point)
-                                .hasSum(-123)
+                                .hasSum(123)
                                 .hasCount(1)
                                 .attributes()
                                 .containsOnly(attributeEntry("myKey", "myValue"))),

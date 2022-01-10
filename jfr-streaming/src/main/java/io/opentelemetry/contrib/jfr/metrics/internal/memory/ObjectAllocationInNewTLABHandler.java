@@ -9,12 +9,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_ARENA
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_ALLOCATION;
+import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -26,13 +25,12 @@ import jdk.jfr.consumer.RecordedEvent;
  */
 public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
-  private static final String DESCRIPTION = "Allocation";
 
   private DoubleHistogram histogram;
 
   public ObjectAllocationInNewTLABHandler(ThreadGrouper grouper) {
     super(grouper);
-    initializeMeter(NoopMeter.getInstance());
+    initializeMeter(defaultMeter());
   }
 
   @Override
@@ -40,7 +38,7 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
     histogram =
         meter
             .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)
-            .setDescription(DESCRIPTION)
+            .setDescription("Allocation")
             .setUnit(BYTES)
             .build();
   }
@@ -59,18 +57,18 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
   private static class PerThreadObjectAllocationInNewTLABHandler
       implements Consumer<RecordedEvent> {
     private static final String TLAB_SIZE = "tlabSize";
-    private static final String TLAB = "TLAB";
 
-    private final BoundDoubleHistogram boundHistogram;
+    private final DoubleHistogram histogram;
+    private final Attributes attributes;
 
     public PerThreadObjectAllocationInNewTLABHandler(DoubleHistogram histogram, String threadName) {
-      boundHistogram =
-          histogram.bind(Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_ARENA_NAME, TLAB));
+      this.histogram = histogram;
+      this.attributes = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_ARENA_NAME, "TLAB");
     }
 
     @Override
     public void accept(RecordedEvent ev) {
-      boundHistogram.record(ev.getLong(TLAB_SIZE));
+      histogram.record(ev.getLong(TLAB_SIZE), attributes);
       // Probably too high a cardinality
       // ev.getClass("objectClass").getName();
     }

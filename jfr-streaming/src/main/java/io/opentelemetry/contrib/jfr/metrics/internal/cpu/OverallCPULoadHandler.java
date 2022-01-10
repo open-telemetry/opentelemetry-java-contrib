@@ -7,15 +7,14 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_CPU_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ONE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.PERCENTAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SYSTEM;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundDoubleHistogram;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
@@ -27,52 +26,36 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String JVM_SYSTEM = "jvmSystem";
   private static final String MACHINE_TOTAL = "machineTotal";
 
-  private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
-  private static final String DESCRIPTION = "CPU Utilization";
+  private static final Attributes ATTR_USER = Attributes.of(ATTR_CPU_USAGE, USER);
+  private static final Attributes ATTR_SYSTEM = Attributes.of(ATTR_CPU_USAGE, SYSTEM);
+  private static final Attributes ATTR_MACHINE = Attributes.of(ATTR_CPU_USAGE, MACHINE);
 
-  private BoundDoubleHistogram userHistogram;
-  private BoundDoubleHistogram systemHistogram;
-  private BoundDoubleHistogram machineHistogram;
+  private DoubleHistogram histogram;
 
   public OverallCPULoadHandler() {
-    initializeMeter(NoopMeter.getInstance());
+    initializeMeter(defaultMeter());
   }
 
   @Override
   public void initializeMeter(Meter meter) {
-    userHistogram =
+    histogram =
         meter
-            .histogramBuilder(METRIC_NAME)
-            .setDescription(DESCRIPTION)
+            .histogramBuilder("runtime.jvm.cpu.utilization")
+            .setDescription("CPU Utilization")
             .setUnit(PERCENTAGE)
-            .build()
-            .bind(Attributes.of(ATTR_CPU_USAGE, USER));
-    systemHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME)
-            .setDescription(DESCRIPTION)
-            .setUnit(ONE)
-            .build()
-            .bind(Attributes.of(ATTR_CPU_USAGE, SYSTEM));
-    machineHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME)
-            .setDescription(DESCRIPTION)
-            .setUnit(ONE)
-            .build()
-            .bind(Attributes.of(ATTR_CPU_USAGE, MACHINE));
+            .build();
   }
 
   @Override
   public void accept(RecordedEvent ev) {
     if (ev.hasField(JVM_USER)) {
-      userHistogram.record(ev.getDouble(JVM_USER));
+      histogram.record(ev.getDouble(JVM_USER), ATTR_USER);
     }
     if (ev.hasField(JVM_SYSTEM)) {
-      systemHistogram.record(ev.getDouble(JVM_SYSTEM));
+      histogram.record(ev.getDouble(JVM_SYSTEM), ATTR_SYSTEM);
     }
     if (ev.hasField(MACHINE_TOTAL)) {
-      machineHistogram.record(ev.getDouble(MACHINE_TOTAL));
+      histogram.record(ev.getDouble(MACHINE_TOTAL), ATTR_MACHINE);
     }
   }
 
