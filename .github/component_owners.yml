@@ -4,12 +4,14 @@ components:
     - anuraaga
     - willarmiros
   contrib-samplers:
+    - anuraaga
     - iNikem
   jfr-streaming:
     - breedx-splk
     - jack-berg
     - kittylyst
   jmx-metrics:
+    - Mrod1598
     - rmfitzpatrick
   maven-extension:
     - cyrille-leclerc
