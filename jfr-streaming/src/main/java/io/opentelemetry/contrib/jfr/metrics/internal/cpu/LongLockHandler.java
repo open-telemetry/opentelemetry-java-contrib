@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
+  private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
+  private static final String METRIC_DESCRIPTION = "Long lock times";
   private static final String EVENT_NAME = "jdk.JavaMonitorWait";
 
   private DoubleHistogram histogram;
@@ -33,8 +35,8 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   public void initializeMeter(Meter meter) {
     histogram =
         meter
-            .histogramBuilder("runtime.jvm.cpu.longlock.time")
-            .setDescription("Long lock times")
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(METRIC_DESCRIPTION)
             .setUnit(MILLISECONDS)
             .build();
   }

@@ -22,8 +22,8 @@ public final class Constants {
   public static final String USED = "used";
   public static final String COMMITTED = "committed";
 
-  public static final String NETWORK_BYTES_NAME = "runtime.jvm.network.io";
-  public static final String NETWORK_BYTES_DESCRIPTION = "Network read/write bytes";
+  public static final String METRIC_NAME_NETWORK_BYTES = "runtime.jvm.network.io";
+  public static final String METRIC_DESCRIPTION_NETWORK_BYTES = "Network read/write bytes";
   public static final String NETWORK_DURATION_NAME = "runtime.jvm.network.duration";
   public static final String NETWORK_DURATION_DESCRIPTION = "Network read/write duration";
   public static final String NETWORK_MODE_READ = "read";
@@ -37,4 +37,5 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_MEMORY_USAGE = AttributeKey.stringKey("usage.type");
 
   public static final String METRIC_NAME_MEMORY_ALLOCATION = "runtime.jvm.memory.allocation";
+  public static final String METRIC_DESCRIPTION_MEMORY_ALLOCATION = "Allocation";
 }

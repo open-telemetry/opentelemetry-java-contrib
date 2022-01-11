@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -59,21 +60,21 @@ public class GroovyMetricEnvironment {
       case "otlp":
       case "prometheus":
       case "logging":
-        // no need for autoconfigure sdk-extension to enable default traces exporter
-        config.properties.setProperty("otel.traces.exporter", "none");
-        // merge our sdk-supported properties to utilize autoconfigure features
-        config.properties.forEach(
-            (k, value) -> {
-              String key = k.toString();
-              if (key.startsWith("otel.") && !key.startsWith("otel.jmx")) {
-                System.setProperty(key, value.toString());
-              }
-            });
         // call the autoconfigure extension and take care of provider and exporter creation for us
         // based on system properties.
         meterProvider =
             AutoConfiguredOpenTelemetrySdk.builder()
                 .setResultAsGlobal(false)
+                .addPropertiesSupplier(
+                    () -> {
+                      Map<String, String> properties = new HashMap<>();
+                      // no need for autoconfigure sdk-extension to enable default traces exporter
+                      properties.put("otel.traces.exporter", "none");
+                      // expose config.properties to autoconfigure
+                      config.properties.forEach(
+                          (k, value) -> properties.put(k.toString(), value.toString()));
+                      return properties;
+                    })
                 .build()
                 .getOpenTelemetrySdk()
                 .getSdkMeterProvider();

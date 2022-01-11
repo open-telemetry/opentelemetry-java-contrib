@@ -21,6 +21,8 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
+  private static final String METRIC_NAME = "runtime.jvm.cpu.utilization";
+  private static final String METRIC_DESCRIPTION = "CPU Utilization";
   private static final String EVENT_NAME = "jdk.CPULoad";
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
@@ -40,8 +42,8 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   public void initializeMeter(Meter meter) {
     histogram =
         meter
-            .histogramBuilder("runtime.jvm.cpu.utilization")
-            .setDescription("CPU Utilization")
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(METRIC_DESCRIPTION)
             .setUnit(PERCENTAGE)
             .build();
   }

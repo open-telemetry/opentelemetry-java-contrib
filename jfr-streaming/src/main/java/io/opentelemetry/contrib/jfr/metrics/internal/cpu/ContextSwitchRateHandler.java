@@ -15,6 +15,7 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContextSwitchRateHandler implements RecordedEventHandler {
+  private static final String METRIC_NAME = "runtime.jvm.cpu.context_switch";
   private static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
 
   private volatile double value = 0;
@@ -36,7 +37,7 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
   @Override
   public void initializeMeter(Meter meter) {
     meter
-        .upDownCounterBuilder("runtime.jvm.cpu.context_switch")
+        .upDownCounterBuilder(METRIC_NAME)
         .ofDoubles()
         .setUnit(HERTZ)
         .buildWithCallback(codm -> codm.record(value));

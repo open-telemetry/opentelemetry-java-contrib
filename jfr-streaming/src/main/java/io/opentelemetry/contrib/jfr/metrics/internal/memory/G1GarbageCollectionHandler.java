@@ -18,6 +18,8 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates the duration of G1 Garbage Collection JFR events */
 public final class G1GarbageCollectionHandler implements RecordedEventHandler {
+  private static final String METRIC_NAME = "runtime.jvm.gc.duration";
+  private static final String METRIC_DESCRIPTION = "GC Duration";
   private static final String EVENT_NAME = "jdk.G1GarbageCollection";
   private static final Attributes ATTR_G1 = Attributes.of(ATTR_GC_COLLECTOR, G1);
 
@@ -31,8 +33,8 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   public void initializeMeter(Meter meter) {
     histogram =
         meter
-            .histogramBuilder("runtime.jvm.gc.duration")
-            .setDescription("GC Duration")
+            .histogramBuilder(METRIC_NAME)
+            .setDescription(METRIC_DESCRIPTION)
             .setUnit(MILLISECONDS)
             .build();
   }
