@@ -5,22 +5,22 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -60,26 +60,39 @@ public class GroovyMetricEnvironment {
       case "otlp":
       case "prometheus":
       case "logging":
-        // no need for autoconfigure sdk-extension to enable default traces exporter
-        config.properties.setProperty("otel.traces.exporter", "none");
-        // merge our sdk-supported properties to utilize autoconfigure features
-        config.properties.forEach(
-            (k, value) -> {
-              String key = k.toString();
-              if (key.startsWith("otel.") && !key.startsWith("otel.jmx")) {
-                System.setProperty(key, value.toString());
-              }
-            });
-        // this call will dynamically load the autoconfigure extension
-        // and take care of provider and exporter creation for us based on system properties.
-        GlobalOpenTelemetry.get();
-        meterProvider = (SdkMeterProvider) GlobalMeterProvider.get();
+        // call the autoconfigure extension and take care of provider and exporter creation for us
+        // based on system properties.
+        meterProvider =
+            AutoConfiguredOpenTelemetrySdk.builder()
+                .setResultAsGlobal(false)
+                .addPropertiesSupplier(
+                    () -> {
+                      Map<String, String> properties = new HashMap<>();
+                      // no need for autoconfigure sdk-extension to enable default traces exporter
+                      properties.put("otel.traces.exporter", "none");
+                      // expose config.properties to autoconfigure
+                      config.properties.forEach(
+                          (k, value) -> {
+                            String key = k.toString();
+                            if (key.startsWith("otel.") && !key.startsWith("otel.jmx")) {
+                              properties.put(key, value.toString());
+                            }
+                          });
+                      return properties;
+                    })
+                .build()
+                .getOpenTelemetrySdk()
+                .getSdkMeterProvider();
         break;
       default: // inmemory fallback
-        meterProvider = SdkMeterProvider.builder().buildAndRegisterGlobal();
+        meterProvider = SdkMeterProvider.builder().build();
     }
 
-    meter = meterProvider.get(instrumentationName, instrumentationVersion, null);
+    meter =
+        meterProvider
+            .meterBuilder(instrumentationName)
+            .setInstrumentationVersion(instrumentationVersion)
+            .build();
   }
 
   // Visible for testing

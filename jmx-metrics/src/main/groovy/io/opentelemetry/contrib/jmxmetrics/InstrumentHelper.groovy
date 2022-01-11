@@ -151,7 +151,7 @@ class InstrumentHelper {
         def labelMap = GroovyMetricEnvironment.mapToAttributes(labels)
         if (instrumentIsObserver(inst)) {
             return { result ->
-                result.observe(value, labelMap)
+                result.record(value, labelMap)
             }
         } else if (instrumentIsCounter(inst)) {
             return { i -> i.add(value, labelMap) }

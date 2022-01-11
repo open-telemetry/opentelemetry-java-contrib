@@ -9,12 +9,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMOR
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundDoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.internal.NoopMeter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +23,9 @@ import jdk.jfr.consumer.RecordedObject;
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
+  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
   private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
-
+  private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
@@ -33,17 +33,18 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String WHEN = "when";
   private static final String HEAP_USED = "heapUsed";
   private static final String HEAP_SPACE = "heapSpace";
-  private static final String DESCRIPTION = "GC Duration";
   private static final String COMMITTED_SIZE = "committedSize";
+  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_MEMORY_USAGE, USED);
+  private static final Attributes ATTR_MEMORY_COMMITTED =
+      Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
   private DoubleHistogram durationHistogram;
-  private BoundDoubleHistogram usedHistogram;
-  private BoundDoubleHistogram committedHistogram;
+  private DoubleHistogram memoryHistogram;
 
   public GCHeapSummaryHandler() {
-    initializeMeter(NoopMeter.getInstance());
+    initializeMeter(defaultMeter());
   }
 
   @Override
@@ -51,17 +52,15 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     durationHistogram =
         meter
             .histogramBuilder(METRIC_NAME_DURATION)
-            .setDescription(DESCRIPTION)
+            .setDescription(METRIC_DESCRIPTION_DURATION)
             .setUnit(BYTES)
             .build();
-    var memoryHistogram =
+    memoryHistogram =
         meter
             .histogramBuilder(METRIC_NAME_MEMORY)
-            .setDescription(DESCRIPTION)
+            .setDescription(METRIC_DESCRIPTION_MEMORY)
             .setUnit(BYTES)
             .build();
-    usedHistogram = memoryHistogram.bind(Attributes.of(ATTR_MEMORY_USAGE, USED));
-    committedHistogram = memoryHistogram.bind(Attributes.of(ATTR_MEMORY_USAGE, COMMITTED));
   }
 
   @Override
@@ -103,13 +102,13 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     durationHistogram.record(
         after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
     if (after.hasField(HEAP_USED)) {
-      usedHistogram.record(after.getLong(HEAP_USED));
+      memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
     }
     if (after.hasField(HEAP_SPACE)) {
       after.getValue(HEAP_SPACE);
       if (after.getValue(HEAP_SPACE) instanceof RecordedObject) {
         RecordedObject ro = after.getValue(HEAP_SPACE);
-        committedHistogram.record(ro.getLong(COMMITTED_SIZE));
+        memoryHistogram.record(ro.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
       }
     }
   }

@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.jfr.metrics.internal;
 
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.internal.NoopMeter;
+import io.opentelemetry.api.metrics.MeterProvider;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -36,7 +36,7 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
 
   /**
    * Set the OpenTelemetry {@link Meter} after the SDK has been initialized. Until called,
-   * implementations should use instruments from {@link NoopMeter}.
+   * implementations should use instruments from {@link #defaultMeter()}.
    *
    * @param meter the meter
    */
@@ -60,5 +60,10 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
    */
   default Optional<Duration> getThreshold() {
     return Optional.empty();
+  }
+
+  /** The default {@link Meter} to use until {@link #initializeMeter(Meter)} is called. */
+  static Meter defaultMeter() {
+    return MeterProvider.noop().get("noop");
   }
 }
