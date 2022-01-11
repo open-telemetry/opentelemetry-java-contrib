@@ -72,7 +72,12 @@ public class GroovyMetricEnvironment {
                       properties.put("otel.traces.exporter", "none");
                       // expose config.properties to autoconfigure
                       config.properties.forEach(
-                          (k, value) -> properties.put(k.toString(), value.toString()));
+                          (k, value) -> {
+                            String key = k.toString();
+                            if (key.startsWith("otel.") && !key.startsWith("otel.jmx")) {
+                              properties.put(key, value.toString());
+                            }
+                          });
                       return properties;
                     })
                 .build()
