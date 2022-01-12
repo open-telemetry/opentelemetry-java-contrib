@@ -3,7 +3,7 @@ components:
   aws-xray:
     - anuraaga
     - willarmiros
-  contrib-samplers:
+  samplers:
     - anuraaga
     - iNikem
   jfr-streaming:
