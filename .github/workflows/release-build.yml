@@ -20,11 +20,10 @@ jobs:
         with:
           distribution: adopt
           java-version: 17
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         name: Build
         with:
           arguments: --stacktrace build
-          remote-build-cache-proxy-enabled: false
       - uses: actions/upload-artifact@v2
         name: Save unit test results
         if: always()
@@ -43,11 +42,10 @@ jobs:
         with:
           distribution: adopt
           java-version: 17
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         name: Integration Tests
         with:
           arguments: --stacktrace integrationTest
-          remote-build-cache-proxy-enabled: false
       - uses: actions/upload-artifact@v2
         name: Save integrationTest results
         if: always()
@@ -67,7 +65,7 @@ jobs:
         with:
           distribution: adopt
           java-version: 17
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         name: Publish
         with:
           arguments: --stacktrace final closeAndReleaseSonatypeStagingRepository -Prelease.version=${{ github.event.inputs.version }}
