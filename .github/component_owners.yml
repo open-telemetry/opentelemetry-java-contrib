@@ -11,6 +11,7 @@ components:
     - jack-berg
     - kittylyst
   jmx-metrics:
+    - dehaansa
     - Mrod1598
     - rmfitzpatrick
   maven-extension:
