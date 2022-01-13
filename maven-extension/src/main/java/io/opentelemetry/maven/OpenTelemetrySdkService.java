@@ -8,19 +8,14 @@ package io.opentelemetry.maven;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
-import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import org.apache.maven.rtinfo.RuntimeInformation;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Disposable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.slf4j.Logger;
@@ -32,16 +27,15 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   private static final Logger logger = LoggerFactory.getLogger(OpenTelemetrySdkService.class);
 
-  @SuppressWarnings("NullAway") // Injected automatically to non-null
-  @Requirement
-  private RuntimeInformation runtimeInformation;
-
   private OpenTelemetry openTelemetry = OpenTelemetry.noop();
   @Nullable private OpenTelemetrySdk openTelemetrySdk;
 
   @Nullable private Tracer tracer;
 
   private boolean mojosInstrumentationEnabled;
+
+  /** Visible for testing */
+  @Nullable AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk;
 
   /**
    * Note: the JVM shutdown hook defined by the {@code
@@ -76,42 +70,28 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     }
     this.openTelemetry = OpenTelemetry.noop();
 
+    this.autoConfiguredOpenTelemetrySdk = null;
     logger.debug("OpenTelemetry: OpenTelemetrySdkService disposed");
   }
 
   @Override
   public void initialize() {
     logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
-    AutoConfiguredOpenTelemetrySdkBuilder autoConfiguredSdkBuilder =
-        AutoConfiguredOpenTelemetrySdk.builder();
 
-    // SDK CONFIGURATION PROPERTIES
-    autoConfiguredSdkBuilder.addPropertiesSupplier(
-        () -> {
-          // Change default of "otel.traces.exporter" from "otlp" to "none"
-          // The impacts are
-          // * If no otel exporter settings are passed, then the Maven extension will not export
-          //   rather than exporting on OTLP GRPC to http://localhost:4317
-          // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_TRACES_EXPORTER is not, then don't
-          //   export
-          return Collections.singletonMap("otel.traces.exporter", "none");
-        });
+    // Change default of "otel.traces.exporter" from "otlp" to "none"
+    // The impacts are
+    // * If no otel exporter settings are passed, then the Maven extension will not export
+    //   rather than exporting on OTLP GRPC to http://localhost:4317
+    // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_TRACES_EXPORTER is not, then don't
+    //   export
+    Map<String, String> properties = Collections.singletonMap("otel.traces.exporter", "none");
 
-    // SDK RESOURCE
-    // Don't use the `io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider` framework because we
-    // need to get the `RuntimeInformation` component injected by Plexus
-    autoConfiguredSdkBuilder.addResourceCustomizer(
-        (resource, configProperties) ->
-            Resource.builder()
-                .putAll(resource)
-                .put(
-                    ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
-                .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
-                .build());
+    this.autoConfiguredOpenTelemetrySdk =
+        AutoConfiguredOpenTelemetrySdk.builder()
+            .setServiceClassLoader(getClass().getClassLoader())
+            .addPropertiesSupplier(() -> properties)
+            .build();
 
-    // BUILD SDK
-    AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
-        autoConfiguredSdkBuilder.build();
     if (logger.isDebugEnabled()) {
       logger.debug(
           "OpenTelemetry: OpenTelemetry SDK initialized with  "

@@ -37,7 +37,6 @@ dependencies {
   implementation("io.prometheus:simpleclient")
   implementation("io.prometheus:simpleclient_httpserver")
   implementation("io.opentelemetry:opentelemetry-api")
-  implementation("io.opentelemetry:opentelemetry-api-metrics")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

@@ -3,13 +3,16 @@ components:
   aws-xray:
     - anuraaga
     - willarmiros
-  contrib-samplers:
+  samplers:
+    - anuraaga
     - iNikem
   jfr-streaming:
     - breedx-splk
     - jack-berg
     - kittylyst
   jmx-metrics:
+    - dehaansa
+    - Mrod1598
     - rmfitzpatrick
   maven-extension:
     - cyrille-leclerc
