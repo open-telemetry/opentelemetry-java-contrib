@@ -1,6 +1,6 @@
 # ActiveMQ Metrics
 
-The JMX Metric Gatherer provides built in Tomcat metric gathering capabilities.
+The JMX Metric Gatherer provides built in ActiveMQ metric gathering capabilities.
 These metrics are sourced from: https://activemq.apache.org/jmx
 
 ### Metrics
