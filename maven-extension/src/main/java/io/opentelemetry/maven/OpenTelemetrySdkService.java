@@ -7,6 +7,7 @@ package io.opentelemetry.maven;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.TracerBuilder;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
@@ -106,7 +107,12 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
             .getBoolean("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null ? true : mojoSpansEnabled;
 
-    this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
+    TracerBuilder tracerBuilder = openTelemetry.tracerBuilder("io.opentelemetry.contrib.maven");
+    String otelMavenExtensionVersion = this.getClass().getPackage().getImplementationVersion();
+    if (otelMavenExtensionVersion != null) {
+      tracerBuilder.setInstrumentationVersion(otelMavenExtensionVersion);
+    }
+    this.tracer = tracerBuilder.build();
   }
 
   public Tracer getTracer() {

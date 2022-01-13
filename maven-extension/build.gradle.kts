@@ -49,6 +49,9 @@ configure<PublishingExtension> {
 
 tasks {
   shadowJar {
+    manifest {
+      attributes["Implementation-Version"] = project.version
+    }
     archiveClassifier.set("")
   }
 
