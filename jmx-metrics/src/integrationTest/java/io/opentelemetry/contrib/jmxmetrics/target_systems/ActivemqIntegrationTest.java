@@ -15,7 +15,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.MountableFile;
 
 class ActivemqIntegrationTest extends AbstractIntegrationTest {
 
@@ -27,24 +26,8 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
   GenericContainer<?> activemq =
       new GenericContainer<>(
               new ImageFromDockerfile()
-                  .withDockerfileFromBuilder(
-                      builder ->
-                          builder
-                              .from("rmohr/activemq:5.15.9-alpine")
-                              .expose(10991)
-                              .env(
-                                  "ACTIVEMQ_JMX_OPTS",
-                                  "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.port=10991 -Dcom.sun.management.jmxremote.rmi.port=10991 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false")
-                              .env("ACTIVEMQ_JMX", "10991")
-                              //                          .env("ACTIVEMQ_OPTS","$ACTIVEMQ_JMX_OPTS
-                              // -Dhawtio.authenticationEnabled=false -Dhawtio.realm=activemq
-                              // -Dhawtio.role=admins
-                              // -Dhawtio.rolePrincipalClasses=org.apache.activemq.jaas.GroupPrincipal")
-                              //
-                              // .env("ACTIVEMQ_SUNJMX_START","-Dcom.sun.management.jmxremote")
-                              .build()))
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("activemq/env", 0400), "/opt/activemq/bin/env")
+                  .withFileFromClasspath("config/env", "activemq/config/env")
+                  .withFileFromClasspath("Dockerfile", "activemq/Dockerfile"))
           .withNetwork(Network.SHARED)
           .withEnv("LOCAL_JMX", "no")
           .withNetworkAliases("activemq")
@@ -56,11 +39,95 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
   void endToEnd() {
     waitAndAssertMetrics(
         metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.consumer.count",
+                "The number of consumers currently reading from the broker.",
+                "{consumers}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.producer.count",
+                "The number of producers currently attached to the broker.",
+                "{producers}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSum(
+                metric,
+                "activemq.connection.count",
+                "The total number of current connections.",
+                "{connections}",
+                /* isMonotonic= */ false),
+        metric ->
             assertGaugeWithAttributes(
                 metric,
                 "activemq.memory.usage",
                 "The percentage of configured memory used.",
                 "%",
-                attrs -> attrs.containsOnly(entry("destination", "client_test"))));
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertGauge(
+                metric,
+                "activemq.disk.store_usage",
+                "The percentage of configured disk used for persistent messages.",
+                "%"),
+        metric ->
+            assertGauge(
+                metric,
+                "activemq.disk.temp_usage",
+                "The percentage of configured disk used for non-persistent messages.",
+                "%"),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.message.current",
+                "The current number of messages waiting to be consumed.",
+                "{messages}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.message.current",
+                "The current number of messages waiting to be consumed.",
+                "{messages}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.message.expired",
+                "The total number of messages not delivered because they expired.",
+                "{messages}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.message.enqueued",
+                "The total number of messages received by the broker.",
+                "{messages}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "activemq.message.dequeued",
+                "The total number of messages delivered to consumers.",
+                "{messages}",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "activemq.message.wait_time.avg",
+                "The average time a message was held on a destination.",
+                "ms",
+                attrs ->
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))));
   }
 }

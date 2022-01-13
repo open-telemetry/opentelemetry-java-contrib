@@ -114,7 +114,7 @@ public abstract class AbstractIntegrationTest {
   @SafeVarargs
   protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
     await()
-        .atMost(Duration.ofMinutes(2))
+        .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
               List<Metric> metrics =

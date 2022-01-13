@@ -19,6 +19,12 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Instrument Type: LongUpDownCounterCallback
 
 
+* Name: `activemq.connection.count`
+* Description: The total number of current connections.
+* Unit: `{connections}`
+* Instrument Type: LongUpDownCounterCallback
+
+
 * Name: `activemq.memory.usage`
 * Description: The percentage of configured memory used.
 * Unit: `%`
@@ -26,29 +32,48 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Instrument Type: DoubleValueCallback
 
 
-* Name: `tomcat.traffic`
-* Description: The number of bytes transmitted and received.
-* Unit: `by`
-* Labels: `proto_handler`, `direction`
+* Name: `activemq.disk.store_usage`
+* Description: The percentage of configured disk used for persistent messages.
+* Unit: `%`
+* Instrument Type: DoubleValueCallback
+
+
+* Name: `activemq.disk.temp_usage`
+* Description: The percentage of configured disk used for non-persistent messages.
+* Unit: `%`
+* Instrument Type: DoubleValueCallback
+
+
+* Name: `activemq.message.current`
+* Description: The current number of messages waiting to be consumed.
+* Unit: `messages`
+* Labels: `destination`
+* Instrument Type: LongUpDownCounterCallback
+
+
+* Name: `activemq.message.expired`
+* Description: The total number of messages not delivered because they expired.
+* Unit: `messages`
+* Labels: `destination`
 * Instrument Type: LongCounterCallback
 
 
-* Name: `tomcat.threads`
-* Description: The number of threads.
-* Unit: `threads`
-* Labels: `proto_handler`, `state`
-* Instrument Type: LongValueCallback
+* Name: `activemq.message.enqueued`
+* Description: The total number of messages received by the broker.
+* Unit: `messages`
+* Labels: `destination`
+* Instrument Type: LongCounterCallback
 
 
-* Name: `tomcat.max_time`
-* Description: Maximum time to process a request.
+* Name: `activemq.message.dequeued`
+* Description: The total number of messages delivered to consumers.
+* Unit: `messages`
+* Labels: `destination`
+* Instrument Type: LongCounterCallback
+
+
+* Name: `activemq.wait_time.avg`
+* Description: The average time a message was held on a destination.
 * Unit: `ms`
-* Labels: `proto_handler`
-* Instrument Type: LongCounterCallback
-
-
-* Name: `tomcat.request_count`
-* Description: The total requests.
-* Unit: `requests`
-* Labels: `proto_handler`
-* Instrument Type: LongCounterCallback
+* Labels: `destination`
+* Instrument Type: DoubleValueCallback
