@@ -22,12 +22,12 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
-public final class GCHeapSummaryHandler implements RecordedEventHandler {
+public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
   private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
   private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
-  private static final String EVENT_NAME = "jdk.GCHeapSummary";
+  private static final String EVENT_NAME = "jdk.G1HeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
@@ -44,7 +44,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private DoubleHistogram durationHistogram;
   private DoubleHistogram memoryHistogram;
 
-  public GCHeapSummaryHandler() {
+  public G1HeapSummaryHandler() {
     initializeMeter(defaultMeter());
   }
 
