@@ -20,7 +20,7 @@ class JmxConfig {
   static final String METRICS_EXPORTER_TYPE = PREFIX + "metrics.exporter";
   static final String EXPORTER = PREFIX + "exporter.";
 
-  static final String EXPORTER_INTERVAL = PREFIX + "imr.export.interval";
+  static final String EXPORTER_INTERVAL = PREFIX + "metric.export.interval";
 
   static final String OTLP_ENDPOINT = EXPORTER + "otlp.endpoint";
 

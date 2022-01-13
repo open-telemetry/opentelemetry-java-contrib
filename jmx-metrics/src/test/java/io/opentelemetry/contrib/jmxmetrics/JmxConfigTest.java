@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
 class JmxConfigTest {
@@ -20,13 +21,12 @@ class JmxConfigTest {
   }
 
   @Test
+  @ClearSystemProperty(key = "otel.metric.export.interval")
   void defaultValues() {
     JmxConfig config = new JmxConfig();
 
     assertThat(config.serviceUrl).isNull();
-    ;
     assertThat(config.groovyScript).isNull();
-    ;
     assertThat(config.targetSystem).isEmpty();
     assertThat(config.targetSystems).isEmpty();
     assertThat(config.intervalMilliseconds).isEqualTo(10000);
@@ -38,6 +38,7 @@ class JmxConfigTest {
     assertThat(config.password).isNull();
     assertThat(config.remoteProfile).isNull();
     assertThat(config.realm).isNull();
+    assertThat(config.properties.getProperty("otel.metric.export.interval")).isEqualTo("10000");
   }
 
   @Test
@@ -115,5 +116,13 @@ class JmxConfigTest {
         .hasMessage(
             "[jvm, unavailabletargetsystem] must specify targets from "
                 + "[cassandra, jvm, kafka, kafka-consumer, kafka-producer, tomcat]");
+  }
+
+  @Test
+  @SetSystemProperty(key = "otel.metric.export.interval", value = "123")
+  void otelMetricExportIntervalRespected() {
+    JmxConfig config = new JmxConfig();
+    assertThat(config.intervalMilliseconds).isEqualTo(10000);
+    assertThat(config.properties.getProperty("otel.metric.export.interval")).isEqualTo("123");
   }
 }
