@@ -22,6 +22,10 @@
   * Support Maven parallel builds
     ([#161](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/161))
 
+* `opentelemetry-samplers`
+  * Rename contrib-samplers to samplers
+    ([#185](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/185))
+
 ## Version 1.9.0 - 2021-12-03
 
 All libraries updated to OpenTelemetry SDK 1.6.0.
