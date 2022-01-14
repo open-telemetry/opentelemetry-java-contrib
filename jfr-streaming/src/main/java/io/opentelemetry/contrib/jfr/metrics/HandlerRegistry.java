@@ -16,6 +16,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler;
 import java.lang.management.ManagementFactory;
@@ -32,7 +33,11 @@ final class HandlerRegistry {
   private final List<RecordedEventHandler> mappers;
 
   private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
-      Map.of("G1", List.of(G1HeapSummaryHandler::new));
+      Map.of(
+          "G1",
+          List.of(G1HeapSummaryHandler::new),
+          "Parallel",
+          List.of(ParallelHeapSummaryHandler::new));
 
   private HandlerRegistry(List<? extends RecordedEventHandler> mappers) {
     this.mappers = new ArrayList<>(mappers);

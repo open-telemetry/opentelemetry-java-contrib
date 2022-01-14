@@ -7,10 +7,9 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMORY_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TOTAL_USED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE_DELTA;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SURVIVOR_SIZE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
@@ -22,43 +21,35 @@ import java.util.Map;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
-/** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
-public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
-  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
+/**
+ * This class handles G1HeapSummary JFR events. For GC purposes they come in pairs. Basic heap
+ * values are sourced from GCHeapSummary - this is young generational details
+ */
+public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
-  private static final String EVENT_NAME = "jdk.GCHeapSummary";
+  private static final String EVENT_NAME = "jdk.PSHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
   private static final String WHEN = "when";
-  private static final String HEAP_USED = "heapUsed";
-  private static final String HEAP_SPACE = "heapSpace";
-  private static final String COMMITTED_SIZE = "committedSize";
-  private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_MEMORY_USAGE, TOTAL_USED);
-  private static final Attributes ATTR_MEMORY_COMMITTED =
-      Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
-  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_MEMORY_USAGE, RESERVED);
+  private static final Attributes ATTR_MEMORY_EDEN_SIZE =
+      Attributes.of(ATTR_MEMORY_USAGE, EDEN_SIZE);
+  private static final Attributes ATTR_MEMORY_EDEN_SIZE_DELTA =
+      Attributes.of(ATTR_MEMORY_USAGE, EDEN_SIZE_DELTA);
+  private static final Attributes ATTR_MEMORY_SURVIVOR_SIZE =
+      Attributes.of(ATTR_MEMORY_USAGE, SURVIVOR_SIZE);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private DoubleHistogram durationHistogram;
   private DoubleHistogram memoryHistogram;
 
-  public GCHeapSummaryHandler() {
+  public ParallelHeapSummaryHandler() {
     initializeMeter(defaultMeter());
   }
 
   @Override
   public void initializeMeter(Meter meter) {
-    durationHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_DURATION)
-            .setDescription(METRIC_DESCRIPTION_DURATION)
-            .setUnit(MILLISECONDS)
-            .build();
     memoryHistogram =
         meter
             .histogramBuilder(METRIC_NAME_MEMORY)
@@ -103,17 +94,18 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   }
 
   private void recordValues(RecordedEvent before, RecordedEvent after) {
-    durationHistogram.record(
-        after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
-    if (after.hasField(HEAP_USED)) {
-      memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
-    }
-    if (after.hasField(HEAP_SPACE)) {
-      if (after.getValue(HEAP_SPACE) instanceof RecordedObject) {
-        RecordedObject heapSpace = after.getValue(HEAP_SPACE);
-        memoryHistogram.record(heapSpace.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
-        memoryHistogram.record(heapSpace.getLong(RESERVED_SIZE), ATTR_MEMORY_RESERVED);
+    if (after.hasField("edenSpace") && after.getValue("edenSpace") instanceof RecordedObject) {
+      RecordedObject edenSpace = after.getValue("edenSpace");
+      memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
+      if (before.hasField("edenSpace") && before.getValue("edenSpace") instanceof RecordedObject) {
+        RecordedObject beforeSpace = before.getValue("edenSpace");
+        memoryHistogram.record(
+            edenSpace.getLong("size") - beforeSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE_DELTA);
       }
+    }
+    if (after.hasField("fromSpace") && after.getValue("fromSpace") instanceof RecordedObject) {
+      RecordedObject fromSpace = after.getValue("fromSpace");
+      memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
     }
   }
 }
