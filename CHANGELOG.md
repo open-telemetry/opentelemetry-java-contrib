@@ -28,7 +28,7 @@
 
 ## Version 1.9.0 - 2021-12-03
 
-All libraries updated to OpenTelemetry SDK 1.6.0.
+All libraries updated to OpenTelemetry SDK 1.9.0.
 
 ### Updated Libraries
 
