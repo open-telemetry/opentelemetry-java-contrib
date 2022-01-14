@@ -9,7 +9,8 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMOR
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TOTAL_USED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
@@ -35,9 +36,11 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String HEAP_USED = "heapUsed";
   private static final String HEAP_SPACE = "heapSpace";
   private static final String COMMITTED_SIZE = "committedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_MEMORY_USAGE, USED);
+  private static final String RESERVED_SIZE = "reservedSize";
+  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_MEMORY_USAGE, TOTAL_USED);
   private static final Attributes ATTR_MEMORY_COMMITTED =
       Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
+  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_MEMORY_USAGE, RESERVED);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
@@ -108,8 +111,9 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     if (after.hasField(HEAP_SPACE)) {
       after.getValue(HEAP_SPACE);
       if (after.getValue(HEAP_SPACE) instanceof RecordedObject) {
-        RecordedObject ro = after.getValue(HEAP_SPACE);
-        memoryHistogram.record(ro.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
+        RecordedObject heapSpace = after.getValue(HEAP_SPACE);
+        memoryHistogram.record(heapSpace.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
+        memoryHistogram.record(heapSpace.getLong(RESERVED_SIZE), ATTR_MEMORY_RESERVED);
       }
     }
   }
