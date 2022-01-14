@@ -38,7 +38,7 @@ These metrics are sourced from: https://docs.oracle.com/cd/E11857_01/em.111/e101
 * Description: Maximum time to process a request.
 * Unit: `ms`
 * Labels: `proto_handler`
-* Instrument Type: LongCounterCallback
+* Instrument Type: longValueCallback
 
 * Name: `tomcat.request_count`
 * Description: The total requests.
