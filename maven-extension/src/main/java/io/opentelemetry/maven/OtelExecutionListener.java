@@ -192,12 +192,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     String spanName =
         MavenUtils.getPluginArtifactIdShortName(mojoExecution.getArtifactId())
             + ":"
-            + mojoExecution.getGoal()
-            + " ("
-            + mojoExecution.getExecutionId()
-            + ")"
-            + " @ "
-            + executionEvent.getProject().getArtifactId();
+            + mojoExecution.getGoal();
     logger.debug("OpenTelemetry: Start mojo execution: span {}", spanName);
     SpanBuilder spanBuilder =
         this.openTelemetrySdkService
