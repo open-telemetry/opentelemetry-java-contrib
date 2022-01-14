@@ -43,23 +43,23 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.consumer.count",
                 "The number of consumers currently reading from the broker.",
-                "{consumers}",
+                "consumers",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "activemq.producer.count",
                 "The number of producers currently attached to the broker.",
-                "{producers}",
+                "producers",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSum(
                 metric,
                 "activemq.connection.count",
                 "The total number of current connections.",
-                "{connections}",
+                "connections",
                 /* isMonotonic= */ false),
         metric ->
             assertGaugeWithAttributes(
@@ -68,7 +68,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 "The percentage of configured memory used.",
                 "%",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertGauge(
                 metric,
@@ -86,41 +86,41 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.current",
                 "The current number of messages waiting to be consumed.",
-                "{messages}",
+                "messages",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "activemq.message.current",
                 "The current number of messages waiting to be consumed.",
-                "{messages}",
+                "messages",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "activemq.message.expired",
                 "The total number of messages not delivered because they expired.",
-                "{messages}",
+                "messages",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "activemq.message.enqueued",
                 "The total number of messages received by the broker.",
-                "{messages}",
+                "messages",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "activemq.message.dequeued",
                 "The total number of messages delivered to consumers.",
-                "{messages}",
+                "messages",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))),
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -128,6 +128,6 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 "The average time a message was held on a destination.",
                 "ms",
                 attrs ->
-                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"))));
+                    attrs.containsOnly(entry("destination", "ActiveMQ.Advisory.MasterBroker"),entry("broker", "localhost"))));
   }
 }

@@ -26,16 +26,18 @@ def activemqMetrics = otel.mbeans(
 otel.instrument(activemqMetrics,
   "activemq.producer.count",
   "The number of producers currently attached to the broker.",
-  "{producers}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "producers",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName")},
+   "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "ProducerCount",
   otel.&longUpDownCounterCallback)
 
 otel.instrument(activemqMetrics,
   "activemq.consumer.count",
   "The number of consumers currently reading from the broker.",
-  "{consumers}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "consumers",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "ConsumerCount",
   otel.&longUpDownCounterCallback)
 
@@ -43,39 +45,44 @@ otel.instrument(activemqMetrics,
   "activemq.memory.usage",
   "The percentage of configured memory used.",
   "%",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+   "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "MemoryPercentUsage",
   otel.&doubleValueCallback)
 
 otel.instrument(activemqMetrics,
   "activemq.message.current",
   "The current number of messages waiting to be consumed.",
-  "{messages}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "messages",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "QueueSize",
   otel.&longUpDownCounterCallback)
 
 otel.instrument(activemqMetrics,
   "activemq.message.expired",
   "The total number of messages not delivered because they expired.",
-  "{messages}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "messages",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "ExpiredCount",
   otel.&longCounterCallback)
 
 otel.instrument(activemqMetrics,
   "activemq.message.enqueued",
   "The total number of messages received by the broker.",
-  "{messages}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "messages",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "EnqueueCount",
   otel.&longCounterCallback)
 
 otel.instrument(activemqMetrics,
   "activemq.message.dequeued",
   "The total number of messages delivered to consumers.",
-  "{messages}",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  "messages",
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "DequeueCount",
   otel.&longCounterCallback)
 
@@ -83,7 +90,8 @@ otel.instrument(activemqMetrics,
   "activemq.message.wait_time.avg",
   "The average time a message was held on a destination.",
   "ms",
-  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") }],
+  ["destination" : { mbean -> mbean.name().getKeyProperty("destinationName") },
+  "broker"       : { mbean -> mbean.name().getKeyProperty("brokerName")}],
   "AverageEnqueueTime",
   otel.&doubleValueCallback)
 
@@ -97,7 +105,7 @@ def activemqMetricsNoDestination = otel.mbean(
 otel.instrument(activemqMetricsNoDestination,
   "activemq.connection.count",
   "The total number of current connections.",
-  "{connections}",
+  "connections",
   "CurrentConnectionsCount",
   otel.&longUpDownCounterCallback)
 
