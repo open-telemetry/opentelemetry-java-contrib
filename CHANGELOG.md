@@ -5,22 +5,28 @@
 ### Updated Libraries
 
 * `opentelemetry-jmx-metrics`
-  * Add support for Tomcat
-    ([#155](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/155))
   * Add multi attribute support
     ([#137](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/137))
+  * Add support for Tomcat
+    ([#155](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/155))
+  * Change metric to Gauge
+    ([#194](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/194))
 
 * `opentelemetry-maven-extension`
-  * Fix default `service.name` + simplify configuration using Otel AutoConfig SDK 1.10 ResourceProvider SPI improvements (enable specifying the classloader making it compatible with Maven Plexus)
-    ([#187](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/187))
-  * Fix `service.name` attribute overwrite
-    ([#184](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/184))
-  * Fix lifecycle to support the Maven daemon
-    ([#169](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/169))
-  * Capture details on mojo goal executions: `deploy:deploy`, `spring-boot:build-image`, `jib:build`, `snyk:test`, `snyk:monitor`
-    ([#146](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/146))
   * Support Maven parallel builds
     ([#161](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/161))
+  * Capture details on mojo goal executions: `deploy:deploy`, `spring-boot:build-image`, `jib:build`, `snyk:test`, `snyk:monitor`
+    ([#146](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/146))
+  * Fix lifecycle to support the Maven daemon
+    ([#169](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/169))
+  * Fix `service.name` attribute overwrite
+    ([#184](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/184))
+  * Fix default `service.name` + simplify configuration using Otel AutoConfig SDK 1.10 ResourceProvider SPI improvements (enable specifying the classloader making it compatible with Maven Plexus)
+    ([#187](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/187))
+  * Add Tracer instrumentationVersion (ie `otel.library.version`)
+    ([#191](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/191))
+  * Reduce the cardinality of mojo span names
+    ([#192](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/192))
 
 * `opentelemetry-samplers`
   * Rename contrib-samplers to samplers
@@ -45,10 +51,10 @@ All libraries updated to OpenTelemetry SDK 1.9.0.
     ([#141](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/141))
 
 * `opentelemetry-jfr-streaming`
-  * Fix units for some metrics
-    ([#140](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/140))
   * Tidy up jfr-streaming
     ([#127](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/127))
+  * Fix units for some metrics
+    ([#140](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/140))
 
 ## Version 1.8.0 - Skipped
 
@@ -75,14 +81,14 @@ All libraries updated to OpenTelemetry SDK 1.7.0.
     ([#118](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/118))
 
 * `opentelemetry-maven-extension`
-  * Support disabling the creation of mojo execution spans
-    ([#108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/108))
-  * Use the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) to support more configuration setting. All the settings of the OTLP exporter are supported.
-    ([#112](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/112))
   * Fix failure to load the extension declaring it in pom.xml
     ([#86](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/86))
   * Fix exception if OTLP exporter is not configured properly
     ([#93](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/93)).
+  * Support disabling the creation of mojo execution spans
+    ([#108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/108))
+  * Use the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) to support more configuration setting. All the settings of the OTLP exporter are supported.
+    ([#112](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/112))
 
 ## Version 1.6.0 - 2021-09-22
 
