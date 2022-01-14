@@ -7,21 +7,21 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 
 * Name: `activemq.consumer.count`
 * Description: The number of consumers currently reading from the broker.
-* Unit: `{consumers}`
+* Unit: `consumers`
 * Labels: `destination`
 * Instrument Type: ObservableLongUpDownCounter
 
 
 * Name: `activemq.producer.count`
 * Description: The number of producers currently attached to the broker.
-* Unit: `{producers}`
+* Unit: `producers`
 * Labels: `destination`
 * Instrument Type: ObservableLongUpDownCounter
 
 
-* Name: `activemq.connection.count`
+* Name: `activemq.connectin.count`
 * Description: The total number of current connections.
-* Unit: `{connections}`
+* Unit: `connections`
 * Instrument Type: ObservableLongUpDownCounter
 
 
