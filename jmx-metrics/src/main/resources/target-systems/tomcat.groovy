@@ -27,7 +27,7 @@ otel.instrument(beantomcatrequestProcessor, "tomcat.request_count", "The total r
   "requestCount", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.max_time", "Maximum time to process a request.", "ms",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-  "maxTime", otel.&longCounterCallback)
+  "maxTime", otel.&longValueCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.processing_time", "The total processing time.", "ms",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "processingTime", otel.&longCounterCallback)
