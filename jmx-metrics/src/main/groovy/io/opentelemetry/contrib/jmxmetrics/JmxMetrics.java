@@ -58,7 +58,6 @@ class JmxMetrics {
   private void shutdown() {
     logger.info("Shutting down JmxMetrics Groovy runner and exporting final metrics.");
     exec.shutdown();
-    runner.shutdown();
   }
 
   private static JmxConfig getConfigFromArgs(final String[] args) {

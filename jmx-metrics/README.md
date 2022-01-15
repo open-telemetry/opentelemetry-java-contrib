@@ -73,6 +73,7 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 | [`kafka`](./docs/target-systems/kafka.md) |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
+| [`tomcat`](./docs/target-systems/tomcat.md) |
 
 ### JMX Query Helpers
 
@@ -218,7 +219,7 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
 | `otel.jmx.groovy.script` | if not using `otel.jmx.target.system` | The path for the desired Groovy script. |
 | `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | A comma-separated list of the supported target applications with built in Groovy scripts. |
-| `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run and its resulting metrics exported. 10000 by default. |
+| `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run. Value will also be used for `otel.metric.export.interval`, if unset, to control asynchronous updates and metric exporting. 10000 by default. |
 | `otel.jmx.username` | no | Username for JMX authentication, if applicable. |
 | `otel.jmx.password` | no | Password for JMX authentication, if applicable. |
 | `otel.jmx.remote.profile` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |

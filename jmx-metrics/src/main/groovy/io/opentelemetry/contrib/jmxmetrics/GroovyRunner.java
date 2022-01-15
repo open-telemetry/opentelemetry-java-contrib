@@ -135,15 +135,6 @@ public class GroovyRunner {
     for (final Script script : scripts) {
       script.run();
     }
-    flush();
-  }
-
-  public void flush() {
-    groovyMetricEnvironment.flush();
-  }
-
-  public void shutdown() {
-    flush();
   }
 
   // Visible for testing
