@@ -11,6 +11,8 @@
     ([#155](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/155))
   * Change metric to Gauge
     ([#194](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/194))
+  * Remove manual exporter flush
+    ([#190](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/190))
 
 * `opentelemetry-maven-extension`
   * Support Maven parallel builds
