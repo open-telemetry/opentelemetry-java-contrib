@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 @Component(role = OpenTelemetrySdkService.class, hint = "opentelemetry-service")
 public final class OpenTelemetrySdkService implements Initializable, Disposable {
 
-  public static final String VERSION =
+  static final String VERSION =
       OpenTelemetrySdkService.class.getPackage().getImplementationVersion();
 
   private static final Logger logger = LoggerFactory.getLogger(OpenTelemetrySdkService.class);
