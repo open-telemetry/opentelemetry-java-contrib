@@ -1,0 +1,6 @@
+plugins {
+    id("otel.java-conventions")
+}
+
+ext.libraryName = 'OpenTelemetry Java Static Instrumentation'
+description = 'OpenTelemetry Java static instrumentation module'
