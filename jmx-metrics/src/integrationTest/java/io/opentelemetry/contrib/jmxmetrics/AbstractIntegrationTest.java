@@ -104,6 +104,7 @@ public abstract class AbstractIntegrationTest {
   @SuppressWarnings("FutureReturnValueIgnored")
   void afterAll() {
     otlpServer.stop();
+    scraper.stop();
   }
 
   @BeforeEach

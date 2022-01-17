@@ -94,7 +94,7 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                     attrs.containsOnly(
                         entry("proto_handler", "\"http-nio-8080\""), entry("state", "busy"))),
         metric ->
-            assertSumWithAttributes(
+            assertGaugeWithAttributes(
                 metric,
                 "tomcat.max_time",
                 "Maximum time to process a request.",
