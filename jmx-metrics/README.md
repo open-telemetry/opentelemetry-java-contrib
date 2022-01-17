@@ -66,13 +66,14 @@ The JMX Metric Gatherer provides built in metric producing Groovy scripts for su
 capable of being specified via the `otel.jmx.target.system` property as a comma-separated list.  This property is
 mutually exclusive with `otel.jmx.groovy.script`. The currently supported target systems are:
 
-| `otel.jmx.target.system` |
-| ------------------------ |
-| [`jvm`](./docs/target-systems/jvm.md) |
-| [`cassandra`](./docs/target-systems/cassandra.md) |
-| [`kafka`](./docs/target-systems/kafka.md) |
+| `otel.jmx.target.system`                                    |
+|-------------------------------------------------------------|
+| [`jvm`](./docs/target-systems/jvm.md)                       |
+| [`cassandra`](./docs/target-systems/cassandra.md)           |
+| [`kafka`](./docs/target-systems/kafka.md)                   |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
+| [`solr`](./docs/target-systems/solr.md)                     |
 
 ### JMX Query Helpers
 
