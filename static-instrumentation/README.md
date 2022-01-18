@@ -12,6 +12,6 @@ In order to statically instrument a JAR, modified agent needs to be both attache
 
 Gradle plugin running static instrumentation agent during the `assemble` lifecycle task. The assembled archive contains statically instrumened class code.
 
-### Maven plugin
+### Maven3 plugin
 
-Maven2 plugin running the static instrumentation agent during the `package` phase. Packaged archive contains statically instrumened class code.
+Maven3 plugin running the static instrumentation agent during the `package` phase. Packaged archive contains statically instrumened class code.

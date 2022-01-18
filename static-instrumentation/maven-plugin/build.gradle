@@ -2,5 +2,5 @@ plugins {
     id("otel.java-conventions")
 }
 
-ext.libraryName = 'OpenTelemetry Java Static Instrumentation Maven2 Plugin'
-description = 'Maven2 plugin for static instrumentation of projects code and dependencies'
+ext.libraryName = 'OpenTelemetry Java Static Instrumentation Maven3 Plugin'
+description = 'Maven3 plugin for static instrumentation of projects code and dependencies'
