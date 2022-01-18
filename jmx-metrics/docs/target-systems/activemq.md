@@ -77,4 +77,3 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Unit: `ms`
 * Labels: `destination`
 * Instrument Type: ObservableDoubleValue
- 
