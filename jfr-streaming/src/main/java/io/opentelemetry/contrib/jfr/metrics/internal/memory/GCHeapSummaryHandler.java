@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
@@ -37,9 +37,9 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String HEAP_SPACE = "heapSpace";
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_USAGE, TOTAL_USED);
-  private static final Attributes ATTR_MEMORY_COMMITTED = Attributes.of(ATTR_USAGE, COMMITTED);
-  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_USAGE, RESERVED);
+  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_TYPE, TOTAL_USED);
+  private static final Attributes ATTR_MEMORY_COMMITTED = Attributes.of(ATTR_TYPE, COMMITTED);
+  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_TYPE, RESERVED);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 

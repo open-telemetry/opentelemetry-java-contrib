@@ -6,18 +6,20 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HERTZ;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.PERCENTAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SYSTEM;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
@@ -32,7 +34,13 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final Attributes ATTR_SYSTEM = Attributes.of(ATTR_USAGE, SYSTEM);
   private static final Attributes ATTR_MACHINE = Attributes.of(ATTR_USAGE, MACHINE);
 
-  private DoubleHistogram histogram;
+  private final List<Double> jvmUserData = new ArrayList<>();
+  private final List<Double> jvmSystemData = new ArrayList<>();
+  private final List<Double> machineTotalData = new ArrayList<>();
+
+  @SuppressWarnings("UnnecessaryLambda")
+  private static final Function<List<Double>, Double> AVERAGE =
+      l -> l.stream().mapToDouble(x -> x).summaryStatistics().getAverage();
 
   public OverallCPULoadHandler() {
     initializeMeter(defaultMeter());
@@ -40,24 +48,29 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    histogram =
-        meter
-            .histogramBuilder(METRIC_NAME)
-            .setDescription(METRIC_DESCRIPTION)
-            .setUnit(PERCENTAGE)
-            .build();
+    meter
+        .upDownCounterBuilder(METRIC_NAME)
+        .ofDoubles()
+        .setUnit(HERTZ)
+        .setDescription(METRIC_DESCRIPTION)
+        .buildWithCallback(
+            codm -> {
+              codm.record(AVERAGE.apply(jvmUserData), ATTR_USER);
+              codm.record(AVERAGE.apply(jvmSystemData), ATTR_SYSTEM);
+              codm.record(AVERAGE.apply(machineTotalData), ATTR_MACHINE);
+            });
   }
 
   @Override
   public void accept(RecordedEvent ev) {
     if (ev.hasField(JVM_USER)) {
-      histogram.record(ev.getDouble(JVM_USER), ATTR_USER);
+      jvmUserData.add(ev.getDouble(JVM_USER));
     }
     if (ev.hasField(JVM_SYSTEM)) {
-      histogram.record(ev.getDouble(JVM_SYSTEM), ATTR_SYSTEM);
+      jvmSystemData.add(ev.getDouble(JVM_SYSTEM));
     }
     if (ev.hasField(MACHINE_TOTAL)) {
-      histogram.record(ev.getDouble(MACHINE_TOTAL), ATTR_MACHINE);
+      machineTotalData.add(ev.getDouble(MACHINE_TOTAL));
     }
   }
 
