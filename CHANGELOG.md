@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.10.0 - 2022-01-18
+
 ### Updated Libraries
 
 * `opentelemetry-jmx-metrics`

@@ -16,12 +16,12 @@ The Maven OpenTelemetry Extension is configured using environment variables or J
 Add the Maven OpenTelemetry Extension to `${maven.home}/lib/ext` or to the classpath using `-Dmaven.ext.class.path=`.
 
 ```
-mvn dependency:copy -Dartifact=io.opentelemetry.contrib:opentelemetry-maven-extension:1.9.0-alpha
+mvn dependency:copy -Dartifact=io.opentelemetry.contrib:opentelemetry-maven-extension:1.10.0-alpha
 
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel.example.com:4317"
 
-mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-1.9.0-alpha.jar verify
+mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-1.10.0-alpha.jar verify
 ```
 
 ### Declaring the extension in the `pom.xml` file
@@ -37,7 +37,7 @@ Add the Maven OpenTelemetry Extension in the `pom.xml` file:
       <extension>
           <groupId>io.opentelemetry.contrib</groupId>
           <artifactId>opentelemetry-maven-extension</artifactId>
-          <version>1.9.0-alpha</version>
+          <version>1.10.0-alpha</version>
       </extension>
     </extensions>
   </build>
