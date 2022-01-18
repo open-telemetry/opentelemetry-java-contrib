@@ -43,7 +43,6 @@ final class HandlerRegistry {
     this.mappers = new ArrayList<>(mappers);
   }
 
-  //  @SuppressWarnings("SystemOut")
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
     var seen = new HashSet<String>();

@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMORY_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE_DELTA;
@@ -26,19 +26,18 @@ import jdk.jfr.consumer.RecordedObject;
  * values are sourced from GCHeapSummary - this is young generational details
  */
 public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
+  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.PSHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
   private static final String WHEN = "when";
-  private static final Attributes ATTR_MEMORY_EDEN_SIZE =
-      Attributes.of(ATTR_MEMORY_USAGE, EDEN_SIZE);
+  private static final Attributes ATTR_MEMORY_EDEN_SIZE = Attributes.of(ATTR_USAGE, EDEN_SIZE);
   private static final Attributes ATTR_MEMORY_EDEN_SIZE_DELTA =
-      Attributes.of(ATTR_MEMORY_USAGE, EDEN_SIZE_DELTA);
+      Attributes.of(ATTR_USAGE, EDEN_SIZE_DELTA);
   private static final Attributes ATTR_MEMORY_SURVIVOR_SIZE =
-      Attributes.of(ATTR_MEMORY_USAGE, SURVIVOR_SIZE);
+      Attributes.of(ATTR_USAGE, SURVIVOR_SIZE);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 

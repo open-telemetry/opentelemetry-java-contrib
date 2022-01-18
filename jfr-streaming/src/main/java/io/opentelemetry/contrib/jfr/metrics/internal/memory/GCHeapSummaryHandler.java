@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_MEMORY_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
@@ -24,9 +24,9 @@ import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_DURATION = "runtime.jvm.gc.duration";
+  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time";
   private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
-  private static final String METRIC_NAME_MEMORY = "runtime.jvm.memory.utilization";
+  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
@@ -37,10 +37,9 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String HEAP_SPACE = "heapSpace";
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_MEMORY_USAGE, TOTAL_USED);
-  private static final Attributes ATTR_MEMORY_COMMITTED =
-      Attributes.of(ATTR_MEMORY_USAGE, COMMITTED);
-  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_MEMORY_USAGE, RESERVED);
+  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_USAGE, TOTAL_USED);
+  private static final Attributes ATTR_MEMORY_COMMITTED = Attributes.of(ATTR_USAGE, COMMITTED);
+  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_USAGE, RESERVED);
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 

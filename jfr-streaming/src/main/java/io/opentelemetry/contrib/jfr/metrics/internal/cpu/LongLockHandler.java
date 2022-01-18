@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
-  private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
+  private static final String METRIC_NAME = "process.runtime.jvm.cpu.longlock";
   private static final String METRIC_DESCRIPTION = "Long lock times";
   private static final String EVENT_NAME = "jdk.JavaMonitorWait";
 
@@ -64,7 +65,7 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
 
     public PerThreadLongLockHandler(DoubleHistogram histogram, String threadName) {
       this.histogram = histogram;
-      this.attributes = Attributes.of(ATTR_THREAD_NAME, threadName);
+      this.attributes = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_TYPE, "time");
     }
 
     @Override
