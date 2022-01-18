@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 @Component(role = OpenTelemetrySdkService.class, hint = "opentelemetry-service")
 public final class OpenTelemetrySdkService implements Initializable, Disposable {
 
+  static final String VERSION =
+      OpenTelemetrySdkService.class.getPackage().getImplementationVersion();
+
   private static final Logger logger = LoggerFactory.getLogger(OpenTelemetrySdkService.class);
 
   private OpenTelemetry openTelemetry = OpenTelemetry.noop();
@@ -76,7 +79,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   @Override
   public void initialize() {
-    logger.debug("OpenTelemetry: initialize OpenTelemetrySdkService...");
+    logger.debug("OpenTelemetry: Initialize OpenTelemetrySdkService v{}...", VERSION);
 
     // Change default of "otel.traces.exporter" from "otlp" to "none"
     // The impacts are
@@ -106,7 +109,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
             .getBoolean("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null ? true : mojoSpansEnabled;
 
-    this.tracer = this.openTelemetry.getTracer("io.opentelemetry.contrib.maven");
+    this.tracer = openTelemetry.getTracer("io.opentelemetry.contrib.maven", VERSION);
   }
 
   public Tracer getTracer() {

@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetSystemProperty;
@@ -28,8 +27,6 @@ class GroovyRunnerTest {
 
     assertThatCode(config::validate).doesNotThrowAnyException();
 
-    AtomicBoolean exportCalled = new AtomicBoolean();
-
     JmxClient stub =
         new JmxClient(config) {
           @Override
@@ -38,20 +35,10 @@ class GroovyRunnerTest {
           }
         };
 
-    GroovyRunner runner =
-        new GroovyRunner(
-            config,
-            stub,
-            new GroovyMetricEnvironment(config) {
-              @Override
-              public void flush() {
-                exportCalled.set(true);
-              }
-            });
+    GroovyRunner runner = new GroovyRunner(config, stub, new GroovyMetricEnvironment(config));
 
     assertThat(runner.getScripts()).hasSize(1);
     runner.run();
-    assertThat(exportCalled).isTrue();
   }
 
   @Test
