@@ -1,4 +1,4 @@
-# OpenTelemetry Java static instrumentation
+# OpenTelemetry Java static instrumenter
 
 ## Structure
 
