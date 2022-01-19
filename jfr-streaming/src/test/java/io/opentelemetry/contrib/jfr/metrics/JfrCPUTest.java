@@ -30,8 +30,8 @@ public class JfrCPUTest extends AbstractMetricsTest {
             metric
                 .hasName("process.runtime.jvm.gc.time")
                 .hasUnit(MILLISECONDS)
-                .hasDoubleHistogram()
+                .hasDoubleSum()
                 .points()
-                .anySatisfy(point -> assertThat(point.getCount()).isPositive()));
+                .anySatisfy(point -> assertThat(point.getValue()).isPositive()));
   }
 }
