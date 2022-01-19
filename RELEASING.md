@@ -15,6 +15,10 @@ next _minor_ release version. This means version `vX.(Y+1).0-SNAPSHOT`.
 
 ## Starting the Release
 
+Before making the release, merge a PR to `main` updating the `CHANGELOG.md`. You can use the script
+at `buildscripts/draft-change-log-entries.sh` to help create an initial draft. We typically only
+include end-user facing changes in the change log.
+
 Open the release build workflow in your browser [here](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/release-build.yml).
 
 You will see a button that says "Run workflow". Press the button, enter the version number you want
@@ -28,7 +32,8 @@ and pushes a git tag with the version number.
 Once the GitHub workflow completes, go to Github [release
 page](https://github.com/open-telemetry/opentelemetry-java-contrib/releases), press
 `Draft a new release` to write release notes about the new release. If there is already a draft
-release notes, just point it at the created tag.
+release notes, just point it at the created tag. You can use the script at
+`buildscripts/draft-release-notes.sh` to generate release notes from the change log.
 
 ### Notifying other OpenTelemetry projects
 
