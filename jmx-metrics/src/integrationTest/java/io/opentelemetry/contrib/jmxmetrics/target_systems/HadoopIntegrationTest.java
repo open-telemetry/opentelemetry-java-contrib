@@ -5,16 +5,16 @@
 
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
+import static org.assertj.core.api.Assertions.entry;
+
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.entry;
 
 class HadoopIntegrationTest extends AbstractIntegrationTest {
 
@@ -24,10 +24,11 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
 
   @Container
   GenericContainer<?> hadoop =
-      new GenericContainer<>(new ImageFromDockerfile()
-          .withFileFromClasspath("hadoop-env.sh", "hadoop/hadoop-env.sh")
-          .withFileFromClasspath("yarn-site.xml", "hadoop/yarn-site.xml")
-          .withFileFromClasspath("Dockerfile", "hadoop/Dockerfile"))
+      new GenericContainer<>(
+              new ImageFromDockerfile()
+                  .withFileFromClasspath("hadoop-env.sh", "hadoop/hadoop-env.sh")
+                  .withFileFromClasspath("yarn-site.xml", "hadoop/yarn-site.xml")
+                  .withFileFromClasspath("Dockerfile", "hadoop/Dockerfile"))
           .withNetwork(Network.SHARED)
           .withNetworkAliases("hadoop")
           .withExposedPorts(8004)
@@ -101,11 +102,8 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "The number of data nodes tracked by the name node.",
                 "nodes",
                 attrs ->
-                    attrs.containsOnly(
-                        entry("node_name", "test-host"), entry("state", "live")),
+                    attrs.containsOnly(entry("node_name", "test-host"), entry("state", "live")),
                 attrs ->
-                    attrs.containsOnly(
-                        entry("node_name", "test-host"), entry("state", "dead")))
-    );
+                    attrs.containsOnly(entry("node_name", "test-host"), entry("state", "dead"))));
   }
 }
