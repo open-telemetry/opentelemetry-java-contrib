@@ -18,7 +18,7 @@ class JmxConfigTest {
   void staticValues() {
     assertThat(JmxConfig.AVAILABLE_TARGET_SYSTEMS)
         .containsOnly(
-            "cassandra", "hbase", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
+            "activemq", "cassandra", "hbase", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
   }
 
   @Test
@@ -116,7 +116,7 @@ class JmxConfigTest {
         .isInstanceOf(ConfigurationException.class)
         .hasMessage(
             "[jvm, unavailabletargetsystem] must specify targets from "
-                + "[cassandra, jvm, kafka, kafka-consumer, kafka-producer, tomcat]");
+                + "[activemq, cassandra, jvm, kafka, kafka-consumer, kafka-producer, tomcat]");
   }
 
   @Test

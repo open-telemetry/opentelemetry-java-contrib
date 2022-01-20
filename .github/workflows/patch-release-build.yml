@@ -124,7 +124,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.event.inputs.version }}
-          release_name: Release v${{ github.event.inputs.version }}
+          release_name: Version ${{ github.event.inputs.version }}
           draft: true
           prerelease: false
       - name: Upload jmx-metrics release asset
