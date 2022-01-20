@@ -8,7 +8,7 @@ The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
 
 * Name: `solr.document.count`
 * Description: The total number of indexed documents.
-* Unit: `documents`
+* Unit: `{documents}`
 * Labels: `core`
 * Instrument Type: ObservableLongUpDownCounter
 
@@ -22,7 +22,7 @@ The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
 
 * Name: `solr.request.count`
 * Description: The number of queries made.
-* Unit: `queries`
+* Unit: `{queries}`
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
@@ -37,42 +37,42 @@ The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
 
 * Name: `solr.request.error.count`
 * Description: The number of queries resulting in an error.
-* Unit: `queries`
+* Unit: `{queries}`
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
 
 * Name: `solr.request.timeout.count`
 * Description: The number of queries resulting in a timeout.
-* Unit: `queries`
+* Unit: `{queries}`
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
 
 * Name: `solr.cache.eviction.count`
 * Description: The number of evictions from a cache.
-* Unit: `evictions`
+* Unit: `{evictions}`
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
 
 * Name: `solr.cache.hit.count`
 * Description: The number of hits from a cache.
-* Unit: `hits`
+* Unit: `{hits}`
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
 
 * Name: `solr.cache.insert.count`
 * Description: The number of inserts from a cache.
-* Unit: `inserts`
+* Unit: `{inserts}`
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
 
 * Name: `solr.cache.lookup.count`
 * Description: The number of lookups from a cache.
-* Unit: `lookups`
+* Unit: `{lookups}`
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
