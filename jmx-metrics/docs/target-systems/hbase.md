@@ -31,7 +31,7 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 
 * Name: `hbase.region_server.region.count`
-* Description: The age of the longest region in transition.
+* Description: The number of regions hosted by the region server.
 * Unit: `{regions}`
 * Labels: `region_server`
 * Instrument Type: longUpDownCounter
@@ -72,24 +72,10 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Instrument Type: longUpDownCounter
 
 
-* Name: `hbase.region_server.queue.length`
-* Description: The number of RPC handlers actively servicing requests.
-* Unit: `{handlers}`
-* Labels: `region_server`, `state`
-* Instrument Type: longUpDownCounter
-
-
 * Name: `hbase.region_server.blocked_update.time`
 * Description: Amount of time updates have been blocked so the memstore can be flushed.
 * Unit: `ms`
 * Labels: `region_server`
-* Instrument Type: longValue
-
-
-* Name: `hbase.region_server.block_cache.operation.count`
-* Description: Number of block cache hits/misses.
-* Unit: `{operations}`
-* Labels: `region_server`, `state`
 * Instrument Type: longValue
 
 
