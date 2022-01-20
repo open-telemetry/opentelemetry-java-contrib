@@ -93,7 +93,8 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   }
 
   private void recordValues(RecordedEvent before, RecordedEvent after) {
-    if (after.hasField("edenSpace") && after.getValue("edenSpace") instanceof RecordedObject edenSpace) {
+    if (after.hasField("edenSpace")
+        && after.getValue("edenSpace") instanceof RecordedObject edenSpace) {
       memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
       if (before.hasField("edenSpace") && before.getValue("edenSpace") instanceof RecordedObject) {
         RecordedObject beforeSpace = before.getValue("edenSpace");
@@ -101,7 +102,8 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
             edenSpace.getLong("size") - beforeSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE_DELTA);
       }
     }
-    if (after.hasField("fromSpace") && after.getValue("fromSpace") instanceof RecordedObject fromSpace) {
+    if (after.hasField("fromSpace")
+        && after.getValue("fromSpace") instanceof RecordedObject fromSpace) {
       memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
     }
   }
