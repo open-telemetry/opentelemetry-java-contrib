@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import static org.assertj.core.api.Assertions.entry;
+
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.master.in_transition_regions.count",
                 "The number of regions that are in transition.",
                 "1",
-                /* isMonotonic= */false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "hbase.master.in_transition_regions.over_threshold",
                 "The number of regions that have been in transition longer than a threshold time.",
                 "1",
-                /* isMonotonic= */false),
+                /* isMonotonic= */ false),
         metric ->
             assertGauge(
                 metric,
@@ -257,7 +258,8 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 attrs -> attrs.contains(entry("state", "failures"))),
         metric ->
             assertSumWithAttributes(
-                metric, "hbase.region_server.gc.time",
+                metric,
+                "hbase.region_server.gc.time",
                 "Time spent in garbage collection.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
