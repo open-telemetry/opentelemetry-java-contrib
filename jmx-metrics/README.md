@@ -74,6 +74,8 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
 | [`tomcat`](./docs/target-systems/tomcat.md) |
+| [`hbase`](./docs/target-systems/hbase.md) |
+
 
 ### JMX Query Helpers
 
