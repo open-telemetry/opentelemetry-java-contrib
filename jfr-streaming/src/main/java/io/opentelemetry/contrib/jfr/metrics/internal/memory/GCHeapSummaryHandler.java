@@ -105,9 +105,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
       memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
     }
     if (after.hasField(HEAP_SPACE)) {
-      after.getValue(HEAP_SPACE);
-      if (after.getValue(HEAP_SPACE) instanceof RecordedObject) {
-        RecordedObject ro = after.getValue(HEAP_SPACE);
+      if (after.getValue(HEAP_SPACE) instanceof RecordedObject ro) {
         memoryHistogram.record(ro.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
       }
     }
