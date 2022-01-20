@@ -14,13 +14,13 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.master.in_transition_regions.count`
 * Description: The number of regions that are in transition.
-* Unit: `1`
+* Unit: `{regions}`
 * Instrument Type: longUpDownCounter
 
 
 * Name: `hbase.master.in_transition_regions.over_threshold`
 * Description: The number of regions that have been in transition longer than a threshold time.
-* Unit: `1`
+* Unit: `{regions}`
 * Instrument Type: longUpDownCounter
 
 
@@ -207,7 +207,7 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.region_server.authentication.count`
 * Description: Number of client connection authentication failures/successes.
-* Unit: `1`
+* Unit: `{authentication requests}`
 * Labels: `region_server`, `state`
 * Instrument Type: longUpDownCounter
 
