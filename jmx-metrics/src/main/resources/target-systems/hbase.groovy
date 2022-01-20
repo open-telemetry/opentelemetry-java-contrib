@@ -37,7 +37,7 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.region.count",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "regionCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.disk.store_file.count",
-  "The number of store files on disk currently managed by the region server.", "{store_files}",
+  "The number of store files on disk currently managed by the region server.", "{files}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "storeFileCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.disk.store_file.size",
