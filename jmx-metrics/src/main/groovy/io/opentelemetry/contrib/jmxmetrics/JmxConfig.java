@@ -33,7 +33,8 @@ class JmxConfig {
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
   static final List<String> AVAILABLE_TARGET_SYSTEMS =
-      Arrays.asList("cassandra", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
+      Arrays.asList(
+          "activemq", "cassandra", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
 
   final String serviceUrl;
   final String groovyScript;
