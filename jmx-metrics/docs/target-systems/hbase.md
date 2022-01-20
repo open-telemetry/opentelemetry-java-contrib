@@ -39,7 +39,7 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.region_server.disk.store_file.count`
 * Description: The number of store files on disk currently managed by the region server.
-* Unit: `{store_files}`
+* Unit: `{files}`
 * Labels: `region_server`
 * Instrument Type: longUpDownCounter
 

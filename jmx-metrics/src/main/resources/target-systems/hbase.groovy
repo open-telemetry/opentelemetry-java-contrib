@@ -22,16 +22,14 @@ otel.instrument(beanMasterServer, "hbase.master.region_server.count",
 
 def beanMasterAssignmentManager = otel.mbean("Hadoop:service=HBase,name=Master,sub=AssignmentManager")
 otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.count",
-  "The number of regions that are in transition.", "1",
+  "The number of regions that are in transition.", "{regions}",
   "ritCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.over_threshold",
-  "The number of regions that have been in transition longer than a threshold time.", "1",
+  "The number of regions that have been in transition longer than a threshold time.", "{regions}",
   "ritCountOverThreshold", otel.&longUpDownCounterCallback)
 otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.oldest_age",
   "The age of the longest region in transition.", "ms",
   "ritOldestAge", otel.&longValueCallback)
-
-
 
 def beanRegionServerServer = otel.mbean("Hadoop:service=HBase,name=RegionServer,sub=Server")
 otel.instrument(beanRegionServerServer, "hbase.region_server.region.count",
@@ -140,7 +138,6 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operations.slow",
   ],
   otel.&longUpDownCounterCallback)
 
-
 def beanRegionServerIPC = otel.mbean("Hadoop:service=HBase,name=RegionServer,sub=IPC")
 otel.instrument(beanRegionServerIPC, "hbase.region_server.open_connection.count",
   "The number of open connections at the RPC layer.", "{connections}",
@@ -160,12 +157,10 @@ otel.instrument(beanRegionServerIPC, "hbase.region_server.queue.request.count",
   ],
   otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerIPC, "hbase.region_server.authentication.count",
-  "Number of client connection authentication failures/successes.", "1",
+  "Number of client connection authentication failures/successes.", "{authentication requests}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["authenticationSuccesses":["state" : {"successes"}], "authenticationFailures": ["state" : {"failures"}]],
   otel.&longUpDownCounterCallback)
-
-
 
 def beanJVMMetrics = otel.mbean("Hadoop:service=HBase,name=JvmMetrics")
 otel.instrument(beanJVMMetrics, "hbase.region_server.gc.time",

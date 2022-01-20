@@ -49,14 +49,14 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.master.in_transition_regions.count",
                 "The number of regions that are in transition.",
-                "1",
+                "{regions}",
                 /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "hbase.master.in_transition_regions.over_threshold",
                 "The number of regions that have been in transition longer than a threshold time.",
-                "1",
+                "{regions}",
                 /* isMonotonic= */ false),
         metric ->
             assertGauge(
@@ -76,7 +76,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.disk.store_file.count",
                 "The number of store files on disk currently managed by the region server.",
-                "{store_files}",
+                "{files}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -253,7 +253,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.authentication.count",
                 "Number of client connection authentication failures/successes.",
-                "1",
+                "{authentication requests}",
                 attrs -> attrs.contains(entry("state", "successes")),
                 attrs -> attrs.contains(entry("state", "failures"))),
         metric ->

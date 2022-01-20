@@ -71,11 +71,11 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 | [`jvm`](./docs/target-systems/jvm.md) |
 | [`activemq`](./docs/target-systems/activemq.md)|
 | [`cassandra`](./docs/target-systems/cassandra.md) |
+| [`hbase`](./docs/target-systems/hbase.md) |
 | [`kafka`](./docs/target-systems/kafka.md) |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
 | [`tomcat`](./docs/target-systems/tomcat.md) |
-| [`hbase`](./docs/target-systems/hbase.md) |
 
 
 ### JMX Query Helpers
