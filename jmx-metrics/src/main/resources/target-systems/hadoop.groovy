@@ -21,25 +21,25 @@ otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.disk.usage", "The amount of d
 otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.disk.limit", "The total disk allotted to data nodes.", "by",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "CapacityTotal", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.count", "The total number of blocks.", "blocks",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.count", "The total number of blocks.", "{blocks}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "BlocksTotal", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.missing", "The number of blocks reported as missing.", "blocks",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.missing", "The number of blocks reported as missing.", "{blocks}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "MissingBlocks", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.corrupt", "The number of blocks reported as corrupt.", "blocks",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.block.corrupt", "The number of blocks reported as corrupt.", "{blocks}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "CorruptBlocks", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.volume.failed", "The number of failed volumes.", "volumes",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.volume.failed", "The number of failed volumes.", "{volumes}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "VolumeFailuresTotal", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.file.count", "The total number of files being tracked by the name node.", "files",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.file.count", "The total number of files being tracked by the name node.", "{files}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "TotalFiles", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.file.load", "The current number of concurrent file accesses.", "operations",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.hdfs.file.load", "The current number of concurrent file accesses.", "{operations}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "TotalLoad", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.data_node.count", "The number of data nodes tracked by the name node.", "nodes",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.data_node.count", "The number of data nodes tracked by the name node.", "{nodes}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["NumLiveDataNodes":["state":{"live"}], "NumDeadDataNodes": ["state":{"dead"}]],
   otel.&longUpDownCounterCallback)

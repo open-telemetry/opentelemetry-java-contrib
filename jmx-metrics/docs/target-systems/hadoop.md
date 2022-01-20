@@ -18,42 +18,42 @@ These metrics are sourced from: https://hadoop.apache.org/docs/r2.7.2/hadoop-pro
 
 * Name: `hadoop.hdfs.block.count`
 * Description: The total number of blocks.
-* Unit: `blocks`
+* Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.hdfs.block.missing`
 * Description: The number of blocks reported as missing.
-* Unit: `blocks`
+* Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.hdfs.block.corrupt`
 * Description: The number of blocks reported as corrupt.
-* Unit: `blocks`
+* Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.hdfs.volume.failed`
 * Description: The number of failed volumes.
-* Unit: `volumes`
+* Unit: `{volumes}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.hdfs.file.count`
 * Description: The total number of files being tracked by the name node.
-* Unit: `files`
+* Unit: `{files}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.hdfs.file.load`
 * Description: The current number of concurrent file accesses.
-* Unit: `operations`
+* Unit: `{operations}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
 * Name: `hadoop.data_node.count`
 * Description: The number of data nodes tracked by the name node.
-* Unit: `nodes`
+* Unit: `{nodes}`
 * Labels: `node_name`, `state`
 * Instrument Type: LongUpDownCounterCallback

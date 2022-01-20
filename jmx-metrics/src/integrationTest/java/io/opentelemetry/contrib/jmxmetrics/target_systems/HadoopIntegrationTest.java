@@ -58,49 +58,49 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hadoop.hdfs.block.count",
                 "The total number of blocks.",
-                "blocks",
+                "{blocks}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.hdfs.block.missing",
                 "The number of blocks reported as missing.",
-                "blocks",
+                "{blocks}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.hdfs.block.corrupt",
                 "The number of blocks reported as corrupt.",
-                "blocks",
+                "{blocks}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.hdfs.volume.failed",
                 "The number of failed volumes.",
-                "volumes",
+                "{volumes}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.hdfs.file.count",
                 "The total number of files being tracked by the name node.",
-                "files",
+                "{files}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.hdfs.file.load",
                 "The current number of concurrent file accesses.",
-                "operations",
+                "{operations}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hadoop.data_node.count",
                 "The number of data nodes tracked by the name node.",
-                "nodes",
+                "{nodes}",
                 attrs ->
                     attrs.containsOnly(entry("node_name", "test-host"), entry("state", "live")),
                 attrs ->
