@@ -30,31 +30,16 @@ otel.instrument(beanWildflyDeployment, "wildfly.session.rejected", "The number o
 
 def beanWildflyHttpListener = otel.mbean("jboss.as:subsystem=undertow,server=*,http-listener=*")
 otel.instrument(beanWildflyHttpListener, "wildfly.request.count", "The number of requests received.", "{requests}",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
+  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "requestCount", otel.&longCounterCallback)
 otel.instrument(beanWildflyHttpListener, "wildfly.request.time", "The total amount of time spent on requests.", "ns",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
+  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "processingTime", otel.&longCounterCallback)
 otel.instrument(beanWildflyHttpListener, "wildfly.request.server_error", "The number of requests that have resulted in a 500 response.", "{requests}",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
+  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "errorCount", otel.&longCounterCallback)
 otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of bytes transmitted.", "by",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
-  ["bytesSent":["state":{"out"}], "bytesReceived":["state":{"in"}]],
-  otel.&longCounterCallback)
-
-def beanWildflyHttpsListener = otel.mbean("jboss.as:subsystem=undertow,server=*,https-listener=*")
-otel.instrument(beanWildflyHttpsListener, "wildfly.request.count", "The number of requests received.", "{requests}",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
-  "requestCount", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpsListener, "wildfly.request.time", "The total amount of time spent on requests.", "ns",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
-  "processingTime", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpsListener, "wildfly.request.server_error", "The number of requests that have resulted in a 500 response.", "{requests}",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
-  "errorCount", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpsListener, "wildfly.network.io", "The number of bytes transmitted.", "by",
-  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("listener")}],
+  ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   ["bytesSent":["state":{"out"}], "bytesReceived":["state":{"in"}]],
   otel.&longCounterCallback)
 
@@ -68,7 +53,7 @@ otel.instrument(beanWildflyDataSource, "wildfly.jdbc.request.wait", "The number 
   "WaitCount", otel.&longCounterCallback)
 
 def beanWildflyTransaction = otel.mbean("jboss.as:subsystem=transactions")
-otel.instrument(beanWildflyTransaction, "wildfly.jdbc.transaction.count", "TThe number of transactions created.", "{transactions}",
+otel.instrument(beanWildflyTransaction, "wildfly.jdbc.transaction.count", "The number of transactions created.", "{transactions}",
   "numberOfTransactions", otel.&longCounterCallback)
 otel.instrument(beanWildflyTransaction, "wildfly.jdbc.rollback.count", "The number of transactions rolled back.", "{transactions}",
   ["numberOfSystemRollbacks":["cause":{"system"}], "numberOfResourceRollbacks":["cause":{"resource"}], "numberOfApplicationRollbacks":["cause":{"application"}]],

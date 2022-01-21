@@ -25,9 +25,9 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
   @Container
   GenericContainer<?> wildfly =
       new GenericContainer<>(
-          new ImageFromDockerfile()
-              .withFileFromClasspath("Dockerfile", "wildfly/Dockerfile")
-              .withFileFromClasspath("start.sh", "wildfly/start.sh"))
+              new ImageFromDockerfile()
+                  .withFileFromClasspath("Dockerfile", "wildfly/Dockerfile")
+                  .withFileFromClasspath("start.sh", "wildfly/start.sh"))
           .withNetwork(Network.SHARED)
           .withNetworkAliases("wildfly")
           .withExposedPorts(9990)
@@ -44,9 +44,11 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "The number of requests received.",
                 "{requests}",
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "default")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "https"))),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "https"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -54,9 +56,11 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "The total amount of time spent on requests.",
                 "ns",
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "default")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "https"))),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "https"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -64,9 +68,11 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "The number of requests that have resulted in a 500 response.",
                 "{requests}",
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "default")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "https"))),
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "https"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -74,12 +80,24 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "The number of bytes transmitted.",
                 "by",
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "default"), entry("state", "in")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "default"),
+                        entry("state", "in")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "default"), entry("state", "out")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "default"),
+                        entry("state", "out")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "https"), entry("state", "in")),
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "https"),
+                        entry("state", "in")),
                 attrs ->
-                    attrs.containsOnly(entry("server", "default-server"), entry("listener", "https"), entry("state", "out"))));
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "https"),
+                        entry("state", "out"))));
   }
 }
