@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.utility.MountableFile;
 
 class HbaseIntegrationTest extends AbstractIntegrationTest {
 
@@ -24,10 +24,12 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
 
   @Container
   GenericContainer<?> hbase =
-      new GenericContainer<>(
-              new ImageFromDockerfile().withFileFromClasspath("Dockerfile", "hbase/Dockerfile"))
+      new GenericContainer<>("dajobe/hbase")
           .withNetwork(Network.SHARED)
           .withEnv("LOCAL_JMX", "no")
+          .withCopyFileToContainer(
+              MountableFile.forClasspathResource("hbase/hbase-env.sh", 0400),
+              "/opt/hbase/conf/hbase-env.sh")
           .withNetworkAliases("hbase")
           .withExposedPorts(9900)
           .withStartupTimeout(Duration.ofMinutes(2))
