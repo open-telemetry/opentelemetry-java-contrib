@@ -24,9 +24,9 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "process.runtime.jvm.cpu.used";
   private static final String METRIC_DESCRIPTION = "CPU Utilization";
   private static final String EVENT_NAME = "jdk.CPULoad";
-  private static final String JVM_USER = "user";
-  private static final String JVM_SYSTEM = "system";
-  private static final String MACHINE_TOTAL = "machine.total";
+  private static final String JVM_USER = "jvmUser";
+  private static final String JVM_SYSTEM = "jvmSystem";
+  private static final String MACHINE_TOTAL = "machineTotal";
 
   private static final Attributes ATTR_USER = Attributes.of(ATTR_USAGE, USER);
   private static final Attributes ATTR_SYSTEM = Attributes.of(ATTR_USAGE, SYSTEM);

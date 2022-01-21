@@ -18,6 +18,7 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
@@ -26,6 +27,8 @@ import jdk.jfr.consumer.RecordedObject;
  * values are sourced from GCHeapSummary - this is young generational details
  */
 public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
+  private static final Logger logger = Logger.getLogger(ParallelHeapSummaryHandler.class.getName());
+
   private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.PSHeapSummary";
@@ -64,14 +67,18 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
 
   @Override
   public void accept(RecordedEvent ev) {
-    String when = null;
+    String when;
+
     if (ev.hasField(WHEN)) {
       when = ev.getString(WHEN);
+    } else {
+      logger.fine(String.format("Parallel GC Event seen without when: %s", ev));
+      return;
     }
-    if (when != null) {
-      if (!(when.equals(BEFORE) || when.equals(AFTER))) {
-        return;
-      }
+    if (!(when.equals(BEFORE) || when.equals(AFTER))) {
+      logger.fine(
+          String.format("Parallel GC Event seen where when is neither before nor after: %s", ev));
+      return;
     }
 
     if (!ev.hasField(GC_ID)) {
@@ -79,12 +86,11 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
     }
     long gcId = ev.getLong(GC_ID);
 
-    var pair = awaitingPairs.get(gcId);
+    var pair = awaitingPairs.remove(gcId);
     if (pair == null) {
       awaitingPairs.put(gcId, ev);
     } else {
-      awaitingPairs.remove(gcId);
-      if (when != null && when.equals(BEFORE)) {
+      if (when.equals(BEFORE)) {
         recordValues(ev, pair);
       } else { //  i.e. when.equals(AFTER)
         recordValues(pair, ev);
@@ -96,15 +102,19 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
     if (after.hasField("edenSpace")
         && after.getValue("edenSpace") instanceof RecordedObject edenSpace) {
       memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
-      if (before.hasField("edenSpace") && before.getValue("edenSpace") instanceof RecordedObject) {
-        RecordedObject beforeSpace = before.getValue("edenSpace");
-        memoryHistogram.record(
-            edenSpace.getLong("size") - beforeSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE_DELTA);
+      if (before.hasField("edenSpace")
+          && before.getValue("edenSpace") instanceof RecordedObject beforeSpace) {
+        if (edenSpace.hasField("size") && beforeSpace.hasField("size")) {
+          memoryHistogram.record(
+              edenSpace.getLong("size") - beforeSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE_DELTA);
+        }
       }
     }
     if (after.hasField("fromSpace")
         && after.getValue("fromSpace") instanceof RecordedObject fromSpace) {
-      memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
+      if (fromSpace.hasField("size")) {
+        memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
+      }
     }
   }
 }
