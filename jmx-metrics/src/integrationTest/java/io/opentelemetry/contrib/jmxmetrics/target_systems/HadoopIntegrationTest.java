@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.utility.MountableFile;
 
 class HadoopIntegrationTest extends AbstractIntegrationTest {
 
@@ -24,11 +24,15 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
 
   @Container
   GenericContainer<?> hadoop =
-      new GenericContainer<>(
-              new ImageFromDockerfile()
-                  .withFileFromClasspath("hadoop-env.sh", "hadoop/hadoop-env.sh")
-                  .withFileFromClasspath("yarn-site.xml", "hadoop/yarn-site.xml")
-                  .withFileFromClasspath("Dockerfile", "hadoop/Dockerfile"))
+      new GenericContainer<>("bmedora/hadoop:2.9-base")
+          .withCopyFileToContainer(
+              MountableFile.forClasspathResource("hadoop/hadoop-env.sh", 0400),
+              "/hadoop/etc/hadoop/hadoop-env.sh"
+          )
+          .withCopyFileToContainer(
+              MountableFile.forClasspathResource("hadoop/yarn-site.xml", 0400),
+              "/hadoop/etc/hadoop/yarn-site.xml"
+          )
           .withNetwork(Network.SHARED)
           .withNetworkAliases("hadoop")
           .withExposedPorts(8004)
