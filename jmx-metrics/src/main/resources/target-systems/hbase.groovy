@@ -21,13 +21,13 @@ otel.instrument(beanMasterServer, "hbase.master.region_server.count",
   otel.&longUpDownCounterCallback)
 
 def beanMasterAssignmentManager = otel.mbean("Hadoop:service=HBase,name=Master,sub=AssignmentManager")
-otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.count",
+otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.count",
   "The number of regions that are in transition.", "{regions}",
   "ritCount", otel.&longUpDownCounterCallback)
-otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.over_threshold",
+otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.over_threshold",
   "The number of regions that have been in transition longer than a threshold time.", "{regions}",
   "ritCountOverThreshold", otel.&longUpDownCounterCallback)
-otel.instrument(beanMasterAssignmentManager, "hbase.master.in_transition_regions.oldest_age",
+otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.oldest_age",
   "The age of the longest region in transition.", "ms",
   "ritOldestAge", otel.&longValueCallback)
 

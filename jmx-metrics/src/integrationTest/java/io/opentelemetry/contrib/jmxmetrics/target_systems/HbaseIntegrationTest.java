@@ -49,21 +49,21 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertSum(
                 metric,
-                "hbase.master.in_transition_regions.count",
+                "hbase.master.regions_in_transition.count",
                 "The number of regions that are in transition.",
                 "{regions}",
                 /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
-                "hbase.master.in_transition_regions.over_threshold",
+                "hbase.master.regions_in_transition.over_threshold",
                 "The number of regions that have been in transition longer than a threshold time.",
                 "{regions}",
                 /* isMonotonic= */ false),
         metric ->
             assertGauge(
                 metric,
-                "hbase.master.in_transition_regions.oldest_age",
+                "hbase.master.regions_in_transition.oldest_age",
                 "The age of the longest region in transition.",
                 "ms"),
         metric ->

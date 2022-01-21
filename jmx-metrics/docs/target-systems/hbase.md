@@ -12,19 +12,19 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Instrument Type: longUpDownCounter
 
 
-* Name: `hbase.master.in_transition_regions.count`
+* Name: `hbase.master.regions_in_transition.count`
 * Description: The number of regions that are in transition.
 * Unit: `{regions}`
 * Instrument Type: longUpDownCounter
 
 
-* Name: `hbase.master.in_transition_regions.over_threshold`
+* Name: `hbase.master.regions_in_transition.over_threshold`
 * Description: The number of regions that have been in transition longer than a threshold time.
 * Unit: `{regions}`
 * Instrument Type: longUpDownCounter
 
 
-* Name: `hbase.master.in_transition_regions.oldest_age`
+* Name: `hbase.master.regions_in_transition.oldest_age`
 * Description: The age of the longest region in transition.
 * Unit: `ms`
 * Instrument Type: longValue
