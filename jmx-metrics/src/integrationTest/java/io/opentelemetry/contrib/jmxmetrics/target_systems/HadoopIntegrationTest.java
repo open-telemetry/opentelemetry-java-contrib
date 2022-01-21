@@ -27,12 +27,10 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
       new GenericContainer<>("bmedora/hadoop:2.9-base")
           .withCopyFileToContainer(
               MountableFile.forClasspathResource("hadoop/hadoop-env.sh", 0400),
-              "/hadoop/etc/hadoop/hadoop-env.sh"
-          )
+              "/hadoop/etc/hadoop/hadoop-env.sh")
           .withCopyFileToContainer(
               MountableFile.forClasspathResource("hadoop/yarn-site.xml", 0400),
-              "/hadoop/etc/hadoop/yarn-site.xml"
-          )
+              "/hadoop/etc/hadoop/yarn-site.xml")
           .withNetwork(Network.SHARED)
           .withNetworkAliases("hadoop")
           .withExposedPorts(8004)
