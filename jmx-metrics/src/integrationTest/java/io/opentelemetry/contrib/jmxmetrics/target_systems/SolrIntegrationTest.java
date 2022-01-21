@@ -59,7 +59,7 @@ class SolrIntegrationTest extends AbstractIntegrationTest {
             assertSolrRequestGaugeMetric(
                 metric,
                 "solr.request.time.average",
-                "The average time of a query. This average is based on the histogram configuration in Solr. By default, Solr uses an exponentially decaying reservoir.",
+                "The average time of a query, based on Solr's histogram configuration.",
                 "ms"),
         metric ->
             assertSolrRequestSumMetric(

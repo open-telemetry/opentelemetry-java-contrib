@@ -35,7 +35,7 @@ otel.instrument(beanSolrCoreRequests, "solr.request.count", "The number of queri
 def beanSolrCoreRequestTimes = otel.mbeans(["solr:dom1=core,dom2=*,category=QUERY,scope=*,name=requestTimes",
                                         "solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=requestTimes"])
 otel.instrument(beanSolrCoreRequestTimes, "solr.request.time.average",
-  "The average time of a query. This average is based on the histogram configuration in Solr. By default, Solr uses an exponentially decaying reservoir.",
+  "The average time of a query, based on Solr's histogram configuration.",
   "ms",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "type" : { mbean -> mbean.name().getKeyProperty("category") },

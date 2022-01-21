@@ -28,8 +28,7 @@ The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
 
 
 * Name: `solr.request.time.average`
-* Description: The average time of a query. This average is based on the histogram configuration
-    in Solr. By default, Solr uses an exponentially decaying reservoir.
+* Description: The average time of a query, based on Solr's histogram configuration.
 * Unit: `ms`
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableDoubleValue
