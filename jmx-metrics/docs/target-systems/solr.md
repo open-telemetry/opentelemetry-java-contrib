@@ -1,6 +1,7 @@
 # Solr Metrics
 
 The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
+Details about using JMX with Solr can be found here: https://solr.apache.org/guide/6_6/using-jmx-with-solr.html
 
 ## Metrics
 
