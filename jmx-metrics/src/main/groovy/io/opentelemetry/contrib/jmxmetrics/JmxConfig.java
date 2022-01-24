@@ -37,6 +37,7 @@ class JmxConfig {
           "activemq",
           "cassandra",
           "hbase",
+          "hadoop",
           "jvm",
           "kafka",
           "kafka-consumer",

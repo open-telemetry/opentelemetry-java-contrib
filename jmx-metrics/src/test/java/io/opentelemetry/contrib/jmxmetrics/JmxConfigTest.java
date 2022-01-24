@@ -21,6 +21,7 @@ class JmxConfigTest {
             "activemq",
             "cassandra",
             "hbase",
+            "hadoop",
             "jvm",
             "kafka",
             "kafka-consumer",
@@ -123,8 +124,8 @@ class JmxConfigTest {
     assertThatThrownBy(config::validate)
         .isInstanceOf(ConfigurationException.class)
         .hasMessage(
-            "[jvm, unavailabletargetsystem] must specify targets from "
-                + "[activemq, cassandra, hbase, jvm, kafka, kafka-consumer, kafka-producer, solr, tomcat]");
+            "[jvm, unavailabletargetsystem] must specify targets from [activemq, cassandra, hbase, hadoop, jvm, "
+                + "kafka, kafka-consumer, kafka-producer, solr, tomcat]");
   }
 
   @Test

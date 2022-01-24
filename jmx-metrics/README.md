@@ -72,6 +72,7 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 | [`activemq`](./docs/target-systems/activemq.md) |
 | [`cassandra`](./docs/target-systems/cassandra.md) |
 | [`hbase`](./docs/target-systems/hbase.md) |
+| [`hadoop`](./docs/target-systems/hadoop.md) |
 | [`kafka`](./docs/target-systems/kafka.md) |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
