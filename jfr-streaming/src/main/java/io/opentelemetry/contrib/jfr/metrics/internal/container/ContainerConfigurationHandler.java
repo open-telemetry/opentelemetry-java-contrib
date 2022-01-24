@@ -13,7 +13,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContainerConfigurationHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME = "runtime.jvm.cpu.limit";
+  private static final String METRIC_NAME = "process.runtime.jvm.cpu.limit";
   private static final String EVENT_NAME = "jdk.ContainerConfiguration";
   private static final String EFFECTIVE_CPU_COUNT = "effectiveCpuCount";
 
