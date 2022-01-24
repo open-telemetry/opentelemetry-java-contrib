@@ -41,6 +41,7 @@ class JmxConfig {
           "kafka",
           "kafka-consumer",
           "kafka-producer",
+          "solr",
           "tomcat");
 
   final String serviceUrl;
