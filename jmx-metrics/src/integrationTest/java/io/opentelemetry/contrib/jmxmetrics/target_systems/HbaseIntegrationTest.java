@@ -149,6 +149,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGaugeWithAttributes(
                 metric,
+                "hbase.region_server.operation.append.latency.min",
+                "Append operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.append.latency.mean",
+                "Append operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.append.latency.median",
+                "Append operation median latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
                 "hbase.region_server.operation.delete.latency.p99",
                 "Delete operation 99th Percentile latency.",
                 "ms",
@@ -158,6 +179,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.operation.delete.latency.max",
                 "Delete operation max latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.delete.latency.min",
+                "Delete operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.delete.latency.mean",
+                "Delete operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.delete.latency.median",
+                "Delete operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
@@ -177,6 +219,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGaugeWithAttributes(
                 metric,
+                "hbase.region_server.operation.put.latency.min",
+                "Put operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.put.latency.mean",
+                "Put operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.put.latency.median",
+                "Put operation median latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
                 "hbase.region_server.operation.get.latency.p99",
                 "Get operation 99th Percentile latency.",
                 "ms",
@@ -186,6 +249,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.operation.get.latency.max",
                 "Get operation max latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.get.latency.min",
+                "Get operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.get.latency.mean",
+                "Get operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.get.latency.median",
+                "Get operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
@@ -205,6 +289,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGaugeWithAttributes(
                 metric,
+                "hbase.region_server.operation.replay.latency.min",
+                "Replay operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.replay.latency.mean",
+                "Replay operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.replay.latency.median",
+                "Replay operation median latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
                 "hbase.region_server.operation.increment.latency.p99",
                 "Increment operation 99th Percentile latency.",
                 "ms",
@@ -214,6 +319,27 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.operation.increment.latency.max",
                 "Increment operation max latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.increment.latency.min",
+                "Increment operation minimum latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.increment.latency.mean",
+                "Increment operation mean latency.",
+                "ms",
+                attrs -> attrs.containsKey("region_server")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "hbase.region_server.operation.increment.latency.median",
+                "Increment operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
         metric ->

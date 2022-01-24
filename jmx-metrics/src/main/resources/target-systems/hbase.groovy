@@ -80,6 +80,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.append.la
   "Append operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Append_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.append.latency.min",
+  "Append operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Append_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.append.latency.mean",
+  "Append operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Append_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.append.latency.median",
+  "Append operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Append_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operation.delete.latency.p99",
   "Delete operation 99th Percentile latency.", "ms",
@@ -89,6 +101,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.delete.la
   "Delete operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Delete_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.delete.latency.min",
+  "Delete operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Delete_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.delete.latency.mean",
+  "Delete operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Delete_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.delete.latency.median",
+  "Delete operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Delete_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operation.put.latency.p99",
   "Put operation 99th Percentile latency.", "ms",
@@ -98,6 +122,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.put.laten
   "Put operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Put_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.put.latency.min",
+  "Put operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Put_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.put.latency.mean",
+  "Put operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Put_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.put.latency.median",
+  "Put operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Put_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operation.get.latency.p99",
   "Get operation 99th Percentile latency.", "ms",
@@ -107,6 +143,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.get.laten
   "Get operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Get_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.get.latency.min",
+  "Get operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Get_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.get.latency.mean",
+  "Get operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Get_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.get.latency.median",
+  "Get operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Get_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operation.replay.latency.p99",
   "Replay operation 99th Percentile latency.", "ms",
@@ -116,6 +164,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.replay.la
   "Replay operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Replay_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.replay.latency.min",
+  "Replay operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Replay_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.replay.latency.mean",
+  "Replay operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Replay_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.replay.latency.median",
+  "Replay operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Replay_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment.latency.p99",
   "Increment operation 99th Percentile latency.", "ms",
@@ -125,6 +185,18 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment
   "Increment operation max latency.", "ms",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "Increment_max", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment.latency.min",
+  "Increment operation minimum latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Increment_min", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment.latency.mean",
+  "Increment operation mean latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Increment_mean", otel.&longValueCallback)
+otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment.latency.median",
+  "Increment operation median latency.", "ms",
+  ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
+  "Increment_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operations.slow",
   "Number of operations that took over 1000ms to complete.", "{operations}",

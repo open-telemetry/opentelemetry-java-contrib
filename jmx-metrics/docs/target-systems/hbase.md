@@ -107,6 +107,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Instrument Type: longValue
 
 
+* Name: `hbase.region_server.operation.append.latency.min`
+* Description: Append operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.append.latency.mean`
+* Description: Append operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.append.latency.median`
+* Description: Append operation median latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
 * Name: `hbase.region_server.operation.delete.latency.p99`
 * Description: Delete operation 99th Percentile latency.
 * Unit: `ms`
@@ -116,6 +137,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.region_server.operation.delete.latency.max`
 * Description: Delete operation max latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.delete.latency.min`
+* Description: Delete operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.delete.latency.mean`
+* Description: Delete operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.delete.latency.median`
+* Description: Delete operation median latency.
 * Unit: `ms`
 * Labels: `region_server`
 * Instrument Type: longValue
@@ -135,6 +177,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Instrument Type: longValue
 
 
+* Name: `hbase.region_server.operation.put.latency.min`
+* Description: Put operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.put.latency.mean`
+* Description: Put operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.put.latency.median`
+* Description: Put operation median latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
 * Name: `hbase.region_server.operation.get.latency.p99`
 * Description: Get operation 99th Percentile latency.
 * Unit: `ms`
@@ -144,6 +207,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.region_server.operation.get.latency.max`
 * Description: Get operation max latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.get.latency.min`
+* Description: Get operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.get.latency.mean`
+* Description: Get operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.get.latency.median`
+* Description: Get operation median latency.
 * Unit: `ms`
 * Labels: `region_server`
 * Instrument Type: longValue
@@ -163,6 +247,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Instrument Type: longValue
 
 
+* Name: `hbase.region_server.operation.replay.latency.min`
+* Description: Replay operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.replay.latency.mean`
+* Description: Replay operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.replay.latency.median`
+* Description: Replay operation median latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
 * Name: `hbase.region_server.operation.increment.latency.p99`
 * Description: Increment operation 99th Percentile latency.
 * Unit: `ms`
@@ -172,6 +277,27 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 
 * Name: `hbase.region_server.operation.increment.latency.max`
 * Description: Increment operation max latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.increment.latency.min`
+* Description: Increment operation minimum latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.increment.latency.mean`
+* Description: Increment operation mean latency.
+* Unit: `ms`
+* Labels: `region_server`
+* Instrument Type: longValue
+
+
+* Name: `hbase.region_server.operation.increment.latency.median`
+* Description: Increment operation median latency.
 * Unit: `ms`
 * Labels: `region_server`
 * Instrument Type: longValue
