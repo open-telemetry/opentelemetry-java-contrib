@@ -1,6 +1,0 @@
-plugins {
-    id("otel.java-conventions")
-}
-
-ext.libraryName = 'OpenTelemetry Java Static Instrumentation Gradle Plugin'
-description = 'Gradle plugin for static instrumentation of projects code and dependencies'
