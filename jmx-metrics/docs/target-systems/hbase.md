@@ -15,7 +15,7 @@ These metrics are sourced from: https://hbase.apache.org/book.html#hbase_metrics
 * Name: `hbase.master.regions_in_transition.count`
 * Description: The number of regions that are in transition.
 * Unit: `{regions}`
-* Instrument Type: longUpDownCounter
+* Instrument Type: longUpDownCounter 
 
 
 * Name: `hbase.master.regions_in_transition.over_threshold`
