@@ -77,12 +77,13 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
       logger.fine(String.format("G1 GC Event seen without when: %s", ev));
       return;
     }
-    if (!(when.equals(BEFORE) || when.equals(AFTER))) {
+    if (!(BEFORE.equals(when) || AFTER.equals(when))) {
       logger.fine(String.format("G1 GC Event seen where when is neither before nor after: %s", ev));
       return;
     }
 
     if (!ev.hasField(GC_ID)) {
+      logger.fine(String.format("G1 GC Event seen without GC ID: %s", ev));
       return;
     }
     long gcId = ev.getLong(GC_ID);
