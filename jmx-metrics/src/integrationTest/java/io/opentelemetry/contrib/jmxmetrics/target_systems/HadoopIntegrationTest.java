@@ -44,21 +44,21 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertSumWithAttributes(
                 metric,
-                "name_node.capacity.usage",
+                "hadoop.name_node.capacity.usage",
                 "The current used capacity across all data nodes reporting to the name node.",
                 "by",
                 attrs -> attrs.contains(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
-                "name_node.capacity.limit",
+                "hadoop.name_node.capacity.limit",
                 "The total capacity allotted to data nodes reporting to the name node.",
                 "by",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
                 metric,
-                "name_node.block.count",
+                "hadoop.name_node.block.count",
                 "The total number of blocks on the name node.",
                 "{blocks}",
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),

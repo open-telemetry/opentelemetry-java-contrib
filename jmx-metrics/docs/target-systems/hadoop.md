@@ -3,57 +3,57 @@
 The JMX Metric Gatherer provides built in Hadoop metric gathering capabilities.
 These metrics are sourced from: https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-common/Metrics.html
 
-### HDFS Metrics
-* Name: `hadoop.hdfs.disk.usage`
-* Description: The amount of disk used by data nodes.
+### Name Node Metrics
+* Name: `hadoop.name_node.capacity.usage`
+* Description: The current used capacity across all data nodes reporting to the name node.
 * Unit: `by`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.disk.limit`
-* Description: The total disk allotted to data nodes.
+* Name: `hadoop.name_node.capacity.limit`
+* Description: The total capacity allotted to data nodes reporting to the name node.
 * Unit: `by`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.block.count`
-* Description: The total number of blocks.
+* Name: `hadoop.name_node.block.count`
+* Description: The total number of blocks on the name node.
 * Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.block.missing`
-* Description: The number of blocks reported as missing.
+* Name: `hadoop.name_node.block.missing`
+* Description: The number of blocks reported as missing to the name node.
 * Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.block.corrupt`
-* Description: The number of blocks reported as corrupt.
+* Name: `hadoop.name_node.block.corrupt`
+* Description: The number of blocks reported as corrupt to the name node.
 * Unit: `{blocks}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.volume.failed`
-* Description: The number of failed volumes.
+* Name: `hadoop.name_node.volume.failed`
+* Description: The number of failed volumes reported to the name node.
 * Unit: `{volumes}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.file.count`
+* Name: `hadoop.name_node.file.count`
 * Description: The total number of files being tracked by the name node.
 * Unit: `{files}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.hdfs.file.load`
+* Name: `hadoop.name_node.file.load`
 * Description: The current number of concurrent file accesses.
 * Unit: `{operations}`
 * Labels: `node_name`
 * Instrument Type: LongUpDownCounterCallback
 
-* Name: `hadoop.data_node.count`
-* Description: The number of data nodes tracked by the name node.
+* Name: `hadoop.name_node.data_node.count`
+* Description: The number of data nodes reporting to the name node.
 * Unit: `{nodes}`
 * Labels: `node_name`, `state`
 * Instrument Type: LongUpDownCounterCallback
