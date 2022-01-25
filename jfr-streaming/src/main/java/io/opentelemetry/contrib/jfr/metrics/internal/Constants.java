@@ -43,6 +43,4 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_ARENA_NAME = AttributeKey.stringKey("arena");
   public static final AttributeKey<String> ATTR_NETWORK_MODE = AttributeKey.stringKey("mode");
   public static final AttributeKey<String> ATTR_USAGE = AttributeKey.stringKey("usage.type");
-  public static final AttributeKey<String> ATTR_TYPE = AttributeKey.stringKey("type");
-  public static final AttributeKey<String> ATTR_GC_COLLECTOR = AttributeKey.stringKey("name");
 }
