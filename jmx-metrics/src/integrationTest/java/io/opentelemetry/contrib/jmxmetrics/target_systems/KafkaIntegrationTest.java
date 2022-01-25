@@ -104,12 +104,6 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGauge(
                 metric,
-                "kafka.partition.count",
-                "The total number of partitions on the broker",
-                "partitions"),
-        metric ->
-            assertGauge(
-                metric,
                 "kafka.partition.offline",
                 "The number of partitions offline",
                 "partitions"),
