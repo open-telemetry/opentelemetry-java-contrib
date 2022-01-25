@@ -7,30 +7,74 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 
 ### Broker Metrics
 
-* Name: `kafka.messages.in`
-* Description: Number of messages in per second
-* Unit: `1`
-* Instrument Type: LongValueObserver
+* Name: `kafka.message.count`
+* Description: The number of messages received by the broker
+* Unit: `messages`
+* Attributes: `topic`
+* Instrument Type: LongCounterObserver
 
-* Name: `kafka.bytes.in`
-* Description: Bytes in per second from clients
+* Name: `kafka.request.count`
+* Description: The number of requests received by the broker
+* Unit: `requests`
+* Attributes: `topic`, `type`
+* Instrument Type: LongCounterObserver
+
+* Name: `kafka.request.failed`
+* Description: The number of requests to the broker resulting in a failure
+* Unit: `requests`
+* Attributes: `topic`, `type`
+* Instrument Type: LongCounterObserver
+
+* Name: `kafka.request.time.total`
+* Description: The total time the broker has taken to service requests
+* Unit: `ms`
+* Attributes: `type`
+* Instrument Type: LongCounterObserver
+
+* Name: `kafka.request.time.50p`
+* Description: The 50th percentile time the broker has taken to service requests
+* Unit: `ms`
+* Attributes: `type`
+* Instrument Type: DoubleValueObserver
+
+* Name: `kafka.request.time.99p`
+* Description: The 99th percentile time the broker has taken to service requests
+* Unit: `ms`
+* Attributes: `type`
+* Instrument Type: DoubleValueObserver
+
+* Name: `kafka.network.io`
+* Description: The bytes received or sent by the broker
 * Unit: `by`
+* Attributes: `topic`, `state`
+* Instrument Type: LongCounterObserver
+
+* Name: `kafka.purgatory.size`
+* Description: The number of requests waiting in purgatory
+* Unit: `requests`
+* Attributes: `type`
 * Instrument Type: LongValueObserver
 
-* Name: `kafka.bytes.out`
-* Description: Bytes out per second to clients
-* Unit: `by`
+* Name: `kafka.partition.count`
+* Description: The number of partitions on the broker
+* Unit: `partitions`
 * Instrument Type: LongValueObserver
 
-* Name: `kafka.isr.shrinks`
-* Description: In-sync replica shrinks per second
-* Unit: `1`
+* Name: `kafka.partition.offline`
+* Description: The number of partitions offline
+* Unit: `partitions`
 * Instrument Type: LongValueObserver
 
-* Name: `kafka.isr.expands`
-* Description: In-sync replica expands per second
-* Unit: `1`
+* Name: `kafka.partition.under_replicated`
+* Description: The number of under replicated partitions
+* Unit: `partitions`
 * Instrument Type: LongValueObserver
+
+* Name: `kafka.isr.operation.count`
+* Description: The number of in-sync replica shrink and expand operations
+* Unit: `operations`
+* Attributes: `operation`
+* Instrument Type: LongCounterObserver
 
 * Name: `kafka.max.lag`
 * Description: Max lag in messages between follower and leader replicas
@@ -39,16 +83,6 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 
 * Name: `kafka.controller.active.count`
 * Description: Controller is active on broker
-* Unit: `1`
-* Instrument Type: LongValueObserver
-
-* Name: `kafka.partitions.offline.count`
-* Description: Number of partitions without an active leader
-* Unit: `1`
-* Instrument Type: LongValueObserver
-
-* Name: `kafka.partitions.underreplicated.count`
-* Description: Number of under replicated partitions
 * Unit: `1`
 * Instrument Type: LongValueObserver
 
@@ -66,51 +100,6 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 * Description: Size of the request queue
 * Unit: `1`
 * Instrument Type: LongValueObserver
-
-* Name: `kafka.fetch.consumer.total.time.count`
-* Description: Fetch consumer request count
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
-* Name: `kafka.fetch.consumer.total.time.median`
-* Description: Fetch consumer request time - 50th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
-
-* Name: `kafka.fetch.consumer.total.time.99p`
-* Description: Fetch consumer request time - 99th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
-
-* Name: `kafka.fetch.follower.total.time.count`
-* Description: Fetch follower request count
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
-* Name: `kafka.fetch.follower.total.time.median`
-* Description: Fetch follower request time - 50th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
-
-* Name: `kafka.fetch.follower.total.time.99p`
-* Description: Fetch follower request time - 99th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
-
-* Name: `kafka.produce.total.time.count`
-* Description: Produce request count
-* Unit: `1`
-* Instrument Type: LongSumObserver
-
-* Name: `kafka.produce.total.time.median`
-* Description: Produce request time - 50th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
-
-* Name: `kafka.produce.total.time.99p`
-* Description: Produce request time - 99th percentile
-* Unit: `ms`
-* Instrument Type: DoubleValueObserver
 
 ### Log metrics
 

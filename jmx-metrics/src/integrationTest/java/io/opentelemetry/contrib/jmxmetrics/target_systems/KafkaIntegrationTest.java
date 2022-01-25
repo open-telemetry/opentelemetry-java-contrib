@@ -6,12 +6,14 @@
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +30,29 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.MountableFile;
 
 abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
+  Startable createTopics =
+      new Startable() {
+        @Override
+        public void start() {
+          try {
+            kafka.execInContainer(
+                "sh",
+                "-c",
+                "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-$i; done");
+          } catch (IOException | InterruptedException e) {
+            throw new AssertionError(e);
+          }
+        }
+
+        @Override
+        public void stop() {}
+
+        @Override
+        public Set<Startable> getDependencies() {
+          return Collections.singleton(kafka);
+        }
+      };
+
   protected KafkaIntegrationTest(String configName) {
     super(/* configFromStdin= */ false, configName);
   }
@@ -53,28 +78,98 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
           .waitingFor(Wait.forListeningPort())
           .dependsOn(zookeeper);
 
-  Startable createTopics =
-      new Startable() {
-        @Override
-        public void start() {
-          try {
-            kafka.execInContainer(
-                "sh",
-                "-c",
-                "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-$i; done");
-          } catch (IOException | InterruptedException e) {
-            throw new AssertionError(e);
-          }
-        }
-
-        @Override
-        public void stop() {}
-
-        @Override
-        public Set<Startable> getDependencies() {
-          return Collections.singleton(kafka);
-        }
-      };
+  List<Consumer<Metric>> kafkaBrokerAssertions() {
+    return Arrays.asList(
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "kafka.request.time.total",
+                "The total time the broker has taken to service requests",
+                "ms",
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
+            ),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "kafka.request.time.50p",
+                "The 50th percentile time the broker has taken to service requests",
+                "ms",
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
+            ),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "kafka.request.time.99p",
+                "The 99th percentile time the broker has taken to service requests",
+                "ms",
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
+            ),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "kafka.purgatory.size",
+                "The number of requests waiting in purgatory",
+                "requests",
+                attrs -> attrs.containsOnly(entry("type", "Produce")),
+                attrs -> attrs.containsOnly(entry("type", "Fetch"))
+            ),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.partition.count",
+                "The total number of partitions on the broker",
+                "partitions"
+            ),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.partition.offline",
+                "The number of partitions offline",
+                "partitions"
+            ),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.partition.under_replicated",
+                "The number of under replicated partitions",
+                "partitions"
+            ),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "kafka.isr.operation.count",
+                "The number of in-sync replica shrink and expand operations",
+                "operations",
+                attrs -> attrs.containsOnly(entry("operation", "Shrink")),
+                attrs -> attrs.containsOnly(entry("operation", "Expand"))
+            ),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.controller.active.count",
+                "controller is active on broker",
+                "controllers"
+            ),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.leader.election.rate",
+                "leader election rate - increasing indicates broker failures",
+                "elections"),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.max.lag",
+                "max lag in messages between follower and leader replicas",
+                "messages"),
+        metric ->
+            assertGauge(
+                metric,
+                "kafka.unclean.election.rate",
+                "unclean leader election rate - non-zero indicates broker failures",
+                "elections")
+        );
+  }
 
   static class KafkaBrokerTargetIntegrationTest extends KafkaIntegrationTest {
     KafkaBrokerTargetIntegrationTest() {
@@ -83,97 +178,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void endToEnd() {
-      waitAndAssertMetrics(
-          metric -> assertGauge(metric, "kafka.bytes.in", "bytes in per second from clients", "by"),
-          metric -> assertGauge(metric, "kafka.bytes.out", "bytes out per second to clients", "by"),
-          metric ->
-              assertGauge(
-                  metric, "kafka.controller.active.count", "controller is active on broker", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.consumer.total.time.99p",
-                  "fetch consumer request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(
-                  metric,
-                  "kafka.fetch.consumer.total.time.count",
-                  "fetch consumer request count",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.consumer.total.time.median",
-                  "fetch consumer request time - 50th percentile",
-                  "ms"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.follower.total.time.99p",
-                  "fetch follower request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(
-                  metric,
-                  "kafka.fetch.follower.total.time.count",
-                  "fetch follower request count",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.follower.total.time.median",
-                  "fetch follower request time - 50th percentile",
-                  "ms"),
-          metric ->
-              assertGauge(metric, "kafka.isr.shrinks", "in-sync replica shrinks per second", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.leader.election.rate",
-                  "leader election rate - non-zero indicates broker failures",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.max.lag",
-                  "max lag in messages between follower and leader replicas",
-                  "1"),
-          metric ->
-              assertGauge(metric, "kafka.messages.in", "number of messages in per second", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.partitions.offline.count",
-                  "number of partitions without an active leader",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.partitions.underreplicated.count",
-                  "number of under replicated partitions",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.produce.total.time.99p",
-                  "produce request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(metric, "kafka.produce.total.time.count", "produce request count", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.produce.total.time.median",
-                  "produce request time - 50th percentile",
-                  "ms"),
-          metric -> assertGauge(metric, "kafka.request.queue", "size of the request queue", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.unclean.election.rate",
-                  "unclean leader election rate - non-zero indicates broker failures",
-                  "1"));
+      waitAndAssertMetrics(kafkaBrokerAssertions());
     }
   }
 
@@ -370,134 +375,57 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
               "G1 Old Gen",
               "G1 Survivor Space",
               "Metaspace");
-      waitAndAssertMetrics(
-          metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "1"),
-          metric ->
-              assertTypedSum(
-                  metric,
-                  "jvm.gc.collections.count",
-                  "total number of collections that have occurred",
-                  "1",
-                  Arrays.asList("G1 Young Generation", "G1 Old Generation")),
-          metric ->
-              assertTypedSum(
-                  metric,
-                  "jvm.gc.collections.elapsed",
-                  "the approximate accumulated collection elapsed time in milliseconds",
-                  "ms",
-                  Arrays.asList("G1 Young Generation", "G1 Old Generation")),
-          metric -> assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "by"),
-          metric ->
-              assertGauge(metric, "jvm.memory.nonheap.committed", "current non-heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "by"),
-          metric -> assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "by"),
-          metric ->
-              assertTypedGauge(
-                  metric, "jvm.memory.pool.committed", "current memory pool usage", "by", gcLabels),
-          metric ->
-              assertTypedGauge(
-                  metric, "jvm.memory.pool.init", "current memory pool usage", "by", gcLabels),
-          metric ->
-              assertTypedGauge(
-                  metric, "jvm.memory.pool.max", "current memory pool usage", "by", gcLabels),
-          metric ->
-              assertTypedGauge(
-                  metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
-          metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1"),
-          metric -> assertGauge(metric, "kafka.bytes.in", "bytes in per second from clients", "by"),
-          metric -> assertGauge(metric, "kafka.bytes.out", "bytes out per second to clients", "by"),
-          metric ->
-              assertGauge(
-                  metric, "kafka.controller.active.count", "controller is active on broker", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.consumer.total.time.99p",
-                  "fetch consumer request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(
-                  metric,
-                  "kafka.fetch.consumer.total.time.count",
-                  "fetch consumer request count",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.consumer.total.time.median",
-                  "fetch consumer request time - 50th percentile",
-                  "ms"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.follower.total.time.99p",
-                  "fetch follower request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(
-                  metric,
-                  "kafka.fetch.follower.total.time.count",
-                  "fetch follower request count",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.fetch.follower.total.time.median",
-                  "fetch follower request time - 50th percentile",
-                  "ms"),
-          metric ->
-              assertGauge(metric, "kafka.isr.shrinks", "in-sync replica shrinks per second", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.leader.election.rate",
-                  "leader election rate - non-zero indicates broker failures",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.max.lag",
-                  "max lag in messages between follower and leader replicas",
-                  "1"),
-          metric ->
-              assertGauge(metric, "kafka.messages.in", "number of messages in per second", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.partitions.offline.count",
-                  "number of partitions without an active leader",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.partitions.underreplicated.count",
-                  "number of under replicated partitions",
-                  "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.produce.total.time.99p",
-                  "produce request time - 99th percentile",
-                  "ms"),
-          metric ->
-              assertSum(metric, "kafka.produce.total.time.count", "produce request count", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.produce.total.time.median",
-                  "produce request time - 50th percentile",
-                  "ms"),
-          metric -> assertGauge(metric, "kafka.request.queue", "size of the request queue", "1"),
-          metric ->
-              assertGauge(
-                  metric,
-                  "kafka.unclean.election.rate",
-                  "unclean leader election rate - non-zero indicates broker failures",
-                  "1"));
+      List<Consumer<Metric>> assertions = new ArrayList<>(kafkaBrokerAssertions());
+      assertions.addAll(
+          Arrays.asList(
+              metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "1"),
+              metric ->
+                  assertTypedSum(
+                      metric,
+                      "jvm.gc.collections.count",
+                      "total number of collections that have occurred",
+                      "1",
+                      Arrays.asList("G1 Young Generation", "G1 Old Generation")),
+              metric ->
+                  assertTypedSum(
+                      metric,
+                      "jvm.gc.collections.elapsed",
+                      "the approximate accumulated collection elapsed time in milliseconds",
+                      "ms",
+                      Arrays.asList("G1 Young Generation", "G1 Old Generation")),
+              metric ->
+                  assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "by"),
+              metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "by"),
+              metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "by"),
+              metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "by"),
+              metric ->
+                  assertGauge(
+                      metric, "jvm.memory.nonheap.committed", "current non-heap usage", "by"),
+              metric ->
+                  assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "by"),
+              metric ->
+                  assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "by"),
+              metric ->
+                  assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "by"),
+              metric ->
+                  assertTypedGauge(
+                      metric,
+                      "jvm.memory.pool.committed",
+                      "current memory pool usage",
+                      "by",
+                      gcLabels),
+              metric ->
+                  assertTypedGauge(
+                      metric, "jvm.memory.pool.init", "current memory pool usage", "by", gcLabels),
+              metric ->
+                  assertTypedGauge(
+                      metric, "jvm.memory.pool.max", "current memory pool usage", "by", gcLabels),
+              metric ->
+                  assertTypedGauge(
+                      metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
+              metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1")));
+
+      waitAndAssertMetrics(assertions);
     }
   }
 

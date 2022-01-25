@@ -14,81 +14,178 @@
  * limitations under the License.
  */
 
-def messagesInPerSec = otel.mbean("kafka.server:type=BrokerTopicMetrics,name=MessagesInPerSec")
-otel.instrument(messagesInPerSec, "kafka.messages.in", "number of messages in per second",
-        "1", "Count", otel.&longValueCallback)
+def messagesInPerSec = otel.mbean("kafka.server:type=BrokerTopicMetrics,name=MessagesInPerSec,topic=*")
+otel.instrument(messagesInPerSec,
+  "kafka.message.count",
+  "The number of messages received by the broker",
+  "messages",
+  [
+    "topic" : { mbean -> mbean.name().getKeyProperty("topic") },
+  ],
+  "Count", otel.&longCounterCallback)
 
-def bytesInPerSec = otel.mbean("kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec")
-otel.instrument(bytesInPerSec, "kafka.bytes.in", "bytes in per second from clients",
-        "by", "Count", otel.&longValueCallback)
+def requests = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=TotalProduceRequestsPerSec,topic=*",
+                           "kafka.server:type=BrokerTopicMetrics,name=TotalFetchRequestsPerSec,topic=*"])
+otel.instrument(requests,
+  "kafka.request.count",
+  "The number of requests received by the broker",
+  "requests",
+  [
+    "topic" : { mbean -> mbean.name().getKeyProperty("topic") },
+    "type" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
+      case "TotalProduceRequestsPerSec":
+        return "Produce"
+        break
+      case "TotalFetchRequestsPerSec":
+        return "Fetch"
+        break
+      }
+    },
+  ],
+  "Count", otel.&longCounterCallback)
 
-def bytesOutPerSec = otel.mbean("kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec")
-otel.instrument(bytesOutPerSec, "kafka.bytes.out", "bytes out per second to clients",
-        "by", "Count", otel.&longValueCallback)
+def failedRequests = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=FailedProduceRequestsPerSec,topic=*",
+                           "kafka.server:type=BrokerTopicMetrics,name=FailedFetchRequestsPerSec,topic=*"])
+otel.instrument(failedRequests,
+  "kafka.request.failed",
+  "The number of requests to the broker resulting in a failure",
+  "requests",
+  [
+    "topic" : { mbean -> mbean.name().getKeyProperty("topic") },
+    "type" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
+      case "FailedProduceRequestsPerSec":
+        return "Produce"
+        break
+      case "FailedFetchRequestsPerSec":
+        return "Fetch"
+        break
+      }
+    },
+  ],
+  "Count", otel.&longCounterCallback)
 
-def isrShrinksPerSec = otel.mbean("kafka.server:type=ReplicaManager,name=IsrShrinksPerSec")
-otel.instrument(isrShrinksPerSec, "kafka.isr.shrinks", "in-sync replica shrinks per second",
-        "1", "Count", otel.&longValueCallback)
+def requestTime = otel.mbean("kafka.network:type=RequestMetrics,name=TotalTimeMs,request=*")
+otel.instrument(requestTime,
+  "kafka.request.time.total",
+  "The total time the broker has taken to service requests",
+  "ms",
+  [
+    "type" : { mbean -> mbean.name().getKeyProperty("request") },
+  ],
+  "Count", otel.&longCounterCallback)
+otel.instrument(requestTime,
+  "kafka.request.time.50p",
+  "The 50th percentile time the broker has taken to service requests",
+  "ms",
+  [
+    "type" : { mbean -> mbean.name().getKeyProperty("request") },
+  ],
+  "50thPercentile", otel.&doubleValueCallback)
+otel.instrument(requestTime,
+  "kafka.request.time.99p",
+  "The 99th percentile time the broker has taken to service requests",
+  "ms",
+  [
+    "type" : { mbean -> mbean.name().getKeyProperty("request") },
+  ],
+  "99thPercentile", otel.&doubleValueCallback)
 
-def isrExpandsPerSec = otel.mbean("kafka.server:type=ReplicaManager,name=IsrExpandsPerSec")
-otel.instrument(isrExpandsPerSec, "kafka.isr.expands", "in-sync replica expands per second",
-        "1", "Count", otel.&longValueCallback)
+
+
+def network = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec,topic=*",
+                          "kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=*"])
+otel.instrument(network,
+  "kafka.network.io",
+  "The bytes received or sent by the broker",
+  "by",
+  [
+    "topic" : { mbean -> mbean.name().getKeyProperty("topic") },
+    "state" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
+      case "BytesInPerSec":
+        return "In"
+        break
+      case "BytesOutPerSec":
+        return "Out"
+        break
+      }
+    },
+  ],
+  "Count", otel.&longCounterCallback)
+
+def purgatorySize = otel.mbean("kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=*")
+otel.instrument(purgatorySize,
+  "kafka.purgatory.size",
+  "The number of requests waiting in purgatory",
+  "requests",
+  [
+    "type" : { mbean -> mbean.name().getKeyProperty("delayedOperation") },
+  ],
+  "Value", otel.&longValueCallback)
+
+def partitionCount = otel.mbean("kafka.server:type=ReplicaManager,name=PartitionCount")
+otel.instrument(partitionCount,
+  "kafka.partition.count",
+  "The number of partitions on the broker",
+  "partitions",
+  "Value", otel.&longValueCallback)
+
+def partitionOffline = otel.mbean("kafka.controller:type=KafkaController,name=OfflinePartitionsCount")
+otel.instrument(partitionOffline,
+  "kafka.partition.offline",
+  "The number of partitions offline",
+  "partitions",
+  "Value", otel.&longValueCallback)
+
+def partitionUnderReplicated = otel.mbean("kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions")
+otel.instrument(partitionUnderReplicated,
+  "kafka.partition.under_replicated",
+  "The number of under replicated partitions",
+  "partitions",
+  "Value", otel.&longValueCallback)
+
+def isrOperations = otel.mbeans(["kafka.server:type=ReplicaManager,name=IsrShrinksPerSec",
+                                "kafka.server:type=ReplicaManager,name=IsrExpandsPerSec"])
+otel.instrument(isrOperations,
+  "kafka.isr.operation.count",
+  "The number of in-sync replica shrink and expand operations",
+  "operations",
+  [
+    "operation" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
+      case "IsrShrinksPerSec":
+        return "Shrink"
+        break
+      case "IsrExpandsPerSec":
+        return "Expand"
+        break
+      }
+    },
+  ],
+  "Count", otel.&longCounterCallback)
+
 
 def maxLag = otel.mbean("kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica")
 otel.instrument(maxLag, "kafka.max.lag", "max lag in messages between follower and leader replicas",
-        "1", "Value", otel.&longValueCallback)
+        "messages", "Value", otel.&longValueCallback)
 
 def activeControllerCount = otel.mbean("kafka.controller:type=KafkaController,name=ActiveControllerCount")
 otel.instrument(activeControllerCount, "kafka.controller.active.count", "controller is active on broker",
-        "1", "Value", otel.&longValueCallback)
-
-def offlinePartitionsCount = otel.mbean("kafka.controller:type=KafkaController,name=OfflinePartitionsCount")
-otel.instrument(offlinePartitionsCount, "kafka.partitions.offline.count", "number of partitions without an active leader",
-        "1", "Value", otel.&longValueCallback)
-
-def underReplicatedPartitionsCount = otel.mbean("kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions")
-otel.instrument(underReplicatedPartitionsCount, "kafka.partitions.underreplicated.count", "number of under replicated partitions",
-        "1", "Value", otel.&longValueCallback)
+        "controllers", "Value", otel.&longValueCallback)
 
 def leaderElectionRate = otel.mbean("kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs")
-otel.instrument(leaderElectionRate, "kafka.leader.election.rate", "leader election rate - non-zero indicates broker failures",
-        "1", "Count", otel.&longValueCallback)
+otel.instrument(leaderElectionRate, "kafka.leader.election.rate", "leader election rate - increasing indicates broker failures",
+        "elections", "Count", otel.&longCounterCallback)
 
 def uncleanLeaderElections = otel.mbean("kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec")
-otel.instrument(uncleanLeaderElections, "kafka.unclean.election.rate", "unclean leader election rate - non-zero indicates broker failures",
-        "1", "Count", otel.&longValueCallback)
+otel.instrument(uncleanLeaderElections, "kafka.unclean.election.rate", "unclean leader election rate - increasing indicates broker failures",
+        "elections", "Count", otel.&longCounterCallback)
 
 def requestQueueSize = otel.mbean("kafka.network:type=RequestChannel,name=RequestQueueSize")
 otel.instrument(requestQueueSize, "kafka.request.queue", "size of the request queue",
-        "1", "Value", otel.&longValueCallback)
-
-def fetchConsumer = otel.mbean("kafka.network:type=RequestMetrics,name=TotalTimeMs,request=FetchConsumer")
-otel.instrument(fetchConsumer, "kafka.fetch.consumer.total.time.count", "fetch consumer request count",
-        "1", "Count", otel.&longCounterCallback)
-otel.instrument(fetchConsumer, "kafka.fetch.consumer.total.time.median", "fetch consumer request time - 50th percentile",
-        "ms", "50thPercentile", otel.&doubleValueCallback)
-otel.instrument(fetchConsumer, "kafka.fetch.consumer.total.time.99p", "fetch consumer request time - 99th percentile",
-        "ms", "99thPercentile", otel.&doubleValueCallback)
-
-def fetchFollower = otel.mbean("kafka.network:type=RequestMetrics,name=TotalTimeMs,request=FetchFollower")
-otel.instrument(fetchFollower, "kafka.fetch.follower.total.time.count", "fetch follower request count",
-        "1", "Count", otel.&longCounterCallback)
-otel.instrument(fetchFollower, "kafka.fetch.follower.total.time.median", "fetch follower request time - 50th percentile",
-        "ms", "50thPercentile", otel.&doubleValueCallback)
-otel.instrument(fetchFollower, "kafka.fetch.follower.total.time.99p", "fetch follower request time - 99th percentile",
-        "ms", "99thPercentile", otel.&doubleValueCallback)
-
-def produce = otel.mbean("kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Produce")
-otel.instrument(produce, "kafka.produce.total.time.count", "produce request count",
-        "1", "Count", otel.&longCounterCallback)
-otel.instrument(produce, "kafka.produce.total.time.median", "produce request time - 50th percentile",
-        "ms", "50thPercentile", otel.&doubleValueCallback)
-otel.instrument(produce, "kafka.produce.total.time.99p", "produce request time - 99th percentile",
-        "ms", "99thPercentile", otel.&doubleValueCallback)
+        "requests", "Value", otel.&longValueCallback)
 
 def logFlushRate = otel.mbean("kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs")
 otel.instrument(logFlushRate, "kafka.logs.flush.time.count", "log flush count",
-        "1", "Count", otel.&longCounterCallback)
+        "ms", "Count", otel.&longCounterCallback)
 otel.instrument(logFlushRate, "kafka.logs.flush.time.median", "log flush time - 50th percentile",
         "ms", "50thPercentile", otel.&doubleValueCallback)
 otel.instrument(logFlushRate, "kafka.logs.flush.time.99p", "log flush time - 99th percentile",
