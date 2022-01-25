@@ -104,6 +104,12 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertGauge(
                 metric,
+                "kafka.partition.count",
+                "The number of partitions on the broker",
+                "partitions"),
+        metric ->
+            assertGauge(
+                metric,
                 "kafka.partition.offline",
                 "The number of partitions offline",
                 "partitions"),
@@ -143,7 +149,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "kafka.unclean.election.rate",
-                "unclean leader election rate - non-zero indicates broker failures",
+                "unclean leader election rate - increasing broker failures",
                 "elections"));
   }
 
