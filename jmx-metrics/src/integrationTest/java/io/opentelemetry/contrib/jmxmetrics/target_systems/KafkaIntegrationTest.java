@@ -86,24 +86,21 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "kafka.request.time.total",
                 "The total time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
-            ),
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "kafka.request.time.50p",
                 "The 50th percentile time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
-            ),
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "kafka.request.time.99p",
                 "The 99th percentile time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))
-            ),
+                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -111,29 +108,25 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "The number of requests waiting in purgatory",
                 "requests",
                 attrs -> attrs.containsOnly(entry("type", "Produce")),
-                attrs -> attrs.containsOnly(entry("type", "Fetch"))
-            ),
+                attrs -> attrs.containsOnly(entry("type", "Fetch"))),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.count",
                 "The total number of partitions on the broker",
-                "partitions"
-            ),
+                "partitions"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.offline",
                 "The number of partitions offline",
-                "partitions"
-            ),
+                "partitions"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.under_replicated",
                 "The number of under replicated partitions",
-                "partitions"
-            ),
+                "partitions"),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -141,15 +134,13 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "The number of in-sync replica shrink and expand operations",
                 "operations",
                 attrs -> attrs.containsOnly(entry("operation", "Shrink")),
-                attrs -> attrs.containsOnly(entry("operation", "Expand"))
-            ),
+                attrs -> attrs.containsOnly(entry("operation", "Expand"))),
         metric ->
             assertGauge(
                 metric,
                 "kafka.controller.active.count",
                 "controller is active on broker",
-                "controllers"
-            ),
+                "controllers"),
         metric ->
             assertGauge(
                 metric,
@@ -167,8 +158,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "kafka.unclean.election.rate",
                 "unclean leader election rate - non-zero indicates broker failures",
-                "elections")
-        );
+                "elections"));
   }
 
   static class KafkaBrokerTargetIntegrationTest extends KafkaIntegrationTest {
