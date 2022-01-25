@@ -102,14 +102,6 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "ms",
                 attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
         metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "kafka.purgatory.size",
-                "The number of requests waiting in purgatory",
-                "requests",
-                attrs -> attrs.containsOnly(entry("type", "Produce")),
-                attrs -> attrs.containsOnly(entry("type", "Fetch"))),
-        metric ->
             assertGauge(
                 metric,
                 "kafka.partition.count",
