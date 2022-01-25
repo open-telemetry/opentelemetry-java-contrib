@@ -149,7 +149,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
             assertSum(
                 metric,
                 "kafka.unclean.election.rate",
-                "unclean leader election rate - increasing broker failures",
+                "unclean leader election rate - increasing indicates broker failures",
                 "elections"));
   }
 
