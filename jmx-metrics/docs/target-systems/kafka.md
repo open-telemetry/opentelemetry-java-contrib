@@ -78,34 +78,34 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 
 * Name: `kafka.max.lag`
 * Description: Max lag in messages between follower and leader replicas
-* Unit: `1`
+* Unit: `messages`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.controller.active.count`
 * Description: Controller is active on broker
-* Unit: `1`
+* Unit: `controllers`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.leader.election.rate`
-* Description: Leader election rate - non-zero indicates broker failures
-* Unit: `1`
-* Instrument Type: LongValueObserver
+* Description: Leader election rate - increasing indicates broker failures
+* Unit: `elections`
+* Instrument Type: LongCounterObserver
 
 * Name: `kafka.unclean.election.rate`
-* Description: Unclean leader election rate - non-zero indicates broker failures
-* Unit: `1`
-* Instrument Type: LongValueObserver
+* Description: Unclean leader election rate - increasing indicates broker failures
+* Unit: `elections`
+* Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.queue`
 * Description: Size of the request queue
-* Unit: `1`
+* Unit: `requests`
 * Instrument Type: LongValueObserver
 
 ### Log metrics
 
 * Name: `kafka.logs.flush.time.count`
 * Description: Log flush count
-* Unit: `1`
+* Unit: `ms`
 * Instrument Type: LongSumObserver
 
 * Name: `kafka.logs.flush.time.median`
