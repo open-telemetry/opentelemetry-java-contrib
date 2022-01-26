@@ -30,29 +30,6 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.MountableFile;
 
 abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
-  Startable createTopics =
-      new Startable() {
-        @Override
-        public void start() {
-          try {
-            kafka.execInContainer(
-                "sh",
-                "-c",
-                "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-$i; done");
-          } catch (IOException | InterruptedException e) {
-            throw new AssertionError(e);
-          }
-        }
-
-        @Override
-        public void stop() {}
-
-        @Override
-        public Set<Startable> getDependencies() {
-          return Collections.singleton(kafka);
-        }
-      };
-
   protected KafkaIntegrationTest(String configName) {
     super(/* configFromStdin= */ false, configName);
   }
@@ -77,6 +54,29 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
           .withStartupTimeout(Duration.ofMinutes(2))
           .waitingFor(Wait.forListeningPort())
           .dependsOn(zookeeper);
+
+  Startable createTopics =
+      new Startable() {
+        @Override
+        public void start() {
+          try {
+            kafka.execInContainer(
+                "sh",
+                "-c",
+                "unset JMX_PORT; for i in `seq 3`; do kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic-$i; done");
+          } catch (IOException | InterruptedException e) {
+            throw new AssertionError(e);
+          }
+        }
+
+        @Override
+        public void stop() {}
+
+        @Override
+        public Set<Startable> getDependencies() {
+          return Collections.singleton(kafka);
+        }
+      };
 
   List<Consumer<Metric>> kafkaBrokerAssertions() {
     return Arrays.asList(

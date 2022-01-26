@@ -112,7 +112,6 @@ public abstract class AbstractIntegrationTest {
     otlpServer.reset();
   }
 
-  @SuppressWarnings("varargs")
   protected final void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
     await()
         .atMost(Duration.ofSeconds(30))
