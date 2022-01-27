@@ -9,19 +9,19 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 
 * Name: `kafka.message.count`
 * Description: The number of messages received by the broker
-* Unit: `messages`
+* Unit: `{messages}`
 * Attributes: `topic`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.count`
 * Description: The number of requests received by the broker
-* Unit: `requests`
+* Unit: `{requests}`
 * Attributes: `topic`, `type`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.failed`
 * Description: The number of requests to the broker resulting in a failure
-* Unit: `requests`
+* Unit: `{requests}`
 * Attributes: `topic`, `type`
 * Instrument Type: LongCounterObserver
 
@@ -51,54 +51,54 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 
 * Name: `kafka.purgatory.size`
 * Description: The number of requests waiting in purgatory
-* Unit: `requests`
+* Unit: `{requests}`
 * Attributes: `type`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.partition.count`
 * Description: The number of partitions on the broker
-* Unit: `partitions`
+* Unit: `{partitions}`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.partition.offline`
 * Description: The number of partitions offline
-* Unit: `partitions`
+* Unit: `{partitions}`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.partition.under_replicated`
 * Description: The number of under replicated partitions
-* Unit: `partitions`
+* Unit: `{partitions}`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.isr.operation.count`
 * Description: The number of in-sync replica shrink and expand operations
-* Unit: `operations`
+* Unit: `{operations}`
 * Attributes: `operation`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.max.lag`
 * Description: Max lag in messages between follower and leader replicas
-* Unit: `messages`
+* Unit: `{messages}`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.controller.active.count`
 * Description: Controller is active on broker
-* Unit: `controllers`
+* Unit: `{controllers}`
 * Instrument Type: LongValueObserver
 
 * Name: `kafka.leader.election.rate`
 * Description: Leader election rate - increasing indicates broker failures
-* Unit: `elections`
+* Unit: `{elections}`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.unclean.election.rate`
 * Description: Unclean leader election rate - increasing indicates broker failures
-* Unit: `elections`
+* Unit: `{elections}`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.queue`
 * Description: Size of the request queue
-* Unit: `requests`
+* Unit: `{requests}`
 * Instrument Type: LongValueObserver
 
 ### Log metrics

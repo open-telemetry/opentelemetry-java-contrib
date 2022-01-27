@@ -78,6 +78,24 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
         }
       };
 
+  @Container
+  GenericContainer<?> producer =
+      new GenericContainer<>("bitnami/kafka:latest")
+          .withNetwork(Network.SHARED)
+          .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
+          .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
+          .withEnv("JMX_PORT", "7199")
+          .withNetworkAliases("kafka-producer")
+          .withExposedPorts(7199)
+          .withCopyFileToContainer(
+              MountableFile.forClasspathResource("target-systems/kafka-producer.sh"),
+              "/usr/bin/kafka-producer.sh")
+          .withCommand("kafka-producer.sh")
+          .withStartupTimeout(Duration.ofMinutes(2))
+          .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
+          .waitingFor(Wait.forListeningPort())
+          .dependsOn(createTopics);
+
   List<Consumer<Metric>> kafkaBrokerAssertions() {
     return Arrays.asList(
         metric ->
@@ -86,71 +104,77 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "kafka.request.time.total",
                 "The total time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
+                attrs -> attrs.containsOnly(entry("type", "produce")),
+                attrs -> attrs.containsOnly(entry("type", "fetchfollower")),
+                attrs -> attrs.containsOnly(entry("type", "fetchconsumer"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "kafka.request.time.50p",
                 "The 50th percentile time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
+                attrs -> attrs.containsOnly(entry("type", "produce")),
+                attrs -> attrs.containsOnly(entry("type", "fetchfollower")),
+                attrs -> attrs.containsOnly(entry("type", "fetchconsumer"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "kafka.request.time.99p",
                 "The 99th percentile time the broker has taken to service requests",
                 "ms",
-                attrs -> attrs.containsOnly(entry("type", "AddOffsetsToTxn"))),
+                attrs -> attrs.containsOnly(entry("type", "produce")),
+                attrs -> attrs.containsOnly(entry("type", "fetchfollower")),
+                attrs -> attrs.containsOnly(entry("type", "fetchconsumer"))),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.count",
                 "The number of partitions on the broker",
-                "partitions"),
+                "{partitions}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.offline",
                 "The number of partitions offline",
-                "partitions"),
+                "{partitions}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.under_replicated",
                 "The number of under replicated partitions",
-                "partitions"),
+                "{partitions}"),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "kafka.isr.operation.count",
                 "The number of in-sync replica shrink and expand operations",
-                "operations",
-                attrs -> attrs.containsOnly(entry("operation", "Shrink")),
-                attrs -> attrs.containsOnly(entry("operation", "Expand"))),
+                "{operations}",
+                attrs -> attrs.containsOnly(entry("operation", "shrink")),
+                attrs -> attrs.containsOnly(entry("operation", "expand"))),
         metric ->
             assertGauge(
                 metric,
                 "kafka.controller.active.count",
                 "controller is active on broker",
-                "controllers"),
+                "{controllers}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.leader.election.rate",
                 "leader election rate - increasing indicates broker failures",
-                "elections"),
+                "{elections}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.max.lag",
                 "max lag in messages between follower and leader replicas",
-                "messages"),
+                "{messages}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.unclean.election.rate",
                 "unclean leader election rate - increasing indicates broker failures",
-                "elections"));
+                "{elections}"));
   }
 
   static class KafkaBrokerTargetIntegrationTest extends KafkaIntegrationTest {
@@ -252,24 +276,6 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
     KafkaProducerIntegrationTest() {
       super("target-systems/kafka-producer.properties");
     }
-
-    @Container
-    GenericContainer<?> producer =
-        new GenericContainer<>("bitnami/kafka:latest")
-            .withNetwork(Network.SHARED)
-            .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
-            .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
-            .withEnv("JMX_PORT", "7199")
-            .withNetworkAliases("kafka-producer")
-            .withExposedPorts(7199)
-            .withCopyFileToContainer(
-                MountableFile.forClasspathResource("target-systems/kafka-producer.sh"),
-                "/usr/bin/kafka-producer.sh")
-            .withCommand("kafka-producer.sh")
-            .withStartupTimeout(Duration.ofMinutes(2))
-            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
-            .waitingFor(Wait.forListeningPort())
-            .dependsOn(createTopics);
 
     @Test
     void endToEnd() {
