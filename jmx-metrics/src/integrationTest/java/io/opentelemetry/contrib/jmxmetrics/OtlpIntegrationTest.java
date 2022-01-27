@@ -9,31 +9,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
-import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.MountableFile;
 
 abstract class OtlpIntegrationTest extends AbstractIntegrationTest {
   OtlpIntegrationTest(boolean configFromStdin) {
     super(configFromStdin, "otlp_config.properties");
   }
 
-  @Container
-  GenericContainer<?> cassandra =
-      new GenericContainer<>("cassandra:3.11")
-          .withNetwork(Network.SHARED)
-          .withEnv("LOCAL_JMX", "no")
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("cassandra/jmxremote.password", 0400),
-              "/etc/cassandra/jmxremote.password")
-          .withNetworkAliases("cassandra")
-          .withExposedPorts(7199)
-          .withStartupTimeout(Duration.ofMinutes(2))
-          .waitingFor(Wait.forListeningPort());
+  @Container GenericContainer<?> cassandra = cassandraContainer();
 
   @Test
   void endToEnd() {
