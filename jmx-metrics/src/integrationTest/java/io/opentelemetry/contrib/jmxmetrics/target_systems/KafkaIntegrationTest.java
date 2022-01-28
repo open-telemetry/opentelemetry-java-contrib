@@ -78,23 +78,23 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
         }
       };
 
-  @Container
-  GenericContainer<?> producer =
-      new GenericContainer<>("bitnami/kafka:latest")
-          .withNetwork(Network.SHARED)
-          .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
-          .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
-          .withEnv("JMX_PORT", "7199")
-          .withNetworkAliases("kafka-producer")
-          .withExposedPorts(7199)
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("target-systems/kafka-producer.sh"),
-              "/usr/bin/kafka-producer.sh")
-          .withCommand("kafka-producer.sh")
-          .withStartupTimeout(Duration.ofMinutes(2))
-          .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
-          .waitingFor(Wait.forListeningPort())
-          .dependsOn(createTopics);
+  protected GenericContainer<?> kafkaProducerContainer() {
+    return new GenericContainer<>("bitnami/kafka:latest")
+        .withNetwork(Network.SHARED)
+        .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
+        .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
+        .withEnv("JMX_PORT", "7199")
+        .withNetworkAliases("kafka-producer")
+        .withExposedPorts(7199)
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("target-systems/kafka-producer.sh"),
+            "/usr/bin/kafka-producer.sh")
+        .withCommand("kafka-producer.sh")
+        .withStartupTimeout(Duration.ofMinutes(2))
+        .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
+        .waitingFor(Wait.forListeningPort())
+        .dependsOn(createTopics);
+  }
 
   List<Consumer<Metric>> kafkaBrokerAssertions() {
     return Arrays.asList(
@@ -181,6 +181,8 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
     KafkaBrokerTargetIntegrationTest() {
       super("target-systems/kafka.properties");
     }
+
+    @Container GenericContainer<?> producer = kafkaProducerContainer();
 
     @Test
     void endToEnd() {
@@ -276,6 +278,8 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
     KafkaProducerIntegrationTest() {
       super("target-systems/kafka-producer.properties");
     }
+
+    @Container GenericContainer<?> producer = kafkaProducerContainer();
 
     @Test
     void endToEnd() {
