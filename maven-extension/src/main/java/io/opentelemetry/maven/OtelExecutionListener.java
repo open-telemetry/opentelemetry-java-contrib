@@ -93,7 +93,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
           .getRequest()
           .setExecutionListener(
               new ChainedExecutionListener(otelExecutionListener, initialExecutionListener));
-      logger.debug(
+      logger.info( // FIXME REVERT LOG LEVEL TO DEBUG
           "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
               + initialExecutionListener);
     }
