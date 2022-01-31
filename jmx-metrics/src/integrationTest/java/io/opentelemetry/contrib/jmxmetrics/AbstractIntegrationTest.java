@@ -112,6 +112,19 @@ public abstract class AbstractIntegrationTest {
     otlpServer.reset();
   }
 
+  protected static GenericContainer<?> cassandraContainer() {
+    return new GenericContainer<>("cassandra:3.11")
+        .withNetwork(Network.SHARED)
+        .withEnv("LOCAL_JMX", "no")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("cassandra/jmxremote.password", 0400),
+            "/etc/cassandra/jmxremote.password")
+        .withNetworkAliases("cassandra")
+        .withExposedPorts(7199)
+        .withStartupTimeout(Duration.ofMinutes(2))
+        .waitingFor(Wait.forLogMessage(".*Startup complete.*", 1));
+  }
+
   protected final void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
     await()
         .atMost(Duration.ofSeconds(30))

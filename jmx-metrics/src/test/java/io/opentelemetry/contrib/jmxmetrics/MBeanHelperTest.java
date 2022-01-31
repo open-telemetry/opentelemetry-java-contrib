@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -24,8 +25,11 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
+@Timeout(value = 10, unit = SECONDS)
 class MBeanHelperTest {
 
   private static final MBeanServer mbeanServer = getPlatformMBeanServer();
@@ -54,6 +58,11 @@ class MBeanHelperTest {
   @AfterAll
   static void tearDown() throws Exception {
     jmxServer.stop();
+  }
+
+  @BeforeEach
+  void confirmServerIsActive() {
+    assertThat(jmxServer.isActive()).isTrue();
   }
 
   @AfterEach

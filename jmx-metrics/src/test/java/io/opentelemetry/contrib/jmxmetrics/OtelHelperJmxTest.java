@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,7 +29,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
+@Timeout(value = 10, unit = SECONDS)
 class OtelHelperJmxTest {
 
   private static final String thingName =
@@ -48,8 +51,13 @@ class OtelHelperJmxTest {
 
   @AfterAll
   static void tearDown() throws Exception {
-    jmxServer.stop();
     mbeanServer.unregisterMBean(new ObjectName(thingName));
+  }
+
+  @AfterEach
+  void stopServer() throws Exception {
+    // each test stands up its own server
+    jmxServer.stop();
   }
 
   @AfterEach

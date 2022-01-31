@@ -36,6 +36,8 @@ class JmxConfig {
       Arrays.asList(
           "activemq",
           "cassandra",
+          "hbase",
+          "hadoop",
           "jvm",
           "kafka",
           "kafka-consumer",
