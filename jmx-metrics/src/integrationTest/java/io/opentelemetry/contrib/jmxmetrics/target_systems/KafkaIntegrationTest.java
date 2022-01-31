@@ -50,7 +50,8 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
           .withNetworkAliases("kafka")
           .withExposedPorts(7199)
           .withStartupTimeout(Duration.ofMinutes(2))
-          .waitingFor(Wait.forListeningPort())
+          .waitingFor(
+              Wait.forLogMessage(".*KafkaServer.*started \\(kafka.server.KafkaServer\\).*", 1))
           .dependsOn(zookeeper);
 
   Startable createTopics =
@@ -200,7 +201,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "--max-messages",
                 "100")
             .withStartupTimeout(Duration.ofMinutes(2))
-            .waitingFor(Wait.forListeningPort())
+            .waitingFor(Wait.forLogMessage(".*Welcome to the Bitnami kafka container.*", 1))
             .dependsOn(createTopics);
 
     @Test
@@ -281,7 +282,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
             .withCommand("kafka-producer.sh")
             .withStartupTimeout(Duration.ofMinutes(2))
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("kafka-producer")))
-            .waitingFor(Wait.forListeningPort())
+            .waitingFor(Wait.forLogMessage(".*Welcome to the Bitnami kafka container.*", 1))
             .dependsOn(createTopics);
 
     @Test
