@@ -10,19 +10,18 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 * Name: `kafka.message.count`
 * Description: The number of messages received by the broker
 * Unit: `{messages}`
-* Attributes: `topic`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.count`
 * Description: The number of requests received by the broker
 * Unit: `{requests}`
-* Attributes: `topic`, `type`
+* Attributes: `type`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.failed`
 * Description: The number of requests to the broker resulting in a failure
 * Unit: `{requests}`
-* Attributes: `topic`, `type`
+* Attributes: `type`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.request.time.total`
@@ -46,7 +45,7 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 * Name: `kafka.network.io`
 * Description: The bytes received or sent by the broker
 * Unit: `by`
-* Attributes: `topic`, `state`
+* Attributes: `state`
 * Instrument Type: LongCounterObserver
 
 * Name: `kafka.purgatory.size`
