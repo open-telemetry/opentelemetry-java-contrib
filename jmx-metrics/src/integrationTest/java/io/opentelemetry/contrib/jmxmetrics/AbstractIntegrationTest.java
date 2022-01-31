@@ -125,8 +125,7 @@ public abstract class AbstractIntegrationTest {
         .waitingFor(Wait.forLogMessage(".*Startup complete.*", 1));
   }
 
-  @SafeVarargs
-  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
+  protected final void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
     await()
         .atMost(Duration.ofSeconds(30))
         .untilAsserted(
@@ -156,6 +155,12 @@ public abstract class AbstractIntegrationTest {
                 assertThat(metrics).anySatisfy(assertion);
               }
             });
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("varargs")
+  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
+    waitAndAssertMetrics(Arrays.asList(assertions));
   }
 
   protected void assertGauge(Metric metric, String name, String description, String unit) {
