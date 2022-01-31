@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import org.apache.maven.cli.event.ExecutionEventLogger;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -102,15 +101,23 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
           newExecutionListeners.add(previousExecutionListener);
         }
       } else {
-        newExecutionListeners.add(new ExecutionEventLogger(new OtelLogger(logEmitter)));
-        if (previousExecutionListener != null && !"org.apache.maven.execution.AbstractExecutionListener".equals(previousExecutionListener.getClass().getName())) {
-          newExecutionListeners.add(previousExecutionListener);
+        newExecutionListeners.add(new OtelLogsExecutionListener(logEmitter));
+        if (previousExecutionListener == null) {
+          // nothing to do here
+        } else if ("org.apache.maven.cli.event.ExecutionEventLogger"
+            .equals(previousExecutionListener.getClass().getName())) {
+          // we replace the existing log listener by Otel logs se we don't add the previous log
+          // listener
         } else {
-
+          newExecutionListeners.add(previousExecutionListener);
         }
       }
 
-      mavenExecutionRequest.setExecutionListener(new ChainedExecutionListener(newExecutionListeners));
+      ExecutionListener newExecutionListener =
+          newExecutionListeners.size() == 1
+              ? newExecutionListeners.get(0)
+              : new ChainedExecutionListener(newExecutionListeners);
+      mavenExecutionRequest.setExecutionListener(newExecutionListener);
       logger.info( // FIXME REVERT LOG LEVEL TO DEBUG
           "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
               + previousExecutionListener);

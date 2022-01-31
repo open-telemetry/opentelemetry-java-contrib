@@ -5,7 +5,6 @@
 
 package io.opentelemetry.maven;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.maven.execution.ExecutionEvent;
@@ -144,8 +143,8 @@ final class ChainedExecutionListener implements ExecutionListener {
 
   @Override
   public String toString() {
-    return "ChainedExecutionListener{" +
-        listeners.stream().map(l-> l.toString()).collect(Collectors.joining(", ")) +
-        '}';
+    return "ChainedExecutionListener{"
+        + listeners.stream().map(l -> l.toString()).collect(Collectors.joining(", "))
+        + '}';
   }
 }

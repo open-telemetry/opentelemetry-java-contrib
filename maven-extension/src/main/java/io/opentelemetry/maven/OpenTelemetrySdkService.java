@@ -11,11 +11,11 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.logs.LogEmitter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import io.opentelemetry.sdk.logs.LogEmitter;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Disposable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -113,11 +113,15 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null ? true : mojoSpansEnabled;
 
     this.tracer = openTelemetry.getTracer("io.opentelemetry.contrib.maven", VERSION);
-    String otelLogsExporter = autoConfiguredOpenTelemetrySdk.getConfig().getString("otel.logs.exporter");
+    String otelLogsExporter =
+        autoConfiguredOpenTelemetrySdk.getConfig().getString("otel.logs.exporter");
     if (otelLogsExporter != null && !otelLogsExporter.equals("none")) {
-      this.logEmitter = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk().getSdkLogEmitterProvider().get("io.opentelemetry.contrib.maven");
+      this.logEmitter =
+          autoConfiguredOpenTelemetrySdk
+              .getOpenTelemetrySdk()
+              .getSdkLogEmitterProvider()
+              .get("io.opentelemetry.contrib.maven");
     }
-
   }
 
   public Tracer getTracer() {
@@ -128,10 +132,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     return tracer;
   }
 
-  /**
-   *
-   * @return {@code null} if no Otel Log Exporter is enabled.
-   */
+  /** Returns {@code null} if no Otel Log Exporter is enabled. */
   @Nullable
   public LogEmitter getLogEmitter() {
     return logEmitter;

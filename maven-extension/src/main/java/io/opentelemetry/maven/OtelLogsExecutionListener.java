@@ -7,6 +7,7 @@ package io.opentelemetry.maven;
 
 import io.opentelemetry.sdk.logs.LogEmitter;
 import io.opentelemetry.sdk.logs.data.Severity;
+import java.time.Duration;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.BuildFailure;
 import org.apache.maven.execution.BuildSuccess;
@@ -22,15 +23,9 @@ import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.maven.cli.CLIReportingUtils.formatDuration;
-import static org.apache.maven.cli.CLIReportingUtils.formatTimestamp;
-import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
-
-/**
- * Inspired by {@code org.apache.maven.cli.event.ExecutionEventLogger}
- */
+/** Inspired by {@code org.apache.maven.cli.event.ExecutionEventLogger} */
 public class OtelLogsExecutionListener extends AbstractExecutionListener {
-  private final static Logger logger = LoggerFactory.getLogger(OtelLogsExecutionListener.class);
+  private static final Logger logger = LoggerFactory.getLogger(OtelLogsExecutionListener.class);
   private final LogEmitter logEmitter;
 
   private static final int LINE_LENGTH = 72;
@@ -144,7 +139,7 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
         buffer.append(']');
       }
 
-      logger.info(buffer.toString());
+      emitLog(buffer.toString(), Severity.INFO);
     }
   }
 
@@ -157,21 +152,21 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
     } else {
       buffer.success("BUILD SUCCESS");
     }
-    logger.info(buffer.toString());
+    emitLog(buffer.toString(), Severity.INFO);
   }
 
+  @SuppressWarnings("JavaUtilDate")
   private void logStats(MavenSession session) {
     infoLine('-');
 
+    long start = session.getRequest().getStartTime().getTime();
     long finish = System.currentTimeMillis();
 
-    long time = finish - session.getRequest().getStartTime().getTime();
+    long duration = finish - start;
 
     String wallClock = session.getRequest().getDegreeOfConcurrency() > 1 ? " (Wall Clock)" : "";
 
-    logger.info("Total time: " + formatDuration(time) + wallClock);
-
-    logger.info("Finished at: " + formatTimestamp(finish));
+    emitLog("Total time: " + formatDuration(duration) + wallClock, Severity.INFO);
 
     System.gc();
 
@@ -179,19 +174,24 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
 
     long mb = 1024 * 1024;
 
-    logger.info(
-        "Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb
-            + "M");
+    emitLog(
+        "Final Memory: "
+            + (r.totalMemory() - r.freeMemory()) / mb
+            + "M/"
+            + r.totalMemory() / mb
+            + "M",
+        Severity.INFO);
   }
 
   @Override
   public void projectSkipped(ExecutionEvent event) {
     if (logger.isInfoEnabled()) {
-      logger.info("");
+      emitLog("", Severity.INFO);
       infoLine('-');
 
       infoMain("Skipping " + event.getProject().getName());
-      logger.info("This project has been banned from the build due to previous failures.");
+      emitLog(
+          "This project has been banned from the build due to previous failures.", Severity.INFO);
 
       infoLine('-');
     }
@@ -200,7 +200,7 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
   @Override
   public void projectStarted(ExecutionEvent event) {
     if (logger.isInfoEnabled()) {
-      logger.info("");
+      emitLog("", Severity.INFO);
       infoLine('-');
 
       infoMain("Building " + event.getProject().getName() + " " + event.getProject().getVersion());
@@ -212,84 +212,100 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
   @Override
   public void mojoSkipped(ExecutionEvent event) {
     if (logger.isWarnEnabled()) {
-      logger.warn("Goal " + event.getMojoExecution().getGoal()
-          + " requires online mode for execution but Maven is currently offline, skipping");
+      logger.warn(
+          "Goal "
+              + event.getMojoExecution().getGoal()
+              + " requires online mode for execution but Maven is currently offline, skipping");
     }
   }
 
   /**
+   *
+   *
    * <pre>--- mojo-artifactId:version:goal (mojo-executionId) @ project-artifactId ---</pre>
    */
   @Override
   public void mojoStarted(ExecutionEvent event) {
     if (logger.isInfoEnabled()) {
-      logger.info("");
+      emitLog("", Severity.INFO);
 
       MessageBuilder buffer = buffer().strong("--- ");
-      append(buffer, event.getMojoExecution());
-      append(buffer, event.getProject());
+      appendMojoExecution(buffer, event.getMojoExecution());
+      appendMavenProject(buffer, event.getProject());
       buffer.strong(" ---");
 
-      logger.info(buffer.toString());
+      emitLog(buffer.toString(), Severity.INFO);
     }
   }
 
-  // CHECKSTYLE_OFF: LineLength
-
-  /**
-   * <pre>&gt;&gt;&gt; mojo-artifactId:version:goal (mojo-executionId) &gt; :forked-goal @ project-artifactId &gt;&gt;&gt;</pre>
-   * <pre>&gt;&gt;&gt; mojo-artifactId:version:goal (mojo-executionId) &gt; [lifecycle]phase @ project-artifactId &gt;&gt;&gt;</pre>
-   */
-  // CHECKSTYLE_ON: LineLength
-  @Override
-  public void forkStarted(ExecutionEvent event) {
-    if (logger.isInfoEnabled()) {
-      logger.info("");
-
-      MessageBuilder buffer = buffer().strong(">>> ");
-      append(buffer, event.getMojoExecution());
-      buffer.strong(" > ");
-      appendForkInfo(buffer, event.getMojoExecution().getMojoDescriptor());
-      append(buffer, event.getProject());
-      buffer.strong(" >>>");
-
-      logger.info(buffer.toString());
-    }
-  }
-
-  // CHECKSTYLE_OFF: LineLength
-
-  /**
-   * <pre>&lt;&lt;&lt; mojo-artifactId:version:goal (mojo-executionId) &lt; :forked-goal @ project-artifactId &lt;&lt;&lt;</pre>
-   * <pre>&lt;&lt;&lt; mojo-artifactId:version:goal (mojo-executionId) &lt; [lifecycle]phase @ project-artifactId &lt;&lt;&lt;</pre>
-   */
-  // CHECKSTYLE_ON: LineLength
-  @Override
-  public void forkSucceeded(ExecutionEvent event) {
-    if (logger.isInfoEnabled()) {
-      logger.info("");
-
-      MessageBuilder buffer = buffer().strong("<<< ");
-      append(buffer, event.getMojoExecution());
-      buffer.strong(" < ");
-      appendForkInfo(buffer, event.getMojoExecution().getMojoDescriptor());
-      append(buffer, event.getProject());
-      buffer.strong(" <<<");
-
-      logger.info(buffer.toString());
-
-      logger.info("");
-    }
-  }
-
-  private void append(MessageBuilder buffer, MojoExecution me) {
+  private static void appendMojoExecution(MessageBuilder buffer, MojoExecution me) {
     buffer.mojo(me.getArtifactId() + ':' + me.getVersion() + ':' + me.getGoal());
     if (me.getExecutionId() != null) {
       buffer.a(' ').strong('(' + me.getExecutionId() + ')');
     }
   }
 
-  private void appendForkInfo(MessageBuilder buffer, MojoDescriptor md) {
+  /**
+   *
+   *
+   * <pre>
+   * &gt;&gt;&gt; mojo-artifactId:version:goal (mojo-executionId) &gt; :forked-goal @ project-artifactId &gt;&gt;&gt;
+   * </pre>
+   *
+   * <pre>
+   * &gt;&gt;&gt; mojo-artifactId:version:goal (mojo-executionId) &gt; [lifecycle]phase @ project-artifactId &gt;&gt;&gt;
+   * </pre>
+   */
+  // CHECKSTYLE_ON: LineLength
+  @Override
+  public void forkStarted(ExecutionEvent event) {
+    if (logger.isInfoEnabled()) {
+      emitLog("", Severity.INFO);
+
+      MessageBuilder buffer = buffer().strong(">>> ");
+      appendMojoExecution(buffer, event.getMojoExecution());
+      buffer.strong(" > ");
+      appendForkInfo(buffer, event.getMojoExecution().getMojoDescriptor());
+      appendMavenProject(buffer, event.getProject());
+      buffer.strong(" >>>");
+
+      emitLog(buffer.toString(), Severity.INFO);
+    }
+  }
+
+  // CHECKSTYLE_OFF: LineLength
+
+  /**
+   *
+   *
+   * <pre>
+   * &lt;&lt;&lt; mojo-artifactId:version:goal (mojo-executionId) &lt; :forked-goal @ project-artifactId &lt;&lt;&lt;
+   * </pre>
+   *
+   * <pre>
+   * &lt;&lt;&lt; mojo-artifactId:version:goal (mojo-executionId) &lt; [lifecycle]phase @ project-artifactId &lt;&lt;&lt;
+   * </pre>
+   */
+  // CHECKSTYLE_ON: LineLength
+  @Override
+  public void forkSucceeded(ExecutionEvent event) {
+    if (logger.isInfoEnabled()) {
+      emitLog("", Severity.INFO);
+
+      MessageBuilder buffer = buffer().strong("<<< ");
+      appendMojoExecution(buffer, event.getMojoExecution());
+      buffer.strong(" < ");
+      appendForkInfo(buffer, event.getMojoExecution().getMojoDescriptor());
+      appendMavenProject(buffer, event.getProject());
+      buffer.strong(" <<<");
+
+      emitLog(buffer.toString(), Severity.INFO);
+
+      emitLog("", Severity.INFO);
+    }
+  }
+
+  private static void appendForkInfo(MessageBuilder buffer, MojoDescriptor md) {
     StringBuilder buff = new StringBuilder();
     if (StringUtils.isNotEmpty(md.getExecutePhase())) {
       // forked phase
@@ -307,14 +323,14 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
     buffer.strong(buff.toString());
   }
 
-  private void append(MessageBuilder buffer, MavenProject project) {
+  private static void appendMavenProject(MessageBuilder buffer, MavenProject project) {
     buffer.a(" @ ").project(project.getArtifactId());
   }
 
   @Override
   public void forkedProjectStarted(ExecutionEvent event) {
     if (logger.isInfoEnabled() && event.getMojoExecution().getForkedExecutions().size() > 1) {
-      logger.info("");
+      emitLog("", Severity.INFO);
       infoLine('>');
 
       infoMain("Forking " + event.getProject().getName() + " " + event.getProject().getVersion());
@@ -324,9 +340,17 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
   }
 
   private void emitLog(String msg, Severity se) {
-    logEmitter.logBuilder()
-        .setBody(msg)
-        .setSeverity(se)
-        .emit();
+    logEmitter.logBuilder().setBody(msg).setSeverity(se).emit();
+  }
+
+  String formatDuration(long millis) {
+    Duration duration = Duration.ofMillis(millis);
+    long seconds = duration.getSeconds();
+    return String.format("%d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+  }
+
+  /** See org.apache.maven.shared.utils.logging.MessageUtils#buffer() */
+  private static MessageBuilder buffer() {
+    return new PlainMessageBuilder();
   }
 }
