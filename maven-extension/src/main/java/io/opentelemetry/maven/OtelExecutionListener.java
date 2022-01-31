@@ -15,14 +15,19 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandlerConfiguration;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import io.opentelemetry.sdk.logs.LogEmitter;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.apache.maven.cli.event.ExecutionEventLogger;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.plugin.MojoExecution;
@@ -78,24 +83,37 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   public static void registerOtelExecutionListener(
       MavenSession session, OtelExecutionListener otelExecutionListener) {
 
-    ExecutionListener initialExecutionListener = session.getRequest().getExecutionListener();
-    if (initialExecutionListener instanceof ChainedExecutionListener
-        || initialExecutionListener instanceof OtelExecutionListener) {
-      // already initialized
+    LogEmitter logEmitter = otelExecutionListener.openTelemetrySdkService.getLogEmitter();
+    MavenExecutionRequest mavenExecutionRequest = session.getRequest();
+    ExecutionListener previousExecutionListener = mavenExecutionRequest.getExecutionListener();
+
+    List<ExecutionListener> newExecutionListeners = new LinkedList<>();
+    if (previousExecutionListener instanceof ChainedExecutionListener
+        || previousExecutionListener instanceof OtelExecutionListener) {
+      // Otel already initialized
+      newExecutionListeners.add(previousExecutionListener);
       logger.debug(
           "OpenTelemetry: OpenTelemetry extension already registered as execution listener, skip.");
-    } else if (initialExecutionListener == null) {
-      session.getRequest().setExecutionListener(otelExecutionListener);
-      logger.debug(
-          "OpenTelemetry: OpenTelemetry extension registered as execution listener. No execution listener initially defined");
     } else {
-      session
-          .getRequest()
-          .setExecutionListener(
-              new ChainedExecutionListener(otelExecutionListener, initialExecutionListener));
+      newExecutionListeners.add(otelExecutionListener);
+
+      if (logEmitter == null) {
+        if (previousExecutionListener != null) {
+          newExecutionListeners.add(previousExecutionListener);
+        }
+      } else {
+        newExecutionListeners.add(new ExecutionEventLogger(new OtelLogger(logEmitter)));
+        if (previousExecutionListener != null && !"org.apache.maven.execution.AbstractExecutionListener".equals(previousExecutionListener.getClass().getName())) {
+          newExecutionListeners.add(previousExecutionListener);
+        } else {
+
+        }
+      }
+
+      mavenExecutionRequest.setExecutionListener(new ChainedExecutionListener(newExecutionListeners));
       logger.info( // FIXME REVERT LOG LEVEL TO DEBUG
           "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
-              + initialExecutionListener);
+              + previousExecutionListener);
     }
   }
 

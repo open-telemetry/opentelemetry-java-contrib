@@ -18,9 +18,9 @@ final class ChainedExecutionListener implements ExecutionListener {
 
   private final List<ExecutionListener> listeners;
 
-  /** @param listeners {@code null} values are filtered */
-  ChainedExecutionListener(ExecutionListener... listeners) {
-    this.listeners = Arrays.stream(listeners).filter(e -> e != null).collect(Collectors.toList());
+  /** @param listeners, {@code null} values are filtered */
+  ChainedExecutionListener(List<ExecutionListener> listeners) {
+    this.listeners = listeners.stream().filter(e -> e != null).collect(Collectors.toList());
   }
 
   @Override
@@ -140,5 +140,12 @@ final class ChainedExecutionListener implements ExecutionListener {
     for (ExecutionListener listener : this.listeners) {
       listener.forkedProjectFailed(event);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "ChainedExecutionListener{" +
+        listeners.stream().map(l-> l.toString()).collect(Collectors.joining(", ")) +
+        '}';
   }
 }
