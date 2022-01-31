@@ -22,6 +22,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-semconv")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-trace")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-logs")
 
   implementation("io.grpc:grpc-netty-shaded")
 

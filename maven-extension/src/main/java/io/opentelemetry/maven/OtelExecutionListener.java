@@ -119,8 +119,9 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
               : new ChainedExecutionListener(newExecutionListeners);
       mavenExecutionRequest.setExecutionListener(newExecutionListener);
       logger.info( // FIXME REVERT LOG LEVEL TO DEBUG
-          "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
-              + previousExecutionListener);
+          "OpenTelemetry: OpenTelemetry extension registered as execution listener {}. InitialExecutionListener: {}",
+          newExecutionListener,
+          previousExecutionListener);
     }
   }
 

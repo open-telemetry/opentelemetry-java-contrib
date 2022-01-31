@@ -339,6 +339,11 @@ public class OtelLogsExecutionListener extends AbstractExecutionListener {
     }
   }
 
+  @Override
+  public String toString() {
+    return "OtelLogsExecutionListener{" + logEmitter + '}';
+  }
+
   private void emitLog(String msg, Severity se) {
     logEmitter.logBuilder().setBody(msg).setSeverity(se).emit();
   }

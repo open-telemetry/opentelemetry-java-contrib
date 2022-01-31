@@ -12,7 +12,10 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogEmitter;
+import io.opentelemetry.sdk.logs.SdkLogEmitterProvider;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -43,6 +46,8 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   /** Visible for testing */
   @Nullable AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk;
 
+  @Nullable private SdkLogEmitterProvider sdkLogEmitterProvider;
+
   /**
    * Note: the JVM shutdown hook defined by the {@code
    * io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration} v1.7.0 does NOT cause
@@ -59,21 +64,28 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   public synchronized void dispose() {
     logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
     OpenTelemetrySdk openTelemetrySdk = this.openTelemetrySdk;
+    List<CompletableResultCode> shutDowns = new LinkedList<>();
     if (openTelemetrySdk != null) {
       logger.debug("OpenTelemetry: Shutdown SDK Trace Provider...");
-      CompletableResultCode sdkProviderShutdown =
-          openTelemetrySdk.getSdkTracerProvider().shutdown();
-      sdkProviderShutdown.join(10, TimeUnit.SECONDS);
-      if (sdkProviderShutdown.isSuccess()) {
-        logger.debug("OpenTelemetry: SDK Trace Provider shut down");
-      } else {
-        logger.warn(
-            "OpenTelemetry: Failure to shutdown SDK Trace Provider (done: "
-                + sdkProviderShutdown.isDone()
-                + ")");
-      }
+      shutDowns.add(openTelemetrySdk.getSdkTracerProvider().shutdown());
       this.openTelemetrySdk = null;
     }
+
+    if (this.sdkLogEmitterProvider != null) {
+      logger.debug("OpenTelemetry: Shutdown SDK Logs Emitter...");
+      shutDowns.add(sdkLogEmitterProvider.shutdown());
+    }
+
+    CompletableResultCode shutDown = CompletableResultCode.ofAll(shutDowns);
+
+    shutDown.join(10, TimeUnit.SECONDS);
+    if (shutDown.isSuccess()) {
+      logger.debug("OpenTelemetry: SDK Providers shut down");
+    } else {
+      logger.warn(
+          "OpenTelemetry: Failure to shutdown SDK Providers and Emitters (done: " + shutDown.isDone() + ")");
+    }
+
     this.openTelemetry = OpenTelemetry.noop();
 
     this.autoConfiguredOpenTelemetrySdk = null;
@@ -116,11 +128,9 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
     String otelLogsExporter =
         autoConfiguredOpenTelemetrySdk.getConfig().getString("otel.logs.exporter");
     if (otelLogsExporter != null && !otelLogsExporter.equals("none")) {
-      this.logEmitter =
-          autoConfiguredOpenTelemetrySdk
-              .getOpenTelemetrySdk()
-              .getSdkLogEmitterProvider()
-              .get("io.opentelemetry.contrib.maven");
+      this.sdkLogEmitterProvider =
+          autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk().getSdkLogEmitterProvider();
+      this.logEmitter = sdkLogEmitterProvider.get("io.opentelemetry.contrib.maven");
     }
   }
 
