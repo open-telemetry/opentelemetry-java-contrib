@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-def beanSolrCoreSearcherNumDocs = otel.mbean("solr:dom1=core,dom2=*,category=SEARCHER,scope=searcher,name=numDocs")
+def beanSolrCoreSearcherNumDocs = otel.mbeans("solr:dom1=core,dom2=*,category=SEARCHER,scope=searcher,name=numDocs")
 otel.instrument(beanSolrCoreSearcherNumDocs, "solr.document.count", "The total number of indexed documents.", "{documents}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") }],
   "Value", otel.&longUpDownCounterCallback)
 
-def beanSolrCoreIndexSize = otel.mbean("solr:dom1=core,dom2=*,category=INDEX,name=sizeInBytes")
+def beanSolrCoreIndexSize = otel.mbeans("solr:dom1=core,dom2=*,category=INDEX,name=sizeInBytes")
 otel.instrument(beanSolrCoreIndexSize, "solr.index.size", "The total index size.", "by",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") }],
   "Value", otel.&longUpDownCounterCallback)
@@ -58,7 +58,7 @@ otel.instrument(beanSolrCoreTimeouts, "solr.request.timeout.count", "The number 
    "handler" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "Count", otel.&longCounterCallback)
 
-def beanSolrCoreQueryResultsCache = otel.mbean("solr:dom1=core,dom2=*,category=CACHE,scope=*,name=queryResultCache")
+def beanSolrCoreQueryResultsCache = otel.mbeans("solr:dom1=core,dom2=*,category=CACHE,scope=*,name=queryResultCache")
 otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.eviction.count", "The number of evictions from a cache.", "{evictions}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
