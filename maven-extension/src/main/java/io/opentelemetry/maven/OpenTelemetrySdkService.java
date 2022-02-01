@@ -83,7 +83,9 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
       logger.debug("OpenTelemetry: SDK Providers shut down");
     } else {
       logger.warn(
-          "OpenTelemetry: Failure to shutdown SDK Providers and Emitters (done: " + shutDown.isDone() + ")");
+          "OpenTelemetry: Failure to shutdown SDK Providers and Emitters (done: "
+              + shutDown.isDone()
+              + ")");
     }
 
     this.openTelemetry = OpenTelemetry.noop();

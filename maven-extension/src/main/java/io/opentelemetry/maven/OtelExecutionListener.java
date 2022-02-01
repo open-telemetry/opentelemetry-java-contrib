@@ -73,6 +73,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     }
   }
 
+  static boolean alwaysOutputLogsToStdout = true;
   /**
    * Register in given {@link OtelExecutionListener} to the lifecycle of the given {@link
    * MavenSession}
@@ -101,11 +102,11 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
           newExecutionListeners.add(previousExecutionListener);
         }
       } else {
-        newExecutionListeners.add(new OtelLogsExecutionListener(logEmitter));
         if (previousExecutionListener == null) {
           // nothing to do here
-        } else if ("org.apache.maven.cli.event.ExecutionEventLogger"
-            .equals(previousExecutionListener.getClass().getName())) {
+        } else if (!alwaysOutputLogsToStdout
+            && "org.apache.maven.cli.event.ExecutionEventLogger"
+                .equals(previousExecutionListener.getClass().getName())) {
           // we replace the existing log listener by Otel logs se we don't add the previous log
           // listener
         } else {
@@ -163,6 +164,10 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             .setSpanKind(SpanKind.SERVER)
             .startSpan();
     spanRegistry.setRootSpan(sessionSpan);
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.sessionStarted(executionEvent, logEmitter, sessionSpan);
+    }
   }
 
   @Override
@@ -182,6 +187,10 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
             .setAttribute(MavenOtelSemanticAttributes.MAVEN_PROJECT_VERSION, project.getVersion())
             .startSpan();
     spanRegistry.putSpan(projectSpan, project);
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.projectStarted(executionEvent, logEmitter, projectSpan);
+    }
   }
 
   @Override
@@ -259,6 +268,10 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
     Span span = spanBuilder.startSpan();
     spanRegistry.putSpan(span, mojoExecution, executionEvent.getProject());
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.mojoStarted(executionEvent, logEmitter, span);
+    }
   }
 
   @Override
@@ -302,7 +315,35 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   @Override
   public void sessionEnded(ExecutionEvent event) {
     logger.debug("OpenTelemetry: Maven session ended");
-    spanRegistry.removeRootSpan().end();
+    Span span = spanRegistry.removeRootSpan();
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.sessionEnded(event, logEmitter, span);
+    }
+    span.end();
+  }
+
+  @Override
+  public void projectDiscoveryStarted(ExecutionEvent event) {
+    // session span not created, skip
+  }
+
+  @Override
+  public void projectSkipped(ExecutionEvent event) {
+    Span sessionSpan = spanRegistry.getRootSpanNotNull();
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.projectSkipped(event, logEmitter, sessionSpan);
+    }
+  }
+
+  @Override
+  public void mojoSkipped(ExecutionEvent event) {
+    Span span = spanRegistry.getSpan(event.getProject());
+    LogEmitter logEmitter = openTelemetrySdkService.getLogEmitter();
+    if (logEmitter != null) {
+      OtelLogsExecutionListener.mojoSkipped(event, logEmitter, span);
+    }
   }
 
   private static class ToUpperCaseTextMapGetter implements TextMapGetter<Map<String, String>> {

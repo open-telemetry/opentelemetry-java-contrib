@@ -30,6 +30,7 @@ dependencies {
   compileOnly("com.google.auto.value:auto-value-annotations")
 
   compileOnly("org.apache.maven:maven-core:3.5.0")
+  compileOnly("org.apache.maven:maven-embedder:3.5.0") // FIXME remove, used to understand Maven code
   compileOnly("org.apache.maven.shared:maven-shared-utils:3.1.0")
 
   compileOnly("org.slf4j:slf4j-api")
