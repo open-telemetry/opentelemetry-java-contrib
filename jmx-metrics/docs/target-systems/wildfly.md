@@ -41,7 +41,7 @@ The JMX Metric Gatherer provides built in WildFly metric gathering capabilities.
 * Instrument Type: LongCounterCallback
 
 * Name: `wildfly.request.server_error`
-* Description: The number of requests that have resulted in a 500 response.
+* Description: The number of requests that have resulted in a 5xx response.
 * Unit: `{requests}`
 * Labels: `server`, `listener`
 * Instrument Type: LongCounterCallback

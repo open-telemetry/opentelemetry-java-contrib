@@ -32,7 +32,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
         .withNetwork(Network.SHARED)
         .withNetworkAliases("wildfly")
         .withCopyFileToContainer(
-            MountableFile.forHostPath(scraperJarPath), "/app/OpenTelemetryJava.jar")
+            MountableFile.forHostPath(scraperJarPath), "/app/OpenTelemetryJMXMetrics.jar")
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("script.groovy"), "/app/script.groovy")
         .withCopyFileToContainer(
@@ -71,7 +71,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
             assertSumWithAttributes(
                 metric,
                 "wildfly.request.server_error",
-                "The number of requests that have resulted in a 500 response.",
+                "The number of requests that have resulted in a 5xx response.",
                 "{requests}",
                 attrs ->
                     attrs.containsOnly(
