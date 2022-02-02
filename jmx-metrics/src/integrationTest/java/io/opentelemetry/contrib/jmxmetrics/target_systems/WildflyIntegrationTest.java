@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.utility.MountableFile;
 
 class WildflyIntegrationTest extends AbstractIntegrationTest {
 
@@ -22,17 +21,27 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
     super(/* configFromStdin= */ false, "target-systems/wildfly.properties");
   }
 
-  @Container
-  GenericContainer<?> wildfly =
-      new GenericContainer<>(
-              new ImageFromDockerfile()
-                  .withFileFromClasspath("Dockerfile", "wildfly/Dockerfile")
-                  .withFileFromClasspath("start.sh", "wildfly/start.sh"))
-          .withNetwork(Network.SHARED)
-          .withNetworkAliases("wildfly")
-          .withExposedPorts(9990)
-          .withStartupTimeout(Duration.ofMinutes(2))
-          .waitingFor(Wait.forListeningPort());
+  @Override
+  protected GenericContainer<?> buildScraper(String otlpEndpoint) {
+    String scraperJarPath = System.getProperty("shadow.jar.path");
+
+    return new GenericContainer<>("jboss/wildfly:23.0.1.Final")
+        .withNetwork(Network.SHARED)
+        .withNetworkAliases("wildfly")
+        .withCopyFileToContainer(
+            MountableFile.forHostPath(scraperJarPath), "/app/OpenTelemetryJava.jar")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("script.groovy"), "/app/script.groovy")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("target-systems/wildfly.properties"),
+            "/app/target-systems/wildfly.properties")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("wildfly/start.sh", 0007), "/app/start.sh")
+        .withEnv("OTLP_ENDPOINT", otlpEndpoint)
+        .withCommand("/app/start.sh")
+        .withStartupTimeout(Duration.ofMinutes(2))
+        .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1));
+  }
 
   @Test
   void endToEnd() {
@@ -45,10 +54,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "{requests}",
                 attrs ->
                     attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "https"))),
+                        entry("server", "default-server"), entry("listener", "default"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -57,10 +63,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "ns",
                 attrs ->
                     attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "https"))),
+                        entry("server", "default-server"), entry("listener", "default"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -69,10 +72,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 "{requests}",
                 attrs ->
                     attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "https"))),
+                        entry("server", "default-server"), entry("listener", "default"))),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -88,16 +88,38 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                     attrs.containsOnly(
                         entry("server", "default-server"),
                         entry("listener", "default"),
-                        entry("state", "out")),
+                        entry("state", "out"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.connection.open",
+                "The number of open jdbc connections.",
+                "{connections}",
                 attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"),
-                        entry("listener", "https"),
-                        entry("state", "in")),
+                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "active")),
                 attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"),
-                        entry("listener", "https"),
-                        entry("state", "out"))));
+                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "idle"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.request.wait",
+                "The number of jdbc connections that had to wait before opening.",
+                "{requests}",
+                attrs -> attrs.containsOnly(entry("data_source", "ExampleDS"))),
+        metric ->
+            assertSum(
+                metric,
+                "wildfly.jdbc.transaction.count",
+                "The number of transactions created.",
+                "{transactions}"),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.rollback.count",
+                "The number of transactions rolled back.",
+                "{transactions}",
+                attrs -> attrs.containsOnly(entry("cause", "system")),
+                attrs -> attrs.containsOnly(entry("cause", "resource")),
+                attrs -> attrs.containsOnly(entry("cause", "application"))));
   }
 }

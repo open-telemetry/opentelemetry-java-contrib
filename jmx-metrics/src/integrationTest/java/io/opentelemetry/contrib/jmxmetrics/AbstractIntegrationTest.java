@@ -62,40 +62,9 @@ public abstract class AbstractIntegrationTest {
     otlpServer = new OtlpGrpcServer();
     otlpServer.start();
     exposeHostPorts(otlpServer.httpPort());
+    String otlpEndpoint = "http://host.testcontainers.internal:" + otlpServer.httpPort();
 
-    String scraperJarPath = System.getProperty("shadow.jar.path");
-
-    List<String> scraperCommand = new ArrayList<>();
-    scraperCommand.add("java");
-    scraperCommand.add("-cp");
-    scraperCommand.add("/app/OpenTelemetryJava.jar");
-    scraperCommand.add("-Dotel.jmx.username=cassandra");
-    scraperCommand.add("-Dotel.jmx.password=cassandra");
-    scraperCommand.add(
-        "-Dotel.exporter.otlp.endpoint=http://host.testcontainers.internal:"
-            + otlpServer.httpPort());
-    scraperCommand.add("io.opentelemetry.contrib.jmxmetrics.JmxMetrics");
-    scraperCommand.add("-config");
-
-    if (configFromStdin) {
-      String cmd = String.join(" ", scraperCommand);
-      scraperCommand = Arrays.asList("sh", "-c", "cat /app/" + configName + " | " + cmd + " -");
-    } else {
-      scraperCommand.add("/app/" + configName);
-    }
-
-    scraper =
-        new GenericContainer<>("openjdk:8u272-jre-slim")
-            .withNetwork(Network.SHARED)
-            .withCopyFileToContainer(
-                MountableFile.forHostPath(scraperJarPath), "/app/OpenTelemetryJava.jar")
-            .withCopyFileToContainer(
-                MountableFile.forClasspathResource("script.groovy"), "/app/script.groovy")
-            .withCopyFileToContainer(
-                MountableFile.forClasspathResource(configName), "/app/" + configName)
-            .withCommand(scraperCommand.toArray(new String[0]))
-            .withStartupTimeout(Duration.ofMinutes(2))
-            .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1));
+    scraper = buildScraper(otlpEndpoint);
     scraper.start();
   }
 
@@ -110,6 +79,39 @@ public abstract class AbstractIntegrationTest {
   @BeforeEach
   void beforeEach() {
     otlpServer.reset();
+  }
+
+  protected GenericContainer<?> buildScraper(String otlpEndpoint) {
+    String scraperJarPath = System.getProperty("shadow.jar.path");
+
+    List<String> scraperCommand = new ArrayList<>();
+    scraperCommand.add("java");
+    scraperCommand.add("-cp");
+    scraperCommand.add("/app/OpenTelemetryJava.jar");
+    scraperCommand.add("-Dotel.jmx.username=cassandra");
+    scraperCommand.add("-Dotel.jmx.password=cassandra");
+    scraperCommand.add("-Dotel.exporter.otlp.endpoint=" + otlpEndpoint);
+    scraperCommand.add("io.opentelemetry.contrib.jmxmetrics.JmxMetrics");
+    scraperCommand.add("-config");
+
+    if (configFromStdin) {
+      String cmd = String.join(" ", scraperCommand);
+      scraperCommand = Arrays.asList("sh", "-c", "cat /app/" + configName + " | " + cmd + " -");
+    } else {
+      scraperCommand.add("/app/" + configName);
+    }
+
+    return new GenericContainer<>("openjdk:8u272-jre-slim")
+        .withNetwork(Network.SHARED)
+        .withCopyFileToContainer(
+            MountableFile.forHostPath(scraperJarPath), "/app/OpenTelemetryJava.jar")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("script.groovy"), "/app/script.groovy")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource(configName), "/app/" + configName)
+        .withCommand(scraperCommand.toArray(new String[0]))
+        .withStartupTimeout(Duration.ofMinutes(2))
+        .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1));
   }
 
   protected static GenericContainer<?> cassandraContainer() {
