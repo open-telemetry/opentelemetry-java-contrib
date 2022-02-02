@@ -21,6 +21,9 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
     super(/* configFromStdin= */ false, "target-systems/wildfly.properties");
   }
 
+  /* In order to create a JMX connection to WildFLy, the scraper requires an additional
+  client jar in the classpath. To facilitate this, the scraper runs in the same container,
+  which gives it access to the client jar packaged with WildFly. */
   @Override
   protected GenericContainer<?> buildScraper(String otlpEndpoint) {
     String scraperJarPath = System.getProperty("shadow.jar.path");
