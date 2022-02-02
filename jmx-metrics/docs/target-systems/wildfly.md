@@ -1,6 +1,7 @@
 # WildFly Metrics
 
 The JMX Metric Gatherer provides built in WildFly metric gathering capabilities.
+Details about using JMX with WildFly can be found here: https://docs.jboss.org/author/display/WFLY/JMX%20subsystem%20configuration.html
 
 ### Deployment Metrics
 * Name: `wildfly.session.count`
