@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-def beanWildflyDeployment = otel.mbean("jboss.as.expr:deployment=*,subsystem=undertow")
+def beanWildflyDeployment = otel.mbeans("jboss.as.expr:deployment=*,subsystem=undertow")
 otel.instrument(beanWildflyDeployment, "wildfly.session.count", "The number of sessions created.", "{sessions}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "sessionsCreated", otel.&longCounterCallback)
@@ -28,7 +28,7 @@ otel.instrument(beanWildflyDeployment, "wildfly.session.rejected", "The number o
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "rejectedSessions", otel.&longCounterCallback)
 
-def beanWildflyHttpListener = otel.mbean("jboss.as:subsystem=undertow,server=*,http-listener=*")
+def beanWildflyHttpListener = otel.mbeans("jboss.as:subsystem=undertow,server=*,http-listener=*")
 otel.instrument(beanWildflyHttpListener, "wildfly.request.count", "The number of requests received.", "{requests}",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "requestCount", otel.&longCounterCallback)
@@ -43,7 +43,7 @@ otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of by
   ["bytesSent":["state":{"out"}], "bytesReceived":["state":{"in"}]],
   otel.&longCounterCallback)
 
-def beanWildflyDataSource = otel.mbean("jboss.as:subsystem=datasources,data-source=*,statistics=pool")
+def beanWildflyDataSource = otel.mbeans("jboss.as:subsystem=datasources,data-source=*,statistics=pool")
 otel.instrument(beanWildflyDataSource, "wildfly.jdbc.connection.open", "The number of open jdbc connections.", "{connections}",
   ["data_source": { mbean -> mbean.name().getKeyProperty("data-source")}],
   ["ActiveCount":["state":{"active"}], "IdleCount":["state":{"idle"}]],
