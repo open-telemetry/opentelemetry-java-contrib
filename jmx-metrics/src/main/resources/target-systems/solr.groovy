@@ -78,4 +78,4 @@ otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.lookup.count", "The n
 otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.size", "The size of the cache occupied in memory.", "by",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
-  "size", otel.&longUpDownCounterCallback)
+  "ramBytesUsed", otel.&longUpDownCounterCallback)
