@@ -43,7 +43,8 @@ class JmxConfig {
           "kafka-consumer",
           "kafka-producer",
           "solr",
-          "tomcat");
+          "tomcat",
+          "wildfly");
 
   final String serviceUrl;
   final String groovyScript;
