@@ -1,0 +1,23 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.samplers;
+
+import io.opentelemetry.contrib.state.OtelTraceState;
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
+public final class ConsistentAlwaysOffSampler extends ConsistentSampler {
+
+  @Override
+  protected int getP(int parentP, boolean isRoot) {
+    return OtelTraceState.getMaxP();
+  }
+
+  @Override
+  public String getDescription() {
+    return "ConsistentAlwaysOffSampler";
+  }
+}
