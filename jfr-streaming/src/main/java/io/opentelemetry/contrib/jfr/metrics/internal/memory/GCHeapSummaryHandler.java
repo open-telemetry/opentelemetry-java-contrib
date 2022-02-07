@@ -6,19 +6,14 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.AVERAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COUNT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MAX;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TOTAL_USED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.ArrayList;
@@ -26,6 +21,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
@@ -33,7 +29,8 @@ import jdk.jfr.consumer.RecordedObject;
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time";
   private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
-  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
+  private static final String METRIC_NAME_MEMORY_USAGE = "process.runtime.jvm.memory.usage";
+  private static final String METRIC_NAME_MEMORY_COMMITTED = "process.runtime.jvm.memory.committed";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
@@ -44,23 +41,24 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String HEAP_SPACE = "heapSpace";
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_USAGE, TOTAL_USED);
-  private static final Attributes ATTR_MEMORY_COMMITTED = Attributes.of(ATTR_USAGE, COMMITTED);
-  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_USAGE, RESERVED);
   private static final Attributes ATTR_DURATION_AVERAGE = Attributes.of(ATTR_TYPE, AVERAGE);
   private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
   private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
 
+  private static final Logger logger = Logger.getLogger(G1HeapSummaryHandler.class.getName());
+
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private DoubleHistogram memoryHistogram;
-  private final List<Double> gcDurations = new ArrayList<>();
+  private final List<Long> durations = new ArrayList<>();
+  private final List<Long> usage = new ArrayList<>();
+  private final List<Long> committed = new ArrayList<>();
+  private final List<Long> max = new ArrayList<>();
 
   public GCHeapSummaryHandler() {
     initializeMeter(defaultMeter());
   }
 
-  private static DoubleSummaryStatistics summarize(List<Double> l) {
+  private static DoubleSummaryStatistics summarize(List<Long> l) {
     return l.stream().mapToDouble(x -> x).summaryStatistics();
   }
 
@@ -73,18 +71,48 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
         .setDescription(METRIC_DESCRIPTION_DURATION)
         .buildWithCallback(
             codm -> {
-              var summary = summarize(gcDurations);
+              var summary = summarize(durations);
               codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
               codm.record(summary.getCount(), ATTR_DURATION_COUNT);
               codm.record(summary.getMax(), ATTR_DURATION_MAX);
-              gcDurations.clear();
+              durations.clear();
             });
-    memoryHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_MEMORY)
-            .setDescription(METRIC_DESCRIPTION_MEMORY)
-            .setUnit(BYTES)
-            .build();
+
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_USAGE)
+        .ofDoubles()
+        .setUnit(BYTES)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .buildWithCallback(
+            codm -> {
+              var summary = summarize(usage);
+              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              usage.clear();
+            });
+
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_COMMITTED)
+        .ofDoubles()
+        .setUnit(BYTES)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .buildWithCallback(
+            codm -> {
+              var summary = summarize(committed);
+              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              committed.clear();
+            });
+
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_COMMITTED)
+        .ofDoubles()
+        .setUnit(BYTES)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .buildWithCallback(
+            codm -> {
+              var summary = summarize(max);
+              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              max.clear();
+            });
   }
 
   @Override
@@ -98,13 +126,13 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     if (ev.hasField(WHEN)) {
       when = ev.getString(WHEN);
     }
-    if (when != null) {
-      if (!(when.equals(BEFORE) || when.equals(AFTER))) {
-        return;
-      }
+    if (!(BEFORE.equals(when) || AFTER.equals(when))) {
+      logger.fine(String.format("GC Event seen with strange " + WHEN + " %s", ev));
+      return;
     }
 
     if (!ev.hasField(GC_ID)) {
+      logger.fine(String.format("GC Event seen without " + GC_ID + " %s", ev));
       return;
     }
     long gcId = ev.getLong(GC_ID);
@@ -123,20 +151,29 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   }
 
   private void recordValues(RecordedEvent before, RecordedEvent after) {
-    gcDurations.add(
-        (double) (after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli()));
-    if (after.hasField(HEAP_USED)) {
-      memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
+    durations.add(after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
+
+    if (!after.hasField(HEAP_USED)) {
+      logger.fine(String.format("GC Event seen without " + HEAP_USED + " %s", after));
+      return;
     }
-    if (after.hasField(HEAP_SPACE)) {
-      if (after.getValue(HEAP_SPACE) instanceof RecordedObject heapSpace) {
-        if (heapSpace.hasField(COMMITTED_SIZE)) {
-          memoryHistogram.record(heapSpace.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
-        }
-        if (heapSpace.hasField(RESERVED_SIZE)) {
-          memoryHistogram.record(heapSpace.getLong(RESERVED_SIZE), ATTR_MEMORY_RESERVED);
-        }
+    usage.add(after.getLong(HEAP_USED));
+
+    if (!after.hasField(HEAP_SPACE)) {
+      logger.fine(String.format("GC Event seen without " + HEAP_SPACE + " %s", after));
+      return;
+    }
+    if (after.getValue(HEAP_SPACE) instanceof RecordedObject heapSpace) {
+      if (!heapSpace.hasField(COMMITTED_SIZE)) {
+        logger.fine(String.format("GC Event seen without " + COMMITTED_SIZE + " %s", after));
+        return;
       }
+      committed.add(heapSpace.getLong(COMMITTED_SIZE));
+      if (!heapSpace.hasField(RESERVED_SIZE)) {
+        logger.fine(String.format("GC Event seen without " + RESERVED_SIZE + " %s", after));
+        return;
+      }
+      max.add(heapSpace.getLong(RESERVED_SIZE));
     }
   }
 }
