@@ -9,10 +9,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_NETWO
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREAD_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_NETWORK_BYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_NETWORK_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_NETWORK_BYTES;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_NETWORK_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_DESCRIPTION;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_DURATION_NAME;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_MODE_READ;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -45,8 +45,8 @@ public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
             .build();
     durationHistogram =
         meter
-            .histogramBuilder(NETWORK_DURATION_NAME)
-            .setDescription(NETWORK_DURATION_DESCRIPTION)
+            .histogramBuilder(METRIC_NAME_NETWORK_DURATION)
+            .setDescription(METRIC_DESCRIPTION_NETWORK_DURATION)
             .setUnit(MILLISECONDS)
             .build();
   }

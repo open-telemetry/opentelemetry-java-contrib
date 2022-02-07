@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class LongLockHandler extends AbstractThreadDispatchingHandler {
-  private static final String METRIC_NAME = "runtime.jvm.cpu.longlock.time";
+  private static final String METRIC_NAME = "process.runtime.jvm.cpu.longlock";
   private static final String METRIC_DESCRIPTION = "Long lock times";
   private static final String EVENT_NAME = "jdk.JavaMonitorWait";
 

@@ -15,7 +15,7 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ContextSwitchRateHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME = "runtime.jvm.cpu.context_switch";
+  private static final String METRIC_NAME = "process.runtime.jvm.cpu.context_switch";
   private static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
 
   private volatile double value = 0;

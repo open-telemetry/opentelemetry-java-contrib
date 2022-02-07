@@ -99,14 +99,25 @@ dependencies {
   }
 
   compileOnly("com.google.code.findbugs:jsr305")
+}
 
-  testImplementation("org.assertj:assertj-core")
-  testImplementation("org.awaitility:awaitility")
-  testImplementation("org.junit.jupiter:junit-jupiter-api")
-  testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("org.mockito:mockito-core")
-  testImplementation("org.mockito:mockito-junit-jupiter")
+testing {
+  suites.withType(JvmTestSuite::class).configureEach {
+    dependencies {
+      implementation(project)
 
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+      compileOnly("com.google.auto.value:auto-value-annotations")
+      compileOnly("com.google.errorprone:error_prone_annotations")
+      compileOnly("com.google.code.findbugs:jsr305")
+
+      implementation("org.junit.jupiter:junit-jupiter-api")
+      implementation("org.junit.jupiter:junit-jupiter-params")
+      implementation("org.mockito:mockito-core")
+      implementation("org.mockito:mockito-junit-jupiter")
+      implementation("org.assertj:assertj-core")
+      implementation("org.awaitility:awaitility")
+
+      runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    }
+  }
 }
