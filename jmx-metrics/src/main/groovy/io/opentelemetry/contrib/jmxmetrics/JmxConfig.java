@@ -34,7 +34,17 @@ class JmxConfig {
 
   static final List<String> AVAILABLE_TARGET_SYSTEMS =
       Arrays.asList(
-          "activemq", "cassandra", "jvm", "kafka", "kafka-consumer", "kafka-producer", "tomcat");
+          "activemq",
+          "cassandra",
+          "hbase",
+          "hadoop",
+          "jvm",
+          "kafka",
+          "kafka-consumer",
+          "kafka-producer",
+          "solr",
+          "tomcat",
+          "wildfly");
 
   final String serviceUrl;
   final String groovyScript;

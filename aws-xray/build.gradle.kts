@@ -1,15 +1,9 @@
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-
-  id("org.unbroken-dome.test-sets")
 }
 
 description = "OpenTelemetry AWS X-Ray Support"
-
-testSets {
-  create("awsTest")
-}
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
@@ -35,7 +29,17 @@ dependencies {
   testImplementation("com.google.guava:guava")
   testImplementation("org.slf4j:slf4j-simple")
   testImplementation("org.skyscreamer:jsonassert")
+}
 
-  add("awsTestImplementation", "io.opentelemetry:opentelemetry-exporter-otlp-trace")
-  add("awsTestImplementation", "org.testcontainers:junit-jupiter")
+testing {
+  suites {
+    val awsTest by registering(JvmTestSuite::class) {
+      dependencies {
+        implementation("io.opentelemetry:opentelemetry-exporter-otlp-trace")
+        implementation("io.opentelemetry:opentelemetry-sdk-testing")
+        implementation("org.testcontainers:junit-jupiter")
+        runtimeOnly("org.slf4j:slf4j-simple")
+      }
+    }
+  }
 }

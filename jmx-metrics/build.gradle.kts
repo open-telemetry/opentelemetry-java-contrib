@@ -1,7 +1,6 @@
 plugins {
   application
   id("com.github.johnrengelman.shadow")
-  id("org.unbroken-dome.test-sets")
 
   id("otel.groovy-conventions")
   id("otel.publish-conventions")
@@ -23,10 +22,6 @@ repositories {
 }
 
 val groovyVersion = "3.0.8"
-
-testSets {
-  create("integrationTest")
-}
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
@@ -53,18 +48,21 @@ dependencies {
 
   runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
 
-  testImplementation("io.grpc:grpc-api")
-  testImplementation("io.grpc:grpc-protobuf")
-  testImplementation("io.grpc:grpc-stub")
-  testImplementation("io.grpc:grpc-testing")
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("org.awaitility:awaitility")
-  testImplementation("org.testcontainers:testcontainers")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:0.11.0-alpha")
+}
 
-  add("integrationTestImplementation", "com.linecorp.armeria:armeria-grpc")
-  add("integrationTestImplementation", "com.linecorp.armeria:armeria-junit5")
-  add("integrationTestImplementation", "org.testcontainers:junit-jupiter")
+testing {
+  suites {
+    val integrationTest by registering(JvmTestSuite::class) {
+      dependencies {
+        implementation("com.linecorp.armeria:armeria-grpc")
+        implementation("com.linecorp.armeria:armeria-junit5")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:0.11.0-alpha")
+        implementation("org.testcontainers:junit-jupiter")
+      }
+    }
+  }
 }
 
 tasks {
