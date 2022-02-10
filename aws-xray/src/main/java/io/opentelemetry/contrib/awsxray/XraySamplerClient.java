@@ -64,7 +64,7 @@ final class XraySamplerClient {
 
   private final String getSamplingRulesEndpoint;
   private final String getSamplingTargetsEndpoint;
-  private final Call.Factory httpClient;
+  private final OkHttpClient httpClient;
 
   XraySamplerClient(String host) {
     this.getSamplingRulesEndpoint = host + "/GetSamplingRules";
@@ -94,7 +94,7 @@ final class XraySamplerClient {
         httpClient.newCall(
             new Request.Builder()
                 .url(endpoint)
-                .post(RequestBody.create(JSON_CONTENT_TYPE, requestBody))
+                .post(RequestBody.create(requestBody, JSON_CONTENT_TYPE))
                 .build());
 
     String response;
