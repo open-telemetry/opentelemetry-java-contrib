@@ -2,9 +2,9 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
   `java-library`
+  jacoco
 
   id("otel.errorprone-conventions")
-  id("otel.jacoco-conventions")
   id("otel.spotless-conventions")
 }
 
