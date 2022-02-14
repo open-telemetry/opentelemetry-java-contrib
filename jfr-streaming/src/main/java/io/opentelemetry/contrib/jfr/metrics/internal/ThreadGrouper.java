@@ -13,7 +13,8 @@ public final class ThreadGrouper {
   // FIXME doesn't actually do any grouping, but should be safe for now
   public Optional<String> groupedName(RecordedEvent ev) {
     Object thisField = ev.getValue("eventThread");
-    if (thisField instanceof RecordedThread thread) {
+    if (thisField instanceof RecordedThread) {
+      RecordedThread thread = (RecordedThread) thisField;
       return Optional.of(thread.getJavaName());
     }
     return Optional.empty();
