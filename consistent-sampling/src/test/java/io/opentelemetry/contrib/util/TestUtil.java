@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.hipparchus.stat.inference.GTest;
@@ -27,11 +26,11 @@ public final class TestUtil {
           }
         };
 
-    ImmutableMap<Object, Double> expectedProbabilities;
+    Map<Object, Double> expectedProbabilities = new HashMap<>();
     if (samplingProbability >= 1.) {
-      expectedProbabilities = ImmutableMap.of(0, 1.);
+      expectedProbabilities.put(0, 1.);
     } else if (samplingProbability <= 0.) {
-      expectedProbabilities = ImmutableMap.of(notSampled, 1.);
+      expectedProbabilities.put(notSampled, 1.);
     } else {
       int exponent = 0;
       while (true) {
@@ -42,17 +41,12 @@ public final class TestUtil {
         exponent += 1;
       }
       if (samplingProbability == Math.pow(0.5, exponent)) {
-        expectedProbabilities =
-            ImmutableMap.of(notSampled, 1 - samplingProbability, exponent, samplingProbability);
+        expectedProbabilities.put(notSampled, 1 - samplingProbability);
+        expectedProbabilities.put(exponent, samplingProbability);
       } else {
-        expectedProbabilities =
-            ImmutableMap.of(
-                notSampled,
-                1 - samplingProbability,
-                exponent,
-                2 * samplingProbability - Math.pow(0.5, exponent),
-                exponent + 1,
-                Math.pow(0.5, exponent) - samplingProbability);
+        expectedProbabilities.put(notSampled, 1 - samplingProbability);
+        expectedProbabilities.put(exponent, 2 * samplingProbability - Math.pow(0.5, exponent));
+        expectedProbabilities.put(exponent + 1, Math.pow(0.5, exponent) - samplingProbability);
       }
     }
 
