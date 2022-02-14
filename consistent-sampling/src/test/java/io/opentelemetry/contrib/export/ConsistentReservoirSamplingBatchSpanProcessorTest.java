@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import javax.annotation.Nullable;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Percentage;
 import org.hipparchus.distribution.discrete.BinomialDistribution;
@@ -73,7 +74,7 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
   private static final String SPAN_NAME_2 = "MySpanName/2";
   private static final long MAX_SCHEDULE_DELAY_MILLIS = 500;
 
-  private SdkTracerProvider sdkTracerProvider;
+  @Nullable private SdkTracerProvider sdkTracerProvider;
   private final BlockingSpanExporter blockingSpanExporter = new BlockingSpanExporter();
 
   @Mock private Sampler mockSampler;
@@ -85,13 +86,13 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
   }
 
   @AfterEach
-  @SuppressWarnings("FieldMissingNullable")
   void cleanup() {
     if (sdkTracerProvider != null) {
       sdkTracerProvider.shutdown();
     }
   }
 
+  @Nullable
   private ReadableSpan createEndedSpan(String spanName) {
     Tracer tracer = sdkTracerProvider.get(getClass().getName());
     Span span = tracer.spanBuilder(spanName).startSpan();
@@ -674,6 +675,7 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
      * @return the list of exported {@link SpanData} objects, otherwise {@code null} if the current
      *     thread is interrupted.
      */
+    @Nullable
     List<SpanData> waitForExport() {
       try {
         countDownLatch.await(timeout, TimeUnit.SECONDS);

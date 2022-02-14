@@ -12,8 +12,9 @@ import io.opentelemetry.contrib.util.RandomGenerator;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A consistent sampler that makes the same sampling decision as the parent and optionally falls back
- * to an alternative consistent sampler, if the parent p-value is invalid (like for root spans).
+ * A consistent sampler that makes the same sampling decision as the parent and optionally falls
+ * back to an alternative consistent sampler, if the parent p-value is invalid (like for root
+ * spans).
  */
 @Immutable
 public final class ConsistentParentBasedSampler extends ConsistentSampler {
