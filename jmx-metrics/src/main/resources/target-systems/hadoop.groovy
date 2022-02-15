@@ -35,7 +35,7 @@ otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.volume.failed", "The num
   "VolumeFailuresTotal", otel.&longUpDownCounterCallback)
 otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.file.count", "The total number of files being tracked by the name node.", "{files}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
-  "TotalFiles", otel.&longUpDownCounterCallback)
+  "FilesTotal", otel.&longUpDownCounterCallback)
 otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.file.load", "The current number of concurrent file accesses.", "{operations}",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "TotalLoad", otel.&longUpDownCounterCallback)
