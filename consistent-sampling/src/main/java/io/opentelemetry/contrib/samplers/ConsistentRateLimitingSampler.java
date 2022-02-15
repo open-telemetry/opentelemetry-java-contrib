@@ -7,11 +7,12 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.api.internal.GuardedBy;
 import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * This consistent {@link Sampler} adjust the sampling probability dynamically to limit the rate of
@@ -23,19 +24,24 @@ import java.util.function.LongSupplier;
  */
 final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
+  @Immutable
+  private static final class State {
+    private final double effectiveWindowCount;
+    private final double effectiveWindowNanos;
+    private final long lastNanoTime;
+
+    public State(double effectiveWindowCount, double effectiveWindowNanos, long lastNanoTime) {
+      this.effectiveWindowCount = effectiveWindowCount;
+      this.effectiveWindowNanos = effectiveWindowNanos;
+      this.lastNanoTime = lastNanoTime;
+    }
+  }
+
   private final String description;
   private final LongSupplier nanoTimeSupplier;
   private final double inverseAdaptationTimeNanos;
   private final double targetSpansPerNanosLimit;
-
-  @GuardedBy("this")
-  private double effectiveWindowCount;
-
-  @GuardedBy("this")
-  private double effectiveWindowNanos;
-
-  @GuardedBy("this")
-  private long lastNanoTime;
+  private final AtomicReference<State> state;
 
   /**
    * Constructor.
@@ -83,26 +89,32 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this.inverseAdaptationTimeNanos = 1e-9 / adaptationTimeSeconds;
     this.targetSpansPerNanosLimit = 1e-9 * targetSpansPerSecondLimit;
 
-    synchronized (this) {
-      this.effectiveWindowCount = 0;
-      this.effectiveWindowNanos = 0;
-      this.lastNanoTime = nanoTimeSupplier.getAsLong();
-    }
+    this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
   }
 
-  private synchronized double updateAndGetSamplingProbability() {
-    long currentNanoTime = Math.max(nanoTimeSupplier.getAsLong(), lastNanoTime);
-    long nanoTimeDelta = currentNanoTime - lastNanoTime;
-    lastNanoTime = currentNanoTime;
+  private State updateState(State oldState, long currentNanoTime) {
+    if (currentNanoTime <= oldState.lastNanoTime) {
+      return new State(
+          oldState.effectiveWindowCount + 1, oldState.effectiveWindowNanos, oldState.lastNanoTime);
+    }
+    long nanoTimeDelta = currentNanoTime - oldState.lastNanoTime;
     double decayFactor = Math.exp(-nanoTimeDelta * inverseAdaptationTimeNanos);
-    effectiveWindowCount = effectiveWindowCount * decayFactor + 1;
-    effectiveWindowNanos = effectiveWindowNanos * decayFactor + nanoTimeDelta;
-    return Math.min(1., (effectiveWindowNanos * targetSpansPerNanosLimit) / effectiveWindowCount);
+    double currentEffectiveWindowCount = oldState.effectiveWindowCount * decayFactor + 1;
+    double currentEffectiveWindowNanos =
+        oldState.effectiveWindowNanos * decayFactor + nanoTimeDelta;
+    return new State(currentEffectiveWindowCount, currentEffectiveWindowNanos, currentNanoTime);
   }
 
   @Override
   protected int getP(int parentP, boolean isRoot) {
-    double samplingProbability = updateAndGetSamplingProbability();
+    long currentNanoTime = nanoTimeSupplier.getAsLong();
+    State currentState = state.updateAndGet(s -> updateState(s, currentNanoTime));
+
+    double samplingProbability =
+        Math.min(
+            1.,
+            (currentState.effectiveWindowNanos * targetSpansPerNanosLimit)
+                / currentState.effectiveWindowCount);
 
     if (samplingProbability >= 1.) {
       return 0;
