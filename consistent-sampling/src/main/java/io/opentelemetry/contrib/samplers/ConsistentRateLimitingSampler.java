@@ -12,7 +12,6 @@ import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.function.LongSupplier;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * This consistent {@link Sampler} adjust the sampling probability dynamically to limit the rate of
@@ -22,7 +21,6 @@ import javax.annotation.concurrent.Immutable;
  * J. "Forecasting data published at irregular time intervals using an extension of Holt's method."
  * Management science 32.4 (1986): 499-510.) to estimate the current rate of spans.
  */
-@Immutable
 public class ConsistentRateLimitingSampler extends ConsistentSampler {
 
   private final String description;
