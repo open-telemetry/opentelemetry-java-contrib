@@ -24,12 +24,7 @@ public class DefaultRandomGenerator implements RandomGenerator {
   }
 
   private static final ThreadLocal<ThreadLocalData> THREAD_LOCAL_DATA =
-      new ThreadLocal<ThreadLocalData>() {
-        @Override
-        protected ThreadLocalData initialValue() {
-          return new ThreadLocalData();
-        }
-      };
+      ThreadLocal.withInitial(ThreadLocalData::new);
 
   private static final DefaultRandomGenerator INSTANCE = new DefaultRandomGenerator();
 
