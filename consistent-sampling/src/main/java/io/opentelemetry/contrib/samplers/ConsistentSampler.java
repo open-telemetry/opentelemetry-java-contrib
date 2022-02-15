@@ -124,6 +124,21 @@ public abstract class ConsistentSampler implements Sampler {
         nanoTimeSupplier);
   }
 
+  /**
+   * Returns a {@link ConsistentSampler} that samples a span if both this and the other given
+   * consistent sampler would sample the span.
+   *
+   * <p>If the other consistent sampler is the same as this, this consistent sampler will be
+   * returned.
+   *
+   * <p>The returned sampler takes care of setting the trace state correctly, which would not happen
+   * if the {@link #shouldSample(Context, String, String, SpanKind, Attributes, List)} method was
+   * called for each sampler individually. Also, the combined sampler is more efficient than
+   * evaluating the two samplers individually and combining both results afterwards.
+   *
+   * @param otherConsistentSampler the other consistent sampler
+   * @return the composed consistent sampler
+   */
   public ConsistentSampler and(ConsistentSampler otherConsistentSampler) {
     if (otherConsistentSampler == this) {
       return this;
@@ -131,6 +146,21 @@ public abstract class ConsistentSampler implements Sampler {
     return new ConsistentComposedAndSampler(this, otherConsistentSampler);
   }
 
+  /**
+   * Returns a {@link ConsistentSampler} that samples a span if either this or the other given
+   * consistent sampler would sample the span.
+   *
+   * <p>If the other consistent sampler is the same as this, this consistent sampler will be
+   * returned.
+   *
+   * <p>The returned sampler takes care of setting the trace state correctly, which would not happen
+   * if the {@link #shouldSample(Context, String, String, SpanKind, Attributes, List)} method was
+   * called for each sampler individually. Also, the combined sampler is more efficient than
+   * evaluating the two samplers individually and combining both results afterwards.
+   *
+   * @param otherConsistentSampler the other consistent sampler
+   * @return the composed consistent sampler
+   */
   public ConsistentSampler or(ConsistentSampler otherConsistentSampler) {
     if (otherConsistentSampler == this) {
       return this;
