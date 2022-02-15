@@ -9,6 +9,7 @@ import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import javax.annotation.concurrent.Immutable;
 
+/** A consistent sampler that samples with a fixed probability. */
 @Immutable
 public class ConsistentProbabilityBasedSampler extends ConsistentSampler {
 
