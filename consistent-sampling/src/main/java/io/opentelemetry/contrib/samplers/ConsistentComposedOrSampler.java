@@ -16,18 +16,13 @@ import javax.annotation.concurrent.Immutable;
  * <p>This sampler samples if any of the two samplers would sample.
  */
 @Immutable
-public final class ConsistentComposedOrSampler extends ConsistentSampler {
+final class ConsistentComposedOrSampler extends ConsistentSampler {
 
   private final ConsistentSampler sampler1;
   private final ConsistentSampler sampler2;
   private final String description;
 
-  public static ConsistentComposedOrSampler create(
-      ConsistentSampler sampler1, ConsistentSampler sampler2) {
-    return new ConsistentComposedOrSampler(sampler1, sampler2);
-  }
-
-  private ConsistentComposedOrSampler(ConsistentSampler sampler1, ConsistentSampler sampler2) {
+  ConsistentComposedOrSampler(ConsistentSampler sampler1, ConsistentSampler sampler2) {
     this.sampler1 = requireNonNull(sampler1);
     this.sampler2 = requireNonNull(sampler2);
     this.description =

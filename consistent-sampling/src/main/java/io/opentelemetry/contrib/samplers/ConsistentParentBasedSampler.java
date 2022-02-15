@@ -17,7 +17,7 @@ import javax.annotation.concurrent.Immutable;
  * spans).
  */
 @Immutable
-public final class ConsistentParentBasedSampler extends ConsistentSampler {
+final class ConsistentParentBasedSampler extends ConsistentSampler {
 
   private final ConsistentSampler rootSampler;
 
@@ -28,7 +28,7 @@ public final class ConsistentParentBasedSampler extends ConsistentSampler {
    *
    * @param rootSampler the root sampler
    */
-  public ConsistentParentBasedSampler(ConsistentSampler rootSampler) {
+  ConsistentParentBasedSampler(ConsistentSampler rootSampler) {
     this(rootSampler, DefaultRandomGenerator.get());
   }
 
@@ -39,7 +39,7 @@ public final class ConsistentParentBasedSampler extends ConsistentSampler {
    * @param rootSampler the root sampler
    * @param threadSafeRandomGenerator a thread-safe random generator
    */
-  public ConsistentParentBasedSampler(
+  ConsistentParentBasedSampler(
       ConsistentSampler rootSampler, RandomGenerator threadSafeRandomGenerator) {
     super(threadSafeRandomGenerator);
     this.rootSampler = requireNonNull(rootSampler);

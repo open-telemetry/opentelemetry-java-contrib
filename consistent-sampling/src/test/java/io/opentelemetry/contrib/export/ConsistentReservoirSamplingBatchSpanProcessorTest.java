@@ -21,8 +21,7 @@ import static org.mockito.Mockito.when;
 import io.opentelemetry.api.internal.GuardedBy;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.contrib.samplers.ConsistentAlwaysOnSampler;
-import io.opentelemetry.contrib.samplers.ConsistentProbabilityBasedSampler;
+import io.opentelemetry.contrib.samplers.ConsistentSampler;
 import io.opentelemetry.contrib.state.OtelTraceState;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -729,7 +728,7 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
 
     sdkTracerProvider =
         SdkTracerProvider.builder()
-            .setSampler(new ConsistentAlwaysOnSampler())
+            .setSampler(ConsistentSampler.alwaysOn())
             .addSpanProcessor(spanProcessor)
             .build();
 
@@ -791,8 +790,7 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
     sdkTracerProvider =
         SdkTracerProvider.builder()
             .setSampler(
-                new ConsistentProbabilityBasedSampler(
-                    samplingProbability, threadSafeRandomGenerator2))
+                ConsistentSampler.probabilityBased(samplingProbability, threadSafeRandomGenerator2))
             .addSpanProcessor(spanProcessor)
             .build();
 
@@ -1013,8 +1011,7 @@ class ConsistentReservoirSamplingBatchSpanProcessorTest {
     sdkTracerProvider =
         SdkTracerProvider.builder()
             .setSampler(
-                new ConsistentProbabilityBasedSampler(
-                    samplingProbability, threadSafeRandomGenerator2))
+                ConsistentSampler.probabilityBased(samplingProbability, threadSafeRandomGenerator2))
             .addSpanProcessor(spanProcessor)
             .build();
 

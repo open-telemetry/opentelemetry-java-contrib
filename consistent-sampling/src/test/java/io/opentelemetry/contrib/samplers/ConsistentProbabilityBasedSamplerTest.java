@@ -48,7 +48,7 @@ public class ConsistentProbabilityBasedSamplerTest {
   private void test(SplittableRandom rng, double samplingProbability) {
     int numSpans = 1000000;
 
-    Sampler sampler = new ConsistentProbabilityBasedSampler(samplingProbability, rng::nextLong);
+    Sampler sampler = ConsistentSampler.probabilityBased(samplingProbability, rng::nextLong);
 
     Map<Integer, Long> observedPvalues = new HashMap<>();
     for (long i = 0; i < numSpans; ++i) {

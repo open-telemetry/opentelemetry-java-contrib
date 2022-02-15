@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable;
 
 /** A consistent sampler that samples with a fixed probability. */
 @Immutable
-public class ConsistentProbabilityBasedSampler extends ConsistentSampler {
+final class ConsistentProbabilityBasedSampler extends ConsistentSampler {
 
   private final int lowerPValue;
   private final int upperPValue;
@@ -23,7 +23,7 @@ public class ConsistentProbabilityBasedSampler extends ConsistentSampler {
    *
    * @param samplingProbability the sampling probability
    */
-  public ConsistentProbabilityBasedSampler(double samplingProbability) {
+  ConsistentProbabilityBasedSampler(double samplingProbability) {
     this(samplingProbability, DefaultRandomGenerator.get());
   }
 
@@ -33,7 +33,7 @@ public class ConsistentProbabilityBasedSampler extends ConsistentSampler {
    * @param samplingProbability the sampling probability
    * @param threadSafeRandomGenerator a thread-safe random generator
    */
-  public ConsistentProbabilityBasedSampler(
+  ConsistentProbabilityBasedSampler(
       double samplingProbability, RandomGenerator threadSafeRandomGenerator) {
     super(threadSafeRandomGenerator);
     if (samplingProbability < 0.0 || samplingProbability > 1.0) {

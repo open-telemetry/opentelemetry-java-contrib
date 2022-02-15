@@ -21,9 +21,122 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
+import java.util.function.LongSupplier;
+import javax.annotation.Nonnull;
 
 /** Abstract base class for consistent samplers. */
-abstract class ConsistentSampler implements Sampler {
+public abstract class ConsistentSampler implements Sampler {
+
+  /**
+   * Returns a {@link ConsistentSampler} that samples all spans.
+   *
+   * @return a sampler
+   */
+  public static final ConsistentSampler alwaysOn() {
+    return ConsistentAlwaysOnSampler.getInstance();
+  }
+
+  /**
+   * Returns a {@link ConsistentSampler} that does not sample any span.
+   *
+   * @return a sampler
+   */
+  public static final ConsistentSampler alwaysOff() {
+    return ConsistentAlwaysOffSampler.getInstance();
+  }
+
+  /**
+   * Returns a {@link ConsistentSampler} that samples each span with a fixed probability.
+   *
+   * @param samplingProbability the sampling probability
+   * @return a sampler
+   */
+  public static final ConsistentSampler probabilityBased(double samplingProbability) {
+    return new ConsistentProbabilityBasedSampler(samplingProbability);
+  }
+
+  /**
+   * Returns a {@link ConsistentSampler} that samples each span with a fixed probability.
+   *
+   * @param samplingProbability the sampling probability
+   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @return a sampler
+   */
+  public static final ConsistentSampler probabilityBased(
+      double samplingProbability, RandomGenerator threadSafeRandomGenerator) {
+    return new ConsistentProbabilityBasedSampler(samplingProbability, threadSafeRandomGenerator);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that respects the sampling decision of the parent span
+   * or falls-back to the given sampler if it is a root span.
+   *
+   * @param rootSampler the root sampler
+   */
+  public static final ConsistentSampler parentBased(@Nonnull ConsistentSampler rootSampler) {
+    return new ConsistentParentBasedSampler(rootSampler);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that respects the sampling decision of the parent span
+   * or falls-back to the given sampler if it is a root span.
+   *
+   * @param rootSampler the root sampler
+   * @param threadSafeRandomGenerator a thread-safe random generator
+   */
+  public static final ConsistentSampler parentBased(
+      ConsistentSampler rootSampler, RandomGenerator threadSafeRandomGenerator) {
+    return new ConsistentParentBasedSampler(rootSampler, threadSafeRandomGenerator);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that attempts to adjust the sampling probability
+   * dynamically to meet the target span rate.
+   *
+   * @param targetSpansPerSecondLimit the desired spans per second limit
+   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
+   *     exponential smoothing)
+   */
+  public static final ConsistentSampler rateLimited(
+      double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+    return new ConsistentRateLimitingSampler(targetSpansPerSecondLimit, adaptationTimeSeconds);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that attempts to adjust the sampling probability
+   * dynamically to meet the target span rate.
+   *
+   * @param targetSpansPerSecondLimit the desired spans per second limit
+   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
+   *     exponential smoothing)
+   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param nanoTimeSupplier a supplier for the current nano time
+   */
+  public static final ConsistentSampler rateLimited(
+      double targetSpansPerSecondLimit,
+      double adaptationTimeSeconds,
+      RandomGenerator threadSafeRandomGenerator,
+      LongSupplier nanoTimeSupplier) {
+    return new ConsistentRateLimitingSampler(
+        targetSpansPerSecondLimit,
+        adaptationTimeSeconds,
+        threadSafeRandomGenerator,
+        nanoTimeSupplier);
+  }
+
+  public ConsistentSampler and(ConsistentSampler otherConsistentSampler) {
+    if (otherConsistentSampler == this) {
+      return this;
+    }
+    return new ConsistentComposedAndSampler(this, otherConsistentSampler);
+  }
+
+  public ConsistentSampler or(ConsistentSampler otherConsistentSampler) {
+    if (otherConsistentSampler == this) {
+      return this;
+    }
+    return new ConsistentComposedOrSampler(this, otherConsistentSampler);
+  }
 
   protected final RandomGenerator threadSafeRandomGenerator;
 

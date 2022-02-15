@@ -61,8 +61,8 @@ class ConsistentRateLimitingSamplerTest {
     double adaptationTimeSeconds = 5;
     SplittableRandom random = new SplittableRandom(0L);
 
-    ConsistentRateLimitingSampler sampler =
-        new ConsistentRateLimitingSampler(
+    ConsistentSampler sampler =
+        ConsistentSampler.rateLimited(
             targetSpansPerSecondLimit, adaptationTimeSeconds, random::nextLong, nanoTimeSupplier);
 
     long nanosBetweenSpans = TimeUnit.MICROSECONDS.toNanos(100);
@@ -95,8 +95,8 @@ class ConsistentRateLimitingSamplerTest {
     double adaptationTimeSeconds = 5;
     SplittableRandom random = new SplittableRandom(0L);
 
-    ConsistentRateLimitingSampler sampler =
-        new ConsistentRateLimitingSampler(
+    ConsistentSampler sampler =
+        ConsistentSampler.rateLimited(
             targetSpansPerSecondLimit, adaptationTimeSeconds, random::nextLong, nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(100);
@@ -151,8 +151,8 @@ class ConsistentRateLimitingSamplerTest {
     double adaptationTimeSeconds = 5;
     SplittableRandom random = new SplittableRandom(0L);
 
-    ConsistentRateLimitingSampler sampler =
-        new ConsistentRateLimitingSampler(
+    ConsistentSampler sampler =
+        ConsistentSampler.rateLimited(
             targetSpansPerSecondLimit, adaptationTimeSeconds, random::nextLong, nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(10);

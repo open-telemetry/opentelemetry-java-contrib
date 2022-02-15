@@ -8,7 +8,15 @@ package io.opentelemetry.contrib.samplers;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public class ConsistentAlwaysOnSampler extends ConsistentSampler {
+final class ConsistentAlwaysOnSampler extends ConsistentSampler {
+
+  private ConsistentAlwaysOnSampler() {}
+
+  private static final ConsistentSampler INSTANCE = new ConsistentAlwaysOnSampler();
+
+  static ConsistentSampler getInstance() {
+    return INSTANCE;
+  }
 
   @Override
   protected int getP(int parentP, boolean isRoot) {

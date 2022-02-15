@@ -21,7 +21,7 @@ import java.util.function.LongSupplier;
  * J. "Forecasting data published at irregular time intervals using an extension of Holt's method."
  * Management science 32.4 (1986): 499-510.) to estimate the current rate of spans.
  */
-public class ConsistentRateLimitingSampler extends ConsistentSampler {
+final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
   private final String description;
   private final LongSupplier nanoTimeSupplier;
@@ -44,8 +44,7 @@ public class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
    */
-  public ConsistentRateLimitingSampler(
-      double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+  ConsistentRateLimitingSampler(double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
     this(
         targetSpansPerSecondLimit,
         adaptationTimeSeconds,
@@ -62,7 +61,7 @@ public class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param threadSafeRandomGenerator a thread-safe random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  public ConsistentRateLimitingSampler(
+  ConsistentRateLimitingSampler(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       RandomGenerator threadSafeRandomGenerator,
