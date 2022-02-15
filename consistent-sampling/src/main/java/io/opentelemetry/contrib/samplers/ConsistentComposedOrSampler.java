@@ -46,15 +46,13 @@ public final class ConsistentComposedOrSampler extends ConsistentSampler {
     if (OtelTraceState.isValidP(p1)) {
       if (OtelTraceState.isValidP(p2)) {
         return Math.min(p1, p2);
-      } else {
-        return p1;
       }
+      return p1;
     } else {
       if (OtelTraceState.isValidP(p2)) {
         return p2;
-      } else {
-        return OtelTraceState.getInvalidP();
       }
+      return OtelTraceState.getInvalidP();
     }
   }
 
