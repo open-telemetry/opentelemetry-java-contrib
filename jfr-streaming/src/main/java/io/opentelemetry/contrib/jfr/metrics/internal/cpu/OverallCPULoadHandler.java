@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.AVERAGE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COUNT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HERTZ;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MAX;
@@ -36,19 +35,13 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   private static final Attributes ATTR_USER_AVERAGE =
       Attributes.of(ATTR_USAGE, USER, ATTR_TYPE, AVERAGE);
-  private static final Attributes ATTR_USER_COUNT =
-      Attributes.of(ATTR_USAGE, USER, ATTR_TYPE, COUNT);
   private static final Attributes ATTR_USER_MAX = Attributes.of(ATTR_USAGE, USER, ATTR_TYPE, MAX);
   private static final Attributes ATTR_SYSTEM_AVERAGE =
       Attributes.of(ATTR_USAGE, SYSTEM, ATTR_TYPE, AVERAGE);
-  private static final Attributes ATTR_SYSTEM_COUNT =
-      Attributes.of(ATTR_USAGE, SYSTEM, ATTR_TYPE, COUNT);
   private static final Attributes ATTR_SYSTEM_MAX =
       Attributes.of(ATTR_USAGE, SYSTEM, ATTR_TYPE, MAX);
   private static final Attributes ATTR_MACHINE_AVERAGE =
       Attributes.of(ATTR_USAGE, MACHINE, ATTR_TYPE, AVERAGE);
-  private static final Attributes ATTR_MACHINE_COUNT =
-      Attributes.of(ATTR_USAGE, MACHINE, ATTR_TYPE, COUNT);
   private static final Attributes ATTR_MACHINE_MAX =
       Attributes.of(ATTR_USAGE, MACHINE, ATTR_TYPE, MAX);
 
@@ -75,17 +68,14 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
             codm -> {
               var summary = summarize(jvmUserData);
               codm.record(summary.getAverage(), ATTR_USER_AVERAGE);
-              codm.record(summary.getCount(), ATTR_USER_COUNT);
               codm.record(summary.getMax(), ATTR_USER_MAX);
               jvmUserData.clear();
               summary = summarize(jvmSystemData);
               codm.record(summary.getAverage(), ATTR_SYSTEM_AVERAGE);
-              codm.record(summary.getCount(), ATTR_SYSTEM_COUNT);
               codm.record(summary.getMax(), ATTR_SYSTEM_MAX);
               jvmSystemData.clear();
               summary = summarize(machineTotalData);
               codm.record(summary.getAverage(), ATTR_MACHINE_AVERAGE);
-              codm.record(summary.getCount(), ATTR_MACHINE_COUNT);
               codm.record(summary.getMax(), ATTR_MACHINE_MAX);
               machineTotalData.clear();
             });

@@ -31,6 +31,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
   private static final String METRIC_NAME_MEMORY_USAGE = "process.runtime.jvm.memory.usage";
   private static final String METRIC_NAME_MEMORY_COMMITTED = "process.runtime.jvm.memory.committed";
+  private static final String METRIC_NAME_MEMORY_MAX = "process.runtime.jvm.memory.max";
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
@@ -45,7 +46,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
   private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
 
-  private static final Logger logger = Logger.getLogger(G1HeapSummaryHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(GCHeapSummaryHandler.class.getName());
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
@@ -103,7 +104,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
             });
 
     meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_COMMITTED)
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_MAX)
         .ofDoubles()
         .setUnit(BYTES)
         .setDescription(METRIC_DESCRIPTION_MEMORY)
