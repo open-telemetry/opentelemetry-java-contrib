@@ -2,6 +2,55 @@
 
 ## Unreleased
 
+## Version 1.11.0 - 2022-03-03
+
+* aws-xray
+  * Migrate from test-sets to test suites.
+    ([#214](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/214))
+  * Update to Otel 1.11 and other dependencies
+    ([#228](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/228))
+* jfr-streaming
+  * Use type expressions from Java 17
+    ([#207](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/207))
+  * Split up GC Handlers, add support for Parallel
+    ([#201](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/201))
+  * Remove unused fields
+    ([#215](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/215))
+  * eliminated use of Java 14 instanceof pattern matching
+    ([#233](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/233))
+* jmx-metrics
+  * jmx-metrics: Activemq
+    ([#188](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/188))
+  * Migrate from test-sets to test suites.
+    ([#214](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/214))
+  * Adds Solr metrics gathering to jmx-metrics
+    ([#204](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/204))
+  * Add Hadoop Monitoring
+    ([#210](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/210))
+  * Add Hbase Support
+    ([#211](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/211))
+  * jmx metrics: Add test timeouts and mbean server status assertions
+    ([#218](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/218))
+  * jmx-metrics: thoroughly wait for cassandra and kafka test containers
+    ([#219](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/219))
+  *  Update Kafka JMX Script
+    ([#216](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/216))
+  * Fixes solr JMX metrics to use all possible MBeans instead of only first
+    ([#223](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/223))
+  * WildFly Monitoring
+    ([#224](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/224))
+  * Updates Solr cache size metric to point to new attribute to measure byte size
+    ([#225](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/225))
+  * Change jmx-metrics jar classifier so shadowJar isn't rebuilt even when nothing changed.
+    ([#231](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/231))
+  * Updates jmx-metrics WildFly integration to point to integer attributes for some metrics
+    ([#232](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/232))
+  * update Filetotal metric
+    ([#234](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/234))
+* maven-extension
+  * Update docs for 1.10 release
+    ([#202](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/202))
+
 ## Version 1.10.0 - 2022-01-18
 
 ### Updated Libraries
