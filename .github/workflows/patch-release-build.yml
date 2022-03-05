@@ -28,7 +28,7 @@ jobs:
       - id: checkout-release-branch
         name: Check out release branch
         continue-on-error: true
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ steps.parse-release-branch.outputs.release-branch-name }}
           fetch-depth: 0
@@ -36,7 +36,7 @@ jobs:
       - id: checkout-release-tag
         name: Check out release tag
         if: ${{ steps.checkout-release-branch.outcome == 'failure' }}
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ steps.parse-release-branch.outputs.release-tag-name }}
           fetch-depth: 0
@@ -52,7 +52,7 @@ jobs:
     needs: prepare-release-branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -79,7 +79,7 @@ jobs:
     needs: prepare-release-branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build, integration-test ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
