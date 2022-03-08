@@ -27,13 +27,11 @@ to release in the input field that pops up, and then press "Run workflow".
 This triggers the release process, which builds the artifacts, publishes the artifacts, and creates
 and pushes a git tag with the version number.
 
-## Announcement
-
-Once the GitHub workflow completes, go to Github [release
-page](https://github.com/open-telemetry/opentelemetry-java-contrib/releases), press
-`Draft a new release` to write release notes about the new release. If there is already a draft
-release notes, just point it at the created tag. You can use the script at
-`buildscripts/draft-release-notes.sh` to generate release notes from the change log.
+Once the GitHub workflow completes, go to Github
+[release page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases),
+find the draft release created by the release workflow, and
+* Select the checkbox for "Create a discussion for this release"
+* Press the "Publish release" button
 
 ### Notifying other OpenTelemetry projects
 
@@ -89,3 +87,9 @@ applied automatically, we need to do code review to make sure the manual cherryp
 After it is merged, Run the patch release workflow again, but leave the commits input field blank.
 The release will be made with the current state of the release branch, which is what you prepared
 above.
+
+Once the GitHub workflow completes, go to Github
+[release page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases),
+find the draft release created by the release workflow, and
+* Select the checkbox for "Create a discussion for this release"
+* Press the "Publish release" button
