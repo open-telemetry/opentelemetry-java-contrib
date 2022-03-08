@@ -87,3 +87,9 @@ applied automatically, we need to do code review to make sure the manual cherryp
 After it is merged, Run the patch release workflow again, but leave the commits input field blank.
 The release will be made with the current state of the release branch, which is what you prepared
 above.
+
+Once the GitHub workflow completes, go to Github
+[release page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases),
+find the draft release created by the release workflow, and
+* Select the checkbox for "Create a discussion for this release"
+* Press the "Publish release" button
