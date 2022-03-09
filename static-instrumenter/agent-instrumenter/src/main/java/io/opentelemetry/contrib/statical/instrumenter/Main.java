@@ -135,7 +135,7 @@ public class Main {
       }
       outJar.closeEntry();
 
-      logger.debug("Additional class added: " + className);
+      logger.debug("Additional class added: {}", className);
     }
   }
 

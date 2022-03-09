@@ -57,7 +57,7 @@ class ClassArchive {
         outJar.closeEntry();
       } catch (ZipException e) {
         if (!isEntryDuplicate(e)) {
-          logger.error("Error while creating entry: " + outEntry.getName(), e);
+          logger.error("Error while creating entry: {}", outEntry.getName(), e);
           throw e;
         }
       }
