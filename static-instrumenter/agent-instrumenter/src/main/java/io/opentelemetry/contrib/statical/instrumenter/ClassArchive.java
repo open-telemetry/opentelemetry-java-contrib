@@ -53,7 +53,7 @@ class ClassArchive {
     try (InputStream entryInputStream = getInputStreamForEntry(inEntry, outEntry)) {
       try {
         outJar.putNextEntry(outEntry);
-        StreamUtils.copy(entryInputStream, outJar);
+        entryInputStream.transferTo(outJar);
         outJar.closeEntry();
       } catch (ZipException e) {
         if (!isEntryDuplicate(e)) {
@@ -75,23 +75,11 @@ class ClassArchive {
     ArchiveEntry entry = ArchiveEntry.ofFilePath(inEntry.getName());
     if (entry.isClass() && !entry.shouldBeSkipped()) {
       String className = entry.getClassName();
-      try {
-        // sanity check
-        Class.forName(className, false, ClassLoader.getSystemClassLoader());
-        byte[] modified = instrumentedClasses.get(entry.getClassPath());
-
-        if (modified != null) {
-          logger.debug("Found instrumented class: " + className);
-          entryIn = new ByteArrayInputStream(modified);
-          outEntry.setSize(modified.length);
-        }
-      } catch (ClassNotFoundException
-          | NoClassDefFoundError cdp) { // NoClassDefFoundError among others
-        logger.warn(
-            "Could not load class: "
-                + className
-                + ". Make sure the dependencies are correctly set.",
-            cdp);
+      byte[] modified = instrumentedClasses.get(entry.getClassPath());
+      if (modified != null) {
+        logger.debug("Found instrumented class: " + className);
+        entryIn = new ByteArrayInputStream(modified);
+        outEntry.setSize(modified.length);
       }
     }
     return (entryIn == null ? source.getInputStream(inEntry) : entryIn);

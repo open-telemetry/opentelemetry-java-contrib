@@ -24,7 +24,7 @@ public class MainTest {
   @TempDir private File tempDir;
 
   @Test
-  public void shouldSaveTransformedJarsTo(@TempDir File target) throws IOException {
+  void shouldSaveTransformedJarsTo(@TempDir File target) throws IOException {
 
     // given
     ClassArchive.Factory factory = mock(ClassArchive.Factory.class);

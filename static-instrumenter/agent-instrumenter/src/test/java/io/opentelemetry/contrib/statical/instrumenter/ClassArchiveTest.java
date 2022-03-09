@@ -20,7 +20,7 @@ public class ClassArchiveTest {
   @TempDir private File tempDir;
 
   @Test
-  public void shouldCopyAllClasses(@TempDir File destination) throws IOException {
+  void shouldCopyAllClasses(@TempDir File destination) throws IOException {
 
     // given
     byte[] newTransformed = new byte[] {(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE};

@@ -22,7 +22,7 @@ class ArchiveEntry {
     this.shouldBeSkipped = shouldBeSkipped;
   }
 
-  public static ArchiveEntry ofFilePath(String path) {
+  static ArchiveEntry ofFilePath(String path) {
     if (!isClass(path)) {
       return NOT_CLASS;
     }

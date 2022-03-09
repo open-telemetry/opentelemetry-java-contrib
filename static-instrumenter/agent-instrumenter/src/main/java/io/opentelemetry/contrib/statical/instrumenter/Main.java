@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 public class Main {
 
-  private static final String PATH_SEPARATROR = System.getProperty("path.separator");
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
   private static final Main INSTANCE = new Main(new ClassArchive.Factory() {});
@@ -48,7 +47,7 @@ public class Main {
 
     String classPath = System.getProperty("java.class.path");
     logger.debug("Classpath (jars list): " + classPath);
-    String[] jarsList = classPath.split(PATH_SEPARATROR);
+    String[] jarsList = classPath.split(File.pathSeparator);
 
     getInstance().saveTransformedJarsTo(jarsList, outDir);
   }
@@ -124,14 +123,15 @@ public class Main {
 
   // FIXME: only relevant additional classes should be injected
   private void injectAdditionalClassesTo(ZipOutputStream outJar) throws IOException {
-    for (String className : additionalClasses.keySet()) {
-      byte[] classData = additionalClasses.get(className);
+    for (Map.Entry<String, byte[]> clazz : additionalClasses.entrySet()) {
+      String className = clazz.getKey();
+      byte[] classData = clazz.getValue();
 
       ZipEntry newEntry = new ZipEntry(className);
       outJar.putNextEntry(newEntry);
       if (classData != null) {
         newEntry.setSize(classData.length);
-        StreamUtils.copy(new ByteArrayInputStream(classData), outJar);
+        new ByteArrayInputStream(classData).transferTo(outJar);
       }
       outJar.closeEntry();
 
