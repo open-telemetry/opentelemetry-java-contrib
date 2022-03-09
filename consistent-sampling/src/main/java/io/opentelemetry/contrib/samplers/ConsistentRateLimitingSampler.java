@@ -20,7 +20,8 @@ import javax.annotation.concurrent.Immutable;
  *
  * <p>This sampler uses exponential smoothing to estimate on irregular data (compare Wright, David
  * J. "Forecasting data published at irregular time intervals using an extension of Holt's method."
- * Management science 32.4 (1986): 499-510.) to estimate the current rate of spans.
+ * Management science 32.4 (1986): 499-510.) to estimate the average waiting time between spans
+ * which further allows to estimate the current rate of spans.
  */
 final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
