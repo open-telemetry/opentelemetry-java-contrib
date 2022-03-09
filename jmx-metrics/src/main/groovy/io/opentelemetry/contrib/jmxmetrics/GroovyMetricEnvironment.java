@@ -275,7 +275,8 @@ public class GroovyMetricEnvironment {
         .setDescription(description)
         .setUnit(unit)
         .buildWithCallback(
-            proxiedDoubleObserver(name, description, unit, InstrumentType.OBSERVABLE_SUM, updater));
+            proxiedDoubleObserver(
+                name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater));
   }
 
   /**
@@ -296,7 +297,8 @@ public class GroovyMetricEnvironment {
         .setDescription(description)
         .setUnit(unit)
         .buildWithCallback(
-            proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_SUM, updater));
+            proxiedLongObserver(
+                name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater));
   }
 
   /**
@@ -319,7 +321,7 @@ public class GroovyMetricEnvironment {
         .setUnit(unit)
         .buildWithCallback(
             proxiedDoubleObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_SUM, updater));
+                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater));
   }
 
   /**
@@ -341,7 +343,7 @@ public class GroovyMetricEnvironment {
         .setUnit(unit)
         .buildWithCallback(
             proxiedLongObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_SUM, updater));
+                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater));
   }
 
   private Consumer<ObservableDoubleMeasurement> proxiedDoubleObserver(
