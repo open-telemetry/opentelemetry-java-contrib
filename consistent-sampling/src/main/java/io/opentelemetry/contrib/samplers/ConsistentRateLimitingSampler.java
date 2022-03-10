@@ -21,7 +21,51 @@ import javax.annotation.concurrent.Immutable;
  * <p>This sampler uses exponential smoothing to estimate on irregular data (compare Wright, David
  * J. "Forecasting data published at irregular time intervals using an extension of Holt's method."
  * Management science 32.4 (1986): 499-510.) to estimate the average waiting time between spans
- * which further allows to estimate the current rate of spans.
+ * which further allows to estimate the current rate of spans. In the paper, Eq. 2 defines the
+ * weighted average of a sequence of data
+ *
+ * <p>{@code ..., X(n-2), X(n-1), X(n)}
+ *
+ * <p>at irregular times
+ *
+ * <p>{@code ..., t(n-2), t(n-1), t(n)}
+ *
+ * <p>as
+ *
+ * <p>{@code E(X(n)) := A(n) * V(n)}.
+ *
+ * <p>{@code A(n)} and {@code V(n)} are computed recursively using Eq. 5 and Eq. 6 given by
+ *
+ * <p>{@code A(n) = b(n) * A(n-1) + X(n)} and {@code V(n) = V(n-1) / (b(n) + V(n-1))}
+ *
+ * <p>where
+ *
+ * <p>{@code b(n) := (1 - a)^(t(n) - t(n-1)) = exp((t(n) - t(n-1)) * ln(1 - a))}.
+ *
+ * <p>Introducing
+ *
+ * <p>{@code C(n) := 1 / V(n)}
+ *
+ * <p>the recursion can be rewritten as
+ *
+ * <p>{@code A(n) = b(n) * A(n-1) + X(n)} and {@code C(n) = b(n) * C(n-1) + 1}.
+ *
+ * <p>
+ *
+ * <p>Since we want to estimate the average waiting time, our data is given by
+ *
+ * <p>{@code X(n) := t(n) - t(n-1)}.
+ *
+ * <p>
+ *
+ * <p>The following correspondence is used for the implementation:
+ *
+ * <ul>
+ *   <li>{@code effectiveWindowNanos} corresponds to {@code A(n)}
+ *   <li>{@code effectiveWindowCount} corresponds to {@code C(n)}
+ *   <li>{@code decayFactor} corresponds to {@code b(n)}
+ *   <li>{@code adaptationTimeSeconds} corresponds to {@code -1 / ln(1 - a)}
+ * </ul>
  */
 final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
