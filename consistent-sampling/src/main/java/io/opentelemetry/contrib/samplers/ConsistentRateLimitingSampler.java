@@ -112,10 +112,8 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     State currentState = state.updateAndGet(s -> updateState(s, currentNanoTime));
 
     double samplingProbability =
-        Math.min(
-            1.,
-            (currentState.effectiveWindowNanos * targetSpansPerNanosLimit)
-                / currentState.effectiveWindowCount);
+        (currentState.effectiveWindowNanos * targetSpansPerNanosLimit)
+            / currentState.effectiveWindowCount;
 
     if (samplingProbability >= 1.) {
       return 0;
