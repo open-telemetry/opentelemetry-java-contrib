@@ -77,7 +77,7 @@ All components updated to target OpenTelemetry SDK 1.10.0.
 
 ## Version 1.9.0 - 2021-12-03
 
-All components updated to target OpenTelemetry SDK 1.9.0.
+All components updated to target OpenTelemetry SDK 1.9.1.
 
 ### Maven extension
 
@@ -119,8 +119,6 @@ Listens for JFR events (using the Streaming API) and converts them to OpenTeleme
 ### Runtime attach - New 🌟
 
 Allows programmatic attach of Javaagent.
-
-### Updated Libraries
 
 ### JMX metrics
 
