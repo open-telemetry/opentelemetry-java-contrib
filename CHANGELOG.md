@@ -2,7 +2,13 @@
 
 ## Unreleased
 
+## Version 1.12.0 - 2022-03-14
+
+All components updated to target OpenTelemetry SDK 1.12.0.
+
 ## Version 1.11.0 - 2022-03-03
+
+All components updated to target OpenTelemetry SDK 1.11.0.
 
 ### JFR streaming
 
@@ -33,6 +39,8 @@
   ([#234](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/234))
 
 ## Version 1.10.0 - 2022-01-18
+
+All components updated to target OpenTelemetry SDK 1.10.0.
 
 ### JMX metrics
 
@@ -69,7 +77,7 @@
 
 ## Version 1.9.0 - 2021-12-03
 
-All libraries updated to OpenTelemetry SDK 1.9.0.
+All components updated to target OpenTelemetry SDK 1.9.0.
 
 ### Maven extension
 
@@ -98,7 +106,7 @@ Skipped to stay in sync with other OpenTelemetry Java repositories.
 
 ## Version 1.7.0 - 2021-10-29
 
-All libraries updated to OpenTelemetry SDK 1.7.0.
+All components updated to target OpenTelemetry SDK 1.7.0.
 
 ### Disruptor span processor - New 🌟
 
@@ -136,7 +144,7 @@ Allows programmatic attach of Javaagent.
 
 ## Version 1.6.0 - 2021-09-22
 
-All libraries updated to OpenTelemetry SDK 1.6.0.
+All components updated to target OpenTelemetry SDK 1.6.0.
 
 ### Maven extension - New 🌟
 
@@ -144,7 +152,7 @@ This extension can be registered in a Maven build to trace different build steps
 
 ## Version 1.5.0 - 2021-09-21
 
-All libraries updated to OpenTelemetry SDK 1.5.0.
+All components updated to target OpenTelemetry SDK 1.5.0.
 
 ### JMX metrics
 
@@ -155,7 +163,7 @@ All libraries updated to OpenTelemetry SDK 1.5.0.
 
 ## Version 1.4.0 - 2021-08-13
 
-All libraries updated to OpenTelemetry SDK 1.4.0.
+All components updated to target OpenTelemetry SDK 1.4.0.
 
 ### AWS X-Ray - New 🌟
 
