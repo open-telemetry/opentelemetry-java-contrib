@@ -35,7 +35,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
 
-    if (args.length == 0) {
+    if (args.length != 1) {
       printUsage();
       return;
     }
@@ -56,7 +56,7 @@ public class Main {
   private static void printUsage() {
     System.out.println(
         "OpenTelemetry Java Static Instrumenter\n"
-            + "Usage:\n"
+            + "Usage:\njava "
             + Main.class.getCanonicalName()
             + " <output directory> (where instrumented archives will be stored)");
   }
@@ -123,7 +123,7 @@ public class Main {
 
   // FIXME: only relevant additional classes should be injected
   private void injectAdditionalClassesTo(ZipOutputStream outJar) throws IOException {
-    for (Map.Entry<String, byte[]> clazz : additionalClasses.entrySet()) {
+    for (Map.Entry<String, byte[]> entry : additionalClasses.entrySet()) {
       String className = clazz.getKey();
       byte[] classData = clazz.getValue();
 

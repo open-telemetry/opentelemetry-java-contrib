@@ -65,7 +65,7 @@ class ClassArchive {
   }
 
   private static boolean isEntryDuplicate(ZipException ze) {
-    return (ze.getMessage() != null && ze.getMessage().contains("duplicate"));
+    return ze.getMessage() != null && ze.getMessage().contains("duplicate");
   }
 
   private InputStream getInputStreamForEntry(JarEntry inEntry, ZipEntry outEntry)
@@ -82,6 +82,6 @@ class ClassArchive {
         outEntry.setSize(modified.length);
       }
     }
-    return (entryIn == null ? source.getInputStream(inEntry) : entryIn);
+    return entryIn == null ? source.getInputStream(inEntry) : entryIn;
   }
 }
