@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.statical.instrumenter;
+package io.opentelemetry.contrib.staticinstrumenter;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -93,20 +92,20 @@ public class Main {
 
     for (String pathItem : jarsList) {
       logger.info("Classpath item processed: " + pathItem);
-      if (shouldProcessItem(pathItem)) {
-        saveJarTo(new File(pathItem), outDir);
+      if (isArchive(pathItem)) {
+        saveArchiveTo(new File(pathItem), outDir);
       }
     }
   }
 
-  private static boolean shouldProcessItem(String pathItem) {
+  private static boolean isArchive(String pathItem) {
     return (pathItem.endsWith(".jar") || pathItem.endsWith(".war"));
   }
 
   // FIXME: don't "instrument" our agent jar
   // FIXME: detect and warn on signed jars (and drop the signing bits)
   // FIXME: multiple jars with same name
-  private void saveJarTo(File inFile, File outDir) throws IOException {
+  private void saveArchiveTo(File inFile, File outDir) throws IOException {
 
     try (JarFile inJar = new JarFile(inFile);
         ZipOutputStream outJar = outJarFor(outDir, inFile)) {
@@ -124,14 +123,14 @@ public class Main {
   // FIXME: only relevant additional classes should be injected
   private void injectAdditionalClassesTo(ZipOutputStream outJar) throws IOException {
     for (Map.Entry<String, byte[]> entry : additionalClasses.entrySet()) {
-      String className = clazz.getKey();
-      byte[] classData = clazz.getValue();
+      String className = entry.getKey();
+      byte[] classData = entry.getValue();
 
       ZipEntry newEntry = new ZipEntry(className);
       outJar.putNextEntry(newEntry);
       if (classData != null) {
         newEntry.setSize(classData.length);
-        new ByteArrayInputStream(classData).transferTo(outJar);
+        outJar.write(classData);
       }
       outJar.closeEntry();
 

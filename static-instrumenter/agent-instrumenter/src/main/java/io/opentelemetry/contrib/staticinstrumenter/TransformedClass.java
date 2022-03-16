@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.statical.instrumenter;
+package io.opentelemetry.contrib.staticinstrumenter;
 
 public class TransformedClass {
   private final byte[] classcode;

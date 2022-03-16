@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.statical.instrumenter;
+package io.opentelemetry.contrib.staticinstrumenter;
 
-import static io.opentelemetry.contrib.statical.instrumenter.JarTestUtil.assertJar;
-import static io.opentelemetry.contrib.statical.instrumenter.JarTestUtil.createJar;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
@@ -34,18 +32,19 @@ public class MainTest {
     underTest.getAdditionalClasses().put("additionalOne", new byte[0]);
     underTest.getAdditionalClasses().put("additionalTwo", new byte[0]);
     String[] jarsList = {
-      createJar(tempDir, "one.jar", "first", "second"), createJar(tempDir, "two.jar", "a", "b", "c")
+      JarTestUtil.createJar(tempDir, "one.jar", "first", "second"),
+      JarTestUtil.createJar(tempDir, "two.jar", "a", "b", "c")
     };
     // when
     underTest.saveTransformedJarsTo(jarsList, target);
 
     // then
-    assertJar(
+    JarTestUtil.assertJar(
         target,
         "one.jar",
         new String[] {"additionalOne", "additionalTwo"},
         new byte[][] {null, null});
-    assertJar(
+    JarTestUtil.assertJar(
         target,
         "one.jar",
         new String[] {"additionalOne", "additionalTwo"},

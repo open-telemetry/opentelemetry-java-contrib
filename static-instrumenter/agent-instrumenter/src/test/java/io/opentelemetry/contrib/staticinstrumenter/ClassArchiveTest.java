@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.statical.instrumenter;
+package io.opentelemetry.contrib.staticinstrumenter;
 
 import java.io.File;
 import java.io.FileOutputStream;
