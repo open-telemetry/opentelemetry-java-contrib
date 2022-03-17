@@ -6,7 +6,7 @@
 
 Module enhancing OpenTelemetry Java Agent for static instrumentation. The modified agent is capable of instrumenting and saving a new JAR with all relevant instrumentations applied and necessary helper class-code included.
 
-In order to statically instrument a JAR, modified agent needs to be both attached (`-javaagent:`) and run as the main method (`io.opentelemetry.contrib.statical.instrumenter.Main` class).
+In order to statically instrument a JAR, modified agent needs to be both attached (`-javaagent:`) and run as the main method (`io.opentelemetry.contrib.staticinstrumenter.Main` class).
 
 ### Gradle plugin
 

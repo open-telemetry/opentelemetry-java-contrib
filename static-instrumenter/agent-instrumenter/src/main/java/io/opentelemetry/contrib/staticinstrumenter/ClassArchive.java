@@ -72,10 +72,10 @@ class ClassArchive {
       throws IOException {
 
     InputStream entryIn = null;
-    ArchiveEntry entry = ArchiveEntry.ofFilePath(inEntry.getName());
-    if (entry.isClass() && !entry.shouldBeSkipped()) {
-      String className = entry.getClassName();
-      byte[] modified = instrumentedClasses.get(entry.getClassPath());
+    ArchiveEntry entry = ArchiveEntry.fromZipEntryName(inEntry.getName());
+    if (entry.shouldInstrument()) {
+      String className = entry.getName();
+      byte[] modified = instrumentedClasses.get(entry.getPath());
       if (modified != null) {
         logger.debug("Found instrumented class: " + className);
         entryIn = new ByteArrayInputStream(modified);

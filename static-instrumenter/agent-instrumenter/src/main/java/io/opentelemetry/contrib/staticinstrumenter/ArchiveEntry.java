@@ -8,53 +8,47 @@ package io.opentelemetry.contrib.staticinstrumenter;
 class ArchiveEntry {
 
   private static final ArchiveEntry NOT_CLASS =
-      new ArchiveEntry("", /* isClass= */ false, /* shouldBeSkipped= */ true);
+      new ArchiveEntry("", "", /* shouldInstrument= */ false);
 
-  private final String className;
-  private final String classPath;
-  private final boolean isClass;
-  private final boolean shouldBeSkipped;
+  private final String name;
+  private final String path;
+  private final boolean shouldInstrument;
 
-  private ArchiveEntry(String className, boolean isClass, boolean shouldBeSkipped) {
-    this.className = className;
-    this.classPath = className.replace(".", "/");
-    this.isClass = isClass;
-    this.shouldBeSkipped = shouldBeSkipped;
+  private ArchiveEntry(String name, String path, boolean shouldInstrument) {
+    this.name = name;
+    this.path = path;
+    this.shouldInstrument = shouldInstrument;
   }
 
-  static ArchiveEntry ofFilePath(String path) {
-    if (!isClass(path)) {
+  static ArchiveEntry fromZipEntryName(String zipEntryName) {
+    if (!isClass(zipEntryName)) {
       return NOT_CLASS;
     }
-    return new ArchiveEntry(
-        className(path), /* isClass= */ true, /* shouldBeSkipped= */ shouldBeSkipped(path));
-  }
-
-  String getClassName() {
-    return className;
-  }
-
-  private static String className(String path) {
-    return path.substring(0, path.indexOf(".class")).replace("/", ".");
-  }
-
-  String getClassPath() {
-    return classPath;
-  }
-
-  boolean isClass() {
-    return isClass;
+    String path = zipEntryName.substring(0, zipEntryName.indexOf(".class"));
+    return new ArchiveEntry(className(path), path, !shouldBeSkipped(zipEntryName));
   }
 
   private static boolean isClass(String path) {
     return path.endsWith(".class");
   }
 
-  boolean shouldBeSkipped() {
-    return shouldBeSkipped;
+  private static String className(String path) {
+    return path.replace("/", ".");
   }
 
-  private static boolean shouldBeSkipped(String path) {
-    return path.startsWith("io/opentelemetry");
+  private static boolean shouldBeSkipped(String zipEntryName) {
+    return zipEntryName.startsWith("io.opentelemetry");
+  }
+
+  String getName() {
+    return name;
+  }
+
+  String getPath() {
+    return path;
+  }
+
+  boolean shouldInstrument() {
+    return shouldInstrument;
   }
 }

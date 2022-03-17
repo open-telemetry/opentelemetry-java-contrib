@@ -26,6 +26,7 @@ public class Main {
 
   private final ClassArchive.Factory classArchiveFactory;
 
+  // key is slashy name, not dotty
   private final Map<String, byte[]> instrumentedClasses = new ConcurrentHashMap<>();
   private final Map<String, byte[]> additionalClasses = new ConcurrentHashMap<>();
 
