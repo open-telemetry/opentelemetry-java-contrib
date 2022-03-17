@@ -20,3 +20,5 @@ components:
   runtime-attach:
     - iNikem
     - trask
+  static-instrumenter:
+    - kubawach
