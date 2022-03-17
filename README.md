@@ -13,8 +13,11 @@ feature or via instrumentation, this project is hopefully for you.
 ## Provided Libraries
 
 * [AWS X-Ray Support](./aws-xray/README.md)
+* [JFR Streaming](./jfr-streaming/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
+* [Runtime Attach](./runtime-attach/README.md)
+* [Samplers](./samplers/README.md)
 
 ## Getting Started
 
