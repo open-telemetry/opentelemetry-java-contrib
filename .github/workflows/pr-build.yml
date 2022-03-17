@@ -60,6 +60,9 @@ jobs:
           name: integration-test-results
           path: jmx-metrics/build/reports/tests/integrationTest
 
+  # markdown-link-check is not included in the PR build because links to external urls can break at
+  # any time, which can be confusing for contributors
+
   markdown-misspell-check:
     runs-on: ubuntu-latest
     steps:
