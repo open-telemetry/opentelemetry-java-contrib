@@ -1,0 +1,8 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github\\.com/open-telemetry/opentelemetry-java-contrib/pull/"
+    }
+  ],
+  "retryOn429": true
+}
