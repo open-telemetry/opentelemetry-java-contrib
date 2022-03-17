@@ -37,7 +37,7 @@ class AwsXrayRemoteSamplerTest {
 
   private static final byte[] RULE_RESPONSE_1;
   private static final byte[] RULE_RESPONSE_2;
-  private static final byte[] TARGETS_RESPONE;
+  private static final byte[] TARGETS_RESPONSE;
 
   static {
     try {
@@ -51,7 +51,7 @@ class AwsXrayRemoteSamplerTest {
               requireNonNull(
                   AwsXrayRemoteSamplerTest.class.getResourceAsStream(
                       "/test-sampling-rules-response-2.json")));
-      TARGETS_RESPONE =
+      TARGETS_RESPONSE =
           ByteStreams.toByteArray(
               requireNonNull(
                   AwsXrayRemoteSamplerTest.class.getResourceAsStream(
@@ -144,7 +144,7 @@ class AwsXrayRemoteSamplerTest {
                   .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
             });
 
-    targetsResponse.set(TARGETS_RESPONE);
+    targetsResponse.set(TARGETS_RESPONSE);
 
     // cat-service target sets fixed rate to 1.0 for this test.
     await()
