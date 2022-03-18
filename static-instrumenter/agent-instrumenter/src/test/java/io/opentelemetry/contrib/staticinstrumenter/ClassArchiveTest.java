@@ -25,17 +25,18 @@ public class ClassArchiveTest {
     // given
     byte[] newTransformed = new byte[] {(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE};
     Map<String, byte[]> transformed = Collections.singletonMap("test/TestClass", newTransformed);
-    String jar = JarTestUtil.createJar(tempDir, "one.jar", "test/TestClass.class", "second.class");
+    String jar =
+        JarTestUtil.createJar(tempDir, "input.jar", "test/TestClass.class", "second.class");
     ClassArchive underTest = new ClassArchive(new JarFile(jar), transformed);
 
     // when
-    File jarOut = new File(destination, "one.jar");
+    File jarOut = new File(destination, "output.jar");
     try (ZipOutputStream zout = zout(jarOut)) {
       underTest.copyAllClassesTo(zout);
     }
     JarTestUtil.assertJar(
         destination,
-        "one.jar",
+        "output.jar",
         new String[] {"test/TestClass.class", "second.class"},
         new byte[][] {newTransformed, null});
   }

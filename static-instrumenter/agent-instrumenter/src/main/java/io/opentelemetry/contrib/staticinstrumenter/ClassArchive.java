@@ -51,15 +51,13 @@ class ClassArchive {
         inEntryName.endsWith(".jar") ? new ZipEntry(inEntry) : new ZipEntry(inEntryName);
 
     try (InputStream entryInputStream = getInputStreamForEntry(inEntry, outEntry)) {
-      try {
-        outJar.putNextEntry(outEntry);
-        entryInputStream.transferTo(outJar);
-        outJar.closeEntry();
-      } catch (ZipException e) {
-        if (!isEntryDuplicate(e)) {
-          logger.error("Error while creating entry: {}", outEntry.getName(), e);
-          throw e;
-        }
+      outJar.putNextEntry(outEntry);
+      entryInputStream.transferTo(outJar);
+      outJar.closeEntry();
+    } catch (ZipException e) {
+      if (!isEntryDuplicate(e)) {
+        logger.error("Error while creating entry: {}", outEntry.getName(), e);
+        throw e;
       }
     }
   }

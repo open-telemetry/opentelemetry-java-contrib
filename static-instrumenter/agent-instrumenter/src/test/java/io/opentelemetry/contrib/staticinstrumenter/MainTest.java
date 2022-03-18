@@ -32,8 +32,8 @@ public class MainTest {
     underTest.getAdditionalClasses().put("additionalOne", new byte[0]);
     underTest.getAdditionalClasses().put("additionalTwo", new byte[0]);
     String[] jarsList = {
-      JarTestUtil.createJar(tempDir, "one.jar", "first", "second"),
-      JarTestUtil.createJar(tempDir, "two.jar", "a", "b", "c")
+      JarTestUtil.createJar(tempDir, "first.jar", "first", "second"),
+      JarTestUtil.createJar(tempDir, "second.jar", "a", "b", "c")
     };
     // when
     underTest.saveTransformedJarsTo(jarsList, target);
@@ -41,12 +41,12 @@ public class MainTest {
     // then
     JarTestUtil.assertJar(
         target,
-        "one.jar",
+        "first.jar",
         new String[] {"additionalOne", "additionalTwo"},
         new byte[][] {null, null});
     JarTestUtil.assertJar(
         target,
-        "one.jar",
+        "second.jar",
         new String[] {"additionalOne", "additionalTwo"},
         new byte[][] {null, null});
 
