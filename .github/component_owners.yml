@@ -1,4 +1,11 @@
 # this file is used by .github/workflows/component-codeowners.yml
+#
+# NOTE component owners must be members of the GitHub OpenTelemetry organization
+# so that they can be added to @open-telemetry/java-contrib-triagers
+# which in turn is required for them to be auto-assigned as reviewers by the automation
+#
+# NOTE when updating this file, don't forget to update the README.md files in the respective
+# components also
 components:
   aws-xray:
     - anuraaga
