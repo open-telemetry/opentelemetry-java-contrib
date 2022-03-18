@@ -4,8 +4,11 @@
 # so that they can be added to @open-telemetry/java-contrib-triagers
 # which in turn is required for them to be auto-assigned as reviewers by the automation
 #
-# NOTE when updating this file, don't forget to update the README.md files in the respective
+# NOTE when updating this file, don't forget to update the README.md files in the associated
 # components also
+#
+# NOTE when adding/updating one of the component names, don't forget to update the associated
+# `comp:*` labels
 components:
   aws-xray:
     - anuraaga
