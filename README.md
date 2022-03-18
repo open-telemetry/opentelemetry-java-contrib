@@ -7,9 +7,6 @@ the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
 feature or via instrumentation, this project is hopefully for you.
 
-*This project is in its early stages and doesn't provide any assurances of stability or production readiness.*
-
-
 ## Provided Libraries
 
 * [AWS X-Ray Support](./aws-xray/README.md)
