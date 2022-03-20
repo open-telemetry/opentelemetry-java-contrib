@@ -1,5 +1,3 @@
-# Releases a patch by cherrypicking commits into a release branch based on the previous
-# release tag.
 name: Patch Release Build
 on:
   workflow_dispatch:
@@ -7,11 +5,9 @@ on:
       version:
         description: The version to tag the release with, e.g., 1.2.1, 1.2.2
         required: true
-      commits:
-        description: Comma separated list of commit shas to cherrypick
-        required: false
 
 jobs:
+  # TODO (trask) remove this after 1.13.0 since release branch is now created proactively
   prepare-release-branch:
     runs-on: ubuntu-latest
     outputs:

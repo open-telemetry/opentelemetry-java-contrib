@@ -124,3 +124,9 @@ jobs:
                             --discussion-category announcements \
                             v${{ github.event.inputs.version }} \
                             opentelemetry-javaagent.jar
+
+        # proactively create release branch so that contributors can suggest patches more easily
+      - name: Create release branch
+        run: |
+          git checkout -b v${{ github.event.inputs.version }}
+          git push origin v${{ github.event.inputs.version }}
