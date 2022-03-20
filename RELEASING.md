@@ -42,7 +42,10 @@ In general, patch releases are only made for bug-fixes for the following types o
 * Memory leaks
 * Deadlocks
 
-Merge PR(s) containing the desired patches to the release branch.
+Before making the release:
+
+* Merge PR(s) containing the desired patches to the release branch
+* Merge a PR to the release branch updating the `CHANGELOG.md`
 
 Open the [Patch release workflow](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/patch-release-build.yml).
 
