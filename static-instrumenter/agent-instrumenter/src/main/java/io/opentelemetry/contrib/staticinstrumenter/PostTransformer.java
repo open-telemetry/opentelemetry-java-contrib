@@ -20,7 +20,7 @@ public class PostTransformer implements ClassFileTransformer {
       ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
 
-    TransformedClass pre = Main.getInstance().getCurrentClass();
+    TransformedClass pre = Main.getInstance().getAndRemoveCurrentClass();
 
     if (pre != null
         && pre.getName().equals(className)

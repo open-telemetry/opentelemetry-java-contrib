@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.jar.JarFile;
-import java.util.zip.ZipOutputStream;
+import java.util.jar.JarOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,7 +31,7 @@ public class ClassArchiveTest {
 
     // when
     File jarOut = new File(destination, "output.jar");
-    try (ZipOutputStream zout = zout(jarOut)) {
+    try (JarOutputStream zout = jarOutputStream(jarOut)) {
       underTest.copyAllClassesTo(zout);
     }
     JarTestUtil.assertJar(
@@ -41,7 +41,7 @@ public class ClassArchiveTest {
         new byte[][] {newTransformed, null});
   }
 
-  private static ZipOutputStream zout(File destination) throws IOException {
-    return new ZipOutputStream(new FileOutputStream(destination));
+  private static JarOutputStream jarOutputStream(File destination) throws IOException {
+    return new JarOutputStream(new FileOutputStream(destination));
   }
 }

@@ -6,15 +6,14 @@
 package io.opentelemetry.contrib.staticinstrumenter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,20 +108,21 @@ public class Main {
   private void saveArchiveTo(File inFile, File outDir) throws IOException {
 
     try (JarFile inJar = new JarFile(inFile);
-        ZipOutputStream outJar = outJarFor(outDir, inFile)) {
+        JarOutputStream outJar = jarOutputStreamFor(outDir, inFile.getName())) {
       ClassArchive inClassArchive = classArchiveFactory.createFor(inJar, instrumentedClasses);
       inClassArchive.copyAllClassesTo(outJar);
       injectAdditionalClassesTo(outJar);
     }
   }
 
-  private static ZipOutputStream outJarFor(File outDir, File inFile) throws FileNotFoundException {
-    File outFile = new File(outDir, inFile.getName());
-    return new ZipOutputStream(new FileOutputStream(outFile));
+  private static JarOutputStream jarOutputStreamFor(File outDir, String fileName)
+      throws IOException {
+    File outFile = new File(outDir, fileName);
+    return new JarOutputStream(new FileOutputStream(outFile));
   }
 
   // FIXME: only relevant additional classes should be injected
-  private void injectAdditionalClassesTo(ZipOutputStream outJar) throws IOException {
+  private void injectAdditionalClassesTo(JarOutputStream outJar) throws IOException {
     for (Map.Entry<String, byte[]> entry : additionalClasses.entrySet()) {
       String className = entry.getKey();
       byte[] classData = entry.getValue();
@@ -139,8 +139,10 @@ public class Main {
     }
   }
 
-  public TransformedClass getCurrentClass() {
-    return currentClass.get();
+  public TransformedClass getAndRemoveCurrentClass() {
+    TransformedClass tc = currentClass.get();
+    currentClass.remove();
+    return tc;
   }
 
   public void setCurrentClass(TransformedClass clazz) {

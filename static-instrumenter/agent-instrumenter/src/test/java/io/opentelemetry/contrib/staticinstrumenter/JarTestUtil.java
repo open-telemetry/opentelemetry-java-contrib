@@ -13,8 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 final class JarTestUtil {
 
@@ -24,7 +24,7 @@ final class JarTestUtil {
 
     File outFile = new File(tempDir, fileName);
     outFile.createNewFile();
-    try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outFile))) {
+    try (JarOutputStream zos = new JarOutputStream(new FileOutputStream(outFile))) {
 
       for (String entry : files) {
         ZipEntry newEntry = new ZipEntry(entry);

@@ -12,9 +12,9 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
-import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ class ClassArchive {
     this.instrumentedClasses = instrumentedClasses;
   }
 
-  void copyAllClassesTo(ZipOutputStream outJar) throws IOException {
+  void copyAllClassesTo(JarOutputStream outJar) throws IOException {
 
     Enumeration<JarEntry> inEntries = source.entries();
     while (inEntries.hasMoreElements()) {
@@ -45,7 +45,7 @@ class ClassArchive {
     }
   }
 
-  private void copyEntry(JarEntry inEntry, ZipOutputStream outJar) throws IOException {
+  private void copyEntry(JarEntry inEntry, JarOutputStream outJar) throws IOException {
     String inEntryName = inEntry.getName();
     ZipEntry outEntry =
         inEntryName.endsWith(".jar") ? new ZipEntry(inEntry) : new ZipEntry(inEntryName);
