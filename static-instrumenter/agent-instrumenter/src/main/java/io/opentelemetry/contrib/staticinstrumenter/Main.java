@@ -29,9 +29,6 @@ public class Main {
   private final Map<String, byte[]> instrumentedClasses = new ConcurrentHashMap<>();
   private final Map<String, byte[]> additionalClasses = new ConcurrentHashMap<>();
 
-  @SuppressWarnings("ThreadLocalUsage")
-  private final ThreadLocal<TransformedClass> currentClass = new ThreadLocal<>();
-
   public static void main(String[] args) throws Exception {
 
     if (args.length != 1) {
@@ -137,16 +134,6 @@ public class Main {
 
       logger.debug("Additional class added: {}", className);
     }
-  }
-
-  public TransformedClass getAndRemoveCurrentClass() {
-    TransformedClass tc = currentClass.get();
-    currentClass.remove();
-    return tc;
-  }
-
-  public void setCurrentClass(TransformedClass clazz) {
-    currentClass.set(clazz);
   }
 
   public Map<String, byte[]> getInstrumentedClasses() {

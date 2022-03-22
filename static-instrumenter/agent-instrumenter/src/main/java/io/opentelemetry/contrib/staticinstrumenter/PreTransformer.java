@@ -20,7 +20,7 @@ public class PreTransformer implements ClassFileTransformer {
       ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
 
-    Main.getInstance().setCurrentClass(new TransformedClass(className, classfileBuffer));
+    CurrentClass.set(new TransformedClass(className, classfileBuffer));
     return null;
   }
 }

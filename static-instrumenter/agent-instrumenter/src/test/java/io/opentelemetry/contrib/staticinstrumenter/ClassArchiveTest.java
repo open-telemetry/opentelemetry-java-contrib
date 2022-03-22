@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.staticinstrumenter;
 
+import static io.opentelemetry.contrib.staticinstrumenter.JarTestUtil.getResourcePath;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,17 +19,14 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class ClassArchiveTest {
 
-  @TempDir private File tempDir;
-
   @Test
   void shouldCopyAllClasses(@TempDir File destination) throws IOException {
 
     // given
     byte[] newTransformed = new byte[] {(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE};
     Map<String, byte[]> transformed = Collections.singletonMap("test/TestClass", newTransformed);
-    String jar =
-        JarTestUtil.createJar(tempDir, "input.jar", "test/TestClass.class", "second.class");
-    ClassArchive underTest = new ClassArchive(new JarFile(jar), transformed);
+    ClassArchive underTest =
+        new ClassArchive(new JarFile(getResourcePath("test.jar")), transformed);
 
     // when
     File jarOut = new File(destination, "output.jar");
@@ -37,7 +36,7 @@ public class ClassArchiveTest {
     JarTestUtil.assertJar(
         destination,
         "output.jar",
-        new String[] {"test/TestClass.class", "second.class"},
+        new String[] {"test/TestClass.class", "test/NotInstrumented.class"},
         new byte[][] {newTransformed, null});
   }
 
