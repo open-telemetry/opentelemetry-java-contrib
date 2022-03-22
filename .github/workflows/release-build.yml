@@ -113,25 +113,21 @@ jobs:
 
           EOF
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1.1.4
+      - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.event.inputs.version }}
-          release_name: Version ${{ github.event.inputs.version }}
-          draft: true
-          prerelease: false
-          body_path: release-notes.txt
+        run: |
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-${{ github.event.inputs.version }}.jar opentelemetry-jmx-metrics.jar
+          gh release create --target ${{ github.ref_name }} \
+                            --title "Version ${{ github.event.inputs.version }}" \
+                            --notes-file release-notes.txt \
+                            --discussion-category announcements \
+                            v${{ github.event.inputs.version }} \
+                            opentelemetry-javaagent.jar
 
-      - name: Upload jmx-metrics release asset
-        id: upload-release-asset-jmx-metrics
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: jmx-metrics/build/libs/opentelemetry-jmx-metrics-${{ github.event.inputs.version }}.jar
-          asset_name: opentelemetry-jmx-metrics.jar
-          asset_content_type: application/java-archive
+        # proactively create release branch so that contributors can suggest patches more easily
+      - name: Create release branch
+        run: |
+          branch_name=$(echo ${{ github.event.inputs.version }} | sed -E 's/([0-9]+)\.([0-9]+)\.0/v\1.\2.x/')
+          git checkout -b $branch_name
+          git push origin $branch_name
