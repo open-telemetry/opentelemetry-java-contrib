@@ -21,7 +21,7 @@ public class Main {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-  private static final Main INSTANCE = new Main(new ClassArchive.Factory() {});
+  private static final Main INSTANCE = new Main(ClassArchive::new);
 
   private final ClassArchive.Factory classArchiveFactory;
 

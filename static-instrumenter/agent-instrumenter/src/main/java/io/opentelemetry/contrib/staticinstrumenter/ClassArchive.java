@@ -22,9 +22,7 @@ import org.slf4j.LoggerFactory;
 class ClassArchive {
 
   interface Factory {
-    default ClassArchive createFor(JarFile source, Map<String, byte[]> instrumentedClasses) {
-      return new ClassArchive(source, instrumentedClasses);
-    }
+    ClassArchive createFor(JarFile source, Map<String, byte[]> instrumentedClasses);
   }
 
   private static final Logger logger = LoggerFactory.getLogger(ClassArchive.class);
