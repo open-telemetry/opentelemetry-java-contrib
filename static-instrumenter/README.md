@@ -21,4 +21,4 @@ Maven3 plugin running the static instrumentation agent during the `package` phas
 - [Jakub Wach](https://github.com/kubawach), Splunk
 - [Anna Nosek](https://github.com/Enkelian), Splunk
 
-Learn more about component owners in [component-owners.yml](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/workflows/component-owners.yml).
+Learn more about component owners in [component-owners.yml](../.github/workflows/component-owners.yml).
