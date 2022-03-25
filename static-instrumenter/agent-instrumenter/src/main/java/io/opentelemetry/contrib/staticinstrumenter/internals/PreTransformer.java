@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.internals;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
 import javax.annotation.Nullable;
 
-public class PostTransformer implements ClassFileTransformer {
+public class PreTransformer implements ClassFileTransformer {
+
   @Override
   @Nullable
   public byte[] transform(
@@ -20,13 +20,7 @@ public class PostTransformer implements ClassFileTransformer {
       ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
 
-    TransformedClass pre = CurrentClass.getAndRemove();
-
-    if (pre != null
-        && pre.getName().equals(className)
-        && !Arrays.equals(pre.getClasscode(), classfileBuffer)) {
-      Main.getInstance().getInstrumentedClasses().put(className, classfileBuffer);
-    }
+    CurrentClass.set(new TransformedClass(className, classfileBuffer));
     return null;
   }
 }

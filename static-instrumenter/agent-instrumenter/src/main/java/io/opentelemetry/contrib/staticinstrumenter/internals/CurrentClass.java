@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.internals;
 
-class CurrentClass {
+public class CurrentClass {
 
   private static final ThreadLocal<TransformedClass> currentClass = new ThreadLocal<>();
 

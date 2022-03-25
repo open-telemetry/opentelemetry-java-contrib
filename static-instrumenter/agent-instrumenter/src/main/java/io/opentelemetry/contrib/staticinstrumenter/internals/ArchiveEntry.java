@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.internals;
 
-class ArchiveEntry {
+public class ArchiveEntry {
 
   private static final ArchiveEntry NOT_CLASS =
       new ArchiveEntry("", "", /* shouldInstrument= */ false);

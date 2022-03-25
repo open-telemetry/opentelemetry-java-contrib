@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.internals;
 
-import static io.opentelemetry.contrib.staticinstrumenter.JarTestUtil.getResourcePath;
+import static io.opentelemetry.contrib.staticinstrumenter.internals.JarTestUtil.getResourcePath;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;

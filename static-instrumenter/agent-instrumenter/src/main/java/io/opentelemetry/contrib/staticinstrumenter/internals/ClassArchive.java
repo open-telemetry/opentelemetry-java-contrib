@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.internals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Represents an archive storing classes (JAR, WAR). */
-class ClassArchive {
+public class ClassArchive {
 
-  interface Factory {
+  public interface Factory {
     ClassArchive createFor(JarFile source, Map<String, byte[]> instrumentedClasses);
   }
 
@@ -71,11 +71,21 @@ class ClassArchive {
     ArchiveEntry entry = ArchiveEntry.fromZipEntryName(inEntry.getName());
     if (entry.shouldInstrument()) {
       String className = entry.getName();
-      byte[] modified = instrumentedClasses.get(entry.getPath());
-      if (modified != null) {
-        logger.debug("Found instrumented class: " + className);
-        entryIn = new ByteArrayInputStream(modified);
-        outEntry.setSize(modified.length);
+      try {
+        // TODO: load classes on archive's separate classloader
+        Class.forName(className, false, ClassLoader.getSystemClassLoader());
+        byte[] modified = instrumentedClasses.get(entry.getPath());
+        if (modified != null) {
+          logger.debug("Found instrumented class: " + className);
+          entryIn = new ByteArrayInputStream(modified);
+          outEntry.setSize(modified.length);
+        }
+      } catch (ClassNotFoundException | NoClassDefFoundError cdp) {
+        logger.warn(
+            "Could not load class: "
+                + className
+                + ". Make sure the dependencies are correctly set.",
+            cdp);
       }
     }
     return entryIn == null ? source.getInputStream(inEntry) : entryIn;
