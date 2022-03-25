@@ -248,4 +248,4 @@ file contents can also be provided via stdin on startup when using `-config -` a
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 - [Sam DeHaan](https://github.com/dehaansa), ObservIQ
 
-Learn more about component owners in [component-owners.yml](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/workflows/component-owners.yml).
+Learn more about component owners in [component-owners.yml](../.github/workflows/component-owners.yml).
