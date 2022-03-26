@@ -12,4 +12,4 @@ The main entry point is the `JfrMetrics` class in the package `io.opentelemetry.
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
 
-Learn more about component owners in [component-owners.yml](../.github/workflows/component-owners.yml).
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

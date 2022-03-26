@@ -1,20 +1,17 @@
-name: "PR Build"
+name: Build pull request
 
 on:
   pull_request:
-    branches:
-      - main
 
 jobs:
   build:
-    name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Java 17
+      - name: Set up JDK for running Gradle
         uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -34,14 +31,13 @@ jobs:
           path: jmx-metrics/build/reports/tests/test
 
   integration-test:
-    name: integration-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Java 17
+      - name: Set up JDK for running Gradle
         uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -60,16 +56,23 @@ jobs:
           name: integration-test-results
           path: jmx-metrics/build/reports/tests/integrationTest
 
-  # markdown-link-check is not included in the PR build because links to external urls can break at
-  # any time, which can be confusing for contributors
+  # this is not a required check to avoid blocking pull requests if external links break
+  markdown-link-check:
+    uses: ./.github/workflows/reusable-markdown-link-check.yml
 
-  markdown-misspell-check:
+  # this is not a required check to avoid blocking pull requests if new misspellings are added
+  # to the misspell dictionary
+  misspell-check:
+    uses: ./.github/workflows/reusable-misspell-check.yml
+
+  required-status-check:
+    needs:
+      - build
+      - integration-test
     runs-on: ubuntu-latest
+    if: always()
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Check markdown for common misspellings
-        run: |
-          curl -L -o ./install-misspell.sh https://git.io/misspell
-          sh ./install-misspell.sh
-          ./bin/misspell -error ./**/*
+      - if: |
+          needs.build.result != 'success' ||
+          needs.integration-test.result != 'success'
+        run: exit 1

@@ -1,0 +1,97 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - v[0-9]+.[0-9]+.x
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: --stacktrace build
+
+      - name: Save unit test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: test-results
+          path: jmx-metrics/build/reports/tests/test
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Integration test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: --stacktrace integrationTest
+
+      - name: Save integration test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: integration-test-results
+          path: jmx-metrics/build/reports/tests/integrationTest
+
+  markdown-link-check:
+    # release branches are excluded to avoid unnecessary maintenance if external links break
+    if: ${{ !startsWith(github.ref_name, 'v') }}
+    uses: ./.github/workflows/reusable-markdown-link-check.yml
+
+  misspell-check:
+    # release branches are excluded to avoid unnecessary maintenance if new misspellings are added
+    # to the misspell dictionary
+    if: ${{ !startsWith(github.ref_name, 'v') }}
+    uses: ./.github/workflows/reusable-misspell-check.yml
+
+  publish-snapshots:
+    needs:
+      # intentionally not blocking snapshot publishing on markdown-link-check, or misspell-check
+      - build
+      - integration-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/gradle-build-action@v2
+        name: Publish
+        with:
+          arguments: --stacktrace snapshot
+        env:
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
