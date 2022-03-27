@@ -1,11 +1,6 @@
-# Releases a new minor / major version from the HEAD of the main branch
 name: Release
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: The version to tag the release with, e.g., 1.2.0, 1.2.1-alpha.1
-        required: true
 
 jobs:
   build:
@@ -58,12 +53,15 @@ jobs:
           name: integration-test-results
           path: jmx-metrics/build/reports/tests/integrationTest
 
-  publish:
+  release:
     runs-on: ubuntu-latest
-    needs: [build, integration-test]
+    needs:
+      - build
+      - integration-test
     steps:
       - uses: actions/checkout@v3
         with:
+          # tags are needed for the generate-release-contributors.sh script
           fetch-depth: 0
 
       - name: Set up JDK for running Gradle
@@ -72,59 +70,117 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/gradle-build-action@v2
-        name: Publish
+      - name: Build and publish artifacts
+        uses: gradle/gradle-build-action@v2
         with:
-          arguments: --stacktrace final closeAndReleaseSonatypeStagingRepository -Prelease.version=${{ github.event.inputs.version }}
+          arguments: assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
 
-      - name: Set SDK version
-        id: set-sdk-version
+      - name: Set versions
+        id: set-versions
         run: |
-          v=$(grep -Po "io.opentelemetry:opentelemetry-bom:\K[0-9]+.[0-9]+.0" dependencyManagement/build.gradle.kts)
-          echo "::set-output name=sdk-version::$v"
+          version=$(grep -Eo "[0-9]+.[0-9]+.[0-9]+" version.gradle.kts | head -1)
+          if [[ $version =~ ([0-9]+).([0-9]+).([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+          else
+            echo "unexpected version: $version"
+            exit 1
+          fi
+          if [[ $patch == 0 ]]; then
+            if [[ $minor == 0 ]]; then
+              prior_major=$((major - 1))
+              prior_minor=$(grep -Po "^## Version $prior_major.\K([0-9]+)" CHANGELOG.md  | head -1)
+              prior_version="$prior_major.$prior_minor"
+            else
+              prior_version="$major.$((minor - 1)).0"
+            fi
+          else
+              prior_version="$major.$minor.$((patch - 1))"
+          fi
+          echo "::set-output name=release-version::$version"
+          echo "::set-output name=prior-release-version::$prior_version"
 
-      - name: Generate Release Notes
+      - name: Generate release notes
         env:
+          VERSION: ${{ steps.set-versions.outputs.release-version }}
+          PRIOR_VERSION: ${{ steps.set-versions.outputs.prior-release-version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat > release-notes.txt << EOF
-          This release targets the OpenTelemetry SDK ${{ steps.set-sdk-version.outputs.sdk-version }}.
+          if [[ $version == *.0 ]]; then
+            cat > release-notes.txt << EOF
+            This release targets the OpenTelemetry SDK $VERSION.
+          
+            EOF
+          else
+            cat > release-notes.txt << EOF
+            This is a patch release on the previous ${{ steps.set-versions.outputs.prior-version }} release, fixing the issue(s) below.
+          
+            EOF
+          fi
 
-          EOF
-
-          sed -n '/^## Version ${{ github.event.inputs.version }}/,/^## Version /p' CHANGELOG.md \
+          sed -n '/^## Version $VERSION/,/^## Version /p' CHANGELOG.md \
             | tail -n +2 \
             | head -n -1 \
             | perl -0pe 's/^\n+//g' \
             | perl -0pe 's/\n+$/\n/g' \
-            | sed -r 's,\[#([0-9]+)]\(https://github.com/open-telemetry/opentelemetry-java-contrib/pull/[0-9]+\),#\1,' \
+            | sed -r 's,\[#([0-9]+)]\(https://github.com/$GITHUB_REPOSITORY/(pull|issues)/[0-9]+\),#\1,' \
             | perl -0pe 's/\n +/ /g' \
             >> release-notes.txt
 
-          cat >> release-notes.txt << EOF
-
-          EOF
+          if [[ $version == *.0 ]]; then
+            cat >> release-notes.txt << EOF
+          
+            ### 🙇 Thank you
+            This release was possible thanks to the following contributors who shared their brilliant ideas and awesome pull requests:
+          
+            EOF
+          
+            .github/scripts/generate-release-contributors.sh v$PRIOR_VERSION v$VERSION >> release-notes.txt
+          fi
 
       - name: Create GitHub release
         env:
+          VERSION: ${{ steps.set-versions.outputs.release-version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-${{ github.event.inputs.version }}.jar opentelemetry-jmx-metrics.jar
-          gh release create --target ${{ github.ref_name }} \
-                            --title "Version ${{ github.event.inputs.version }}" \
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION.jar opentelemetry-jmx-metrics.jar
+          gh release create --target $GITHUB_REF_NAME \
+                            --title "Version $VERSION" \
                             --notes-file release-notes.txt \
                             --discussion-category announcements \
-                            v${{ github.event.inputs.version }} \
-                            opentelemetry-javaagent.jar
+                            v$VERSION \
+                            opentelemetry-jmx-metrics.jar
 
-        # proactively create release branch so that contributors can suggest patches more easily
-      - name: Create release branch
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          # history is needed in order to generate the patch
+          fetch-depth: 0
+
+      - name: Set up git name
         run: |
-          branch_name=$(echo ${{ github.event.inputs.version }} | sed -E 's/([0-9]+)\.([0-9]+)\.0/v\1.\2.x/')
-          git checkout -b $branch_name
-          git push origin $branch_name
+          git config user.name opentelemetry-java-bot
+          git config user.email 97938252+opentelemetry-java-bot@users.noreply.github.com
+
+        # this step should be last since it will fail if conflicting change log updates on main
+      - name: Create pull request to merge any change log updates to main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git format-patch --stdout main..$GITHUB_REF_NAME CHANGELOG.md > patch
+          if [ -s patch ]; then
+            git apply patch
+            msg="Merge change log updates from $GITHUB_REF_NAME to main"
+            git commit -a -m "$msg"
+            git push origin HEAD:opentelemetry-java-bot/merge-change-log-updates
+            gh pr create --title "$msg" \
+                         --body "$msg" \
+                         --head opentelemetry-java-bot/merge-change-log-updates \
+                         --base main
+          fi
