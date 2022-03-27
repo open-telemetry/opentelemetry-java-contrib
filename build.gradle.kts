@@ -1,4 +1,3 @@
-import nebula.plugin.release.git.opinion.Strategies
 import java.time.Duration
 
 plugins {
@@ -8,16 +7,9 @@ plugins {
 
   id("com.github.ben-manes.versions")
   id("io.github.gradle-nexus.publish-plugin")
-  id("nebula.release")
 }
 
-release {
-  defaultVersionStrategy = Strategies.getSNAPSHOT()
-}
-
-nebulaRelease {
-  addReleaseBranchPattern("""v\d+\.\d+\.x""")
-}
+apply(from = "version.gradle.kts")
 
 nexusPublishing {
   packageGroup.set("io.opentelemetry")
