@@ -34,9 +34,9 @@ jobs:
 
       - name: Bump version on release branch
         run: |
-          v=$(grep -Eo "[0-9]+.[0-9]+.0-SNAPSHOT" version.gradle.kts | sed 's/-SNAPSHOT//')
-          sed -ri "s/$PRIOR_VERSION-SNAPSHOT/$VERSION/" version.gradle.kts
-          sed -ri "s/$PRIOR_VERSION-alpha-SNAPSHOT/$VERSION-alpha/" version.gradle.kts
+          version=$(grep -Eo "[0-9]+.[0-9]+.0-SNAPSHOT" version.gradle.kts | sed 's/-SNAPSHOT//')
+          sed -ri "s/$version-SNAPSHOT/$version/" version.gradle.kts
+          sed -ri "s/$version-alpha-SNAPSHOT/$version-alpha/" version.gradle.kts
 
       - name: Set up git name
         run: |

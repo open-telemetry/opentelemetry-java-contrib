@@ -7,8 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@v3
@@ -32,8 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@v3
@@ -119,7 +115,7 @@ jobs:
             EOF
           else
             cat > release-notes.txt << EOF
-            This is a patch release on the previous ${{ steps.set-versions.outputs.prior-version }} release, fixing the issue(s) below.
+            This is a patch release on the previous $PRIOR_VERSION release, fixing the issue(s) below.
           
             EOF
           fi
