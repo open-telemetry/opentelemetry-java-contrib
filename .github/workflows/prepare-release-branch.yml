@@ -64,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Bump SNAPSHOT version
+      - name: Bump snapshot version
         run: |
           version=$(grep -Eo "[0-9]+.[0-9]+.0-SNAPSHOT" version.gradle.kts | sed 's/-SNAPSHOT//')
           if [[ $version =~ ([0-9]+).([0-9]+).0 ]]; then
