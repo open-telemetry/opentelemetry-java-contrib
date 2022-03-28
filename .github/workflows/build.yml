@@ -71,7 +71,7 @@ jobs:
       - build
       - integration-test
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
+    if: ${{ github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
     steps:
       - uses: actions/checkout@v3
 
