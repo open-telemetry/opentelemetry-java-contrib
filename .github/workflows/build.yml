@@ -81,10 +81,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/gradle-build-action@v2
-        name: Publish
+      - name: Build and publish snapshots
+        uses: gradle/gradle-build-action@v2
         with:
-          arguments: --stacktrace snapshot
+          arguments: --stacktrace assemble publishToSonatype
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
