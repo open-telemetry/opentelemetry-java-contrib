@@ -19,12 +19,6 @@ publishing {
         }
       }
 
-      if (findProperty("otel.stable") != "true") {
-        val versionParts = version.split('-').toMutableList()
-        versionParts[0] += "-alpha"
-        version = versionParts.joinToString("-")
-      }
-
       afterEvaluate {
         val mavenGroupId: String? by project
         if (mavenGroupId != null) {
@@ -66,10 +60,6 @@ publishing {
       }
     }
   }
-}
-
-rootProject.tasks.named("release").configure {
-  finalizedBy(tasks["publishToSonatype"])
 }
 
 // Sign only if we have a key to do so

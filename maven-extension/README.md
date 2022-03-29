@@ -186,4 +186,4 @@ The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wra
 - [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Elastic
 - [Ken Finnigan](https://github.com/kenfinnigan), Workday
 
-Learn more about component owners in [component-owners.yml](../.github/workflows/component-owners.yml).
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
