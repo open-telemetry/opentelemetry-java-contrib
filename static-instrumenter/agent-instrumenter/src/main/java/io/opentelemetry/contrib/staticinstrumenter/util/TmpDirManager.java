@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.staticinstrumenter.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +24,9 @@ public final class TmpDirManager {
             new Thread(
                 () -> {
                   try {
-                    FileUtils.deleteDirectory(tmpDir.toFile());
+                    Files.delete(tmpDir);
                   } catch (IOException e) {
-                    logger.debug("Could not create shutdown hook.");
+                    logger.debug("Could delete the temporary directory.");
                   }
                 }));
   }

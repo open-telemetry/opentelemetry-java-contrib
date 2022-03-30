@@ -42,7 +42,7 @@ public class Main {
     }
 
     String classPath = System.getProperty("java.class.path");
-    logger.debug("Classpath (jars list): " + classPath);
+    logger.debug("Classpath (jars list): {}", classPath);
     String[] jarsList = classPath.split(File.pathSeparator);
 
     getInstance().saveTransformedJarsTo(jarsList, outDir);

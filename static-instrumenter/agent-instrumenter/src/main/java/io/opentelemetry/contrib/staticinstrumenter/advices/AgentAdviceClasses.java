@@ -9,14 +9,12 @@ import io.opentelemetry.contrib.staticinstrumenter.internals.Main;
 import java.lang.instrument.Instrumentation;
 import net.bytebuddy.asm.Advice;
 
-@SuppressWarnings({"SystemOut", "CatchAndPrintStackTrace"})
-public final class AgentAdvices {
+public final class AgentAdviceClasses {
   @SuppressWarnings("unused")
   public static final class InstallBootstrapJarAdvice {
 
     @Advice.OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-    static void enterInstallBoostrapJar(
-        @Advice.Argument(value = 0, readOnly = false) Instrumentation inst) {
+    static void enterInstallBoostrapJar(@Advice.Argument(value = 0) Instrumentation inst) {
       inst.addTransformer(Main.getPreTransformer());
     }
 
@@ -27,12 +25,12 @@ public final class AgentAdvices {
   public static final class AgentMainAdvice {
 
     @Advice.OnMethodExit(suppress = Throwable.class)
-    static void exitStartAgent(@Advice.Argument(value = 0, readOnly = false) Instrumentation inst) {
+    static void exitStartAgent(@Advice.Argument(value = 0) Instrumentation inst) {
       inst.addTransformer(Main.getPostTransformer(), true);
     }
 
     private AgentMainAdvice() {}
   }
 
-  private AgentAdvices() {}
+  private AgentAdviceClasses() {}
 }

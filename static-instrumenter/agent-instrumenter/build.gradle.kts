@@ -9,7 +9,6 @@ plugins {
 description = "OpenTelemetry Java Static Instrumentation Agent"
 
 dependencies {
-  implementation("commons-io:commons-io:2.11.0")
   implementation("net.bytebuddy:byte-buddy-dep:1.12.8")
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")

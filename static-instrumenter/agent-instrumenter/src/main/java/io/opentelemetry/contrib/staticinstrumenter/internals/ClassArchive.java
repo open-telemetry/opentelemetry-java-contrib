@@ -72,11 +72,15 @@ public class ClassArchive {
     if (entry.shouldInstrument()) {
       String className = entry.getName();
       try {
+        // This line triggers the instrumentation of by forcefully loading the class.
+        // We have to "feed" the class to the agent ourselves,
+        // since during static instrumentation process the classes in user's app
+        // have no guarantee of getting loaded otherwise.
         // TODO: load classes on archive's separate classloader
         Class.forName(className, false, ClassLoader.getSystemClassLoader());
         byte[] modified = instrumentedClasses.get(entry.getPath());
         if (modified != null) {
-          logger.debug("Found instrumented class: " + className);
+          logger.debug("Found instrumented class: {}", className);
           entryIn = new ByteArrayInputStream(modified);
           outEntry.setSize(modified.length);
         }

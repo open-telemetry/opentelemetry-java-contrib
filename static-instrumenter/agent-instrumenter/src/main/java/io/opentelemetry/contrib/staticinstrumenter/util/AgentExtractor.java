@@ -9,12 +9,13 @@ import io.opentelemetry.contrib.staticinstrumenter.util.path.AgentPathGetter;
 import io.opentelemetry.contrib.staticinstrumenter.util.path.SimplePathGetter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Extracts the agent to a temporary directory. This is done to enable simple loading of agent
@@ -29,13 +30,12 @@ public final class AgentExtractor {
   }
 
   /**
-   * Extracts the agent JAR entry to a temporary directory.
-   *
-   * @param agentFile File object representing the OpenTelemetry javaagent file
-   * @throws IOException If process of writing to file encounters problems
+   * Extracts the agent JAR entry to a temporary directory. It removes the inst/ prefix and
+   * changes .classdata format to .class in appropriate agent classes so that they could be normally
+   * loaded and modified.
    */
-  public Path extractAgent(File agentFile) throws IOException {
-    JarFile otelJarFile = new JarFile(agentFile);
+  public Path extractAgent(Path agentFile) throws IOException {
+    JarFile otelJarFile = new JarFile(agentFile.toString());
 
     Enumeration<JarEntry> entries = otelJarFile.entries();
 
@@ -55,25 +55,17 @@ public final class AgentExtractor {
     return extractedAgent;
   }
 
-  /**
-   * Extracts the agent JAR entry to temporary directory under new, sanitized name.
-   *
-   * @param otelJarFile JarFile object representing the OpenTelemetry javaagent file
-   * @param entryToSave JAR entry that is extracted
-   * @param sanitized Sanitized JAR entry name
-   * @throws IOException If process of writing to file encounters problems
-   */
-  private void extractEntry(JarFile otelJarFile, JarEntry entryToSave, String sanitized)
+  private void extractEntry(JarFile otelJavaagent, JarEntry entryToSave, String sanitizedEntryName)
       throws IOException {
-    int lastSlashIdx = sanitized.lastIndexOf("/");
-    String path =
-        sanitized.substring(0, lastSlashIdx).replace("/", System.getProperty("file.separator"));
-    String className = sanitized.substring(lastSlashIdx + 1);
+    int lastSlashIdx = sanitizedEntryName.lastIndexOf("/");
+    String path = sanitizedEntryName.substring(0, lastSlashIdx).replace("/", File.separator);
+    String className = sanitizedEntryName.substring(lastSlashIdx + 1);
 
     Path classPackage = Files.createDirectories(extractedAgent.resolve(path));
 
-    Files.write(
-        classPackage.resolve(className),
-        IOUtils.toByteArray(otelJarFile.getInputStream(entryToSave)));
+    try (InputStream in = otelJavaagent.getInputStream(entryToSave);
+        OutputStream out = Files.newOutputStream(classPackage.resolve(className))) {
+      in.transferTo(out);
+    }
   }
 }

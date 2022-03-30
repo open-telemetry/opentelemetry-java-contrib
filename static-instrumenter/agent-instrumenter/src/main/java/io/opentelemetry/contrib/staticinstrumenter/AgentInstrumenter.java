@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.staticinstrumenter;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-import io.opentelemetry.contrib.staticinstrumenter.advices.AgentAdvices;
+import io.opentelemetry.contrib.staticinstrumenter.advices.AgentAdviceClasses;
 import io.opentelemetry.contrib.staticinstrumenter.advices.HelperInjectorAdvice;
 import io.opentelemetry.contrib.staticinstrumenter.internals.ArchiveEntry;
 import io.opentelemetry.contrib.staticinstrumenter.internals.ClassArchive;
@@ -22,7 +22,6 @@ import io.opentelemetry.contrib.staticinstrumenter.util.AgentExtractor;
 import io.opentelemetry.contrib.staticinstrumenter.util.TmpDirManager;
 import io.opentelemetry.contrib.staticinstrumenter.util.path.IdentityPathGetter;
 import io.opentelemetry.contrib.staticinstrumenter.util.path.SimplePathGetter;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -43,12 +42,12 @@ import org.slf4j.LoggerFactory;
 final class AgentInstrumenter {
   private static final Logger logger = LoggerFactory.getLogger(AgentInstrumenter.class);
   private final Map<String, byte[]> classesToInject;
-  private final File otelJar;
+  private final Path otelJar;
   private final Path finalJarDir;
 
   AgentInstrumenter(String otelJarPath, String finalJarDir) {
     this.classesToInject = new HashMap<>();
-    this.otelJar = new File(otelJarPath);
+    this.otelJar = Path.of(otelJarPath);
     this.finalJarDir = Paths.get(finalJarDir);
   }
 
@@ -72,7 +71,7 @@ final class AgentInstrumenter {
       rebaseOpenTelemetryAgent(openTelemetryAgentClass);
       rebaseHelperInjector(helperInjectorClass);
 
-      prepareAdditionalClasses();
+      prepareStaticInstrumenterClasses();
 
       new AgentCreator(tmpDirManager, new IdentityPathGetter())
           .create(finalJarDir.resolve("opentelemetry-javaagent.jar"), otelJar, classesToInject);
@@ -87,16 +86,24 @@ final class AgentInstrumenter {
     }
   }
 
+  /**
+   * Modifies the <code>io.opentelemetry.javaagent.OpenTelemetryAgent</code> class so that it adds
+   * {@link PreTransformer} and {@link PostTransformer} instances to the {@link
+   * java.lang.instrument.Instrumentation} object used in the agent's premain method. Adding a
+   * PreTransformer instance must be performed after <code>installBootstrapJar</code> method and
+   * adding a PostTransformer must be performed at the end of <code>startAgent</code> method (after
+   * initializing the agent).
+   */
   private void rebaseOpenTelemetryAgent(Class<?> openTelemetryAgentClass) {
 
     DynamicType.Unloaded<?> openTelemetryAgentType =
         new ByteBuddy()
             .rebase(openTelemetryAgentClass)
             .visit(
-                Advice.to(AgentAdvices.AgentMainAdvice.class)
+                Advice.to(AgentAdviceClasses.AgentMainAdvice.class)
                     .on(isMethod().and(named("startAgent"))))
             .visit(
-                Advice.to(AgentAdvices.InstallBootstrapJarAdvice.class)
+                Advice.to(AgentAdviceClasses.InstallBootstrapJarAdvice.class)
                     .on(isMethod().and(named("installBootstrapJar"))))
             .make();
 
@@ -105,6 +112,12 @@ final class AgentInstrumenter {
         openTelemetryAgentType.getBytes());
   }
 
+  /**
+   * Modifies the <code>io.opentelemetry.javaagent.tooling.HelperInjector</code> class so that it
+   * saves additional classes created by the agent in the {@link Main#getAdditionalClasses()} map.
+   * At the end of the static instrumentation process, the Main class saves all additionalClasses to
+   * the result jar.
+   */
   private void rebaseHelperInjector(Class<?> helperInjectorClass) {
 
     DynamicType.Unloaded<?> helperInjectorType =
@@ -120,7 +133,7 @@ final class AgentInstrumenter {
         helperInjectorType.getBytes());
   }
 
-  private void prepareAdditionalClasses() {
+  private void prepareStaticInstrumenterClasses() {
     List<Class<?>> additionalClasses =
         new ArrayList<>(
             Arrays.asList(
