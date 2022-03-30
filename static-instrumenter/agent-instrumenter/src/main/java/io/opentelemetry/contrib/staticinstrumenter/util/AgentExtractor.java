@@ -30,9 +30,9 @@ public final class AgentExtractor {
   }
 
   /**
-   * Extracts the agent JAR entry to a temporary directory. It removes the inst/ prefix and
-   * changes .classdata format to .class in appropriate agent classes so that they could be normally
-   * loaded and modified.
+   * Extracts the agent JAR entry to a temporary directory. It removes the inst/ prefix and changes
+   * .classdata format to .class in appropriate agent classes so that they could be normally loaded
+   * and modified.
    */
   public Path extractAgent(Path agentFile) throws IOException {
     JarFile otelJarFile = new JarFile(agentFile.toString());
