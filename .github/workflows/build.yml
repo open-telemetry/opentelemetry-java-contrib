@@ -22,7 +22,7 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: --stacktrace build
+          arguments: build
 
       - name: Save unit test results
         uses: actions/upload-artifact@v2
@@ -45,7 +45,7 @@ jobs:
       - name: Integration test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: --stacktrace integrationTest
+          arguments: integrationTest
 
       - name: Save integration test results
         uses: actions/upload-artifact@v2
@@ -84,7 +84,7 @@ jobs:
       - name: Build and publish snapshots
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: --stacktrace assemble publishToSonatype
+          arguments: assemble publishToSonatype
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}

@@ -18,7 +18,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         name: Build
         with:
-          arguments: --stacktrace build
+          arguments: build
           cache-read-only: true
 
       - uses: actions/upload-artifact@v2
@@ -42,7 +42,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         name: Integration test
         with:
-          arguments: --stacktrace integrationTest
+          arguments: integrationTest
           cache-read-only: true
 
       - uses: actions/upload-artifact@v2

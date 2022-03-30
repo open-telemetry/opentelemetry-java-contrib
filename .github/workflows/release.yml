@@ -17,7 +17,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         name: Build
         with:
-          arguments: --stacktrace build
+          arguments: build
 
       - uses: actions/upload-artifact@v2
         name: Save unit test results
@@ -40,7 +40,7 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         name: Integration test
         with:
-          arguments: --stacktrace integrationTest
+          arguments: integrationTest
 
       - uses: actions/upload-artifact@v2
         name: Save integration test results
