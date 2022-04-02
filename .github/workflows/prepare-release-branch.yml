@@ -21,8 +21,7 @@ jobs:
         env:
           RELEASE_BRANCH_NAME: ${{ steps.set-release-branch-name.outputs.release-branch-name }}
         run: |
-          git checkout -b $RELEASE_BRANCH_NAME
-          git push origin $RELEASE_BRANCH_NAME
+          git push origin HEAD:$RELEASE_BRANCH_NAME
 
   create-pull-request-against-release-branch:
     needs: prepare-release-branch
@@ -38,7 +37,7 @@ jobs:
           sed -ri "s/$version-SNAPSHOT/$version/" version.gradle.kts
           sed -ri "s/$version-alpha-SNAPSHOT/$version-alpha/" version.gradle.kts
 
-      - name: Set up git name
+      - name: Set git user
         run: |
           git config user.name opentelemetry-java-bot
           git config user.email 97938252+opentelemetry-java-bot@users.noreply.github.com
@@ -78,7 +77,7 @@ jobs:
           sed -ri "s/$version-SNAPSHOT/$next_version-SNAPSHOT/" version.gradle.kts
           sed -ri "s/$version-apha-SNAPSHOT/$next_version-apha-SNAPSHOT/" version.gradle.kts
 
-      - name: Set up git name
+      - name: Set git user
         run: |
           git config user.name opentelemetry-java-bot
           git config user.email 97938252+opentelemetry-java-bot@users.noreply.github.com
