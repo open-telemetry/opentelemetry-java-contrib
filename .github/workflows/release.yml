@@ -76,8 +76,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
 
-      - name: Set versions
-        id: set-versions
+      - name: Set environment variables
         run: |
           version=$(grep -Eo "[0-9]+.[0-9]+.[0-9]+" version.gradle.kts | head -1)
           if [[ $version =~ ([0-9]+).([0-9]+).([0-9]+) ]]; then
@@ -99,13 +98,11 @@ jobs:
           else
               prior_version="$major.$minor.$((patch - 1))"
           fi
-          echo "::set-output name=release-version::$version"
-          echo "::set-output name=prior-release-version::$prior_version"
+          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "PRIOR_VERSION=$prior_version" >> $GITHUB_ENV
 
       - name: Generate release notes
         env:
-          VERSION: ${{ steps.set-versions.outputs.release-version }}
-          PRIOR_VERSION: ${{ steps.set-versions.outputs.prior-release-version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ $version == *.0 ]]; then
@@ -142,7 +139,6 @@ jobs:
 
       - name: Create GitHub release
         env:
-          VERSION: ${{ steps.set-versions.outputs.release-version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION.jar opentelemetry-jmx-metrics.jar
