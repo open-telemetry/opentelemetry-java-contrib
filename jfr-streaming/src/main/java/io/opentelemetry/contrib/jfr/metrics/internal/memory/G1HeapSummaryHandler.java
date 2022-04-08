@@ -15,7 +15,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SURVIVOR_S
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private DoubleHistogram memoryHistogram;
+  private LongHistogram memoryHistogram;
 
   public G1HeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -60,6 +60,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
             .histogramBuilder(METRIC_NAME_MEMORY)
             .setDescription(METRIC_DESCRIPTION_MEMORY)
             .setUnit(BYTES)
+            .ofLongs()
             .build();
   }
 
