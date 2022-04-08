@@ -33,12 +33,8 @@ final class JarTestUtil {
     return JarTestUtil.class.getClassLoader().getResource(fileName).getFile();
   }
 
-  @FunctionalInterface
-  interface ThrowingConsumer<T, E extends Exception> {
-    void accept(T t) throws E;
-  }
-
-  static Path createJar(String prefix, ThrowingConsumer<ZipOutputStream, IOException> creator)
+  static Path createJar(
+      String prefix, JarSupport.ThrowingConsumer<ZipOutputStream, IOException> creator)
       throws IOException {
     Path path = Files.createTempFile(prefix, "jar");
     try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(path))) {

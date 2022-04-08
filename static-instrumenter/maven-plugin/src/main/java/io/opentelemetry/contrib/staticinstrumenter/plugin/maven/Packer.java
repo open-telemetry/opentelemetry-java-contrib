@@ -5,13 +5,12 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSupport.consumeEntries;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.createZipEntryFromFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
@@ -25,7 +24,7 @@ class Packer {
     this.finalNameSuffix = finalNameSuffix;
   }
 
-  Path packAndCopy(Path mainArtifact, FrameworkSupport frameworkSupport) throws IOException {
+  Path packAndCopy(Path mainArtifact, PackagingSupport packagingSupport) throws IOException {
 
     Path mainDirectory = mainArtifact.getParent();
     if (mainDirectory == null) {
@@ -37,21 +36,20 @@ class Packer {
 
     try (JarFile sourceJar = new JarFile(mainArtifact.toFile());
         ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {
-
       targetOut.setMethod(ZipOutputStream.STORED);
-      Enumeration<JarEntry> enums = sourceJar.entries();
-      while (enums.hasMoreElements()) {
-        JarEntry entry = enums.nextElement();
-        if (entry.getName().endsWith(".jar")) {
-          String[] dependencyPathElements = entry.getName().split("/");
-          String dependencyName = dependencyPathElements[dependencyPathElements.length - 1];
-          createZipEntryFromFile(targetOut, mainDirectory.resolve(dependencyName), entry.getName());
-        } else {
-          frameworkSupport.copyAddingPrefix(entry, sourceJar, targetOut);
-        }
-      }
+      consumeEntries(
+          sourceJar,
+          (entry) -> {
+            if (entry.getName().endsWith(".jar")) {
+              String[] dependencyPathElements = entry.getName().split("/");
+              String dependencyName = dependencyPathElements[dependencyPathElements.length - 1];
+              createZipEntryFromFile(
+                  targetOut, mainDirectory.resolve(dependencyName), entry.getName());
+            } else {
+              packagingSupport.copyAddingPrefix(entry, sourceJar, targetOut);
+            }
+          });
     }
-
     return targetFile;
   }
 

@@ -5,13 +5,13 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSupport.consumeEntries;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntry;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
@@ -71,26 +71,30 @@ public class InstrumentationAgent {
    * Adds classes from OpenTelemetry javaagent JAR to target file. Removes the shading and replaces
    * classdata file extension with class file extension.
    */
-  public void copyAgentClassesTo(Path targetFile, FrameworkSupport frameworkSupport)
+  public void copyAgentClassesTo(Path targetFile, PackagingSupport packagingSupport)
       throws IOException {
 
     try (ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {
       targetOut.setMethod(ZipOutputStream.STORED);
-      Enumeration<JarEntry> enums = agentJar.entries();
-      while (enums.hasMoreElements()) {
-        JarEntry entry = enums.nextElement();
-        String entryName = entry.getName();
-        if ((entryName.startsWith("inst/") || entryName.startsWith("io/"))
-            && !entry.isDirectory()) {
-          String modifiedName = modifyAgentEntryName(entryName, frameworkSupport);
-          moveEntry(targetOut, modifiedName, entry, agentJar);
-        }
-      }
+      consumeEntries(
+          agentJar,
+          (entry) -> {
+            String entryName = entry.getName();
+            if (isInstrumentationClass(entry)) {
+              String modifiedName = modifyAgentEntryName(entryName, packagingSupport);
+              moveEntry(targetOut, modifiedName, entry, agentJar);
+            }
+          });
     }
   }
 
-  private static String modifyAgentEntryName(String entryName, FrameworkSupport frameworkSupport) {
-    String prefix = frameworkSupport.getClassesPrefix();
+  private static boolean isInstrumentationClass(JarEntry entry) {
+    return (entry.getName().startsWith("inst/") || entry.getName().startsWith("io/"))
+        && !entry.isDirectory();
+  }
+
+  private static String modifyAgentEntryName(String entryName, PackagingSupport packagingSupport) {
+    String prefix = packagingSupport.getClassesPrefix();
     String newEntryPath = entryName.replace(".classdata", ".class");
     return newEntryPath.replace("inst/", prefix);
   }

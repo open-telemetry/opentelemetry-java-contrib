@@ -13,16 +13,16 @@ import java.util.function.Supplier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public final class FrameworkSupportFactory {
+public final class PackagingSupportFactory {
 
-  private static final Map<String, Supplier<FrameworkSupport>> SUPPORTED_FRAMEWORKS =
+  private static final Map<String, Supplier<PackagingSupport>> SUPPORTED_FRAMEWORKS =
       Map.of(
-          "BOOT-INF/lib/", () -> new FrameworkSupport("BOOT-INF/classes/"),
-          "WEB-INF/lib/", () -> new FrameworkSupport("WEB-INF/classes/"));
+          "BOOT-INF/lib/", () -> new PackagingSupport("BOOT-INF/classes/"),
+          "WEB-INF/lib/", () -> new PackagingSupport("WEB-INF/classes/"));
 
-  private FrameworkSupportFactory() {}
+  private PackagingSupportFactory() {}
 
-  public static FrameworkSupport getFrameworkSupport(Path mainArtifact) throws IOException {
+  public static PackagingSupport packagingSupportFor(Path mainArtifact) throws IOException {
     JarFile jarFile = new JarFile(mainArtifact.toFile());
     Enumeration<JarEntry> enums = jarFile.entries();
     while (enums.hasMoreElements()) {
@@ -31,6 +31,6 @@ public final class FrameworkSupportFactory {
         return SUPPORTED_FRAMEWORKS.get(entry.getName()).get();
       }
     }
-    return FrameworkSupport.EMPTY;
+    return PackagingSupport.EMPTY;
   }
 }

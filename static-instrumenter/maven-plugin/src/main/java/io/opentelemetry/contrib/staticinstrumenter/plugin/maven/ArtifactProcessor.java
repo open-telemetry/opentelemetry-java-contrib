@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.FrameworkSupportFactory.getFrameworkSupport;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.PackagingSupportFactory.packagingSupportFor;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -27,17 +27,21 @@ class ArtifactProcessor {
   }
 
   /**
-   * Instruments, repackages and enhances an artifacts. Exact steps: - unpacks artifacts into a temp
-   * dir</br> - runs instrumentation agent, creating instrumented copy of a JAR and
-   * dependencies</br> - packs all dependencies into a single JAR</br> - adds open telemetry classes
-   * - move jar to final location, adding a suffix</br>
+   * Instruments, repackages and enhances an artifacts. Exact steps:
+   *
+   * <ul>
+   *   <li>unpacks artifacts into a temp dir
+   *   <li>runs instrumentation agent, creating instrumented copy of a JAR and dependencies
+   *   <li>packs all dependencies into a single JAR</br> - adds open telemetry classes
+   *   <li>move jar to final location, adding a suffix
+   * </ul>
    */
   Path process(Path artifact) throws IOException {
-    FrameworkSupport frameworkSupport = getFrameworkSupport(artifact);
-    List<Path> artifactsToInstrument = unpacker.copyAndUnpack(artifact, frameworkSupport);
+    PackagingSupport packagingSupport = packagingSupportFor(artifact);
+    List<Path> artifactsToInstrument = unpacker.copyAndUnpack(artifact, packagingSupport);
     Path instrumentedArtifact =
         instrumenter.instrument(artifact.getFileName(), artifactsToInstrument);
-    agent.copyAgentClassesTo(instrumentedArtifact, frameworkSupport);
-    return packer.packAndCopy(instrumentedArtifact, frameworkSupport);
+    agent.copyAgentClassesTo(instrumentedArtifact, packagingSupport);
+    return packer.packAndCopy(instrumentedArtifact, packagingSupport);
   }
 }

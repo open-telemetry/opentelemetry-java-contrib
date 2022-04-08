@@ -27,7 +27,6 @@ final class ZipEntryCreator {
     try (InputStream sourceInput = sourceJar.getInputStream(sourceEntry)) {
 
       entry.setSize(sourceEntry.getSize());
-      entry.setCompressedSize(sourceEntry.getCompressedSize());
       entry.setCrc(sourceEntry.getCrc());
 
       targetOut.putNextEntry(entry);
