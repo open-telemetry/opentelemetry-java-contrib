@@ -1,7 +1,7 @@
 plugins {
   `kotlin-dsl`
   // When updating, update below in dependencies too
-  id("com.diffplug.spotless") version "6.2.2"
+  id("com.diffplug.spotless") version "6.4.2"
 }
 
 repositories {
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
   // When updating, update above in plugins too
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.2.2")
+  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.4.2")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:2.0.2")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:1.3.0")
 }
