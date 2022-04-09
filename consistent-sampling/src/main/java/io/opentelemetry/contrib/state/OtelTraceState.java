@@ -207,7 +207,6 @@ public final class OtelTraceState {
         }
       }
       if (eqPos == tsStartPos || eqPos == len || ts.charAt(eqPos) != ':') {
-        // error = true;
         return new OtelTraceState();
       }
 
