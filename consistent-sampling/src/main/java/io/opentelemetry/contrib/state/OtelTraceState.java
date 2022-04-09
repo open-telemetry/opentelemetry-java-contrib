@@ -190,7 +190,6 @@ public final class OtelTraceState {
     }
 
     if (ts.length() > TRACE_STATE_SIZE_LIMIT) {
-      // error = true;
       return new OtelTraceState();
     }
 
