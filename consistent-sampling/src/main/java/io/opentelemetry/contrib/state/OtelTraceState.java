@@ -231,7 +231,6 @@ public final class OtelTraceState {
       }
 
       if (sepPos < len && ts.charAt(sepPos) != ';') {
-        // error = true;
         return new OtelTraceState();
       }
 
