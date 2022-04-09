@@ -184,7 +184,6 @@ public final class OtelTraceState {
     List<String> otherKeyValuePairs = null;
     int p = INVALID_P;
     int r = INVALID_R;
-    // boolean error = false;
 
     if (ts == null || ts.isEmpty()) {
       return new OtelTraceState();
