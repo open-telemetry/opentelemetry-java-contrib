@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased
+## Version 1.13.0 (unreleased)
 
-## Version 1.12.0 - 2022-03-14
+## Version 1.12.0 (2022-03-14)
 
 All components updated to target OpenTelemetry SDK 1.12.0.
 
-## Version 1.11.0 - 2022-03-03
+## Version 1.11.0 (2022-03-03)
 
 All components updated to target OpenTelemetry SDK 1.11.0.
 
@@ -38,7 +38,7 @@ All components updated to target OpenTelemetry SDK 1.11.0.
 * Update file total metric
   ([#234](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/234))
 
-## Version 1.10.0 - 2022-01-18
+## Version 1.10.0 (2022-01-18)
 
 All components updated to target OpenTelemetry SDK 1.10.0.
 
@@ -75,7 +75,7 @@ All components updated to target OpenTelemetry SDK 1.10.0.
 * Rename contrib-samplers to samplers
   ([#185](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/185))
 
-## Version 1.9.0 - 2021-12-03
+## Version 1.9.0 (2021-12-03)
 
 All components updated to target OpenTelemetry SDK 1.9.1.
 
@@ -104,7 +104,7 @@ All components updated to target OpenTelemetry SDK 1.9.1.
 
 Skipped to stay in sync with other OpenTelemetry Java repositories.
 
-## Version 1.7.0 - 2021-10-29
+## Version 1.7.0 (2021-10-29)
 
 All components updated to target OpenTelemetry SDK 1.7.0.
 
@@ -140,7 +140,7 @@ Allows programmatic attach of Javaagent.
 * Use the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) to support more configuration setting. All the settings of the OTLP exporter are supported.
   ([#112](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/112))
 
-## Version 1.6.0 - 2021-09-22
+## Version 1.6.0 (2021-09-22)
 
 All components updated to target OpenTelemetry SDK 1.6.0.
 
@@ -148,7 +148,7 @@ All components updated to target OpenTelemetry SDK 1.6.0.
 
 This extension can be registered in a Maven build to trace different build steps, for example project build and Maven plugin executions.
 
-## Version 1.5.0 - 2021-09-21
+## Version 1.5.0 (2021-09-21)
 
 All components updated to target OpenTelemetry SDK 1.5.0.
 
@@ -159,7 +159,7 @@ All components updated to target OpenTelemetry SDK 1.5.0.
   * `*Sum` have been replaced with `*Counter`
   * `*Observer` have been replaced with `*Callback` and do not return any object anymore
 
-## Version 1.4.0 - 2021-08-13
+## Version 1.4.0 (2021-08-13)
 
 All components updated to target OpenTelemetry SDK 1.4.0.
 
@@ -171,7 +171,7 @@ This library contains OTel extensions for use with [AWS X-Ray](https://docs.aws.
 
 * Because of numerous backwards incompatible changes in the OpenTelemetry Metrics data model, you will want to make sure you are running the latest version of the OpenTelemetry collector. Older versions will likely not process metrics correctly.
 
-## Version 1.0.0-alpha - 2021-06-02
+## Version 1.0.0-alpha (2021-06-02)
 
 ### JMX metrics - New 🌟
 
