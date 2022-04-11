@@ -33,7 +33,12 @@ public class InstrumentationAgent {
     this.agentJar = new JarFile(agentPath);
   }
 
-  public static InstrumentationAgent createFromSourceJar(Path targetFolder) throws IOException {
+  /**
+   * Creates new instance using {@value #JAR_FILE_NAME} classpath agent. Agent is copied to the
+   * target folder.
+   */
+  public static InstrumentationAgent createFromClasspathAgent(Path targetFolder)
+      throws IOException {
 
     Path targetPath = targetFolder.resolve(JAR_FILE_NAME);
     try {

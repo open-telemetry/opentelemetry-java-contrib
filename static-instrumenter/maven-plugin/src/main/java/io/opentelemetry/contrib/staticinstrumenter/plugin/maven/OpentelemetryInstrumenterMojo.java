@@ -87,7 +87,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   private static ArtifactProcessor createProcessor(String finalNameSuffix) throws IOException {
     Unpacker unpacker = new Unpacker(WorkingFolders.getInstance().instrumentationFolder());
     InstrumentationAgent agent =
-        InstrumentationAgent.createFromSourceJar(WorkingFolders.getInstance().agentFolder());
+        InstrumentationAgent.createFromClasspathAgent(WorkingFolders.getInstance().agentFolder());
     Instrumenter instrumenter =
         new Instrumenter(agent, WorkingFolders.getInstance().instrumentationFolder());
     Packer packer = new Packer(WorkingFolders.getInstance().finalFolder(), finalNameSuffix);

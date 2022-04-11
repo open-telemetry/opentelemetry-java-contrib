@@ -24,6 +24,16 @@ class Packer {
     this.finalNameSuffix = finalNameSuffix;
   }
 
+  /**
+   * Packs copies any nested JARs of the main artifacts from the its folder. Then, copies the main
+   * artifacts to the target folder, adding entries prefixes using the packaging support service.
+   * Copied artifact will carry the finalNameSuffix.
+   *
+   * @param mainArtifact the artifact to be packed/copied
+   * @param packagingSupport packaging support
+   * @return path to the final artifact in the target folder
+   * @throws IOException in case of any problems
+   */
   Path packAndCopy(Path mainArtifact, PackagingSupport packagingSupport) throws IOException {
 
     Path mainDirectory = mainArtifact.getParent();
@@ -41,10 +51,8 @@ class Packer {
           sourceJar,
           (entry) -> {
             if (entry.getName().endsWith(".jar")) {
-              String[] dependencyPathElements = entry.getName().split("/");
-              String dependencyName = dependencyPathElements[dependencyPathElements.length - 1];
               createZipEntryFromFile(
-                  targetOut, mainDirectory.resolve(dependencyName), entry.getName());
+                  targetOut, mainDirectory.resolve(entry.getName()), entry.getName());
             } else {
               packagingSupport.copyAddingPrefix(entry, sourceJar, targetOut);
             }
