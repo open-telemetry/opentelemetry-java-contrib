@@ -15,8 +15,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import jdk.jfr.consumer.RecordedEvent;
@@ -44,7 +47,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
   private DoubleHistogram durationHistogram;
-  private DoubleHistogram memoryHistogram;
+  private LongHistogram memoryHistogram;
 
   public GCHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -63,6 +66,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
             .histogramBuilder(METRIC_NAME_MEMORY)
             .setDescription(METRIC_DESCRIPTION_MEMORY)
             .setUnit(BYTES)
+            .ofLongs()
             .build();
   }
 
@@ -103,7 +107,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   private void recordValues(RecordedEvent before, RecordedEvent after) {
     durationHistogram.record(
-        after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
+        DurationUtil.toMillis(Duration.between(before.getStartTime(), after.getStartTime())));
     if (after.hasField(HEAP_USED)) {
       memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
     }

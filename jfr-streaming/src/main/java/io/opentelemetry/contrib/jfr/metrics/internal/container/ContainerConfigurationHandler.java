@@ -27,7 +27,6 @@ public final class ContainerConfigurationHandler implements RecordedEventHandler
   public void initializeMeter(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME)
-        .ofDoubles()
         .setUnit(ONE)
         .buildWithCallback(codm -> codm.record(value));
   }

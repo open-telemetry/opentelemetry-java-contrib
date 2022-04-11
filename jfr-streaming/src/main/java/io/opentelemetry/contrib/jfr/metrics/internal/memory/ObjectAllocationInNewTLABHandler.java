@@ -13,7 +13,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
@@ -27,7 +27,7 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
 
-  private DoubleHistogram histogram;
+  private LongHistogram histogram;
 
   public ObjectAllocationInNewTLABHandler(ThreadGrouper grouper) {
     super(grouper);
@@ -41,6 +41,7 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
             .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)
             .setDescription(METRIC_DESCRIPTION_MEMORY_ALLOCATION)
             .setUnit(BYTES)
+            .ofLongs()
             .build();
   }
 
@@ -59,10 +60,10 @@ public final class ObjectAllocationInNewTLABHandler extends AbstractThreadDispat
       implements Consumer<RecordedEvent> {
     private static final String TLAB_SIZE = "tlabSize";
 
-    private final DoubleHistogram histogram;
+    private final LongHistogram histogram;
     private final Attributes attributes;
 
-    public PerThreadObjectAllocationInNewTLABHandler(DoubleHistogram histogram, String threadName) {
+    public PerThreadObjectAllocationInNewTLABHandler(LongHistogram histogram, String threadName) {
       this.histogram = histogram;
       this.attributes = Attributes.of(ATTR_THREAD_NAME, threadName, ATTR_ARENA_NAME, "TLAB");
     }

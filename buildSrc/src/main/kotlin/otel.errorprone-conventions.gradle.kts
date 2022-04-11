@@ -26,6 +26,9 @@ tasks {
         disableWarningsInGeneratedCode.set(true)
         allDisabledChecksAsWarnings.set(true)
 
+        // Still Java 8 mostly
+        disable("Varifier")
+
         // Doesn't currently use Var annotations.
         disable("Var") // "-Xep:Var:OFF"
 
@@ -58,9 +61,6 @@ tasks {
         // until we have everything converted, we need these
         disable("JdkObsolete")
         disable("UnnecessaryAnonymousClass")
-
-        // Limits APIs
-        disable("NoFunctionalReturnType")
 
         // We don't depend on Guava so use normal splitting
         disable("StringSplitter")
