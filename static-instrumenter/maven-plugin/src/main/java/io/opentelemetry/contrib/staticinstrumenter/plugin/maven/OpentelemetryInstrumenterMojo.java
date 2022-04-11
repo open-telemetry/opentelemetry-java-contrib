@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -53,23 +54,27 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException {
 
     try {
-      executeInternal();
+      if (project == null) {
+        throw new MojoExecutionException("Project not set");
+      }
+
+      String finalFolder =
+          (outputFolder == null ? project.getBuild().getDirectory() : outputFolder);
+      String finalNameSuffix = (suffix == null ? "" : suffix);
+
+      List<Path> artifactsToInstrument =
+          new ProjectModel(project).chooseForInstrumentation(artifactName);
+      executeInternal(finalFolder, finalNameSuffix, artifactsToInstrument);
+
     } catch (IOException | IllegalArgumentException ioe) {
-      throw new MojoExecutionException("", ioe);
+      throw new MojoExecutionException("Exception executing plugin", ioe);
     }
   }
 
-  private void executeInternal() throws IOException, MojoExecutionException {
-
-    if (project == null) {
-      throw new MojoExecutionException("Project not set");
-    }
-
-    String finalFolder = (outputFolder == null ? project.getBuild().getDirectory() : outputFolder);
-    String finalNameSuffix = (suffix == null ? "" : suffix);
-
-    List<Path> artifactsToInstrument =
-        new ProjectModel(project).chooseForInstrumentation(artifactName);
+  @VisibleForTesting
+  final void executeInternal(
+      String finalFolder, String finalNameSuffix, List<Path> artifactsToInstrument)
+      throws IOException {
 
     try {
       WorkingFolders.create(finalFolder);
@@ -80,17 +85,19 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
         WorkingFolders.getInstance().cleanInstrumentationFolder();
       }
     } finally {
-      WorkingFolders.getInstance().delete();
+      try {
+        WorkingFolders.getInstance().delete();
+      } catch (Exception e) {
+        // ignored
+      }
     }
   }
 
   private static ArtifactProcessor createProcessor(String finalNameSuffix) throws IOException {
-    Unpacker unpacker = new Unpacker(WorkingFolders.getInstance().instrumentationFolder());
-    InstrumentationAgent agent =
-        InstrumentationAgent.createFromClasspathAgent(WorkingFolders.getInstance().agentFolder());
-    Instrumenter instrumenter =
-        new Instrumenter(agent, WorkingFolders.getInstance().instrumentationFolder());
-    Packer packer = new Packer(WorkingFolders.getInstance().finalFolder(), finalNameSuffix);
-    return new ArtifactProcessor(unpacker, instrumenter, agent, packer);
+    return ArtifactProcessor.createProcessor(
+        WorkingFolders.getInstance().instrumentationFolder(),
+        WorkingFolders.getInstance().agentFolder(),
+        WorkingFolders.getInstance().finalFolder(),
+        finalNameSuffix);
   }
 }

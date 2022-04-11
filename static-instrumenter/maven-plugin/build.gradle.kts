@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-  compileOnly("org.apache.maven:maven-plugin-api:3.6.3")
-  compileOnly("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0")
+  implementation("org.apache.maven:maven-plugin-api:3.6.3")
+  implementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0")
   implementation("org.apache.maven:maven-project:2.2.1")
   implementation("org.apache.maven:maven-core:3.3.9")
   implementation("org.apache.maven.resolver:maven-resolver:1.6.2")

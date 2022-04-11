@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSupport.consumeEntries;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntry;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class InstrumentationAgent {
 
   public static final String JAR_FILE_NAME = "opentelemetry-javaagent.jar";
-  public static final String MAIN_CLASS = "io.opentelemetry.contrib.staticinstrumenter.Main";
+  public static final String MAIN_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
 
   private static final Logger logger = LoggerFactory.getLogger(InstrumentationAgent.class);
 
@@ -67,7 +68,7 @@ public class InstrumentationAgent {
         "-Dotel.instrumentation.internal-class-loader.enabled=false",
         String.format("-javaagent:%s", agentPath),
         "-cp",
-        String.format("%s", classpath),
+        String.format("%s" + File.pathSeparator + "%s", classpath, agentPath),
         MAIN_CLASS,
         outputFolder.toString());
   }

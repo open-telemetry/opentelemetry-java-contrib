@@ -5,8 +5,10 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,13 +33,20 @@ public class Instrumenter {
     Process process =
         agent
             .getInstrumentationProcess(toClasspath(artifactsToInstrument), targetFolder)
-            .inheritIO()
+            .redirectErrorStream(true)
             .start();
     try {
       int ret = process.waitFor();
       if (ret != 0) {
-        throw new IOException(
-            "The instrumentation process for JAR dependencies finished with exit value: " + ret);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        process.getInputStream().transferTo(output);
+        StringBuilder builder =
+            new StringBuilder(
+                    "The instrumentation process for JAR dependencies finished with exit value: ")
+                .append(ret)
+                .append("\nSystem out:\n")
+                .append(output.toString(Charset.defaultCharset()));
+        throw new IOException(builder.toString());
       }
     } catch (InterruptedException ie) {
       throw new IOException(ie);

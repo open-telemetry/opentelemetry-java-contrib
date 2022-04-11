@@ -18,6 +18,16 @@ class ArtifactProcessor {
   private final Unpacker unpacker;
   private final Packer packer;
 
+  static ArtifactProcessor createProcessor(
+      Path instrumentationFolder, Path agentFolder, Path finalFolder, String finalNameSuffix)
+      throws IOException {
+    Unpacker unpacker = new Unpacker(instrumentationFolder);
+    InstrumentationAgent agent = InstrumentationAgent.createFromClasspathAgent(agentFolder);
+    Instrumenter instrumenter = new Instrumenter(agent, instrumentationFolder);
+    Packer packer = new Packer(finalFolder, finalNameSuffix);
+    return new ArtifactProcessor(unpacker, instrumenter, agent, packer);
+  }
+
   ArtifactProcessor(
       Unpacker unpacker, Instrumenter instrumenter, InstrumentationAgent agent, Packer packer) {
     this.agent = agent;
