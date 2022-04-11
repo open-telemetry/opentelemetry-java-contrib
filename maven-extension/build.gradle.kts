@@ -21,6 +21,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation("io.opentelemetry:opentelemetry-semconv")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-trace")
 
   implementation("io.grpc:grpc-netty-shaded")
