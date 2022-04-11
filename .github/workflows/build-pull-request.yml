@@ -21,7 +21,7 @@ jobs:
           arguments: build
           cache-read-only: true
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Save unit test results
         if: always()
         with:
@@ -45,7 +45,7 @@ jobs:
           arguments: integrationTest
           cache-read-only: true
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Save integration test results
         if: always()
         with:
