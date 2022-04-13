@@ -80,7 +80,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       WorkingFolders.create(finalFolder);
       ArtifactProcessor artifactProcessor = createProcessor(finalNameSuffix);
       for (Path artifact : artifactsToInstrument) {
-        logger.debug("Processing an artifact: {}", artifact);
+        logger.info("Processing artifact: {}", artifact);
         artifactProcessor.process(artifact);
         WorkingFolders.getInstance().cleanInstrumentationFolder();
       }

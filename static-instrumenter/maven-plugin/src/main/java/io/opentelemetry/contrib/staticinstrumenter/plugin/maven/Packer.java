@@ -46,7 +46,6 @@ class Packer {
 
     try (JarFile sourceJar = new JarFile(mainArtifact.toFile());
         ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {
-      targetOut.setMethod(ZipOutputStream.STORED);
       consumeEntries(
           sourceJar,
           (entry) -> {

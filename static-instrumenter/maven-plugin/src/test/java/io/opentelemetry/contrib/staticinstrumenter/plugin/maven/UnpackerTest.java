@@ -5,21 +5,18 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.jar.JarFile;
-import java.util.zip.ZipOutputStream;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 class UnpackerTest {
 
@@ -42,17 +39,22 @@ class UnpackerTest {
   void shouldCopyTestJarContent(@TempDir File targetFolder) throws Exception {
     // given
     Unpacker unpacker = new Unpacker(targetFolder.toPath());
-    PackagingSupport support = mock(PackagingSupport.class);
+    PackagingSupport support = PackagingSupport.EMPTY;
     Path jar = Paths.get(getResourcePath("test.jar"));
-    ArgumentCaptor<JarFile> captor = ArgumentCaptor.forClass(JarFile.class);
+
     // when
-    unpacker.copyAndUnpack(jar, support);
+    List<Path> copied = unpacker.copyAndUnpack(jar, support);
     // then
-    then(support).should().copyRemovingPrefix(captor.capture(), Mockito.any(ZipOutputStream.class));
-    JarFile captured = captor.getValue();
+    assertThat(copied).hasSize(3);
     // copied the right file?
-    assertThat(captured.getName()).isEqualTo(jar.toString());
+    assertThat(copied.get(0).getFileName().toString()).isEqualTo("test.jar");
     // got the target file right?
-    assertThat(Files.exists(targetFolder.toPath().resolve("test.jar"))).isTrue();
+    assertJar(
+        copied.get(0),
+        "META-INF/MANIFEST.MF",
+        "test/NotInstrumented.class",
+        "test/TestClass.class",
+        "lib/firstNested.jar",
+        "lib/secondNested.jar");
   }
 }

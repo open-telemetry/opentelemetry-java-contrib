@@ -8,6 +8,8 @@ package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.createJar;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.createZipEntryFromFile;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntry;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +27,7 @@ class ZipEntryCreatorTest {
         createJar(
             "test-copy",
             (target) ->
-                ZipEntryCreator.moveEntry(
+                moveEntry(
                     target,
                     "test/TestClass.class",
                     source.getJarEntry("test/TestClass.class"),
@@ -43,12 +45,12 @@ class ZipEntryCreatorTest {
         createJar(
             "test-copy",
             (target) -> {
-              ZipEntryCreator.moveEntry(
+              moveEntry(
                   target,
                   "newpath/TestClassRenamed.classdata",
                   source.getJarEntry("test/TestClass.class"),
                   source);
-              ZipEntryCreator.moveEntry(
+              moveEntry(
                   target,
                   "test/NotInstrumented.class",
                   source.getJarEntry("test/NotInstrumented.class"),
@@ -66,7 +68,7 @@ class ZipEntryCreatorTest {
     Path targetFile =
         createJar(
             "new-jar",
-            (target) -> ZipEntryCreator.createZipEntryFromFile(target, file, "stored/entry.file"));
+            (target) -> createZipEntryFromFile(target, file, "stored/entry.file"));
     // then
     assertJar(targetFile, "stored/entry.file");
   }

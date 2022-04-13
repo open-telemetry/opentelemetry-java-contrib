@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSupport.consumeEntries;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntry;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,7 +67,7 @@ public class InstrumentationAgent {
         "-Dotel.instrumentation.internal-class-loader.enabled=false",
         String.format("-javaagent:%s", agentPath),
         "-cp",
-        String.format("%s" + File.pathSeparator + "%s", classpath, agentPath),
+        classpath,
         MAIN_CLASS,
         outputFolder.toString());
   }
@@ -81,7 +80,6 @@ public class InstrumentationAgent {
       throws IOException {
 
     try (ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {
-      targetOut.setMethod(ZipOutputStream.STORED);
       consumeEntries(
           agentJar,
           (entry) -> {

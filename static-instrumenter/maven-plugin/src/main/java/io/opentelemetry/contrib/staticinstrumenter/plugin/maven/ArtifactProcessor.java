@@ -10,8 +10,12 @@ import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.Packaging
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ArtifactProcessor {
+
+  private static final Logger log = LoggerFactory.getLogger(ArtifactProcessor.class);
 
   private final InstrumentationAgent agent;
   private final Instrumenter instrumenter;
@@ -49,9 +53,13 @@ class ArtifactProcessor {
   Path process(Path artifact) throws IOException {
     PackagingSupport packagingSupport = packagingSupportFor(artifact);
     List<Path> artifactsToInstrument = unpacker.copyAndUnpack(artifact, packagingSupport);
+    log.info("Unpacked artifacts: {}", artifactsToInstrument);
     Path instrumentedArtifact =
         instrumenter.instrument(artifact.getFileName(), artifactsToInstrument);
+    log.info("Main artifact after instrumentation: {}", instrumentedArtifact);
     agent.copyAgentClassesTo(instrumentedArtifact, packagingSupport);
-    return packer.packAndCopy(instrumentedArtifact, packagingSupport);
+    Path finalArtifact = packer.packAndCopy(instrumentedArtifact, packagingSupport);
+    log.info("Final artifact: {}", finalArtifact);
+    return finalArtifact;
   }
 }

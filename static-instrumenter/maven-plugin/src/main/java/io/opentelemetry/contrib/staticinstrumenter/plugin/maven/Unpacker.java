@@ -43,9 +43,9 @@ class Unpacker {
 
   private Path copy(Path artifact, PackagingSupport packagingSupport) throws IOException {
     Path targetArtifact = Files.createFile(targetFolder.resolve(artifact.getFileName()));
-    try (ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetArtifact))) {
-      JarFile artifactJar = new JarFile(artifact.toFile());
-      targetOut.setMethod(ZipOutputStream.STORED);
+    try (ZipOutputStream targetOut = new ZipOutputStream(
+        Files.newOutputStream(targetArtifact)); JarFile artifactJar = new JarFile(
+        artifact.toFile())) {
       packagingSupport.copyRemovingPrefix(artifactJar, targetOut);
     }
     return targetArtifact;

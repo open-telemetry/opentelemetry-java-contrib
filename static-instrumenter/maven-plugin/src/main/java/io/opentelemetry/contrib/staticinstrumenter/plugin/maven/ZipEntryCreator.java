@@ -27,6 +27,8 @@ final class ZipEntryCreator {
     try (InputStream sourceInput = sourceJar.getInputStream(sourceEntry)) {
 
       entry.setSize(sourceEntry.getSize());
+      entry.setCompressedSize(sourceEntry.getCompressedSize());
+      entry.setMethod(sourceEntry.getMethod());
       entry.setCrc(sourceEntry.getCrc());
 
       targetOut.putNextEntry(entry);
@@ -39,6 +41,7 @@ final class ZipEntryCreator {
       throws IOException {
 
     ZipEntry entry = new ZipEntry(entryPath);
+    entry.setMethod(ZipOutputStream.DEFLATED);
     byte[] bytes = Files.readAllBytes(sourceFile);
     entry.setSize(bytes.length);
     CRC32 crc = new CRC32();
