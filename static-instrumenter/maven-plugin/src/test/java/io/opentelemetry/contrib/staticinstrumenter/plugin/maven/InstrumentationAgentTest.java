@@ -5,12 +5,14 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.jar.JarFile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,7 +33,8 @@ class InstrumentationAgentTest {
   void shouldCopyAgentClasses(@TempDir File targetFolder) throws IOException {
     // given
     Path targetFile = targetFolder.toPath().resolve("copied-agent.jar");
-    Files.createFile(targetFile);
+    Path sourceJar = Paths.get(getResourcePath("test.jar"));
+    Files.copy(sourceJar, targetFile);
     InstrumentationAgent agent =
         InstrumentationAgent.createFromClasspathAgent(targetFolder.toPath());
     // when

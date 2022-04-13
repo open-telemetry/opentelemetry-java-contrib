@@ -23,9 +23,13 @@ class ArtifactProcessor {
   private final Packer packer;
 
   static ArtifactProcessor createProcessor(
-      Path instrumentationFolder, Path agentFolder, Path finalFolder, String finalNameSuffix)
+      Path instrumentationFolder,
+      Path preparationFolder,
+      Path agentFolder,
+      Path finalFolder,
+      String finalNameSuffix)
       throws IOException {
-    Unpacker unpacker = new Unpacker(instrumentationFolder);
+    Unpacker unpacker = new Unpacker(preparationFolder);
     InstrumentationAgent agent = InstrumentationAgent.createFromClasspathAgent(agentFolder);
     Instrumenter instrumenter = new Instrumenter(agent, instrumentationFolder);
     Packer packer = new Packer(finalFolder, finalNameSuffix);

@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
@@ -15,8 +20,9 @@ class InstrumenterTest {
   @Test
   void shouldInstrument(@TempDir File tempDir) throws IOException {
     // given
-    Instrumenter instrumenter = new Instrumenter(
-        InstrumentationAgent.createFromClasspathAgent(tempDir.toPath()), tempDir.toPath());
+    Instrumenter instrumenter =
+        new Instrumenter(
+            InstrumentationAgent.createFromClasspathAgent(tempDir.toPath()), tempDir.toPath());
     Path testJar = Paths.get(JarTestUtil.getResourcePath("test.jar"));
     // when
     Path instrumented = instrumenter.instrument(testJar.getFileName(), Arrays.asList(testJar));

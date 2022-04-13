@@ -30,7 +30,7 @@ final class JarTestUtil {
   }
 
   static String getResourcePath(String fileName) {
-    return JarTestUtil.class.getClassLoader().getResource(fileName).getFile();
+    return Thread.currentThread().getContextClassLoader().getResource(fileName).getFile();
   }
 
   static Path createJar(

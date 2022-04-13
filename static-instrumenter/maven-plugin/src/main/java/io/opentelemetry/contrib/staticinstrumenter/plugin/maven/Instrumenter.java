@@ -12,8 +12,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Instrumenter {
+
+  private static final Logger log = LoggerFactory.getLogger(Instrumenter.class);
 
   private final InstrumentationAgent agent;
   private final Path targetFolder;
@@ -30,11 +34,13 @@ public class Instrumenter {
   }
 
   private void runInstrumentationProcess(List<Path> artifactsToInstrument) throws IOException {
-    Process process =
+    ProcessBuilder processBuilder =
         agent
             .getInstrumentationProcess(toClasspath(artifactsToInstrument), targetFolder)
-            .redirectErrorStream(true)
-            .start();
+            .redirectErrorStream(true);
+    log.debug("Instrumentation process: {}", processBuilder.command());
+    Process process = processBuilder.start();
+
     try {
       int ret = process.waitFor();
       if (ret != 0) {

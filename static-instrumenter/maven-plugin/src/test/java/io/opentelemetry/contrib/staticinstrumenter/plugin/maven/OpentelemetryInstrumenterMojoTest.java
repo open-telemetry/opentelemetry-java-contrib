@@ -33,10 +33,15 @@ class OpentelemetryInstrumenterMojoTest {
 
   private static void verifyApplicationByExampleRun(Path instrumentedApp) throws Exception {
     ProcessBuilder pb =
-        new ProcessBuilder("java", "-jar", instrumentedApp.toString()).redirectErrorStream(true);
+        new ProcessBuilder(
+                "java",
+                "-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default",
+                "-jar",
+                instrumentedApp.toString())
+            .redirectErrorStream(true);
     Process process = pb.start();
     process.waitFor();
     String output = new String(process.getInputStream().readAllBytes(), Charset.defaultCharset());
-    assertThat(output).isEqualTo("SUCCESS");
+    assertThat(output).contains("SUCCESS");
   }
 }

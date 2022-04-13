@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.JarEntry;
@@ -18,6 +19,17 @@ import java.util.zip.ZipOutputStream;
 final class ZipEntryCreator {
 
   private ZipEntryCreator() {}
+
+  static void moveEntryUpdating(
+      FileSystem targetFs, String targetPath, JarEntry sourceEntry, JarFile sourceJar)
+      throws IOException {
+
+    Path entry = targetFs.getPath("/", targetPath);
+    Files.createDirectories(entry.getParent());
+    try (InputStream sourceInput = sourceJar.getInputStream(sourceEntry)) {
+      Files.copy(sourceInput, entry);
+    }
+  }
 
   static void moveEntry(
       ZipOutputStream targetOut, String targetPath, JarEntry sourceEntry, JarFile sourceJar)

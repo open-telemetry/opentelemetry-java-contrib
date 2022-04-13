@@ -21,6 +21,7 @@ dependencies {
   implementation("org.apache.maven.resolver:maven-resolver-transport-http:1.6.2")
   implementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling:1.12.0-alpha")
   implementation("org.apache.commons:commons-lang3:3.12.0")
+  testImplementation("org.slf4j:slf4j-simple")
 }
 
 tasks {

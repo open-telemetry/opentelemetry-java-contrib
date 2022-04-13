@@ -66,9 +66,7 @@ class ZipEntryCreatorTest {
     Path file = Paths.get(getResourcePath("testing.file"));
     // when
     Path targetFile =
-        createJar(
-            "new-jar",
-            (target) -> createZipEntryFromFile(target, file, "stored/entry.file"));
+        createJar("new-jar", (target) -> createZipEntryFromFile(target, file, "stored/entry.file"));
     // then
     assertJar(targetFile, "stored/entry.file");
   }

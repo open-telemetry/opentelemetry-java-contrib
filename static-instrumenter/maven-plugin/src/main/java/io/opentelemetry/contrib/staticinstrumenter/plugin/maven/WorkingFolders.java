@@ -18,6 +18,8 @@ class WorkingFolders {
 
   // folder where OTel agent is stored
   private final Path agentFolder;
+  // folder where jars fro instrumentation are prepared
+  private final Path preparationFolder;
   // folder where instrumentation and processing is conducted
   private final Path instrumentationFolder;
   // folder where final (instrumented, with OTel classes) JARs are stored
@@ -25,6 +27,7 @@ class WorkingFolders {
 
   private WorkingFolders(String finalFolder) throws IOException {
     agentFolder = Files.createTempDirectory("OTEL_AGENT_FOLDER");
+    preparationFolder = Files.createTempDirectory("PREPARATION_FOLDER");
     instrumentationFolder = Files.createTempDirectory("INSTRUMENTATION_WORKING_FOLDER");
     this.finalFolder = Files.createDirectories(Paths.get(finalFolder));
   }
@@ -43,11 +46,16 @@ class WorkingFolders {
 
   void delete() throws IOException {
     FileUtils.deleteDirectory(agentFolder.toFile());
+    FileUtils.deleteDirectory(preparationFolder.toFile());
     FileUtils.deleteDirectory(instrumentationFolder.toFile());
   }
 
   Path agentFolder() {
     return agentFolder;
+  }
+
+  Path getPreparationFolder() {
+    return preparationFolder;
   }
 
   Path instrumentationFolder() {
@@ -58,7 +66,8 @@ class WorkingFolders {
     return finalFolder;
   }
 
-  void cleanInstrumentationFolder() throws IOException {
+  void cleanWorkingFolders() throws IOException {
     FileUtils.cleanDirectory(instrumentationFolder.toFile());
+    FileUtils.cleanDirectory(preparationFolder.toFile());
   }
 }

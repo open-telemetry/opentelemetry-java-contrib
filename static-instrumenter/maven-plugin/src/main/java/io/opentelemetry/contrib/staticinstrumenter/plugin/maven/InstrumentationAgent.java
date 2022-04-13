@@ -6,21 +6,26 @@
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSupport.consumeEntries;
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntry;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntryUpdating;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InstrumentationAgent {
 
+  // TODO: change after the new static-instr capable agent is released
   public static final String JAR_FILE_NAME = "opentelemetry-javaagent.jar";
+  // TODO: change after the new static-instr capable agent is released
   public static final String MAIN_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
 
   private static final Logger logger = LoggerFactory.getLogger(InstrumentationAgent.class);
@@ -79,17 +84,28 @@ public class InstrumentationAgent {
   public void copyAgentClassesTo(Path targetFile, PackagingSupport packagingSupport)
       throws IOException {
 
-    try (ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {
+    Set<String> existing = allNames(targetFile);
+    try (FileSystem targetFs = FileSystems.newFileSystem(targetFile, null)) {
       consumeEntries(
           agentJar,
           (entry) -> {
             String entryName = entry.getName();
             if (isInstrumentationClass(entry)) {
               String modifiedName = modifyAgentEntryName(entryName, packagingSupport);
-              moveEntry(targetOut, modifiedName, entry, agentJar);
+              if (!existing.contains(modifiedName)) {
+                moveEntryUpdating(targetFs, modifiedName, entry, agentJar);
+              }
             }
           });
     }
+  }
+
+  private static Set<String> allNames(Path jarPath) throws IOException {
+    Set<String> result = new HashSet<>();
+    try (JarFile jar = new JarFile(jarPath.toFile())) {
+      JarSupport.consumeEntries(jar, entry -> result.add(entry.getName()));
+    }
+    return result;
   }
 
   private static boolean isInstrumentationClass(JarEntry entry) {
