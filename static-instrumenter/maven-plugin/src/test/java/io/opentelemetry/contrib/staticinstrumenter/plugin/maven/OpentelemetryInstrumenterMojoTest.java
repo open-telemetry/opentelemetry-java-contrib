@@ -31,6 +31,11 @@ class OpentelemetryInstrumenterMojoTest {
     verifyApplicationByExampleRun(instrumentedApp);
   }
 
+  /**
+   * Test application does an http call using Apache HTTP client. If a response contains
+   * "Traceparent" header (result of autoinstrumentation), application writes "SUCCESS" to system
+   * out.
+   */
   private static void verifyApplicationByExampleRun(Path instrumentedApp) throws Exception {
     ProcessBuilder pb =
         new ProcessBuilder(
