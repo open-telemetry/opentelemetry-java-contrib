@@ -70,5 +70,10 @@ public class OtelTraceStateTest {
     assertEquals("r:6", OtelTraceState.parse("r:5;r:6").serialize());
     assertEquals("p:6;r:10", OtelTraceState.parse("p:5;p:6;r:10").serialize());
     assertEquals("", OtelTraceState.parse("p5;p:6;r:10").serialize());
+    assertEquals("p:6;r:10;p5:3", OtelTraceState.parse("p5:3;p:6;r:10").serialize());
+    assertEquals("", OtelTraceState.parse(":p:6;r:10").serialize());
+    assertEquals("", OtelTraceState.parse(";p:6;r:10").serialize());
+    assertEquals("", OtelTraceState.parse("_;p:6;r:10").serialize());
+    assertEquals("", OtelTraceState.parse("5;p:6;r:10").serialize());
   }
 }
