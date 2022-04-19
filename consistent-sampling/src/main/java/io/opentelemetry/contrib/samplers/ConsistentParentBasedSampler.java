@@ -44,7 +44,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
     super(threadSafeRandomGenerator);
     this.rootSampler = requireNonNull(rootSampler);
     this.description =
-        "ConsistentComposedSampler{rootSampler=" + rootSampler.getDescription() + '}';
+        "ConsistentParentBasedSampler{rootSampler=" + rootSampler.getDescription() + '}';
   }
 
   @Override
