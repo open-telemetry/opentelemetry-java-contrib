@@ -15,6 +15,18 @@ public final class RandomUtil {
    * Returns a pseudorandomly chosen {@code boolean} value where the probability of returning {@code
    * true} is predefined.
    *
+   * <p>{@code true} needs to be returned with a success probability of {@code probability}. If the
+   * success probability is greater than 50% ({@code probability > 0.5}), the same can be achieved
+   * by returning {@code true} with a probability of 50%, and returning the result of a Bernoulli
+   * trial with a probability of {@code 2 * probability - 1}. The resulting success probability will
+   * be the same as {@code 0.5 + 0.5 * (2 * probability - 1) = probabilty}. Similarly, if the
+   * success probability is smaller than 50% ({@code probability <= 0.5}), {@code false} is returned
+   * with a probability of 50%. Otherwise, the result of a Bernoulli trial with success probability
+   * of {@code 2 * probability} is returned. Again, the resulting success probability is exactly as
+   * desired because {@code 0.5 * (2 * probability) = probability}. Recursive continuation of this
+   * approach allows realizing Bernoulli trials with arbitrary success probabilities using just few
+   * random bits.
+   *
    * @param randomBooleanSupplier a random boolean supplier
    * @param probability the probability of returning {@code true}
    * @return a random {@code boolean}
