@@ -175,7 +175,7 @@ public abstract class ConsistentSampler implements Sampler {
   }
 
   protected ConsistentSampler() {
-    this.threadSafeRandomGenerator = DefaultRandomGenerator.get();
+    this(DefaultRandomGenerator.get());
   }
 
   @Override
