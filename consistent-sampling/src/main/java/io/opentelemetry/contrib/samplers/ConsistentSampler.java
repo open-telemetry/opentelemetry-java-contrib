@@ -300,7 +300,7 @@ public abstract class ConsistentSampler implements Sampler {
   protected static double getSamplingProbability(int p) {
     if (OtelTraceState.isValidP(p)) {
       if (p == OtelTraceState.getMaxP()) {
-        return 0.;
+        return 0.0;
       } else {
         return Double.longBitsToDouble((0x3FFL - p) << 52);
       }
@@ -319,11 +319,11 @@ public abstract class ConsistentSampler implements Sampler {
    * @return the p-value
    */
   protected static int getLowerBoundP(double samplingProbability) {
-    if (!(samplingProbability >= 0. && samplingProbability <= 1.)) {
+    if (!(samplingProbability >= 0.0 && samplingProbability <= 1.0)) {
       throw new IllegalArgumentException();
     }
     if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
-      return OtelTraceState.getMaxP() - (samplingProbability > 0. ? 1 : 0);
+      return OtelTraceState.getMaxP() - (samplingProbability > 0.0 ? 1 : 0);
     } else {
       long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
       long mantissa = longSamplingProbability & 0x000FFFFFFFFFFFFFL;
@@ -340,7 +340,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @return the p-value
    */
   protected static int getUpperBoundP(double samplingProbability) {
-    if (!(samplingProbability >= 0. && samplingProbability <= 1.)) {
+    if (!(samplingProbability >= 0.0 && samplingProbability <= 1.0)) {
       throw new IllegalArgumentException();
     }
     if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
