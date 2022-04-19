@@ -11,7 +11,7 @@ import io.opentelemetry.contrib.state.OtelTraceState;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A consistent sampler composes two consistent samplers.
+ * A consistent sampler composed of two consistent samplers.
  *
  * <p>This sampler samples if both samplers would sample.
  */
