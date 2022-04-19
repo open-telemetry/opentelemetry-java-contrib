@@ -101,18 +101,18 @@ public final class OtelTraceState {
       sb.append("r:").append(rval);
     }
     if (otherKeyValuePairs != null) {
-      for (String s : otherKeyValuePairs) {
+      for (String pair : otherKeyValuePairs) {
         int ex = sb.length();
         if (ex != 0) {
           ex += 1;
         }
-        if (ex + s.length() > TRACE_STATE_SIZE_LIMIT) {
+        if (ex + pair.length() > TRACE_STATE_SIZE_LIMIT) {
           break;
         }
         if (sb.length() > 0) {
           sb.append(';');
         }
-        sb.append(s);
+        sb.append(pair);
       }
     }
     return sb.toString();
