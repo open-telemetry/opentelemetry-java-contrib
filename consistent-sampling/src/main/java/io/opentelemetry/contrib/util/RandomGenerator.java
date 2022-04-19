@@ -16,37 +16,6 @@ public interface RandomGenerator {
   long nextLong();
 
   /**
-   * Returns a pseudorandomly chosen {@code int} value between zero (inclusive) and the specified
-   * bound (exclusive).
-   *
-   * <p>The implementation is based on Daniel Lemire's algorithm as described in "Fast random
-   * integer generation in an interval." ACM Transactions on Modeling and Computer Simulation
-   * (TOMACS) 29.1 (2019): 3.
-   *
-   * @param bound the upper bound (exclusive) for the returned value. Must be positive.
-   * @return a pseudorandomly chosen {@code int} value between zero (inclusive) and the bound
-   *     (exclusive)
-   * @throws IllegalArgumentException if {@code bound} is not positive
-   */
-  default int nextInt(int bound) {
-    if (bound <= 0) {
-      throw new IllegalArgumentException();
-    }
-    long x = nextLong() >>> 33; // use only 31 random bits
-    long m = x * bound;
-    int l = (int) m & 0x7FFFFFFF;
-    if (l < bound) {
-      int t = (-bound & 0x7FFFFFFF) % bound;
-      while (l < t) {
-        x = nextLong() >>> 33; // use only 31 random bits
-        m = x * bound;
-        l = (int) m & 0x7FFFFFFF;
-      }
-    }
-    return (int) (m >>> 31);
-  }
-
-  /**
    * Returns a pseudorandomly chosen {@code boolean} value where the probability of returning {@code
    * true} is predefined.
    *
