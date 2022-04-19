@@ -15,7 +15,7 @@ import java.util.function.LongSupplier;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * This consistent {@link Sampler} adjust the sampling probability dynamically to limit the rate of
+ * This consistent {@link Sampler} adjusts the sampling probability dynamically to limit the rate of
  * sampled spans.
  *
  * <p>This sampler uses exponential smoothing to estimate on irregular data (compare Wright, David
