@@ -3,7 +3,7 @@
 Pull requests for bug fixes are always welcome!
 
 Before submitting new features or changes to current functionality, it is recommended to first
-[open an issue](https://github.com/open-telemetry/opentelemetry-java-contribu/issues/new)
+[open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new)
 and discuss your ideas or propose the changes you wish to make.
 
 ### Building
