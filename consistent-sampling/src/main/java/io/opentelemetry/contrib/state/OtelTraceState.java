@@ -118,30 +118,30 @@ public final class OtelTraceState {
     return sb.toString();
   }
 
-  private static boolean isValueByte(char r) {
-    if (isLowerCaseAlphaNum(r)) {
+  private static boolean isValueByte(char c) {
+    if (isLowerCaseAlphaNum(c)) {
       return true;
     }
-    if (isUpperCaseAlpha(r)) {
+    if (isUpperCaseAlpha(c)) {
       return true;
     }
-    return r == '.' || r == '_' || r == '-';
+    return c == '.' || c == '_' || c == '-';
   }
 
-  private static boolean isLowerCaseAlphaNum(char r) {
-    return isLowerCaseAlpha(r) || isLowerCaseNum(r);
+  private static boolean isLowerCaseAlphaNum(char c) {
+    return isLowerCaseAlpha(c) || isLowerCaseNum(c);
   }
 
-  private static boolean isLowerCaseNum(char r) {
-    return r >= '0' && r <= '9';
+  private static boolean isLowerCaseNum(char c) {
+    return c >= '0' && c <= '9';
   }
 
-  private static boolean isLowerCaseAlpha(char r) {
-    return r >= 'a' && r <= 'z';
+  private static boolean isLowerCaseAlpha(char c) {
+    return c >= 'a' && c <= 'z';
   }
 
-  private static boolean isUpperCaseAlpha(char r) {
-    return r >= 'A' && r <= 'Z';
+  private static boolean isUpperCaseAlpha(char c) {
+    return c >= 'A' && c <= 'Z';
   }
 
   private static int parseOneOrTwoDigitNumber(
