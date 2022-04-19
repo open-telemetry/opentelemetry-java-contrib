@@ -177,6 +177,22 @@ public abstract class ConsistentSampler implements Sampler {
     this(DefaultRandomGenerator.get());
   }
 
+  private static final boolean isInvariantViolated(
+      OtelTraceState otelTraceState, boolean isParentSampled) {
+    if (otelTraceState.hasValidR() && otelTraceState.hasValidP()) {
+      // if valid p- and r-values are given, they must be consistent with the isParentSampled flag
+      // see
+      // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling.md#sampled-flag
+      int p = otelTraceState.getP();
+      int r = otelTraceState.getR();
+      int maxP = OtelTraceState.getMaxP();
+      boolean isInvariantTrue = ((p <= r) == isParentSampled) || (isParentSampled && (p == maxP));
+      return !isInvariantTrue;
+    } else {
+      return false;
+    }
+  }
+
   @Override
   public final SamplingResult shouldSample(
       Context parentContext,
@@ -195,16 +211,9 @@ public abstract class ConsistentSampler implements Sampler {
     String otelTraceStateString = parentTraceState.get(OtelTraceState.TRACE_STATE_KEY);
     OtelTraceState otelTraceState = OtelTraceState.parse(otelTraceStateString);
 
-    if (!otelTraceState.hasValidR()) {
+    if (!otelTraceState.hasValidR() || isInvariantViolated(otelTraceState, isParentSampled)) {
+      // unset p-value in case of an invalid r-value or in case of any invariant violation
       otelTraceState.invalidateP();
-    }
-    // Invariant checking: unset p-value when p-value, r-value, and isParentSampled are inconsistent
-    if (otelTraceState.hasValidR() && otelTraceState.hasValidP()) {
-      if ((((otelTraceState.getP() <= otelTraceState.getR()) == isParentSampled)
-              || (isParentSampled && (otelTraceState.getP() == OtelTraceState.getMaxP())))
-          == false) {
-        otelTraceState.invalidateP();
-      }
     }
 
     // generate new r-value if not available
