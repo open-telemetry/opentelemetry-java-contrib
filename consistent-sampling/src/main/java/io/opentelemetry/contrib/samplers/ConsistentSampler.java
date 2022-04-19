@@ -322,8 +322,10 @@ public abstract class ConsistentSampler implements Sampler {
     if (!(samplingProbability >= 0.0 && samplingProbability <= 1.0)) {
       throw new IllegalArgumentException();
     }
-    if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
-      return OtelTraceState.getMaxP() - (samplingProbability > 0.0 ? 1 : 0);
+    if (samplingProbability == 0.) {
+      return OtelTraceState.getMaxP();
+    } else if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
+      return OtelTraceState.getMaxP() - 1;
     } else {
       long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
       long mantissa = longSamplingProbability & 0x000FFFFFFFFFFFFFL;
