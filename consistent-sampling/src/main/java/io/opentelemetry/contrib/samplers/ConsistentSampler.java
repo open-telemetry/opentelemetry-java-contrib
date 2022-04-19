@@ -295,7 +295,8 @@ public abstract class ConsistentSampler implements Sampler {
    * Returns the sampling probability for a given p-value.
    *
    * @param p the p-value
-   * @return the sampling probability in the range [0,1] or Double.Nan if the p-value is invalid
+   * @return the sampling probability in the range [0,1]
+   * @throws IllegalArgumentException if the given p-value is invalid
    */
   protected static double getSamplingProbability(int p) {
     if (OtelTraceState.isValidP(p)) {
@@ -305,7 +306,7 @@ public abstract class ConsistentSampler implements Sampler {
         return Double.longBitsToDouble((0x3FFL - p) << 52);
       }
     } else {
-      return Double.NaN;
+      throw new IllegalArgumentException("Invalid p-value!");
     }
   }
 
@@ -329,7 +330,8 @@ public abstract class ConsistentSampler implements Sampler {
     } else {
       long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
       long mantissa = longSamplingProbability & 0x000FFFFFFFFFFFFFL;
-      long exponent = longSamplingProbability >>> 52;
+      long exponent = longSamplingProbability >>> 52; // compare
+      // https://en.wikipedia.org/wiki/Double-precision_floating-point_format#Exponent_encoding
       return (int) (0x3FFL - exponent) - (mantissa != 0 ? 1 : 0);
     }
   }
@@ -349,7 +351,8 @@ public abstract class ConsistentSampler implements Sampler {
       return OtelTraceState.getMaxP();
     } else {
       long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
-      long exponent = longSamplingProbability >>> 52;
+      long exponent = longSamplingProbability >>> 52; // compare
+      // https://en.wikipedia.org/wiki/Double-precision_floating-point_format#Exponent_encoding
       return (int) (0x3FFL - exponent);
     }
   }

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.samplers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.opentelemetry.contrib.state.OtelTraceState;
 import java.util.SplittableRandom;
@@ -16,13 +17,15 @@ class ConsistentSamplerTest {
 
   @Test
   void testGetSamplingRate() {
-    assertEquals(Double.NaN, ConsistentSampler.getSamplingProbability(-1));
+    assertThrows(
+        IllegalArgumentException.class, () -> ConsistentSampler.getSamplingProbability(-1));
     for (int i = 0; i < OtelTraceState.getMaxP() - 1; i += 1) {
       assertEquals(Math.pow(0.5, i), ConsistentSampler.getSamplingProbability(i));
     }
     assertEquals(0., ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP()));
-    assertEquals(
-        Double.NaN, ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP() + 1));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP() + 1));
   }
 
   @Test
