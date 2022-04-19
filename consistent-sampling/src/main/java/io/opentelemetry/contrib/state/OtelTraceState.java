@@ -175,7 +175,7 @@ public final class OtelTraceState {
   /**
    * Parses the OtelTraceState from a given string.
    *
-   * <p>If the string cannot be successfully parsed. A new OtelTraceState is returned
+   * <p>If the string cannot be successfully parsed, a new empty OtelTraceState is returned.
    *
    * @param ts the string
    * @return the parsed OtelTraceState or a new empty OtelTraceState in case of parsing errors
