@@ -200,11 +200,8 @@ public final class OtelTraceState {
       }
 
       int sepPos = eqPos + 1;
-      for (; sepPos < len; sepPos++) {
-        if (isValueByte(ts.charAt(sepPos))) {
-          continue;
-        }
-        break;
+      while (sepPos < len && isValueByte(ts.charAt(sepPos))) {
+        sepPos++;
       }
 
       if (eqPos - tsStartPos == 1 && ts.charAt(tsStartPos) == P_SUBKEY) {
