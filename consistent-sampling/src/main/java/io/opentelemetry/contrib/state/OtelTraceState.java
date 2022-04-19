@@ -116,13 +116,7 @@ public final class OtelTraceState {
   }
 
   private static boolean isValueByte(char c) {
-    if (isLowerCaseAlphaNum(c)) {
-      return true;
-    }
-    if (isUpperCaseAlpha(c)) {
-      return true;
-    }
-    return c == '.' || c == '_' || c == '-';
+    return isLowerCaseAlphaNum(c) || isUpperCaseAlpha(c) || c == '.' || c == '_' || c == '-';
   }
 
   private static boolean isLowerCaseAlphaNum(char c) {
