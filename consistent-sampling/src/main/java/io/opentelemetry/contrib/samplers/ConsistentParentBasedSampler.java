@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import javax.annotation.concurrent.Immutable;
 
@@ -29,7 +28,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
    * @param rootSampler the root sampler
    */
   ConsistentParentBasedSampler(ConsistentSampler rootSampler) {
-    this(rootSampler, DefaultRandomGenerator.get());
+    this(rootSampler, RandomGenerator.getDefault());
   }
 
   /**

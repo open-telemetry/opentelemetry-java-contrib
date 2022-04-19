@@ -13,6 +13,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.state.OtelTraceState;
+import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
@@ -48,7 +49,9 @@ public class ConsistentProbabilityBasedSamplerTest {
   private void test(SplittableRandom rng, double samplingProbability) {
     int numSpans = 1000000;
 
-    Sampler sampler = ConsistentSampler.probabilityBased(samplingProbability, rng::nextLong);
+    Sampler sampler =
+        ConsistentSampler.probabilityBased(
+            samplingProbability, RandomGenerator.create(rng::nextLong));
 
     Map<Integer, Long> observedPvalues = new HashMap<>();
     for (long i = 0; i < numSpans; ++i) {

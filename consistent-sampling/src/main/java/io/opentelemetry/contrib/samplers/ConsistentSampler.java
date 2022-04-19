@@ -14,7 +14,6 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.state.OtelTraceState;
-import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -58,12 +57,12 @@ public abstract class ConsistentSampler implements Sampler {
    * Returns a {@link ConsistentSampler} that samples each span with a fixed probability.
    *
    * @param samplingProbability the sampling probability
-   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param randomGenerator a random generator
    * @return a sampler
    */
   public static final ConsistentSampler probabilityBased(
-      double samplingProbability, RandomGenerator threadSafeRandomGenerator) {
-    return new ConsistentProbabilityBasedSampler(samplingProbability, threadSafeRandomGenerator);
+      double samplingProbability, RandomGenerator randomGenerator) {
+    return new ConsistentProbabilityBasedSampler(samplingProbability, randomGenerator);
   }
 
   /**
@@ -81,11 +80,11 @@ public abstract class ConsistentSampler implements Sampler {
    * or falls-back to the given sampler if it is a root span.
    *
    * @param rootSampler the root sampler
-   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param randomGenerator a random generator
    */
   public static final ConsistentSampler parentBased(
-      ConsistentSampler rootSampler, RandomGenerator threadSafeRandomGenerator) {
-    return new ConsistentParentBasedSampler(rootSampler, threadSafeRandomGenerator);
+      ConsistentSampler rootSampler, RandomGenerator randomGenerator) {
+    return new ConsistentParentBasedSampler(rootSampler, randomGenerator);
   }
 
   /**
@@ -108,19 +107,16 @@ public abstract class ConsistentSampler implements Sampler {
    * @param targetSpansPerSecondLimit the desired spans per second limit
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
-   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param randomGenerator a random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   public static final ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      RandomGenerator threadSafeRandomGenerator,
+      RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
     return new ConsistentRateLimitingSampler(
-        targetSpansPerSecondLimit,
-        adaptationTimeSeconds,
-        threadSafeRandomGenerator,
-        nanoTimeSupplier);
+        targetSpansPerSecondLimit, adaptationTimeSeconds, randomGenerator, nanoTimeSupplier);
   }
 
   /**
@@ -167,14 +163,14 @@ public abstract class ConsistentSampler implements Sampler {
     return new ConsistentComposedOrSampler(this, otherConsistentSampler);
   }
 
-  protected final RandomGenerator threadSafeRandomGenerator;
+  protected final RandomGenerator randomGenerator;
 
-  protected ConsistentSampler(RandomGenerator threadSafeRandomGenerator) {
-    this.threadSafeRandomGenerator = requireNonNull(threadSafeRandomGenerator);
+  protected ConsistentSampler(RandomGenerator randomGenerator) {
+    this.randomGenerator = requireNonNull(randomGenerator);
   }
 
   protected ConsistentSampler() {
-    this(DefaultRandomGenerator.get());
+    this(RandomGenerator.getDefault());
   }
 
   private static final boolean isInvariantViolated(
@@ -219,9 +215,7 @@ public abstract class ConsistentSampler implements Sampler {
     // generate new r-value if not available
     if (!otelTraceState.hasValidR()) {
       otelTraceState.setR(
-          Math.min(
-              threadSafeRandomGenerator.numberOfLeadingZerosOfRandomLong(),
-              OtelTraceState.getMaxR()));
+          Math.min(randomGenerator.numberOfLeadingZerosOfRandomLong(), OtelTraceState.getMaxR()));
     }
 
     // determine and set new p-value that is used for the sampling decision

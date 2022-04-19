@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.contrib.util.DefaultRandomGenerator;
 import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,7 +98,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this(
         targetSpansPerSecondLimit,
         adaptationTimeSeconds,
-        DefaultRandomGenerator.get(),
+        RandomGenerator.getDefault(),
         System::nanoTime);
   }
 
@@ -109,15 +108,15 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param targetSpansPerSecondLimit the desired spans per second limit
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
-   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param randomGenerator a random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   ConsistentRateLimitingSampler(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      RandomGenerator threadSafeRandomGenerator,
+      RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
-    super(threadSafeRandomGenerator);
+    super(randomGenerator);
 
     if (targetSpansPerSecondLimit < 0.0) {
       throw new IllegalArgumentException("Limit for sampled spans per second must be nonnegative!");
@@ -175,7 +174,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     double probabilityToUseLowerPValue =
         (samplingProbability - lowerSamplingRate) / (upperSamplingRate - lowerSamplingRate);
 
-    if (threadSafeRandomGenerator.nextBoolean(probabilityToUseLowerPValue)) {
+    if (randomGenerator.nextBoolean(probabilityToUseLowerPValue)) {
       return lowerPValue;
     } else {
       return upperPValue;
