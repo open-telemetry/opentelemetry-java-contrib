@@ -199,31 +199,31 @@ public final class OtelTraceState {
         return new OtelTraceState();
       }
 
-      int sepPos = eqPos + 1;
-      while (sepPos < len && isValueByte(ts.charAt(sepPos))) {
-        sepPos++;
+      int separatorPos = eqPos + 1;
+      while (separatorPos < len && isValueByte(ts.charAt(separatorPos))) {
+        separatorPos++;
       }
 
       if (eqPos - tsStartPos == 1 && ts.charAt(tsStartPos) == P_SUBKEY) {
-        p = parseOneOrTwoDigitNumber(ts, eqPos + 1, sepPos, MAX_P, INVALID_P);
+        p = parseOneOrTwoDigitNumber(ts, eqPos + 1, separatorPos, MAX_P, INVALID_P);
       } else if (eqPos - tsStartPos == 1 && ts.charAt(tsStartPos) == R_SUBKEY) {
-        r = parseOneOrTwoDigitNumber(ts, eqPos + 1, sepPos, MAX_R, INVALID_R);
+        r = parseOneOrTwoDigitNumber(ts, eqPos + 1, separatorPos, MAX_R, INVALID_R);
       } else {
         if (otherKeyValuePairs == null) {
           otherKeyValuePairs = new ArrayList<>();
         }
-        otherKeyValuePairs.add(ts.substring(tsStartPos, sepPos));
+        otherKeyValuePairs.add(ts.substring(tsStartPos, separatorPos));
       }
 
-      if (sepPos < len && ts.charAt(sepPos) != ';') {
+      if (separatorPos < len && ts.charAt(separatorPos) != ';') {
         return new OtelTraceState();
       }
 
-      if (sepPos == len) {
+      if (separatorPos == len) {
         break;
       }
 
-      tsStartPos = sepPos + 1;
+      tsStartPos = separatorPos + 1;
 
       // test for a trailing ;
       if (tsStartPos == len) {
