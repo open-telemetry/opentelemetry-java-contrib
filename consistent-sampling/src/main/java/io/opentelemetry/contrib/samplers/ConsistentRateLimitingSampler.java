@@ -85,7 +85,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private final String description;
   private final LongSupplier nanoTimeSupplier;
   private final double inverseAdaptationTimeNanos;
-  private final double targetSpansPerNanosLimit;
+  private final double targetSpansPerNanosecondLimit;
   private final AtomicReference<State> state;
 
   /**
@@ -132,7 +132,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this.nanoTimeSupplier = requireNonNull(nanoTimeSupplier);
 
     this.inverseAdaptationTimeNanos = 1e-9 / adaptationTimeSeconds;
-    this.targetSpansPerNanosLimit = 1e-9 * targetSpansPerSecondLimit;
+    this.targetSpansPerNanosecondLimit = 1e-9 * targetSpansPerSecondLimit;
 
     this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
   }
@@ -156,7 +156,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     State currentState = state.updateAndGet(s -> updateState(s, currentNanoTime));
 
     double samplingProbability =
-        (currentState.effectiveWindowNanos * targetSpansPerNanosLimit)
+        (currentState.effectiveWindowNanos * targetSpansPerNanosecondLimit)
             / currentState.effectiveWindowCount;
 
     if (samplingProbability >= 1.) {
