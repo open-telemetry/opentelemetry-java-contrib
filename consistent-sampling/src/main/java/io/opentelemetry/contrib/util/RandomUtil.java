@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.util;
 
-import java.util.BitSet;
 import java.util.function.BooleanSupplier;
 
 public final class RandomUtil {
@@ -41,24 +40,6 @@ public final class RandomUtil {
   }
 
   /**
-   * Stochastically rounds the given floating-point value.
-   *
-   * <p>see https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding
-   *
-   * @param randomGenerator a random generator
-   * @param x the value to be rounded
-   * @return the rounded value
-   */
-  public static long roundStochastically(RandomGenerator randomGenerator, double x) {
-    long i = (long) Math.floor(x);
-    if (randomGenerator.nextBoolean(x - i)) {
-      return i + 1;
-    } else {
-      return i;
-    }
-  }
-
-  /**
    * Returns the number of leading zeros of a uniform random 64-bit integer.
    *
    * @param randomBooleanSupplier a random boolean supplier
@@ -70,40 +51,5 @@ public final class RandomUtil {
       count += 1;
     }
     return count;
-  }
-
-  /**
-   * Generates a random bit set where a given number of 1-bits are randomly set.
-   *
-   * @param randomGenerator the random generator
-   * @param numBits the total number of bits
-   * @param numOneBits the number of 1-bits
-   * @return a random bit set
-   * @throws IllegalArgumentException if {@code 0 <= numOneBits <= numBits} is violated
-   */
-  public static BitSet generateRandomBitSet(
-      RandomGenerator randomGenerator, int numBits, int numOneBits) {
-
-    if (numOneBits < 0 || numOneBits > numBits) {
-      throw new IllegalArgumentException();
-    }
-
-    BitSet result = new BitSet(numBits);
-    int numZeroBits = numBits - numOneBits;
-
-    // based on Fisher-Yates shuffling
-    for (int i = Math.max(numZeroBits, numOneBits); i < numBits; ++i) {
-      int j = randomGenerator.nextInt(i + 1);
-      if (result.get(j)) {
-        result.set(i);
-      } else {
-        result.set(j);
-      }
-    }
-    if (numZeroBits < numOneBits) {
-      result.flip(0, numBits);
-    }
-
-    return result;
   }
 }
