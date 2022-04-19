@@ -129,10 +129,10 @@ public final class OtelTraceState {
   }
 
   private static boolean isLowerCaseAlphaNum(char c) {
-    return isLowerCaseAlpha(c) || isLowerCaseNum(c);
+    return isLowerCaseAlpha(c) || isDigit(c);
   }
 
-  private static boolean isLowerCaseNum(char c) {
+  private static boolean isDigit(char c) {
     return c >= '0' && c <= '9';
   }
 
@@ -148,13 +148,13 @@ public final class OtelTraceState {
       String ts, int from, int to, int twoDigitMaxValue, int invalidValue) {
     if (to - from == 1) {
       char c = ts.charAt(from);
-      if (isLowerCaseNum(c)) {
+      if (isDigit(c)) {
         return c - '0';
       }
     } else if (to - from == 2) {
       char c1 = ts.charAt(from);
       char c2 = ts.charAt(from + 1);
-      if (isLowerCaseNum(c1) && isLowerCaseNum(c2)) {
+      if (isDigit(c1) && isDigit(c2)) {
         int v = (c1 - '0') * 10 + (c2 - '0');
         if (v <= twoDigitMaxValue) {
           return v;
@@ -200,7 +200,7 @@ public final class OtelTraceState {
       int eqPos = tsStartPos;
       for (; eqPos < len; eqPos++) {
         char c = ts.charAt(eqPos);
-        if (!isLowerCaseAlpha(c) && (!isLowerCaseNum(c) || eqPos == tsStartPos)) {
+        if (!isLowerCaseAlpha(c) && (!isDigit(c) || eqPos == tsStartPos)) {
           break;
         }
       }
