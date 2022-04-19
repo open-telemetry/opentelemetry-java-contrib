@@ -19,7 +19,7 @@ the Sonatype OSS snapshots repository at `https://oss.sonatype.org/content/repos
 
 #### Building from source
 
-Building using Java 11:
+Building using Java 11+:
 
 ```bash
 java -version
