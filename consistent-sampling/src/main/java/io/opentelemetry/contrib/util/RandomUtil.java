@@ -19,7 +19,7 @@ public final class RandomUtil {
    * success probability is greater than 50% ({@code probability > 0.5}), the same can be achieved
    * by returning {@code true} with a probability of 50%, and returning the result of a Bernoulli
    * trial with a probability of {@code 2 * probability - 1}. The resulting success probability will
-   * be the same as {@code 0.5 + 0.5 * (2 * probability - 1) = probabilty}. Similarly, if the
+   * be the same as {@code 0.5 + 0.5 * (2 * probability - 1) = probability}. Similarly, if the
    * success probability is smaller than 50% ({@code probability <= 0.5}), {@code false} is returned
    * with a probability of 50%. Otherwise, the result of a Bernoulli trial with success probability
    * of {@code 2 * probability} is returned. Again, the resulting success probability is exactly as
