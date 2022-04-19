@@ -184,35 +184,35 @@ public final class OtelTraceState {
       return new OtelTraceState();
     }
 
-    int tsStartPos = 0;
+    int startPos = 0;
     int len = ts.length();
 
     while (true) {
-      int eqPos = tsStartPos;
-      for (; eqPos < len; eqPos++) {
-        char c = ts.charAt(eqPos);
-        if (!isLowerCaseAlpha(c) && (!isDigit(c) || eqPos == tsStartPos)) {
+      int colonPos = startPos;
+      for (; colonPos < len; colonPos++) {
+        char c = ts.charAt(colonPos);
+        if (!isLowerCaseAlpha(c) && (!isDigit(c) || colonPos == startPos)) {
           break;
         }
       }
-      if (eqPos == tsStartPos || eqPos == len || ts.charAt(eqPos) != ':') {
+      if (colonPos == startPos || colonPos == len || ts.charAt(colonPos) != ':') {
         return new OtelTraceState();
       }
 
-      int separatorPos = eqPos + 1;
+      int separatorPos = colonPos + 1;
       while (separatorPos < len && isValueByte(ts.charAt(separatorPos))) {
         separatorPos++;
       }
 
-      if (eqPos - tsStartPos == 1 && ts.charAt(tsStartPos) == P_SUBKEY) {
-        p = parseOneOrTwoDigitNumber(ts, eqPos + 1, separatorPos, MAX_P, INVALID_P);
-      } else if (eqPos - tsStartPos == 1 && ts.charAt(tsStartPos) == R_SUBKEY) {
-        r = parseOneOrTwoDigitNumber(ts, eqPos + 1, separatorPos, MAX_R, INVALID_R);
+      if (colonPos - startPos == 1 && ts.charAt(startPos) == P_SUBKEY) {
+        p = parseOneOrTwoDigitNumber(ts, colonPos + 1, separatorPos, MAX_P, INVALID_P);
+      } else if (colonPos - startPos == 1 && ts.charAt(startPos) == R_SUBKEY) {
+        r = parseOneOrTwoDigitNumber(ts, colonPos + 1, separatorPos, MAX_R, INVALID_R);
       } else {
         if (otherKeyValuePairs == null) {
           otherKeyValuePairs = new ArrayList<>();
         }
-        otherKeyValuePairs.add(ts.substring(tsStartPos, separatorPos));
+        otherKeyValuePairs.add(ts.substring(startPos, separatorPos));
       }
 
       if (separatorPos < len && ts.charAt(separatorPos) != ';') {
@@ -223,10 +223,10 @@ public final class OtelTraceState {
         break;
       }
 
-      tsStartPos = separatorPos + 1;
+      startPos = separatorPos + 1;
 
       // test for a trailing ;
-      if (tsStartPos == len) {
+      if (startPos == len) {
         return new OtelTraceState();
       }
     }
