@@ -22,7 +22,6 @@ import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
 import java.util.function.LongSupplier;
-import javax.annotation.Nonnull;
 
 /** Abstract base class for consistent samplers. */
 public abstract class ConsistentSampler implements Sampler {
@@ -73,7 +72,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @param rootSampler the root sampler
    */
-  public static final ConsistentSampler parentBased(@Nonnull ConsistentSampler rootSampler) {
+  public static final ConsistentSampler parentBased(ConsistentSampler rootSampler) {
     return new ConsistentParentBasedSampler(rootSampler);
   }
 
