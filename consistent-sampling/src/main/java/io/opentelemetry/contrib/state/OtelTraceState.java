@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.state;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -24,18 +25,16 @@ public final class OtelTraceState {
   private int rval; // valid in the interval [0, MAX_R]
   private int pval; // valid in the interval [0, MAX_P]
 
-  @Nullable private final List<String> otherKeyValuePairs;
+  private final List<String> otherKeyValuePairs;
 
-  private OtelTraceState(int rvalue, int pvalue, @Nullable List<String> otherKeyValuePairs) {
+  private OtelTraceState(int rvalue, int pvalue, List<String> otherKeyValuePairs) {
     this.rval = rvalue;
     this.pval = pvalue;
     this.otherKeyValuePairs = otherKeyValuePairs;
   }
 
   private OtelTraceState() {
-    this.rval = INVALID_R;
-    this.pval = INVALID_P;
-    this.otherKeyValuePairs = null;
+    this(INVALID_R, INVALID_P, Collections.emptyList());
   }
 
   public boolean hasValidR() {
@@ -100,20 +99,18 @@ public final class OtelTraceState {
       }
       sb.append("r:").append(rval);
     }
-    if (otherKeyValuePairs != null) {
-      for (String pair : otherKeyValuePairs) {
-        int ex = sb.length();
-        if (ex != 0) {
-          ex += 1;
-        }
-        if (ex + pair.length() > TRACE_STATE_SIZE_LIMIT) {
-          break;
-        }
-        if (sb.length() > 0) {
-          sb.append(';');
-        }
-        sb.append(pair);
+    for (String pair : otherKeyValuePairs) {
+      int ex = sb.length();
+      if (ex != 0) {
+        ex += 1;
       }
+      if (ex + pair.length() > TRACE_STATE_SIZE_LIMIT) {
+        break;
+      }
+      if (sb.length() > 0) {
+        sb.append(';');
+      }
+      sb.append(pair);
     }
     return sb.toString();
   }
@@ -243,7 +240,8 @@ public final class OtelTraceState {
       }
     }
 
-    return new OtelTraceState(r, p, otherKeyValuePairs);
+    return new OtelTraceState(
+        r, p, (otherKeyValuePairs != null) ? otherKeyValuePairs : Collections.emptyList());
   }
 
   public int getR() {
