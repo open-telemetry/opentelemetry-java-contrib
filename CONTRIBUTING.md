@@ -8,6 +8,8 @@ and discuss your ideas or propose the changes you wish to make.
 
 ### Building
 
+In order to build and test this whole repository you need JDK 11+.
+
 #### Snapshot builds
 
 For developers testing code changes before a release is complete, there are
@@ -17,7 +19,7 @@ the Sonatype OSS snapshots repository at `https://oss.sonatype.org/content/repos
 
 #### Building from source
 
-Building requires Java 11:
+Building using Java 11:
 
 ```bash
 java -version
