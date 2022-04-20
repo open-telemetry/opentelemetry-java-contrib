@@ -36,6 +36,7 @@ rootProject.name = "opentelemetry-java-contrib"
 
 include(":all")
 include(":aws-xray")
+include(":consistent-sampling")
 include(":dependencyManagement")
 include(":example")
 include(":jfr-streaming")

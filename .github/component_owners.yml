@@ -13,6 +13,8 @@ components:
   aws-xray:
     - anuraaga
     - willarmiros
+  consistent-sampling:
+    - oertl
   samplers:
     - anuraaga
     - iNikem
