@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.13.0 (unreleased)
+## Version 1.13.0 (2022-04-20)
 
 All components updated to target OpenTelemetry SDK 1.13.0.
 
