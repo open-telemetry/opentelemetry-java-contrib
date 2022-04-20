@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.state;
+package io.opentelemetry.contrib.samplers;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
-public final class OtelTraceState {
+final class OtelTraceState {
 
   public static final String TRACE_STATE_KEY = "ot";
 

@@ -13,8 +13,6 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.state.OtelTraceState;
-import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
@@ -60,7 +58,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param randomGenerator a random generator
    * @return a sampler
    */
-  public static final ConsistentSampler probabilityBased(
+  static final ConsistentSampler probabilityBased(
       double samplingProbability, RandomGenerator randomGenerator) {
     return new ConsistentProbabilityBasedSampler(samplingProbability, randomGenerator);
   }
@@ -82,7 +80,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param rootSampler the root sampler
    * @param randomGenerator a random generator
    */
-  public static final ConsistentSampler parentBased(
+  static final ConsistentSampler parentBased(
       ConsistentSampler rootSampler, RandomGenerator randomGenerator) {
     return new ConsistentParentBasedSampler(rootSampler, randomGenerator);
   }
@@ -110,7 +108,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param randomGenerator a random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  public static final ConsistentSampler rateLimited(
+  static final ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       RandomGenerator randomGenerator,

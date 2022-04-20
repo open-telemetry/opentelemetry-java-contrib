@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.samplers;
 
-import io.opentelemetry.contrib.util.RandomGenerator;
 import javax.annotation.concurrent.Immutable;
 
 /** A consistent sampler that samples with a fixed probability. */

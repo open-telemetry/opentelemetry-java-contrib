@@ -5,15 +5,13 @@
 
 package io.opentelemetry.contrib.samplers;
 
-import static io.opentelemetry.contrib.util.TestUtil.verifyObservedPvaluesUsingGtest;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.state.OtelTraceState;
-import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
@@ -23,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
+import org.hipparchus.stat.inference.GTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -86,5 +85,65 @@ public class ConsistentProbabilityBasedSamplerTest {
     test(random, 0.2);
     test(random, 0.13);
     test(random, 0.05);
+  }
+
+  private static void verifyObservedPvaluesUsingGtest(
+      long originalNumberOfSpans, Map<Integer, Long> observedPvalues, double samplingProbability) {
+
+    Object notSampled =
+        new Object() {
+          @Override
+          public String toString() {
+            return "NOT SAMPLED";
+          }
+        };
+
+    Map<Object, Double> expectedProbabilities = new HashMap<>();
+    if (samplingProbability >= 1.) {
+      expectedProbabilities.put(0, 1.);
+    } else if (samplingProbability <= 0.) {
+      expectedProbabilities.put(notSampled, 1.);
+    } else {
+      int exponent = 0;
+      while (true) {
+        if (Math.pow(0.5, exponent + 1) < samplingProbability
+            && Math.pow(0.5, exponent) >= samplingProbability) {
+          break;
+        }
+        exponent += 1;
+      }
+      if (samplingProbability == Math.pow(0.5, exponent)) {
+        expectedProbabilities.put(notSampled, 1 - samplingProbability);
+        expectedProbabilities.put(exponent, samplingProbability);
+      } else {
+        expectedProbabilities.put(notSampled, 1 - samplingProbability);
+        expectedProbabilities.put(exponent, 2 * samplingProbability - Math.pow(0.5, exponent));
+        expectedProbabilities.put(exponent + 1, Math.pow(0.5, exponent) - samplingProbability);
+      }
+    }
+
+    Map<Object, Long> extendedObservedAdjustedCounts = new HashMap<>(observedPvalues);
+    long numberOfSpansNotSampled =
+        originalNumberOfSpans - observedPvalues.values().stream().mapToLong(i -> i).sum();
+    if (numberOfSpansNotSampled > 0) {
+      extendedObservedAdjustedCounts.put(notSampled, numberOfSpansNotSampled);
+    }
+
+    double[] expectedValues = new double[expectedProbabilities.size()];
+    long[] observedValues = new long[expectedProbabilities.size()];
+
+    int counter = 0;
+    for (Object key : expectedProbabilities.keySet()) {
+      observedValues[counter] = extendedObservedAdjustedCounts.getOrDefault(key, 0L);
+      double p = expectedProbabilities.get(key);
+      expectedValues[counter] = p * originalNumberOfSpans;
+      counter += 1;
+    }
+
+    if (expectedProbabilities.size() > 1) {
+      assertThat(new GTest().gTest(expectedValues, observedValues)).isGreaterThan(0.01);
+    } else {
+      assertThat((double) observedValues[0]).isEqualTo(expectedValues[0]);
+    }
   }
 }

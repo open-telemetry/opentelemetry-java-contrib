@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.contrib.util.RandomGenerator;
 import javax.annotation.concurrent.Immutable;
 
 /**

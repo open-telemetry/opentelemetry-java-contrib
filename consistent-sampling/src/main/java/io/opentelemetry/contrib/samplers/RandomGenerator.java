@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.util;
+package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongSupplier;
 
-public final class RandomGenerator {
+final class RandomGenerator {
 
   private final LongSupplier threadSafeRandomLongSupplier;
 

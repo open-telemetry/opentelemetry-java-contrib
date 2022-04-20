@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.opentelemetry.contrib.state.OtelTraceState;
 import java.util.SplittableRandom;
 import org.junit.jupiter.api.Test;
 

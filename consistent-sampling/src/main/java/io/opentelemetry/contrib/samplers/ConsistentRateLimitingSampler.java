@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.contrib.util.RandomGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;

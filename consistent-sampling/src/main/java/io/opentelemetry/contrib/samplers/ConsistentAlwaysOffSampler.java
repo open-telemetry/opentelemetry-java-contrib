@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.samplers;
 
-import io.opentelemetry.contrib.state.OtelTraceState;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
