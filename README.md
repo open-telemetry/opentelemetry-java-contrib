@@ -10,6 +10,7 @@ feature or via instrumentation, this project is hopefully for you.
 ## Provided Libraries
 
 * [AWS X-Ray Support](./aws-xray/README.md)
+* [Consistent sampling](./consistent-sampling/README.md)
 * [JFR Streaming](./jfr-streaming/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
