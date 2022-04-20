@@ -18,5 +18,11 @@ else
   prior_version="$major.$((minor - 1)).0"
 fi
 
-git log --reverse --pretty=format:"- %s" "v$prior_version"..HEAD \
-  | sed -r 's,\(#([0-9]+)\),\n  ([#\1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/\1)),'
+for component in aws-xray consistent-sampling jfr-streaming jmx-metrics maven-extension runtime-attach samplers; do
+  echo "### $component"
+  echo
+  git log --reverse --pretty=format:"- %s" "v$prior_version"..HEAD $component \
+    | sed -r 's,\(#([0-9]+)\),\n    ([#\1](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/\1)),'
+  echo
+  echo
+done
