@@ -1,3 +1,4 @@
+import groovy.util.Node
 
 plugins {
   id("otel.java-conventions")
@@ -6,9 +7,6 @@ plugins {
 }
 
 description = "Maven3 plugin for static instrumentation of projects code and dependencies"
-
-// setting version is needed for maven plugin to run
-//version = "1.0-SNAPSHOT"
 
 dependencies {
   implementation("org.apache.maven:maven-plugin-api:3.6.3")
@@ -22,49 +20,17 @@ dependencies {
   testImplementation("org.slf4j:slf4j-simple")
 }
 
-tasks {
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
-    }
-  }
-}
-
 publishing {
   publications {
     create<MavenPublication>("mavenPlugin") {
 
       from(components["java"])
 
-      versionMapping {
-        allVariants {
-          fromResolutionResult()
-        }
-      }
-
-      if (findProperty("otel.stable") != "true") {
-        val versionParts = version.split('-').toMutableList()
-        versionParts[0] += "-alpha"
-        version = versionParts.joinToString("-")
-      }
-
-      afterEvaluate {
-        val mavenGroupId: String? by project
-        if (mavenGroupId != null) {
-          groupId = mavenGroupId
-        }
-        artifactId = base.archivesName.get()
-
-        if (!groupId.startsWith("io.opentelemetry.contrib")) {
-          throw GradleException("groupId is not set for this project or its parent ${project.parent}")
-        }
-
-        pom.description.set(project.description)
-      }
-
       pom {
         name.set("OpenTelemetry Java Contrib")
         url.set("https://github.com/open-telemetry/opentelemetry-java-contrib")
+        artifactId = base.archivesName.get()
+        description.set(project.description)
 
         licenses {
           license {
@@ -86,7 +52,31 @@ publishing {
           developerConnection.set("scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git")
           url.set("git@github.com:open-telemetry/opentelemetry-java-contrib.git")
         }
+
+        // remove dependencyManagement tag causing issues
+        withXml {
+          val dependencyManagement = asNode().get("dependencyManagement") as groovy.util.NodeList
+          asNode().remove(dependencyManagement[0] as Node?)
+        }
       }
+    }
+  }
+}
+
+// sets artifactId of the plugin descriptor
+mavenPlugin {
+  artifactId.set(base.archivesName.get())
+}
+
+tasks {
+  withType<JavaCompile>().configureEach {
+    with(options) {
+      release.set(11)
+    }
+  }
+  withType<Javadoc>().configureEach {
+    with(options as StandardJavadocDocletOptions) {
+      source = "11"
     }
   }
 }

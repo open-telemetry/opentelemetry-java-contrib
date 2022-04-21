@@ -13,8 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Packer {
+
+  private static final Logger log = LoggerFactory.getLogger(Packer.class);
 
   private final Path targetFolder;
   private final String finalNameSuffix;
@@ -42,7 +46,11 @@ class Packer {
     }
     String targetFileName = createFinalName(mainArtifact.getFileName().toString());
     Path targetFile = targetFolder.resolve(targetFileName);
-    Files.createFile(targetFile);
+    if (!Files.exists(targetFile)) {
+      Files.createFile(targetFile);
+    } else {
+      log.warn("Target file {} exists and will be overwritten.", targetFile);
+    }
 
     try (JarFile sourceJar = new JarFile(mainArtifact.toFile());
         ZipOutputStream targetOut = new ZipOutputStream(Files.newOutputStream(targetFile))) {

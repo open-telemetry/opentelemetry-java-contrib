@@ -9,6 +9,7 @@ import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarSuppor
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.moveEntryUpdating;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -46,11 +47,14 @@ public class InstrumentationAgent {
       throws IOException {
 
     Path targetPath = targetFolder.resolve(JAR_FILE_NAME);
+    InputStream agentSource =
+        InstrumentationAgent.class.getClassLoader().getResourceAsStream(JAR_FILE_NAME);
+    if (agentSource == null) {
+      throw new IllegalStateException(
+          "Instrumented OTel agent not found in class path and JAR name: " + JAR_FILE_NAME);
+    }
     try {
-      Files.copy(
-          InstrumentationAgent.class.getClassLoader().getResourceAsStream(JAR_FILE_NAME),
-          targetPath,
-          StandardCopyOption.REPLACE_EXISTING);
+      Files.copy(agentSource, targetPath, StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException exception) {
       logger.error("Couldn't copy agent JAR using class resource: {}.", JAR_FILE_NAME);
       throw exception;

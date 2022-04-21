@@ -66,7 +66,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
           new ProjectModel(project).chooseForInstrumentation(artifactName);
       executeInternal(finalFolder, finalNameSuffix, artifactsToInstrument);
 
-    } catch (IOException | IllegalArgumentException ioe) {
+    } catch (Exception ioe) {
       throw new MojoExecutionException("Exception executing plugin", ioe);
     }
   }
