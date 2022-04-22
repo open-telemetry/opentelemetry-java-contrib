@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.agent.main;
 
+import io.opentelemetry.contrib.staticinstrumenter.util.SystemLogger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,12 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("SystemOut")
 public class Main {
 
-  private static final Logger logger = LoggerFactory.getLogger(Main.class);
+  private static final SystemLogger logger = SystemLogger.getLogger(Main.class);
 
   private static final Main INSTANCE = new Main(ClassArchive::new);
 
@@ -27,7 +27,6 @@ public class Main {
 
   // key is slashy name, not dotty
   private final Map<String, byte[]> instrumentedClasses = new ConcurrentHashMap<>();
-  private final Map<String, byte[]> additionalClasses = new ConcurrentHashMap<>();
 
   public static void main(String[] args) throws Exception {
 
@@ -42,13 +41,12 @@ public class Main {
     }
 
     String classPath = System.getProperty("java.class.path");
-    logger.debug("Classpath (jars list): " + classPath);
+    logger.debug("Classpath (jars list): {}", classPath);
     String[] jarsList = classPath.split(File.pathSeparator);
 
     getInstance().saveTransformedJarsTo(jarsList, outDir);
   }
 
-  @SuppressWarnings("SystemOut")
   private static void printUsage() {
     System.out.println(
         "OpenTelemetry Java Static Instrumenter\n"
@@ -119,8 +117,8 @@ public class Main {
   }
 
   // FIXME: only relevant additional classes should be injected
-  private void injectAdditionalClassesTo(JarOutputStream outJar) throws IOException {
-    for (Map.Entry<String, byte[]> entry : additionalClasses.entrySet()) {
+  private static void injectAdditionalClassesTo(JarOutputStream outJar) throws IOException {
+    for (Map.Entry<String, byte[]> entry : AdditionalClasses.get().entrySet()) {
       String className = entry.getKey();
       byte[] classData = entry.getValue();
 
@@ -138,9 +136,5 @@ public class Main {
 
   public Map<String, byte[]> getInstrumentedClasses() {
     return instrumentedClasses;
-  }
-
-  public Map<String, byte[]> getAdditionalClasses() {
-    return additionalClasses;
   }
 }
