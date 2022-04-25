@@ -20,7 +20,7 @@ tasks {
 
   jar {
     manifest {
-      attributes(mapOf("Main-Class" to "io.opentelemetry.contrib.staticinstrumenter.test.HttpClientTest"))
+      attributes("Main-Class" to "io.opentelemetry.contrib.staticinstrumenter.test.HttpClientTest")
     }
   }
 
