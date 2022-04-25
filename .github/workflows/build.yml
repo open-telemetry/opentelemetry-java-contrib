@@ -5,7 +5,12 @@ on:
     branches:
       - main
       - release/*
+  pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -23,6 +28,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
 
       - name: Save unit test results
         uses: actions/upload-artifact@v3
@@ -46,6 +52,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: integrationTest
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
 
       - name: Save integration test results
         uses: actions/upload-artifact@v3
@@ -67,11 +74,12 @@ jobs:
 
   publish-snapshots:
     needs:
-      # intentionally not blocking snapshot publishing on markdown-link-check, or misspell-check
+      # intentionally not blocking snapshot publishing on markdown-link-check or misspell-check
       - build
       - integration-test
     runs-on: ubuntu-latest
     # skipping release branches because the versions in those branches are not snapshots
+    # (also this skips pull requests)
     if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
     steps:
       - uses: actions/checkout@v3
@@ -91,3 +99,19 @@ jobs:
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+
+  required-status-check:
+    needs:
+        # markdown-link-check is not required so that pull requests will not be blocked if external
+        # links break
+        # similarly misspell-check is not required so that pull requests will not be blocked if new
+        # misspellings are added to the misspell dictionary
+      - build
+      - integration-test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - if: |
+          needs.build.result != 'success' ||
+          needs.integration-test.result != 'success'
+        run: exit 1
