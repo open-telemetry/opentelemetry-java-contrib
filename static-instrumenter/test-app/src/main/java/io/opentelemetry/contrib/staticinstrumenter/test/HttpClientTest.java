@@ -28,7 +28,6 @@ public final class HttpClientTest {
       HttpGet request = new HttpGet("https://httpbin.org/get");
       try (CloseableHttpResponse response = httpClient.execute(request)) {
         HttpEntity entity = response.getEntity();
-        System.out.println();
         if (entity != null) {
           Header traceparent = request.getFirstHeader("traceparent");
           if (traceparent != null) {
