@@ -5,7 +5,7 @@ plugins {
   id("com.github.johnrengelman.shadow") version "7.1.2"
   id("org.unbroken-dome.test-sets") version "4.0.0"
 }
-// TODO: update readme and PR!
+
 description = "OpenTelemetry Java Static Instrumentation Agent"
 
 val javaagentLibs: Configuration by configurations.creating {
