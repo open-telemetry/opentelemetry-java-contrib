@@ -12,8 +12,9 @@ import io.opentelemetry.javaagent.tooling.HelperInjector;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 
 /**
- * Configures a static instrumenter hook before the agents starts. The hook enables passing
- * additional classes created by the agent to the static instrumenter's main.
+ * Configures a listener on {@link io.opentelemetry.javaagent.tooling.HelperInjector} before the
+ * agents starts. The listener enables passing additional classes created by the agent to the static
+ * instrumenter, which in turn saves them into the app jar.
  */
 @AutoService(AgentListener.class)
 public class AdditionalClassesInjectorInstaller implements AgentListener {
