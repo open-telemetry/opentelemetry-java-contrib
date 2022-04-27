@@ -5,21 +5,23 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.extension;
 
-import io.opentelemetry.contrib.staticinstrumenter.agent.main.AdditionalClasses;
-import io.opentelemetry.javaagent.tooling.HelperInjectorListener;
-import java.util.Map;
+import com.google.auto.service.AutoService;
+import io.opentelemetry.instrumentation.api.config.Config;
+import io.opentelemetry.javaagent.extension.AgentListener;
+import io.opentelemetry.javaagent.tooling.HelperInjector;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 
 /**
- * A listener to be registered in {@link io.opentelemetry.javaagent.tooling.HelperInjector}. It
- * saves all additional classes created by the agent to the AdditionalClasses class.
+ * Configures a listener on {@link io.opentelemetry.javaagent.tooling.HelperInjector} before the
+ * agents starts. The listener enables passing additional classes created by the agent to the static
+ * instrumenter, which in turn saves them into the app jar.
  */
-public class AdditionalClassesInjectorListenerInstaller implements HelperInjectorListener {
+@AutoService(AgentListener.class)
+public class AdditionalClassesInjectorListenerInstaller implements AgentListener {
 
   @Override
-  public void onInjection(Map<String, byte[]> classnameToBytes) {
-    for (Map.Entry<String, byte[]> classEntry : classnameToBytes.entrySet()) {
-      String classFileName = classEntry.getKey().replace(".", "/") + ".class";
-      AdditionalClasses.put(classFileName, classEntry.getValue());
-    }
+  public void beforeAgent(
+      Config config, AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
+    HelperInjector.setHelperInjectorListener(new AdditionalClassesInjectorListener());
   }
 }

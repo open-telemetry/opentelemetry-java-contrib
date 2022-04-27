@@ -113,8 +113,8 @@ fun CopySpec.isolateClasses(jars: Iterable<File>) {
 }
 
 tasks.withType<ShadowJar>().configureEach {
-  // we depend on opentelemetry-javaagent-instrumentation-api in agent-extension so we need to relocate its usage
-  relocate("io.opentelemetry.instrumentation", "io.opentelemetry.javaagent.shaded.instrumentation")
+  // we depend on opentelemetry-instrumentation-api in agent-extension, so we need to relocate its usage
+  relocate("io.opentelemetry.instrumentation.api", "io.opentelemetry.javaagent.shaded.instrumentation.api")
 }
 
 tasks {
