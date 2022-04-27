@@ -16,7 +16,6 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
-@SuppressWarnings("SystemOut")
 public class Main {
 
   private static final SystemLogger logger = SystemLogger.getLogger(Main.class);
@@ -47,6 +46,7 @@ public class Main {
     getInstance().saveTransformedJarsTo(jarsList, outDir);
   }
 
+  @SuppressWarnings("SystemOut")
   private static void printUsage() {
     System.out.println(
         "OpenTelemetry Java Static Instrumenter\n"

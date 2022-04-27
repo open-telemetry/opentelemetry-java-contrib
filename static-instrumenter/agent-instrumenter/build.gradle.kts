@@ -30,10 +30,11 @@ dependencies {
   javaagent(files("libs/opentelemetry-javaagent.jar"))
   // javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 
-  bootstrapLibs(project(":static-instrumenter:common"))
+  bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
 }
 
+// TODO: migrate to JVM test suite plugin
 testSets {
   create("integrationTest")
 }
@@ -46,17 +47,11 @@ tasks {
     archiveFileName.set("javaagentLibs-relocated.jar")
   }
 
-  val isolateJavaagentLibs by registering(Copy::class) {
-    dependsOn(relocateJavaagentLibs)
-    isolateClasses(relocateJavaagentLibs.get().outputs.files)
-    into("$buildDir/isolated/javaagentLibs")
-  }
-
   shadowJar {
     configurations = listOf(javaagent, bootstrapLibs)
 
-    dependsOn(isolateJavaagentLibs)
-    from(isolateJavaagentLibs.get().outputs)
+    dependsOn(relocateJavaagentLibs)
+    isolateClasses(relocateJavaagentLibs.get().outputs.files)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
@@ -70,21 +65,14 @@ tasks {
     }
   }
 
-  val mainShadowJar by registering(Jar::class) {
-    archiveFileName.set("opentelemetry-static-agent.jar")
-    from(zipTree(shadowJar.get().archiveFile))
-
-    manifest {
-      attributes(shadowJar.get().manifest.attributes)
-    }
-  }
-
   // TODO: the resulting jar contains both inst and unpacked inst,
   //  but we need only the unpacked inst here
   val createNoInstAgent by registering(ShadowJar::class) {
 
     configurations = listOf(javaagent)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveClassifier.set("no-inst")
 
     inputs.files.forEach {
       if (it.name.endsWith(".jar")) {
@@ -98,22 +86,15 @@ tasks {
         }
       }
     }
-    archiveFileName.set("opentelemetry-no-inst-agent.jar")
   }
 
   assemble {
-    dependsOn(shadowJar, mainShadowJar, createNoInstAgent)
+    dependsOn(shadowJar, createNoInstAgent)
   }
 
-  val copyJarsToTestRes by registering(Copy::class) {
+  val integrationTest by existing(Test::class) {
     dependsOn(assemble)
-    from("$buildDir/libs/opentelemetry-no-inst-agent.jar")
-    from("$buildDir/libs/opentelemetry-static-agent.jar")
-    destinationDir = File("src/integrationTest/resources")
-  }
-
-  val integrationTest by existing {
-    dependsOn(copyJarsToTestRes)
+    jvmArgumentProviders.add(AgentJarsProvider(shadowJar.flatMap { it.archiveFile }, createNoInstAgent.flatMap { it.archiveFile }))
   }
 }
 
@@ -132,6 +113,7 @@ fun CopySpec.isolateClasses(jars: Iterable<File>) {
 }
 
 tasks.withType<ShadowJar>().configureEach {
+  // we depend on opentelemetry-javaagent-instrumentation-api in agent-extension so we need to relocate its usage
   relocate("io.opentelemetry.instrumentation", "io.opentelemetry.javaagent.shaded.instrumentation")
 }
 
@@ -141,4 +123,15 @@ tasks {
       release.set(11)
     }
   }
+}
+
+class AgentJarsProvider(
+  @InputFile
+  @PathSensitive(PathSensitivity.RELATIVE)
+  val agentJar: Provider<RegularFile>,
+  @InputFile
+  @PathSensitive(PathSensitivity.RELATIVE)
+  val noInstAgentJar: Provider<RegularFile>
+) : CommandLineArgumentProvider {
+  override fun asArguments(): Iterable<String> = listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
 }

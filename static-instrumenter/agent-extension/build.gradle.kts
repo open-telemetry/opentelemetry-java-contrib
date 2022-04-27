@@ -18,7 +18,7 @@ dependencies {
   compileOnly(files("libs/opentelemetry-muzzle.jar"))
 //  compileOnly("io.opentelemetry.javaagent:opentelemetry-muzzle")
 
-  implementation(project(":static-instrumenter:common"))
+  compileOnly(project(":static-instrumenter:bootstrap"))
 }
 
 tasks {

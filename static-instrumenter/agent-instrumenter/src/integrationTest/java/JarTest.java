@@ -25,14 +25,14 @@ final class JarTest {
 
   @Test
   void testSampleJar() throws IOException, InterruptedException {
-    Path agentPath = getPath("opentelemetry-static-agent.jar");
-    Path noInstAgentPath = getPath("opentelemetry-no-inst-agent.jar");
+    Path agentPath = Path.of(System.getProperty("agent"));
+    Path noInstAgentPath = Path.of(System.getProperty("no.inst.agent"));
     Path appPath = getPath("app.jar");
 
     ProcessBuilder instrumentationProcessBuilder =
         new ProcessBuilder(
             "java",
-            String.format("-javaagent:%s", agentPath),
+            "-javaagent:" + agentPath,
             "-cp",
             appPath.toString(),
             INSTRUMENTATION_MAIN,
@@ -44,6 +44,7 @@ final class JarTest {
 
     String instrumentationLog =
         new String(instrumentationIn.readAllBytes(), StandardCharsets.UTF_8);
+    assertThat(instrumentationProcess.exitValue()).isEqualTo(0);
     assertThat(instrumentationLog).isNotEmpty();
 
     Path resultAppPath = outPath.resolve("app.jar");
@@ -62,6 +63,7 @@ final class JarTest {
     InputStream err = runtimeProcess.getErrorStream();
     runtimeProcess.waitFor(10, TimeUnit.SECONDS);
 
+    assertThat(runtimeProcess.exitValue()).isEqualTo(0);
     assertThat(new String(err.readAllBytes(), StandardCharsets.UTF_8))
         .startsWith(
             "[main] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'HTTP GET'");

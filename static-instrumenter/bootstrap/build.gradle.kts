@@ -2,7 +2,7 @@ plugins {
   id("otel.java-conventions")
 }
 
-description = "Extension for OpenTelemetry Java Agent"
+description = "Bootstrap classes for static agent"
 
 tasks {
   withType<JavaCompile>().configureEach {

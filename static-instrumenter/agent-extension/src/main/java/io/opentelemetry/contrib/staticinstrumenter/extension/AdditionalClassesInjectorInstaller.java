@@ -22,6 +22,6 @@ public class AdditionalClassesInjectorInstaller implements AgentListener {
   @Override
   public void beforeAgent(
       Config config, AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
-    HelperInjector.setHelperInjectorListener(new AdditionalClassesInjector());
+    HelperInjector.setHelperInjectorListener(new AdditionalClassesInjectorListenerInstaller());
   }
 }
