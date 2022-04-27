@@ -46,9 +46,9 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   private final Logger logger = LoggerFactory.getLogger(OpentelemetryInstrumenterMojo.class);
 
   /**
-   * Conducts the process of application target file instrumentation. Adds the shutdown hook to
-   * clean the temporary directories. Sets the output folder for instrumented target file. Executes
-   * the instrumentation process of artifacts chosen by the user.
+   * Conducts the process of application target file instrumentation. Cleans the temporary
+   * directories. Sets the output folder for instrumented target file. Executes the instrumentation
+   * process of artifacts chosen by the user.
    */
   @Override
   public void execute() throws MojoExecutionException {
@@ -76,29 +76,33 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       String finalFolder, String finalNameSuffix, List<Path> artifactsToInstrument)
       throws IOException {
 
+    WorkingFolders workingFolders = null;
     try {
-      WorkingFolders.create(finalFolder);
-      ArtifactProcessor artifactProcessor = createProcessor(finalNameSuffix);
+      workingFolders = new WorkingFolders(finalFolder);
+      ArtifactProcessor artifactProcessor = createProcessor(workingFolders, finalNameSuffix);
       for (Path artifact : artifactsToInstrument) {
         logger.info("Processing artifact: {}", artifact);
         artifactProcessor.process(artifact);
-        WorkingFolders.getInstance().cleanWorkingFolders();
+        workingFolders.cleanWorkingFolders();
       }
     } finally {
       try {
-        WorkingFolders.getInstance().delete();
+        if (workingFolders != null) {
+          workingFolders.delete();
+        }
       } catch (Exception e) {
         // ignored
       }
     }
   }
 
-  private static ArtifactProcessor createProcessor(String finalNameSuffix) throws IOException {
+  private static ArtifactProcessor createProcessor(
+      WorkingFolders workingFolders, String finalNameSuffix) throws IOException {
     return ArtifactProcessor.createProcessor(
-        WorkingFolders.getInstance().instrumentationFolder(),
-        WorkingFolders.getInstance().getPreparationFolder(),
-        WorkingFolders.getInstance().agentFolder(),
-        WorkingFolders.getInstance().finalFolder(),
+        workingFolders.instrumentationFolder(),
+        workingFolders.getPreparationFolder(),
+        workingFolders.agentFolder(),
+        workingFolders.finalFolder(),
         finalNameSuffix);
   }
 }
