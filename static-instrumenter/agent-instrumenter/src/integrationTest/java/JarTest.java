@@ -27,6 +27,7 @@ final class JarTest {
   void testSampleJar() throws IOException, InterruptedException {
     Path agentPath = Path.of(System.getProperty("agent"));
     Path noInstAgentPath = Path.of(System.getProperty("no.inst.agent"));
+    // jar created in test-app module
     Path appPath = getPath("app.jar");
 
     ProcessBuilder instrumentationProcessBuilder =
