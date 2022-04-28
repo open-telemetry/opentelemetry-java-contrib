@@ -3,13 +3,6 @@ plugins {
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-repositories {
-  mavenCentral()
-  maven {
-    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-  }
-}
-
 description = "Extension for OpenTelemetry Java Agent"
 
 dependencies {

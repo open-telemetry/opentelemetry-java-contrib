@@ -6,13 +6,6 @@ plugins {
   id("org.unbroken-dome.test-sets") version "4.0.0"
 }
 
-repositories {
-  mavenCentral()
-  maven {
-    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-  }
-}
-
 description = "OpenTelemetry Java Static Instrumentation Agent"
 
 val javaagentLibs: Configuration by configurations.creating {
