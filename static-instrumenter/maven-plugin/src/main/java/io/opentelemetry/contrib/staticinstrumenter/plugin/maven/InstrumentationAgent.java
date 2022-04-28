@@ -107,7 +107,7 @@ public class InstrumentationAgent {
   private static Set<String> allNames(Path jarPath) throws IOException {
     Set<String> result = new HashSet<>();
     try (JarFile jar = new JarFile(jarPath.toFile())) {
-      JarSupport.consumeEntries(jar, entry -> result.add(entry.getName()));
+      consumeEntries(jar, entry -> result.add(entry.getName()));
     }
     return result;
   }

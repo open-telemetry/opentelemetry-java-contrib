@@ -55,6 +55,7 @@ public class Instrumenter {
         throw new IOException(builder.toString());
       }
     } catch (InterruptedException ie) {
+      Thread.currentThread().interrupt();
       throw new IOException(ie);
     }
   }

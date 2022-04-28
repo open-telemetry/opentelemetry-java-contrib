@@ -23,11 +23,12 @@ public final class PackagingSupportFactory {
 
   public static PackagingSupport packagingSupportFor(Path mainArtifact) throws IOException {
 
-    JarFile jarFile = new JarFile(mainArtifact.toFile());
-    for (Map.Entry<String, Supplier<PackagingSupport>> entry : SUPPORTED_FRAMEWORKS.entrySet()) {
-      JarEntry jarEntry = jarFile.getJarEntry(entry.getKey());
-      if ((jarEntry != null) && jarEntry.isDirectory()) {
-        return entry.getValue().get();
+    try (JarFile jarFile = new JarFile(mainArtifact.toFile())) {
+      for (Map.Entry<String, Supplier<PackagingSupport>> entry : SUPPORTED_FRAMEWORKS.entrySet()) {
+        JarEntry jarEntry = jarFile.getJarEntry(entry.getKey());
+        if ((jarEntry != null) && jarEntry.isDirectory()) {
+          return entry.getValue().get();
+        }
       }
     }
     return PackagingSupport.EMPTY;

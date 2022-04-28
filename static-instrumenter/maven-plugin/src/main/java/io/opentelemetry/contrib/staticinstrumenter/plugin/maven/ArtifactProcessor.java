@@ -56,7 +56,7 @@ class ArtifactProcessor {
    */
   Path process(Path artifact) throws IOException {
     PackagingSupport packagingSupport = packagingSupportFor(artifact);
-    List<Path> artifactsToInstrument = unpacker.copyAndUnpack(artifact, packagingSupport);
+    List<Path> artifactsToInstrument = unpacker.copyAndExtract(artifact, packagingSupport);
     log.info("Unpacked artifacts: {}", artifactsToInstrument);
     Path instrumentedArtifact =
         instrumenter.instrument(artifact.getFileName(), artifactsToInstrument);

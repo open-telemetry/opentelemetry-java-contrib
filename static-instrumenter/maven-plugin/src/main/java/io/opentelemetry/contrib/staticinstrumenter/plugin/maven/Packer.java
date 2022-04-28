@@ -70,10 +70,8 @@ class Packer {
 
   private String createFinalName(String instrumentedFileName) {
     int lastDotIndex = instrumentedFileName.lastIndexOf('.');
-    return String.format(
-        "%s%s%s",
-        instrumentedFileName.substring(0, lastDotIndex),
-        finalNameSuffix,
-        instrumentedFileName.substring(lastDotIndex));
+    return instrumentedFileName.substring(0, lastDotIndex)
+        + finalNameSuffix
+        + instrumentedFileName.substring(lastDotIndex);
   }
 }

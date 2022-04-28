@@ -27,7 +27,7 @@ class UnpackerTest {
     PackagingSupport support = mock(PackagingSupport.class);
     Path jar = Paths.get(getResourcePath("test.jar"));
     // when
-    unpacker.copyAndUnpack(jar, support);
+    unpacker.copyAndExtract(jar, support);
     // then
     assertThat(Files.exists(targetFolder.toPath().resolve("lib/firstNested.jar"))).isTrue();
     assertThat(Files.size(targetFolder.toPath().resolve("lib/firstNested.jar"))).isGreaterThan(0);
@@ -43,7 +43,7 @@ class UnpackerTest {
     Path jar = Paths.get(getResourcePath("test.jar"));
 
     // when
-    List<Path> copied = unpacker.copyAndUnpack(jar, support);
+    List<Path> copied = unpacker.copyAndExtract(jar, support);
     // then
     assertThat(copied).hasSize(3);
     // copied the right file?
