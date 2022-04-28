@@ -6,6 +6,13 @@ plugins {
   id("org.unbroken-dome.test-sets") version "4.0.0"
 }
 
+repositories {
+  mavenCentral()
+  maven {
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+  }
+}
+
 description = "OpenTelemetry Java Static Instrumentation Agent"
 
 val javaagentLibs: Configuration by configurations.creating {
@@ -26,9 +33,8 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 
-  // TODO: remove local jar once agent with hook is released
-  javaagent(files("libs/opentelemetry-javaagent.jar"))
-  // javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  // TODO: remove snapshot once new agent is released
+  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.14.0-SNAPSHOT")
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
@@ -88,6 +94,17 @@ tasks {
     }
   }
 
+  withType<ShadowJar>().configureEach {
+    // we depend on opentelemetry-instrumentation-api in agent-extension, so we need to relocate its usage
+    relocate("io.opentelemetry.instrumentation.api", "io.opentelemetry.javaagent.shaded.instrumentation.api")
+  }
+
+  withType<JavaCompile>().configureEach {
+    with(options) {
+      release.set(11)
+    }
+  }
+
   assemble {
     dependsOn(shadowJar, createNoInstAgent)
   }
@@ -108,19 +125,6 @@ fun CopySpec.isolateClasses(jars: Iterable<File>) {
       exclude("META-INF/INDEX.LIST")
       exclude("META-INF/*.DSA")
       exclude("META-INF/*.SF")
-    }
-  }
-}
-
-tasks.withType<ShadowJar>().configureEach {
-  // we depend on opentelemetry-instrumentation-api in agent-extension, so we need to relocate its usage
-  relocate("io.opentelemetry.instrumentation.api", "io.opentelemetry.javaagent.shaded.instrumentation.api")
-}
-
-tasks {
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
     }
   }
 }

@@ -3,6 +3,13 @@ plugins {
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
+repositories {
+  mavenCentral()
+  maven {
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+  }
+}
+
 description = "Extension for OpenTelemetry Java Agent"
 
 dependencies {
@@ -13,10 +20,7 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-instrumentation-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-
-  // TODO: replace with the following file once new javaagent is released
-  compileOnly(files("libs/opentelemetry-muzzle.jar"))
-//  compileOnly("io.opentelemetry.javaagent:opentelemetry-muzzle")
+  compileOnly("io.opentelemetry.javaagent:opentelemetry-muzzle")
 
   compileOnly(project(":static-instrumenter:bootstrap"))
 }
