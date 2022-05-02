@@ -38,6 +38,7 @@ class JmxConfig {
           "cassandra",
           "hbase",
           "hadoop",
+          "jetty",
           "jvm",
           "kafka",
           "kafka-consumer",
