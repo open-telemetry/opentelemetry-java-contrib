@@ -40,8 +40,6 @@ class AgentAttachmentTest {
   @SetEnvironmentVariable(key = "OTEL_TRACES_EXPORTER", value = "logging")
   void attachOtelAgentWithLoggingExporter() throws IOException {
 
-    RuntimeAttach.attachJavaagentToCurrentJVM();
-
     List<String> httpHeaders = makeHttpCallAndReturnHeaders();
 
     String w3cTraceParentHeader = "traceparent";
