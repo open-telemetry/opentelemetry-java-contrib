@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJarContainsFiles;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.createJar;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 
@@ -29,7 +29,7 @@ class PackagingSupportTest {
               underTest.copyRemovingPrefix(new JarFile(path.toFile()), target);
             });
     // then
-    JarTestUtil.assertJar(
+    JarTestUtil.assertJarContainsFiles(
         withoutPrefix,
         "META-INF/MANIFEST.MF",
         "test/NotInstrumented.class",
@@ -62,13 +62,13 @@ class PackagingSupportTest {
                   (entry) -> underTest.copyAddingPrefix(entry, withoutPrefixJar, target));
             });
     // then
-    assertJar(
+    assertJarContainsFiles(
         withoutPrefix,
         "META-INF/MANIFEST.MF",
         "first.class",
         "com/test/second.class",
         "BOOT-INF/lib/test.jar");
-    assertJar(
+    assertJarContainsFiles(
         clone,
         "META-INF/MANIFEST.MF",
         "BOOT-INF/classes/first.class",

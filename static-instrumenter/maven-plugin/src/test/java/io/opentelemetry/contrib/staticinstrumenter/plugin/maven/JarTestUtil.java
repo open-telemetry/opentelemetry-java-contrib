@@ -18,7 +18,7 @@ final class JarTestUtil {
 
   private JarTestUtil() {}
 
-  static void assertJar(Path jarFile, String... files) throws IOException {
+  static void assertJarContainsFiles(Path jarFile, String... files) throws IOException {
     assertThat(Files.exists(jarFile)).isTrue();
     try (JarFile jar = new JarFile(jarFile.toFile())) {
       for (int i = 0; i < files.length; i++) {

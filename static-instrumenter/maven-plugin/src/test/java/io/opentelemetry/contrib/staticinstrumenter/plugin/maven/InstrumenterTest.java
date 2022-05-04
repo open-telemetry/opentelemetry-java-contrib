@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJarContainsFiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ class InstrumenterTest {
     Path instrumented = instrumenter.instrument(testJar.getFileName(), Arrays.asList(testJar));
     // then
     // got the target file right?
-    assertJar(
+    assertJarContainsFiles(
         instrumented,
         "META-INF/MANIFEST.MF",
         "test/NotInstrumented.class",

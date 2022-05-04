@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJarContainsFiles;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.createJar;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.ZipEntryCreator.createZipEntryFromFile;
@@ -33,7 +33,7 @@ class ZipEntryCreatorTest {
                     source.getJarEntry("test/TestClass.class"),
                     source));
     // then
-    assertJar(targetFile, "test/TestClass.class");
+    assertJarContainsFiles(targetFile, "test/TestClass.class");
   }
 
   @Test
@@ -57,7 +57,8 @@ class ZipEntryCreatorTest {
                   source);
             });
     // then
-    assertJar(targetFile, "newpath/TestClassRenamed.classdata", "test/NotInstrumented.class");
+    assertJarContainsFiles(
+        targetFile, "newpath/TestClassRenamed.classdata", "test/NotInstrumented.class");
   }
 
   @Test
@@ -68,6 +69,6 @@ class ZipEntryCreatorTest {
     Path targetFile =
         createJar("new-jar", (target) -> createZipEntryFromFile(target, file, "stored/entry.file"));
     // then
-    assertJar(targetFile, "stored/entry.file");
+    assertJarContainsFiles(targetFile, "stored/entry.file");
   }
 }

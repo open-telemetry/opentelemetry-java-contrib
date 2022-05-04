@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
-import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJar;
+import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJarContainsFiles;
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -54,7 +54,7 @@ class UnpackerTest {
             targetFolderPath.resolve("lib/firstNested.jar"),
             targetFolderPath.resolve("lib/secondNested.jar"));
     // got the target file right?
-    assertJar(
+    assertJarContainsFiles(
         copied.get(0),
         "META-INF/MANIFEST.MF",
         "test/NotInstrumented.class",
