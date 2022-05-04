@@ -111,18 +111,18 @@ class JmxConfig {
 
     // For the list of System Properties, if they have been set in the properties file
     // they need to be set in Java System Properties.
-    JAVA_SYSTEM_PROPERTIES.forEach(key -> {
-      // As properties file & command line properties are combined into properties
-      // at this point, only override if it was not already set via command line
-      if (System.getProperty(key) != null) {
-        return;
-      }
-      String value = properties.getProperty(key);
-      if (value != null) {
-        System.setProperty(key, value);
-      }
-    });
-
+    JAVA_SYSTEM_PROPERTIES.forEach(
+        key -> {
+          // As properties file & command line properties are combined into properties
+          // at this point, only override if it was not already set via command line
+          if (System.getProperty(key) != null) {
+            return;
+          }
+          String value = properties.getProperty(key);
+          if (value != null) {
+            System.setProperty(key, value);
+          }
+        });
   }
 
   JmxConfig() {

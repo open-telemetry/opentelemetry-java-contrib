@@ -8,10 +8,10 @@ package io.opentelemetry.contrib.jmxmetrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetSystemProperty;
-import java.util.Properties;
 
 class JmxConfigTest {
 
@@ -91,7 +91,8 @@ class JmxConfigTest {
   @Test
   void propertiesFile() {
     Properties props = new Properties();
-    JmxMetrics.loadPropertiesFromPath(props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
+    JmxMetrics.loadPropertiesFromPath(
+        props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
     JmxConfig config = new JmxConfig(props);
 
     assertThat(config.serviceUrl).isEqualTo("service:jmx:rmi:///jndi/rmi://myhost:12345/jmxrmi");
@@ -118,13 +119,13 @@ class JmxConfigTest {
     assertThat(System.getProperty("javax.net.ssl.trustStoreType")).isEqualTo("JKS");
   }
 
-
   @Test
   @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
   @SetSystemProperty(key = "otel.resource.attributes", value = "truth=yes")
   void propertiesFileOverride() {
     Properties props = new Properties();
-    JmxMetrics.loadPropertiesFromPath(props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
+    JmxMetrics.loadPropertiesFromPath(
+        props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
     JmxConfig config = new JmxConfig(props);
 
     assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
@@ -141,7 +142,8 @@ class JmxConfigTest {
     assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
     assertThat(config.realm).isEqualTo("myRealm");
 
-    // This property should retain the system property pre-defined and not be overwritten by the file
+    // This property should retain the system property pre-defined and not be overwritten by the
+    // file
     assertThat(System.getProperty("otel.resource.attributes")).isEqualTo("truth=yes");
     // These properties are set from the config file loading into JmxConfig
     assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
