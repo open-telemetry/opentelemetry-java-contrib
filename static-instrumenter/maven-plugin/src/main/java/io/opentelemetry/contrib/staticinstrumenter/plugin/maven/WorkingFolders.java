@@ -15,7 +15,7 @@ class WorkingFolders {
 
   // folder where OTel agent is stored
   private final Path agentFolder;
-  // folder where jars fro instrumentation are prepared
+  // folder where jars for instrumentation are prepared
   private final Path preparationFolder;
   // folder where instrumentation and processing is conducted
   private final Path instrumentationFolder;

@@ -90,7 +90,7 @@ public class InstrumentationAgent {
       throws IOException {
 
     Set<String> existing = allNames(targetFile);
-    try (FileSystem targetFs = FileSystems.newFileSystem(targetFile, null)) {
+    try (FileSystem targetFs = FileSystems.newFileSystem(targetFile, (ClassLoader) null)) {
       consumeEntries(
           agentJar,
           (entry) -> {
