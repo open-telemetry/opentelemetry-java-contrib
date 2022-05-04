@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetSystemProperty;
+import java.util.Properties;
 
 class JmxConfigTest {
 
@@ -85,6 +86,70 @@ class JmxConfigTest {
     assertThat(config.password).isEqualTo("myPassword");
     assertThat(config.remoteProfile).isEqualTo("myRemoteProfile");
     assertThat(config.realm).isEqualTo("myRealm");
+  }
+
+  @Test
+  void propertiesFile() {
+    Properties props = new Properties();
+    JmxMetrics.loadPropertiesFromPath(props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
+    JmxConfig config = new JmxConfig(props);
+
+    assertThat(config.serviceUrl).isEqualTo("service:jmx:rmi:///jndi/rmi://myhost:12345/jmxrmi");
+    assertThat(config.groovyScript).isEqualTo("/my/groovy/script");
+    assertThat(config.targetSystem).isEqualTo("jvm,cassandra");
+    assertThat(config.targetSystems).containsOnly("jvm", "cassandra");
+    assertThat(config.intervalMilliseconds).isEqualTo(20000);
+    assertThat(config.metricsExporterType).isEqualTo("otlp");
+    assertThat(config.otlpExporterEndpoint).isEqualTo("https://myotlpendpoint");
+    assertThat(config.prometheusExporterHost).isEqualTo("host123.domain.com");
+    assertThat(config.prometheusExporterPort).isEqualTo(67890);
+    assertThat(config.username).isEqualTo("myUser\nname");
+    assertThat(config.password).isEqualTo("myPassw\\ord");
+    assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
+    assertThat(config.realm).isEqualTo("myRealm");
+
+    // These properties are set from the config file loading into JmxConfig
+    assertThat(System.getProperty("otel.resource.attributes")).isEqualTo("one=two,three=four");
+    assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
+    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("abc123");
+    assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
+    assertThat(System.getProperty("javax.net.ssl.trustStore")).isEqualTo("/my/trust/store");
+    assertThat(System.getProperty("javax.net.ssl.trustStorePassword")).isEqualTo("def456");
+    assertThat(System.getProperty("javax.net.ssl.trustStoreType")).isEqualTo("JKS");
+  }
+
+
+  @Test
+  @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
+  @SetSystemProperty(key = "otel.resource.attributes", value = "truth=yes")
+  void propertiesFileOverride() {
+    Properties props = new Properties();
+    JmxMetrics.loadPropertiesFromPath(props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
+    JmxConfig config = new JmxConfig(props);
+
+    assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
+    assertThat(config.groovyScript).isEqualTo("/my/groovy/script");
+    assertThat(config.targetSystem).isEqualTo("jvm,cassandra");
+    assertThat(config.targetSystems).containsOnly("jvm", "cassandra");
+    assertThat(config.intervalMilliseconds).isEqualTo(20000);
+    assertThat(config.metricsExporterType).isEqualTo("otlp");
+    assertThat(config.otlpExporterEndpoint).isEqualTo("https://myotlpendpoint");
+    assertThat(config.prometheusExporterHost).isEqualTo("host123.domain.com");
+    assertThat(config.prometheusExporterPort).isEqualTo(67890);
+    assertThat(config.username).isEqualTo("myUser\nname");
+    assertThat(config.password).isEqualTo("myPassw\\ord");
+    assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
+    assertThat(config.realm).isEqualTo("myRealm");
+
+    // This property should retain the system property pre-defined and not be overwritten by the file
+    assertThat(System.getProperty("otel.resource.attributes")).isEqualTo("truth=yes");
+    // These properties are set from the config file loading into JmxConfig
+    assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
+    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("abc123");
+    assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
+    assertThat(System.getProperty("javax.net.ssl.trustStore")).isEqualTo("/my/trust/store");
+    assertThat(System.getProperty("javax.net.ssl.trustStorePassword")).isEqualTo("def456");
+    assertThat(System.getProperty("javax.net.ssl.trustStoreType")).isEqualTo("JKS");
   }
 
   @Test

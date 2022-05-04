@@ -32,6 +32,16 @@ class JmxConfig {
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
+  static final List<String> JAVA_SYSTEM_PROPERTIES =
+      Arrays.asList(
+          "otel.resource.attributes",
+          "javax.net.ssl.keyStore",
+          "javax.net.ssl.keyStorePassword",
+          "javax.net.ssl.keyStoreType",
+          "javax.net.ssl.trustStore",
+          "javax.net.ssl.trustStorePassword",
+          "javax.net.ssl.trustStoreType");
+
   static final List<String> AVAILABLE_TARGET_SYSTEMS =
       Arrays.asList(
           "activemq",
@@ -98,6 +108,21 @@ class JmxConfig {
 
     remoteProfile = properties.getProperty(JMX_REMOTE_PROFILE);
     realm = properties.getProperty(JMX_REALM);
+
+    // For the list of System Properties, if they have been set in the properties file
+    // they need to be set in Java System Properties.
+    JAVA_SYSTEM_PROPERTIES.forEach(key -> {
+      // As properties file & command line properties are combined into properties
+      // at this point, only override if it was not already set via command line
+      if (System.getProperty(key) != null) {
+        return;
+      }
+      String value = properties.getProperty(key);
+      if (value != null) {
+        System.setProperty(key, value);
+      }
+    });
+
   }
 
   JmxConfig() {
