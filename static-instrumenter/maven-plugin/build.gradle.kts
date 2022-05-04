@@ -29,7 +29,7 @@ publishing {
       pom {
         name.set("OpenTelemetry Java Contrib")
         url.set("https://github.com/open-telemetry/opentelemetry-java-contrib")
-        artifactId = base.archivesName.get()
+        artifactId = "static-instrumentation-maven-plugin"
         description.set(project.description)
 
         licenses {
@@ -65,7 +65,7 @@ publishing {
 
 // sets artifactId of the plugin descriptor
 mavenPlugin {
-  artifactId.set(base.archivesName.get())
+  artifactId.set("static-instrumentation-maven-plugin")
 }
 
 tasks {

@@ -54,7 +54,7 @@ class ArtifactProcessor {
    *   <li>move jar to final location, adding a suffix
    * </ul>
    */
-  Path process(Path artifact) throws IOException {
+  void process(Path artifact) throws IOException {
     PackagingSupport packagingSupport = packagingSupportFor(artifact);
     List<Path> artifactsToInstrument = unpacker.copyAndExtract(artifact, packagingSupport);
     log.info("Unpacked artifacts: {}", artifactsToInstrument);
@@ -64,6 +64,5 @@ class ArtifactProcessor {
     agent.copyAgentClassesTo(instrumentedArtifact, packagingSupport);
     Path finalArtifact = packer.packAndCopy(instrumentedArtifact, packagingSupport);
     log.info("Final artifact: {}", finalArtifact);
-    return finalArtifact;
   }
 }

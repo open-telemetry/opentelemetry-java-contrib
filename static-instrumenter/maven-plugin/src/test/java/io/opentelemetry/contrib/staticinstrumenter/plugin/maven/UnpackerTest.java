@@ -38,7 +38,8 @@ class UnpackerTest {
   @Test
   void shouldCopyTestJarContent(@TempDir File targetFolder) throws Exception {
     // given
-    Unpacker unpacker = new Unpacker(targetFolder.toPath());
+    Path targetFolderPath = targetFolder.toPath();
+    Unpacker unpacker = new Unpacker(targetFolderPath);
     PackagingSupport support = PackagingSupport.EMPTY;
     Path jar = Paths.get(getResourcePath("test.jar"));
 
@@ -47,7 +48,11 @@ class UnpackerTest {
     // then
     assertThat(copied).hasSize(3);
     // copied the right file?
-    assertThat(copied.get(0).getFileName().toString()).isEqualTo("test.jar");
+    assertThat(copied)
+        .containsExactlyInAnyOrder(
+            targetFolderPath.resolve("test.jar"),
+            targetFolderPath.resolve("lib/firstNested.jar"),
+            targetFolderPath.resolve("lib/secondNested.jar"));
     // got the target file right?
     assertJar(
         copied.get(0),

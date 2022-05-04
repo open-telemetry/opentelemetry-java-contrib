@@ -63,7 +63,8 @@ public class InstrumentationAgent {
   }
 
   /**
-   * Returns the ProcessBuilder for instrumentation process.
+   * Returns the ProcessBuilder for instrumentation process. TODO: remove extra agent properties
+   * once static instr distro is released
    *
    * @param classpath classpath for instrumentation process (list of JARs to instrument, separated
    *     with path separator)
