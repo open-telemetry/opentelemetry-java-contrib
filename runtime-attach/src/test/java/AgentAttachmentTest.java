@@ -15,14 +15,30 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 class AgentAttachmentTest {
 
+  @BeforeAll
+  static void before() {
+    RuntimeAttach.attachJavaagentToCurrentJVM();
+  }
+
+  @Test
+  void attachOtelAgent() throws IOException {
+
+    List<String> httpHeaders = makeHttpCallAndReturnHeaders();
+
+    String w3cTraceParentHeader = "traceparent";
+
+    assertThat(httpHeaders).contains(w3cTraceParentHeader);
+  }
+
   @Test
   @SetEnvironmentVariable(key = "OTEL_TRACES_EXPORTER", value = "logging")
-  void attachOtelAgent() throws IOException {
+  void attachOtelAgentWithLoggingExporter() throws IOException {
 
     RuntimeAttach.attachJavaagentToCurrentJVM();
 
