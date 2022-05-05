@@ -15,8 +15,10 @@
  */
 
 def classLoading = otel.mbean("java.lang:type=ClassLoading")
-otel.instrument(classLoading, "jvm.classes.loaded", "number of loaded classes",
-        "1", "LoadedClassCount", otel.&longValueCallback)
+otel.instrument(classLoading, "process.runtime.jvm.classes.loaded", "Number of classes currently loaded",
+        "1", "LoadedClassCount", otel.&longUpDownCounterCallback)
+otel.instrument(classLoading, "process.runtime.jvm.classes.unloaded", "Number of classes unloaded since JVM start",
+        "1", "UnloadedClassCount", otel.&longUpDownCounterCallback)
 
 def garbageCollector = otel.mbeans("java.lang:type=GarbageCollector,*")
 otel.instrument(garbageCollector, "jvm.gc.collections.count", "total number of collections that have occurred",
@@ -39,5 +41,5 @@ otel.instrument(memoryPool, "jvm.memory.pool", "current memory pool usage",
         "Usage", otel.&longValueCallback)
 
 def threading = otel.mbean("java.lang:type=Threading")
-otel.instrument(threading, "jvm.threads.count", "number of threads",
-        "1", "ThreadCount", otel.&longValueCallback)
+otel.instrument(threading, "process.runtime.jvm.threads.count", "Number of executing threads",
+        "1", "ThreadCount", otel.&longUpDownCounterCallback)

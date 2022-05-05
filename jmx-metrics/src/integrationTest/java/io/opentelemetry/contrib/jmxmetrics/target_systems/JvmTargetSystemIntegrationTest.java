@@ -31,7 +31,20 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
             "Metaspace",
             "Par Survivor Space");
     waitAndAssertMetrics(
-        metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "1"),
+        metric ->
+            assertSum(
+                metric,
+                "process.runtime.jvm.classes.loaded",
+                "Number of classes currently loaded",
+                "{classes}",
+                false),
+        metric ->
+            assertSum(
+                metric,
+                "process.runtime.jvm.classes.unloaded",
+                "Number of classes unloaded since JVM start",
+                "{classes}",
+                false),
         metric ->
             assertTypedSum(
                 metric,
@@ -67,6 +80,12 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
         metric ->
             assertTypedGauge(
                 metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
-        metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1"));
+        metric ->
+            assertSum(
+                metric,
+                "process.runtime.jvm.threads.count",
+                "number of threads",
+                "{threads}",
+                false));
   }
 }
