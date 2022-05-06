@@ -112,33 +112,33 @@ def purgatorySize = otel.mbeans(["kafka.server:type=DelayedOperationPurgatory,na
                                  "kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Fetch"])
 otel.instrument(purgatorySize,
   "kafka.purgatory.size",
-  "The number of requests waiting in purgatory",
+  "The number of requests waiting in the purgatory",
   "{requests}",
   [
     "type" : { mbean -> mbean.name().getKeyProperty("delayedOperation").toLowerCase() },
   ],
-  "Value", otel.&longValueCallback)
+  "Value", otel.&longUpDownCounterCallback)
 
 def partitionCount = otel.mbean("kafka.server:type=ReplicaManager,name=PartitionCount")
 otel.instrument(partitionCount,
   "kafka.partition.count",
-  "The number of partitions on the broker",
+  "The number of partitions in the broker",
   "{partitions}",
-  "Value", otel.&longValueCallback)
+  "Value", otel.&longUpDownCounterCallback)
 
 def partitionOffline = otel.mbean("kafka.controller:type=KafkaController,name=OfflinePartitionsCount")
 otel.instrument(partitionOffline,
   "kafka.partition.offline",
   "The number of partitions offline",
   "{partitions}",
-  "Value", otel.&longValueCallback)
+  "Value", otel.&longUpDownCounterCallback)
 
 def partitionUnderReplicated = otel.mbean("kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions")
 otel.instrument(partitionUnderReplicated,
   "kafka.partition.under_replicated",
   "The number of under replicated partitions",
   "{partitions}",
-  "Value", otel.&longValueCallback)
+  "Value", otel.&longUpDownCounterCallback)
 
 def isrOperations = otel.mbeans(["kafka.server:type=ReplicaManager,name=IsrShrinksPerSec",
                                 "kafka.server:type=ReplicaManager,name=IsrExpandsPerSec"])
@@ -162,23 +162,23 @@ otel.instrument(isrOperations,
 
 def maxLag = otel.mbean("kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica")
 otel.instrument(maxLag, "kafka.max.lag", "max lag in messages between follower and leader replicas",
-        "{messages}", "Value", otel.&longValueCallback)
+        "{messages}", "Value", otel.&longUpDownCounterCallback)
 
 def activeControllerCount = otel.mbean("kafka.controller:type=KafkaController,name=ActiveControllerCount")
-otel.instrument(activeControllerCount, "kafka.controller.active.count", "controller is active on broker",
-        "{controllers}", "Value", otel.&longValueCallback)
+otel.instrument(activeControllerCount, "kafka.controller.active.count", "The number of active controllers in the broker",
+        "{controllers}", "Value", otel.&longUpDownCounterCallback)
 
 def leaderElectionRate = otel.mbean("kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs")
-otel.instrument(leaderElectionRate, "kafka.leader.election.rate", "leader election rate - increasing indicates broker failures",
+otel.instrument(leaderElectionRate, "kafka.leader.elections", "Leader election rate (increasing values indicates broker failures)",
         "{elections}", "Count", otel.&longCounterCallback)
 
 def uncleanLeaderElections = otel.mbean("kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec")
-otel.instrument(uncleanLeaderElections, "kafka.unclean.election.rate", "unclean leader election rate - increasing indicates broker failures",
+otel.instrument(uncleanLeaderElections, "kafka.leader.unclean-elections", "Unclean leader election rate (increasing values indicates broker failures)",
         "{elections}", "Count", otel.&longCounterCallback)
 
 def requestQueueSize = otel.mbean("kafka.network:type=RequestChannel,name=RequestQueueSize")
-otel.instrument(requestQueueSize, "kafka.request.queue", "size of the request queue",
-        "{requests}", "Value", otel.&longValueCallback)
+otel.instrument(requestQueueSize, "kafka.request.queue", "The number of requests in the request queue",
+        "{requests}", "Value", otel.&longUpDownCounterCallback)
 
 def logFlushRate = otel.mbean("kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs")
 otel.instrument(logFlushRate, "kafka.logs.flush.time.count", "log flush count",
