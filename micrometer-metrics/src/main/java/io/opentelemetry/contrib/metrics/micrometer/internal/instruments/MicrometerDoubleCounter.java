@@ -79,7 +79,7 @@ final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCou
 
             @Override
             public void record(double value, Attributes attributes) {
-              instrument.counter(Attributes.empty()).increment(value);
+              instrument.counter(attributes).increment(value);
             }
           });
     }
