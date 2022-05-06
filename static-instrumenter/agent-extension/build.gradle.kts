@@ -1,6 +1,5 @@
 plugins {
   id("otel.java-conventions")
-  id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 description = "Extension for OpenTelemetry Java Agent"
@@ -10,7 +9,7 @@ dependencies {
   compileOnly("com.google.auto.service:auto-service")
 
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-instrumentation-api")
+  compileOnly("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-muzzle")
