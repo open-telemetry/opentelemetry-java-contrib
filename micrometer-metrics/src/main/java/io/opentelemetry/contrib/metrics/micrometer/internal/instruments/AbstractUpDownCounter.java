@@ -25,7 +25,7 @@ abstract class AbstractUpDownCounter extends AbstractInstrument {
 
   private Counter createCounter(Attributes attributes) {
     Counter counter = new Counter();
-    Gauge.builder(name(), counter, Counter::doubleValue)
+    Gauge.builder(name(), counter, Counter::getDouble)
         .tags(attributesToTags(attributes))
         .description(description())
         .baseUnit(unit())
@@ -43,8 +43,12 @@ abstract class AbstractUpDownCounter extends AbstractInstrument {
         currentLong = get();
         double currentDouble = Double.longBitsToDouble(currentLong);
         double proposedDouble = currentDouble + value;
-        proposedLong = Double.doubleToRawLongBits(proposedDouble);
+        proposedLong = Double.doubleToLongBits(proposedDouble);
       } while (!compareAndSet(currentLong, proposedLong));
+    }
+
+    public double getDouble() {
+      return Double.longBitsToDouble(get());
     }
   }
 }

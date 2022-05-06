@@ -17,7 +17,7 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.instruments.Micromet
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 
 final class MicrometerMeter implements Meter {
-  private final MeterSharedState meterSharedState;
+  final MeterSharedState meterSharedState;
 
   MicrometerMeter(MeterSharedState meterSharedState) {
     this.meterSharedState = meterSharedState;

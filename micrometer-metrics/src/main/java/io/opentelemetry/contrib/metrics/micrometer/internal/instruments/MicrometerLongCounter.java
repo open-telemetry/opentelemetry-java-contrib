@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public final class MicrometerLongCounter extends AbstractCounter implements LongCounter {
 
-  private MicrometerLongCounter(InstrumentState instrumentState) {
+  MicrometerLongCounter(InstrumentState instrumentState) {
     super(instrumentState);
   }
 

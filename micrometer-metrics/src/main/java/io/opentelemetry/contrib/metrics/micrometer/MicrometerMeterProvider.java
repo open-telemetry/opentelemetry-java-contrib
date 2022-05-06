@@ -11,22 +11,34 @@ import io.opentelemetry.api.metrics.MeterBuilder;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class MicrometerMeterProvider implements MeterProvider, AutoCloseable {
+  static final String OTEL_POLLING_METER_NAME = "otel_polling_meter";
+
   private final MeterProviderSharedState meterProviderSharedState;
+  private final List<Runnable> callbacks;
   private final Meter pollingMeter;
 
   public MicrometerMeterProvider(MeterRegistry meterRegistry) {
-    this.meterProviderSharedState = new MeterProviderSharedState(meterRegistry);
+    this(meterRegistry, new CopyOnWriteArrayList<>());
+  }
 
-    this.pollingMeter =
-        Meter.builder("otel_polling_meter", Meter.Type.OTHER, PollingIterable.of(this::poll))
-            .register(meterRegistry);
+  MicrometerMeterProvider(MeterRegistry meterRegistry, List<Runnable> callbacks) {
+    this.meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbacks);
+    this.callbacks = callbacks;
+    this.pollingMeter = createPollingMeter(meterRegistry);
+  }
+
+  private Meter createPollingMeter(MeterRegistry meterRegistry) {
+    return Meter.builder(OTEL_POLLING_METER_NAME, Meter.Type.OTHER, PollingIterable.of(this::poll))
+        .register(meterRegistry);
   }
 
   private void poll() {
-    for (Runnable callback : meterProviderSharedState.callbacks()) {
+    for (Runnable callback : this.callbacks) {
       callback.run();
     }
   }
