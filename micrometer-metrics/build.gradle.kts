@@ -3,7 +3,7 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "OpenTelemetry AWS X-Ray Support"
+description = "OpenTelemetry Micrometer MeterProvider"
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
@@ -18,10 +18,15 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  testImplementation("com.linecorp.armeria:armeria-junit5")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("com.google.guava:guava")
-  testImplementation("org.slf4j:slf4j-simple")
-  testImplementation("org.skyscreamer:jsonassert")
+  testImplementation("io.micrometer:micrometer-core:1.8.5")
+}
+
+testing {
+  suites {
+    val integrationTest by registering(JvmTestSuite::class) {
+      dependencies {
+        implementation("io.micrometer:micrometer-registry-prometheus:1.8.5")
+      }
+    }
+  }
 }
