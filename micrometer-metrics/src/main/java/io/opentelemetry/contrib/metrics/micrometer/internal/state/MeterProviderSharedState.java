@@ -9,6 +9,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.contrib.metrics.micrometer.RegisteredCallback;
 import java.util.List;
 
+/**
+ * State for a meter provider.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class MeterProviderSharedState {
   private final MeterRegistry meterRegistry;
   private final List<Runnable> callbacks;

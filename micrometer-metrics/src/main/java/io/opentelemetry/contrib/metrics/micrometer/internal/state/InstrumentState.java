@@ -9,6 +9,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.contrib.metrics.micrometer.RegisteredCallback;
 import javax.annotation.Nullable;
 
+/**
+ * State for an instrument.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class InstrumentState {
   private final MeterSharedState meterSharedState;
   private final String name;

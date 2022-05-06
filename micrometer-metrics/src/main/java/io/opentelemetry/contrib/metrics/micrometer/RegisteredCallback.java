@@ -12,6 +12,7 @@ import io.opentelemetry.api.metrics.ObservableLongCounter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 
+/** Helper interface representing any of the observable instruments. */
 @FunctionalInterface
 public interface RegisteredCallback
     extends ObservableLongCounter,
@@ -19,8 +20,14 @@ public interface RegisteredCallback
         ObservableLongUpDownCounter,
         ObservableDoubleUpDownCounter,
         ObservableLongGauge,
-        ObservableDoubleGauge {
+        ObservableDoubleGauge,
+        AutoCloseable {
 
+  /**
+   * Remove the callback registered via {@code buildWithCallback(Consumer)}. After this is called,
+   * the callback won't be invoked on future collections. Subsequent calls to {@link #close()} have
+   * no effect.
+   */
   @Override
   void close();
 }

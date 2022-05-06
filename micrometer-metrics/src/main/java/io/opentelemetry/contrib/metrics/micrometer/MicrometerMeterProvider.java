@@ -13,8 +13,13 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderS
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * An implementation of {@link MeterProvider} that delegates metrics to a Micrometer {@link
+ * MeterRegistry}.
+ */
 public final class MicrometerMeterProvider implements MeterProvider, AutoCloseable {
   static final String OTEL_POLLING_METER_NAME = "otel_polling_meter";
 
@@ -22,16 +27,28 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
   private final List<Runnable> callbacks;
   private final Meter pollingMeter;
 
+  /**
+   * Creates a new instance of {@link MicrometerMeterProvider} for the provided {@link
+   * MeterRegistry}.
+   *
+   * @param meterRegistry the {@link MeterRegistry}
+   */
   public MicrometerMeterProvider(MeterRegistry meterRegistry) {
     this(meterRegistry, new CopyOnWriteArrayList<>());
   }
 
+  // for testing purposes
   MicrometerMeterProvider(MeterRegistry meterRegistry, List<Runnable> callbacks) {
+    Objects.requireNonNull(meterRegistry, "meterRegistry");
     this.meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbacks);
     this.callbacks = callbacks;
     this.pollingMeter = createPollingMeter(meterRegistry);
   }
 
+  /**
+   * Creates a dummy {@link Meter} which will be used to intercept when measurements are being
+   * enumerated so that observable instruments can be polled to record their metrics.
+   */
   private Meter createPollingMeter(MeterRegistry meterRegistry) {
     return Meter.builder(OTEL_POLLING_METER_NAME, Meter.Type.OTHER, PollingIterable.of(this::poll))
         .register(meterRegistry);
@@ -48,11 +65,17 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
     meterProviderSharedState.meterRegistry().remove(pollingMeter);
   }
 
+  /** {@inheritDoc} */
   @Override
   public MeterBuilder meterBuilder(String instrumentationScopeName) {
+    Objects.requireNonNull(instrumentationScopeName, "instrumentationScopeName");
     return new MicrometerMeterBuilder(meterProviderSharedState, instrumentationScopeName);
   }
 
+  /**
+   * An implementation of an {@link Iterable Iterable<T>} that will invoke a {@link Runnable} when
+   * it is enumerated.
+   */
   @SuppressWarnings("IterableAndIterator")
   private static class PollingIterable<T> implements Iterable<T>, Iterator<T> {
 
