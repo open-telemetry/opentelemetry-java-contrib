@@ -17,10 +17,16 @@
 def beanSelector = otel.mbean("org.eclipse.jetty.io:context=*,type=managedselector,id=*")
 otel.instrument(beanSelector, "jetty.select.count", "The number of select calls.", "{operations}","selectCount", otel.&longCounterCallback)
 
-def beanSessions = otel.mbean("org.eclipse.jetty.server.session:context=jetty,type=sessionhandler,id=*")
-otel.instrument(beanSessions, "jetty.session.count", "The number of sessions established in total.", "{sessions}","sessionsCreated", otel.&longCounterCallback)
-otel.instrument(beanSessions, "jetty.session.time.total", "The total time sessions have been active.", "s","sessionTimeTotal", otel.&longUpDownCounterCallback)
-otel.instrument(beanSessions, "jetty.session.time.max", "The maximum amount of time a session has been active.", "s","sessionTimeMax", otel.&longValueCallback)
+def beanSessions = otel.mbean("org.eclipse.jetty.server.session:context=*,type=sessionhandler,id=*")
+otel.instrument(beanSessions, "jetty.session.count", "The number of sessions established in total.", "{sessions}",
+  ["resource" : { mbean -> mbean.name().getKeyProperty("context") }],
+  "sessionsCreated", otel.&longCounterCallback)
+otel.instrument(beanSessions, "jetty.session.time.total", "The total time sessions have been active.", "s",
+  ["resource" : { mbean -> mbean.name().getKeyProperty("context") }],
+  "sessionTimeTotal", otel.&longUpDownCounterCallback)
+otel.instrument(beanSessions, "jetty.session.time.max", "The maximum amount of time a session has been active.", "s",
+  ["resource" : { mbean -> mbean.name().getKeyProperty("context") }],
+  "sessionTimeMax", otel.&longValueCallback)
 
 def beanThreads = otel.mbean("org.eclipse.jetty.util.thread:type=queuedthreadpool,id=*")
 otel.instrument(beanThreads, "jetty.thread.count", "The current number of threads.", "{threads}",
