@@ -34,7 +34,6 @@ class JmxConfig {
 
   static final List<String> JAVA_SYSTEM_PROPERTIES =
       Arrays.asList(
-          "otel.resource.attributes",
           "javax.net.ssl.keyStore",
           "javax.net.ssl.keyStorePassword",
           "javax.net.ssl.keyStoreType",

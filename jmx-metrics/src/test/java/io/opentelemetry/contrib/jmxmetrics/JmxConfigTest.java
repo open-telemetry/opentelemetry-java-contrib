@@ -110,7 +110,6 @@ class JmxConfigTest {
     assertThat(config.realm).isEqualTo("myRealm");
 
     // These properties are set from the config file loading into JmxConfig
-    assertThat(System.getProperty("otel.resource.attributes")).isEqualTo("one=two,three=four");
     assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
     assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("abc123");
     assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
@@ -121,14 +120,16 @@ class JmxConfigTest {
 
   @Test
   @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
-  @SetSystemProperty(key = "otel.resource.attributes", value = "truth=yes")
+  @SetSystemProperty(key = "javax.net.ssl.keyStorePassword", value = "truth")
   void propertiesFileOverride() {
     Properties props = new Properties();
     JmxMetrics.loadPropertiesFromPath(
         props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
     JmxConfig config = new JmxConfig(props);
 
+    // This property should retain the system property value, not the config file value
     assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
+    // These properties are set from the config file
     assertThat(config.groovyScript).isEqualTo("/my/groovy/script");
     assertThat(config.targetSystem).isEqualTo("jvm,cassandra");
     assertThat(config.targetSystems).containsOnly("jvm", "cassandra");
@@ -142,12 +143,10 @@ class JmxConfigTest {
     assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
     assertThat(config.realm).isEqualTo("myRealm");
 
-    // This property should retain the system property pre-defined and not be overwritten by the
-    // file
-    assertThat(System.getProperty("otel.resource.attributes")).isEqualTo("truth=yes");
+    // This property should retain the system property value, not the config file value
+    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("truth");
     // These properties are set from the config file loading into JmxConfig
     assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
-    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("abc123");
     assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
     assertThat(System.getProperty("javax.net.ssl.trustStore")).isEqualTo("/my/trust/store");
     assertThat(System.getProperty("javax.net.ssl.trustStorePassword")).isEqualTo("def456");
