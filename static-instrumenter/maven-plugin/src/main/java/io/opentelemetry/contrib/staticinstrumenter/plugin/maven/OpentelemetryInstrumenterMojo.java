@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
     defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class OpentelemetryInstrumenterMojo extends AbstractMojo {
+public class OpenTelemetryInstrumenterMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   @Nullable

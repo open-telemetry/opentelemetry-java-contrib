@@ -50,7 +50,7 @@ class ArtifactProcessor {
    * <ul>
    *   <li>unpacks artifacts into a temp dir
    *   <li>runs instrumentation agent, creating instrumented copy of a JAR and dependencies
-   *   <li>packs all dependencies into a single JAR</br> - adds open telemetry classes
+   *   <li>packs all dependencies into a single JAR and adds open telemetry classes
    *   <li>move jar to final location, adding a suffix
    * </ul>
    */

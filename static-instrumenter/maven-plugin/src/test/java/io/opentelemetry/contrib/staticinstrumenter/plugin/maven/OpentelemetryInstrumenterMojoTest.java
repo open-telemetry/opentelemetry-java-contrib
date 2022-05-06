@@ -16,7 +16,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class OpentelemetryInstrumenterMojoTest {
+class OpenTelemetryInstrumenterMojoTest {
 
   @Test
   void shouldInstrumentSampleApplication(@TempDir File tempdir) throws Exception {
