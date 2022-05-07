@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 public final class MicrometerDoubleGauge extends AbstractInstrument {
   private final MultiGauge multiGauge;
 
-  public MicrometerDoubleGauge(InstrumentState instrumentState) {
+  private MicrometerDoubleGauge(InstrumentState instrumentState) {
     super(instrumentState);
     multiGauge =
         MultiGauge.builder(name())
@@ -70,18 +70,18 @@ public final class MicrometerDoubleGauge extends AbstractInstrument {
   }
 
   public static DoubleGaugeBuilder builder(MeterSharedState meterSharedState, String name) {
-    return new Builder(meterSharedState, name);
+    return new DoubleBuilder(meterSharedState, name);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
+  private static class DoubleBuilder extends AbstractInstrumentBuilder<DoubleBuilder>
       implements DoubleGaugeBuilder {
 
-    public Builder(MeterSharedState meterSharedState, String name) {
+    private DoubleBuilder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
     }
 
     @Override
-    public Builder self() {
+    public DoubleBuilder self() {
       return this;
     }
 
@@ -99,7 +99,7 @@ public final class MicrometerDoubleGauge extends AbstractInstrument {
 
   private static class LongBuilder extends AbstractInstrumentBuilder<LongBuilder>
       implements LongGaugeBuilder {
-    public LongBuilder(
+    private LongBuilder(
         MeterSharedState meterSharedState,
         String name,
         @Nullable String description,

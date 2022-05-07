@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
     implements DoubleUpDownCounter {
-  public MicrometerDoubleUpDownCounter(InstrumentState instrumentState) {
+  private MicrometerDoubleUpDownCounter(InstrumentState instrumentState) {
     super(instrumentState);
   }
 
@@ -47,7 +47,7 @@ final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
 
   private static class Builder extends AbstractInstrumentBuilder<Builder>
       implements DoubleUpDownCounterBuilder {
-    public Builder(
+    private Builder(
         MeterSharedState meterSharedState,
         String name,
         @Nullable String description,

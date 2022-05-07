@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 
 final class MicrometerLongHistogram extends AbstractHistogram implements LongHistogram {
 
-  public MicrometerLongHistogram(InstrumentState instrumentState) {
+  private MicrometerLongHistogram(InstrumentState instrumentState) {
     super(instrumentState);
   }
 
@@ -44,7 +44,7 @@ final class MicrometerLongHistogram extends AbstractHistogram implements LongHis
 
   private static class Builder extends AbstractInstrumentBuilder<Builder>
       implements LongHistogramBuilder {
-    public Builder(
+    private Builder(
         MeterSharedState meterSharedState,
         String name,
         @Nullable String description,

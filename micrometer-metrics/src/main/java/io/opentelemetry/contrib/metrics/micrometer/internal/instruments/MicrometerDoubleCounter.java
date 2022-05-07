@@ -47,7 +47,7 @@ final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCou
 
   private static class Builder extends AbstractInstrumentBuilder<Builder>
       implements DoubleCounterBuilder {
-    public Builder(
+    private Builder(
         MeterSharedState meterSharedState,
         String name,
         @Nullable String description,

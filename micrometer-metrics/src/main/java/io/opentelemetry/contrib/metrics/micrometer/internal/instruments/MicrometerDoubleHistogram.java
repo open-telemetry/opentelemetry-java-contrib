@@ -15,7 +15,7 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedSta
 
 public final class MicrometerDoubleHistogram extends AbstractHistogram implements DoubleHistogram {
 
-  public MicrometerDoubleHistogram(InstrumentState instrumentState) {
+  private MicrometerDoubleHistogram(InstrumentState instrumentState) {
     super(instrumentState);
   }
 
@@ -40,7 +40,7 @@ public final class MicrometerDoubleHistogram extends AbstractHistogram implement
 
   private static class Builder extends AbstractInstrumentBuilder<Builder>
       implements DoubleHistogramBuilder {
-    public Builder(MeterSharedState meterSharedState, String name) {
+    private Builder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
     }
 
