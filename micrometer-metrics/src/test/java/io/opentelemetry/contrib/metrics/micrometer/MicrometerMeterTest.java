@@ -95,14 +95,14 @@ public class MicrometerMeterTest {
         underTest.gaugeBuilder("gauge").buildWithCallback(doubleMeasurementConsumer);
 
     assertThat(callbacks).isNotEmpty();
-    verify(doubleMeasurementConsumer).accept(any());
+    verifyNoInteractions(doubleMeasurementConsumer);
 
+    pollingMeter.measure().forEach(measurement -> {});
+    verify(doubleMeasurementConsumer, times(1)).accept(any());
     pollingMeter.measure().forEach(measurement -> {});
     verify(doubleMeasurementConsumer, times(2)).accept(any());
     pollingMeter.measure().forEach(measurement -> {});
     verify(doubleMeasurementConsumer, times(3)).accept(any());
-    pollingMeter.measure().forEach(measurement -> {});
-    verify(doubleMeasurementConsumer, times(4)).accept(any());
 
     counter.close();
     assertThat(callbacks).isEmpty();

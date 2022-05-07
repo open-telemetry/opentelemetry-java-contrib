@@ -17,13 +17,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 abstract class AbstractInstrument {
   private final InstrumentState instrumentState;
+  private final Logger logger;
 
   protected AbstractInstrument(InstrumentState instrumentState) {
     this.instrumentState = instrumentState;
+    this.logger = Logger.getLogger(getClass().getName());
   }
 
   protected final MeterRegistry meterRegistry() {
@@ -58,16 +62,32 @@ abstract class AbstractInstrument {
 
   protected final RegisteredCallback registerLongCallback(
       Consumer<ObservableLongMeasurement> callback, ObservableLongMeasurement measurement) {
-    return instrumentState.registerCallback(() -> callback.accept(measurement));
+    return registerCallback(() -> callback.accept(measurement));
   }
 
   protected final RegisteredCallback registerDoubleCallback(
       Consumer<ObservableDoubleMeasurement> callback, ObservableDoubleMeasurement measurement) {
-    return instrumentState.registerCallback(() -> callback.accept(measurement));
+    return registerCallback(() -> callback.accept(measurement));
   }
 
   protected final RegisteredCallback registerCallback(Runnable callback) {
-    callback.run();
-    return instrumentState.registerCallback(callback);
+    return instrumentState.registerCallback(invokeSafely(callback));
+  }
+
+  private Runnable invokeSafely(Runnable runnable) {
+    return () -> {
+      try {
+        runnable.run();
+      } catch (Error error) {
+        throw error;
+      } catch (Throwable throwable) {
+        logger.log(
+            Level.WARNING,
+            "An exception occurred invoking callback for instrument "
+                + instrumentState.name()
+                + ".",
+            throwable);
+      }
+    };
   }
 }
