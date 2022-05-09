@@ -36,6 +36,6 @@ Details about using JMX with WildFly can be found here: https://www.eclipse.org/
 
 
 * Name: `jetty.thread.queue.count`
-* Description: The maximum amount of time a session has been active.
+* Description: The current number of threads in the queue.
 * Unit: `{threads}`
 * Instrument Type: longValueCallback
