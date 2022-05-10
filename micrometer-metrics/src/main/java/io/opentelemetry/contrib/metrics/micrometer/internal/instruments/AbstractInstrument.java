@@ -10,7 +10,7 @@ import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
-import io.opentelemetry.contrib.metrics.micrometer.RegisteredCallback;
+import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,17 +60,17 @@ abstract class AbstractInstrument {
     return list;
   }
 
-  protected final RegisteredCallback registerLongCallback(
+  protected final CallbackRegistration registerLongCallback(
       Consumer<ObservableLongMeasurement> callback, ObservableLongMeasurement measurement) {
     return registerCallback(() -> callback.accept(measurement));
   }
 
-  protected final RegisteredCallback registerDoubleCallback(
+  protected final CallbackRegistration registerDoubleCallback(
       Consumer<ObservableDoubleMeasurement> callback, ObservableDoubleMeasurement measurement) {
     return registerCallback(() -> callback.accept(measurement));
   }
 
-  protected final RegisteredCallback registerCallback(Runnable callback) {
+  protected final CallbackRegistration registerCallback(Runnable callback) {
     return instrumentState.registerCallback(invokeSafely(callback));
   }
 

@@ -14,11 +14,10 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,7 @@ public class MicrometerDoubleHistogramTest {
 
   SimpleMeterRegistry meterRegistry;
 
-  List<Runnable> callbacks;
+  TestCallbackRegistrar callbacks;
 
   MeterProviderSharedState meterProviderSharedState;
 
@@ -35,7 +34,7 @@ public class MicrometerDoubleHistogramTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new ArrayList<>();
+    callbacks = new TestCallbackRegistrar();
     meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbacks);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", null, null);
   }
@@ -50,7 +49,7 @@ public class MicrometerDoubleHistogramTest {
 
     underTest.record(10.0);
 
-    DistributionSummary summary = meterRegistry.find("histogram").summary();
+    DistributionSummary summary = meterRegistry.get("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");
@@ -78,7 +77,7 @@ public class MicrometerDoubleHistogramTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.record(10.0, attributes);
 
-    DistributionSummary summary = meterRegistry.find("histogram").summary();
+    DistributionSummary summary = meterRegistry.get("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");
@@ -106,7 +105,7 @@ public class MicrometerDoubleHistogramTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.record(10.0, attributes, Context.root());
 
-    DistributionSummary summary = meterRegistry.find("histogram").summary();
+    DistributionSummary summary = meterRegistry.get("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");

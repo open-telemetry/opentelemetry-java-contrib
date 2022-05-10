@@ -39,7 +39,7 @@ public class PrometheusIntegrationTest {
   @BeforeEach
   void setUp() {
     prometheusMeterRegistry = new PrometheusMeterRegistry(DefaultPrometheusConfig.INSTANCE);
-    MeterProvider meterProvider = new MicrometerMeterProvider(prometheusMeterRegistry);
+    MeterProvider meterProvider = MicrometerMeterProvider.builder(prometheusMeterRegistry).build();
     meter = meterProvider.get("integrationTest");
   }
 

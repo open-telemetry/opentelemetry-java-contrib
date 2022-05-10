@@ -14,7 +14,8 @@ use the OpenTelemetry Metrics `MeterProvider` API to create instruments.
 MeterRegistry meterRegistry = ...;
 
 // create the meter provider
-MeterProvider meterProvider = new MicrometerMeterProvider(meterRegistry);
+MeterProvider meterProvider = MicrometerMeterProvider.builder(meterRegistry)
+    .build();
 Meter meter = meterProvider.get("my-app");
 
 // create an instrument

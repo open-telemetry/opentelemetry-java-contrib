@@ -7,31 +7,29 @@ package io.opentelemetry.contrib.metrics.micrometer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MicrometerMeterProviderTest {
   SimpleMeterRegistry meterRegistry;
 
-  List<Runnable> callbacks;
+  CallbackRegistrar callbacks;
 
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new CopyOnWriteArrayList<>();
+    callbacks = new TestCallbackRegistrar();
   }
 
   @Test
   void createMeter() {
-    MeterProvider underTest = new MicrometerMeterProvider(meterRegistry, callbacks);
+    MeterProvider underTest =
+        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
     Meter meter = underTest.get("name");
 
     assertThat(meter)
@@ -47,7 +45,8 @@ public class MicrometerMeterProviderTest {
 
   @Test
   void createMeterWithNameAndVersion() {
-    MeterProvider underTest = new MicrometerMeterProvider(meterRegistry, callbacks);
+    MeterProvider underTest =
+        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
     Meter meter = underTest.meterBuilder("name").setInstrumentationVersion("version").build();
 
     assertThat(meter)
@@ -64,7 +63,8 @@ public class MicrometerMeterProviderTest {
 
   @Test
   void createMeterWithNameAndSchemaUrl() {
-    MeterProvider underTest = new MicrometerMeterProvider(meterRegistry, callbacks);
+    MeterProvider underTest =
+        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
     Meter meter = underTest.meterBuilder("name").setSchemaUrl("schemaUrl").build();
 
     assertThat(meter)
@@ -80,7 +80,8 @@ public class MicrometerMeterProviderTest {
 
   @Test
   void createMeterWithNameVersionAndSchemaUrl() {
-    MeterProvider underTest = new MicrometerMeterProvider(meterRegistry, callbacks);
+    MeterProvider underTest =
+        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
     Meter meter =
         underTest
             .meterBuilder("name")
@@ -101,26 +102,12 @@ public class MicrometerMeterProviderTest {
   }
 
   @Test
-  void createsPollingMeter() {
-    MicrometerMeterProvider underTest = new MicrometerMeterProvider(meterRegistry, callbacks);
-
-    io.micrometer.core.instrument.Meter meter =
-        meterRegistry.find(MicrometerMeterProvider.OTEL_POLLING_METER_NAME).meter();
-    assertThat(meter).isNotNull();
-    assertThat(meter.getId().getName()).isEqualTo(MicrometerMeterProvider.OTEL_POLLING_METER_NAME);
-
-    Runnable callback = mock(Runnable.class);
-    callbacks.add(callback);
-
-    meter.measure().forEach(measurement -> {});
-    verify(callback).run();
-    meter.measure().forEach(measurement -> {});
-    verify(callback, times(2)).run();
-    meter.measure().forEach(measurement -> {});
-    verify(callback, times(3)).run();
+  void close() {
+    CallbackRegistrar registrar = mock(CallbackRegistrar.class);
+    MicrometerMeterProvider underTest =
+        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(registrar).build();
 
     underTest.close();
-    meter = meterRegistry.find(MicrometerMeterProvider.OTEL_POLLING_METER_NAME).meter();
-    assertThat(meter).isNull();
+    verify(registrar).close();
   }
 }

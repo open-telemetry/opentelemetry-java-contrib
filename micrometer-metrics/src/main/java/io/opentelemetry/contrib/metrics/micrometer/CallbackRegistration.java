@@ -14,7 +14,7 @@ import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 
 /** Helper interface representing any of the observable instruments. */
 @FunctionalInterface
-public interface RegisteredCallback
+public interface CallbackRegistration
     extends ObservableLongCounter,
         ObservableDoubleCounter,
         ObservableLongUpDownCounter,

@@ -15,11 +15,10 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,7 @@ public class MicrometerLongUpDownCounterTest {
 
   SimpleMeterRegistry meterRegistry;
 
-  List<Runnable> callbacks;
+  TestCallbackRegistrar callbacks;
 
   MeterProviderSharedState meterProviderSharedState;
 
@@ -36,7 +35,7 @@ public class MicrometerLongUpDownCounterTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new ArrayList<>();
+    callbacks = new TestCallbackRegistrar();
     meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbacks);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", null, null);
   }
@@ -51,7 +50,7 @@ public class MicrometerLongUpDownCounterTest {
 
     underTest.add(10);
 
-    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    Gauge gauge = meterRegistry.get("upDownCounter").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
@@ -77,7 +76,7 @@ public class MicrometerLongUpDownCounterTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.add(10, attributes);
 
-    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    Gauge gauge = meterRegistry.get("upDownCounter").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
@@ -103,7 +102,7 @@ public class MicrometerLongUpDownCounterTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.add(10, attributes, Context.root());
 
-    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    Gauge gauge = meterRegistry.get("upDownCounter").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
@@ -125,12 +124,11 @@ public class MicrometerLongUpDownCounterTest {
             .buildWithCallback(measurement -> measurement.record(10));
 
     assertThat(callbacks).hasSize(1);
-    Runnable callback = callbacks.get(0);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
-    callback.run();
-    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    callbacks.run();
+    Gauge gauge = meterRegistry.get("upDownCounter").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
@@ -139,7 +137,7 @@ public class MicrometerLongUpDownCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callback.run();
+    callbacks.run();
     assertThat(gauge.value()).isEqualTo(20.0);
 
     underTest.close();
@@ -157,12 +155,11 @@ public class MicrometerLongUpDownCounterTest {
             .buildWithCallback(measurement -> measurement.record(10, attributes));
 
     assertThat(callbacks).hasSize(1);
-    Runnable callback = callbacks.get(0);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
-    callback.run();
-    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    callbacks.run();
+    Gauge gauge = meterRegistry.get("upDownCounter").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
@@ -171,7 +168,7 @@ public class MicrometerLongUpDownCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callback.run();
+    callbacks.run();
     assertThat(gauge.value()).isEqualTo(20.0);
 
     underTest.close();

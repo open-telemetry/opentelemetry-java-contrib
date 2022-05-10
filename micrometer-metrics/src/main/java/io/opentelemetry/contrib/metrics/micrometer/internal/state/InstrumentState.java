@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.contrib.metrics.micrometer.RegisteredCallback;
+import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 import javax.annotation.Nullable;
 
 /**
@@ -36,7 +36,7 @@ public final class InstrumentState {
     return meterSharedState.meterRegistry();
   }
 
-  public RegisteredCallback registerCallback(Runnable runnable) {
+  public CallbackRegistration registerCallback(Runnable runnable) {
     return meterSharedState.registerCallback(runnable);
   }
 

@@ -7,7 +7,7 @@ description = "OpenTelemetry Micrometer MeterProvider"
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
-  api("io.opentelemetry:opentelemetry-sdk-trace")
+  api("io.opentelemetry:opentelemetry-sdk-metrics")
 
   compileOnly("io.micrometer:micrometer-core:1.1.0")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

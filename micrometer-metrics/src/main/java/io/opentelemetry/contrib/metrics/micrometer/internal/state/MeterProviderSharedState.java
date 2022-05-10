@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.contrib.metrics.micrometer.RegisteredCallback;
-import java.util.List;
+import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistrar;
+import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 
 /**
  * State for a meter provider.
@@ -17,19 +17,19 @@ import java.util.List;
  */
 public final class MeterProviderSharedState {
   private final MeterRegistry meterRegistry;
-  private final List<Runnable> callbacks;
+  private final CallbackRegistrar callbackRegistrar;
 
-  public MeterProviderSharedState(MeterRegistry meterRegistry, List<Runnable> callbacks) {
+  public MeterProviderSharedState(
+      MeterRegistry meterRegistry, CallbackRegistrar callbackRegistrar) {
     this.meterRegistry = meterRegistry;
-    this.callbacks = callbacks;
+    this.callbackRegistrar = callbackRegistrar;
   }
 
   public MeterRegistry meterRegistry() {
     return meterRegistry;
   }
 
-  public RegisteredCallback registerCallback(Runnable callback) {
-    callbacks.add(callback);
-    return () -> callbacks.remove(callback);
+  public CallbackRegistration registerCallback(Runnable callback) {
+    return callbackRegistrar.registerCallback(callback);
   }
 }
