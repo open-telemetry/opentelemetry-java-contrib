@@ -43,7 +43,7 @@ public class OpenTelemetryInstrumenterMojo extends AbstractMojo {
   @Nullable
   private String suffix;
 
-  private final Logger logger = LoggerFactory.getLogger(OpentelemetryInstrumenterMojo.class);
+  private final Logger logger = LoggerFactory.getLogger(OpenTelemetryInstrumenterMojo.class);
 
   /**
    * Conducts the process of application target file instrumentation. Cleans the temporary
