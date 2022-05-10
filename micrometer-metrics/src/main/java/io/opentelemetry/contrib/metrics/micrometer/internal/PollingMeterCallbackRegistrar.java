@@ -15,8 +15,8 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Implementation of a {@link CallbackRegistrar} that uses a Micrometer {@link Meter} to
- * invoke the callbacks when the meter is measured.
+ * Implementation of a {@link CallbackRegistrar} that uses a Micrometer {@link Meter} to invoke the
+ * callbacks when the meter is measured.
  *
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
