@@ -32,6 +32,8 @@ class JmxConfig {
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
+  // These properties need to be copied into System Properties if provided via the property
+  // file so they are available to the JMX Connection builder
   static final List<String> JAVA_SYSTEM_PROPERTIES =
       Arrays.asList(
           "javax.net.ssl.keyStore",
