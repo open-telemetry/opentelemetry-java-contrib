@@ -23,6 +23,16 @@ dependencies {
   }
 }
 
+tasks {
+  // We don't compile anything here. This project is mostly for
+  // aggregating jacoco reports and it doesn't work if this isn't at least as high as the
+  // highest supported Java version in any of our projects. Most of our projects target
+  // Java 8, but some target Java 11 or 17.
+  withType(JavaCompile::class) {
+    options.release.set(17)
+  }
+}
+
 afterEvaluate {
   tasks {
     testCodeCoverageReport {
