@@ -21,7 +21,7 @@ class OpenTelemetryInstrumenterMojoTest {
   @Test
   void shouldInstrumentSampleApplication(@TempDir File tempdir) throws Exception {
     // given
-    OpentelemetryInstrumenterMojo mojo = new OpentelemetryInstrumenterMojo();
+    OpenTelemetryInstrumenterMojo mojo = new OpenTelemetryInstrumenterMojo();
     Path testApp = Paths.get(JarTestUtil.getResourcePath("test-http-app.jar"));
     // when
     mojo.executeInternal(tempdir.getPath(), "-instrumented", Collections.singletonList(testApp));
