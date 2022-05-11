@@ -20,7 +20,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 public class AdditionalClassesInjectorListenerInstaller implements AgentListener {
 
   @Override
-  public void beforeAgent(
+  public void afterAgent(
       Config config, AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
     HelperInjector.setHelperInjectorListener(new AdditionalClassesInjectorListener());
   }
