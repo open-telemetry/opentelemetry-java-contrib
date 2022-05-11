@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.agent.main;
 
-import static io.opentelemetry.contrib.staticinstrumenter.JarTestUtil.getResourcePath;
+import static io.opentelemetry.contrib.staticinstrumenter.agent.main.JarTestUtil.getResourcePath;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -18,6 +18,9 @@ repositories {
       includeGroupByRegex("""org\.terracotta.*""")
     }
   }
+  maven {
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+  }
   mavenLocal()
 }
 

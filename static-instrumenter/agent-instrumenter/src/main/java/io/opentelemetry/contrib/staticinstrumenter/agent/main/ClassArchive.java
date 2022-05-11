@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.agent.main;
 
+import io.opentelemetry.contrib.staticinstrumenter.util.SystemLogger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -15,8 +18,6 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Represents an archive storing classes (JAR, WAR). */
 class ClassArchive {
@@ -25,7 +26,7 @@ class ClassArchive {
     ClassArchive createFor(JarFile source, Map<String, byte[]> instrumentedClasses);
   }
 
-  private static final Logger logger = LoggerFactory.getLogger(ClassArchive.class);
+  private static final SystemLogger logger = SystemLogger.getLogger(ClassArchive.class);
 
   private final JarFile source;
   private final Map<String, byte[]> instrumentedClasses;
@@ -54,7 +55,7 @@ class ClassArchive {
       outJar.closeEntry();
     } catch (ZipException e) {
       if (!isEntryDuplicate(e)) {
-        logger.error("Error while creating entry: {}", outEntry.getName(), e);
+        logger.error("Error while creating entry: ", e, outEntry.getName());
         throw e;
       }
     }
@@ -71,11 +72,18 @@ class ClassArchive {
     ArchiveEntry entry = ArchiveEntry.fromZipEntryName(inEntry.getName());
     if (entry.shouldInstrument()) {
       String className = entry.getName();
-      byte[] modified = instrumentedClasses.get(entry.getPath());
-      if (modified != null) {
-        logger.debug("Found instrumented class: " + className);
-        entryIn = new ByteArrayInputStream(modified);
-        outEntry.setSize(modified.length);
+      try {
+        ClassLoader loader = new URLClassLoader(new URL[0]);
+        loader.loadClass(className);
+
+        byte[] modified = instrumentedClasses.get(entry.getPath());
+        if (modified != null) {
+          logger.debug("Found instrumented class: {}", className);
+          entryIn = new ByteArrayInputStream(modified);
+          outEntry.setSize(modified.length);
+        }
+      } catch (ClassNotFoundException | NoClassDefFoundError e) {
+        logger.error("Problem with class: {}", e, className);
       }
     }
     return entryIn == null ? source.getInputStream(inEntry) : entryIn;

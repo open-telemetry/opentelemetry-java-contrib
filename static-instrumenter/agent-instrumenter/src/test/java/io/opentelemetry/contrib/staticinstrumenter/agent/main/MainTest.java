@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.staticinstrumenter;
+package io.opentelemetry.contrib.staticinstrumenter.agent.main;
 
-import static io.opentelemetry.contrib.staticinstrumenter.JarTestUtil.getResourcePath;
+import static io.opentelemetry.contrib.staticinstrumenter.agent.main.JarTestUtil.getResourcePath;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
@@ -26,8 +26,8 @@ public class MainTest {
     ClassArchive mockArchive = mock(ClassArchive.class);
     given(factory.createFor(any(), anyMap())).willReturn(mockArchive);
     Main underTest = new Main(factory);
-    underTest.getAdditionalClasses().put("additionalOne.class", new byte[0]);
-    underTest.getAdditionalClasses().put("additionalTwo.class", new byte[0]);
+    AdditionalClasses.put("additionalOne.class", new byte[0]);
+    AdditionalClasses.put("additionalTwo.class", new byte[0]);
 
     // when
     underTest.saveTransformedJarsTo(new String[] {getResourcePath("test.jar")}, destination);
