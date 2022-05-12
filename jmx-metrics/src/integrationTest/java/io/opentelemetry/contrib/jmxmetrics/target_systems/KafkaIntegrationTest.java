@@ -132,21 +132,21 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "messaging.kafka.partitions.all",
                 "The number of partitions in the broker",
                 "{partitions}",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "messaging.kafka.partitions.offline",
                 "The number of partitions offline",
                 "{partitions}",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "messaging.kafka.partitions.under-replicated",
                 "The number of under replicated partitions",
                 "{partitions}",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -161,7 +161,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "messaging.kafka.controllers.active",
                 "The number of active controllers in the broker",
                 "{controllers}",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
@@ -174,7 +174,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 "messaging.kafka.max.lag",
                 "max lag in messages between follower and leader replicas",
                 "{messages}",
-                false),
+                /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
