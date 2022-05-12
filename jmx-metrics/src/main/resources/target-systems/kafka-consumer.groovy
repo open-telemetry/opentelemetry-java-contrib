@@ -15,45 +15,45 @@
  */
 
 def consumerFetchManagerMetrics = otel.mbeans("kafka.consumer:client-id=*,type=consumer-fetch-manager-metrics")
-otel.instrument(consumerFetchManagerMetrics, "kafka.consumer.fetch-rate",
+otel.instrument(consumerFetchManagerMetrics, "messaging.kafka.consumer.fetch-rate",
         "The number of fetch requests for all topics per second", "1",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") }],
         "fetch-rate", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetrics, "kafka.consumer.records-lag-max",
+otel.instrument(consumerFetchManagerMetrics, "messaging.kafka.consumer.records-lag-max",
         "Number of messages the consumer lags behind the producer", "1",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") }],
         "records-lag-max", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetrics, "kafka.consumer.total.bytes-consumed-rate",
+otel.instrument(consumerFetchManagerMetrics, "messaging.kafka.consumer.total.bytes-consumed-rate",
         "The average number of bytes consumed for all topics per second", "by",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") }],
         "bytes-consumed-rate", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetrics, "kafka.consumer.total.fetch-size-avg",
+otel.instrument(consumerFetchManagerMetrics, "messaging.kafka.consumer.total.fetch-size-avg",
         "The average number of bytes fetched per request for all topics", "by",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") }],
         "fetch-size-avg", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetrics, "kafka.consumer.total.records-consumed-rate",
+otel.instrument(consumerFetchManagerMetrics, "messaging.kafka.consumer.total.records-consumed-rate",
         "The average number of records consumed for all topics per second", "1",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") }],
         "records-consumed-rate", otel.&doubleValueCallback)
 
 def consumerFetchManagerMetricsByTopic = otel.mbeans("kafka.consumer:client-id=*,topic=*,type=consumer-fetch-manager-metrics")
-otel.instrument(consumerFetchManagerMetricsByTopic, "kafka.consumer.bytes-consumed-rate",
+otel.instrument(consumerFetchManagerMetricsByTopic, "messaging.kafka.consumer.bytes-consumed-rate",
         "The average number of bytes consumed per second", "by",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "bytes-consumed-rate", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetricsByTopic, "kafka.consumer.fetch-size-avg",
+otel.instrument(consumerFetchManagerMetricsByTopic, "messaging.kafka.consumer.fetch-size-avg",
         "The average number of bytes fetched per request", "by",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "fetch-size-avg", otel.&doubleValueCallback)
 
-otel.instrument(consumerFetchManagerMetricsByTopic, "kafka.consumer.records-consumed-rate",
+otel.instrument(consumerFetchManagerMetricsByTopic, "messaging.kafka.consumer.records-consumed-rate",
         "The average number of records consumed per second", "1",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
