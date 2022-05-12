@@ -14,6 +14,9 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
+    maven {
+      url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+    }
     mavenLocal()
   }
 }
@@ -47,4 +50,6 @@ include(":samplers")
 include(":static-instrumenter:agent-instrumenter")
 include(":static-instrumenter:gradle-plugin")
 include(":static-instrumenter:maven-plugin")
+include(":static-instrumenter:agent-extension")
+include(":static-instrumenter:bootstrap")
 include(":static-instrumenter:test-app")

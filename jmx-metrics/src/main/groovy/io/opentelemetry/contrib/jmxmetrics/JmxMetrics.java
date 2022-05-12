@@ -90,7 +90,7 @@ class JmxMetrics {
     }
   }
 
-  private static void loadPropertiesFromPath(Properties props, String path) {
+  public static void loadPropertiesFromPath(Properties props, String path) {
     try (InputStream is = new FileInputStream(path)) {
       props.load(is);
     } catch (IOException e) {
