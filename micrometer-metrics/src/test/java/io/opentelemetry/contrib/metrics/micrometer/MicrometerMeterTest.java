@@ -44,7 +44,7 @@ public class MicrometerMeterTest {
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
     callbacks = new TestCallbackRegistrar();
-    MeterProvider meterProvider = new MicrometerMeterProvider(meterRegistry, callbacks);
+    MeterProvider meterProvider = new MicrometerMeterProvider(() -> meterRegistry, callbacks);
     underTest = meterProvider.get("meter");
   }
 

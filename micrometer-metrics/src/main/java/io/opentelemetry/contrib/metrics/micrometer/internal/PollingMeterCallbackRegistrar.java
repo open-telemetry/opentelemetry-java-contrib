@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 /**
  * Implementation of a {@link CallbackRegistrar} that uses a Micrometer {@link Meter} to invoke the
@@ -24,23 +26,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class PollingMeterCallbackRegistrar implements CallbackRegistrar {
   static final String OTEL_POLLING_METER_NAME = "otel_polling_meter";
 
-  private final MeterRegistry meterRegistry;
+  private final Supplier<MeterRegistry> meterRegistrySupplier;
   private final List<Runnable> callbacks;
-  private final Meter pollingMeter;
+  @Nullable private volatile Meter pollingMeter;
 
-  public PollingMeterCallbackRegistrar(MeterRegistry meterRegistry) {
-    this.meterRegistry = meterRegistry;
+  public PollingMeterCallbackRegistrar(Supplier<MeterRegistry> meterRegistrySupplier) {
+    this.meterRegistrySupplier = meterRegistrySupplier;
     this.callbacks = new CopyOnWriteArrayList<>();
-    this.pollingMeter = createPollingMeter(meterRegistry);
-  }
-
-  /**
-   * Creates a dummy {@link Meter} which will be used to intercept when measurements are being
-   * enumerated so that observable instruments can be polled to record their metrics.
-   */
-  private Meter createPollingMeter(MeterRegistry meterRegistry) {
-    return Meter.builder(OTEL_POLLING_METER_NAME, Meter.Type.OTHER, PollingIterable.of(this::poll))
-        .register(meterRegistry);
   }
 
   private void poll() {
@@ -52,6 +44,7 @@ public final class PollingMeterCallbackRegistrar implements CallbackRegistrar {
   @Override
   public CallbackRegistration registerCallback(Runnable callback) {
     if (callback != null) {
+      ensurePollingMeterCreated();
       callbacks.add(callback);
       return () -> callbacks.remove(callback);
     } else {
@@ -59,9 +52,27 @@ public final class PollingMeterCallbackRegistrar implements CallbackRegistrar {
     }
   }
 
+  private synchronized void ensurePollingMeterCreated() {
+    if (pollingMeter == null) {
+      pollingMeter = createPollingMeter(meterRegistrySupplier.get());
+    }
+  }
+
+  /**
+   * Creates a dummy {@link Meter} which will be used to intercept when measurements are being
+   * enumerated so that observable instruments can be polled to record their metrics.
+   */
+  private Meter createPollingMeter(MeterRegistry meterRegistry) {
+    return Meter.builder(OTEL_POLLING_METER_NAME, Meter.Type.OTHER, PollingIterable.of(this::poll))
+        .register(meterRegistry);
+  }
+
   @Override
-  public void close() {
-    meterRegistry.remove(pollingMeter);
+  public synchronized void close() {
+    if (pollingMeter != null) {
+      meterRegistrySupplier.get().remove(pollingMeter);
+      pollingMeter = null;
+    }
   }
 
   /**

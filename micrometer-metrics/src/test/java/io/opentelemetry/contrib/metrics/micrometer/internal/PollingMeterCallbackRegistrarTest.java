@@ -27,10 +27,16 @@ class PollingMeterCallbackRegistrarTest {
   }
 
   @Test
-  void createsPollingMeter() {
+  void createsPollingMeterOnCallbackRegistration() {
     Meter pollingMeter;
     try (PollingMeterCallbackRegistrar underTest =
-        new PollingMeterCallbackRegistrar(meterRegistry)) {
+        new PollingMeterCallbackRegistrar(() -> meterRegistry)) {
+
+      pollingMeter = meterRegistry.find("otel_polling_meter").meter();
+      assertThat(pollingMeter).isNull();
+
+      underTest.registerCallback(() -> {});
+
       pollingMeter = meterRegistry.get("otel_polling_meter").meter();
       assertThat(pollingMeter).isNotNull();
     }
@@ -42,12 +48,16 @@ class PollingMeterCallbackRegistrarTest {
   void pollingMeterInvokesCallback() {
     Meter pollingMeter;
     try (PollingMeterCallbackRegistrar underTest =
-        new PollingMeterCallbackRegistrar(meterRegistry)) {
-      pollingMeter = meterRegistry.get("otel_polling_meter").meter();
-      assertThat(pollingMeter).isNotNull();
+        new PollingMeterCallbackRegistrar(() -> meterRegistry)) {
+
+      pollingMeter = meterRegistry.find("otel_polling_meter").meter();
+      assertThat(pollingMeter).isNull();
 
       Runnable callback = mock(Runnable.class);
       try (CallbackRegistration registration = underTest.registerCallback(callback)) {
+
+        pollingMeter = meterRegistry.get("otel_polling_meter").meter();
+        assertThat(pollingMeter).isNotNull();
 
         verifyNoInteractions(callback);
 

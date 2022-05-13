@@ -36,7 +36,7 @@ public class MicrometerDoubleUpDownCounterTest {
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
     callbacks = new TestCallbackRegistrar();
-    meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbacks);
+    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbacks);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", null, null);
   }
 

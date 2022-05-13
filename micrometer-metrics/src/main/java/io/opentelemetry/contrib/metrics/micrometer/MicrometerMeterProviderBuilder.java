@@ -7,15 +7,16 @@ package io.opentelemetry.contrib.metrics.micrometer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.contrib.metrics.micrometer.internal.PollingMeterCallbackRegistrar;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /** Builder utility class for creating instances of {@link MicrometerMeterProvider}. */
 public class MicrometerMeterProviderBuilder {
-  private final MeterRegistry meterRegistry;
+  private final Supplier<MeterRegistry> meterRegistrySupplier;
   @Nullable private CallbackRegistrar callbackRegistrar;
 
-  MicrometerMeterProviderBuilder(MeterRegistry meterRegistry) {
-    this.meterRegistry = meterRegistry;
+  MicrometerMeterProviderBuilder(Supplier<MeterRegistry> meterRegistrySupplier) {
+    this.meterRegistrySupplier = meterRegistrySupplier;
   }
 
   public MicrometerMeterProviderBuilder setCallbackRegistrar(CallbackRegistrar callbackRegistrar) {
@@ -31,8 +32,8 @@ public class MicrometerMeterProviderBuilder {
   public MicrometerMeterProvider build() {
     CallbackRegistrar callbackRegistrar = this.callbackRegistrar;
     if (callbackRegistrar == null) {
-      callbackRegistrar = new PollingMeterCallbackRegistrar(meterRegistry);
+      callbackRegistrar = new PollingMeterCallbackRegistrar(meterRegistrySupplier);
     }
-    return new MicrometerMeterProvider(meterRegistry, callbackRegistrar);
+    return new MicrometerMeterProvider(meterRegistrySupplier, callbackRegistrar);
   }
 }

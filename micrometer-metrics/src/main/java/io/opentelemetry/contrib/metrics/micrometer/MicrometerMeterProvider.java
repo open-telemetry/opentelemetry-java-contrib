@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.MeterBuilder;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * An implementation of {@link MeterProvider} that delegates metrics to a Micrometer {@link
@@ -25,11 +26,13 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
    * Creates a new instance of {@link MicrometerMeterProvider} for the provided {@link
    * MeterRegistry}.
    *
-   * @param meterRegistry the {@link MeterRegistry}
+   * @param meterRegistrySupplier supplies the {@link MeterRegistry}
    */
-  MicrometerMeterProvider(MeterRegistry meterRegistry, CallbackRegistrar callbackRegistrar) {
+  MicrometerMeterProvider(
+      Supplier<MeterRegistry> meterRegistrySupplier, CallbackRegistrar callbackRegistrar) {
     this.callbackRegistrar = callbackRegistrar;
-    this.meterProviderSharedState = new MeterProviderSharedState(meterRegistry, callbackRegistrar);
+    this.meterProviderSharedState =
+        new MeterProviderSharedState(meterRegistrySupplier, callbackRegistrar);
   }
 
   @Override
@@ -45,6 +48,11 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
   }
 
   public static MicrometerMeterProviderBuilder builder(MeterRegistry meterRegistry) {
+    Objects.requireNonNull(meterRegistry, "meterRegistry");
+    return new MicrometerMeterProviderBuilder(() -> meterRegistry);
+  }
+
+  public static MicrometerMeterProviderBuilder builder(Supplier<MeterRegistry> meterRegistry) {
     Objects.requireNonNull(meterRegistry, "meterRegistry");
     return new MicrometerMeterProviderBuilder(meterRegistry);
   }

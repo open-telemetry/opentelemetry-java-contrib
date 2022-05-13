@@ -44,12 +44,10 @@ public class PrometheusIntegrationTest {
   }
 
   @Test
-  void pollingMeter() {
+  void noMeters() {
     String output = prometheusMeterRegistry.scrape();
 
-    assertThat(output)
-        .contains("# HELP otel_polling_meter")
-        .contains("# TYPE otel_polling_meter untyped");
+    assertThat(output).isEmpty();
   }
 
   @Test
@@ -89,6 +87,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longCounter");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longCounter_units_total counter")
           .contains("# HELP longCounter_units_total LongCounter test")
           .contains("longCounter_units_total{key1=\"value1\",} 1.0")
@@ -135,6 +135,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleCounter");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleCounter_units_total counter")
           .contains("# HELP doubleCounter_units_total DoubleCounter test")
           .contains("doubleCounter_units_total{key1=\"value1\",} 1.5")
@@ -188,6 +190,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longUpDownCounter_units gauge")
           .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
           .contains("longUpDownCounter_units{key1=\"value1\",} 1.0")
@@ -241,6 +245,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleUpDownCounter");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleUpDownCounter_units gauge")
           .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
           .contains("doubleUpDownCounter_units{key1=\"value1\",} 1.5")
@@ -332,6 +338,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleGauge");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleGauge_units gauge")
           .contains("# HELP doubleGauge_units DoubleGauge test")
           .contains("doubleGauge_units{key1=\"value1\",} 1.5")
@@ -355,6 +363,8 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longGauge");
       assertThat(output)
+          .contains("# HELP otel_polling_meter")
+          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longGauge_units gauge")
           .contains("# HELP longGauge_units LongGauge test")
           .contains("longGauge_units{key1=\"value1\",} 1.0")
