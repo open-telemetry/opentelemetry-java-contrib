@@ -64,26 +64,28 @@ tasks {
     }
   }
 
-  // TODO: the resulting jar contains both inst and unpacked inst,
-  //  but we need only the unpacked inst here
-  val createNoInstAgent by registering(ShadowJar::class) {
-
-    configurations = listOf(javaagent)
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
+  val createNoInstAgent by registering(Jar::class) {
     archiveClassifier.set("no-inst")
+    // source jar has no timestamps don't add any to the destination
+    isPreserveFileTimestamps = false
 
-    inputs.files.forEach {
-      if (it.name.endsWith(".jar")) {
-        from(zipTree(it)) {
-          include("inst/")
-          eachFile {
-            // drop inst/
-            relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
-            rename("(.*)\\.classdata\$", "\$1.class")
+    from(zipTree(shadowJar.get().archiveFile)) {
+      // renaming inst/ leaves behind empty directories
+      includeEmptyDirs = false
+      // skip to avoid duplicate entry error
+      exclude("inst/META-INF/MANIFEST.MF")
+      eachFile {
+        if (path.startsWith("inst/")) {
+          path = path.substring("inst/".length)
+          if (path.endsWith(".classdata")) {
+            path = path.substring(0, path.length - 4)
           }
         }
       }
+    }
+
+    manifest {
+      attributes(shadowJar.get().manifest.attributes)
     }
   }
 
