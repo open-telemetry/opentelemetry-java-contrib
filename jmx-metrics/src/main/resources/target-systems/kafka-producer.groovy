@@ -38,27 +38,27 @@ otel.instrument(producerMetrics, "messaging.kafka.producer.responses.rate",
 
 def producerTopicMetrics = otel.mbeans("kafka.producer:client-id=*,topic=*,type=producer-topic-metrics")
 otel.instrument(producerTopicMetrics, "messaging.kafka.producer.bytes.rate",
-        "The average number of bytes sent per second for a specific topic", "by/s",
+        "The average number of bytes sent per second for a specific topic.", "by/s",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "byte-rate", otel.&doubleValueCallback)
 otel.instrument(producerTopicMetrics, "messaging.kafka.producer.compression-ratio",
-        "The average compression ratio of record batches for a specific topic", "{compression}",
+        "The average compression ratio of record batches for a specific topic.", "{compression}",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "compression-rate", otel.&doubleValueCallback)
 otel.instrument(producerTopicMetrics, "messaging.kafka.producer.record-error.rate",
-        "The average per-second number of record sends that resulted in errors for a specific topic", "{errors}/s",
+        "The average per-second number of record sends that resulted in errors for a specific topic.", "{errors}/s",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "record-error-rate", otel.&doubleValueCallback)
 otel.instrument(producerTopicMetrics, "messaging.kafka.producer.record-retry.rate",
-        "The average per-second number of retried record sends for a specific topic", "{retries}/s",
+        "The average per-second number of retried record sends for a specific topic.", "{retries}/s",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "record-retry-rate", otel.&doubleValueCallback)
 otel.instrument(producerTopicMetrics, "messaging.kafka.producer.record-sent.rate",
-        "The average number of records sent per second for a specific topic", "{records_sent}/s",
+        "The average number of records sent per second for a specific topic.", "{records_sent}/s",
         ["client-id" : { mbean -> mbean.name().getKeyProperty("client-id") },
             "topic" : { mbean -> mbean.name().getKeyProperty("topic") }],
         "record-send-rate", otel.&doubleValueCallback)

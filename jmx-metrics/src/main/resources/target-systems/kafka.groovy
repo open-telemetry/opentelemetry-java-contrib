@@ -17,7 +17,7 @@
 def messagesInPerSec = otel.mbean("kafka.server:type=BrokerTopicMetrics,name=MessagesInPerSec")
 otel.instrument(messagesInPerSec,
   "messaging.kafka.messages",
-  "The number of messages received by the broker",
+  "The number of messages received by the broker.",
   "{messages}",
   "Count", otel.&longCounterCallback)
 
@@ -44,7 +44,7 @@ def failedRequests = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=Fai
                            "kafka.server:type=BrokerTopicMetrics,name=FailedFetchRequestsPerSec"])
 otel.instrument(failedRequests,
   "messaging.kafka.requests.failed",
-  "The number of requests to the broker resulting in a failure",
+  "The number of requests to the broker resulting in a failure.",
   "{requests}",
   [
     "type" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
@@ -93,7 +93,7 @@ def network = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=BytesInPer
                           "kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec"])
 otel.instrument(network,
   "messaging.kafka.network.io",
-  "The bytes received or sent by the broker",
+  "The bytes received or sent by the broker.",
   "by",
   [
     "state" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
@@ -112,7 +112,7 @@ def purgatorySize = otel.mbeans(["kafka.server:type=DelayedOperationPurgatory,na
                                  "kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Fetch"])
 otel.instrument(purgatorySize,
   "messaging.kafka.purgatory.size",
-  "The number of requests waiting in the purgatory",
+  "The number of requests waiting in the purgatory.",
   "{requests}",
   [
     "type" : { mbean -> mbean.name().getKeyProperty("delayedOperation").toLowerCase() },
@@ -122,21 +122,21 @@ otel.instrument(purgatorySize,
 def partitionCount = otel.mbean("kafka.server:type=ReplicaManager,name=PartitionCount")
 otel.instrument(partitionCount,
   "messaging.kafka.partitions.all",
-  "The number of partitions in the broker",
+  "The number of partitions in the broker.",
   "{partitions}",
   "Value", otel.&longUpDownCounterCallback)
 
 def partitionOffline = otel.mbean("kafka.controller:type=KafkaController,name=OfflinePartitionsCount")
 otel.instrument(partitionOffline,
   "messaging.kafka.partitions.offline",
-  "The number of partitions offline",
+  "The number of offline partitions.",
   "{partitions}",
   "Value", otel.&longUpDownCounterCallback)
 
 def partitionUnderReplicated = otel.mbean("kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions")
 otel.instrument(partitionUnderReplicated,
   "messaging.kafka.partitions.under-replicated",
-  "The number of under replicated partitions",
+  "The number of under replicated partitions.",
   "{partitions}",
   "Value", otel.&longUpDownCounterCallback)
 
@@ -144,7 +144,7 @@ def isrOperations = otel.mbeans(["kafka.server:type=ReplicaManager,name=IsrShrin
                                 "kafka.server:type=ReplicaManager,name=IsrExpandsPerSec"])
 otel.instrument(isrOperations,
   "messaging.kafka.isr.operations",
-  "The number of in-sync replica shrink and expand operations",
+  "The number of in-sync replica shrink and expand operations.",
   "{operations}",
   [
     "operation" : { mbean -> switch(mbean.name().getKeyProperty("name")) {
@@ -161,23 +161,23 @@ otel.instrument(isrOperations,
 
 
 def maxLag = otel.mbean("kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica")
-otel.instrument(maxLag, "messaging.kafka.max.lag", "max lag in messages between follower and leader replicas",
+otel.instrument(maxLag, "messaging.kafka.max.lag", "Max lag in messages between follower and leader replicas.",
         "{messages}", "Value", otel.&longUpDownCounterCallback)
 
 def activeControllerCount = otel.mbean("kafka.controller:type=KafkaController,name=ActiveControllerCount")
-otel.instrument(activeControllerCount, "messaging.kafka.controllers.active", "The number of active controllers in the broker",
+otel.instrument(activeControllerCount, "messaging.kafka.controllers.active", "The number of active controllers in the broker.",
         "{controllers}", "Value", otel.&longUpDownCounterCallback)
 
 def leaderElectionRate = otel.mbean("kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs")
-otel.instrument(leaderElectionRate, "messaging.kafka.leader.elections", "Leader election rate (increasing values indicates broker failures)",
+otel.instrument(leaderElectionRate, "messaging.kafka.leader.elections", "Leader election rate (increasing values indicates broker failures).",
         "{elections}", "Count", otel.&longCounterCallback)
 
 def uncleanLeaderElections = otel.mbean("kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec")
-otel.instrument(uncleanLeaderElections, "messaging.kafka.leader.unclean-elections", "Unclean leader election rate (increasing values indicates broker failures)",
+otel.instrument(uncleanLeaderElections, "messaging.kafka.leader.unclean-elections", "Unclean leader election rate (increasing values indicates broker failures).",
         "{elections}", "Count", otel.&longCounterCallback)
 
 def requestQueueSize = otel.mbean("kafka.network:type=RequestChannel,name=RequestQueueSize")
-otel.instrument(requestQueueSize, "messaging.kafka.requests.queue", "The number of requests in the request queue",
+otel.instrument(requestQueueSize, "messaging.kafka.requests.queue", "The number of requests in the request queue.",
         "{requests}", "Value", otel.&longUpDownCounterCallback)
 
 def logFlushRate = otel.mbean("kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs")
