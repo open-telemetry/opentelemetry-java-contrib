@@ -19,6 +19,13 @@ public class MicrometerMeterProviderBuilder {
     this.meterRegistrySupplier = meterRegistrySupplier;
   }
 
+  /**
+   * Sets the {@link CallbackRegistrar} used to poll asynchronous instruments for measurements.
+   *
+   * <p>If this is not set the {@link MicrometerMeterProvider} will create a {@link
+   * io.micrometer.core.instrument.Meter} which will poll asynchronous instruments when that meter
+   * is measured.
+   */
   public MicrometerMeterProviderBuilder setCallbackRegistrar(CallbackRegistrar callbackRegistrar) {
     this.callbackRegistrar = callbackRegistrar;
     return this;

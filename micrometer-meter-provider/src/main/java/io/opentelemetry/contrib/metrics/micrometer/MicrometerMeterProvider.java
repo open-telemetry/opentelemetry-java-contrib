@@ -35,6 +35,7 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
         new MeterProviderSharedState(meterRegistrySupplier, callbackRegistrar);
   }
 
+  /** Closes the current provider. */
   @Override
   public void close() {
     callbackRegistrar.close();
@@ -47,11 +48,16 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
     return new MicrometerMeterBuilder(meterProviderSharedState, instrumentationScopeName);
   }
 
+  /** Returns a new builder instance for this provider with the specified {@link MeterRegistry}. */
   public static MicrometerMeterProviderBuilder builder(MeterRegistry meterRegistry) {
     Objects.requireNonNull(meterRegistry, "meterRegistry");
     return new MicrometerMeterProviderBuilder(() -> meterRegistry);
   }
 
+  /**
+   * Returns a new builder instance for this provider with a {@link Supplier} for a {@link
+   * MeterRegistry}.
+   */
   public static MicrometerMeterProviderBuilder builder(Supplier<MeterRegistry> meterRegistry) {
     Objects.requireNonNull(meterRegistry, "meterRegistry");
     return new MicrometerMeterProviderBuilder(meterRegistry);

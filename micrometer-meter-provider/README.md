@@ -31,6 +31,30 @@ measurement.  But tags are required to create Micrometer metrics.  Because of th
 adapter must listen for when measurements are being read by the `MeterRegistry` in order to call
 callbacks registered for observable metrics in order to create the Micrometer meters on demand.
 
+By default the `MicrometerMeterProvider` will create a dummy `Metric` with the name
+"otel-polling-meter" which will be used to poll the asynchronous OpenTelemetry instruments as it
+is measured.  However, you can also specify an alternative `CallbackRegistrar` strategy.
+
+```java
+MeterRegistry meterRegistry = ...;
+
+// create the meter provider
+MeterProvider meterProvider = MicrometerMeterProvider.builder(meterRegistry)
+    .setCallbackRegistrar(TimerCallbackRegistrar.builder()
+        .setDelay(Duration.ofSeconds(10L))
+        .setPeriod(Duration.ofSeconds(10L))
+        .build())
+    .build();
+Meter meter = meterProvider.get("my-app");
+
+// create an asynchronous instrument
+ObservableDoubleGauge gauge = meter.gaugeBuilder("my.gauge")
+    .buildWithCallback(measurement -> {
+        // record metrics
+        measurement.record(queue.size(), Attributes.of(AttributeKey.stringKey("key"), "value"));
+    });
+```
+
 ## Component owners
 
 - [Justin Spindler](https://github.com/HaloFour), Comcast

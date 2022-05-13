@@ -9,6 +9,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Function;
 
+/**
+ * An implementation of {@link CallbackRegistrar} that uses a {@link Timer} to execute the
+ * registered callbacks on the specified periodicity.
+ */
 public final class TimerCallbackRegistrar implements CallbackRegistrar {
   private final Timer timer;
   private final Function<Runnable, TimerTask> timerTaskFunction;
