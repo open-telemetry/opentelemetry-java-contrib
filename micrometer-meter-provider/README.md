@@ -40,8 +40,7 @@ MeterRegistry meterRegistry = ...;
 
 // create the meter provider
 MeterProvider meterProvider = MicrometerMeterProvider.builder(meterRegistry)
-    .setCallbackRegistrar(TimerCallbackRegistrar.builder()
-        .setDelay(Duration.ofSeconds(10L))
+    .setCallbackRegistrar(ScheduledCallbackRegistrar.builder()
         .setPeriod(Duration.ofSeconds(10L))
         .build())
     .build();
