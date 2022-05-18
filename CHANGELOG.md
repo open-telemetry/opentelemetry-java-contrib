@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.14.0 (Unreleased)
+
+All components updated to target OpenTelemetry SDK 1.14.0.
+
+### JMX metrics
+
+- Support setting more properties in the JMX Metrics properties file
+  ([#323](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/323))
+- Add Jetty Integration
+  ([#320](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/320))
+
+### Static instrumenter
+
+- Static instrumenter logic - a new agent distro
+  ([#319](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/319))
+
 ## Version 1.13.0 (2022-04-20)
 
 All components updated to target OpenTelemetry SDK 1.13.0.
