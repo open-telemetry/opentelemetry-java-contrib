@@ -98,6 +98,10 @@ tasks {
   assemble {
     dependsOn(shadowJar, createNoInstAgent)
   }
+
+  check {
+    dependsOn(testing.suites)
+  }
 }
 
 testing {
