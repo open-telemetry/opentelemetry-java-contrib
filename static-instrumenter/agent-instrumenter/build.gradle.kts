@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id("otel.java-conventions")
   id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("org.unbroken-dome.test-sets") version "4.0.0"
+  id("jvm-test-suite")
 }
 
 description = "OpenTelemetry Java Static Instrumentation Agent"
@@ -31,11 +31,6 @@ dependencies {
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
-}
-
-// TODO: migrate to JVM test suite plugin
-testSets {
-  create("integrationTest")
 }
 
 tasks {
@@ -103,10 +98,22 @@ tasks {
   assemble {
     dependsOn(shadowJar, createNoInstAgent)
   }
+}
 
-  val integrationTest by existing(Test::class) {
-    dependsOn(assemble)
-    jvmArgumentProviders.add(AgentJarsProvider(shadowJar.flatMap { it.archiveFile }, createNoInstAgent.flatMap { it.archiveFile }))
+testing {
+  suites {
+    val integrationTest by registering(JvmTestSuite::class) {
+      targets.all {
+        testTask.configure {
+          jvmArgumentProviders.add(
+            AgentJarsProvider(
+              tasks.shadowJar.flatMap { it.archiveFile },
+              tasks.named<Jar>("createNoInstAgent").flatMap { it.archiveFile }
+            )
+          )
+        }
+      }
+    }
   }
 }
 
