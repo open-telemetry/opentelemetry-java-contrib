@@ -12,24 +12,27 @@ import static org.mockito.Mockito.verify;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MicrometerMeterProviderTest {
   SimpleMeterRegistry meterRegistry;
 
-  CallbackRegistrar callbacks;
+  CallbackRegistrar callbackRegistrar;
 
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new TestCallbackRegistrar();
+    callbackRegistrar = new TestCallbackRegistrar(Collections.emptyList());
   }
 
   @Test
   void createMeter() {
     MeterProvider underTest =
-        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
+        MicrometerMeterProvider.builder(meterRegistry)
+            .setCallbackRegistrar(callbackRegistrar)
+            .build();
     Meter meter = underTest.get("name");
 
     assertThat(meter)
@@ -46,7 +49,9 @@ public class MicrometerMeterProviderTest {
   @Test
   void createMeterWithNameAndVersion() {
     MeterProvider underTest =
-        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
+        MicrometerMeterProvider.builder(meterRegistry)
+            .setCallbackRegistrar(callbackRegistrar)
+            .build();
     Meter meter = underTest.meterBuilder("name").setInstrumentationVersion("version").build();
 
     assertThat(meter)
@@ -64,7 +69,9 @@ public class MicrometerMeterProviderTest {
   @Test
   void createMeterWithNameAndSchemaUrl() {
     MeterProvider underTest =
-        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
+        MicrometerMeterProvider.builder(meterRegistry)
+            .setCallbackRegistrar(callbackRegistrar)
+            .build();
     Meter meter = underTest.meterBuilder("name").setSchemaUrl("schemaUrl").build();
 
     assertThat(meter)
@@ -81,7 +88,9 @@ public class MicrometerMeterProviderTest {
   @Test
   void createMeterWithNameVersionAndSchemaUrl() {
     MeterProvider underTest =
-        MicrometerMeterProvider.builder(meterRegistry).setCallbackRegistrar(callbacks).build();
+        MicrometerMeterProvider.builder(meterRegistry)
+            .setCallbackRegistrar(callbackRegistrar)
+            .build();
     Meter meter =
         underTest
             .meterBuilder("name")

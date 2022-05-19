@@ -16,13 +16,17 @@ import io.opentelemetry.api.metrics.ObservableDoubleGauge;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MicrometerDoubleGaugeTest {
   SimpleMeterRegistry meterRegistry;
 
-  TestCallbackRegistrar callbacks;
+  List<Runnable> callbacks;
+
+  TestCallbackRegistrar callbackRegistrar;
 
   MeterProviderSharedState meterProviderSharedState;
 
@@ -31,8 +35,9 @@ public class MicrometerDoubleGaugeTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new TestCallbackRegistrar();
-    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbacks);
+    callbacks = new ArrayList<>();
+    callbackRegistrar = new TestCallbackRegistrar(callbacks);
+    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbackRegistrar);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", "1.0", null);
   }
 
@@ -46,7 +51,7 @@ public class MicrometerDoubleGaugeTest {
 
     assertThat(callbacks).hasSize(1);
 
-    callbacks.run();
+    callbackRegistrar.run();
     Gauge gauge = meterRegistry.get("gauge").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
@@ -59,7 +64,7 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbacks.run();
+    callbackRegistrar.run();
     assertThat(gauge.value()).isEqualTo(10.0);
 
     underTest.close();
@@ -78,7 +83,7 @@ public class MicrometerDoubleGaugeTest {
 
     assertThat(callbacks).hasSize(1);
 
-    callbacks.run();
+    callbackRegistrar.run();
     Gauge gauge = meterRegistry.get("gauge").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
@@ -92,7 +97,7 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbacks.run();
+    callbackRegistrar.run();
     assertThat(gauge.value()).isEqualTo(10.0);
 
     underTest.close();

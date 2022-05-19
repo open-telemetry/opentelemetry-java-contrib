@@ -5,24 +5,30 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class TestCallbackRegistrar extends ArrayList<Runnable>
-    implements CallbackRegistrar, Runnable {
+public class TestCallbackRegistrar implements CallbackRegistrar, Runnable {
+
+  private final List<Runnable> callbacks;
+
+  public TestCallbackRegistrar(List<Runnable> callbacks) {
+    this.callbacks = callbacks;
+  }
+
   @Override
   public CallbackRegistration registerCallback(Runnable callback) {
-    this.add(callback);
-    return () -> this.remove(callback);
+    callbacks.add(callback);
+    return () -> callbacks.remove(callback);
   }
 
   @Override
   public void close() {
-    this.clear();
+    callbacks.clear();
   }
 
   @Override
   public void run() {
-    for (Runnable callback : this) {
+    for (Runnable callback : callbacks) {
       callback.run();
     }
   }

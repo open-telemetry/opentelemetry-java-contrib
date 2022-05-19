@@ -21,6 +21,8 @@ import io.opentelemetry.api.metrics.ObservableLongCounter;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 import io.opentelemetry.contrib.metrics.micrometer.internal.instruments.MicrometerDoubleHistogram;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class MicrometerMeterTest {
   SimpleMeterRegistry meterRegistry;
 
-  TestCallbackRegistrar callbacks;
+  List<Runnable> callbacks;
+
+  TestCallbackRegistrar callbackRegistrar;
 
   Meter underTest;
 
@@ -43,8 +47,10 @@ public class MicrometerMeterTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new TestCallbackRegistrar();
-    MeterProvider meterProvider = new MicrometerMeterProvider(() -> meterRegistry, callbacks);
+    callbacks = new ArrayList<>();
+    callbackRegistrar = new TestCallbackRegistrar(callbacks);
+    MeterProvider meterProvider =
+        new MicrometerMeterProvider(() -> meterRegistry, callbackRegistrar);
     underTest = meterProvider.get("meter");
   }
 
@@ -56,11 +62,11 @@ public class MicrometerMeterTest {
     assertThat(callbacks).isNotEmpty();
     verifyNoInteractions(longMeasurementConsumer);
 
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer, times(2)).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer, times(3)).accept(any());
 
     counter.close();
@@ -75,11 +81,11 @@ public class MicrometerMeterTest {
     assertThat(callbacks).isNotEmpty();
     verifyNoInteractions(longMeasurementConsumer);
 
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer, times(2)).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(longMeasurementConsumer, times(3)).accept(any());
 
     counter.close();
@@ -94,11 +100,11 @@ public class MicrometerMeterTest {
     assertThat(callbacks).isNotEmpty();
     verifyNoInteractions(doubleMeasurementConsumer);
 
-    callbacks.run();
+    callbackRegistrar.run();
     verify(doubleMeasurementConsumer, times(1)).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(doubleMeasurementConsumer, times(2)).accept(any());
-    callbacks.run();
+    callbackRegistrar.run();
     verify(doubleMeasurementConsumer, times(3)).accept(any());
 
     counter.close();

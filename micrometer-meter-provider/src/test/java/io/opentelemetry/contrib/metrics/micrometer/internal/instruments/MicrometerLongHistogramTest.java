@@ -17,6 +17,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,7 @@ public class MicrometerLongHistogramTest {
 
   SimpleMeterRegistry meterRegistry;
 
-  TestCallbackRegistrar callbacks;
+  TestCallbackRegistrar callbackRegistrar;
 
   MeterProviderSharedState meterProviderSharedState;
 
@@ -33,8 +34,8 @@ public class MicrometerLongHistogramTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new TestCallbackRegistrar();
-    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbacks);
+    callbackRegistrar = new TestCallbackRegistrar(Collections.emptyList());
+    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbackRegistrar);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", "1.0", null);
   }
 

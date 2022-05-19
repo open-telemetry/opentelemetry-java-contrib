@@ -18,6 +18,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +27,9 @@ public class MicrometerDoubleCounterTest {
 
   SimpleMeterRegistry meterRegistry;
 
-  TestCallbackRegistrar callbacks;
+  List<Runnable> callbacks;
+
+  TestCallbackRegistrar callbackRegistrar;
 
   MeterProviderSharedState meterProviderSharedState;
 
@@ -34,8 +38,9 @@ public class MicrometerDoubleCounterTest {
   @BeforeEach
   void setUp() {
     meterRegistry = new SimpleMeterRegistry();
-    callbacks = new TestCallbackRegistrar();
-    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbacks);
+    callbacks = new ArrayList<>();
+    callbackRegistrar = new TestCallbackRegistrar(callbacks);
+    meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbackRegistrar);
     meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", "1.0", null);
   }
 
@@ -132,7 +137,7 @@ public class MicrometerDoubleCounterTest {
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
-    callbacks.run();
+    callbackRegistrar.run();
     Counter counter = meterRegistry.get("counter").counter();
     assertThat(counter).isNotNull();
     Meter.Id id = counter.getId();
@@ -145,7 +150,7 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
 
-    callbacks.run();
+    callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
 
     underTest.close();
@@ -167,7 +172,7 @@ public class MicrometerDoubleCounterTest {
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
-    callbacks.run();
+    callbackRegistrar.run();
     Counter counter = meterRegistry.get("counter").counter();
     assertThat(counter).isNotNull();
     Meter.Id id = counter.getId();
@@ -181,7 +186,7 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
 
-    callbacks.run();
+    callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
 
     underTest.close();
