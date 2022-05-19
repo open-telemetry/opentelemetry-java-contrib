@@ -73,14 +73,18 @@ jobs:
     uses: ./.github/workflows/reusable-misspell-check.yml
 
   publish-snapshots:
+    # the condition is on the steps below instead of here on the job, because skipping the job
+    # causes the job to show up as canceled in the GitHub UI which prevents the build section from
+    # collapsing when everything (else) is green
+    #
+    # and the name is updated when the steps below are skipped which makes what's happening clearer
+    # in the GitHub UI
+    name: publish-snapshots${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' && '' || ' (skipped)' }}
     needs:
       # intentionally not blocking snapshot publishing on markdown-link-check or misspell-check
       - build
       - integration-test
     runs-on: ubuntu-latest
-    # skipping release branches because the versions in those branches are not snapshots
-    # (also this skips pull requests)
-    if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
     steps:
       - uses: actions/checkout@v3
 
@@ -92,6 +96,9 @@ jobs:
 
       - name: Build and publish snapshots
         uses: gradle/gradle-build-action@v2
+        # skipping release branches because the versions in those branches are not snapshots
+        # (also this skips pull requests)
+        if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
         with:
           arguments: assemble publishToSonatype
         env:
