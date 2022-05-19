@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.staticinstrumenter.extension;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.instrumentation.api.config.Config;
-import io.opentelemetry.javaagent.extension.AgentListener;
+import io.opentelemetry.javaagent.tooling.BeforeAgentListener;
 import io.opentelemetry.javaagent.tooling.HelperInjector;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 
@@ -16,8 +16,8 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
  * agents starts. The listener enables passing additional classes created by the agent to the static
  * instrumenter, which in turn saves them into the app jar.
  */
-@AutoService(AgentListener.class)
-public class AdditionalClassesInjectorListenerInstaller implements AgentListener {
+@AutoService(BeforeAgentListener.class)
+public class AdditionalClassesInjectorListenerInstaller implements BeforeAgentListener {
 
   @Override
   public void afterAgent(
