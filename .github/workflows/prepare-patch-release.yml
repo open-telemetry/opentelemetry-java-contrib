@@ -20,6 +20,13 @@ jobs:
           fi
           echo "VERSION=$major_minor.$((patch + 1))" >> $GITHUB_ENV
 
+      - name: Check change log has been updated
+        run: |
+          if ! grep --quiet "^## Version $VERSION" CHANGELOG.md; then
+            echo the change log needs to be updated
+            exit 1
+          fi
+
       - name: Update version
         run: |
           sed -ri "s/[0-9]+\.[0-9]+\.[0-9]+/$VERSION/" version.gradle.kts

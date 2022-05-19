@@ -3,8 +3,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  prereqs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          version=$(.github/scripts/get-version.sh)
+          version=${version//-SNAPSHOT/}
+          if ! grep --quiet "^## Version $version" CHANGELOG.md; then
+            echo the change log needs to be updated
+            exit 1
+          fi
+
   create-pull-request-against-release-branch:
     runs-on: ubuntu-latest
+    needs: prereqs
     steps:
       - uses: actions/checkout@v3
 
@@ -44,6 +56,7 @@ jobs:
 
   create-pull-request-against-main:
     runs-on: ubuntu-latest
+    needs: prereqs
     steps:
       - uses: actions/checkout@v3
 
