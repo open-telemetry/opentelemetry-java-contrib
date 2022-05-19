@@ -6,6 +6,8 @@ jobs:
   prereqs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - run: |
           version=$(.github/scripts/get-version.sh)
           version=${version//-SNAPSHOT/}
