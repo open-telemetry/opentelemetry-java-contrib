@@ -38,7 +38,6 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  implementation("io.opentelemetry:opentelemetry-sdk-metrics-testing")
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")

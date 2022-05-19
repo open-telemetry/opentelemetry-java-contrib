@@ -5,15 +5,14 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.assertj.MetricAssertions;
-import io.opentelemetry.sdk.testing.assertj.MetricDataAssert;
+import io.opentelemetry.sdk.testing.assertj.MetricAssert;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -33,7 +32,7 @@ public class AbstractMetricsTest {
   }
 
   @SafeVarargs
-  protected final void waitAndAssertMetrics(Consumer<MetricDataAssert>... assertions) {
+  protected final void waitAndAssertMetrics(Consumer<MetricAssert>... assertions) {
     await()
         .untilAsserted(
             () -> {
@@ -41,9 +40,8 @@ public class AbstractMetricsTest {
 
               assertThat(metrics).isNotEmpty();
 
-              for (Consumer<MetricDataAssert> assertion : assertions) {
-                assertThat(metrics)
-                    .anySatisfy(metric -> assertion.accept(MetricAssertions.assertThat(metric)));
+              for (Consumer<MetricAssert> assertion : assertions) {
+                assertThat(metrics).anySatisfy(metric -> assertion.accept(assertThat(metric)));
               }
             });
   }

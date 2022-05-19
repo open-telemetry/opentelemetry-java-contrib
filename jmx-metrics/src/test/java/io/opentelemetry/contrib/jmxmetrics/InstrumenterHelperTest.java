@@ -5,16 +5,17 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-import static io.opentelemetry.sdk.testing.assertj.MetricAssertions.assertThat;
-import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.attributeEntry;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import groovy.lang.Closure;
 import groovy.util.Eval;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.data.DoublePointData;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.testing.assertj.DoublePointAssert;
+import io.opentelemetry.sdk.testing.assertj.LongPointAssert;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,9 +130,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleSum()
-                      .points()
-                      .satisfiesExactly(this::assertDoublePoint));
+                      .hasDoubleSumSatisfying(
+                          sum -> sum.hasPointsSatisfying(this::assertDoublePoint)));
     }
 
     @ParameterizedTest
@@ -158,9 +158,7 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasLongSum()
-                      .points()
-                      .satisfiesExactly(this::assertLongPoint));
+                      .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(this::assertLongPoint)));
     }
 
     @ParameterizedTest
@@ -181,17 +179,18 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleHistogram()
-                      .points()
-                      .satisfiesExactly(
-                          point ->
-                              assertThat(point)
-                                  .hasSum(234)
-                                  .hasCount(1)
-                                  .attributes()
-                                  .containsOnly(
-                                      attributeEntry("labelOne", "labelOneValue"),
-                                      attributeEntry("labelTwo", "0"))));
+                      .hasHistogramSatisfying(
+                          histogram ->
+                              histogram.hasPointsSatisfying(
+                                  point ->
+                                      point
+                                          .hasSum(234)
+                                          .hasCount(1)
+                                          .hasAttributesSatisfying(
+                                              equalTo(
+                                                  AttributeKey.stringKey("labelOne"),
+                                                  "labelOneValue"),
+                                              equalTo(AttributeKey.stringKey("labelTwo"), "0")))));
     }
 
     @Test
@@ -212,9 +211,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleGauge()
-                      .points()
-                      .satisfiesExactly(this::assertDoublePoint));
+                      .hasDoubleGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(this::assertDoublePoint)));
     }
 
     @Test
@@ -235,25 +233,24 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasLongGauge()
-                      .points()
-                      .satisfiesExactly(this::assertLongPoint));
+                      .hasLongGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(this::assertLongPoint)));
     }
 
-    private void assertDoublePoint(DoublePointData point) {
-      assertThat(point)
+    private void assertDoublePoint(DoublePointAssert point) {
+      point
           .hasValue(123.456)
-          .attributes()
-          .containsOnly(
-              attributeEntry("labelOne", "labelOneValue"), attributeEntry("labelTwo", "0"));
+          .hasAttributesSatisfying(
+              equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+              equalTo(AttributeKey.stringKey("labelTwo"), "0"));
     }
 
-    private void assertLongPoint(LongPointData point) {
-      assertThat(point)
+    private void assertLongPoint(LongPointAssert point) {
+      point
           .hasValue(234)
-          .attributes()
-          .containsOnly(
-              attributeEntry("labelOne", "labelOneValue"), attributeEntry("labelTwo", "0"));
+          .hasAttributesSatisfying(
+              equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+              equalTo(AttributeKey.stringKey("labelTwo"), "0"));
     }
   }
 
@@ -284,9 +281,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleSum()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+                      .hasDoubleSumSatisfying(
+                          sum -> sum.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @ParameterizedTest
@@ -316,9 +312,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleSum()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+                      .hasDoubleSumSatisfying(
+                          sum -> sum.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @ParameterizedTest
@@ -345,9 +340,7 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasLongSum()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertLongPoints()));
+                      .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(assertLongPoints())));
     }
 
     @ParameterizedTest
@@ -368,41 +361,45 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleHistogram()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(
-                          point ->
-                              assertThat(point)
-                                  .hasSum(234)
-                                  .hasCount(1)
-                                  .attributes()
-                                  .containsOnly(
-                                      attributeEntry("labelOne", "labelOneValue"),
-                                      attributeEntry("labelTwo", "0")),
-                          point ->
-                              assertThat(point)
-                                  .hasSum(234)
-                                  .hasCount(1)
-                                  .attributes()
-                                  .containsOnly(
-                                      attributeEntry("labelOne", "labelOneValue"),
-                                      attributeEntry("labelTwo", "1")),
-                          point ->
-                              assertThat(point)
-                                  .hasSum(234)
-                                  .hasCount(1)
-                                  .attributes()
-                                  .containsOnly(
-                                      attributeEntry("labelOne", "labelOneValue"),
-                                      attributeEntry("labelTwo", "2")),
-                          point ->
-                              assertThat(point)
-                                  .hasSum(234)
-                                  .hasCount(1)
-                                  .attributes()
-                                  .containsOnly(
-                                      attributeEntry("labelOne", "labelOneValue"),
-                                      attributeEntry("labelTwo", "3"))));
+                      .hasHistogramSatisfying(
+                          histogram ->
+                              histogram.hasPointsSatisfying(
+                                  point ->
+                                      point
+                                          .hasSum(234)
+                                          .hasCount(1)
+                                          .hasAttributesSatisfying(
+                                              equalTo(
+                                                  AttributeKey.stringKey("labelOne"),
+                                                  "labelOneValue"),
+                                              equalTo(AttributeKey.stringKey("labelTwo"), "0")),
+                                  point ->
+                                      point
+                                          .hasSum(234)
+                                          .hasCount(1)
+                                          .hasAttributesSatisfying(
+                                              equalTo(
+                                                  AttributeKey.stringKey("labelOne"),
+                                                  "labelOneValue"),
+                                              equalTo(AttributeKey.stringKey("labelTwo"), "1")),
+                                  point ->
+                                      point
+                                          .hasSum(234)
+                                          .hasCount(1)
+                                          .hasAttributesSatisfying(
+                                              equalTo(
+                                                  AttributeKey.stringKey("labelOne"),
+                                                  "labelOneValue"),
+                                              equalTo(AttributeKey.stringKey("labelTwo"), "2")),
+                                  point ->
+                                      point
+                                          .hasSum(234)
+                                          .hasCount(1)
+                                          .hasAttributesSatisfying(
+                                              equalTo(
+                                                  AttributeKey.stringKey("labelOne"),
+                                                  "labelOneValue"),
+                                              equalTo(AttributeKey.stringKey("labelTwo"), "3")))));
     }
 
     @Test
@@ -423,9 +420,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleGauge()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+                      .hasDoubleGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @Test
@@ -449,9 +445,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleGauge()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertDoublePoints()));
+                      .hasDoubleGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @Test
@@ -490,9 +485,8 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasDoubleGauge()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertAttributeDoublePoints()));
+                      .hasDoubleGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(assertAttributeDoublePoints())));
     }
 
     @Test
@@ -513,102 +507,89 @@ class InstrumenterHelperTest {
                       .hasName(instrumentName)
                       .hasDescription(description)
                       .hasUnit("1")
-                      .hasLongGauge()
-                      .points()
-                      .satisfiesExactlyInAnyOrder(assertLongPoints()));
+                      .hasLongGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(assertLongPoints())));
     }
 
     @SuppressWarnings("unchecked")
-    private Consumer<DoublePointData>[] assertDoublePoints() {
-      return Stream.<Consumer<DoublePointData>>of(
+    private Consumer<DoublePointAssert>[] assertDoublePoints() {
+      return Stream.<Consumer<DoublePointAssert>>of(
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(123.456)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "0")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "0")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(123.456)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "1")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "1")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(123.456)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "2")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "2")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(123.456)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "3")))
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "3")))
           .toArray(Consumer[]::new);
     }
 
     @SuppressWarnings("unchecked")
-    private Consumer<DoublePointData>[] assertAttributeDoublePoints() {
-      return Stream.<Consumer<DoublePointData>>of(
+    private Consumer<DoublePointAssert>[] assertAttributeDoublePoints() {
+      return Stream.<Consumer<DoublePointAssert>>of(
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(11.0)
-                      .attributes()
-                      .containsOnly(attributeEntry("Thing", "1")),
+                      .hasAttributesSatisfying(equalTo(AttributeKey.stringKey("Thing"), "1")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(10.0)
-                      .attributes()
-                      .containsOnly(attributeEntry("Thing", "2")),
+                      .hasAttributesSatisfying(equalTo(AttributeKey.stringKey("Thing"), "2")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(9.0)
-                      .attributes()
-                      .containsOnly(attributeEntry("Thing", "3")),
+                      .hasAttributesSatisfying(equalTo(AttributeKey.stringKey("Thing"), "3")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(8.0)
-                      .attributes()
-                      .containsOnly(attributeEntry("Thing", "4")))
+                      .hasAttributesSatisfying(equalTo(AttributeKey.stringKey("Thing"), "4")))
           .toArray(Consumer[]::new);
     }
 
     @SuppressWarnings("unchecked")
-    private Consumer<LongPointData>[] assertLongPoints() {
-      return Stream.<Consumer<LongPointData>>of(
+    private Consumer<LongPointAssert>[] assertLongPoints() {
+      return Stream.<Consumer<LongPointAssert>>of(
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(234)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "0")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "0")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(234)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "1")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "1")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(234)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "2")),
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "2")),
               point ->
-                  assertThat(point)
+                  point
                       .hasValue(234)
-                      .attributes()
-                      .containsOnly(
-                          attributeEntry("labelOne", "labelOneValue"),
-                          attributeEntry("labelTwo", "3")))
+                      .hasAttributesSatisfying(
+                          equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                          equalTo(AttributeKey.stringKey("labelTwo"), "3")))
           .toArray(Consumer[]::new);
     }
   }
