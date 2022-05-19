@@ -15,6 +15,7 @@ public final class ScheduledCallbackRegistrarBuilder {
   private final ScheduledExecutorService scheduledExecutorService;
   private long period;
   private TimeUnit timeUnit;
+  private boolean shutdownExecutorOnClose;
 
   ScheduledCallbackRegistrarBuilder(ScheduledExecutorService scheduledExecutorService) {
     this.scheduledExecutorService = scheduledExecutorService;
@@ -39,11 +40,22 @@ public final class ScheduledCallbackRegistrarBuilder {
   }
 
   /**
+   * Sets that the executor should be {@link ScheduledExecutorService#shutdown() shutdown} when the
+   * {@link CallbackRegistrar} is {@link CallbackRegistrar#close() closed}.
+   */
+  public ScheduledCallbackRegistrarBuilder setShutdownExecutorOnClose(
+      boolean shutdownExecutorOnClose) {
+    this.shutdownExecutorOnClose = shutdownExecutorOnClose;
+    return this;
+  }
+
+  /**
    * Constructs a new instance of the {@link CallbackRegistrar} based on the builder's values.
    *
    * @return a new instance.
    */
   public CallbackRegistrar build() {
-    return new ScheduledCallbackRegistrar(scheduledExecutorService, period, timeUnit);
+    return new ScheduledCallbackRegistrar(
+        scheduledExecutorService, period, timeUnit, shutdownExecutorOnClose);
   }
 }
