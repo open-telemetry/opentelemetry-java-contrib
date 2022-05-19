@@ -18,7 +18,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +36,7 @@ public class MicrometerDoubleUpDownCounterTest {
     meterRegistry = new SimpleMeterRegistry();
     callbacks = new TestCallbackRegistrar();
     meterProviderSharedState = new MeterProviderSharedState(() -> meterRegistry, callbacks);
-    meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", null, null);
+    meterSharedState = new MeterSharedState(meterProviderSharedState, "meter", "1.0", null);
   }
 
   @Test
@@ -55,7 +54,10 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
-    assertThat(id.getTags()).isEmpty();
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
@@ -82,7 +84,11 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
-    assertThat(id.getTags()).isEqualTo(Collections.singletonList(Tag.of("key", "value")));
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of("key", "value"),
+            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
@@ -109,7 +115,11 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
-    assertThat(id.getTags()).isEqualTo(Collections.singletonList(Tag.of("key", "value")));
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of("key", "value"),
+            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
@@ -136,7 +146,10 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
-    assertThat(id.getTags()).isEmpty();
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
@@ -168,7 +181,11 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
-    assertThat(id.getTags()).isEqualTo(Collections.singletonList(Tag.of("key", "value")));
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of("key", "value"),
+            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);

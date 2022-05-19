@@ -40,7 +40,7 @@ public final class MicrometerDoubleGauge extends AbstractInstrument {
         new ObservableLongMeasurement() {
           @Override
           public void record(long value) {
-            rows.add(MultiGauge.Row.of(Tags.empty(), value));
+            record(value, Attributes.empty());
           }
 
           @Override
@@ -58,7 +58,7 @@ public final class MicrometerDoubleGauge extends AbstractInstrument {
         new ObservableDoubleMeasurement() {
           @Override
           public void record(double value) {
-            rows.add(MultiGauge.Row.of(Tags.empty(), value));
+            record(value, Attributes.empty());
           }
 
           @Override

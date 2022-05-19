@@ -36,6 +36,15 @@ public final class InstrumentState {
     return meterSharedState.meterRegistry();
   }
 
+  public String instrumentationScopeName() {
+    return meterSharedState.instrumentationScopeName();
+  }
+
+  @Nullable
+  public String instrumentationScopeVersion() {
+    return meterSharedState.instrumentationScopeVersion();
+  }
+
   public CallbackRegistration registerCallback(Runnable runnable) {
     return meterSharedState.registerCallback(runnable);
   }
