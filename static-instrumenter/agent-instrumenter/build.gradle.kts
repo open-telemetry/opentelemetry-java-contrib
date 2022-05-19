@@ -3,7 +3,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id("otel.java-conventions")
   id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("jvm-test-suite")
 }
 
 description = "OpenTelemetry Java Static Instrumentation Agent"
