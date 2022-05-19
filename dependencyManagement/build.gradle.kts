@@ -20,7 +20,7 @@ val DEPENDENCY_BOMS = listOf(
     "io.grpc:grpc-bom:1.42.1",
     "io.opentelemetry:opentelemetry-bom:1.14.0",
     "io.opentelemetry:opentelemetry-bom-alpha:1.14.0-alpha",
-    "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.14.0-alpha-SNAPSHOT",
+    "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.14.0-alpha",
     "org.testcontainers:testcontainers-bom:1.16.3"
 )
 
