@@ -33,3 +33,8 @@ java -version
 
 See the [Style guide](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/style-guideline.md)
 from the opentelemetry-java-instrumentation repository.
+
+### Gradle conventions
+
+- Use kotlin instead of groovy
+- Plugin versions should be specified in `settings.gradle.kts`, not in individual modules
