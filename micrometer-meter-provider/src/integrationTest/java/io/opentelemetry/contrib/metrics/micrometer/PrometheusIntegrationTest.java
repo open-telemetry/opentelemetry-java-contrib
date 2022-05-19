@@ -25,6 +25,7 @@ import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter;
 import io.opentelemetry.api.metrics.ObservableLongCounter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -383,12 +384,11 @@ public class PrometheusIntegrationTest {
 
   private <T> Consumer<T> onlyOnce(Consumer<T> consumer) {
     return new Consumer<T>() {
-      boolean first = true;
+      final AtomicBoolean first = new AtomicBoolean(true);
 
       @Override
       public void accept(T t) {
-        if (first) {
-          first = false;
+        if (first.compareAndSet(true, false)) {
           consumer.accept(t);
         }
       }
