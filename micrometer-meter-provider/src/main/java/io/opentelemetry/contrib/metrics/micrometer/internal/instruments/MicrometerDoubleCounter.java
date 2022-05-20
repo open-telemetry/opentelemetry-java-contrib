@@ -24,17 +24,23 @@ final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCou
 
   @Override
   public void add(double value) {
-    counter(Attributes.empty()).increment(value);
+    if (value >= 0.0) {
+      counter(Attributes.empty()).increment(value);
+    }
   }
 
   @Override
   public void add(double value, Attributes attributes) {
-    counter(attributes).increment(value);
+    if (value >= 0.0) {
+      counter(attributes).increment(value);
+    }
   }
 
   @Override
   public void add(double value, Attributes attributes, Context context) {
-    counter(attributes).increment(value);
+    if (value >= 0.0) {
+      counter(attributes).increment(value);
+    }
   }
 
   public static DoubleCounterBuilder builder(

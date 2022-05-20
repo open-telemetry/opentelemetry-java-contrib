@@ -64,9 +64,16 @@ public class MicrometerLongHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5);
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (long value : RandomUtils.randomLongs(10, 0L, 10L)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value);
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 
   @Test
@@ -97,9 +104,16 @@ public class MicrometerLongHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5, attributes);
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (long value : RandomUtils.randomLongs(10, 0L, 10L)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value, attributes);
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 
   @Test
@@ -130,8 +144,15 @@ public class MicrometerLongHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5, attributes, Context.root());
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (long value : RandomUtils.randomLongs(10, 0L, 10L)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value, attributes, Context.root());
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 }

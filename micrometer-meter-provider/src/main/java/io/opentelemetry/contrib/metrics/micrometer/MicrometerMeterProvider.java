@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.metrics.micrometer;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.api.metrics.MeterBuilder;
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.contrib.metrics.micrometer.internal.MemoizingSupplier;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -56,9 +57,12 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
   /**
    * Returns a new builder instance for this provider with a {@link Supplier} for a {@link
    * MeterRegistry}.
+   *
+   * <p>This method should be used when the {@link MeterRegistry} must be lazily initialized.
    */
-  public static MicrometerMeterProviderBuilder builder(Supplier<MeterRegistry> meterRegistry) {
-    Objects.requireNonNull(meterRegistry, "meterRegistry");
-    return new MicrometerMeterProviderBuilder(meterRegistry);
+  public static MicrometerMeterProviderBuilder builder(
+      Supplier<MeterRegistry> meterRegistrySupplier) {
+    Objects.requireNonNull(meterRegistrySupplier, "meterRegistrySupplier");
+    return new MicrometerMeterProviderBuilder(new MemoizingSupplier<>(meterRegistrySupplier));
   }
 }

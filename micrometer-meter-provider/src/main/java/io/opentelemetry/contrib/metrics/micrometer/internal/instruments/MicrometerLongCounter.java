@@ -24,17 +24,23 @@ public final class MicrometerLongCounter extends AbstractCounter implements Long
 
   @Override
   public void add(long value) {
-    counter(Attributes.empty()).increment((double) value);
+    if (value > 0L) {
+      counter(Attributes.empty()).increment((double) value);
+    }
   }
 
   @Override
   public void add(long value, Attributes attributes) {
-    counter(attributes).increment((double) value);
+    if (value > 0L) {
+      counter(attributes).increment((double) value);
+    }
   }
 
   @Override
   public void add(long value, Attributes attributes, Context context) {
-    counter(attributes).increment((double) value);
+    if (value > 0L) {
+      counter(attributes).increment((double) value);
+    }
   }
 
   public static LongCounterBuilder builder(MeterSharedState meterSharedState, String name) {

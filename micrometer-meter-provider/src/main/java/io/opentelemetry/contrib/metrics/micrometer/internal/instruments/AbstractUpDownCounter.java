@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
-import io.micrometer.core.instrument.FunctionCounter;
+import io.micrometer.core.instrument.Gauge;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import java.util.Map;
@@ -28,7 +28,7 @@ abstract class AbstractUpDownCounter extends AbstractInstrument {
 
   private AtomicDoubleCounter createCounter(Attributes attributes) {
     AtomicDoubleCounter counter = new AtomicDoubleCounter();
-    FunctionCounter.builder(name(), counter, AtomicDoubleCounter::current)
+    Gauge.builder(name(), counter, AtomicDoubleCounter::current)
         .tags(attributesToTags(attributes))
         .description(description())
         .baseUnit(unit())

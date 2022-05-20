@@ -14,11 +14,11 @@ final class AtomicDoubleCounter {
   @SuppressWarnings("UnusedVariable")
   private volatile long doubleBits;
 
-  public double current() {
+  double current() {
     return Double.longBitsToDouble(doubleBits);
   }
 
-  public boolean increment(double increment) {
+  boolean increment(double increment) {
     while (true) {
       double current = current();
       double update = current + increment;
@@ -28,12 +28,12 @@ final class AtomicDoubleCounter {
     }
   }
 
-  public boolean set(double value) {
+  boolean set(double value) {
     BITS_UPDATER.set(this, Double.doubleToRawLongBits(value));
     return true;
   }
 
-  public boolean setMonotonically(double value) {
+  boolean setMonotonically(double value) {
     while (true) {
       double current = current();
       if (current > value) {
@@ -45,7 +45,7 @@ final class AtomicDoubleCounter {
     }
   }
 
-  public boolean compareAndSet(double expected, double update) {
+  boolean compareAndSet(double expected, double update) {
     long expectedBits = Double.doubleToRawLongBits(expected);
     long updateBits = Double.doubleToRawLongBits(update);
     return BITS_UPDATER.compareAndSet(this, expectedBits, updateBits);

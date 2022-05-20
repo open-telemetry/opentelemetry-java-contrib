@@ -63,9 +63,16 @@ public class MicrometerDoubleHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5.0);
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value);
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 
   @Test
@@ -95,9 +102,16 @@ public class MicrometerDoubleHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5.0, attributes);
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value, attributes);
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 
   @Test
@@ -127,8 +141,15 @@ public class MicrometerDoubleHistogramTest {
     assertThat(summary.count()).isEqualTo(1);
     assertThat(summary.totalAmount()).isEqualTo(10.0);
 
-    underTest.record(5.0, attributes, Context.root());
-    assertThat(summary.count()).isEqualTo(2);
-    assertThat(summary.totalAmount()).isEqualTo(15.0);
+    long expectedCount = 1;
+    double expectedTotal = 10.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += 1;
+      expectedTotal += value;
+
+      underTest.record(value, attributes, Context.root());
+      assertThat(summary.count()).isEqualTo(expectedCount);
+      assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
+    }
   }
 }

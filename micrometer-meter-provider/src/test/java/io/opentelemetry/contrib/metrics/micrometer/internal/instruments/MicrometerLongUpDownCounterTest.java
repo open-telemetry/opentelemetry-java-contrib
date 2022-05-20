@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.micrometer.core.instrument.FunctionCounter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -21,6 +21,7 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderS
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,9 +56,9 @@ public class MicrometerLongUpDownCounterTest {
 
     underTest.add(10);
 
-    FunctionCounter functionCounter = meterRegistry.find("upDownCounter").functionCounter();
-    assertThat(functionCounter).isNotNull();
-    Meter.Id id = functionCounter.getId();
+    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    assertThat(gauge).isNotNull();
+    Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
@@ -65,10 +66,23 @@ public class MicrometerLongUpDownCounterTest {
             Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
-    assertThat(functionCounter.count()).isEqualTo(10.0);
+    assertThat(gauge.value()).isEqualTo(10.0);
 
-    underTest.add(-10);
-    assertThat(functionCounter.count()).isEqualTo(0.0);
+    // test that counter can be increased
+    underTest.add(10);
+    assertThat(gauge.value()).isEqualTo(20.0);
+
+    // test that counter can be decreased
+    underTest.add(-5);
+    assertThat(gauge.value()).isEqualTo(15.0);
+
+    double expectedCount = 15.0;
+    for (long value : RandomUtils.randomLongs(10, -500L, 500L)) {
+      expectedCount += value;
+
+      underTest.add(value);
+      assertThat(gauge.value()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
@@ -84,9 +98,9 @@ public class MicrometerLongUpDownCounterTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.add(10, attributes);
 
-    FunctionCounter functionCounter = meterRegistry.find("upDownCounter").functionCounter();
-    assertThat(functionCounter).isNotNull();
-    Meter.Id id = functionCounter.getId();
+    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    assertThat(gauge).isNotNull();
+    Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
@@ -95,10 +109,23 @@ public class MicrometerLongUpDownCounterTest {
             Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
-    assertThat(functionCounter.count()).isEqualTo(10.0);
+    assertThat(gauge.value()).isEqualTo(10.0);
 
-    underTest.add(-10, attributes);
-    assertThat(functionCounter.count()).isEqualTo(0.0);
+    // test that counter can be increased
+    underTest.add(10, attributes);
+    assertThat(gauge.value()).isEqualTo(20.0);
+
+    // test that counter can be decreased
+    underTest.add(-5, attributes);
+    assertThat(gauge.value()).isEqualTo(15.0);
+
+    double expectedCount = 15.0;
+    for (long value : RandomUtils.randomLongs(10, -500L, 500L)) {
+      expectedCount += value;
+
+      underTest.add(value, attributes);
+      assertThat(gauge.value()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
@@ -114,9 +141,9 @@ public class MicrometerLongUpDownCounterTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.add(10, attributes, Context.root());
 
-    FunctionCounter functionCounter = meterRegistry.find("upDownCounter").functionCounter();
-    assertThat(functionCounter).isNotNull();
-    Meter.Id id = functionCounter.getId();
+    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    assertThat(gauge).isNotNull();
+    Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
@@ -125,30 +152,43 @@ public class MicrometerLongUpDownCounterTest {
             Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
-    assertThat(functionCounter.count()).isEqualTo(10.0);
+    assertThat(gauge.value()).isEqualTo(10.0);
 
-    underTest.add(-10, attributes, Context.root());
-    assertThat(functionCounter.count()).isEqualTo(0.0);
+    // test that counter can be increased
+    underTest.add(10, attributes, Context.root());
+    assertThat(gauge.value()).isEqualTo(20.0);
+
+    // test that counter can be decreased
+    underTest.add(-5, attributes, Context.root());
+    assertThat(gauge.value()).isEqualTo(15.0);
+
+    double expectedCount = 15.0;
+    for (long value : RandomUtils.randomLongs(10, -500L, 500L)) {
+      expectedCount += value;
+
+      underTest.add(value, attributes, Context.root());
+      assertThat(gauge.value()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
   void observable() {
-    Measureable measureable = new Measureable();
-    measureable.value = 10L;
+    AtomicLong atomicLong = new AtomicLong();
     ObservableLongUpDownCounter underTest =
         MicrometerLongUpDownCounter.builder(meterSharedState, "upDownCounter")
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(measureable.value));
+            .buildWithCallback(measurement -> measurement.record(atomicLong.get()));
 
     assertThat(callbacks).hasSize(1);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
+    atomicLong.set(10L);
     callbackRegistrar.run();
-    FunctionCounter functionCounter = meterRegistry.find("upDownCounter").functionCounter();
-    assertThat(functionCounter).isNotNull();
-    Meter.Id id = functionCounter.getId();
+    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    assertThat(gauge).isNotNull();
+    Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
@@ -156,11 +196,23 @@ public class MicrometerLongUpDownCounterTest {
             Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
-    assertThat(functionCounter.count()).isEqualTo(10.0);
+    assertThat(gauge.value()).isEqualTo(10.0);
 
-    measureable.value = 20L;
+    // test that counter can be increased
+    atomicLong.set(20L);
     callbackRegistrar.run();
-    assertThat(functionCounter.count()).isEqualTo(20.0);
+    assertThat(gauge.value()).isEqualTo(20.0);
+
+    // test that counter can be decreased
+    atomicLong.set(15L);
+    callbackRegistrar.run();
+    assertThat(gauge.value()).isEqualTo(15.0);
+
+    for (long value : RandomUtils.randomLongs(10, 0L, 500L)) {
+      atomicLong.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo((double) value);
+    }
 
     underTest.close();
 
@@ -169,23 +221,23 @@ public class MicrometerLongUpDownCounterTest {
 
   @Test
   void observableWithAttributes() {
-    Measureable measureable = new Measureable();
-    measureable.value = 10L;
+    AtomicLong atomicLong = new AtomicLong();
     Attributes attributes = Attributes.builder().put("key", "value").build();
     ObservableLongUpDownCounter underTest =
         MicrometerLongUpDownCounter.builder(meterSharedState, "upDownCounter")
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(measureable.value, attributes));
+            .buildWithCallback(measurement -> measurement.record(atomicLong.get(), attributes));
 
     assertThat(callbacks).hasSize(1);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
+    atomicLong.set(10L);
     callbackRegistrar.run();
-    FunctionCounter functionCounter = meterRegistry.find("upDownCounter").functionCounter();
-    assertThat(functionCounter).isNotNull();
-    Meter.Id id = functionCounter.getId();
+    Gauge gauge = meterRegistry.find("upDownCounter").gauge();
+    assertThat(gauge).isNotNull();
+    Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
@@ -194,18 +246,26 @@ public class MicrometerLongUpDownCounterTest {
             Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
-    assertThat(functionCounter.count()).isEqualTo(10.0);
+    assertThat(gauge.value()).isEqualTo(10.0);
 
-    measureable.value = 20L;
+    // test that counter can be increased
+    atomicLong.set(20L);
     callbackRegistrar.run();
-    assertThat(functionCounter.count()).isEqualTo(20.0);
+    assertThat(gauge.value()).isEqualTo(20.0);
+
+    // test that counter can be decreased
+    atomicLong.set(15L);
+    callbackRegistrar.run();
+    assertThat(gauge.value()).isEqualTo(15.0);
+
+    for (long value : RandomUtils.randomLongs(10, 0L, 500L)) {
+      atomicLong.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo((double) value);
+    }
 
     underTest.close();
 
     assertThat(callbacks).isEmpty();
-  }
-
-  private static class Measureable {
-    public long value;
   }
 }

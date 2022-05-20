@@ -44,14 +44,17 @@ public class MicrometerDoubleGaugeTest {
 
   @Test
   void observable() {
+    AtomicDoubleCounter atomicDoubleCounter = new AtomicDoubleCounter();
+
     ObservableDoubleGauge underTest =
         MicrometerDoubleGauge.builder(meterSharedState, "gauge")
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(10.0));
+            .buildWithCallback(measurement -> measurement.record(atomicDoubleCounter.current()));
 
     assertThat(callbacks).hasSize(1);
 
+    atomicDoubleCounter.set(10.0);
     callbackRegistrar.run();
     Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
@@ -65,8 +68,11 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbackRegistrar.run();
-    assertThat(gauge.value()).isEqualTo(10.0);
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
+      atomicDoubleCounter.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo(value);
+    }
 
     underTest.close();
 
@@ -75,15 +81,18 @@ public class MicrometerDoubleGaugeTest {
 
   @Test
   void observableWithAttributes() {
+    AtomicDoubleCounter atomicDoubleCounter = new AtomicDoubleCounter();
     Attributes attributes = Attributes.builder().put("key", "value").build();
     ObservableDoubleGauge underTest =
         MicrometerDoubleGauge.builder(meterSharedState, "gauge")
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(10.0, attributes));
+            .buildWithCallback(
+                measurement -> measurement.record(atomicDoubleCounter.current(), attributes));
 
     assertThat(callbacks).hasSize(1);
 
+    atomicDoubleCounter.set(10.0);
     callbackRegistrar.run();
     Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
@@ -98,8 +107,11 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbackRegistrar.run();
-    assertThat(gauge.value()).isEqualTo(10.0);
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
+      atomicDoubleCounter.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo(value);
+    }
 
     underTest.close();
 

@@ -19,6 +19,7 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderS
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,15 +45,17 @@ public class MicrometerLongGaugeTest {
 
   @Test
   void observable() {
+    AtomicLong atomicLong = new AtomicLong();
     ObservableLongGauge underTest =
         MicrometerDoubleGauge.builder(meterSharedState, "gauge")
             .ofLongs()
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(10));
+            .buildWithCallback(measurement -> measurement.record(atomicLong.get()));
 
     assertThat(callbacks).hasSize(1);
 
+    atomicLong.set(10L);
     callbackRegistrar.run();
     Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
@@ -66,8 +69,11 @@ public class MicrometerLongGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbackRegistrar.run();
-    assertThat(gauge.value()).isEqualTo(10.0);
+    for (long value : RandomUtils.randomLongs(10, -500L, 500L)) {
+      atomicLong.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo((double) value);
+    }
 
     underTest.close();
 
@@ -76,16 +82,18 @@ public class MicrometerLongGaugeTest {
 
   @Test
   void observableWithAttributes() {
+    AtomicLong atomicLong = new AtomicLong();
     Attributes attributes = Attributes.builder().put("key", "value").build();
     ObservableLongGauge underTest =
         MicrometerDoubleGauge.builder(meterSharedState, "gauge")
             .ofLongs()
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(10, attributes));
+            .buildWithCallback(measurement -> measurement.record(atomicLong.get(), attributes));
 
     assertThat(callbacks).hasSize(1);
 
+    atomicLong.set(10L);
     callbackRegistrar.run();
     Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
@@ -100,8 +108,11 @@ public class MicrometerLongGaugeTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
 
-    callbackRegistrar.run();
-    assertThat(gauge.value()).isEqualTo(10.0);
+    for (long value : RandomUtils.randomLongs(10, -500L, 500L)) {
+      atomicLong.set(value);
+      callbackRegistrar.run();
+      assertThat(gauge.value()).isEqualTo((double) value);
+    }
 
     underTest.close();
 

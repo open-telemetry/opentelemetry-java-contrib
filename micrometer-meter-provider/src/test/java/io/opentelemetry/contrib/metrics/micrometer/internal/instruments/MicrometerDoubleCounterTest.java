@@ -68,6 +68,22 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
+
+    // test that counter can be increased
+    underTest.add(10.0);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    underTest.add(-5.0);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 20.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += value;
+
+      underTest.add(value);
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
@@ -96,6 +112,22 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
+
+    // test that counter can be increased
+    underTest.add(10.0, attributes);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    underTest.add(-5.0, attributes);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 20.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += value;
+
+      underTest.add(value, attributes);
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
@@ -124,22 +156,39 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
+
+    // test that counter can be increased
+    underTest.add(10.0, attributes, Context.root());
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    underTest.add(-5.0, attributes, Context.root());
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 20.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 10.0)) {
+      expectedCount += value;
+
+      underTest.add(value, attributes, Context.root());
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
   }
 
   @Test
   void observable() {
-    DoubleMeasurement measurable = new DoubleMeasurement(10.0);
+    AtomicDoubleCounter atomicDoubleCounter = new AtomicDoubleCounter();
     ObservableDoubleCounter underTest =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .ofDoubles()
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(measurable.value()));
+            .buildWithCallback(measurement -> measurement.record(atomicDoubleCounter.current()));
 
     assertThat(callbacks).hasSize(1);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
+    atomicDoubleCounter.set(10.0);
     callbackRegistrar.run();
     FunctionCounter counter = meterRegistry.find("counter").functionCounter();
     assertThat(counter).isNotNull();
@@ -153,9 +202,24 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
 
-    measurable.setValue(20.0);
+    // test that counter can be increased
+    atomicDoubleCounter.set(20.0);
     callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    atomicDoubleCounter.set(5.0);
+    callbackRegistrar.run();
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 20.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
+      expectedCount += value;
+
+      atomicDoubleCounter.set(expectedCount);
+      callbackRegistrar.run();
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
 
     underTest.close();
 
@@ -164,19 +228,21 @@ public class MicrometerDoubleCounterTest {
 
   @Test
   void observableWithAttributes() {
-    DoubleMeasurement measurable = new DoubleMeasurement(10.0);
+    AtomicDoubleCounter atomicDoubleCounter = new AtomicDoubleCounter();
     Attributes attributes = Attributes.builder().put("key", "value").build();
     ObservableDoubleCounter underTest =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .ofDoubles()
             .setDescription("description")
             .setUnit("unit")
-            .buildWithCallback(measurement -> measurement.record(measurable.value(), attributes));
+            .buildWithCallback(
+                measurement -> measurement.record(atomicDoubleCounter.current(), attributes));
 
     assertThat(callbacks).hasSize(1);
 
     assertThat(meterRegistry.getMeters()).isEmpty();
 
+    atomicDoubleCounter.set(10.0);
     callbackRegistrar.run();
     FunctionCounter counter = meterRegistry.find("counter").functionCounter();
     assertThat(counter).isNotNull();
@@ -191,9 +257,24 @@ public class MicrometerDoubleCounterTest {
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
 
-    measurable.setValue(20.0);
+    // test that counter can be increased
+    atomicDoubleCounter.set(20.0);
     callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    atomicDoubleCounter.set(5.0);
+    callbackRegistrar.run();
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 10.0;
+    for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
+      expectedCount += value;
+
+      atomicDoubleCounter.set(expectedCount);
+      callbackRegistrar.run();
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
 
     underTest.close();
 

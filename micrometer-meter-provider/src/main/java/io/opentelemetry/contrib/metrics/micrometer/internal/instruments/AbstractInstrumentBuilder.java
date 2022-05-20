@@ -9,7 +9,7 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentStat
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import javax.annotation.Nullable;
 
-abstract class AbstractInstrumentBuilder<BuilderT extends AbstractInstrumentBuilder<BuilderT>> {
+abstract class AbstractInstrumentBuilder<BUILDER extends AbstractInstrumentBuilder<BUILDER>> {
   protected final MeterSharedState meterSharedState;
   protected final String name;
   @Nullable protected String description;
@@ -31,14 +31,14 @@ abstract class AbstractInstrumentBuilder<BuilderT extends AbstractInstrumentBuil
     this.unit = unit;
   }
 
-  protected abstract BuilderT self();
+  protected abstract BUILDER self();
 
-  public BuilderT setDescription(String description) {
+  public BUILDER setDescription(String description) {
     this.description = description;
     return self();
   }
 
-  public BuilderT setUnit(String unit) {
+  public BUILDER setUnit(String unit) {
     this.unit = unit;
     return self();
   }

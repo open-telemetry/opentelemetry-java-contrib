@@ -168,12 +168,12 @@ public class PrometheusIntegrationTest {
     String output = prometheusMeterRegistry.scrape();
 
     assertThat(output)
-        .contains("# HELP longUpDownCounter_units_total LongUpDownCounter test")
-        .contains("# TYPE longUpDownCounter_units_total counter")
+        .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
+        .contains("# TYPE longUpDownCounter_units gauge")
         .contains(
-            "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
         .contains(
-            "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
 
     longUpDownCounter.add(1, Attributes.of(KEY1, "value1"));
     longUpDownCounter.add(2, Attributes.of(KEY1, "value2"));
@@ -182,9 +182,9 @@ public class PrometheusIntegrationTest {
 
     assertThat(output)
         .contains(
-            "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
         .contains(
-            "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0");
+            "longUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0");
   }
 
   @Test
@@ -204,12 +204,12 @@ public class PrometheusIntegrationTest {
       assertThat(output)
           .contains("# HELP otel_polling_meter")
           .contains("# TYPE otel_polling_meter untyped")
-          .contains("# TYPE longUpDownCounter_units_total counter")
-          .contains("# HELP longUpDownCounter_units_total LongUpDownCounter test")
+          .contains("# TYPE longUpDownCounter_units gauge")
+          .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
           .contains(
-              "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+              "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
           .contains(
-              "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.0");
+              "longUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.0");
     }
   }
 
@@ -229,12 +229,12 @@ public class PrometheusIntegrationTest {
     String output = prometheusMeterRegistry.scrape();
 
     assertThat(output)
-        .contains("# HELP doubleUpDownCounter_units_total DoubleUpDownCounter test")
-        .contains("# TYPE doubleUpDownCounter_units_total counter")
+        .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
+        .contains("# TYPE doubleUpDownCounter_units gauge")
         .contains(
-            "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
         .contains(
-            "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
 
     doubleUpDownCounter.add(0.5, Attributes.of(KEY1, "value1"));
     doubleUpDownCounter.add(-1.5, Attributes.of(KEY1, "value2"));
@@ -243,9 +243,9 @@ public class PrometheusIntegrationTest {
 
     assertThat(output)
         .contains(
-            "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
         .contains(
-            "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0");
+            "doubleUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0");
   }
 
   @Test
@@ -267,12 +267,12 @@ public class PrometheusIntegrationTest {
       assertThat(output)
           .contains("# HELP otel_polling_meter")
           .contains("# TYPE otel_polling_meter untyped")
-          .contains("# TYPE doubleUpDownCounter_units_total counter")
-          .contains("# HELP doubleUpDownCounter_units_total DoubleUpDownCounter test")
+          .contains("# TYPE doubleUpDownCounter_units gauge")
+          .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
           .contains(
-              "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+              "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
           .contains(
-              "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.5");
+              "doubleUpDownCounter_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.5");
     }
   }
 
