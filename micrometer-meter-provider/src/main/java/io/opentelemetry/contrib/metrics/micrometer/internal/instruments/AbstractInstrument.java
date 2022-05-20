@@ -74,13 +74,13 @@ abstract class AbstractInstrument {
     return instrumentState.unit();
   }
 
+  protected final Attributes attributesOrEmpty(@Nullable Attributes attributes) {
+    return attributes != null ? attributes : Attributes.empty();
+  }
+
   @SuppressWarnings("PreferredInterfaceType")
   protected final Iterable<Tag> attributesToTags(Attributes attributes) {
-    if (attributes == null) {
-      attributes = Attributes.empty();
-    }
-
-    return attributesTagsCache.computeIfAbsent(attributes, this::calculateTags);
+    return attributesTagsCache.computeIfAbsent(attributesOrEmpty(attributes), this::calculateTags);
   }
 
   @SuppressWarnings("PreferredInterfaceType")

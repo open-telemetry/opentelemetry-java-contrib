@@ -24,17 +24,17 @@ final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
 
   @Override
   public void add(double value) {
-    record(Attributes.empty(), value);
+    add(Attributes.empty(), value);
   }
 
   @Override
   public void add(double value, Attributes attributes) {
-    record(attributes, value);
+    add(attributes, value);
   }
 
   @Override
   public void add(double value, Attributes attributes, Context context) {
-    record(attributes, value);
+    add(attributes, value);
   }
 
   static DoubleUpDownCounterBuilder builder(
@@ -74,12 +74,12 @@ final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
           new ObservableDoubleMeasurement() {
             @Override
             public void record(double value) {
-              instrument.record(Attributes.empty(), value);
+              instrument.record(value, Attributes.empty());
             }
 
             @Override
             public void record(double value, Attributes attributes) {
-              instrument.record(attributes, value);
+              instrument.record(value, attributes);
             }
           });
     }

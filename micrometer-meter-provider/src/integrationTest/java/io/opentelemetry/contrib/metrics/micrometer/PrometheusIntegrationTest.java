@@ -41,7 +41,7 @@ public class PrometheusIntegrationTest {
   void setUp() {
     prometheusMeterRegistry = new PrometheusMeterRegistry(DefaultPrometheusConfig.INSTANCE);
     MeterProvider meterProvider = MicrometerMeterProvider.builder(prometheusMeterRegistry).build();
-    meter = meterProvider.get("integrationTest");
+    meter = meterProvider.meterBuilder("integrationTest").setInstrumentationVersion("1.0").build();
   }
 
   @Test
@@ -68,8 +68,10 @@ public class PrometheusIntegrationTest {
     assertThat(output)
         .contains("# HELP longCounter_units_total LongCounter test")
         .contains("# TYPE longCounter_units_total counter")
-        .contains("longCounter_units_total{key1=\"value1\",} 1.0")
-        .contains("longCounter_units_total{key1=\"value2\",} 2.0");
+        .contains(
+            "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
   }
 
   @Test
@@ -92,8 +94,10 @@ public class PrometheusIntegrationTest {
           .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longCounter_units_total counter")
           .contains("# HELP longCounter_units_total LongCounter test")
-          .contains("longCounter_units_total{key1=\"value1\",} 1.0")
-          .contains("longCounter_units_total{key1=\"value2\",} 2.0");
+          .contains(
+              "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+          .contains(
+              "longCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
     }
   }
 
@@ -115,8 +119,10 @@ public class PrometheusIntegrationTest {
     assertThat(output)
         .contains("# HELP doubleCounter_units_total DoubleCounter test")
         .contains("# TYPE doubleCounter_units_total counter")
-        .contains("doubleCounter_units_total{key1=\"value2\",} 2.5")
-        .contains("doubleCounter_units_total{key1=\"value1\",} 1.5");
+        .contains(
+            "doubleCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
+        .contains(
+            "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5");
   }
 
   @Test
@@ -140,8 +146,10 @@ public class PrometheusIntegrationTest {
           .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleCounter_units_total counter")
           .contains("# HELP doubleCounter_units_total DoubleCounter test")
-          .contains("doubleCounter_units_total{key1=\"value1\",} 1.5")
-          .contains("doubleCounter_units_total{key1=\"value2\",} 2.5");
+          .contains(
+              "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+          .contains(
+              "doubleCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
     }
   }
 
@@ -160,10 +168,12 @@ public class PrometheusIntegrationTest {
     String output = prometheusMeterRegistry.scrape();
 
     assertThat(output)
-        .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
-        .contains("# TYPE longUpDownCounter_units gauge")
-        .contains("longUpDownCounter_units{key1=\"value1\",} 1.0")
-        .contains("longUpDownCounter_units{key1=\"value2\",} 2.0");
+        .contains("# HELP longUpDownCounter_units_total LongUpDownCounter test")
+        .contains("# TYPE longUpDownCounter_units_total counter")
+        .contains(
+            "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
 
     longUpDownCounter.add(1, Attributes.of(KEY1, "value1"));
     longUpDownCounter.add(2, Attributes.of(KEY1, "value2"));
@@ -171,8 +181,10 @@ public class PrometheusIntegrationTest {
     output = prometheusMeterRegistry.scrape();
 
     assertThat(output)
-        .contains("longUpDownCounter_units{key1=\"value1\",} 2.0")
-        .contains("longUpDownCounter_units{key1=\"value2\",} 4.0");
+        .contains(
+            "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+        .contains(
+            "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0");
   }
 
   @Test
@@ -183,20 +195,21 @@ public class PrometheusIntegrationTest {
             .setDescription("LongUpDownCounter test")
             .setUnit("units")
             .buildWithCallback(
-                onlyOnce(
-                    measurement -> {
-                      measurement.record(1, Attributes.of(KEY1, "value1"));
-                      measurement.record(-2, Attributes.of(KEY1, "value2"));
-                    }))) {
+                measurement -> {
+                  measurement.record(1, Attributes.of(KEY1, "value1"));
+                  measurement.record(-2, Attributes.of(KEY1, "value2"));
+                })) {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
           .contains("# HELP otel_polling_meter")
           .contains("# TYPE otel_polling_meter untyped")
-          .contains("# TYPE longUpDownCounter_units gauge")
-          .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
-          .contains("longUpDownCounter_units{key1=\"value1\",} 1.0")
-          .contains("longUpDownCounter_units{key1=\"value2\",} -2.0");
+          .contains("# TYPE longUpDownCounter_units_total counter")
+          .contains("# HELP longUpDownCounter_units_total LongUpDownCounter test")
+          .contains(
+              "longUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+          .contains(
+              "longUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.0");
     }
   }
 
@@ -215,18 +228,24 @@ public class PrometheusIntegrationTest {
 
     String output = prometheusMeterRegistry.scrape();
 
-    assertThat(output).contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test");
-    assertThat(output).contains("# TYPE doubleUpDownCounter_units gauge");
-    assertThat(output).contains("doubleUpDownCounter_units{key1=\"value1\",} 1.5");
-    assertThat(output).contains("doubleUpDownCounter_units{key1=\"value2\",} 2.5");
+    assertThat(output)
+        .contains("# HELP doubleUpDownCounter_units_total DoubleUpDownCounter test")
+        .contains("# TYPE doubleUpDownCounter_units_total counter")
+        .contains(
+            "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+        .contains(
+            "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
 
     doubleUpDownCounter.add(0.5, Attributes.of(KEY1, "value1"));
     doubleUpDownCounter.add(-1.5, Attributes.of(KEY1, "value2"));
 
     output = prometheusMeterRegistry.scrape();
 
-    assertThat(output).contains("doubleUpDownCounter_units{key1=\"value1\",} 2.0");
-    assertThat(output).contains("doubleUpDownCounter_units{key1=\"value2\",} 1.0");
+    assertThat(output)
+        .contains(
+            "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+        .contains(
+            "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0");
   }
 
   @Test
@@ -248,10 +267,12 @@ public class PrometheusIntegrationTest {
       assertThat(output)
           .contains("# HELP otel_polling_meter")
           .contains("# TYPE otel_polling_meter untyped")
-          .contains("# TYPE doubleUpDownCounter_units gauge")
-          .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
-          .contains("doubleUpDownCounter_units{key1=\"value1\",} 1.5")
-          .contains("doubleUpDownCounter_units{key1=\"value2\",} -2.5");
+          .contains("# TYPE doubleUpDownCounter_units_total counter")
+          .contains("# HELP doubleUpDownCounter_units_total DoubleUpDownCounter test")
+          .contains(
+              "doubleUpDownCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+          .contains(
+              "doubleUpDownCounter_units_total{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.5");
     }
   }
 
@@ -271,22 +292,31 @@ public class PrometheusIntegrationTest {
     assertThat(output)
         .contains("# HELP doubleHistogram_units DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units summary")
-        .contains("doubleHistogram_units_count{key1=\"value1\",} 1.0")
-        .contains("doubleHistogram_units_sum{key1=\"value1\",} 1.5")
-        .contains("doubleHistogram_units_count{key1=\"value2\",} 1.0")
-        .contains("doubleHistogram_units_sum{key1=\"value2\",} 2.5")
+        .contains(
+            "doubleHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "doubleHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+        .contains(
+            "doubleHistogram_units_count{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "doubleHistogram_units_sum{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
         .contains("# HELP doubleHistogram_units_max DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units_max gauge")
-        .contains("doubleHistogram_units_max{key1=\"value1\",} 1.5")
-        .contains("doubleHistogram_units_max{key1=\"value2\",} 2.5");
+        .contains(
+            "doubleHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+        .contains(
+            "doubleHistogram_units_max{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
 
     doubleHistogram.record(2.5, Attributes.of(KEY1, "value1"));
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
-        .contains("doubleHistogram_units_count{key1=\"value1\",} 2.0")
-        .contains("doubleHistogram_units_sum{key1=\"value1\",} 4.0")
-        .contains("doubleHistogram_units_max{key1=\"value1\",} 2.5");
+        .contains(
+            "doubleHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+        .contains(
+            "doubleHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+        .contains(
+            "doubleHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
   }
 
   @Test
@@ -306,22 +336,31 @@ public class PrometheusIntegrationTest {
     assertThat(output)
         .contains("# HELP longHistogram_units LongHistogram test")
         .contains("# TYPE longHistogram_units summary")
-        .contains("longHistogram_units_count{key1=\"value1\",} 1.0")
-        .contains("longHistogram_units_sum{key1=\"value1\",} 1.0")
-        .contains("longHistogram_units_count{key1=\"value2\",} 1.0")
-        .contains("longHistogram_units_sum{key1=\"value2\",} 2.0")
+        .contains(
+            "longHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longHistogram_units_count{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longHistogram_units_sum{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
         .contains("# HELP longHistogram_units_max LongHistogram test")
         .contains("# TYPE longHistogram_units_max gauge")
-        .contains("longHistogram_units_max{key1=\"value1\",} 1.0")
-        .contains("longHistogram_units_max{key1=\"value2\",} 2.0");
+        .contains(
+            "longHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+        .contains(
+            "longHistogram_units_max{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
 
     longHistogram.record(2, Attributes.of(KEY1, "value1"));
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
-        .contains("longHistogram_units_count{key1=\"value1\",} 2.0")
-        .contains("longHistogram_units_sum{key1=\"value1\",} 3.0")
-        .contains("longHistogram_units_max{key1=\"value1\",} 2.0");
+        .contains(
+            "longHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+        .contains(
+            "longHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+        .contains(
+            "longHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
   }
 
   @Test
@@ -343,8 +382,10 @@ public class PrometheusIntegrationTest {
           .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleGauge_units gauge")
           .contains("# HELP doubleGauge_units DoubleGauge test")
-          .contains("doubleGauge_units{key1=\"value1\",} 1.5")
-          .contains("doubleGauge_units{key1=\"value2\",} 2.5");
+          .contains(
+              "doubleGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+          .contains(
+              "doubleGauge_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
     }
   }
 
@@ -368,8 +409,10 @@ public class PrometheusIntegrationTest {
           .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longGauge_units gauge")
           .contains("# HELP longGauge_units LongGauge test")
-          .contains("longGauge_units{key1=\"value1\",} 1.0")
-          .contains("longGauge_units{key1=\"value2\",} 2.0");
+          .contains(
+              "longGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+          .contains(
+              "longGauge_units{key1=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
     }
   }
 

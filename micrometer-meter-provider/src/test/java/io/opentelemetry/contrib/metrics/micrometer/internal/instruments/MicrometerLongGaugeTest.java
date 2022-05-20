@@ -53,7 +53,7 @@ public class MicrometerLongGaugeTest {
     assertThat(callbacks).hasSize(1);
 
     callbackRegistrar.run();
-    Gauge gauge = meterRegistry.get("gauge").gauge();
+    Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("gauge");
@@ -86,7 +86,7 @@ public class MicrometerLongGaugeTest {
     assertThat(callbacks).hasSize(1);
 
     callbackRegistrar.run();
-    Gauge gauge = meterRegistry.get("gauge").gauge();
+    Gauge gauge = meterRegistry.find("gauge").gauge();
     assertThat(gauge).isNotNull();
     Meter.Id id = gauge.getId();
     assertThat(id.getName()).isEqualTo("gauge");

@@ -70,12 +70,12 @@ public final class MicrometerLongCounter extends AbstractCounter implements Long
           new ObservableLongMeasurement() {
             @Override
             public void record(long value) {
-              instrument.counter(Attributes.empty()).increment((double) value);
+              record(value, Attributes.empty());
             }
 
             @Override
             public void record(long value, Attributes attributes) {
-              instrument.counter(attributes).increment((double) value);
+              instrument.record((double) value, attributes);
             }
           });
     }

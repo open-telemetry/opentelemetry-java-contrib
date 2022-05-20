@@ -49,7 +49,7 @@ public class MicrometerDoubleHistogramTest {
 
     underTest.record(10.0);
 
-    DistributionSummary summary = meterRegistry.get("histogram").summary();
+    DistributionSummary summary = meterRegistry.find("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");
@@ -80,7 +80,7 @@ public class MicrometerDoubleHistogramTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.record(10.0, attributes);
 
-    DistributionSummary summary = meterRegistry.get("histogram").summary();
+    DistributionSummary summary = meterRegistry.find("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");
@@ -112,7 +112,7 @@ public class MicrometerDoubleHistogramTest {
     Attributes attributes = Attributes.builder().put("key", "value").build();
     underTest.record(10.0, attributes, Context.root());
 
-    DistributionSummary summary = meterRegistry.get("histogram").summary();
+    DistributionSummary summary = meterRegistry.find("histogram").summary();
     assertThat(summary).isNotNull();
     Meter.Id id = summary.getId();
     assertThat(id.getName()).isEqualTo("histogram");

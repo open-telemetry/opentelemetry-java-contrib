@@ -24,17 +24,17 @@ public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
 
   @Override
   public void add(long value) {
-    record(Attributes.empty(), (double) value);
+    add(Attributes.empty(), (double) value);
   }
 
   @Override
   public void add(long value, Attributes attributes) {
-    record(attributes, (double) value);
+    add(attributes, (double) value);
   }
 
   @Override
   public void add(long value, Attributes attributes, Context context) {
-    record(attributes, (double) value);
+    add(attributes, (double) value);
   }
 
   public static LongUpDownCounterBuilder builder(MeterSharedState meterSharedState, String name) {
@@ -71,12 +71,12 @@ public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
           new ObservableLongMeasurement() {
             @Override
             public void record(long value) {
-              instrument.record(Attributes.empty(), (double) value);
+              instrument.record((double) value, Attributes.empty());
             }
 
             @Override
             public void record(long value, Attributes attributes) {
-              instrument.record(attributes, (double) value);
+              instrument.record((double) value, attributes);
             }
           });
     }

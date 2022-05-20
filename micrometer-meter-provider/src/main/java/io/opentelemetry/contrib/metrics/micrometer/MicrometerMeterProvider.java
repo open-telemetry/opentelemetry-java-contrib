@@ -17,7 +17,6 @@ import java.util.function.Supplier;
  * MeterRegistry}.
  */
 public final class MicrometerMeterProvider implements MeterProvider, AutoCloseable {
-  static final String OTEL_POLLING_METER_NAME = "otel_polling_meter";
 
   private final MeterProviderSharedState meterProviderSharedState;
   private final CallbackRegistrar callbackRegistrar;
