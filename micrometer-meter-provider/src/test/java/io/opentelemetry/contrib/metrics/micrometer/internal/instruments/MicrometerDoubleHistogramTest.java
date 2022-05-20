@@ -15,6 +15,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.Collections;
@@ -55,8 +56,8 @@ public class MicrometerDoubleHistogramTest {
     assertThat(id.getName()).isEqualTo("histogram");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(summary.count()).isEqualTo(1);
@@ -87,8 +88,8 @@ public class MicrometerDoubleHistogramTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(summary.count()).isEqualTo(1);
@@ -119,8 +120,8 @@ public class MicrometerDoubleHistogramTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(summary.count()).isEqualTo(1);

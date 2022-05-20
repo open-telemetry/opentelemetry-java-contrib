@@ -17,6 +17,7 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.ObservableLongCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.ArrayList;
@@ -63,8 +64,8 @@ public class MicrometerLongCounterTest {
     assertThat(id.getTags())
         .isEqualTo(
             Arrays.asList(
-                Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-                Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0")));
+                Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+                Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0")));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
@@ -91,8 +92,8 @@ public class MicrometerLongCounterTest {
         .isEqualTo(
             Arrays.asList(
                 Tag.of("key", "value"),
-                Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-                Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0")));
+                Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+                Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0")));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
@@ -119,8 +120,8 @@ public class MicrometerLongCounterTest {
         .isEqualTo(
             Arrays.asList(
                 Tag.of("key", "value"),
-                Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-                Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0")));
+                Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+                Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0")));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
@@ -146,8 +147,8 @@ public class MicrometerLongCounterTest {
     assertThat(id.getName()).isEqualTo("counter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);
@@ -183,8 +184,8 @@ public class MicrometerLongCounterTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(counter.count()).isEqualTo(10.0);

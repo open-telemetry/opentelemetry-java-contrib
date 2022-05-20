@@ -5,13 +5,8 @@
 
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
-import static io.opentelemetry.contrib.metrics.micrometer.internal.instruments.Constants.INSTRUMENTATION_NAME;
-import static io.opentelemetry.contrib.metrics.micrometer.internal.instruments.Constants.INSTRUMENTATION_VERSION;
-import static io.opentelemetry.contrib.metrics.micrometer.internal.instruments.Constants.UNKNOWN;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.util.StringUtils;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
@@ -38,22 +33,9 @@ abstract class AbstractInstrument {
   protected AbstractInstrument(InstrumentState instrumentState) {
     this.instrumentState = instrumentState;
     this.logger = Logger.getLogger(getClass().getName());
-    instrumentationNameTag =
-        instrumentationScopeNameTag(instrumentState.instrumentationScopeName());
-    instrumentationVersionTag =
-        instrumentationScopeVersionTag(instrumentState.instrumentationScopeVersion());
+    this.instrumentationNameTag = instrumentState.instrumentationScopeNameTag();
+    this.instrumentationVersionTag = instrumentState.instrumentationScopeVersionTag();
     this.attributesTagsCache = new ConcurrentHashMap<>();
-  }
-
-  private static Tag instrumentationScopeNameTag(String instrumentationScopeName) {
-    return Tag.of(INSTRUMENTATION_NAME, instrumentationScopeName);
-  }
-
-  private static Tag instrumentationScopeVersionTag(@Nullable String instrumentationScopeVersion) {
-    if (StringUtils.isBlank(instrumentationScopeVersion)) {
-      instrumentationScopeVersion = UNKNOWN;
-    }
-    return Tag.of(INSTRUMENTATION_VERSION, instrumentationScopeVersion);
   }
 
   protected final MeterRegistry meterRegistry() {

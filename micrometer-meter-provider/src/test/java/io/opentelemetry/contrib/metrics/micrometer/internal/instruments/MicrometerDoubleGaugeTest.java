@@ -14,6 +14,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.ObservableDoubleGauge;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.ArrayList;
@@ -58,8 +59,8 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getName()).isEqualTo("gauge");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);
@@ -91,8 +92,8 @@ public class MicrometerDoubleGaugeTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(gauge.value()).isEqualTo(10.0);

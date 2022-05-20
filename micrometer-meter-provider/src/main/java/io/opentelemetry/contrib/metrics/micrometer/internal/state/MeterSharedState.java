@@ -6,7 +6,10 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import javax.annotation.Nullable;
 
 /**
@@ -17,8 +20,8 @@ import javax.annotation.Nullable;
  */
 public final class MeterSharedState {
   private final MeterProviderSharedState providerSharedState;
-  private final String instrumentationScopeName;
-  @Nullable private final String instrumentationScopeVersion;
+  private final Tag instrumentationScopeNameTag;
+  private final Tag instrumentationScopeVersionTag;
   @Nullable private final String schemaUrl;
 
   public MeterSharedState(
@@ -26,9 +29,16 @@ public final class MeterSharedState {
       String instrumentationScopeName,
       @Nullable String instrumentationScopeVersion,
       @Nullable String schemaUrl) {
+
     this.providerSharedState = providerSharedState;
-    this.instrumentationScopeName = instrumentationScopeName;
-    this.instrumentationScopeVersion = instrumentationScopeVersion;
+    this.instrumentationScopeNameTag =
+        Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, instrumentationScopeName);
+    if (StringUtils.isNotBlank(instrumentationScopeVersion)) {
+      this.instrumentationScopeVersionTag =
+          Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, instrumentationScopeVersion);
+    } else {
+      this.instrumentationScopeVersionTag = Constants.UNKNOWN_INSTRUMENTATION_VERSION_TAG;
+    }
     this.schemaUrl = schemaUrl;
   }
 
@@ -36,13 +46,12 @@ public final class MeterSharedState {
     return providerSharedState.meterRegistry();
   }
 
-  public String instrumentationScopeName() {
-    return instrumentationScopeName;
+  public Tag instrumentationScopeNameTag() {
+    return instrumentationScopeNameTag;
   }
 
-  @Nullable
-  public String instrumentationScopeVersion() {
-    return instrumentationScopeVersion;
+  public Tag instrumentationScopeVersionTag() {
+    return instrumentationScopeVersionTag;
   }
 
   @Nullable

@@ -16,6 +16,7 @@ import io.opentelemetry.api.metrics.DoubleUpDownCounter;
 import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.ArrayList;
@@ -61,8 +62,8 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(functionCounter.count()).isEqualTo(10.0);
@@ -92,8 +93,8 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(functionCounter.count()).isEqualTo(10.0);
@@ -123,8 +124,8 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(functionCounter.count()).isEqualTo(10.0);
@@ -154,8 +155,8 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(id.getName()).isEqualTo("upDownCounter");
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(functionCounter.count()).isEqualTo(10.0);
@@ -192,8 +193,8 @@ public class MicrometerDoubleUpDownCounterTest {
     assertThat(id.getTags())
         .containsExactlyInAnyOrder(
             Tag.of("key", "value"),
-            Tag.of(Constants.INSTRUMENTATION_NAME, "meter"),
-            Tag.of(Constants.INSTRUMENTATION_VERSION, "1.0"));
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
     assertThat(id.getDescription()).isEqualTo("description");
     assertThat(id.getBaseUnit()).isEqualTo("unit");
     assertThat(functionCounter.count()).isEqualTo(10.0);

@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 import javax.annotation.Nullable;
 
@@ -36,13 +37,12 @@ public final class InstrumentState {
     return meterSharedState.meterRegistry();
   }
 
-  public String instrumentationScopeName() {
-    return meterSharedState.instrumentationScopeName();
+  public Tag instrumentationScopeNameTag() {
+    return meterSharedState.instrumentationScopeNameTag();
   }
 
-  @Nullable
-  public String instrumentationScopeVersion() {
-    return meterSharedState.instrumentationScopeVersion();
+  public Tag instrumentationScopeVersionTag() {
+    return meterSharedState.instrumentationScopeVersionTag();
   }
 
   public CallbackRegistration registerCallback(Runnable runnable) {

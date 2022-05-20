@@ -9,9 +9,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +41,10 @@ public class MicrometerMeterProviderTest {
         .isInstanceOfSatisfying(
             MicrometerMeter.class,
             micrometerMeter -> {
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeName())
-                  .isEqualTo("name");
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersion()).isNull();
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeNameTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "name"));
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersionTag())
+                  .isEqualTo(Constants.UNKNOWN_INSTRUMENTATION_VERSION_TAG);
               assertThat(micrometerMeter.meterSharedState.schemaUrl()).isNull();
             });
   }
@@ -58,10 +61,10 @@ public class MicrometerMeterProviderTest {
         .isInstanceOfSatisfying(
             MicrometerMeter.class,
             micrometerMeter -> {
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeName())
-                  .isEqualTo("name");
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersion())
-                  .isEqualTo("version");
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeNameTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "name"));
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersionTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "version"));
               assertThat(micrometerMeter.meterSharedState.schemaUrl()).isNull();
             });
   }
@@ -78,9 +81,10 @@ public class MicrometerMeterProviderTest {
         .isInstanceOfSatisfying(
             MicrometerMeter.class,
             micrometerMeter -> {
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeName())
-                  .isEqualTo("name");
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersion()).isNull();
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeNameTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "name"));
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersionTag())
+                  .isEqualTo(Constants.UNKNOWN_INSTRUMENTATION_VERSION_TAG);
               assertThat(micrometerMeter.meterSharedState.schemaUrl()).isEqualTo("schemaUrl");
             });
   }
@@ -102,10 +106,10 @@ public class MicrometerMeterProviderTest {
         .isInstanceOfSatisfying(
             MicrometerMeter.class,
             micrometerMeter -> {
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeName())
-                  .isEqualTo("name");
-              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersion())
-                  .isEqualTo("version");
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeNameTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "name"));
+              assertThat(micrometerMeter.meterSharedState.instrumentationScopeVersionTag())
+                  .isEqualTo(Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "version"));
               assertThat(micrometerMeter.meterSharedState.schemaUrl()).isEqualTo("schemaUrl");
             });
   }
