@@ -72,6 +72,9 @@ tasks {
         // We don't get much benefit from it anyways.
         disable("InlineMeSuggester")
 
+        // allow UPPERCASE type parameter names
+        disable("TypeParameterNaming")
+
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names
           disable("MemberName")
