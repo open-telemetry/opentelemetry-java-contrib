@@ -82,7 +82,7 @@ final class RandomGenerator {
     }
   }
 
-  private static final ThreadLocal<ThreadLocalData> THREAD_LOCAL_DATA =
+  private final ThreadLocal<ThreadLocalData> threadLocalData =
       ThreadLocal.withInitial(ThreadLocalData::new);
 
   private static final RandomGenerator INSTANCE =
@@ -120,7 +120,7 @@ final class RandomGenerator {
    * @return a random {@code boolean}
    */
   public boolean nextBoolean(double probability) {
-    return THREAD_LOCAL_DATA.get().generateRandomBoolean(threadSafeRandomLongSupplier, probability);
+    return threadLocalData.get().generateRandomBoolean(threadSafeRandomLongSupplier, probability);
   }
 
   /**
@@ -129,6 +129,6 @@ final class RandomGenerator {
    * @return the number of leading zeros
    */
   public int numberOfLeadingZerosOfRandomLong() {
-    return THREAD_LOCAL_DATA.get().numberOfLeadingZerosOfRandomLong(threadSafeRandomLongSupplier);
+    return threadLocalData.get().numberOfLeadingZerosOfRandomLong(threadSafeRandomLongSupplier);
   }
 }

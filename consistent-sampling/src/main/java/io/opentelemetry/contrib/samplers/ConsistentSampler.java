@@ -231,6 +231,11 @@ public abstract class ConsistentSampler implements Sampler {
     SamplingDecision samplingDecision =
         isSampled ? SamplingDecision.RECORD_AND_SAMPLE : SamplingDecision.DROP;
 
+    // invalidate p-value if not sampled
+    if (!isSampled) {
+      otelTraceState.invalidateP();
+    }
+
     String newOtTraceState = otelTraceState.serialize();
 
     return new SamplingResult() {
