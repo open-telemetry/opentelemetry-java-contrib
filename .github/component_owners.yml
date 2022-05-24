@@ -29,6 +29,8 @@ components:
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
+  micrometer-meter-provider:
+    - HaloFour
   runtime-attach:
     - iNikem
     - trask
