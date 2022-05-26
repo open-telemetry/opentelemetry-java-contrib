@@ -24,7 +24,12 @@ publishing {
         if (mavenGroupId != null) {
           groupId = mavenGroupId
         }
-        artifactId = base.archivesName.get()
+        val mavenArtifactId: String? by project
+        artifactId = if (mavenArtifactId != null) {
+          mavenArtifactId
+        } else {
+          base.archivesName.get()
+        }
 
         if (!groupId.startsWith("io.opentelemetry.contrib")) {
           throw GradleException("groupId is not set for this project or its parent ${project.parent}")
