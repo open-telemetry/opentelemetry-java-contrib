@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.BitSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongSupplier;
 
@@ -130,5 +131,95 @@ final class RandomGenerator {
    */
   public int numberOfLeadingZerosOfRandomLong() {
     return threadLocalData.get().numberOfLeadingZerosOfRandomLong(threadSafeRandomLongSupplier);
+  }
+
+  /**
+   * Returns a pseudorandomly chosen {@code long} value.
+   *
+   * @return a pseudorandomly chosen {@code long} value
+   */
+  public long nextLong() {
+    return threadSafeRandomLongSupplier.getAsLong();
+  }
+
+  /**
+   * Stochastically rounds the given floating-point value.
+   *
+   * <p>see https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding
+   *
+   * @param x the value to be rounded
+   * @return the rounded value
+   */
+  public long roundStochastically(double x) {
+    long i = (long) Math.floor(x);
+    if (nextBoolean(x - i)) {
+      return i + 1;
+    } else {
+      return i;
+    }
+  }
+
+  /**
+   * Returns a pseudorandomly chosen {@code int} value between zero (inclusive) and the specified
+   * bound (exclusive).
+   *
+   * <p>The implementation is based on Daniel Lemire's algorithm as described in "Fast random
+   * integer generation in an interval." ACM Transactions on Modeling and Computer Simulation
+   * (TOMACS) 29.1 (2019): 3.
+   *
+   * @param bound the upper bound (exclusive) for the returned value. Must be positive.
+   * @return a pseudorandomly chosen {@code int} value between zero (inclusive) and the bound
+   *     (exclusive)
+   * @throws IllegalArgumentException if {@code bound} is not positive
+   */
+  private int nextInt(int bound) {
+    if (bound <= 0) {
+      throw new IllegalArgumentException();
+    }
+    long x = nextLong() >>> 33; // use only 31 random bits
+    long m = x * bound;
+    int l = (int) m & 0x7FFFFFFF;
+    if (l < bound) {
+      int t = (-bound & 0x7FFFFFFF) % bound;
+      while (l < t) {
+        x = nextLong() >>> 33; // use only 31 random bits
+        m = x * bound;
+        l = (int) m & 0x7FFFFFFF;
+      }
+    }
+    return (int) (m >>> 31);
+  }
+
+  /**
+   * Generates a random bit set where a given number of 1-bits are randomly set.
+   *
+   * @param numBits the total number of bits
+   * @param numOneBits the number of 1-bits
+   * @return a random bit set
+   * @throws IllegalArgumentException if {@code 0 <= numOneBits <= numBits} is violated
+   */
+  public BitSet generateRandomBitSet(int numBits, int numOneBits) {
+
+    if (numOneBits < 0 || numOneBits > numBits) {
+      throw new IllegalArgumentException();
+    }
+
+    BitSet result = new BitSet(numBits);
+    int numZeroBits = numBits - numOneBits;
+
+    // based on Fisher-Yates shuffling
+    for (int i = Math.max(numZeroBits, numOneBits); i < numBits; ++i) {
+      int j = nextInt(i + 1);
+      if (result.get(j)) {
+        result.set(i);
+      } else {
+        result.set(j);
+      }
+    }
+    if (numZeroBits < numOneBits) {
+      result.flip(0, numBits);
+    }
+
+    return result;
   }
 }
