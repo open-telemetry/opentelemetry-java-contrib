@@ -72,6 +72,6 @@ class PackerTest {
     JarEntry firstEntry = jar.getJarEntry(name);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     jar.getInputStream(firstEntry).transferTo(baos);
-    assertThat(baos.toString(Charset.defaultCharset())).isEqualTo("COPIED\n");
+    assertThat(baos.toString(Charset.defaultCharset())).isEqualTo("not a real jar file\n");
   }
 }
