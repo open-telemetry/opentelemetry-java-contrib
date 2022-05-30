@@ -4,7 +4,7 @@ plugins {
 }
 
 description = "Maven3 plugin for static instrumentation of projects code and dependencies"
-extra["mavenArtifactId"] = "static-instrumentation-maven-plugin"
+base.archivesName.set("static-instrumentation-maven-plugin")
 
 dependencies {
   implementation("org.apache.maven:maven-plugin-api:3.6.3")
