@@ -33,6 +33,10 @@ public final class RuntimeAttach {
       LOGGER.warning("Agent was disabled with " + AGENT_ENABLED_ENV_VAR + " environment variable.");
       return false;
     }
+    if (agentIsAttached()) {
+      LOGGER.warning("Agent is already attached. It is not attached a second time.");
+      return false;
+    }
     return true;
   }
 
@@ -44,6 +48,15 @@ public final class RuntimeAttach {
   private static boolean agentIsDisabledWithEnvVar() {
     String agentEnabledEnvVarValue = System.getenv(AGENT_ENABLED_ENV_VAR);
     return "false".equals(agentEnabledEnvVarValue);
+  }
+
+  private static boolean agentIsAttached() {
+    try {
+      Class.forName("io.opentelemetry.javaagent.OpenTelemetryAgent", false, null);
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   private static String getPid() {
