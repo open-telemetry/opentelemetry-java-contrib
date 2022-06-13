@@ -15,6 +15,7 @@ public final class RuntimeAttach {
   private static final Logger LOGGER = Logger.getLogger(RuntimeAttach.class.getName());
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
+  static final String MAIN_THREAD_CHECK_PROP = "otel.javaagent.runtimeattach.mainthreadcheck";
 
   public static void attachJavaagentToCurrentJVM() {
     if (!shouldAttach()) {
@@ -37,6 +38,11 @@ public final class RuntimeAttach {
       LOGGER.warning("Agent is already attached. It is not attached a second time.");
       return false;
     }
+    if (mainThreadCheckIsEnabled() && !isMainThread()) {
+      LOGGER.warning(
+          "Agent is not attached because runtime attachment was requested from main thread.");
+      return false;
+    }
     return true;
   }
 
@@ -57,6 +63,16 @@ public final class RuntimeAttach {
     } catch (ClassNotFoundException e) {
       return false;
     }
+  }
+
+  private static boolean mainThreadCheckIsEnabled() {
+    String mainThreadCheck = System.getProperty(MAIN_THREAD_CHECK_PROP);
+    return !"false".equals(mainThreadCheck);
+  }
+
+  private static boolean isMainThread() {
+    Thread currentThread = Thread.currentThread();
+    return "main".equals(currentThread.getName());
   }
 
   private static String getPid() {
