@@ -21,8 +21,13 @@ public final class RuntimeAttach {
     if (!shouldAttach()) {
       return;
     }
+
     File javaagentFile = AgentFileLocator.locateAgentFile();
     ByteBuddyAgent.attach(javaagentFile, getPid());
+
+    if (!agentIsAttached()) {
+      LOGGER.warning("Agent was not attached. An unexpected issue has happened.");
+    }
   }
 
   private static boolean shouldAttach() {
