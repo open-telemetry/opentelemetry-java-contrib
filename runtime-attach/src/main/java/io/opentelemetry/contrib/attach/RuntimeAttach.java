@@ -10,9 +10,7 @@ import java.lang.management.ManagementFactory;
 import java.util.logging.Logger;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
-/**
- * This class allows you to attach the OTel agent for Java at runtime.
- */
+/** This class allows you to attach the OTel agent for Java at runtime. */
 public final class RuntimeAttach {
 
   private static final Logger LOGGER = Logger.getLogger(RuntimeAttach.class.getName());
@@ -21,7 +19,8 @@ public final class RuntimeAttach {
   static final String MAIN_THREAD_CHECK_PROP = "otel.javaagent.runtimeattach.mainthreadcheck";
 
   /**
-   * Attach the OTel agent for Java to the current JVM. The attachment must be requested at the beginning of the main method.
+   * Attach the OTel agent for Java to the current JVM. The attachment must be requested at the
+   * beginning of the main method.
    */
   public static void attachJavaagentToCurrentJVM() {
     if (!shouldAttach()) {
