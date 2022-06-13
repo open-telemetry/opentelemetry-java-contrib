@@ -18,7 +18,7 @@ public class SpringBootApp {
 
     public static void main(String[] args) {
         RuntimeAttach.attachJavaagentToCurrentJVM();
-        SpringApplication.run();
+        SpringApplication.run(SpringBootApp.class, args);
     }
 
 }
