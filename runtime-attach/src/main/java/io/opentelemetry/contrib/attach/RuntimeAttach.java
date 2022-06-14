@@ -20,7 +20,7 @@ public final class RuntimeAttach {
       "otel.javaagent.testing.runtime-attach.main-thread-check";
 
   /**
-   * Attach the OTel agent for Java to the current JVM. The attachment must be requested at the
+   * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
    * beginning of the main method.
    */
   public static void attachJavaagentToCurrentJVM() {
