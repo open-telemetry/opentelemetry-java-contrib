@@ -50,7 +50,7 @@ public final class RuntimeAttach {
       return false;
     }
     if (mainThreadCheckIsEnabled() && !isMainThread()) {
-      LOGGER.fine(
+      LOGGER.warning(
           "Agent is not attached because runtime attachment was not requested from main thread.");
       return false;
     }
