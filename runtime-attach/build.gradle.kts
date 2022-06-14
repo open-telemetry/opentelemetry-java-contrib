@@ -12,7 +12,7 @@ dependencies {
   // Used by byte-buddy but not brought in as a transitive dependency.
   compileOnly("com.google.code.findbugs:annotations")
 
-  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent:1.13.1")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent:1.14.0")
   testImplementation("io.opentelemetry:opentelemetry-extension-annotations")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testImplementation("org.junit-pioneer:junit-pioneer")
