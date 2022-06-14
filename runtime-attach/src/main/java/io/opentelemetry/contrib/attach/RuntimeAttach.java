@@ -10,7 +10,7 @@ import java.lang.management.ManagementFactory;
 import java.util.logging.Logger;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
-/** This class allows you to attach the OTel agent for Java at runtime. */
+/** This class allows you to attach the OpenTelemetry Javaagent at runtime. */
 public final class RuntimeAttach {
 
   private static final Logger LOGGER = Logger.getLogger(RuntimeAttach.class.getName());
