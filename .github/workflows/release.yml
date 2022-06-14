@@ -57,7 +57,7 @@ jobs:
     steps:
       - run: |
           if [[ $GITHUB_REF_NAME != release/* ]]; then
-            echo the release workflow should only be run against release branches
+            echo this workflow should only be run against release branches
             exit 1
           fi
 
