@@ -15,6 +15,7 @@ components:
     - willarmiros
   consistent-sampling:
     - oertl
+    - PeterF778
   samplers:
     - anuraaga
     - iNikem
