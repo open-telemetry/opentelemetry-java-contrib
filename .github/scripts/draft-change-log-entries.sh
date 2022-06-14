@@ -23,6 +23,9 @@ else
   range="v$major.$((minor - 1)).0..HEAD"
 fi
 
+echo "## Unreleased"
+echo
+
 declare -A component_names=()
 component_names["aws-xray/"]="AWS X-Ray"
 component_names["consistent-sampling/"]="Consistent sampling"
