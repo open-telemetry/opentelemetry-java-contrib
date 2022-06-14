@@ -16,7 +16,7 @@ public final class RuntimeAttach {
   private static final Logger LOGGER = Logger.getLogger(RuntimeAttach.class.getName());
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
-  static final String MAIN_THREAD_CHECK_PROP = "otel.javaagent.runtimeattach.mainthreadcheck";
+  static final String MAIN_THREAD_CHECK_PROP = "otel.javaagent.testing.runtime-attach.main-thread-check";
 
   /**
    * Attach the OTel agent for Java to the current JVM. The attachment must be requested at the
