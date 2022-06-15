@@ -59,7 +59,7 @@ public final class RuntimeAttach {
 
   private static boolean agentIsDisabledWithProp() {
     String agentEnabledPropValue = System.getProperty(AGENT_ENABLED_PROPERTY);
-    return "false".equals(agentEnabledPropValue);
+    return "false".equalsIgnoreCase(agentEnabledPropValue);
   }
 
   private static boolean agentIsDisabledWithEnvVar() {
