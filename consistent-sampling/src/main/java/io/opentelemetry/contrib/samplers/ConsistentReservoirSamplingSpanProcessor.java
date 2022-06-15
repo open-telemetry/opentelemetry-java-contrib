@@ -45,7 +45,8 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
   private final Worker worker;
   private final AtomicBoolean isShutdown = new AtomicBoolean(false);
 
-  public static final long DEFAULT_EXPORT_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+  // visible for testing
+  static final long DEFAULT_EXPORT_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
 
   private static final class ReadableSpanWithPriority {
 
