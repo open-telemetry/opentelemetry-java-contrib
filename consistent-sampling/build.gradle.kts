@@ -7,6 +7,6 @@ description = "Sampler and exporter implementations for consistent sampling"
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
-  testImplementation("org.hipparchus:hipparchus-core:2.0")
-  testImplementation("org.hipparchus:hipparchus-stat:2.0")
+  testImplementation("org.hipparchus:hipparchus-core:2.1")
+  testImplementation("org.hipparchus:hipparchus-stat:2.1")
 }
