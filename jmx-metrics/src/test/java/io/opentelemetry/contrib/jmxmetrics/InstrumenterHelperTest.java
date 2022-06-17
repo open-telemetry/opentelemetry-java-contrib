@@ -612,22 +612,27 @@ class InstrumenterHelperTest {
 
   @ParameterizedTest
   @CsvSource({
-    "doubleCounter,false,true",
-    "longCounter,false,true",
-    "doubleCounterCallback,true,false",
-    "longCounterCallback,true,false",
-    "doubleUpDownCounter,false,true",
-    "longUpDownCounter,false,true",
-    "doubleUpDownCounterCallback,true,false",
-    "longUpDownCounterCallback,true,false",
-    "doubleValueCallback,true,false",
-    "longValueCallback,true,false",
-    "doubleHistogram,false,false",
-    "longHistogram,false,false",
+    "doubleCounter,false,false,true",
+    "longCounter,false,false,true",
+    "doubleCounterCallback,true,false,false",
+    "longCounterCallback,false,true,false",
+    "doubleUpDownCounter,false,false,true",
+    "longUpDownCounter,false,false,true",
+    "doubleUpDownCounterCallback,true,false,false",
+    "longUpDownCounterCallback,false,true,false",
+    "doubleValueCallback,true,false,false",
+    "longValueCallback,false,true,false",
+    "doubleHistogram,false,false,false",
+    "longHistogram,false,false,false",
   })
-  void correctlyClassified(String instrumentMethod, boolean isObserver, boolean isCounter) {
+  void correctlyClassified(
+      String instrumentMethod,
+      boolean isDoubleObserver,
+      boolean isLongObserver,
+      boolean isCounter) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
-    assertThat(InstrumentHelper.instrumentIsObserver(instrument)).isEqualTo(isObserver);
+    assertThat(InstrumentHelper.instrumentIsDoubleObserver(instrument)).isEqualTo(isDoubleObserver);
+    assertThat(InstrumentHelper.instrumentIsLongObserver(instrument)).isEqualTo(isLongObserver);
     assertThat(InstrumentHelper.instrumentIsCounter(instrument)).isEqualTo(isCounter);
   }
 
