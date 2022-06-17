@@ -99,8 +99,7 @@ public final class RuntimeAttach {
 
   private static StackTraceElement findBottomOfStack(Thread thread) {
     StackTraceElement[] stackTrace = thread.getStackTrace();
-    StackTraceElement bottomOfStackStrace = stackTrace[stackTrace.length - 1];
-    return bottomOfStackStrace;
+    return stackTrace[stackTrace.length - 1];
   }
 
   private static String getPid() {
