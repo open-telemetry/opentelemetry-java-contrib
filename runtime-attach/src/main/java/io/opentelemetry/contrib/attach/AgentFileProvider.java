@@ -30,8 +30,8 @@ final class AgentFileProvider {
   }
 
   private static void deleteTempDirOnJvmExit(Path tempDirPath, Path tempAgentJarPath) {
-      tempAgentJarPath.toFile().deleteOnExit();
-      tempDirPath.toFile().deleteOnExit();
+    tempAgentJarPath.toFile().deleteOnExit();
+    tempDirPath.toFile().deleteOnExit();
   }
 
   private static void verifyExistenceOfAgentJarFile() {
