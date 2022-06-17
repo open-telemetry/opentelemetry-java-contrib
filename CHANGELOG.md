@@ -16,6 +16,11 @@ and delegates the reporting of all metrics through Micrometer.  This enables pro
 rely on Micrometer and cannot currently migrate to OpenTelemetry Metrics to be able to report on
 metrics that are reported through the OpenTelemetry Metrics API.
 
+### Runtime attach
+
+- Runtime attachment additions
+  ([#354](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/354))
+
 ## Version 1.14.0 (2022-05-19)
 
 All components updated to target OpenTelemetry SDK 1.14.0.
