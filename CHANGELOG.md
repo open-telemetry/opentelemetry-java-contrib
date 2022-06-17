@@ -18,8 +18,10 @@ metrics that are reported through the OpenTelemetry Metrics API.
 
 ### Runtime attach
 
-- Runtime attachment additions
+- Do not attach if not requested from the main method on the main thread
   ([#354](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/354))
+- Fix "URI is not hierarchical" during runtime attachment
+  ([#359](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/359))
 
 ## Version 1.14.0 (2022-05-19)
 
