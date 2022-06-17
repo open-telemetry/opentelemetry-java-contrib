@@ -6,12 +6,14 @@
 package io.opentelemetry.contrib.attach;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,8 +21,11 @@ import java.util.logging.Logger;
 final class AgentFileProvider {
 
   private static final Logger logger = Logger.getLogger(RuntimeAttach.class.getName());
+
+  @Nullable
   private Path tempDirPath;
 
+  @Nullable
   private Path agentJarPath;
 
   File getAgentFile() {
