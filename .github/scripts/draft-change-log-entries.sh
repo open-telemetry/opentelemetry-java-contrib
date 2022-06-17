@@ -29,9 +29,13 @@ component_names["consistent-sampling/"]="Consistent sampling"
 component_names["jfr-streaming/"]="JFR streaming"
 component_names["jmx-metrics/"]="JMX metrics"
 component_names["maven-extension/"]="Maven extension"
+component_names["micrometer-meter-provider/"]="Micrometer MeterProvider"
 component_names["runtime-attach/"]="Runtime attach"
 component_names["samplers/"]="Samplers"
 component_names["static-instrumenter/"]="Static instrumenter"
+
+echo "## Unreleased"
+echo
 
 for component in */ ; do
   component_name=${component_names[$component]:=$component}
