@@ -31,12 +31,14 @@ final class AgentFileProvider {
   }
 
   void deleteTempDir() {
-    try {
-      Files.delete(this.agentJarPath);
-      Files.delete(this.tempDirPath);
-    } catch (IOException e) {
-      agentJarPath.toFile().deleteOnExit();
-      tempDirPath.toFile().deleteOnExit();
+    if (this.tempDirPath != null && agentJarPath != null) {
+      try {
+        Files.delete(this.agentJarPath);
+        Files.delete(this.tempDirPath);
+      } catch (IOException e) {
+        agentJarPath.toFile().deleteOnExit();
+        tempDirPath.toFile().deleteOnExit();
+      }
     }
   }
 
