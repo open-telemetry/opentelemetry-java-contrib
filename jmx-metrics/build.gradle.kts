@@ -40,6 +40,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-exporter-prometheus")
   implementation("org.slf4j:slf4j-api")
   implementation("org.slf4j:slf4j-simple")
