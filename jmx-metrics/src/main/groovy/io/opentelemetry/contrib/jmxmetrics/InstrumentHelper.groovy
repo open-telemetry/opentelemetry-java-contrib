@@ -118,7 +118,7 @@ class InstrumentHelper {
             def description = tuple.getAt(2)
             def unit = tuple.getAt(3)
 
-            if (instrumentIsObserver(instrument)) {
+            if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
                 // Though the instrument updater is only set at build time,
                 // our GroovyMetricEnvironment helpers ensure the updater
                 // uses the Closure specified here.
@@ -149,9 +149,13 @@ class InstrumentHelper {
 
     private static Closure prepareUpdateClosure(inst, value, labels) {
         def labelMap = GroovyMetricEnvironment.mapToAttributes(labels)
-        if (instrumentIsObserver(inst)) {
+        if (instrumentIsLongObserver(inst)) {
             return { result ->
-                result.record(value, labelMap)
+                result.record((long) value, labelMap)
+            }
+        } else if (instrumentIsDoubleObserver(inst)) {
+            return { result ->
+                result.record((double) value, labelMap)
             }
         } else if (instrumentIsCounter(inst)) {
             return { i -> i.add(value, labelMap) }
@@ -160,14 +164,19 @@ class InstrumentHelper {
         }
     }
 
-    @PackageScope static boolean instrumentIsObserver(inst) {
+    @PackageScope static boolean instrumentIsDoubleObserver(inst) {
         return [
             "doubleCounterCallback",
             "doubleUpDownCounterCallback",
+            "doubleValueCallback",
+        ].contains(inst.method)
+    }
+
+    @PackageScope static boolean instrumentIsLongObserver(inst) {
+        return [
             "longCounterCallback",
             "longUpDownCounterCallback",
-            "doubleValueCallback" ,
-            "longValueCallback"
+            "longValueCallback",
         ].contains(inst.method)
     }
 
