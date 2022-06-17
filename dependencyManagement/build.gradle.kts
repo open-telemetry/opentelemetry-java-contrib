@@ -18,9 +18,9 @@ val DEPENDENCY_BOMS = listOf(
     "org.junit:junit-bom:5.8.2",
     "com.linecorp.armeria:armeria-bom:1.9.1",
     "io.grpc:grpc-bom:1.42.1",
-    "io.opentelemetry:opentelemetry-bom:1.14.0",
-    "io.opentelemetry:opentelemetry-bom-alpha:1.14.0-alpha",
-    "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.14.0-alpha",
+    "io.opentelemetry:opentelemetry-bom:1.15.0",
+    "io.opentelemetry:opentelemetry-bom-alpha:1.15.0-alpha",
+    "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.15.0-alpha",
     "org.testcontainers:testcontainers-bom:1.16.3"
 )
 
@@ -58,6 +58,7 @@ val DEPENDENCY_SETS = listOf(
 )
 
 val DEPENDENCIES = listOf(
+    "io.opentelemetry.javaagent:opentelemetry-javaagent:1.14.0",
     "com.google.code.findbugs:annotations:3.0.1u2",
     "com.google.code.findbugs:jsr305:3.0.2",
     "com.squareup.okhttp3:okhttp:4.9.3",

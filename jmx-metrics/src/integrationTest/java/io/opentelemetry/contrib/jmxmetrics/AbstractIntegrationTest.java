@@ -36,8 +36,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
@@ -45,6 +48,8 @@ import org.testcontainers.utility.MountableFile;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class AbstractIntegrationTest {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
   private final boolean configFromStdin;
   private final String configName;
@@ -110,6 +115,7 @@ public abstract class AbstractIntegrationTest {
         .withCopyFileToContainer(
             MountableFile.forClasspathResource(configName), "/app/" + configName)
         .withCommand(scraperCommand.toArray(new String[0]))
+        .withLogConsumer(new Slf4jLogConsumer(logger))
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forLogMessage(".*Started GroovyRunner.*", 1));
   }

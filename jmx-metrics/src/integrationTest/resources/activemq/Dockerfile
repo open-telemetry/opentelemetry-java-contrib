@@ -1,4 +1,4 @@
-FROM rmohr/activemq:5.15.9-alpine
+FROM rmohr/activemq:5.15.9
 
 
 COPY --chown=activemq config/env /opt/activemq/bin/env
