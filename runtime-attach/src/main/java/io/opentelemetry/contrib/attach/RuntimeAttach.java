@@ -16,14 +16,10 @@ public final class RuntimeAttach {
       return;
     }
 
-    AgentFileProvider agentFileProvider = new AgentFileProvider();
-    File javaagentFile = agentFileProvider.getAgentFile();
+    File javaagentFile = AgentFileProvider.getAgentFile();
 
-    try {
-      ByteBuddyAgent.attach(javaagentFile, getPid());
-    } finally {
-      agentFileProvider.deleteTempDir();
-    }
+    ByteBuddyAgent.attach(javaagentFile, getPid());
+
   }
 
   private static boolean agentIsDisabled() {
