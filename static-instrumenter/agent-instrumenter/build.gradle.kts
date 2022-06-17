@@ -25,8 +25,7 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 
-  // TODO: remove snapshot once new agent is released
-  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.14.0-SNAPSHOT")
+  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.15.0")
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
