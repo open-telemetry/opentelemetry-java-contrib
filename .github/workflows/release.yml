@@ -129,8 +129,6 @@ jobs:
           cat > /tmp/release-notes.txt << EOF
           This release targets the OpenTelemetry SDK $VERSION.
 
-          Note that all artifacts other than \`io.opentelemetry.javaagent:opentelemetry-javaagent\` have the \`-alpha\` suffix attached to their version number, reflecting that they are still alpha quality and will continue to have breaking changes. Please see the [VERSIONING.md](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/VERSIONING.md#opentelemetry-java-instrumentation-versioning) for more details.
-
           EOF
           else
           cat > /tmp/release-notes.txt << EOF
@@ -165,13 +163,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp javaagent/build/libs/opentelemetry-javaagent-${VERSION}.jar opentelemetry-javaagent.jar
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             --discussion-category announcements \
                             v$VERSION \
-                            opentelemetry-javaagent.jar
+                            opentelemetry-jmx-metrics.jar
 
       - uses: actions/checkout@v3
         with:
