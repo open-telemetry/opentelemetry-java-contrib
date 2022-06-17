@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.15.0 (2022-06-17)
+
 ### Consistent sampling
 
 - ConsistentSampler does not unset p from tracestate when deciding not to sample
