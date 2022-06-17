@@ -16,8 +16,8 @@ public final class RuntimeAttach {
   private static final Logger logger = Logger.getLogger(RuntimeAttach.class.getName());
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
-  static final String MAIN_THREAD_CHECK_PROP =
-      "otel.javaagent.testing.runtime-attach.main-thread-check";
+  static final String MAIN_METHOD_CHECK_PROP =
+      "otel.javaagent.testing.runtime-attach.main-method-check";
 
   /**
    * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
@@ -49,9 +49,14 @@ public final class RuntimeAttach {
       logger.fine("Agent is already attached. It is not attached a second time.");
       return false;
     }
-    if (mainThreadCheckIsEnabled() && !isMainThread()) {
+    if (mainMethodCheckIsEnabled() && !isMainThread()) {
       logger.warning(
           "Agent is not attached because runtime attachment was not requested from main thread.");
+      return false;
+    }
+    if (mainMethodCheckIsEnabled() && !isMainMethod()) {
+      logger.warning(
+          "Agent is not attached because runtime attachment was not requested from main method.");
       return false;
     }
     return true;
@@ -76,14 +81,26 @@ public final class RuntimeAttach {
     }
   }
 
-  private static boolean mainThreadCheckIsEnabled() {
-    String mainThreadCheck = System.getProperty(MAIN_THREAD_CHECK_PROP);
+  private static boolean mainMethodCheckIsEnabled() {
+    String mainThreadCheck = System.getProperty(MAIN_METHOD_CHECK_PROP);
     return !"false".equals(mainThreadCheck);
   }
 
   private static boolean isMainThread() {
     Thread currentThread = Thread.currentThread();
     return "main".equals(currentThread.getName());
+  }
+
+  static boolean isMainMethod() {
+    StackTraceElement bottomOfStack = findBottomOfStack(Thread.currentThread());
+    String methodName = bottomOfStack.getMethodName();
+    return "main".equals(methodName);
+  }
+
+  private static StackTraceElement findBottomOfStack(Thread thread) {
+    StackTraceElement[] stackTrace = thread.getStackTrace();
+    StackTraceElement bottomOfStackStrace = stackTrace[stackTrace.length - 1];
+    return bottomOfStackStrace;
   }
 
   private static String getPid() {

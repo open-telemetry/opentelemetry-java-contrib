@@ -8,9 +8,10 @@ The attachment will not be initiated in the following cases:
 * The `otel.javaagent.enabled` property is set to `false`
 * The `OTEL_JAVAAGENT_ENABLED` environment variable is set to `false`
 * The attachment is not requested from the _main_ thread
+* The attachment is not requested from the `public static void main(String[] args)` method
 * The agent is already attached
 
-_The attachment must be requested at the beginning of the `main` method._ We give below an example for Spring Boot applications:
+_The attachment must be requested at the beginning of the `public static void main(String[] args)` method._ We give below an example for Spring Boot applications:
 
 ```java
 @SpringBootApplication
