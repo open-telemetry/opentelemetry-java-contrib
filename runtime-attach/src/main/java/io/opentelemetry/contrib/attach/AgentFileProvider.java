@@ -6,27 +6,20 @@
 package io.opentelemetry.contrib.attach;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.CodeSource;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 final class AgentFileProvider {
 
-  private static final Logger logger = Logger.getLogger(RuntimeAttach.class.getName());
+  @Nullable private Path tempDirPath;
 
-  @Nullable
-  private Path tempDirPath;
-
-  @Nullable
-  private Path agentJarPath;
+  @Nullable private Path agentJarPath;
 
   File getAgentFile() {
 
@@ -39,13 +32,11 @@ final class AgentFileProvider {
 
   void deleteTempDir() {
     try {
-      Files.delete(this.tempDirPath);
       Files.delete(this.agentJarPath);
+      Files.delete(this.tempDirPath);
     } catch (IOException e) {
-      logger.log(
-          Level.WARNING,
-          "Error during deletion of the temp dir used by the runtime attachement",
-          e);
+      agentJarPath.toFile().deleteOnExit();
+      tempDirPath.toFile().deleteOnExit();
     }
   }
 
@@ -78,7 +69,7 @@ final class AgentFileProvider {
   }
 
   private static Path copyTo(URL url, Path tempDir, String fileName) throws IOException {
-    Path tempFile = tempDir.resolveSibling(fileName);
+    Path tempFile = tempDir.resolve(fileName);
     try (InputStream in = url.openStream()) {
       Files.copy(in, tempFile);
     }
