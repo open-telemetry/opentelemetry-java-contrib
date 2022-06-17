@@ -28,7 +28,7 @@ public final class RuntimeAttach {
       return;
     }
 
-    File javaagentFile = AgentFileLocator.locateAgentFile();
+    File javaagentFile = AgentFileProvider.getAgentFile();
     ByteBuddyAgent.attach(javaagentFile, getPid());
 
     if (!agentIsAttached()) {
