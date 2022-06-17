@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### Consistent sampling
+
+- ConsistentSampler does not unset p from tracestate when deciding not to sample
+  ([#350](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/350))
+- Add consistent reservoir sampling span processor
+  ([#352](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/352))
+
+### Micrometer MeterProvider - New 🌟
+
+This utility provides an implementation of `MeterProvider` which wraps a Micrometer `MeterRegistry`
+and delegates the reporting of all metrics through Micrometer.  This enables projects which already
+rely on Micrometer and cannot currently migrate to OpenTelemetry Metrics to be able to report on
+metrics that are reported through the OpenTelemetry Metrics API.
+
+### Runtime attach
+
+- Do not attach if not requested from the main method on the main thread
+  ([#354](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/354))
+- Fix "URI is not hierarchical" during runtime attachment
+  ([#359](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/359))
+
 ## Version 1.14.0 (2022-05-19)
 
 All components updated to target OpenTelemetry SDK 1.14.0.
