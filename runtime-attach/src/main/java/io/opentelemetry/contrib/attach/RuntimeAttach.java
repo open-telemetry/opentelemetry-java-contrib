@@ -15,8 +15,15 @@ public final class RuntimeAttach {
     if (agentIsDisabled()) {
       return;
     }
-    File javaagentFile = AgentFileLocator.locateAgentFile();
-    ByteBuddyAgent.attach(javaagentFile, getPid());
+
+    AgentFileProvider agentFileProvider = new AgentFileProvider();
+    File javaagentFile = agentFileProvider.getAgentFile();
+
+    try {
+      ByteBuddyAgent.attach(javaagentFile, getPid());
+    } finally {
+      agentFileProvider.deleteTempDir();
+    }
   }
 
   private static boolean agentIsDisabled() {
