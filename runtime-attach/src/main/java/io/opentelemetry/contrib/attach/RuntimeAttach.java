@@ -7,13 +7,11 @@ package io.opentelemetry.contrib.attach;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.util.logging.Logger;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 /** This class allows you to attach the OpenTelemetry Java agent at runtime. */
 public final class RuntimeAttach {
 
-  private static final Logger logger = Logger.getLogger(RuntimeAttach.class.getName());
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
   static final String MAIN_METHOD_CHECK_PROP =
@@ -32,30 +30,32 @@ public final class RuntimeAttach {
     ByteBuddyAgent.attach(javaagentFile, getPid());
 
     if (!agentIsAttached()) {
-      logger.warning("Agent was not attached. An unexpected issue has happened.");
+      printError("Agent was not attached. An unexpected issue has happened.");
     }
+  }
+
+  @SuppressWarnings("SystemOut")
+  private static void printError(String message) {
+    System.err.println(message);
   }
 
   private static boolean shouldAttach() {
     if (agentIsDisabledWithProp()) {
-      logger.fine("Agent was disabled with " + AGENT_ENABLED_PROPERTY + " property.");
       return false;
     }
     if (agentIsDisabledWithEnvVar()) {
-      logger.fine("Agent was disabled with " + AGENT_ENABLED_ENV_VAR + " environment variable.");
       return false;
     }
     if (agentIsAttached()) {
-      logger.fine("Agent is already attached. It is not attached a second time.");
       return false;
     }
     if (mainMethodCheckIsEnabled() && !isMainThread()) {
-      logger.warning(
+      printError(
           "Agent is not attached because runtime attachment was not requested from main thread.");
       return false;
     }
     if (mainMethodCheckIsEnabled() && !isMainMethod()) {
-      logger.warning(
+      printError(
           "Agent is not attached because runtime attachment was not requested from main method.");
       return false;
     }
