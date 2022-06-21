@@ -36,6 +36,9 @@ public final class RuntimeAttach {
 
   @SuppressWarnings("SystemOut")
   private static void printError(String message) {
+    // not using java.util.logging in order to avoid initializing the global LogManager
+    // too early (and incompatibly with the user's app),
+    // and because this is too early to use the Javaagent's PatchLogger
     System.err.println(message);
   }
 
