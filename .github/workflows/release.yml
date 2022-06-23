@@ -54,6 +54,9 @@ jobs:
     needs:
       - build
       - integration-test
+    outputs:
+      jmx-metrics-version: ${{ steps.create-github-release.outputs.jmx-metrics-version }}
+      jmx-metrics-sha256: ${{ steps.create-github-release.outputs.jmx-metrics-sha256 }}
     steps:
       - run: |
           if [[ $GITHUB_REF_NAME != release/* ]]; then
@@ -164,17 +167,22 @@ jobs:
           .github/scripts/generate-release-contributors.sh v$PRIOR_VERSION >> /tmp/release-notes.txt
           fi
 
+      - id: create-github-release
       - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
+          jmx_metrics_version=$VERSION-alpha
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$jmx_metrics_version.jar opentelemetry-jmx-metrics.jar
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             --discussion-category announcements \
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar
+
+          echo "::set-output name=jmx-metrics-version::$jmx_metrics_version"
+          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar)"
 
       - uses: actions/checkout@v3
         with:
@@ -252,3 +260,12 @@ jobs:
                        --body "$body" \
                        --head $branch \
                        --base main
+
+  create-collector-contrib-pull-request:
+    needs: release
+    uses: ./.github/workflows/reusable-create-collector-contrib-pull-request.yml
+    with:
+      jmx-metrics-version: ${{ needs.release.outputs.jmx-metrics-version }}
+      jmx-metrics-sha256: ${{ needs.release.outputs.jmx-metrics-sha256 }}
+    secrets:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
