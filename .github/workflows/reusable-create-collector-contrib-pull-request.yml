@@ -30,7 +30,7 @@ jobs:
         with:
           repository: opentelemetry-java-bot/opentelemetry-collector-contrib
           # this is the personal access token used for "git push" below
-          token: ${{ secrets.JAVA_BOT_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
 
       - name: Initialize pull request branch
         env:
@@ -57,7 +57,7 @@ jobs:
       - name: Create pull request against opentelemetry-collector-contrib
         env:
           # this is the personal access token used for "gh pr create" below
-          GITHUB_TOKEN: ${{ secrets.JAVA_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
           VERSION: ${{ inputs.jmx-metrics-version }}
         run: |
           message="Update the jmx-metrics version to $VERSION"

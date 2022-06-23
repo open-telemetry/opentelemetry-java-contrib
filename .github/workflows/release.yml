@@ -268,4 +268,4 @@ jobs:
       jmx-metrics-version: ${{ needs.release.outputs.jmx-metrics-version }}
       jmx-metrics-sha256: ${{ needs.release.outputs.jmx-metrics-sha256 }}
     secrets:
-      JAVA_BOT_TOKEN: ${{ secrets.JAVA_BOT_TOKEN }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
