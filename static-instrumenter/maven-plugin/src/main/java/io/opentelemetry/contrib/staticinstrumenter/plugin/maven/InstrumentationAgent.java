@@ -24,10 +24,9 @@ import org.slf4j.LoggerFactory;
 
 public class InstrumentationAgent {
 
-  // TODO: change after the new static-instr capable agent is released
-  public static final String JAR_FILE_NAME = "opentelemetry-javaagent.jar";
-  // TODO: change after the new static-instr capable agent is released
-  public static final String MAIN_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
+  public static final String JAR_FILE_NAME = "opentelemetry-agent.jar";
+  public static final String MAIN_CLASS =
+      "io.opentelemetry.contrib.staticinstrumenter.agent.main.Main";
 
   private static final Logger logger = LoggerFactory.getLogger(InstrumentationAgent.class);
 
