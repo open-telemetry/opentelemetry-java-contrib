@@ -16,6 +16,8 @@ public final class RuntimeAttach {
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
   static final String MAIN_METHOD_CHECK_PROP =
       "otel.javaagent.testing.runtime-attach.main-method-check";
+  private static final String UNEXPECTED_ISSUE =
+      "Agent was not attached. An unexpected issue has happened.";
 
   /**
    * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
@@ -30,7 +32,25 @@ public final class RuntimeAttach {
     ByteBuddyAgent.attach(javaagentFile, getPid());
 
     if (!agentIsAttached()) {
-      printError("Agent was not attached. An unexpected issue has happened.");
+      printError(UNEXPECTED_ISSUE);
+    }
+  }
+
+  /**
+   * Attach an OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
+   * beginning of the main method.
+   *
+   * @param javaagentFile A jar file of an OpenTelemetry Java agent
+   */
+  public static void attachJavaagentToCurrentJVM(File javaagentFile) {
+    if (!shouldAttach()) {
+      return;
+    }
+
+    ByteBuddyAgent.attach(javaagentFile, getPid());
+
+    if (!agentIsAttached()) {
+      printError(UNEXPECTED_ISSUE);
     }
   }
 
