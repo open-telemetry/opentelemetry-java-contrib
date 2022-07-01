@@ -9,6 +9,8 @@ pluginManagement {
 
 plugins {
   id("com.gradle.enterprise")
+
+  id("com.github.johnrengelman.shadow") apply false
 }
 
 dependencyResolutionManagement {

@@ -35,7 +35,7 @@ testing {
   suites {
     val awsTest by registering(JvmTestSuite::class) {
       dependencies {
-        implementation("io.opentelemetry:opentelemetry-exporter-otlp-trace")
+        implementation("io.opentelemetry:opentelemetry-exporter-otlp")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
         implementation("org.testcontainers:junit-jupiter")
         runtimeOnly("org.slf4j:slf4j-simple")
