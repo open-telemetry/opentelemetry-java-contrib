@@ -168,7 +168,7 @@ jobs:
           fi
 
       - id: create-github-release
-      - name: Create GitHub release
+        name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
