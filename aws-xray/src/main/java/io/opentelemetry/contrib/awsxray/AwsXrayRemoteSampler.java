@@ -17,8 +17,10 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.io.Closeable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -49,7 +51,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   // Unique per-sampler client ID, generated as a random string.
   private final String clientId;
   private final long pollingIntervalNanos;
-  private final int jitterNanos;
+  private final Iterator<Long> jitterNanos;
 
   @Nullable private volatile ScheduledFuture<?> pollFuture;
   @Nullable private volatile ScheduledFuture<?> fetchTargetsFuture;
@@ -94,8 +96,8 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     sampler = initialSampler;
 
     this.pollingIntervalNanos = pollingIntervalNanos;
-    // Add ~1% of jitter. Truncating to int is safe for any practical polling interval.
-    jitterNanos = (int) (pollingIntervalNanos / 100);
+    // Add ~1% of jitter
+    jitterNanos = RANDOM.longs(0, pollingIntervalNanos / 100).iterator();
 
     // Execute first update right away on the executor thread.
     executor.execute(this::getAndUpdateSampler);
@@ -148,8 +150,23 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   }
 
   private void scheduleSamplerUpdate() {
-    long delay = pollingIntervalNanos + RANDOM.nextInt(jitterNanos);
+    long delay = pollingIntervalNanos + jitterNanos.next();
     pollFuture = executor.schedule(this::getAndUpdateSampler, delay, TimeUnit.NANOSECONDS);
+  }
+
+  /**
+   * returns the duration until the next scheduled sampler update or null if no next update is
+   * scheduled yet.
+   *
+   * <p>only used for testing.
+   */
+  @Nullable
+  Duration getNextSamplerUpdateScheduledDuration() {
+    ScheduledFuture<?> pollFuture = this.pollFuture;
+    if (pollFuture == null) {
+      return null;
+    }
+    return Duration.ofNanos(pollFuture.getDelay(TimeUnit.NANOSECONDS));
   }
 
   private void fetchTargets() {
