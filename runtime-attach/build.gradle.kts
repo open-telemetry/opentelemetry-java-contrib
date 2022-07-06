@@ -8,8 +8,8 @@ description = "To runtime attach the OpenTelemetry Java Instrumentation agent"
 val agent: Configuration by configurations.creating
 
 dependencies {
-  implementation(project(":runtime-attach-distro"))
-  agent("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  implementation(project(":runtime-attach-core"))
+  agent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.15.0")
 
   // Used by byte-buddy but not brought in as a transitive dependency.
   compileOnly("com.google.code.findbugs:annotations")

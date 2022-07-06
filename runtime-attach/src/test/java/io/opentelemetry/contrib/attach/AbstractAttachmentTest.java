@@ -12,7 +12,7 @@ public class AbstractAttachmentTest {
 
   @BeforeAll
   static void disableMainThreadCheck() {
-    System.setProperty(DistroRuntimeAttach.MAIN_METHOD_CHECK_PROP, "false");
+    System.setProperty(CoreRuntimeAttach.MAIN_METHOD_CHECK_PROP, "false");
   }
 
   boolean isAttached() {

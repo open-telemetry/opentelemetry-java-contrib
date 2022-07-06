@@ -14,7 +14,7 @@ public final class RuntimeAttach {
    */
   public static void attachJavaagentToCurrentJVM() {
 
-    DistroRuntimeAttach distroRuntimeAttach = new DistroRuntimeAttach("/otel-agent.jar");
+    CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/otel-agent.jar");
 
     distroRuntimeAttach.attachJavaagentToCurrentJVM();
   }

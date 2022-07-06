@@ -10,7 +10,7 @@ import java.lang.management.ManagementFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 /** This class allows you to attach the OpenTelemetry Java agent at runtime. */
-public final class DistroRuntimeAttach {
+public final class CoreRuntimeAttach {
 
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
@@ -24,7 +24,7 @@ public final class DistroRuntimeAttach {
    *
    * @param agentJarResourceName Resource name of the agent jar.
    */
-  public DistroRuntimeAttach(String agentJarResourceName) {
+  public CoreRuntimeAttach(String agentJarResourceName) {
     this.agentJarResourceName = agentJarResourceName;
   }
 

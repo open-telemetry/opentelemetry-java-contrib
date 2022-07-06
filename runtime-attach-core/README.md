@@ -1,4 +1,4 @@
-# Runtime attachment distro
+# Runtime attachment core
 
 This project is dedicated to providers of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). It helps them to build a dependency to runtime attach their agent jar file.
 
