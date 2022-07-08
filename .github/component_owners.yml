@@ -34,7 +34,7 @@ components:
     - HaloFour
   runtime-attach:
     - iNikem
-    - trask
+    - jeanbisutti
   static-instrumenter:
     - kubawach
     - anosek-an
