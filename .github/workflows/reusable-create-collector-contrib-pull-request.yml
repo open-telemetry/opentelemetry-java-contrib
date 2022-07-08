@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: opentelemetry-java-bot/opentelemetry-collector-contrib
+          repository: opentelemetrybot/opentelemetry-collector-contrib
           # this is the personal access token used for "git push" below
           token: ${{ secrets.BOT_TOKEN }}
 
