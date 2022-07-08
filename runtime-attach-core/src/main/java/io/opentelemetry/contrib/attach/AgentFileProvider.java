@@ -5,24 +5,25 @@
 
 package io.opentelemetry.contrib.attach;
 
-import io.opentelemetry.javaagent.OpenTelemetryAgent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.CodeSource;
 
 final class AgentFileProvider {
 
-  static File getAgentFile() {
+  private final String agentJarResourceName;
 
-    verifyExistenceOfAgentJarFile();
+  AgentFileProvider(String agentJarResourceName) {
+    this.agentJarResourceName = agentJarResourceName;
+  }
+
+  File getAgentFile() {
 
     Path tempDirPath = createTempDir();
 
-    Path tempAgentJarPath = createTempAgentJarFile(tempDirPath);
+    Path tempAgentJarPath = createTempAgentJarFileIn(tempDirPath);
 
     deleteTempDirOnJvmExit(tempDirPath, tempAgentJarPath);
 
@@ -32,13 +33,6 @@ final class AgentFileProvider {
   private static void deleteTempDirOnJvmExit(Path tempDirPath, Path tempAgentJarPath) {
     tempAgentJarPath.toFile().deleteOnExit();
     tempDirPath.toFile().deleteOnExit();
-  }
-
-  private static void verifyExistenceOfAgentJarFile() {
-    CodeSource codeSource = OpenTelemetryAgent.class.getProtectionDomain().getCodeSource();
-    if (codeSource == null) {
-      throw new IllegalStateException("could not get agent jar location");
-    }
   }
 
   private static Path createTempDir() {
@@ -51,23 +45,18 @@ final class AgentFileProvider {
     return tempDir;
   }
 
-  private static Path createTempAgentJarFile(Path tempDir) {
-    URL url = OpenTelemetryAgent.class.getProtectionDomain().getCodeSource().getLocation();
-    try {
-      return copyTo(url, tempDir, "agent.jar");
+  private Path createTempAgentJarFileIn(Path tempDir) {
+    Path agentJarPath = tempDir.resolve("agent.jar");
+    try (InputStream jarAsInputStream =
+        AgentFileProvider.class.getResourceAsStream(this.agentJarResourceName)) {
+      if (jarAsInputStream == null) {
+        throw new IllegalStateException(this.agentJarResourceName + " resource can't be found");
+      }
+      Files.copy(jarAsInputStream, agentJarPath);
     } catch (IOException e) {
       throw new IllegalStateException(
           "Runtime attachment can't create agent jar file in temp directory", e);
     }
+    return agentJarPath;
   }
-
-  private static Path copyTo(URL url, Path tempDir, String fileName) throws IOException {
-    Path tempFile = tempDir.resolve(fileName);
-    try (InputStream in = url.openStream()) {
-      Files.copy(in, tempFile);
-    }
-    return tempFile;
-  }
-
-  private AgentFileProvider() {}
 }
