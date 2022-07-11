@@ -27,7 +27,7 @@ public class SpringBootApp {
 
 ## Component owners
 
+- [Jean Bisutti](https://github.com/jeanbisutti), Microsoft
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
-- [Trask Stalnaker](https://github.com/trask), Microsoft
 
-Learn more about component owners in [component_owners.yml](../../.github/component_owners.yml).
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
