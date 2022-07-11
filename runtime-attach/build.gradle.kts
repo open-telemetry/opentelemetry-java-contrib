@@ -6,10 +6,11 @@ plugins {
 description = "To runtime attach the OpenTelemetry Java Instrumentation agent"
 
 val agent: Configuration by configurations.creating
+val otelVersion: String by project
 
 dependencies {
   implementation(project(":runtime-attach-core"))
-  agent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.15.0")
+  agent("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion")
 
   // Used by byte-buddy but not brought in as a transitive dependency.
   compileOnly("com.google.code.findbugs:annotations")
