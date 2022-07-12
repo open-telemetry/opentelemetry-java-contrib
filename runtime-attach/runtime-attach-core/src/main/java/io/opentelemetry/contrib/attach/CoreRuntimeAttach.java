@@ -40,7 +40,12 @@ public final class CoreRuntimeAttach {
     AgentFileProvider agentFileProvider = new AgentFileProvider(agentJarResourceName);
 
     File javaagentFile = agentFileProvider.getAgentFile();
-    ByteBuddyAgent.attach(javaagentFile, getPid());
+
+    try {
+      ByteBuddyAgent.attach(javaagentFile, getPid());
+    } catch (RuntimeException e) {
+      handleByteBuddyException(e);
+    }
 
     if (!agentIsAttached()) {
       printError("Agent was not attached. An unexpected issue has happened.");
@@ -86,6 +91,24 @@ public final class CoreRuntimeAttach {
   private static boolean agentIsDisabledWithEnvVar() {
     String agentEnabledEnvVarValue = System.getenv(AGENT_ENABLED_ENV_VAR);
     return "false".equals(agentEnabledEnvVarValue);
+  }
+
+  private static void handleByteBuddyException(RuntimeException exception) {
+    handleNoAgentProvider(exception);
+    throw new RuntimeAttachException(
+        "A problem has occurred during the runtime attachment of the Java agent.", exception);
+  }
+
+  private static void handleNoAgentProvider(RuntimeException exception) {
+    if (exception instanceof IllegalStateException) {
+      String message = exception.getMessage();
+      if (message != null
+          && message.contains(
+              "No compatible attachment provider is available")) { // ByteBuddy message
+        throw new RuntimeAttachException(
+            "Runtime attachment has failed. Are you using a JRE (not a JDK)?", exception);
+      }
+    }
   }
 
   private static boolean agentIsAttached() {

@@ -40,7 +40,9 @@ final class AgentFileProvider {
     try {
       tempDir = Files.createTempDirectory("otel-agent");
     } catch (IOException e) {
-      throw new IllegalStateException("Runtime attachment can't create temp directory", e);
+      throw new RuntimeAttachException(
+          "Runtime attachment can't create a temp directory. Are you using a read-only file system?",
+          e);
     }
     return tempDir;
   }
@@ -50,12 +52,12 @@ final class AgentFileProvider {
     try (InputStream jarAsInputStream =
         AgentFileProvider.class.getResourceAsStream(this.agentJarResourceName)) {
       if (jarAsInputStream == null) {
-        throw new IllegalStateException(this.agentJarResourceName + " resource can't be found");
+        throw new RuntimeAttachException(this.agentJarResourceName + " resource can't be found");
       }
       Files.copy(jarAsInputStream, agentJarPath);
     } catch (IOException e) {
-      throw new IllegalStateException(
-          "Runtime attachment can't create agent jar file in temp directory", e);
+      throw new RuntimeAttachException(
+          "Runtime attachment can't create an agent jar file in temp directory", e);
     }
     return agentJarPath;
   }
