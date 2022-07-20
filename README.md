@@ -50,7 +50,6 @@ Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open
 
 - [John Watson](https://github.com/jkwatson), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Pablo Collins](https://github.com/pmcollins), Splunk
 
 Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
 
