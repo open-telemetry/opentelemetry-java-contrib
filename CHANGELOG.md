@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.16.0 (2022-07-20)
+
 ### AWS X-Ray
 
 - Fix #376: `AwsXrayRemoteSampler` doesn’t poll for update
