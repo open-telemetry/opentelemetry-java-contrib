@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### AWS X-Ray
+
+- Fix #376: `AwsXrayRemoteSampler` doesn’t poll for update
+  ([#377](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/377))
+
+### Runtime attach
+
+- Fix "Class path contains multiple SLF4J bindings"
+  ([#380](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/380))
+- Improve exception handling and documentation
+  ([#388](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/388))
+
 ## Version 1.15.0 (2022-06-17)
 
 ### Consistent sampling
