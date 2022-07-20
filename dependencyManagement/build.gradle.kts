@@ -11,7 +11,7 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-val otelVersion = "1.15.0"
+val otelVersion = "1.16.0"
 
 val DEPENDENCY_BOMS = listOf(
     "com.fasterxml.jackson:jackson-bom:2.13.2.20220328",

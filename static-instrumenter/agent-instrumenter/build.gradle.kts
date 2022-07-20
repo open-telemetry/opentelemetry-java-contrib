@@ -15,7 +15,10 @@ val javaagentLibs: Configuration by configurations.creating {
 val bootstrapLibs: Configuration by configurations.creating
 configurations.getByName("implementation").extendsFrom(bootstrapLibs)
 
-val javaagent: Configuration by configurations.creating
+val javaagent: Configuration by configurations.creating {
+  isCanBeResolved = true
+  isCanBeConsumed = false
+}
 configurations.getByName("implementation").extendsFrom(javaagent)
 
 dependencies {
@@ -25,7 +28,7 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 
-  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.15.0")
+  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
