@@ -182,7 +182,7 @@ jobs:
                             opentelemetry-jmx-metrics.jar
 
           echo "::set-output name=jmx-metrics-version::$jmx_metrics_version"
-          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar)"
+          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar | cut -d ' ' -f 1)"
 
       - uses: actions/checkout@v3
         with:
