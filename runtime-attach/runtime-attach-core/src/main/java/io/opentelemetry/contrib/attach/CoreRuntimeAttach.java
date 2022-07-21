@@ -19,6 +19,8 @@ public final class CoreRuntimeAttach {
 
   private final String agentJarResourceName;
 
+  private boolean runtimeAttachmentRequested;
+
   /**
    * Creates a new {@code DistroRuntimeAttach} from the resource name of the agent jar.
    *
@@ -36,6 +38,11 @@ public final class CoreRuntimeAttach {
     if (!shouldAttach()) {
       return;
     }
+
+    if (runtimeAttachmentRequested) {
+      return;
+    }
+    runtimeAttachmentRequested = true;
 
     AgentFileProvider agentFileProvider = new AgentFileProvider(agentJarResourceName);
 
