@@ -46,7 +46,7 @@ jobs:
           HASH: ${{ inputs.jmx-metrics-sha256 }}
         run: |
           # NOTE there are intentional tab characters in the line below
-          sed "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
+          sed -i "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
           git diff
 
       - name: Use CLA approved github bot
