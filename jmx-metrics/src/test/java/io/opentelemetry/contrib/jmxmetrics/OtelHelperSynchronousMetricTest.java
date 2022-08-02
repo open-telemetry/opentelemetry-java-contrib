@@ -39,15 +39,20 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void doubleCounter() {
     DoubleCounter dc = otel.doubleCounter("double-counter", "a double counter", "ms");
+    assertThat(dc).isSameAs(otel.doubleCounter("double-counter", "a double counter", "ms"));
     dc.add(123.456, Attributes.builder().put("key", "value").build());
 
     dc = otel.doubleCounter("my-double-counter", "another double counter", "us");
+    assertThat(dc)
+        .isSameAs(otel.doubleCounter("my-double-counter", "another double counter", "us"));
     dc.add(234.567, Attributes.builder().put("myKey", "myValue").build());
 
     dc = otel.doubleCounter("another-double-counter", "double counter");
+    assertThat(dc).isSameAs(otel.doubleCounter("another-double-counter", "double counter"));
     dc.add(345.678, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     dc = otel.doubleCounter("yet-another-double-counter");
+    assertThat(dc).isSameAs(otel.doubleCounter("yet-another-double-counter"));
     dc.add(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())
@@ -113,15 +118,19 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void longCounter() {
     LongCounter lc = otel.longCounter("long-counter", "a long counter", "ms");
+    assertThat(lc).isSameAs(otel.longCounter("long-counter", "a long counter", "ms"));
     lc.add(123, Attributes.builder().put("key", "value").build());
 
     lc = otel.longCounter("my-long-counter", "another long counter", "us");
+    assertThat(lc).isSameAs(otel.longCounter("my-long-counter", "another long counter", "us"));
     lc.add(234, Attributes.builder().put("myKey", "myValue").build());
 
     lc = otel.longCounter("another-long-counter", "long counter");
+    assertThat(lc).isSameAs(otel.longCounter("another-long-counter", "long counter"));
     lc.add(345, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     lc = otel.longCounter("yet-another-long-counter");
+    assertThat(lc).isSameAs(otel.longCounter("yet-another-long-counter"));
     lc.add(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())
@@ -188,17 +197,28 @@ class OtelHelperSynchronousMetricTest {
   void doubleUpDownCounter() {
     DoubleUpDownCounter dudc =
         otel.doubleUpDownCounter("double-up-down-counter", "a double up-down-counter", "ms");
+    assertThat(dudc)
+        .isSameAs(
+            otel.doubleUpDownCounter("double-up-down-counter", "a double up-down-counter", "ms"));
     dudc.add(-234.567, Attributes.builder().put("key", "value").build());
 
     dudc =
         otel.doubleUpDownCounter(
             "my-double-up-down-counter", "another double up-down-counter", "us");
+    assertThat(dudc)
+        .isSameAs(
+            otel.doubleUpDownCounter(
+                "my-double-up-down-counter", "another double up-down-counter", "us"));
     dudc.add(-123.456, Attributes.builder().put("myKey", "myValue").build());
 
     dudc = otel.doubleUpDownCounter("another-double-up-down-counter", "double up-down-counter");
+    assertThat(dudc)
+        .isSameAs(
+            otel.doubleUpDownCounter("another-double-up-down-counter", "double up-down-counter"));
     dudc.add(345.678, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     dudc = otel.doubleUpDownCounter("yet-another-double-up-down-counter");
+    assertThat(dudc).isSameAs(otel.doubleUpDownCounter("yet-another-double-up-down-counter"));
     dudc.add(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())
@@ -265,15 +285,24 @@ class OtelHelperSynchronousMetricTest {
   void longUpDownCounter() {
     LongUpDownCounter ludc =
         otel.longUpDownCounter("long-up-down-counter", "a long up-down-counter", "ms");
+    assertThat(ludc)
+        .isSameAs(otel.longUpDownCounter("long-up-down-counter", "a long up-down-counter", "ms"));
     ludc.add(-234, Attributes.builder().put("key", "value").build());
 
     ludc = otel.longUpDownCounter("my-long-up-down-counter", "another long up-down-counter", "us");
+    assertThat(ludc)
+        .isSameAs(
+            otel.longUpDownCounter(
+                "my-long-up-down-counter", "another long up-down-counter", "us"));
     ludc.add(-123, Attributes.builder().put("myKey", "myValue").build());
 
     ludc = otel.longUpDownCounter("another-long-up-down-counter", "long up-down-counter");
+    assertThat(ludc)
+        .isSameAs(otel.longUpDownCounter("another-long-up-down-counter", "long up-down-counter"));
     ludc.add(345, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     ludc = otel.longUpDownCounter("yet-another-long-up-down-counter");
+    assertThat(ludc).isSameAs(otel.longUpDownCounter("yet-another-long-up-down-counter"));
     ludc.add(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())
@@ -339,15 +368,20 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void doubleHistogram() {
     DoubleHistogram dh = otel.doubleHistogram("double-histogram", "a double histogram", "ms");
+    assertThat(dh).isSameAs(otel.doubleHistogram("double-histogram", "a double histogram", "ms"));
     dh.record(234.567, Attributes.builder().put("key", "value").build());
 
     dh = otel.doubleHistogram("my-double-histogram", "another double histogram", "us");
+    assertThat(dh)
+        .isSameAs(otel.doubleHistogram("my-double-histogram", "another double histogram", "us"));
     dh.record(123.456, Attributes.builder().put("myKey", "myValue").build());
 
     dh = otel.doubleHistogram("another-double-histogram", "double histogram");
+    assertThat(dh).isSameAs(otel.doubleHistogram("another-double-histogram", "double histogram"));
     dh.record(345.678, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     dh = otel.doubleHistogram("yet-another-double-histogram");
+    assertThat(dh).isSameAs(otel.doubleHistogram("yet-another-double-histogram"));
     dh.record(456.789, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())
@@ -417,15 +451,20 @@ class OtelHelperSynchronousMetricTest {
   @Test
   void longHistogram() {
     LongHistogram lh = otel.longHistogram("long-histogram", "a long histogram", "ms");
+    assertThat(lh).isSameAs(otel.longHistogram("long-histogram", "a long histogram", "ms"));
     lh.record(234, Attributes.builder().put("key", "value").build());
 
     lh = otel.longHistogram("my-long-histogram", "another long histogram", "us");
+    assertThat(lh)
+        .isSameAs(otel.longHistogram("my-long-histogram", "another long histogram", "us"));
     lh.record(123, Attributes.builder().put("myKey", "myValue").build());
 
     lh = otel.longHistogram("another-long-histogram", "long histogram");
+    assertThat(lh).isSameAs(otel.longHistogram("another-long-histogram", "long histogram"));
     lh.record(345, Attributes.builder().put("anotherKey", "anotherValue").build());
 
     lh = otel.longHistogram("yet-another-long-histogram");
+    assertThat(lh).isSameAs(otel.longHistogram("yet-another-long-histogram"));
     lh.record(456, Attributes.builder().put("yetAnotherKey", "yetAnotherValue").build());
 
     assertThat(metricReader.collectAllMetrics())

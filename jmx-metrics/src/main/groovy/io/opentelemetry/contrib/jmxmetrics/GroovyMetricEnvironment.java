@@ -14,8 +14,14 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableDoubleCounter;
+import io.opentelemetry.api.metrics.ObservableDoubleGauge;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
+import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter;
+import io.opentelemetry.api.metrics.ObservableLongCounter;
+import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
@@ -26,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 
 public class GroovyMetricEnvironment {
@@ -33,15 +40,68 @@ public class GroovyMetricEnvironment {
   private final SdkMeterProvider meterProvider;
   private final Meter meter;
 
-  // Observer updaters can only be specified in the builder as of v0.13.0, so to work with our model
+  private class Registry<T> {
+    private final Map<Integer, AtomicReference<T>> registry = new ConcurrentHashMap<>();
+
+    private T getOrSet(
+        String name,
+        String description,
+        String unit,
+        InstrumentType instrumentType,
+        InstrumentValueType instrumentValueType,
+        Function<Integer, T> createFunction) {
+      InstrumentDescriptor descriptor =
+          InstrumentDescriptor.create(name, description, unit, instrumentType, instrumentValueType);
+      return registry
+          .computeIfAbsent(
+              descriptor.hashCode(),
+              k -> {
+                AtomicReference<T> at = new AtomicReference<T>();
+                at.set(createFunction.apply(k));
+                return at;
+              })
+          .get();
+    }
+
+    private AtomicReference<T> getExisting(
+        String name,
+        String description,
+        String unit,
+        InstrumentType instrumentType,
+        InstrumentValueType instrumentValueType) {
+      InstrumentDescriptor descriptor =
+          InstrumentDescriptor.create(name, description, unit, instrumentType, instrumentValueType);
+      registry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
+      return registry.get(descriptor.hashCode());
+    }
+  }
+
+  // cache all instruments by their descriptors to prevent attempted duplicate creation
+  private final Registry<DoubleCounter> doubleCounterRegistry = new Registry<>();
+  private final Registry<LongCounter> longCounterRegistry = new Registry<>();
+  private final Registry<DoubleUpDownCounter> doubleUpDownCounterRegistry = new Registry<>();
+  private final Registry<LongUpDownCounter> longUpDownCounterRegistry = new Registry<>();
+  private final Registry<DoubleHistogram> doubleHistogramRegistry = new Registry<>();
+  private final Registry<LongHistogram> longHistogramRegistry = new Registry<>();
+  private final Registry<ObservableDoubleGauge> observableDoubleGaugeRegistry = new Registry<>();
+  private final Registry<ObservableLongGauge> observableLongGaugeRegistry = new Registry<>();
+  private final Registry<ObservableDoubleCounter> observableDoubleCounterRegistry =
+      new Registry<>();
+  private final Registry<ObservableLongCounter> observableLongCounterRegistry = new Registry<>();
+  private final Registry<ObservableDoubleUpDownCounter> observableDoubleUpDownCounterRegistry =
+      new Registry<>();
+  private final Registry<ObservableLongUpDownCounter> observableLongUpDownCounterRegistry =
+      new Registry<>();
+
+  // Observable consumers can only be specified in the builder as of v0.13.0, so to work with our
+  // model
   // of running groovy scripts on an interval a reference to the desired updater should be held and
   // updated w/ each instrument creation call.  Otherwise no observed changes in MBean availability
-  // would be possible.  These registry stores are maps of instrument descriptor hashes to updater
-  // consumer references.
-  private final Map<Integer, AtomicReference<Consumer<ObservableLongMeasurement>>>
-      longUpdaterRegistry = new ConcurrentHashMap<>();
-  private final Map<Integer, AtomicReference<Consumer<ObservableDoubleMeasurement>>>
-      doubleUpdaterRegistry = new ConcurrentHashMap<>();
+  // would be possible.
+  private final Registry<Consumer<ObservableLongMeasurement>> longUpdaterRegistry =
+      new Registry<>();
+  private final Registry<Consumer<ObservableDoubleMeasurement>> doubleUpdaterRegistry =
+      new Registry<>();
 
   /**
    * A central context for creating and exporting metrics, to be used by groovy scripts via {@link
@@ -139,7 +199,19 @@ public class GroovyMetricEnvironment {
    */
   public DoubleCounter getDoubleCounter(
       final String name, final String description, final String unit) {
-    return meter.counterBuilder(name).setDescription(description).setUnit(unit).ofDoubles().build();
+    return doubleCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.COUNTER,
+        InstrumentValueType.DOUBLE,
+        k ->
+            meter
+                .counterBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .ofDoubles()
+                .build());
   }
 
   /**
@@ -152,7 +224,13 @@ public class GroovyMetricEnvironment {
    */
   public LongCounter getLongCounter(
       final String name, final String description, final String unit) {
-    return meter.counterBuilder(name).setDescription(description).setUnit(unit).build();
+    return longCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.COUNTER,
+        InstrumentValueType.LONG,
+        k -> meter.counterBuilder(name).setDescription(description).setUnit(unit).build());
   }
 
   /**
@@ -165,12 +243,19 @@ public class GroovyMetricEnvironment {
    */
   public DoubleUpDownCounter getDoubleUpDownCounter(
       final String name, final String description, final String unit) {
-    return meter
-        .upDownCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .ofDoubles()
-        .build();
+    return doubleUpDownCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.UP_DOWN_COUNTER,
+        InstrumentValueType.DOUBLE,
+        k ->
+            meter
+                .upDownCounterBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .ofDoubles()
+                .build());
   }
 
   /**
@@ -183,7 +268,13 @@ public class GroovyMetricEnvironment {
    */
   public LongUpDownCounter getLongUpDownCounter(
       final String name, final String description, final String unit) {
-    return meter.upDownCounterBuilder(name).setDescription(description).setUnit(unit).build();
+    return longUpDownCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.UP_DOWN_COUNTER,
+        InstrumentValueType.LONG,
+        k -> meter.upDownCounterBuilder(name).setDescription(description).setUnit(unit).build());
   }
 
   /**
@@ -196,7 +287,13 @@ public class GroovyMetricEnvironment {
    */
   public DoubleHistogram getDoubleHistogram(
       final String name, final String description, final String unit) {
-    return meter.histogramBuilder(name).setDescription(description).setUnit(unit).build();
+    return doubleHistogramRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.HISTOGRAM,
+        InstrumentValueType.DOUBLE,
+        k -> meter.histogramBuilder(name).setDescription(description).setUnit(unit).build());
   }
 
   /**
@@ -209,7 +306,19 @@ public class GroovyMetricEnvironment {
    */
   public LongHistogram getLongHistogram(
       final String name, final String description, final String unit) {
-    return meter.histogramBuilder(name).setDescription(description).setUnit(unit).ofLongs().build();
+    return longHistogramRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.HISTOGRAM,
+        InstrumentValueType.LONG,
+        k ->
+            meter
+                .histogramBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .ofLongs()
+                .build());
   }
 
   /**
@@ -225,13 +334,21 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableDoubleMeasurement> updater) {
-    meter
-        .gaugeBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedDoubleObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableDoubleMeasurement> pdo =
+        proxiedDoubleObserver(name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater);
+    observableDoubleGaugeRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_GAUGE,
+        InstrumentValueType.DOUBLE,
+        k ->
+            meter
+                .gaugeBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   /**
@@ -247,13 +364,22 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableLongMeasurement> updater) {
-    meter
-        .gaugeBuilder(name)
-        .ofLongs()
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableLongMeasurement> pdo =
+        proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_GAUGE, updater);
+    observableLongGaugeRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_GAUGE,
+        InstrumentValueType.LONG,
+        k ->
+            meter
+                .gaugeBuilder(name)
+                .ofLongs()
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   /**
@@ -269,14 +395,22 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableDoubleMeasurement> updater) {
-    meter
-        .counterBuilder(name)
-        .ofDoubles()
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedDoubleObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableDoubleMeasurement> pdo =
+        proxiedDoubleObserver(name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater);
+    observableDoubleCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_COUNTER,
+        InstrumentValueType.DOUBLE,
+        k ->
+            meter
+                .counterBuilder(name)
+                .ofDoubles()
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   /**
@@ -292,13 +426,21 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableLongMeasurement> updater) {
-    meter
-        .counterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedLongObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableLongMeasurement> pdo =
+        proxiedLongObserver(name, description, unit, InstrumentType.OBSERVABLE_COUNTER, updater);
+    observableLongCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_COUNTER,
+        InstrumentValueType.LONG,
+        k ->
+            meter
+                .counterBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   /**
@@ -314,14 +456,23 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableDoubleMeasurement> updater) {
-    meter
-        .upDownCounterBuilder(name)
-        .ofDoubles()
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedDoubleObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableDoubleMeasurement> pdo =
+        proxiedDoubleObserver(
+            name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater);
+    observableDoubleUpDownCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_UP_DOWN_COUNTER,
+        InstrumentValueType.DOUBLE,
+        k ->
+            meter
+                .upDownCounterBuilder(name)
+                .ofDoubles()
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   /**
@@ -337,13 +488,22 @@ public class GroovyMetricEnvironment {
       final String description,
       final String unit,
       final Consumer<ObservableLongMeasurement> updater) {
-    meter
-        .upDownCounterBuilder(name)
-        .setDescription(description)
-        .setUnit(unit)
-        .buildWithCallback(
-            proxiedLongObserver(
-                name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater));
+    // we must invoke this every call to update the consumer's proxied value
+    Consumer<ObservableLongMeasurement> pdo =
+        proxiedLongObserver(
+            name, description, unit, InstrumentType.OBSERVABLE_UP_DOWN_COUNTER, updater);
+    observableLongUpDownCounterRegistry.getOrSet(
+        name,
+        description,
+        unit,
+        InstrumentType.OBSERVABLE_UP_DOWN_COUNTER,
+        InstrumentValueType.LONG,
+        k ->
+            meter
+                .upDownCounterBuilder(name)
+                .setDescription(description)
+                .setUnit(unit)
+                .buildWithCallback(pdo));
   }
 
   private Consumer<ObservableDoubleMeasurement> proxiedDoubleObserver(
@@ -352,16 +512,12 @@ public class GroovyMetricEnvironment {
       final String unit,
       final InstrumentType instrumentType,
       final Consumer<ObservableDoubleMeasurement> updater) {
-    InstrumentDescriptor descriptor =
-        InstrumentDescriptor.create(
-            name, description, unit, instrumentType, InstrumentValueType.DOUBLE);
-    doubleUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
     AtomicReference<Consumer<ObservableDoubleMeasurement>> existingUpdater =
-        doubleUpdaterRegistry.get(descriptor.hashCode());
+        doubleUpdaterRegistry.getExisting(
+            name, description, unit, instrumentType, InstrumentValueType.DOUBLE);
     existingUpdater.set(updater);
     return doubleResult -> {
-      Consumer<ObservableDoubleMeasurement> existing = existingUpdater.get();
-      existing.accept(doubleResult);
+      existingUpdater.get().accept(doubleResult);
     };
   }
 
@@ -371,16 +527,12 @@ public class GroovyMetricEnvironment {
       final String unit,
       final InstrumentType instrumentType,
       final Consumer<ObservableLongMeasurement> updater) {
-    InstrumentDescriptor descriptor =
-        InstrumentDescriptor.create(
-            name, description, unit, instrumentType, InstrumentValueType.LONG);
-    longUpdaterRegistry.putIfAbsent(descriptor.hashCode(), new AtomicReference<>());
     AtomicReference<Consumer<ObservableLongMeasurement>> existingUpdater =
-        longUpdaterRegistry.get(descriptor.hashCode());
+        longUpdaterRegistry.getExisting(
+            name, description, unit, instrumentType, InstrumentValueType.LONG);
     existingUpdater.set(updater);
     return longResult -> {
-      Consumer<ObservableLongMeasurement> existing = existingUpdater.get();
-      existing.accept(longResult);
+      existingUpdater.get().accept(longResult);
     };
   }
 }
