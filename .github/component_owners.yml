@@ -11,14 +11,13 @@
 # `comp:*` labels
 components:
   aws-xray:
-    - anuraaga
     - willarmiros
   consistent-sampling:
     - oertl
     - PeterF778
   samplers:
-    - anuraaga
     - iNikem
+    - trask
   jfr-streaming:
     - breedx-splk
     - jack-berg
