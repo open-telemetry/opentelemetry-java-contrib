@@ -27,7 +27,7 @@ tasks {
         allDisabledChecksAsWarnings.set(true)
 
         // Ignore warnings for generated classes
-        excludedPaths.set(".*generated.*")
+        excludedPaths.set(".*/build/generated/.*")
 
         // Still Java 8 mostly
         disable("Varifier")
