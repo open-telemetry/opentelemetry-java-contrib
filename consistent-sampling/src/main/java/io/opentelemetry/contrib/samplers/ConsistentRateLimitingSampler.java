@@ -8,9 +8,9 @@ package io.opentelemetry.contrib.samplers;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import javax.annotation.concurrent.Immutable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * This consistent {@link Sampler} adjusts the sampling probability dynamically to limit the rate of
