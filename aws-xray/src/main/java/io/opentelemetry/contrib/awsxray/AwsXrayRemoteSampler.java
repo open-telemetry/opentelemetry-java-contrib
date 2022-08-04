@@ -205,6 +205,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   }
 
   @Override
+  @SuppressWarnings("Interruption")
   public void close() {
     ScheduledFuture<?> pollFuture = this.pollFuture;
     if (pollFuture != null) {
