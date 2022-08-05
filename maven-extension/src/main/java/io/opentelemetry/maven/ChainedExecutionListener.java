@@ -18,7 +18,9 @@ final class ChainedExecutionListener implements ExecutionListener {
 
   private final List<ExecutionListener> listeners;
 
-  /** @param listeners {@code null} values are filtered */
+  /**
+   * @param listeners {@code null} values are filtered
+   */
   ChainedExecutionListener(ExecutionListener... listeners) {
     this.listeners = Arrays.stream(listeners).filter(e -> e != null).collect(Collectors.toList());
   }
