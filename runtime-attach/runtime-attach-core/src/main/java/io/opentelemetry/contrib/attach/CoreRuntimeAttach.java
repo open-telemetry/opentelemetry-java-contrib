@@ -10,24 +10,49 @@ import java.lang.management.ManagementFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 /** This class allows you to attach the OpenTelemetry Java agent at runtime. */
-public final class RuntimeAttach {
+public final class CoreRuntimeAttach {
 
   private static final String AGENT_ENABLED_PROPERTY = "otel.javaagent.enabled";
   private static final String AGENT_ENABLED_ENV_VAR = "OTEL_JAVAAGENT_ENABLED";
   static final String MAIN_METHOD_CHECK_PROP =
       "otel.javaagent.testing.runtime-attach.main-method-check";
 
+  private final String agentJarResourceName;
+
+  private boolean runtimeAttachmentRequested;
+
+  /**
+   * Creates a new {@code DistroRuntimeAttach} from the resource name of the agent jar.
+   *
+   * @param agentJarResourceName Resource name of the agent jar.
+   */
+  public CoreRuntimeAttach(String agentJarResourceName) {
+    this.agentJarResourceName = agentJarResourceName;
+  }
+
   /**
    * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
    * beginning of the main method.
    */
-  public static void attachJavaagentToCurrentJVM() {
+  public void attachJavaagentToCurrentJVM() {
     if (!shouldAttach()) {
       return;
     }
 
-    File javaagentFile = AgentFileProvider.getAgentFile();
-    ByteBuddyAgent.attach(javaagentFile, getPid());
+    if (runtimeAttachmentRequested) {
+      return;
+    }
+    runtimeAttachmentRequested = true;
+
+    AgentFileProvider agentFileProvider = new AgentFileProvider(agentJarResourceName);
+
+    File javaagentFile = agentFileProvider.getAgentFile();
+
+    try {
+      ByteBuddyAgent.attach(javaagentFile, getPid());
+    } catch (RuntimeException e) {
+      handleByteBuddyException(e);
+    }
 
     if (!agentIsAttached()) {
       printError("Agent was not attached. An unexpected issue has happened.");
@@ -75,6 +100,24 @@ public final class RuntimeAttach {
     return "false".equals(agentEnabledEnvVarValue);
   }
 
+  private static void handleByteBuddyException(RuntimeException exception) {
+    handleNoAgentProvider(exception);
+    throw new RuntimeAttachException(
+        "A problem has occurred during the runtime attachment of the Java agent.", exception);
+  }
+
+  private static void handleNoAgentProvider(RuntimeException exception) {
+    if (exception instanceof IllegalStateException) {
+      String message = exception.getMessage();
+      if (message != null
+          && message.contains(
+              "No compatible attachment provider is available")) { // ByteBuddy message
+        throw new RuntimeAttachException(
+            "Runtime attachment has failed. Are you using a JRE (not a JDK)?", exception);
+      }
+    }
+  }
+
   private static boolean agentIsAttached() {
     try {
       Class.forName("io.opentelemetry.javaagent.OpenTelemetryAgent", false, null);
@@ -108,6 +151,4 @@ public final class RuntimeAttach {
   private static String getPid() {
     return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
   }
-
-  private RuntimeAttach() {}
 }

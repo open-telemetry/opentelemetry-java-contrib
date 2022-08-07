@@ -50,11 +50,9 @@ Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open
 
 - [John Watson](https://github.com/jkwatson), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Pablo Collins](https://github.com/pmcollins), Splunk
 
 Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
 
-- [Anuraag Agrawal](https://github.com/anuraaga), AWS
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk

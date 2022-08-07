@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: opentelemetry-java-bot/opentelemetry-collector-contrib
+          repository: opentelemetrybot/opentelemetry-collector-contrib
           # this is the personal access token used for "git push" below
           token: ${{ secrets.BOT_TOKEN }}
 
@@ -46,13 +46,14 @@ jobs:
           HASH: ${{ inputs.jmx-metrics-sha256 }}
         run: |
           # NOTE there are intentional tab characters in the line below
-          sed "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
+          sed -i "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
           git diff
 
-      - name: Set git user
+      - name: Use CLA approved github bot
         run: |
-          git config user.name opentelemetry-java-bot
-          git config user.email 97938252+opentelemetry-java-bot@users.noreply.github.com
+          # cannot run the use-cla-approved-github-bot.sh script here since in a different repo
+          git config user.name opentelemetrybot
+          git config user.email 107717825+opentelemetrybot@users.noreply.github.com
 
       - name: Create pull request against opentelemetry-collector-contrib
         env:

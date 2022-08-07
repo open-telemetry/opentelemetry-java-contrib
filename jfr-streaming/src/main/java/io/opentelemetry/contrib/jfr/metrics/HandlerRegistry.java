@@ -81,7 +81,9 @@ final class HandlerRegistry {
     return new HandlerRegistry(handlers);
   }
 
-  /** @return all entries in this registry. */
+  /**
+   * @return all entries in this registry.
+   */
   List<RecordedEventHandler> all() {
     return mappers;
   }

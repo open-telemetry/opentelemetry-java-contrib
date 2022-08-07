@@ -7,12 +7,12 @@ plugins {
   id("net.ltgt.nullaway")
 }
 
-val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean() ?: false
-
 dependencies {
   errorprone("com.google.errorprone:error_prone_core")
   errorprone("com.uber.nullaway:nullaway")
 }
+
+val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean() ?: false
 
 tasks {
   withType<JavaCompile>().configureEach {
@@ -25,6 +25,9 @@ tasks {
 
         disableWarningsInGeneratedCode.set(true)
         allDisabledChecksAsWarnings.set(true)
+
+        // Ignore warnings for generated classes
+        excludedPaths.set(".*/build/generated/.*")
 
         // Still Java 8 mostly
         disable("Varifier")
@@ -45,22 +48,13 @@ tasks {
         // deprecation warning.
         disable("UnnecessarilyFullyQualified")
 
-        // Ignore warnings for protobuf and jmh generated files.
-        excludedPaths.set(".*generated.*|.*internal.shaded.*")
-
+        // TODO (trask) use animal sniffer
         disable("Java7ApiChecker")
         disable("Java8ApiChecker")
         disable("AndroidJdkLibsChecker")
 
         // apparently disabling android doesn't disable this
         disable("StaticOrDefaultInterfaceMethod")
-
-        // Prevents defensive null checks and we have nullaway
-        disable("ParameterMissingNullable")
-
-        // until we have everything converted, we need these
-        disable("JdkObsolete")
-        disable("UnnecessaryAnonymousClass")
 
         // We don't depend on Guava so use normal splitting
         disable("StringSplitter")
@@ -71,6 +65,12 @@ tasks {
         // Seems to trigger even when a deprecated method isn't called anywhere.
         // We don't get much benefit from it anyways.
         disable("InlineMeSuggester")
+
+        // We have nullaway so don't need errorprone nullable checks which have more false positives.
+        disable("FieldMissingNullable")
+        disable("ParameterMissingNullable")
+        disable("ReturnMissingNullable")
+        disable("VoidMissingNullable")
 
         // allow UPPERCASE type parameter names
         disable("TypeParameterNaming")

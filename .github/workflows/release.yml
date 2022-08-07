@@ -168,7 +168,7 @@ jobs:
           fi
 
       - id: create-github-release
-      - name: Create GitHub release
+        name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -182,7 +182,7 @@ jobs:
                             opentelemetry-jmx-metrics.jar
 
           echo "::set-output name=jmx-metrics-version::$jmx_metrics_version"
-          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar)"
+          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar | cut -d ' ' -f 1)"
 
       - uses: actions/checkout@v3
         with:
@@ -235,8 +235,8 @@ jobs:
             cp /tmp/CHANGELOG.md CHANGELOG.md
           fi
 
-      - name: Set git user
-        run: .github/scripts/set-git-user.sh
+      - name: Use CLA approved github bot
+        run: .github/scripts/use-cla-approved-github-bot.sh
 
       - name: Create pull request against main
         env:
