@@ -27,7 +27,7 @@ import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time";
+  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
   private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
   private static final String METRIC_NAME_MEMORY_USAGE = "process.runtime.jvm.memory.usage";
   private static final String METRIC_NAME_MEMORY_COMMITTED = "process.runtime.jvm.memory.committed";
