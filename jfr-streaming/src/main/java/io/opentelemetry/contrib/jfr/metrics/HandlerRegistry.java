@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.OverallCPULoadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.GarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
@@ -65,6 +66,7 @@ final class HandlerRegistry {
             new NetworkReadHandler(grouper),
             new NetworkWriteHandler(grouper),
             new GCHeapSummaryHandler(),
+            new GarbageCollectionHandler(),
             new ContextSwitchRateHandler(),
             new OverallCPULoadHandler(),
             new ContainerConfigurationHandler(),

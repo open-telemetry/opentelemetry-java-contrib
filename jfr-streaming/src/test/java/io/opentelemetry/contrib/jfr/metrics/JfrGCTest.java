@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class JfrGCTest extends AbstractMetricsTest {
 
   @Test
-  @Disabled
   public void shouldHaveGcEvents() throws Exception {
     // This should generate some events
     System.gc();

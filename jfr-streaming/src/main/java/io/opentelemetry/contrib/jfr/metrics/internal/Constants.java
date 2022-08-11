@@ -47,5 +47,6 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_NETWORK_MODE = AttributeKey.stringKey("mode");
   public static final AttributeKey<String> ATTR_USAGE = AttributeKey.stringKey("usage");
   public static final AttributeKey<String> ATTR_TYPE = AttributeKey.stringKey("type");
-  public static final AttributeKey<String> ATTR_GC_COLLECTOR = AttributeKey.stringKey("name");
+  public static final AttributeKey<String> ATTR_GC_COLLECTOR = AttributeKey.stringKey("gc");
+  public static final AttributeKey<String> ATTR_GC_CAUSE = AttributeKey.stringKey("cause");
 }

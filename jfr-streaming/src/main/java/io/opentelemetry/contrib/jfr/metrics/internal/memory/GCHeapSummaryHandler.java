@@ -31,8 +31,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_MEMORY_MAX = "process.runtime.jvm.memory.limit";
 
   // Experimental GC metrics follow
-  //  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
-  //  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
+  private static final String METRIC_NAME_GC_COUNT = "process.runtime.jvm.gc.count";
 
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
@@ -44,7 +43,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String HEAP_SPACE = "heapSpace";
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_DURATION_AVERAGE = Attributes.of(ATTR_TYPE, AVERAGE);
+  private static final Attributes ATTR_AVERAGE = Attributes.of(ATTR_TYPE, AVERAGE);
   //  private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
   //  private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
 
@@ -52,7 +51,6 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private final List<Long> durations = new ArrayList<>();
   private final List<Long> usage = new ArrayList<>();
   private final List<Long> committed = new ArrayList<>();
   private final List<Long> max = new ArrayList<>();
@@ -75,7 +73,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
         .buildWithCallback(
             codm -> {
               var summary = summarize(usage);
-              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              codm.record(summary.getAverage(), ATTR_AVERAGE);
               usage.clear();
             });
     meter
@@ -86,7 +84,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
         .buildWithCallback(
             codm -> {
               var summary = summarize(committed);
-              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              codm.record(summary.getAverage(), ATTR_AVERAGE);
               committed.clear();
             });
 
@@ -98,8 +96,20 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
         .buildWithCallback(
             codm -> {
               var summary = summarize(max);
-              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+              codm.record(summary.getAverage(), ATTR_AVERAGE);
               max.clear();
+            });
+
+    meter
+        .upDownCounterBuilder(METRIC_NAME_GC_COUNT)
+        .ofDoubles()
+        .setUnit(BYTES)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .buildWithCallback(
+            codm -> {
+              var summary = summarize(usage);
+              codm.record(summary.getAverage(), ATTR_AVERAGE);
+              usage.clear();
             });
 
     // FIXME
@@ -147,34 +157,32 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     } else {
       awaitingPairs.remove(gcId);
       if (when != null && when.equals(BEFORE)) {
-        recordValues(ev, pair);
+        recordValues(pair);
       } else { //  i.e. when.equals(AFTER)
-        recordValues(pair, ev);
+        recordValues(ev);
       }
     }
   }
 
-  private void recordValues(RecordedEvent before, RecordedEvent after) {
-    durations.add(after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
-
-    if (!after.hasField(HEAP_USED)) {
-      logger.fine(String.format("GC Event seen without " + HEAP_USED + " %s", after));
+  private void recordValues(RecordedEvent event) {
+    if (!event.hasField(HEAP_USED)) {
+      logger.fine(String.format("GC Event seen without " + HEAP_USED + " %s", event));
       return;
     }
-    usage.add(after.getLong(HEAP_USED));
+    usage.add(event.getLong(HEAP_USED));
 
-    if (!after.hasField(HEAP_SPACE)) {
-      logger.fine(String.format("GC Event seen without " + HEAP_SPACE + " %s", after));
+    if (!event.hasField(HEAP_SPACE)) {
+      logger.fine(String.format("GC Event seen without " + HEAP_SPACE + " %s", event));
       return;
     }
-    if (after.getValue(HEAP_SPACE) instanceof RecordedObject heapSpace) {
+    if (event.getValue(HEAP_SPACE) instanceof RecordedObject heapSpace) {
       if (!heapSpace.hasField(COMMITTED_SIZE)) {
-        logger.fine(String.format("GC Event seen without " + COMMITTED_SIZE + " %s", after));
+        logger.fine(String.format("GC Event seen without " + COMMITTED_SIZE + " %s", event));
         return;
       }
       committed.add(heapSpace.getLong(COMMITTED_SIZE));
       if (!heapSpace.hasField(RESERVED_SIZE)) {
-        logger.fine(String.format("GC Event seen without " + RESERVED_SIZE + " %s", after));
+        logger.fine(String.format("GC Event seen without " + RESERVED_SIZE + " %s", event));
         return;
       }
       max.add(heapSpace.getLong(RESERVED_SIZE));
