@@ -11,8 +11,7 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-// this variable is updated by opentelemetry-java-instrumentation release process, if you change its
-// name make sure that the instrumentation repo also reflects these changes
+// this line is managed by .github/scripts/update-sdk-version.sh
 val otelVersion = "1.16.0"
 
 val DEPENDENCY_BOMS = listOf(
