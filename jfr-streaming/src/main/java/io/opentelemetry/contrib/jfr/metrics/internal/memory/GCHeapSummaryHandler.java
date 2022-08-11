@@ -31,8 +31,8 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_MEMORY_MAX = "process.runtime.jvm.memory.limit";
 
   // Experimental GC metrics follow
-//  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
-//  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
+  //  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
+  //  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
 
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
@@ -45,8 +45,8 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
   private static final Attributes ATTR_DURATION_AVERAGE = Attributes.of(ATTR_TYPE, AVERAGE);
-//  private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
-//  private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
+  //  private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
+  //  private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
 
   private static final Logger logger = Logger.getLogger(GCHeapSummaryHandler.class.getName());
 
@@ -103,19 +103,19 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
             });
 
     // FIXME
-//    meter
-//        .upDownCounterBuilder(METRIC_NAME_DURATION)
-//        .ofDoubles()
-//        .setUnit(MILLISECONDS)
-//        .setDescription(METRIC_DESCRIPTION_DURATION)
-//        .buildWithCallback(
-//            codm -> {
-//              var summary = summarize(durations);
-//              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
-//              codm.record(summary.getCount(), ATTR_DURATION_COUNT);
-//              codm.record(summary.getMax(), ATTR_DURATION_MAX);
-//              durations.clear();
-//            });
+    //    meter
+    //        .upDownCounterBuilder(METRIC_NAME_DURATION)
+    //        .ofDoubles()
+    //        .setUnit(MILLISECONDS)
+    //        .setDescription(METRIC_DESCRIPTION_DURATION)
+    //        .buildWithCallback(
+    //            codm -> {
+    //              var summary = summarize(durations);
+    //              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+    //              codm.record(summary.getCount(), ATTR_DURATION_COUNT);
+    //              codm.record(summary.getMax(), ATTR_DURATION_MAX);
+    //              durations.clear();
+    //            });
 
   }
 
