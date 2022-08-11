@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,13 +24,11 @@ public class JfrCPUTest extends AbstractMetricsTest {
             metric
                 .hasName("process.runtime.jvm.cpu.longlock")
                 .hasUnit(MILLISECONDS)
-                .hasDoubleHistogram(),
+                .hasHistogramSatisfying(histogram -> {}),
         metric ->
             metric
                 .hasName("process.runtime.jvm.gc.time")
                 .hasUnit(MILLISECONDS)
-                .hasDoubleSum()
-                .points()
-                .anySatisfy(point -> assertThat(point.getValue()).isPositive()));
+                .hasHistogramSatisfying(histogram -> {}));
   }
 }

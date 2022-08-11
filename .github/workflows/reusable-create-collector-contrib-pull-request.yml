@@ -1,0 +1,76 @@
+name: Reusable - Create collector contrib pull request
+
+on:
+  workflow_call:
+    inputs:
+      jmx-metrics-version:
+        type: string
+        required: true
+      jmx-metrics-sha256:
+        type: string
+        required: true
+    secrets:
+      BOT_TOKEN:
+        required: true
+  # to help with partial release build failures
+  workflow_dispatch:
+    inputs:
+      jmx-metrics-version:
+        description: "JMX metrics version"
+        required: true
+      jmx-metrics-sha256:
+        description: "JMX metrics hash (sha256)"
+        required: true
+
+jobs:
+  create-collector-contrib-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: opentelemetrybot/opentelemetry-collector-contrib
+          # this is the personal access token used for "git push" below
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Initialize pull request branch
+        env:
+          VERSION: ${{ inputs.jmx-metrics-version }}
+        run: |
+          git remote add upstream https://github.com/open-telemetry/opentelemetry-collector-contrib.git
+          git fetch upstream
+          git checkout -b update-opentelemetry-jmx-metrics-to-${VERSION} upstream/main
+
+      - name: Update version
+        env:
+          VERSION: ${{ inputs.jmx-metrics-version }}
+          HASH: ${{ inputs.jmx-metrics-sha256 }}
+        run: |
+          # NOTE there are intentional tab characters in the line below
+          sed -i "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
+          git diff
+
+      - name: Use CLA approved github bot
+        run: |
+          # cannot run the use-cla-approved-github-bot.sh script here since in a different repo
+          git config user.name opentelemetrybot
+          git config user.email 107717825+opentelemetrybot@users.noreply.github.com
+
+      - name: Create pull request against opentelemetry-collector-contrib
+        env:
+          # this is the personal access token used for "gh pr create" below
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          VERSION: ${{ inputs.jmx-metrics-version }}
+        run: |
+          message="Update the jmx-metrics version to $VERSION"
+          body="Update the jmx-metrics version to \`$VERSION\`."
+
+          # gh pr create doesn't have a way to explicitly specify different head and base
+          # repositories currently, but it will implicitly pick up the head from a different
+          # repository if you set up a tracking branch
+
+          git commit -a -m "$message"
+          git push --set-upstream origin HEAD:update-opentelemetry-jmx-metrics-to-${VERSION}
+          gh pr create --title "$message" \
+                       --body "$body" \
+                       --repo open-telemetry/opentelemetry-collector-contrib \
+                       --base main

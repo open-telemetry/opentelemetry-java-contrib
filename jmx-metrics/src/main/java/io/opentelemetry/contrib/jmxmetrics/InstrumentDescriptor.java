@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 
 @AutoValue
 abstract class InstrumentDescriptor {

@@ -73,6 +73,7 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
 | [`cassandra`](./docs/target-systems/cassandra.md) |
 | [`hbase`](./docs/target-systems/hbase.md) |
 | [`hadoop`](./docs/target-systems/hadoop.md) |
+| [`jetty`](./docs/target-systems/jetty.md) |
 | [`kafka`](./docs/target-systems/kafka.md) |
 | [`kafka-consumer`](./docs/target-systems/kafka-consumer.md) |
 | [`kafka-producer`](./docs/target-systems/kafka-producer.md) |
@@ -109,7 +110,7 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
    instances (available via `otel.instrument()`) as described below.  It is intended to be used in cases
    where your given `objectNameStr` can return a multiple element `List<GroovyMBean>`.
 - `otel.mbeans(List<String> objectNameStrs)`
-   - This method is equivalent to the above method except, it adds support for multiple ObjectNames. This support is meant for when there are multiple mbeans that relate to the same metric and can be seperated using labels in `otel.instrument()`.
+   - This method is equivalent to the above method except, it adds support for multiple ObjectNames. This support is meant for when there are multiple mbeans that relate to the same metric and can be separated using labels in `otel.instrument()`.
 
 - `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument)`
    - This method provides the ability to easily create and automatically update instrument instances from an
@@ -248,4 +249,4 @@ file contents can also be provided via stdin on startup when using `-config -` a
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 - [Sam DeHaan](https://github.com/dehaansa), ObservIQ
 
-Learn more about component owners in [component-owners.yml](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/workflows/component-owners.yml).
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

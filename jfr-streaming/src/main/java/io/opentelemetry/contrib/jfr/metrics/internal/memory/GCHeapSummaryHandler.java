@@ -8,9 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.AVERAGE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COUNT;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MAX;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
@@ -27,11 +24,16 @@ import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
-  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
+  // The OTel 1.0 metrics follow
   private static final String METRIC_NAME_MEMORY_USAGE = "process.runtime.jvm.memory.usage";
+  // Missing: process.runtime.jvm.memory.init
   private static final String METRIC_NAME_MEMORY_COMMITTED = "process.runtime.jvm.memory.committed";
-  private static final String METRIC_NAME_MEMORY_MAX = "process.runtime.jvm.memory.max";
+  private static final String METRIC_NAME_MEMORY_MAX = "process.runtime.jvm.memory.limit";
+
+  // Experimental GC metrics follow
+//  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time.stopped";
+//  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
+
   private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
@@ -43,8 +45,8 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String COMMITTED_SIZE = "committedSize";
   private static final String RESERVED_SIZE = "reservedSize";
   private static final Attributes ATTR_DURATION_AVERAGE = Attributes.of(ATTR_TYPE, AVERAGE);
-  private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
-  private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
+//  private static final Attributes ATTR_DURATION_COUNT = Attributes.of(ATTR_TYPE, COUNT);
+//  private static final Attributes ATTR_DURATION_MAX = Attributes.of(ATTR_TYPE, MAX);
 
   private static final Logger logger = Logger.getLogger(GCHeapSummaryHandler.class.getName());
 
@@ -66,20 +68,6 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   @Override
   public void initializeMeter(Meter meter) {
     meter
-        .upDownCounterBuilder(METRIC_NAME_DURATION)
-        .ofDoubles()
-        .setUnit(MILLISECONDS)
-        .setDescription(METRIC_DESCRIPTION_DURATION)
-        .buildWithCallback(
-            codm -> {
-              var summary = summarize(durations);
-              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
-              codm.record(summary.getCount(), ATTR_DURATION_COUNT);
-              codm.record(summary.getMax(), ATTR_DURATION_MAX);
-              durations.clear();
-            });
-
-    meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_USAGE)
         .ofDoubles()
         .setUnit(BYTES)
@@ -90,7 +78,6 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
               codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
               usage.clear();
             });
-
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_COMMITTED)
         .ofDoubles()
@@ -114,6 +101,22 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
               codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
               max.clear();
             });
+
+    // FIXME
+//    meter
+//        .upDownCounterBuilder(METRIC_NAME_DURATION)
+//        .ofDoubles()
+//        .setUnit(MILLISECONDS)
+//        .setDescription(METRIC_DESCRIPTION_DURATION)
+//        .buildWithCallback(
+//            codm -> {
+//              var summary = summarize(durations);
+//              codm.record(summary.getAverage(), ATTR_DURATION_AVERAGE);
+//              codm.record(summary.getCount(), ATTR_DURATION_COUNT);
+//              codm.record(summary.getMax(), ATTR_DURATION_MAX);
+//              durations.clear();
+//            });
+
   }
 
   @Override

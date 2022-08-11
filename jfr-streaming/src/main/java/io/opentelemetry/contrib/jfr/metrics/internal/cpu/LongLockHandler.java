@@ -14,6 +14,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.time.Duration;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
     @Override
     public void accept(RecordedEvent recordedEvent) {
       if (recordedEvent.hasField(EVENT_THREAD)) {
-        histogram.record(recordedEvent.getDuration().toMillis(), attributes);
+        histogram.record(DurationUtil.toMillis(recordedEvent.getDuration()), attributes);
       }
       // What about the class name in MONITOR_CLASS ?
       // We can get a stack trace from the thread on the event

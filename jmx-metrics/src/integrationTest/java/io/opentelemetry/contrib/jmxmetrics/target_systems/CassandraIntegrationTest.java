@@ -32,55 +32,55 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.client.request.range_slice.latency.50p",
                 "Token range read request latency - 50th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.99p",
                 "Token range read request latency - 99th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.range_slice.latency.max",
                 "Maximum token range read request latency",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.50p",
                 "Standard read request latency - 50th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.99p",
                 "Standard read request latency - 99th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.read.latency.max",
                 "Maximum standard read request latency",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.50p",
                 "Regular write request latency - 50th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.99p",
                 "Regular write request latency - 99th percentile",
-                "µs"),
+                "us"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.client.request.write.latency.max",
                 "Maximum regular write request latency",
-                "µs"),
+                "us"),
         metric ->
             assertSum(
                 metric,

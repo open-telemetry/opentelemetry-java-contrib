@@ -1,10 +1,9 @@
 pluginManagement {
   plugins {
-    id("com.github.ben-manes.versions") version "0.39.0"
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("com.gradle.enterprise") version "3.8"
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.gradle.enterprise") version "3.10.3"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
-    id("nebula.release") version "16.0.0"
   }
 }
 
@@ -15,6 +14,9 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
+    maven {
+      url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+    }
     mavenLocal()
   }
 }
@@ -37,13 +39,19 @@ rootProject.name = "opentelemetry-java-contrib"
 
 include(":all")
 include(":aws-xray")
+include(":consistent-sampling")
 include(":dependencyManagement")
 include(":example")
 include(":jfr-streaming")
+include(":micrometer-meter-provider")
 include(":jmx-metrics")
 include(":maven-extension")
-include(":runtime-attach")
+include(":runtime-attach:runtime-attach")
+include(":runtime-attach:runtime-attach-core")
 include(":samplers")
 include(":static-instrumenter:agent-instrumenter")
 include(":static-instrumenter:gradle-plugin")
 include(":static-instrumenter:maven-plugin")
+include(":static-instrumenter:agent-extension")
+include(":static-instrumenter:bootstrap")
+include(":static-instrumenter:test-app")

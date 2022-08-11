@@ -1,5 +1,5 @@
 # OpenTelemetry Java Contrib
-[![Build](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/pr-build.yml/badge.svg)](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/pr-build.yml)
+[![Build](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/build.yml/badge.svg)](https://github.com/open-telemetry/opentelemetry-java-contrib/actions/workflows/build.yml)
 
 This project is intended to provide helpful libraries and standalone OpenTelemetry-based utilities that don't fit
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or
@@ -7,13 +7,15 @@ the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
 feature or via instrumentation, this project is hopefully for you.
 
-*This project is in its early stages and doesn't provide any assurances of stability or production readiness.*
-
-
 ## Provided Libraries
 
 * [AWS X-Ray Support](./aws-xray/README.md)
+* [Consistent sampling](./consistent-sampling/README.md)
+* [JFR Streaming](./jfr-streaming/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
+* [OpenTelemetry Maven Extension](./maven-extension/README.md)
+* [Runtime Attach](./runtime-attach/README.md)
+* [Samplers](./samplers/README.md)
 
 ## Getting Started
 
@@ -48,11 +50,10 @@ Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open
 
 - [John Watson](https://github.com/jkwatson), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Pablo Collins](https://github.com/pmcollins), Splunk
 
 Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
 
-- [Anuraag Agrawal](https://github.com/anuraaga), AWS
+- [Jack Berg](https://github.com/jack-berg), New Relic
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk

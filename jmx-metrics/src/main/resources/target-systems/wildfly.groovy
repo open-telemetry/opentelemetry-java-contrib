@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-def beanWildflyDeployment = otel.mbeans("jboss.as.expr:deployment=*,subsystem=undertow")
+def beanWildflyDeployment = otel.mbeans("jboss.as:deployment=*,subsystem=undertow")
 otel.instrument(beanWildflyDeployment, "wildfly.session.count", "The number of sessions created.", "{sessions}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "sessionsCreated", otel.&longCounterCallback)

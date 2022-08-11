@@ -21,51 +21,51 @@ def clientRequestRangeSlice = "${clientRequest},scope=RangeSlice"
 def clientRequestRangeSliceLatency = otel.mbean("${clientRequestRangeSlice},name=Latency")
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.50p",
-        "Token range read request latency - 50th percentile", "µs", "50thPercentile",
+        "Token range read request latency - 50th percentile", "us", "50thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.99p",
-        "Token range read request latency - 99th percentile", "µs", "99thPercentile",
+        "Token range read request latency - 99th percentile", "us", "99thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestRangeSliceLatency,
         "cassandra.client.request.range_slice.latency.max",
-        "Maximum token range read request latency", "µs", "Max",
+        "Maximum token range read request latency", "us", "Max",
         otel.&doubleValueCallback)
 
 def clientRequestRead = "${clientRequest},scope=Read"
 def clientRequestReadLatency = otel.mbean("${clientRequestRead},name=Latency")
 otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.50p",
-        "Standard read request latency - 50th percentile", "µs", "50thPercentile",
+        "Standard read request latency - 50th percentile", "us", "50thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.99p",
-        "Standard read request latency - 99th percentile", "µs", "99thPercentile",
+        "Standard read request latency - 99th percentile", "us", "99thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestReadLatency,
         "cassandra.client.request.read.latency.max",
-        "Maximum standard read request latency", "µs", "Max",
+        "Maximum standard read request latency", "us", "Max",
         otel.&doubleValueCallback)
 
 def clientRequestWrite = "${clientRequest},scope=Write"
 def clientRequestWriteLatency = otel.mbean("${clientRequestWrite},name=Latency")
 otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.50p",
-        "Regular write request latency - 50th percentile", "µs", "50thPercentile",
+        "Regular write request latency - 50th percentile", "us", "50thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.99p",
-        "Regular write request latency - 99th percentile", "µs", "99thPercentile",
+        "Regular write request latency - 99th percentile", "us", "99thPercentile",
         otel.&doubleValueCallback)
 
 otel.instrument(clientRequestWriteLatency,
         "cassandra.client.request.write.latency.max",
-        "Maximum regular write request latency", "µs", "Max",
+        "Maximum regular write request latency", "us", "Max",
         otel.&doubleValueCallback)
 
 def storage = "${cassandraMetrics}:type=Storage"

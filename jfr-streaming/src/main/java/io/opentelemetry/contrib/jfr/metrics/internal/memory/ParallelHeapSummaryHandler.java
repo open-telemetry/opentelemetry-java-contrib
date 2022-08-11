@@ -13,7 +13,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SURVIVOR_S
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 
-  private DoubleHistogram memoryHistogram;
+  private LongHistogram memoryHistogram;
 
   public ParallelHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -57,6 +57,7 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
             .histogramBuilder(METRIC_NAME_MEMORY)
             .setDescription(METRIC_DESCRIPTION_MEMORY)
             .setUnit(BYTES)
+            .ofLongs()
             .build();
   }
 
@@ -100,21 +101,31 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   }
 
   private void recordValues(RecordedEvent before, RecordedEvent after) {
-    if (after.hasField("edenSpace")
-        && after.getValue("edenSpace") instanceof RecordedObject edenSpace) {
-      memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
-      if (before.hasField("edenSpace")
-          && before.getValue("edenSpace") instanceof RecordedObject beforeSpace) {
-        if (edenSpace.hasField("size") && beforeSpace.hasField("size")) {
-          memoryHistogram.record(
-              edenSpace.getLong("size") - beforeSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE_DELTA);
+    if (after.hasField("edenSpace")) {
+      Object edenSpaceObj = after.getValue("edenSpace");
+      if (edenSpaceObj instanceof RecordedObject) {
+        RecordedObject edenSpace = (RecordedObject) edenSpaceObj;
+        memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
+        if (before.hasField("edenSpace")) {
+          Object beforeSpaceObj = before.getValue("edenSpace");
+          if (beforeSpaceObj instanceof RecordedObject) {
+            RecordedObject beforeSpace = (RecordedObject) beforeSpaceObj;
+            if (edenSpace.hasField("size") && beforeSpace.hasField("size")) {
+              memoryHistogram.record(
+                  edenSpace.getLong("size") - beforeSpace.getLong("size"),
+                  ATTR_MEMORY_EDEN_SIZE_DELTA);
+            }
+          }
         }
       }
     }
-    if (after.hasField("fromSpace")
-        && after.getValue("fromSpace") instanceof RecordedObject fromSpace) {
-      if (fromSpace.hasField("size")) {
-        memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
+    if (after.hasField("fromSpace")) {
+      Object fromSpaceObj = after.getValue("fromSpace");
+      if (after.getValue("fromSpace") instanceof RecordedObject) {
+        RecordedObject fromSpace = (RecordedObject) fromSpaceObj;
+        if (fromSpace.hasField("size")) {
+          memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
+        }
       }
     }
   }

@@ -1,11 +1,23 @@
 # this file is used by .github/workflows/component-codeowners.yml
+#
+# NOTE component owners must be members of the GitHub OpenTelemetry organization
+# so that they can be added to @open-telemetry/java-contrib-triagers
+# which in turn is required for them to be auto-assigned as reviewers by the automation
+#
+# NOTE when updating this file, don't forget to update the README.md files in the associated
+# components also
+#
+# NOTE when adding/updating one of the component names, don't forget to update the associated
+# `comp:*` labels
 components:
   aws-xray:
-    - anuraaga
     - willarmiros
+  consistent-sampling:
+    - oertl
+    - PeterF778
   samplers:
-    - anuraaga
     - iNikem
+    - trask
   jfr-streaming:
     - breedx-splk
     - jack-berg
@@ -17,6 +29,11 @@ components:
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
+  micrometer-meter-provider:
+    - HaloFour
   runtime-attach:
     - iNikem
-    - trask
+    - jeanbisutti
+  static-instrumenter:
+    - kubawach
+    - anosek-an

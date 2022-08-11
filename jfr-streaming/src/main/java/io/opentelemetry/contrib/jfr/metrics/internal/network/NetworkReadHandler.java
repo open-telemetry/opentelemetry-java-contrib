@@ -18,8 +18,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
@@ -27,7 +29,7 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.SocketRead";
 
-  private DoubleHistogram bytesHistogram;
+  private LongHistogram bytesHistogram;
   private DoubleHistogram durationHistogram;
 
   public NetworkReadHandler(ThreadGrouper nameNormalizer) {
@@ -42,6 +44,7 @@ public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
             .histogramBuilder(METRIC_NAME_NETWORK_BYTES)
             .setDescription(METRIC_DESCRIPTION_NETWORK_BYTES)
             .setUnit(BYTES)
+            .ofLongs()
             .build();
     durationHistogram =
         meter
@@ -64,12 +67,12 @@ public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
   private static class PerThreadNetworkReadHandler implements Consumer<RecordedEvent> {
     private static final String BYTES_READ = "bytesRead";
 
-    private final DoubleHistogram bytesHistogram;
+    private final LongHistogram bytesHistogram;
     private final DoubleHistogram durationHistogram;
     private final Attributes attributes;
 
     public PerThreadNetworkReadHandler(
-        DoubleHistogram bytesHistogram, DoubleHistogram durationHistogram, String threadName) {
+        LongHistogram bytesHistogram, DoubleHistogram durationHistogram, String threadName) {
       this.bytesHistogram = bytesHistogram;
       this.durationHistogram = durationHistogram;
       this.attributes =
@@ -79,7 +82,7 @@ public final class NetworkReadHandler extends AbstractThreadDispatchingHandler {
     @Override
     public void accept(RecordedEvent ev) {
       bytesHistogram.record(ev.getLong(BYTES_READ), attributes);
-      durationHistogram.record(ev.getDuration().toMillis(), attributes);
+      durationHistogram.record(DurationUtil.toMillis(ev.getDuration()), attributes);
     }
   }
 }
