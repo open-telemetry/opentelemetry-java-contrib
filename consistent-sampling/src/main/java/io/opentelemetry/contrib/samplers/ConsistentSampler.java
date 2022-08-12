@@ -179,7 +179,8 @@ public abstract class ConsistentSampler implements Sampler {
     if (otherConsistentSampler == this) {
       return this;
     }
-    return new ConsistentComposedAndSampler(this, otherConsistentSampler);
+    return new ConsistentComposedAndSampler(
+        this, otherConsistentSampler, RValueGenerators.getDefault());
   }
 
   /**
@@ -201,7 +202,8 @@ public abstract class ConsistentSampler implements Sampler {
     if (otherConsistentSampler == this) {
       return this;
     }
-    return new ConsistentComposedOrSampler(this, otherConsistentSampler);
+    return new ConsistentComposedOrSampler(
+        this, otherConsistentSampler, RValueGenerators.getDefault());
   }
 
   private final RValueGenerator rValueGenerator;
