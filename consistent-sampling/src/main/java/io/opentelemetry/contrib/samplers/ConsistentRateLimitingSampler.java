@@ -10,7 +10,6 @@ import static java.util.Objects.requireNonNull;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
-import java.util.function.ToIntFunction;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -101,7 +100,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   ConsistentRateLimitingSampler(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      ToIntFunction<String> rValueGenerator,
+      RValueGenerator rValueGenerator,
       RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
     super(rValueGenerator);

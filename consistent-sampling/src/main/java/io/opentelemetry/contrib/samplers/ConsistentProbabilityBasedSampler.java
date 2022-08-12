@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.samplers;
 
-import java.util.function.ToIntFunction;
 import javax.annotation.concurrent.Immutable;
 
 /** A consistent sampler that samples with a fixed probability. */
@@ -26,7 +25,7 @@ final class ConsistentProbabilityBasedSampler extends ConsistentSampler {
    */
   ConsistentProbabilityBasedSampler(
       double samplingProbability,
-      ToIntFunction<String> rValueGenerator,
+      RValueGenerator rValueGenerator,
       RandomGenerator randomGenerator) {
     super(rValueGenerator);
     if (samplingProbability < 0.0 || samplingProbability > 1.0) {

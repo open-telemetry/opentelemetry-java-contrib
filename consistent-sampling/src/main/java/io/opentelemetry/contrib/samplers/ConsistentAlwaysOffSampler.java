@@ -10,14 +10,8 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class ConsistentAlwaysOffSampler extends ConsistentSampler {
 
-  private ConsistentAlwaysOffSampler() {
-    super(s -> RandomGenerator.getDefault().numberOfLeadingZerosOfRandomLong());
-  }
-
-  private static final ConsistentSampler INSTANCE = new ConsistentAlwaysOffSampler();
-
-  static ConsistentSampler getInstance() {
-    return INSTANCE;
+  ConsistentAlwaysOffSampler(RValueGenerator rValueGenerator) {
+    super(rValueGenerator);
   }
 
   @Override

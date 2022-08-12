@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.function.ToIntFunction;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -30,7 +29,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
    * @param rValueGenerator the function to use for generating the r-value
    */
   ConsistentParentBasedSampler(
-      ConsistentSampler rootSampler, ToIntFunction<String> rValueGenerator) {
+      ConsistentSampler rootSampler, RValueGenerator rValueGenerator) {
     super(rValueGenerator);
     this.rootSampler = requireNonNull(rootSampler);
     this.description =
