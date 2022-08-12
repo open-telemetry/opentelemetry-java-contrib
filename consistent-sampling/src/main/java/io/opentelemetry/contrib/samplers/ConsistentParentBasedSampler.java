@@ -28,8 +28,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
    * @param rootSampler the root sampler
    * @param rValueGenerator the function to use for generating the r-value
    */
-  ConsistentParentBasedSampler(
-      ConsistentSampler rootSampler, RValueGenerator rValueGenerator) {
+  ConsistentParentBasedSampler(ConsistentSampler rootSampler, RValueGenerator rValueGenerator) {
     super(rValueGenerator);
     this.rootSampler = requireNonNull(rootSampler);
     this.description =
