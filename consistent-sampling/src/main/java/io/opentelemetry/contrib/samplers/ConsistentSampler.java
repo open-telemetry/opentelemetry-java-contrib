@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
 import java.util.function.LongSupplier;
+import java.util.function.ToIntFunction;
 
 /** Abstract base class for consistent samplers. */
 public abstract class ConsistentSampler implements Sampler {
@@ -28,7 +29,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @return a sampler
    */
-  public static final ConsistentSampler alwaysOn() {
+  public static ConsistentSampler alwaysOn() {
     return ConsistentAlwaysOnSampler.getInstance();
   }
 
@@ -37,7 +38,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @return a sampler
    */
-  public static final ConsistentSampler alwaysOff() {
+  public static ConsistentSampler alwaysOff() {
     return ConsistentAlwaysOffSampler.getInstance();
   }
 
@@ -47,8 +48,25 @@ public abstract class ConsistentSampler implements Sampler {
    * @param samplingProbability the sampling probability
    * @return a sampler
    */
-  public static final ConsistentSampler probabilityBased(double samplingProbability) {
-    return new ConsistentProbabilityBasedSampler(samplingProbability);
+  public static ConsistentSampler probabilityBased(double samplingProbability) {
+    RandomGenerator randomGenerator = RandomGenerator.getDefault();
+    return new ConsistentProbabilityBasedSampler(
+        samplingProbability,
+        s -> randomGenerator.numberOfLeadingZerosOfRandomLong(),
+        randomGenerator);
+  }
+
+  /**
+   * Returns a {@link ConsistentSampler} that samples each span with a fixed probability.
+   *
+   * @param samplingProbability the sampling probability
+   * @param rValueGenerator the function to use for generating the r-value
+   * @return a sampler
+   */
+  public static ConsistentSampler probabilityBased(
+      double samplingProbability, ToIntFunction<String> rValueGenerator) {
+    return new ConsistentProbabilityBasedSampler(
+        samplingProbability, rValueGenerator, RandomGenerator.getDefault());
   }
 
   /**
@@ -58,9 +76,12 @@ public abstract class ConsistentSampler implements Sampler {
    * @param randomGenerator a random generator
    * @return a sampler
    */
-  static final ConsistentSampler probabilityBased(
+  static ConsistentSampler probabilityBased(
       double samplingProbability, RandomGenerator randomGenerator) {
-    return new ConsistentProbabilityBasedSampler(samplingProbability, randomGenerator);
+    return new ConsistentProbabilityBasedSampler(
+        samplingProbability,
+        s -> randomGenerator.numberOfLeadingZerosOfRandomLong(),
+        randomGenerator);
   }
 
   /**
@@ -69,8 +90,9 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @param rootSampler the root sampler
    */
-  public static final ConsistentSampler parentBased(ConsistentSampler rootSampler) {
-    return new ConsistentParentBasedSampler(rootSampler);
+  public static ConsistentSampler parentBased(ConsistentSampler rootSampler) {
+    return parentBased(
+        rootSampler, s -> RandomGenerator.getDefault().numberOfLeadingZerosOfRandomLong());
   }
 
   /**
@@ -78,11 +100,11 @@ public abstract class ConsistentSampler implements Sampler {
    * or falls-back to the given sampler if it is a root span.
    *
    * @param rootSampler the root sampler
-   * @param randomGenerator a random generator
+   * @param rValueGenerator the function to use for generating the r-value
    */
-  static final ConsistentSampler parentBased(
-      ConsistentSampler rootSampler, RandomGenerator randomGenerator) {
-    return new ConsistentParentBasedSampler(rootSampler, randomGenerator);
+  static ConsistentSampler parentBased(
+      ConsistentSampler rootSampler, ToIntFunction<String> rValueGenerator) {
+    return new ConsistentParentBasedSampler(rootSampler, rValueGenerator);
   }
 
   /**
@@ -93,9 +115,15 @@ public abstract class ConsistentSampler implements Sampler {
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
    */
-  public static final ConsistentSampler rateLimited(
+  public static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
-    return new ConsistentRateLimitingSampler(targetSpansPerSecondLimit, adaptationTimeSeconds);
+    RandomGenerator randomGenerator = RandomGenerator.getDefault();
+    return new ConsistentRateLimitingSampler(
+        targetSpansPerSecondLimit,
+        adaptationTimeSeconds,
+        s -> randomGenerator.numberOfLeadingZerosOfRandomLong(),
+        randomGenerator,
+        System::nanoTime);
   }
 
   /**
@@ -108,13 +136,17 @@ public abstract class ConsistentSampler implements Sampler {
    * @param randomGenerator a random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  static final ConsistentSampler rateLimited(
+  static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
     return new ConsistentRateLimitingSampler(
-        targetSpansPerSecondLimit, adaptationTimeSeconds, randomGenerator, nanoTimeSupplier);
+        targetSpansPerSecondLimit,
+        adaptationTimeSeconds,
+        s -> randomGenerator.numberOfLeadingZerosOfRandomLong(),
+        RandomGenerator.getDefault(),
+        nanoTimeSupplier);
   }
 
   /**
@@ -161,17 +193,13 @@ public abstract class ConsistentSampler implements Sampler {
     return new ConsistentComposedOrSampler(this, otherConsistentSampler);
   }
 
-  protected final RandomGenerator randomGenerator;
+  private final ToIntFunction<String> rValueGenerator;
 
-  protected ConsistentSampler(RandomGenerator randomGenerator) {
-    this.randomGenerator = requireNonNull(randomGenerator);
+  protected ConsistentSampler(ToIntFunction<String> rValueGenerator) {
+    this.rValueGenerator = requireNonNull(rValueGenerator);
   }
 
-  protected ConsistentSampler() {
-    this(RandomGenerator.getDefault());
-  }
-
-  private static final boolean isInvariantViolated(
+  private static boolean isInvariantViolated(
       OtelTraceState otelTraceState, boolean isParentSampled) {
     if (otelTraceState.hasValidR() && otelTraceState.hasValidP()) {
       // if valid p- and r-values are given, they must be consistent with the isParentSampled flag
@@ -212,8 +240,7 @@ public abstract class ConsistentSampler implements Sampler {
 
     // generate new r-value if not available
     if (!otelTraceState.hasValidR()) {
-      otelTraceState.setR(
-          Math.min(randomGenerator.numberOfLeadingZerosOfRandomLong(), OtelTraceState.getMaxR()));
+      otelTraceState.setR(Math.min(rValueGenerator.applyAsInt(traceId), OtelTraceState.getMaxR()));
     }
 
     // determine and set new p-value that is used for the sampling decision

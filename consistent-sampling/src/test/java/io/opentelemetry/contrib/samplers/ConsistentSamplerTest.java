@@ -91,7 +91,8 @@ class ConsistentSamplerTest {
   private static ConsistentSampler createConsistentSampler(int p, int r) {
     long randomLong = ~(0xFFFFFFFFFFFFFFFFL << r);
 
-    return new ConsistentSampler(RandomGenerator.create(() -> randomLong)) {
+    return new ConsistentSampler(
+        s -> RandomGenerator.create(() -> randomLong).numberOfLeadingZerosOfRandomLong()) {
       @Override
       public String getDescription() {
         throw new UnsupportedOperationException();

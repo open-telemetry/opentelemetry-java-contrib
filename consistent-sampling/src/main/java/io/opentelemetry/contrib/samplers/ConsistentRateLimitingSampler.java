@@ -10,6 +10,7 @@ import static java.util.Objects.requireNonNull;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
+import java.util.function.ToIntFunction;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -85,6 +86,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private final double inverseAdaptationTimeNanos;
   private final double targetSpansPerNanosecondLimit;
   private final AtomicReference<State> state;
+  private final RandomGenerator randomGenerator;
 
   /**
    * Constructor.
@@ -92,30 +94,17 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param targetSpansPerSecondLimit the desired spans per second limit
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
-   */
-  ConsistentRateLimitingSampler(double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
-    this(
-        targetSpansPerSecondLimit,
-        adaptationTimeSeconds,
-        RandomGenerator.getDefault(),
-        System::nanoTime);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param targetSpansPerSecondLimit the desired spans per second limit
-   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
-   *     exponential smoothing)
+   * @param rValueGenerator the function to use for generating the r-value
    * @param randomGenerator a random generator
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   ConsistentRateLimitingSampler(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
+      ToIntFunction<String> rValueGenerator,
       RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
-    super(randomGenerator);
+    super(rValueGenerator);
 
     if (targetSpansPerSecondLimit < 0.0) {
       throw new IllegalArgumentException("Limit for sampled spans per second must be nonnegative!");
@@ -133,6 +122,8 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this.targetSpansPerNanosecondLimit = 1e-9 * targetSpansPerSecondLimit;
 
     this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
+
+    this.randomGenerator = randomGenerator;
   }
 
   private State updateState(State oldState, long currentNanoTime) {

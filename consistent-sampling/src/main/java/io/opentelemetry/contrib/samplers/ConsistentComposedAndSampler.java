@@ -22,6 +22,7 @@ final class ConsistentComposedAndSampler extends ConsistentSampler {
   private final String description;
 
   ConsistentComposedAndSampler(ConsistentSampler sampler1, ConsistentSampler sampler2) {
+    super(s -> RandomGenerator.getDefault().numberOfLeadingZerosOfRandomLong());
     this.sampler1 = requireNonNull(sampler1);
     this.sampler2 = requireNonNull(sampler2);
     this.description =
