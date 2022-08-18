@@ -6,9 +6,9 @@
 package io.opentelemetry.contrib.staticinstrumenter.config;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.instrumentation.api.config.Config;
 import io.opentelemetry.javaagent.tooling.bootstrap.BootstrapPackagesBuilder;
 import io.opentelemetry.javaagent.tooling.bootstrap.BootstrapPackagesConfigurer;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 
 /**
  * Makes classes from {@link io.opentelemetry.contrib.staticinstrumenter.agent.main} package
@@ -18,7 +18,7 @@ import io.opentelemetry.javaagent.tooling.bootstrap.BootstrapPackagesConfigurer;
 public class StaticPackagesConfigurer implements BootstrapPackagesConfigurer {
 
   @Override
-  public void configure(Config config, BootstrapPackagesBuilder builder) {
+  public void configure(BootstrapPackagesBuilder builder, ConfigProperties config) {
     builder.add("io.opentelemetry.contrib.staticinstrumenter.agent.main");
   }
 }
