@@ -1,4 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+  id("com.github.johnrengelman.shadow")
+
   id("otel.java-conventions")
   id("otel.publish-conventions")
 }
@@ -19,6 +23,14 @@ dependencies {
 }
 
 tasks {
+  processResources {
+    val agentJar = project(":static-instrumenter:agent-instrumenter").tasks.getByName("shadowJar", ShadowJar::class)
+    dependsOn(agentJar)
+    from(agentJar.archiveFile) {
+      rename { "opentelemetry-agent.jar" }
+    }
+  }
+
   withType<JavaCompile>().configureEach {
     with(options) {
       release.set(11)
