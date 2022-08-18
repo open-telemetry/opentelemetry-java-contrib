@@ -26,7 +26,7 @@ package io.opentelemetry.contrib.samplers;
  *   <tr><td>59</td><td>2**-60</td></tr>
  *   <tr><td>60</td><td>2**-61</td></tr>
  *   <tr><td>61</td><td>2**-62</td></tr>
- *   <tr><td>62</td><td>2**-62</td></tr>
+ *   <tr><td>>=62</td><td>2**-62</td></tr>
  * </tbody>
  * </table>
  *
