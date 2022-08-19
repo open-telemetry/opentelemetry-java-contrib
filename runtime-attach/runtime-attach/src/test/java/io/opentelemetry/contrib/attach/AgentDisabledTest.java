@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.attach;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.extension.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
