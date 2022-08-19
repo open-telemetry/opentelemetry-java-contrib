@@ -59,14 +59,10 @@ class ConsistentRateLimitingSamplerTest {
 
     double targetSpansPerSecondLimit = 1000;
     double adaptationTimeSeconds = 5;
-    SplittableRandom random = new SplittableRandom(0L);
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            RandomGenerator.create(random::nextLong),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, rValueGenerator(), nanoTimeSupplier);
 
     long nanosBetweenSpans = TimeUnit.MICROSECONDS.toNanos(100);
     int numSpans = 1000000;
@@ -96,14 +92,10 @@ class ConsistentRateLimitingSamplerTest {
 
     double targetSpansPerSecondLimit = 1000;
     double adaptationTimeSeconds = 5;
-    SplittableRandom random = new SplittableRandom(0L);
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            RandomGenerator.create(random::nextLong),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, rValueGenerator(), nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(100);
     long nanosBetweenSpans2 = TimeUnit.MICROSECONDS.toNanos(10);
@@ -155,14 +147,10 @@ class ConsistentRateLimitingSamplerTest {
 
     double targetSpansPerSecondLimit = 1000;
     double adaptationTimeSeconds = 5;
-    SplittableRandom random = new SplittableRandom(0L);
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            RandomGenerator.create(random::nextLong),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, rValueGenerator(), nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(10);
     long nanosBetweenSpans2 = TimeUnit.MICROSECONDS.toNanos(100);
@@ -207,5 +195,11 @@ class ConsistentRateLimitingSamplerTest {
         .isLessThan(0.5 * targetSpansPerSecondLimit);
     assertThat(numSampledSpansInLast5Seconds / 5.)
         .isCloseTo(targetSpansPerSecondLimit, Percentage.withPercentage(5));
+  }
+
+  private static RValueGenerator rValueGenerator() {
+    SplittableRandom random = new SplittableRandom(0L);
+    RandomGenerator randomGenerator = RandomGenerator.create(random::nextLong);
+    return s -> randomGenerator.numberOfLeadingZerosOfRandomLong();
   }
 }

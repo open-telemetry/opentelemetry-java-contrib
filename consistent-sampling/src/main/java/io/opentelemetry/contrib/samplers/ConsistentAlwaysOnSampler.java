@@ -10,12 +10,8 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class ConsistentAlwaysOnSampler extends ConsistentSampler {
 
-  private ConsistentAlwaysOnSampler() {}
-
-  private static final ConsistentSampler INSTANCE = new ConsistentAlwaysOnSampler();
-
-  static ConsistentSampler getInstance() {
-    return INSTANCE;
+  ConsistentAlwaysOnSampler(RValueGenerator rValueGenerator) {
+    super(rValueGenerator);
   }
 
   @Override
