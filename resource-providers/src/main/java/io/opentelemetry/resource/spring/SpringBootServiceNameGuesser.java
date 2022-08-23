@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resource.spring;
 
 import com.google.auto.service.AutoService;
@@ -5,9 +10,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -23,21 +25,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 /**
- * A ResourceProvider that will attempt to guess the application name for a
- * Spring Boot service. When successful, it will return a Resource that has
- * the service name attribute populated with the name of the Spring Boot
- * application. It uses the following strategies, and the first successful
+ * A ResourceProvider that will attempt to guess the application name for a Spring Boot service.
+ * When successful, it will return a Resource that has the service name attribute populated with the
+ * name of the Spring Boot application. It uses the following strategies, and the first successful
  * strategy wins:
- * - Check for the SPRING_APPLICATION_NAME environment variable
- * - Check for spring.application.name system property
- * - Check for application.properties file on the classpath
- * - Check for application.properties in the current working dir
- * - Check for application.yml on the classpath
- * - Check for application.yml in the current working dir
- * - Check for --spring.application.name program argument (not jvm arg) via ProcessHandle
- * - Check for --spring.application.name program argument via sun.java.command system property
+ *
+ * <ul>
+ *   <li>Check for the SPRING_APPLICATION_NAME environment variable
+ *   <li>Check for spring.application.name system property
+ *   <li>Check for application.properties file on the classpath
+ *   <li>Check for application.properties in the current working dir
+ *   <li>Check for application.yml on the classpath
+ *   <li>Check for application.yml in the current working dir
+ *   <li>Check for --spring.application.name program argument (not jvm arg) via ProcessHandle
+ *   <li>Check for --spring.application.name program argument via sun.java.command system property
+ * </ul>
  */
 @AutoService(ResourceProvider.class)
 public class SpringBootServiceNameGuesser implements ResourceProvider {
@@ -45,10 +52,14 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   private static final Logger logger = LoggerFactory.getLogger(SpringBootServiceNameGuesser.class);
   private final SystemHelper system;
 
-  public SpringBootServiceNameGuesser() {this(new SystemHelper());}
+  public SpringBootServiceNameGuesser() {
+    this(new SystemHelper());
+  }
 
   // Exists for testing
-  SpringBootServiceNameGuesser(SystemHelper system) {this.system = system;}
+  SpringBootServiceNameGuesser(SystemHelper system) {
+    this.system = system;
+  }
 
   @Override
   public Resource createResource(ConfigProperties config) {
@@ -62,17 +73,16 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
             this::findByCurrentDirectoryApplicationProperties,
             this::findByClasspathApplicationYaml,
             this::findByCurrentDirectoryApplicationYaml,
-            this::findByCommandlineArgument
-        );
-    return finders.map(Supplier::get)
+            this::findByCommandlineArgument);
+    return finders
+        .map(Supplier::get)
         .filter(Objects::nonNull)
         .findFirst()
-        .map(serviceName -> {
-          logger.debug("Guessed Spring Boot service name: " + serviceName);
-          return Resource.builder()
-              .put(ResourceAttributes.SERVICE_NAME, serviceName)
-              .build();
-        })
+        .map(
+            serviceName -> {
+              logger.debug("Guessed Spring Boot service name: " + serviceName);
+              return Resource.builder().put(ResourceAttributes.SERVICE_NAME, serviceName).build();
+            })
         .orElseGet(Resource::empty);
   }
 
@@ -100,10 +110,9 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Nullable
   private String findByCurrentDirectoryApplicationProperties() {
     String result = null;
-    try(InputStream in = system.openFile("application.properties")){
+    try (InputStream in = system.openFile("application.properties")) {
       result = getAppNamePropertyFromStream(in);
-    }
-    catch(Exception e){
+    } catch (Exception e) {
       // expected to fail sometimes
     }
     logger.debug("Checking application.properties in current dir: " + result);
@@ -120,10 +129,9 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Nullable
   private String findByCurrentDirectoryApplicationYaml() {
     String result = null;
-    try(InputStream in = system.openFile("application.yml")){
+    try (InputStream in = system.openFile("application.yml")) {
       result = parseNameFromYaml(in);
-    }
-    catch(Exception e){
+    } catch (Exception e) {
       // expected to fail sometimes
     }
     logger.debug("Checking application.yml in current dir: " + result);
@@ -136,14 +144,14 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     Yaml yaml = new Yaml();
     try {
       Map<String, Object> data = yaml.load(in);
-      Map<String, Map<String, Object>> spring = (Map<String, Map<String, Object>>) data.get("spring");
-      Map<String, Object> app =  spring.get("application");
+      Map<String, Map<String, Object>> spring =
+          (Map<String, Map<String, Object>>) data.get("spring");
+      Map<String, Object> app = spring.get("application");
       Object name = app.get("name");
-      if(name != null){
+      if (name != null) {
         return (String) name;
       }
-    }
-    catch(Exception e){
+    } catch (Exception e) {
       // expected to fail sometimes
     }
     return null;
@@ -152,7 +160,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Nullable
   private String findByCommandlineArgument() {
     String result = attemptProcessHandleReflection();
-    if(result == null){
+    if (result == null) {
       String javaCommand = system.getProperty("sun.java.command");
       result = parseNameFromCommandLine(javaCommand);
     }
@@ -194,7 +202,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   }
 
   @Nullable
-  private String loadFromClasspath(String filename, Function<InputStream,String> parser){
+  private String loadFromClasspath(String filename, Function<InputStream, String> parser) {
     try (InputStream in = system.openClasspathResource(filename)) {
       return parser.apply(in);
     } catch (Exception e) {
@@ -213,7 +221,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
       return System.getProperty(key);
     }
 
-    InputStream openClasspathResource(String filename){
+    InputStream openClasspathResource(String filename) {
       return getClass().getClassLoader().getResourceAsStream(filename);
     }
 
@@ -222,8 +230,8 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     }
 
     /**
-     * Attempts to use ProcessHandle to get the full commandline of the current process.
-     * Will only succeed on java 9+.
+     * Attempts to use ProcessHandle to get the full commandline of the current process. Will only
+     * succeed on java 9+.
      */
     @SuppressWarnings("unchecked")
     String attemptGetCommandLineViaReflection() throws Exception {
@@ -237,5 +245,4 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
       return ((Optional<String>) optionalCommandLine).get();
     }
   }
-
 }

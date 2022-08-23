@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resource.spring;
 
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
@@ -19,10 +24,8 @@ class SpringBootServiceNameGuesserTest {
 
   public static final String PROPS = "application.properties";
   public static final String APPLICATION_YML = "application.yml";
-  @Mock
-  ConfigProperties config;
-  @Mock
-  SpringBootServiceNameGuesser.SystemHelper system;
+  @Mock ConfigProperties config;
+  @Mock SpringBootServiceNameGuesser.SystemHelper system;
 
   @Test
   void findByEnvVar() {
@@ -52,8 +55,7 @@ class SpringBootServiceNameGuesserTest {
       var guesser = new SpringBootServiceNameGuesser(system);
       var result = guesser.createResource(config);
       expectServiceName(result, "fish-tank");
-    }
-    finally{
+    } finally {
       Files.delete(propsPath);
     }
   }
@@ -78,15 +80,16 @@ class SpringBootServiceNameGuesserTest {
       var guesser = new SpringBootServiceNameGuesser(system);
       var result = guesser.createResource(config);
       expectServiceName(result, "cat-store");
-    }
-    finally{
+    } finally {
       Files.delete(yamlPath);
     }
   }
 
   @Test
   void getFromCommandlineArgsWithProcessHandle() throws Exception {
-    when(system.attemptGetCommandLineViaReflection()).thenReturn("/bin/java sweet-spring.jar --spring.application.name=tiger-town --quiet=never");
+    when(system.attemptGetCommandLineViaReflection())
+        .thenReturn(
+            "/bin/java sweet-spring.jar --spring.application.name=tiger-town --quiet=never");
     var guesser = new SpringBootServiceNameGuesser(system);
     var result = guesser.createResource(config);
     expectServiceName(result, "tiger-town");
@@ -95,7 +98,8 @@ class SpringBootServiceNameGuesserTest {
   @Test
   void getFromCommandlineArgsWithSystemProperty() throws Exception {
     when(system.getProperty("spring.application.name")).thenReturn(null);
-    when(system.getProperty("sun.java.command")).thenReturn("/bin/java sweet-spring.jar --spring.application.name=bullpen --quiet=never");
+    when(system.getProperty("sun.java.command"))
+        .thenReturn("/bin/java sweet-spring.jar --spring.application.name=bullpen --quiet=never");
     var guesser = new SpringBootServiceNameGuesser(system);
     var result = guesser.createResource(config);
     expectServiceName(result, "bullpen");
@@ -104,5 +108,4 @@ class SpringBootServiceNameGuesserTest {
   private void expectServiceName(Resource result, String expected) {
     assertThat(result.getAttribute(SERVICE_NAME)).isEqualTo(expected);
   }
-
 }
