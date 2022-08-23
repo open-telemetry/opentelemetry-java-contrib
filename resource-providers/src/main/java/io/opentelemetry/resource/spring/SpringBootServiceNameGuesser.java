@@ -121,7 +121,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   @Nullable
   private String findByClasspathApplicationYaml() {
-    String result = loadFromClasspath("application.yml", this::parseNameFromYaml);
+    String result = loadFromClasspath("application.yml", SpringBootServiceNameGuesser::parseNameFromYaml);
     logger.debug("Checking application.yml in classpath: " + result);
     return result;
   }
@@ -140,7 +140,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   @Nullable
   @SuppressWarnings("unchecked")
-  private String parseNameFromYaml(InputStream in) {
+  private static String parseNameFromYaml(InputStream in) {
     Yaml yaml = new Yaml();
     try {
       Map<String, Object> data = yaml.load(in);
