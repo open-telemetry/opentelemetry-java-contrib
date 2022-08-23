@@ -49,7 +49,8 @@ import org.yaml.snakeyaml.Yaml;
 @AutoService(ResourceProvider.class)
 public class SpringBootServiceNameGuesser implements ResourceProvider {
 
-  private static final Pattern COMMANDLINE_PATTERN = Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
+  private static final Pattern COMMANDLINE_PATTERN =
+      Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
   private static final Logger logger = LoggerFactory.getLogger(SpringBootServiceNameGuesser.class);
   private final SystemHelper system;
 
@@ -122,7 +123,8 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   @Nullable
   private String findByClasspathApplicationYaml() {
-    String result = loadFromClasspath("application.yml", SpringBootServiceNameGuesser::parseNameFromYaml);
+    String result =
+        loadFromClasspath("application.yml", SpringBootServiceNameGuesser::parseNameFromYaml);
     logger.debug("Checking application.yml in classpath: " + result);
     return result;
   }
@@ -147,9 +149,9 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
       Map<String, Object> data = yaml.load(in);
       Map<String, Map<String, Object>> spring =
           (Map<String, Map<String, Object>>) data.get("spring");
-      if(spring != null){
+      if (spring != null) {
         Map<String, Object> app = spring.get("application");
-        if(app != null){
+        if (app != null) {
           Object name = app.get("name");
           if (name != null) {
             return (String) name;
