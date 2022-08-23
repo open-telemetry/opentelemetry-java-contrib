@@ -49,6 +49,7 @@ import org.yaml.snakeyaml.Yaml;
 @AutoService(ResourceProvider.class)
 public class SpringBootServiceNameGuesser implements ResourceProvider {
 
+  private static final Pattern COMMANDLINE_PATTERN = Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
   private static final Logger logger = LoggerFactory.getLogger(SpringBootServiceNameGuesser.class);
   private final SystemHelper system;
 
@@ -179,8 +180,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   }
 
   private String parseNameFromCommandLine(String commandLine) {
-    Pattern pattern = Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
-    Matcher matcher = pattern.matcher(commandLine);
+    Matcher matcher = COMMANDLINE_PATTERN.matcher(commandLine);
     boolean ignored = matcher.find(); // Required before group()
     return matcher.group(1);
   }
