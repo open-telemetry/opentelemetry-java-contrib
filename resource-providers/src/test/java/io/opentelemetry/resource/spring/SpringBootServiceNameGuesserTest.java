@@ -105,7 +105,7 @@ class SpringBootServiceNameGuesserTest {
     expectServiceName(result, "bullpen");
   }
 
-  private void expectServiceName(Resource result, String expected) {
+  private static void expectServiceName(Resource result, String expected) {
     assertThat(result.getAttribute(SERVICE_NAME)).isEqualTo(expected);
   }
 }
