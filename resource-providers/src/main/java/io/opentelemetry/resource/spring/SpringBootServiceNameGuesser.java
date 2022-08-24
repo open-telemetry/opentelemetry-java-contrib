@@ -158,7 +158,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
           }
         }
       }
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       // expected to fail sometimes
     }
     return null;
