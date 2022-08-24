@@ -193,7 +193,8 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   @Nullable
   private String readNameFromAppProperties() {
-    return loadFromClasspath("application.properties", SpringBootServiceNameGuesser::getAppNamePropertyFromStream);
+    return loadFromClasspath(
+        "application.properties", SpringBootServiceNameGuesser::getAppNamePropertyFromStream);
   }
 
   @Nullable
