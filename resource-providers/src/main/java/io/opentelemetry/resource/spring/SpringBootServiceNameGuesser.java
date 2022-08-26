@@ -69,13 +69,13 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     logger.log(Level.FINER, "Performing Spring Boot service name auto-detection...");
     Stream<Supplier<String>> finders =
         Stream.of(
-            this::findByEnvironmentVariable,
+            this::findByCommandlineArgument,
             this::findBySystemProperties,
-            this::findByClasspathApplicationProperties,
+            this::findByEnvironmentVariable,
             this::findByCurrentDirectoryApplicationProperties,
-            this::findByClasspathApplicationYaml,
             this::findByCurrentDirectoryApplicationYaml,
-            this::findByCommandlineArgument);
+            this::findByClasspathApplicationProperties,
+            this::findByClasspathApplicationYaml);
     return finders
         .map(Supplier::get)
         .filter(Objects::nonNull)
