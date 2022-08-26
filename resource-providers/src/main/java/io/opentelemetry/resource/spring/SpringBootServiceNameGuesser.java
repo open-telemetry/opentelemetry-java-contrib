@@ -22,10 +22,10 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.yaml.snakeyaml.Yaml;
 
@@ -51,7 +51,8 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   private static final Pattern COMMANDLINE_PATTERN =
       Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
-  private static final Logger logger = Logger.getLogger(SpringBootServiceNameGuesser.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(SpringBootServiceNameGuesser.class.getName());
   private final SystemHelper system;
 
   public SpringBootServiceNameGuesser() {
@@ -105,7 +106,9 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Nullable
   private String findByClasspathApplicationProperties() {
     String result = readNameFromAppProperties();
-    logger.log(Level.FINER, "Checking for spring.application.name in application.properties file: " + result);
+    logger.log(
+        Level.FINER,
+        "Checking for spring.application.name in application.properties file: " + result);
     return result;
   }
 
@@ -183,8 +186,9 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     }
   }
 
-  private static String parseNameFromCommandLine(String commandLine) {
-    if(commandLine == null) {
+  @Nullable
+  private static String parseNameFromCommandLine(@Nullable String commandLine) {
+    if (commandLine == null) {
       return null;
     }
     Matcher matcher = COMMANDLINE_PATTERN.matcher(commandLine);
@@ -204,7 +208,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   private static String getAppNamePropertyFromStream(InputStream in) {
     Properties properties = new Properties();
     try {
-      //Note: load() uses ISO 8859-1 encoding, same as spring uses by default for property files
+      // Note: load() uses ISO 8859-1 encoding, same as spring uses by default for property files
       properties.load(in);
       return properties.getProperty("spring.application.name");
     } catch (IOException e) {
