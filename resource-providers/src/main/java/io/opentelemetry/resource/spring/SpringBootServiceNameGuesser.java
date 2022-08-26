@@ -186,8 +186,10 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   private static String parseNameFromCommandLine(String commandLine) {
     Matcher matcher = COMMANDLINE_PATTERN.matcher(commandLine);
-    boolean ignored = matcher.find(); // Required before group()
-    return matcher.group(1);
+    if (matcher.find()) { // Required before group()
+      return matcher.group(1);
+    }
+    return null;
   }
 
   @Nullable
