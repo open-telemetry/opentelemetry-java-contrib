@@ -14,8 +14,6 @@ dependencies {
   implementation("com.google.auto.service:auto-service")
 
   implementation("org.yaml:snakeyaml:1.30")
-  implementation("org.slf4j:slf4j-api")
-  implementation("org.slf4j:slf4j-simple")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 }
 

@@ -24,9 +24,8 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -51,7 +50,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
 
   private static final Pattern COMMANDLINE_PATTERN =
       Pattern.compile(".*--spring\\.application\\.name=([a-zA-Z.\\-_]+).*");
-  private static final Logger logger = LoggerFactory.getLogger(SpringBootServiceNameGuesser.class);
+  private static final Logger logger = Logger.getLogger(SpringBootServiceNameGuesser.class.getName());
   private final SystemHelper system;
 
   public SpringBootServiceNameGuesser() {
