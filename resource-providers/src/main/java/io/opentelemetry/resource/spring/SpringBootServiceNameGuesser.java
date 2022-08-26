@@ -201,6 +201,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   private static String getAppNamePropertyFromStream(InputStream in) {
     Properties properties = new Properties();
     try {
+      //Note: load() uses ISO 8859-1 encoding, same as spring uses by default for property files
       properties.load(in);
       return properties.getProperty("spring.application.name");
     } catch (IOException e) {
