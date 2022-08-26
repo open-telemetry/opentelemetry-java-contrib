@@ -228,7 +228,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     }
 
     InputStream openClasspathResource(String filename) {
-      return getClass().getClassLoader().getResourceAsStream(filename);
+      return ClassLoader.getSystemClassLoader().getResourceAsStream(filename);
     }
 
     InputStream openFile(String filename) throws Exception {
