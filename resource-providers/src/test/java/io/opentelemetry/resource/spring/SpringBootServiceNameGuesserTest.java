@@ -22,8 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SpringBootServiceNameGuesserTest {
 
-  public static final String PROPS = "application.properties";
-  public static final String APPLICATION_YML = "application.yml";
+  static final String PROPS = "application.properties";
+  static final String APPLICATION_YML = "application.yml";
   @Mock ConfigProperties config;
   @Mock SpringBootServiceNameGuesser.SystemHelper system;
 
