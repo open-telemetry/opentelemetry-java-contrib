@@ -153,9 +153,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
         Map<String, Object> app = spring.get("application");
         if (app != null) {
           Object name = app.get("name");
-          if (name != null) {
-            return (String) name;
-          }
+          return (String) name;
         }
       }
     } catch (RuntimeException e) {
