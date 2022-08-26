@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -65,7 +66,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Override
   public Resource createResource(ConfigProperties config) {
 
-    logger.debug("Performing Spring Boot service name auto-detection...");
+    logger.log(Level.FINER, "Performing Spring Boot service name auto-detection...");
     Stream<Supplier<String>> finders =
         Stream.of(
             this::findByEnvironmentVariable,
@@ -81,7 +82,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
         .findFirst()
         .map(
             serviceName -> {
-              logger.debug("Guessed Spring Boot service name: " + serviceName);
+              logger.log(Level.FINER, "Guessed Spring Boot service name: " + serviceName);
               return Resource.builder().put(ResourceAttributes.SERVICE_NAME, serviceName).build();
             })
         .orElseGet(Resource::empty);
@@ -90,21 +91,21 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   @Nullable
   private String findByEnvironmentVariable() {
     String result = system.getenv("SPRING_APPLICATION_NAME");
-    logger.debug("Checking for SPRING_APPLICATION_NAME in env: " + result);
+    logger.log(Level.FINER, "Checking for SPRING_APPLICATION_NAME in env: " + result);
     return result;
   }
 
   @Nullable
   private String findBySystemProperties() {
     String result = system.getProperty("spring.application.name");
-    logger.debug("Checking for spring.application.name system property: " + result);
+    logger.log(Level.FINER, "Checking for spring.application.name system property: " + result);
     return result;
   }
 
   @Nullable
   private String findByClasspathApplicationProperties() {
     String result = readNameFromAppProperties();
-    logger.debug("Checking for spring.application.name in application.properties file: " + result);
+    logger.log(Level.FINER, "Checking for spring.application.name in application.properties file: " + result);
     return result;
   }
 
@@ -116,7 +117,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     } catch (Exception e) {
       // expected to fail sometimes
     }
-    logger.debug("Checking application.properties in current dir: " + result);
+    logger.log(Level.FINER, "Checking application.properties in current dir: " + result);
     return result;
   }
 
@@ -124,7 +125,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
   private String findByClasspathApplicationYaml() {
     String result =
         loadFromClasspath("application.yml", SpringBootServiceNameGuesser::parseNameFromYaml);
-    logger.debug("Checking application.yml in classpath: " + result);
+    logger.log(Level.FINER, "Checking application.yml in classpath: " + result);
     return result;
   }
 
@@ -136,7 +137,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
     } catch (Exception e) {
       // expected to fail sometimes
     }
-    logger.debug("Checking application.yml in current dir: " + result);
+    logger.log(Level.FINER, "Checking application.yml in current dir: " + result);
     return result;
   }
 
@@ -170,7 +171,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
       String javaCommand = system.getProperty("sun.java.command");
       result = parseNameFromCommandLine(javaCommand);
     }
-    logger.debug("Checking application commandline args: " + result);
+    logger.log(Level.FINER, "Checking application commandline args: " + result);
     return result;
   }
 
