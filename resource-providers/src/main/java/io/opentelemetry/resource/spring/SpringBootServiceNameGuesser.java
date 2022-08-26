@@ -243,6 +243,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
      * succeed on java 9+.
      */
     @SuppressWarnings("unchecked")
+    @Nullable
     String attemptGetCommandLineViaReflection() throws Exception {
       Class<?> clazz = Class.forName("java.lang.ProcessHandle");
       Method currentMethod = clazz.getDeclaredMethod("current");
@@ -251,7 +252,7 @@ public class SpringBootServiceNameGuesser implements ResourceProvider {
       Object info = infoMethod.invoke(currentInstance);
       Method commandLineMethod = info.getClass().getInterfaces()[0].getMethod("commandLine");
       Object optionalCommandLine = commandLineMethod.invoke(info);
-      return ((Optional<String>) optionalCommandLine).get();
+      return ((Optional<String>) optionalCommandLine).orElse(null);
     }
   }
 }
