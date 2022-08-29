@@ -33,6 +33,8 @@ components:
     - kenfinnigan
   micrometer-meter-provider:
     - HaloFour
+  noop-api:
+    - jack-berg
   runtime-attach:
     - iNikem
     - jeanbisutti
