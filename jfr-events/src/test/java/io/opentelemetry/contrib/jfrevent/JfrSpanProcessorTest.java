@@ -11,8 +11,6 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.contrib.jfrevent.JfrContextStorageWrapper;
-import io.opentelemetry.contrib.jfrevent.JfrSpanProcessor;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import java.io.IOException;
 import java.nio.file.Files;
