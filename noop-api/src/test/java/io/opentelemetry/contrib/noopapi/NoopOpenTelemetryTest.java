@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.noopapi;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
@@ -15,10 +17,8 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import org.junit.jupiter.api.Test;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class NoopOpenTelemetryTest {
 
