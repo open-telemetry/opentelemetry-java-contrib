@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.sdk.extension.jfr;
+package io.opentelemetry.contrib.jfrevent;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

@@ -6,9 +6,9 @@
 /**
  * Capture Spans and Scopes as events in JFR recordings.
  *
- * @see io.opentelemetry.sdk.extension.jfr.JfrSpanProcessor
+ * @see io.opentelemetry.contrib.jfrevent.JfrSpanProcessor
  */
 @ParametersAreNonnullByDefault
-package io.opentelemetry.sdk.extension.jfr;
+package io.opentelemetry.contrib.jfrevent;
 
 import javax.annotation.ParametersAreNonnullByDefault;
