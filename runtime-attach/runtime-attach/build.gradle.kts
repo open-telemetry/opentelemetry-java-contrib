@@ -18,7 +18,7 @@ dependencies {
   compileOnly("com.google.code.findbugs:annotations")
 
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent")
-  testImplementation("io.opentelemetry:opentelemetry-extension-annotations")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("org.assertj:assertj-core")

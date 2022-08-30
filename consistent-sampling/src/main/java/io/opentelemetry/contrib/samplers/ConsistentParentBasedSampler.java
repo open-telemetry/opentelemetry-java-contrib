@@ -22,24 +22,14 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
   private final String description;
 
   /**
-   * Constructs a new consistent parent based sampler using the given root sampler.
-   *
-   * @param rootSampler the root sampler
-   */
-  ConsistentParentBasedSampler(ConsistentSampler rootSampler) {
-    this(rootSampler, RandomGenerator.getDefault());
-  }
-
-  /**
    * Constructs a new consistent parent based sampler using the given root sampler and the given
    * thread-safe random generator.
    *
    * @param rootSampler the root sampler
-   * @param threadSafeRandomGenerator a thread-safe random generator
+   * @param rValueGenerator the function to use for generating the r-value
    */
-  ConsistentParentBasedSampler(
-      ConsistentSampler rootSampler, RandomGenerator threadSafeRandomGenerator) {
-    super(threadSafeRandomGenerator);
+  ConsistentParentBasedSampler(ConsistentSampler rootSampler, RValueGenerator rValueGenerator) {
+    super(rValueGenerator);
     this.rootSampler = requireNonNull(rootSampler);
     this.description =
         "ConsistentParentBasedSampler{rootSampler=" + rootSampler.getDescription() + '}';

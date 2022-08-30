@@ -526,11 +526,12 @@ class ConsistentReservoirSamplingSpanProcessorTest {
             DEFAULT_EXPORT_TIMEOUT_NANOS,
             RandomGenerator.create(asThreadSafeLongSupplier(rng1)));
 
+    RandomGenerator randomGenerator = RandomGenerator.create(asThreadSafeLongSupplier(rng2));
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
             .setSampler(
                 ConsistentSampler.probabilityBased(
-                    samplingProbability, RandomGenerator.create(asThreadSafeLongSupplier(rng2))))
+                    samplingProbability, s -> randomGenerator.numberOfLeadingZerosOfRandomLong()))
             .addSpanProcessor(processor)
             .build();
 

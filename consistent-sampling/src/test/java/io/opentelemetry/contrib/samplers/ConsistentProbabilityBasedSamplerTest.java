@@ -50,7 +50,8 @@ public class ConsistentProbabilityBasedSamplerTest {
 
     Sampler sampler =
         ConsistentSampler.probabilityBased(
-            samplingProbability, RandomGenerator.create(rng::nextLong));
+            samplingProbability,
+            s -> RandomGenerator.create(rng::nextLong).numberOfLeadingZerosOfRandomLong());
 
     Map<Integer, Long> observedPvalues = new HashMap<>();
     for (long i = 0; i < numSpans; ++i) {

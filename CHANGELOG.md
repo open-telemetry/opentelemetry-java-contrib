@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## Version 1.17.0 (2022-08-19)
+
+### Consistent sampling
+
+- Support traceId-based r-values
+  ([#417](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/417))
+
+### Runtime attach
+
+- Prevent the runtime attachment from launching multiple times
+  ([#409](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/409))
+
 ## Version 1.16.0 (2022-07-20)
 
 ### AWS X-Ray
