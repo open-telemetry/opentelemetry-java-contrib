@@ -10,6 +10,8 @@
 # NOTE when adding/updating one of the component names, don't forget to update the associated
 # `comp:*` labels
 components:
+  aws-resources:
+    - willarmiros
   aws-xray:
     - willarmiros
   consistent-sampling:

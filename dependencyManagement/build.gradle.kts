@@ -50,7 +50,7 @@ val DEPENDENCY_SETS = listOf(
   ),
   DependencySet(
     "org.mockito",
-    "4.3.1",
+    "4.7.0",
     listOf("mockito-core", "mockito-junit-jupiter")
   ),
   DependencySet(
@@ -68,6 +68,7 @@ val DEPENDENCIES = listOf(
   "com.uber.nullaway:nullaway:0.9.5",
   "org.assertj:assertj-core:3.22.0",
   "org.awaitility:awaitility:4.1.1",
+  "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.7.0",
   "org.skyscreamer:jsonassert:1.5.0"
 )
