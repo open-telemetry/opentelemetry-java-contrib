@@ -38,6 +38,7 @@ gradleEnterprise {
 rootProject.name = "opentelemetry-java-contrib"
 
 include(":all")
+include(":aws-resources")
 include(":aws-xray")
 include(":consistent-sampling")
 include(":dependencyManagement")
