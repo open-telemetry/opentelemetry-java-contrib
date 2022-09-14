@@ -5,8 +5,9 @@
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,7 +25,7 @@ final class JarTest {
   @TempDir public Path outPath;
 
   @Test
-  void testSampleJar() throws IOException, InterruptedException {
+  void testSampleJar() throws Exception {
     Path agentPath = Path.of(System.getProperty("agent"));
     Path noInstAgentPath = Path.of(System.getProperty("no.inst.agent"));
     // jar created in test-app module
@@ -57,7 +58,7 @@ final class JarTest {
             "-Dotel.traces.exporter=logging",
             "-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default",
             "-cp",
-            String.format("%s:%s", resultAppPath, noInstAgentPath),
+            resultAppPath + File.pathSeparator + noInstAgentPath,
             APP_MAIN);
 
     Process runtimeProcess = runtimeProcessBuilder.start();
@@ -70,9 +71,9 @@ final class JarTest {
             "[main] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'HTTP GET'");
   }
 
-  private static Path getPath(String resourceName) {
+  private static Path getPath(String resourceName) throws URISyntaxException {
     URL resourceURL = JarTest.class.getResource(resourceName);
     assertThat(resourceURL).isNotNull();
-    return Path.of(resourceURL.getPath());
+    return Path.of(resourceURL.toURI());
   }
 }
