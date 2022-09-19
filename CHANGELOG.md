@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### aws-resources/
+
+Relocated from the opentelemetry-java repository, and now published under the coordinates
+`io.opentelemetry.contrib:opentelemetry-aws-resources`
+
+### jfr-events/
+
+Relocated from the opentelemetry-java repository, and now published under the coordinates
+`io.opentelemetry.contrib:opentelemetry-jfr-events`
+
+### noop-api/
+
+Relocated from the opentelemetry-java repository, and now published under the coordinates
+`io.opentelemetry.contrib:opentelemetry-noop-api`
+
 ## Version 1.17.0 (2022-08-19)
 
 ### Consistent sampling
@@ -40,7 +55,7 @@
 ### Micrometer MeterProvider - New 🌟
 
 This utility provides an implementation of `MeterProvider` which wraps a Micrometer `MeterRegistry`
-and delegates the reporting of all metrics through Micrometer.  This enables projects which already
+and delegates the reporting of all metrics through Micrometer. This enables projects which already
 rely on Micrometer and cannot currently migrate to OpenTelemetry Metrics to be able to report on
 metrics that are reported through the OpenTelemetry Metrics API.
 
@@ -127,13 +142,16 @@ All components updated to target OpenTelemetry SDK 1.10.0.
 
 - Support Maven parallel builds
   ([#161](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/161))
-- Capture details on mojo goal executions: `deploy:deploy`, `spring-boot:build-image`, `jib:build`, `snyk:test`, `snyk:monitor`
+- Capture details on mojo goal executions: `deploy:deploy`, `spring-boot:build-image`, `jib:build`
+  , `snyk:test`, `snyk:monitor`
   ([#146](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/146))
 - Fix lifecycle to support the Maven daemon
   ([#169](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/169))
 - Fix `service.name` attribute overwrite
   ([#184](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/184))
-- Fix default `service.name` + simplify configuration using Otel AutoConfig SDK 1.10 ResourceProvider SPI improvements (enable specifying the classloader making it compatible with Maven Plexus)
+- Fix default `service.name` + simplify configuration using Otel AutoConfig SDK 1.10
+  ResourceProvider SPI improvements (enable specifying the classloader making it compatible with
+  Maven Plexus)
   ([#187](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/187))
 - Add Tracer instrumentationVersion (ie `otel.library.version`)
   ([#191](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/191))
@@ -207,7 +225,9 @@ Allows programmatic attach of Javaagent.
   ([#93](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/93)).
 - Support disabling the creation of mojo execution spans
   ([#108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/108))
-- Use the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) to support more configuration setting. All the settings of the OTLP exporter are supported.
+- Use
+  the [OpenTelemetry SDK Autoconfigure extension](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure)
+  to support more configuration setting. All the settings of the OTLP exporter are supported.
   ([#112](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/112))
 
 ## Version 1.6.0 (2021-09-22)
@@ -216,7 +236,8 @@ All components updated to target OpenTelemetry SDK 1.6.0.
 
 ### Maven extension - New 🌟
 
-This extension can be registered in a Maven build to trace different build steps, for example project build and Maven plugin executions.
+This extension can be registered in a Maven build to trace different build steps, for example
+project build and Maven plugin executions.
 
 ## Version 1.5.0 (2021-09-21)
 
@@ -224,7 +245,8 @@ All components updated to target OpenTelemetry SDK 1.5.0.
 
 ### JMX metrics
 
-- Due to updating to OpenTelemetry SDK 1.5.0, many of the APIs presented for configuration have been changed so you will need to update any Groovy config scripts to match.
+- Due to updating to OpenTelemetry SDK 1.5.0, many of the APIs presented for configuration have been
+  changed so you will need to update any Groovy config scripts to match.
   * `*ValueRecorder` has been replaced with `*Histogram`
   * `*Sum` have been replaced with `*Counter`
   * `*Observer` have been replaced with `*Callback` and do not return any object anymore
@@ -235,11 +257,14 @@ All components updated to target OpenTelemetry SDK 1.4.0.
 
 ### AWS X-Ray - New 🌟
 
-This library contains OTel extensions for use with [AWS X-Ray](https://docs.aws.amazon.com/xray/index.html).
+This library contains OTel extensions for use
+with [AWS X-Ray](https://docs.aws.amazon.com/xray/index.html).
 
 ### JMX Metrics
 
-- Because of numerous backwards incompatible changes in the OpenTelemetry Metrics data model, you will want to make sure you are running the latest version of the OpenTelemetry collector. Older versions will likely not process metrics correctly.
+- Because of numerous backwards incompatible changes in the OpenTelemetry Metrics data model, you
+  will want to make sure you are running the latest version of the OpenTelemetry collector. Older
+  versions will likely not process metrics correctly.
 
 ## Version 1.0.0-alpha (2021-06-02)
 
