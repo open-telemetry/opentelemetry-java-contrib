@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.18.0 (2022-09-19)
+
 ### aws-resources/
 
 Relocated from the opentelemetry-java repository, and now published under the coordinates
