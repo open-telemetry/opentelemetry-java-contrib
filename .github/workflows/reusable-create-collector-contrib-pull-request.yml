@@ -67,7 +67,7 @@ jobs:
           # and so it cannot @ mention OpenTelemetry org groups
           body="Update the jmx-metrics version to \`$VERSION\`.
 
-          cc @jack-berg @mateuszrzeszutek @trask
+          cc @jack-berg @mateuszrzeszutek @rmfitzpatrick @trask
           "
 
           # gh pr create doesn't have a way to explicitly specify different head and base
