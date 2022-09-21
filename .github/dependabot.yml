@@ -11,13 +11,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gradle"
-    directory: "/dependencyManagement"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "gradle"
     directory: "/"
-    allow:
-      - dependency-name: "com.gradle*"
     registries:
       - gradle-plugin-portal
     schedule:
