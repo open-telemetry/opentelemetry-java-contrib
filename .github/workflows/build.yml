@@ -79,7 +79,10 @@ jobs:
     #
     # and the name is updated when the steps below are skipped which makes what's happening clearer
     # in the GitHub UI
-    name: publish-snapshots${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' && '' || ' (skipped)' }}
+    #
+    # note: the condition below has to be written so that '' is last since it resolves to false
+    # and so would not short-circuit if used in the second-last position
+    name: publish-snapshots${{ (github.ref_name != 'main' || github.repository != 'open-telemetry/opentelemetry-java-contrib') && ' (skipped)' || '' }}
     needs:
       # intentionally not blocking snapshot publishing on markdown-link-check or misspell-check
       - build
@@ -109,10 +112,10 @@ jobs:
 
   required-status-check:
     needs:
-        # markdown-link-check is not required so that pull requests will not be blocked if external
-        # links break
-        # similarly misspell-check is not required so that pull requests will not be blocked if new
-        # misspellings are added to the misspell dictionary
+      # markdown-link-check is not required so that pull requests will not be blocked if external
+      # links break
+      # similarly misspell-check is not required so that pull requests will not be blocked if new
+      # misspellings are added to the misspell dictionary
       - build
       - integration-test
     runs-on: ubuntu-latest
