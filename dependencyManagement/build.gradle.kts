@@ -67,7 +67,7 @@ val DEPENDENCIES = listOf(
   "com.squareup.okhttp3:okhttp:4.9.3",
   "com.uber.nullaway:nullaway:0.9.5",
   "org.assertj:assertj-core:3.22.0",
-  "org.awaitility:awaitility:4.1.1",
+  "org.awaitility:awaitility:4.2.0",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.7.0",
   "org.skyscreamer:jsonassert:1.5.0"
