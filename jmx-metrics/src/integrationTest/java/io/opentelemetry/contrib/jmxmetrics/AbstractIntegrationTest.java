@@ -141,20 +141,13 @@ public abstract class AbstractIntegrationTest {
               List<Metric> metrics =
                   otlpServer.getMetrics().stream()
                       .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(
-                          rm ->
-                              rm.stream()
-                                  .map(ResourceMetrics::getInstrumentationLibraryMetricsList))
+                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
                       .flatMap(Collection::stream)
                       .filter(
-                          ilm ->
-                              ilm.getInstrumentationLibrary()
-                                      .getName()
-                                      .equals("io.opentelemetry.contrib.jmxmetrics")
-                                  && ilm.getInstrumentationLibrary()
-                                      .getVersion()
-                                      .equals(expectedMeterVersion()))
-                      .flatMap(ilm -> ilm.getMetricsList().stream())
+                          sm ->
+                              sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
+                                  && sm.getScope().getVersion().equals(expectedMeterVersion()))
+                      .flatMap(sm -> sm.getMetricsList().stream())
                       .collect(Collectors.toList());
 
               assertThat(metrics).isNotEmpty();
