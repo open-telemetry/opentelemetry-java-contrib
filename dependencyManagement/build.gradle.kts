@@ -68,7 +68,7 @@ val DEPENDENCIES = listOf(
   "org.assertj:assertj-core:3.23.1",
   "org.awaitility:awaitility:4.2.0",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
-  "org.junit-pioneer:junit-pioneer:1.7.0",
+  "org.junit-pioneer:junit-pioneer:1.7.1",
   "org.skyscreamer:jsonassert:1.5.0"
 )
 
