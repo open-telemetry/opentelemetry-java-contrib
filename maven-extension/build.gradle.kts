@@ -27,7 +27,7 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  compileOnly("org.apache.maven:maven-core:3.5.0")
+  compileOnly("org.apache.maven:maven-core:3.8.6")
   compileOnly("org.slf4j:slf4j-api")
   compileOnly("org.sonatype.aether:aether-api:1.13.1")
 

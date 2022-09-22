@@ -14,7 +14,7 @@ dependencies {
   implementation("org.apache.maven:maven-plugin-api:3.8.6")
   implementation("org.apache.maven:maven-project:2.2.1")
   compileOnly("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0")
-  compileOnly("org.apache.maven:maven-core:3.5.0")
+  compileOnly("org.apache.maven:maven-core:3.8.6")
   compileOnly("org.slf4j:slf4j-api")
 
   testImplementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0")
