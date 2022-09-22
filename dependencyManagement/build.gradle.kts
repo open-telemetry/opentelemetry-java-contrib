@@ -64,7 +64,7 @@ val DEPENDENCIES = listOf(
   "io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
-  "com.squareup.okhttp3:okhttp:4.9.3",
+  "com.squareup.okhttp3:okhttp:4.10.0",
   "com.uber.nullaway:nullaway:0.9.5",
   "org.assertj:assertj-core:3.22.0",
   "org.awaitility:awaitility:4.1.1",
