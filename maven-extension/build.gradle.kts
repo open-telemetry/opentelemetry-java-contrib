@@ -12,7 +12,7 @@ plugins {
 description = "Maven extension to observe Maven builds with distributed traces using OpenTelemetry SDK"
 
 dependencies {
-  implementation("org.codehaus.plexus:plexus-component-annotations:2.1.0")
+  implementation("org.codehaus.plexus:plexus-component-annotations:2.1.1")
 
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
