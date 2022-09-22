@@ -37,7 +37,7 @@ to https://github.com/open-telemetry/community/blob/main/docs/how-to-configure-n
 
 ### `dependabot/**/*`
 
-* Status checks that are required:
+* Require status checks to pass before merging > Status checks that are required:
 
   EasyCLA
 
