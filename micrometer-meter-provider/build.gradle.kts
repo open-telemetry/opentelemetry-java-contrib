@@ -9,7 +9,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-api")
   api("io.opentelemetry:opentelemetry-sdk-metrics")
 
-  compileOnly("io.micrometer:micrometer-core:1.1.0")
+  compileOnly("io.micrometer:micrometer-core:1.9.4")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
   annotationProcessor("com.google.auto.service:auto-service")
@@ -18,7 +18,7 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  testImplementation("io.micrometer:micrometer-core:1.8.5")
+  testImplementation("io.micrometer:micrometer-core:1.9.4")
 }
 
 testing {
