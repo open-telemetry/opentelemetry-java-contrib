@@ -62,7 +62,6 @@ final class JarTest {
 
     Path resultAppPath = outPath.resolve("app.jar");
     assertThat(resultAppPath).exists();
-    assertThat(Files.exists(resultAppPath)).isTrue();
 
     // Run the jar with static instrumentation
     ProcessBuilder runtimeProcessBuilder =
