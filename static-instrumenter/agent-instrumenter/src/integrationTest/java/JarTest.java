@@ -48,8 +48,8 @@ final class JarTest {
     Process instrumentationProcess = instrumentationProcessBuilder.start();
     instrumentationProcess.waitFor(10, TimeUnit.SECONDS);
 
-    boolean isHotJdkJvm = System.getProperty("java.vm.name").contains("OpenJDK");
-    if (isHotJdkJvm) {
+    boolean isOpenJdkJvm = System.getProperty("java.vm.name").contains("OpenJDK");
+    if (isOpenJdkJvm) {
       InputStream errorOutput = instrumentationProcess.getErrorStream();
       String errorOutputAsString = new String(errorOutput.readAllBytes(), StandardCharsets.UTF_8);
       assertThat(errorOutputAsString)
