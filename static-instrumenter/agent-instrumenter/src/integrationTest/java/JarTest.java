@@ -47,14 +47,11 @@ final class JarTest {
     Process instrumentationProcess = instrumentationProcessBuilder.start();
     instrumentationProcess.waitFor(10, TimeUnit.SECONDS);
 
-    boolean isOpenJdkJvm = System.getProperty("java.vm.name").contains("OpenJDK");
-    if (isOpenJdkJvm) {
-      InputStream errorOutput = instrumentationProcess.getErrorStream();
+    try (InputStream errorOutput = instrumentationProcess.getErrorStream()) {
       String errorOutputAsString = new String(errorOutput.readAllBytes(), StandardCharsets.UTF_8);
       assertThat(errorOutputAsString)
-          .isNotEmpty()
           .contains(
-              "Sharing is only supported for boot loader classes because bootstrap classpath has been appended");
+              "[main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent");
     }
 
     assertThat(instrumentationProcess.exitValue()).isEqualTo(0);
@@ -77,10 +74,11 @@ final class JarTest {
 
     assertThat(runtimeProcess.exitValue()).isEqualTo(0);
 
-    InputStream standardOutputOfInstrumentedApp = runtimeProcess.getInputStream();
-    String standardOutputAsStringIns =
-        new String(standardOutputOfInstrumentedApp.readAllBytes(), StandardCharsets.UTF_8);
-    assertThat(standardOutputAsStringIns).startsWith("SUCCESS - Trace parent value");
+    try (InputStream standardOutputOfInstrumentedApp = runtimeProcess.getInputStream()) {
+      String standardOutputAsStringIns =
+          new String(standardOutputOfInstrumentedApp.readAllBytes(), StandardCharsets.UTF_8);
+      assertThat(standardOutputAsStringIns).startsWith("SUCCESS - Trace parent value");
+    }
   }
 
   private static Path getPath(String resourceName) throws URISyntaxException {
