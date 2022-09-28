@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.jar.JarFile;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +29,7 @@ class InstrumentationAgentTest extends AbstractTempDirTest {
   void shouldCopyAgentClasses() throws IOException {
     // given
     Path targetFile = tempDir.toPath().resolve("copied-agent.jar");
-    Path sourceJar = Paths.get(getResourcePath("test.jar"));
+    Path sourceJar = getResourcePath("test.jar");
     Files.copy(sourceJar, targetFile);
     InstrumentationAgent agent = InstrumentationAgent.createFromClasspathAgent(tempDir.toPath());
     // when

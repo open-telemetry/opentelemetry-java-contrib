@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +19,7 @@ class OpenTelemetryInstrumenterMojoTest extends AbstractTempDirTest {
   void shouldInstrumentSampleApplication() throws Exception {
     // given
     OpenTelemetryInstrumenterMojo mojo = new OpenTelemetryInstrumenterMojo();
-    Path testApp = Paths.get(JarTestUtil.getResourcePath("test-http-app.jar"));
+    Path testApp = JarTestUtil.getResourcePath("test-http-app.jar");
     // when
 
     mojo.executeInternal(tempDir.getPath(), "-instrumented", Collections.singletonList(testApp));

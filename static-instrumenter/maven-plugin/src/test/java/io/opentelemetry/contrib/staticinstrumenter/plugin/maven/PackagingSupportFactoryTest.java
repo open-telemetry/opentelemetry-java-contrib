@@ -9,7 +9,6 @@ import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUt
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 class PackagingSupportFactoryTest {
@@ -17,7 +16,7 @@ class PackagingSupportFactoryTest {
   @Test
   void shouldReturnForSpringBoot() throws Exception {
     // given
-    Path path = Paths.get(getResourcePath("spring-boot.jar"));
+    Path path = getResourcePath("spring-boot.jar");
     // when
     PackagingSupport result = PackagingSupportFactory.packagingSupportFor(path);
     // then
@@ -28,7 +27,7 @@ class PackagingSupportFactoryTest {
   @Test
   void shouldReturnForWar() throws Exception {
     // given
-    Path path = Paths.get(getResourcePath("web.war"));
+    Path path = getResourcePath("web.war");
     // when
     PackagingSupport result = PackagingSupportFactory.packagingSupportFor(path);
     // then
@@ -39,7 +38,7 @@ class PackagingSupportFactoryTest {
   @Test
   void shouldReturnEmptyForUnsupported() throws Exception {
     // given
-    Path path = Paths.get(getResourcePath("test.jar"));
+    Path path = getResourcePath("test.jar");
     // when
     PackagingSupport result = PackagingSupportFactory.packagingSupportFor(path);
     // then

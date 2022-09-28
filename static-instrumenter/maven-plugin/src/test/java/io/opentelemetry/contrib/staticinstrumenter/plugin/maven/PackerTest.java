@@ -14,7 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
@@ -27,7 +26,7 @@ class PackerTest extends AbstractTempDirTest {
   @Test
   void shouldCopyClassesAddingPrefix() throws Exception {
     // given
-    Path jar = Paths.get(getResourcePath("test.jar"));
+    Path jar = getResourcePath("test.jar");
     Packer packer = new Packer(tempDir.toPath(), "-processed");
     PackagingSupport support = Mockito.mock(PackagingSupport.class);
     ArgumentCaptor<JarFile> captor = ArgumentCaptor.forClass(JarFile.class);
@@ -39,14 +38,14 @@ class PackerTest extends AbstractTempDirTest {
         .should(Mockito.times(6))
         .copyAddingPrefix(any(JarEntry.class), captor.capture(), any(ZipOutputStream.class));
     JarFile source = captor.getValue();
-    assertThat(source.getName()).isEqualTo(getResourcePath("test.jar"));
+    assertThat(source.getName()).isEqualTo(getResourcePath("test.jar").toString());
     assertThat(Files.exists(copy)).isTrue();
   }
 
   @Test
   void shouldPackNestedJarsToCopiedArtifact() throws Exception {
     // given
-    Path jar = Paths.get(getResourcePath("test.jar"));
+    Path jar = getResourcePath("test.jar");
     Packer packer = new Packer(tempDir.toPath(), "-processed");
     PackagingSupport support = Mockito.mock(PackagingSupport.class);
     ArgumentCaptor<JarFile> captor = ArgumentCaptor.forClass(JarFile.class);
@@ -62,7 +61,7 @@ class PackerTest extends AbstractTempDirTest {
         .should(Mockito.times(6))
         .copyAddingPrefix(any(JarEntry.class), captor.capture(), any(ZipOutputStream.class));
     JarFile source = captor.getValue();
-    assertThat(source.getName()).isEqualTo(getResourcePath("test.jar"));
+    assertThat(source.getName()).isEqualTo(getResourcePath("test.jar").toString());
     assertThat(Files.exists(copy)).isTrue();
   }
 

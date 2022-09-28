@@ -10,7 +10,6 @@ import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUt
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.getResourcePath;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.jar.JarFile;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +18,7 @@ class PackagingSupportTest {
   @Test
   void shouldCopyPreservingPrefix() throws Exception {
     // given
-    Path path = Paths.get(getResourcePath("test.jar"));
+    Path path = getResourcePath("test.jar");
     PackagingSupport underTest = PackagingSupportFactory.packagingSupportFor(path);
     // when
     Path withoutPrefix =
@@ -41,7 +40,7 @@ class PackagingSupportTest {
   @Test
   void shouldCopyRemovingAndAddingPrefix() throws Exception {
     // given
-    Path path = Paths.get(getResourcePath("spring-boot.jar"));
+    Path path = getResourcePath("spring-boot.jar");
     PackagingSupport underTest = PackagingSupportFactory.packagingSupportFor(path);
     // when
     // copy files to new jar removing prefix

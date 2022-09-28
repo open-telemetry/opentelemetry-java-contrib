@@ -32,14 +32,14 @@ final class JarTestUtil {
     }
   }
 
-  static String getResourcePath(String fileName) {
+  static Path getResourcePath(String fileName) {
     try {
       URL resource = Thread.currentThread().getContextClassLoader().getResource(fileName);
       if (resource == null) {
         throw new RuntimeException("Resource not found for " + fileName);
       }
       URI uri = resource.toURI();
-      return Path.of(uri).toString();
+      return Path.of(uri);
     } catch (URISyntaxException e) {
       throw new RuntimeException("Problem to find the path of " + fileName, e);
     }

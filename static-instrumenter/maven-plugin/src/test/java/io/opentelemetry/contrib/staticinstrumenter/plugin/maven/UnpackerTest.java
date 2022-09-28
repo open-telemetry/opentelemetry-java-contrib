@@ -12,7 +12,6 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ class UnpackerTest extends AbstractTempDirTest {
     // given
     Unpacker unpacker = new Unpacker(tempDir.toPath());
     PackagingSupport support = mock(PackagingSupport.class);
-    Path jar = Paths.get(getResourcePath("test.jar"));
+    Path jar = getResourcePath("test.jar");
     // when
     unpacker.copyAndExtract(jar, support);
     // then
@@ -39,7 +38,7 @@ class UnpackerTest extends AbstractTempDirTest {
     Path targetFolderPath = tempDir.toPath();
     Unpacker unpacker = new Unpacker(targetFolderPath);
     PackagingSupport support = PackagingSupport.EMPTY;
-    Path jar = Paths.get(getResourcePath("test.jar"));
+    Path jar = getResourcePath("test.jar");
 
     // when
     List<Path> copied = unpacker.copyAndExtract(jar, support);

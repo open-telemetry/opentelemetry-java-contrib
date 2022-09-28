@@ -21,7 +21,7 @@ class ZipEntryCreatorTest {
   @Test
   void shouldMoveEntryWithoutRenaming() throws Exception {
     // given
-    JarFile source = new JarFile(getResourcePath("test.jar"));
+    JarFile source = new JarFile(getResourcePath("test.jar").toString());
     // when
     Path targetFile =
         createJar(
@@ -39,7 +39,7 @@ class ZipEntryCreatorTest {
   @Test
   void shouldMoveEntryRenaming() throws Exception {
     // given
-    JarFile source = new JarFile(getResourcePath("test.jar"));
+    JarFile source = new JarFile(getResourcePath("test.jar").toString());
     // when
     Path targetFile =
         createJar(
@@ -64,7 +64,7 @@ class ZipEntryCreatorTest {
   @Test
   void shouldAddFileToJar() throws Exception {
     // given
-    Path file = Paths.get(getResourcePath("testing.file"));
+    Path file = Paths.get(getResourcePath("testing.file").toString());
     // when
     Path targetFile =
         createJar("new-jar", (target) -> createZipEntryFromFile(target, file, "stored/entry.file"));
