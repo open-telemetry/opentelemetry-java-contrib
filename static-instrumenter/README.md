@@ -4,18 +4,26 @@
 
 ### Agent instrumenter
 
-Module enhancing OpenTelemetry Java Agent for static instrumentation. The modified agent is capable of instrumenting and saving a new JAR with all relevant instrumentations applied and necessary helper class-code included.
+Module enhancing OpenTelemetry Java Agent for static instrumentation. The modified agent can instrument and save a new JAR with all relevant instrumentations applied and necessary helper class-code included.
 
-In order to statically instrument a JAR, modified agent needs to be both attached (`-javaagent:`) and run as the main method (`io.opentelemetry.contrib.staticinstrumenter.agent.main.Main` class).
-:
+#### Generate a new application jar containing the static instrumentation
 
-To instrument you app use `opentelemetry-static-agent.jar` and pass the main class of the agent:
+Execute the following command line with your application jar name and the desired output folder of the new jar:
 
-`java -javaagent:opentelemetry-static-agent.jar -cp your-app.jar io.opentelemetry.contrib.staticinstrumenter.agent.main.Main output-folder`
+`java -javaagent:opentelemetry-static-agent.jar -cp <your-app.jar> io.opentelemetry.contrib.staticinstrumenter.agent.main.Main <output-folder>`
 
-To run an instrumented app pass the `-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default` option and add `no-inst-agent.jar` to the classpath:
+The `opentelemetry-static-agent.jar` agent needs to be both attached (`-javaagent:`) and run as the main method (`io.opentelemetry.contrib.staticinstrumenter.agent.main.Main` class).
 
-`java -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default -cp output-folder/your-app.jar:no-inst-agent.jar org.example.YourMainClass`
+The generated jar will keep the name of your non-instrumented jar.
+
+#### Run the instrumented application
+
+Execute the following command line:
+
+`java -cp <output-folder>/<your-app.jar><file-separator>no-inst-agent.jar <your-main-class-with-package-name>`
+
+`<file-separator>` is `:` on UNIX systems and `;` on Windows systems.
+
 
 ### Gradle plugin
 
