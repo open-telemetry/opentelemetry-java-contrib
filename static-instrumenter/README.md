@@ -24,11 +24,6 @@ Execute the following command line:
 
 `<file-separator>` is `:` on UNIX systems and `;` on Windows systems.
 
-
-### Gradle plugin
-
-Gradle plugin running static instrumentation agent during the `assemble` lifecycle task. The assembled archive contains statically instrumened class code.
-
 ### Maven3 plugin
 
 Maven3 plugin running the static instrumentation agent during the `package` phase. Packaged archive contains statically instrumened class code.
