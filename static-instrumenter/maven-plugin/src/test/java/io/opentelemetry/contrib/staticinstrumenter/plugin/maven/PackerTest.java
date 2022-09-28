@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,17 +19,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-class PackerTest {
+class PackerTest extends AbstractTempDirTest {
 
   @Test
-  void shouldCopyClassesAddingPrefix(@TempDir File targetFolder) throws Exception {
+  void shouldCopyClassesAddingPrefix() throws Exception {
     // given
     Path jar = Paths.get(getResourcePath("test.jar"));
-    Packer packer = new Packer(targetFolder.toPath(), "-processed");
+    Packer packer = new Packer(tempDir.toPath(), "-processed");
     PackagingSupport support = Mockito.mock(PackagingSupport.class);
     ArgumentCaptor<JarFile> captor = ArgumentCaptor.forClass(JarFile.class);
     // when
@@ -46,10 +44,10 @@ class PackerTest {
   }
 
   @Test
-  void shouldPackNestedJarsToCopiedArtifact(@TempDir File targetFolder) throws Exception {
+  void shouldPackNestedJarsToCopiedArtifact() throws Exception {
     // given
     Path jar = Paths.get(getResourcePath("test.jar"));
-    Packer packer = new Packer(targetFolder.toPath(), "-processed");
+    Packer packer = new Packer(tempDir.toPath(), "-processed");
     PackagingSupport support = Mockito.mock(PackagingSupport.class);
     ArgumentCaptor<JarFile> captor = ArgumentCaptor.forClass(JarFile.class);
     // when
