@@ -6,11 +6,11 @@
 package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
 import static io.opentelemetry.contrib.staticinstrumenter.plugin.maven.JarTestUtil.assertJarContainsFiles;
+import static java.util.Collections.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class InstrumenterTest extends AbstractTempDirTest {
@@ -23,8 +23,7 @@ class InstrumenterTest extends AbstractTempDirTest {
             InstrumentationAgent.createFromClasspathAgent(tempDir.toPath()), tempDir.toPath());
     Path testJar = Paths.get(JarTestUtil.getResourcePath("test.jar"));
     // when
-    Path instrumented =
-        instrumenter.instrument(testJar.getFileName(), Collections.singletonList(testJar));
+    Path instrumented = instrumenter.instrument(testJar.getFileName(), singletonList(testJar));
     // then
     // got the target file right?
     assertJarContainsFiles(
