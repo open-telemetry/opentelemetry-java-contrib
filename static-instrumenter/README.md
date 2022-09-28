@@ -20,7 +20,7 @@ The generated jar will keep the name of your non-instrumented jar.
 
 Execute the following command line:
 
-`java -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default -cp <output-folder>/<your-app.jar><file-separator>no-inst-agent.jar <your-main-class-with-package-name>`
+`java -cp <output-folder>/<your-app.jar><file-separator>no-inst-agent.jar <your-main-class-with-package-name>`
 
 `<file-separator>` is `:` on UNIX systems and `;` on Windows systems.
 
