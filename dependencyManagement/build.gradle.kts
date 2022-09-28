@@ -26,37 +26,23 @@ val DEPENDENCY_BOMS = listOf(
   "org.testcontainers:testcontainers-bom:1.17.3"
 )
 
-val DEPENDENCY_SETS = listOf(
-  DependencySet(
-    "com.google.auto.service",
-    "1.0.1",
-    listOf("auto-service", "auto-service-annotations")
-  ),
-  DependencySet(
-    "com.google.auto.value",
-    "1.9",
-    listOf("auto-value", "auto-value-annotations")
-  ),
-  DependencySet(
-    "com.google.errorprone",
-    "2.14.0",
-    listOf("error_prone_annotations", "error_prone_core")
-  ),
-  DependencySet(
-    "io.prometheus",
-    "0.12.0",
-    listOf("simpleclient", "simpleclient_common", "simpleclient_httpserver")
-  ),
-  DependencySet(
-    "org.mockito",
-    "4.7.0",
-    listOf("mockito-core", "mockito-junit-jupiter")
-  ),
-  DependencySet(
-    "org.slf4j",
-    "1.7.36",
-    listOf("slf4j-api", "slf4j-simple", "log4j-over-slf4j", "jcl-over-slf4j", "jul-to-slf4j")
-  )
+val CORE_DEPENDENCIES = listOf(
+  "com.google.auto.service:auto-service:1.0.1",
+  "com.google.auto.service:auto-service-annotations:1.0.1",
+  "com.google.auto.value:auto-value:1.9",
+  "com.google.auto.value:auto-value-annotations:1.9",
+  "com.google.errorprone:error_prone_annotations:2.14.0",
+  "com.google.errorprone:error_prone_core:2.14.0",
+  "io.prometheus:simpleclient:0.12.0",
+  "io.prometheus:simpleclient_common:0.12.0",
+  "io.prometheus:simpleclient_httpserver:0.12.0",
+  "org.mockito:mockito-core:4.8.0",
+  "org.mockito:mockito-junit-jupiter:4.8.0",
+  "org.slf4j:slf4j-api:1.7.36",
+  "org.slf4j:slf4j-simple:1.7.36",
+  "org.slf4j:log4j-over-slf4j:1.7.36",
+  "org.slf4j:jcl-over-slf4j:1.7.36",
+  "org.slf4j:jul-to-slf4j:1.7.36"
 )
 
 val DEPENDENCIES = listOf(
@@ -83,11 +69,10 @@ dependencies {
     dependencyVersions[split[0]] = split[2]
   }
   constraints {
-    for (set in DEPENDENCY_SETS) {
-      for (module in set.modules) {
-        api("${set.group}:${module}:${set.version}")
-        dependencyVersions[set.group] = set.version
-      }
+    for (dependency in CORE_DEPENDENCIES) {
+      api(dependency)
+      val split = dependency.split(':')
+      dependencyVersions[split[0]] = split[2]
     }
     for (dependency in DEPENDENCIES) {
       api(dependency)
