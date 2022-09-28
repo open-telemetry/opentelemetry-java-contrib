@@ -7,26 +7,24 @@ package io.opentelemetry.contrib.staticinstrumenter.plugin.maven;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-class OpenTelemetryInstrumenterMojoTest {
+class OpenTelemetryInstrumenterMojoTest extends AbstractTempDirTest {
 
   @Test
-  void shouldInstrumentSampleApplication(@TempDir File tempdir) throws Exception {
+  void shouldInstrumentSampleApplication() throws Exception {
     // given
     OpenTelemetryInstrumenterMojo mojo = new OpenTelemetryInstrumenterMojo();
-    Path testApp = Paths.get(JarTestUtil.getResourcePath("test-http-app.jar"));
+    Path testApp = JarTestUtil.getResourcePath("test-http-app.jar");
     // when
-    mojo.executeInternal(tempdir.getPath(), "-instrumented", Collections.singletonList(testApp));
+
+    mojo.executeInternal(tempDir.getPath(), "-instrumented", Collections.singletonList(testApp));
     // then
-    Path instrumentedApp = tempdir.toPath().resolve("test-http-app-instrumented.jar");
+    Path instrumentedApp = tempDir.toPath().resolve("test-http-app-instrumented.jar");
     assertThat(Files.exists(instrumentedApp)).isTrue();
     verifyApplicationByExampleRun(instrumentedApp);
   }
@@ -38,12 +36,7 @@ class OpenTelemetryInstrumenterMojoTest {
    */
   private static void verifyApplicationByExampleRun(Path instrumentedApp) throws Exception {
     ProcessBuilder pb =
-        new ProcessBuilder(
-                "java",
-                "-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default",
-                "-jar",
-                instrumentedApp.toString())
-            .redirectErrorStream(true);
+        new ProcessBuilder("java", "-jar", instrumentedApp.toString()).redirectErrorStream(true);
     Process process = pb.start();
     process.waitFor();
     String output = new String(process.getInputStream().readAllBytes(), Charset.defaultCharset());
