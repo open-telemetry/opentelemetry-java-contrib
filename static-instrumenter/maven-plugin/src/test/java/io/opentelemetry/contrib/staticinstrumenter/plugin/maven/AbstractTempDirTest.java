@@ -17,12 +17,8 @@ abstract class AbstractTempDirTest {
   File tempDir;
 
   @BeforeEach
-  public void before() {
-    try {
-      tempDir = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
-    } catch (IOException e) {
-      throw new RuntimeException("Problem in the creation of the temp directory", e);
-    }
+  public void before() throws IOException {
+    tempDir = Files.createTempDirectory(this.getClass().getSimpleName()).toFile();
   }
 
   @AfterEach
