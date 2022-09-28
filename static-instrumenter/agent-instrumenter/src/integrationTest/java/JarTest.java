@@ -64,7 +64,6 @@ final class JarTest {
         new ProcessBuilder(
             "java",
             "-Dotel.traces.exporter=logging",
-            "-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default",
             "-cp",
             resultAppPath + File.pathSeparator + noInstAgentPath,
             APP_MAIN);
