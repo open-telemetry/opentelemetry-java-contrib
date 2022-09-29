@@ -34,7 +34,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_annotations:2.15.0",
   "com.google.errorprone:error_prone_core:2.14.0",
   "io.prometheus:simpleclient:0.16.0",
-  "io.prometheus:simpleclient_common:0.12.0",
+  "io.prometheus:simpleclient_common:0.16.0",
   "io.prometheus:simpleclient_httpserver:0.12.0",
   "org.mockito:mockito-core:4.8.0",
   "org.mockito:mockito-junit-jupiter:4.8.0",
