@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import javax.annotation.Nullable;
@@ -33,11 +34,13 @@ abstract class AbstractInstrumentBuilder<BUILDER extends AbstractInstrumentBuild
 
   protected abstract BUILDER self();
 
+  @CanIgnoreReturnValue
   public BUILDER setDescription(String description) {
     this.description = description;
     return self();
   }
 
+  @CanIgnoreReturnValue
   public BUILDER setUnit(String unit) {
     this.unit = unit;
     return self();

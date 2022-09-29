@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.contrib.metrics.micrometer.internal.PollingMeterCallbackRegistrar;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ public class MicrometerMeterProviderBuilder {
    * io.micrometer.core.instrument.Meter} which will poll asynchronous instruments when that meter
    * is measured.
    */
+  @CanIgnoreReturnValue
   public MicrometerMeterProviderBuilder setCallbackRegistrar(CallbackRegistrar callbackRegistrar) {
     this.callbackRegistrar = callbackRegistrar;
     return this;

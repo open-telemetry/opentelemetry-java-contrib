@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.samplers;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -23,6 +24,7 @@ public final class RuleBasedRoutingSamplerBuilder {
     this.defaultDelegate = defaultDelegate;
   }
 
+  @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
     rules.add(
         new SamplingRule(
@@ -32,6 +34,7 @@ public final class RuleBasedRoutingSamplerBuilder {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder recordAndSample(
       AttributeKey<String> attributeKey, String pattern) {
     rules.add(

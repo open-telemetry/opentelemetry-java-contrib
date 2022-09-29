@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ public final class ScheduledCallbackRegistrarBuilder {
   }
 
   /** Sets the period between successive executions of each registered callback */
+  @CanIgnoreReturnValue
   public ScheduledCallbackRegistrarBuilder setPeriod(long period, TimeUnit unit) {
     Objects.requireNonNull(unit, "unit");
     this.period = period;
@@ -32,6 +34,7 @@ public final class ScheduledCallbackRegistrarBuilder {
   }
 
   /** Sets the period between successive executions of each registered callback */
+  @CanIgnoreReturnValue
   public ScheduledCallbackRegistrarBuilder setPeriod(Duration period) {
     Objects.requireNonNull(period, "period");
     this.period = period.toMillis();
@@ -43,6 +46,7 @@ public final class ScheduledCallbackRegistrarBuilder {
    * Sets that the executor should be {@link ScheduledExecutorService#shutdown() shutdown} when the
    * {@link CallbackRegistrar} is {@link CallbackRegistrar#close() closed}.
    */
+  @CanIgnoreReturnValue
   public ScheduledCallbackRegistrarBuilder setShutdownExecutorOnClose(
       boolean shutdownExecutorOnClose) {
     this.shutdownExecutorOnClose = shutdownExecutorOnClose;
