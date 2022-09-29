@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterBuilder;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
@@ -24,12 +25,14 @@ final class MicrometerMeterBuilder implements MeterBuilder {
   }
 
   @Override
+  @CanIgnoreReturnValue
   public MeterBuilder setSchemaUrl(String schemaUrl) {
     this.schemaUrl = schemaUrl;
     return this;
   }
 
   @Override
+  @CanIgnoreReturnValue
   public MeterBuilder setInstrumentationVersion(String instrumentationScopeVersion) {
     this.instrumentationScopeVersion = instrumentationScopeVersion;
     return this;

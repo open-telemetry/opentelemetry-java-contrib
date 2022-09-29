@@ -32,7 +32,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.auto.value:auto-value:1.9",
   "com.google.auto.value:auto-value-annotations:1.9",
   "com.google.errorprone:error_prone_annotations:2.15.0",
-  "com.google.errorprone:error_prone_core:2.14.0",
+  "com.google.errorprone:error_prone_core:2.15.0",
   "io.prometheus:simpleclient:0.16.0",
   "io.prometheus:simpleclient_common:0.16.0",
   "io.prometheus:simpleclient_httpserver:0.16.0",

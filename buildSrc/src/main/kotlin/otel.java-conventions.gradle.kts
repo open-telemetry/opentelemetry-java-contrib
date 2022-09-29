@@ -103,6 +103,7 @@ dependencies {
   }
 
   compileOnly("com.google.code.findbugs:jsr305")
+  compileOnly("com.google.errorprone:error_prone_annotations")
 }
 
 testing {
