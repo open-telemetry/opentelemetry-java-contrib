@@ -23,7 +23,7 @@ val DEPENDENCY_BOMS = listOf(
   "io.opentelemetry:opentelemetry-bom:$otelVersion",
   "io.opentelemetry:opentelemetry-bom-alpha:${otelVersion}-alpha",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelVersion}-alpha",
-  "org.testcontainers:testcontainers-bom:1.17.3"
+  "org.testcontainers:testcontainers-bom:1.17.4"
 )
 
 val CORE_DEPENDENCIES = listOf(
