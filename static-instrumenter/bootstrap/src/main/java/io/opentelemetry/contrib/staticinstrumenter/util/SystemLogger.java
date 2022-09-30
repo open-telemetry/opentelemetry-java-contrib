@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 @SuppressWarnings("SystemOut")
 public class SystemLogger {
 
+  private static final String DEBUG_SYSTEM_LOGGER = "otel.javaagent.static-instrumentation.debug";
+
+  private final boolean debugEnabled;
+
   enum LogLevel {
     INFO,
     DEBUG,
@@ -30,6 +34,7 @@ public class SystemLogger {
   }
 
   private SystemLogger(Class<?> clazz) {
+    this.debugEnabled = Boolean.getBoolean(DEBUG_SYSTEM_LOGGER);
     this.clazz = clazz;
   }
 
@@ -38,7 +43,9 @@ public class SystemLogger {
   }
 
   public void debug(String message, Object... args) {
-    System.err.println(format(LogLevel.DEBUG, message, args));
+    if (debugEnabled) {
+      System.err.println(format(LogLevel.DEBUG, message, args));
+    }
   }
 
   public void error(String message, Object... args) {
