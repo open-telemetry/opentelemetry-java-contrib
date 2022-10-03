@@ -7,7 +7,7 @@
   <description>Maven3 plugin for static instrumentation of projects code and dependencies</description>
   <groupId>io.opentelemetry.contrib</groupId>
   <artifactId>static-instrumentation-maven-plugin</artifactId>
-  <version>1.17.0-alpha-SNAPSHOT</version>
+  <version>1.19.0-alpha-SNAPSHOT</version>
   <goalPrefix>static-instrumentation</goalPrefix>
   <mojos>
     <mojo>
