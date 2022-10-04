@@ -57,7 +57,10 @@ class ProjectModel {
             + " not found. The available artifacts are: "
             + toFileNames(allArtifacts)
             + ". Project artifact: "
-            + project.getArtifact();
+            + project.getArtifact()
+            + ". "
+            + "File of project artifact: "
+            + project.getArtifact().getFile();
     throw new IllegalArgumentException(message);
   }
 
