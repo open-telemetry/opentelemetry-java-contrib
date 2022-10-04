@@ -33,7 +33,7 @@ Execute the following command line:
 Maven 3 plugin running the static instrumentation agent during the `package` phase. Packaged archive
 contains statically instrumented class code.
 
-| Parameter     | Description                                                                                                | 
+| Parameter     | Description                                                                                                |
 |---------------|------------------------------------------------------------------------------------------------------------|
 | artifactName  | Name of the artifact to instrument. If not provided, the plugin will instrument all the project artifacts. |
 | outputFolder  | Path to the folder where the plugin will generate the instrumented artifacts.                              |
