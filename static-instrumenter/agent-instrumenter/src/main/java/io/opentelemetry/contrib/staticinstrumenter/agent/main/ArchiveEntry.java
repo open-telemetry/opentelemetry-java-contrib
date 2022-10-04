@@ -25,7 +25,7 @@ class ArchiveEntry {
       return NOT_CLASS;
     }
     String path = zipEntryName.substring(0, zipEntryName.indexOf(".class"));
-    return new ArchiveEntry(className(path), path, !shouldBeSkipped(zipEntryName));
+    return new ArchiveEntry(className(path), path, !isOTel(zipEntryName));
   }
 
   private static boolean isClass(String path) {
@@ -36,7 +36,7 @@ class ArchiveEntry {
     return path.replace("/", ".");
   }
 
-  private static boolean shouldBeSkipped(String zipEntryName) {
+  private static boolean isOTel(String zipEntryName) {
     return zipEntryName.startsWith("io.opentelemetry");
   }
 
