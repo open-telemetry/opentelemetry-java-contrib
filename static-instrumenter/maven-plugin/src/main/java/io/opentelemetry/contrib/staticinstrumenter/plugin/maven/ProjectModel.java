@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -34,13 +35,13 @@ class ProjectModel {
    */
   List<Path> chooseForInstrumentation(@Nullable String artifactName) {
 
-    List<Path> allArtifacts = getAllAsFiles();
+    List<Path> allArtifacts = findProjectArtifacts();
 
     if (artifactName == null) {
       if (logger.isDebugEnabled()) {
-        String names =
-            Arrays.toString(allArtifacts.stream().map(Path::toFile).map(File::getName).toArray());
-        logger.debug("Artifact name not provided. Defaults to instrument all artifacts: {}", names);
+        String fileNames = toFileNames(allArtifacts);
+        logger.debug(
+            "Artifact name not provided. Defaults to instrument all artifacts: {}", fileNames);
       }
       return allArtifacts;
     }
@@ -50,18 +51,42 @@ class ProjectModel {
         return new ArrayList<>(Collections.singletonList(artifactFile));
       }
     }
-    String message = "Artifact with name " + artifactName + " not found.";
-    logger.error(message);
+    String message =
+        "Artifact with name "
+            + artifactName
+            + " not found. The available artifacts are: "
+            + toFileNames(allArtifacts)
+            + ". Project artifact: "
+            + project.getArtifact()
+            + ". "
+            + "File of project artifact: "
+            + project.getArtifact().getFile();
     throw new IllegalArgumentException(message);
   }
 
-  private List<Path> getAllAsFiles() {
+  private static String toFileNames(List<Path> paths) {
+    return Arrays.toString(paths.stream().map(Path::toFile).map(File::getName).toArray());
+  }
+
+  private List<Path> findProjectArtifacts() {
+
     List<Path> artifactFiles = new ArrayList<>();
-    artifactFiles.add(project.getArtifact().getFile().toPath());
-    project.getAttachedArtifacts().stream()
+
+    Artifact artifact = project.getArtifact();
+    File file = artifact.getFile();
+    if (file != null) {
+      artifactFiles.add(file.toPath());
+    }
+
+    artifactFiles.addAll(findPathsOfAttachedArtifacts());
+
+    return artifactFiles;
+  }
+
+  private List<Path> findPathsOfAttachedArtifacts() {
+    return project.getAttachedArtifacts().stream()
         .map(Artifact::getFile)
         .map(File::toPath)
-        .forEach(artifactFiles::add);
-    return artifactFiles;
+        .collect(Collectors.toList());
   }
 }
