@@ -5,34 +5,36 @@
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.contrib.staticinstrumenter.agent.main.Main;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 final class JarTest {
 
-  private static final String INSTRUMENTATION_MAIN =
-      "io.opentelemetry.contrib.staticinstrumenter.agent.main.Main";
-  private static final String APP_MAIN = "org.example.SingleGetter";
+  private static final String INSTRUMENTATION_MAIN = Main.class.getCanonicalName();
+
+  // Class contained in test-app project
+  private static final String APP_MAIN =
+      "io.opentelemetry.contrib.staticinstrumenter.test.HttpClientTest";
 
   @TempDir public Path outPath;
 
-  @Disabled("This test broke when updating to 1.18.0")
   @Test
   void testSampleJar() throws Exception {
+
     Path agentPath = Path.of(System.getProperty("agent"));
     Path noInstAgentPath = Path.of(System.getProperty("no.inst.agent"));
     // jar created in test-app module
     Path appPath = getPath("app.jar");
 
+    // Create a jar with static instrumentation
     ProcessBuilder instrumentationProcessBuilder =
         new ProcessBuilder(
             "java",
@@ -43,34 +45,39 @@ final class JarTest {
             outPath.toString());
 
     Process instrumentationProcess = instrumentationProcessBuilder.start();
-    InputStream instrumentationIn = instrumentationProcess.getErrorStream();
     instrumentationProcess.waitFor(10, TimeUnit.SECONDS);
 
-    String instrumentationLog =
-        new String(instrumentationIn.readAllBytes(), StandardCharsets.UTF_8);
+    try (InputStream errorOutput = instrumentationProcess.getErrorStream()) {
+      String errorOutputAsString = new String(errorOutput.readAllBytes(), StandardCharsets.UTF_8);
+      assertThat(errorOutputAsString)
+          .contains(
+              "[main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent");
+    }
+
     assertThat(instrumentationProcess.exitValue()).isEqualTo(0);
-    assertThat(instrumentationLog).isNotEmpty();
 
     Path resultAppPath = outPath.resolve("app.jar");
-    assertThat(Files.exists(resultAppPath)).isTrue();
+    assertThat(resultAppPath).exists();
 
+    // Run the jar with static instrumentation
     ProcessBuilder runtimeProcessBuilder =
         new ProcessBuilder(
             "java",
             "-Dotel.traces.exporter=logging",
-            "-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default",
             "-cp",
             resultAppPath + File.pathSeparator + noInstAgentPath,
             APP_MAIN);
 
     Process runtimeProcess = runtimeProcessBuilder.start();
-    InputStream err = runtimeProcess.getErrorStream();
     runtimeProcess.waitFor(10, TimeUnit.SECONDS);
 
     assertThat(runtimeProcess.exitValue()).isEqualTo(0);
-    assertThat(new String(err.readAllBytes(), StandardCharsets.UTF_8))
-        .startsWith(
-            "[main] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'HTTP GET'");
+
+    try (InputStream standardOutputOfInstrumentedApp = runtimeProcess.getInputStream()) {
+      String standardOutputAsStringIns =
+          new String(standardOutputOfInstrumentedApp.readAllBytes(), StandardCharsets.UTF_8);
+      assertThat(standardOutputAsStringIns).startsWith("SUCCESS - Trace parent value");
+    }
   }
 
   private static Path getPath(String resourceName) throws URISyntaxException {
