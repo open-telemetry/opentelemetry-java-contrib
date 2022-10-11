@@ -29,7 +29,7 @@ tasks {
     from({
       agent.singleFile
     })
-    rename { "otel-agent.jar" }
+    rename("^(.*)\\.jar\$", "otel-agent.jar")
   }
 
   withType<Test>().configureEach {
