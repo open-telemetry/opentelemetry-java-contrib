@@ -10,10 +10,27 @@ The attachment will _not_ be initiated in the following cases:
 * The attachment is not requested from the _main_ thread
 * The attachment is not requested from the `public static void main(String[] args)` method
 * The agent is already attached
-* The application is running on a JRE (a JDK is necessary)
-* The application is running on a read-only file system
+* The application is running on a JRE (a JDK is necessary, see [this issue](https://github.com/raphw/byte-buddy/issues/374))
+* The temporary directory should be writable
 
-_The attachment must be requested at the beginning of the `public static void main(String[] args)` method._ We give below an example for Spring Boot applications:
+To use runtime attachment, you have to add the following dependency:
+
+_Maven_
+```xml
+<dependency>
+  <groupId>io.opentelemetry.contrib</groupId>
+  <artifactId>opentelemetry-runtime-attach</artifactId>
+  <version>...</version>
+</dependency>
+```
+_Gradle_
+```
+implementation 'io.opentelemetry.contrib:opentelemetry-runtime-attach:...'
+```
+
+After, you have to request the attachment of the agent _at the beginning of the `public static void main(String[] args)` method_ with the help of the `io.opentelemetry.contrib.attach.RuntimeAttach.attachJavaagentToCurrentJVM()` method.
+
+We give below an example for Spring Boot applications:
 
 ```java
 @SpringBootApplication
