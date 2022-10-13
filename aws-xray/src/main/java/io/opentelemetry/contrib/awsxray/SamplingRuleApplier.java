@@ -153,7 +153,7 @@ final class SamplingRuleApplier {
     this.nextSnapshotTimeNanos = nextSnapshotTimeNanos;
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings("deprecation") // TODO
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
     String httpTarget = null;
