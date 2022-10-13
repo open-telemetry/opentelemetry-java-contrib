@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Runtime attach
+
+- Fix missing class in opentelemetry-runtime-attach jar
+  ([#509](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/509))
+
 ## Version 1.18.0 (2022-09-19)
 
 ### aws-resources/
