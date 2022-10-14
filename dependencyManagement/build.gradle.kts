@@ -15,7 +15,7 @@ rootProject.extra["versions"] = dependencyVersions
 val otelVersion = "1.19.0"
 
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.13.4.20221012",
+  "com.fasterxml.jackson:jackson-bom:2.13.4.20221013",
   "com.google.guava:guava-bom:31.1-jre",
   "com.linecorp.armeria:armeria-bom:1.20.1",
   "org.junit:junit-bom:5.9.1",
