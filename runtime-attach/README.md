@@ -6,8 +6,7 @@ If you can't update the JVM arguments to attach the [OpenTelemetry Java agent](h
 
 ### Add a dependency
 
-Replace `OPENTELEMETRY_CONTRIB_VERSION` with the latest stable
-[release](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-runtime-attach).
+Replace `OPENTELEMETRY_CONTRIB_VERSION` with the latest stable [release](https://mvnrepository.com/artifact/io.opentelemetry).
 
 For Maven, add to your `pom.xml` the following dependency:
 
