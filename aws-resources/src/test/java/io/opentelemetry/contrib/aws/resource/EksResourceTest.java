@@ -21,6 +21,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ServiceLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,10 @@ public class EksResourceTest {
             entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
             entry(ResourceAttributes.CLOUD_PLATFORM, "aws_eks"),
             entry(ResourceAttributes.K8S_CLUSTER_NAME, "my-cluster"),
-            entry(ResourceAttributes.CONTAINER_ID, "0123456789A"));
+            entry(ResourceAttributes.CONTAINER_ID, "0123456789A"),
+            entry(
+                ResourceAttributes.AWS_LOG_GROUP_NAMES,
+                Arrays.asList("/aws/containerinsights/my-cluster/application")));
   }
 
   @Test

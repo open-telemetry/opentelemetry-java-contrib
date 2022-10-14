@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -72,6 +73,9 @@ public final class EksResource {
     String clusterName = getClusterName(httpClient);
     if (clusterName != null && !clusterName.isEmpty()) {
       attrBuilders.put(ResourceAttributes.K8S_CLUSTER_NAME, clusterName);
+
+      String logGroupName = String.format("/aws/containerinsights/%s/application", clusterName);
+      attrBuilders.put(ResourceAttributes.AWS_LOG_GROUP_NAMES, Arrays.asList(logGroupName));
     }
 
     String containerId = dockerHelper.getContainerId();
