@@ -72,8 +72,8 @@ query($q: String!, $endCursor: String) {
   }
 }
 ' --jq '.data.search.edges.[].node.body' \
-  | grep -oE "#[0-9]{4,}|$GITHUB_REPOSITORY/issues/[0-9]{4,}" \
-  | grep -oE "[0-9]{4,}" \
+  | grep -oE "#[0-9]{3,}$|#[0-9]{3,}[^0-9<]|$GITHUB_REPOSITORY/issues/[0-9]{3,}" \
+  | grep -oE "[0-9]{3,}" \
   | xargs -I{} gh issue view {} --json 'author,url' --jq '[.author.login,.url]' \
   | grep -v '/pull/' \
   | sed 's/^\["//' \
