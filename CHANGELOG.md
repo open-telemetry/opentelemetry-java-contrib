@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.19.0 (2022-10-14)
 
 ### Runtime attach
 
