@@ -1,8 +1,7 @@
 plugins {
   id("otel.java-conventions")
 
-  // TODO: uncomment after 1.18.0 release
-  // id("otel.publish-conventions")
+  id("otel.publish-conventions")
 }
 
 description = "OpenTelemetry AWS Resources Support"
