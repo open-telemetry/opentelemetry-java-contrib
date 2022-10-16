@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### aws-resources/
+
+- Fixed artifact `io.opentelemetry.contrib:opentelemetry-aws-resources` not being published to
+  maven central
+  ([#535](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/535))
+
 ## Version 1.19.0 (2022-10-14)
 
 ### Runtime attach
