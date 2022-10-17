@@ -24,7 +24,9 @@ else
 fi
 
 declare -A component_names=()
-component_names["aws-xray/"]="AWS X-Ray"
+component_names["aws-resources/"]="AWS Resources"
+component_names["aws-xray/"]="AWS X-Ray SDK Support"
+component_names["aws-xray-propagator/"]="AWS X-Ray Propagator"
 component_names["consistent-sampling/"]="Consistent sampling"
 component_names["jfr-streaming/"]="JFR streaming"
 component_names["jmx-metrics/"]="JMX metrics"
