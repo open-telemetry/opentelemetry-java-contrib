@@ -9,7 +9,9 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-* [AWS X-Ray Support](./aws-xray/README.md)
+* [AWS Resources](./aws-resources/README.md)
+* [AWS X-Ray SDK Support](./aws-xray/README.md)
+* [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
 * [Consistent sampling](./consistent-sampling/README.md)
 * [JFR Streaming](./jfr-streaming/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
