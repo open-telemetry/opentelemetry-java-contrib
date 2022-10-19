@@ -14,6 +14,8 @@ components:
     - willarmiros
   aws-xray:
     - willarmiros
+  aws-xray-propagator:
+    - willarmiros
   consistent-sampling:
     - oertl
     - PeterF778
