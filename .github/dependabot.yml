@@ -13,6 +13,10 @@ updates:
 
   - package-ecosystem: "gradle"
     directory: "/"
+    ignore:
+      - dependency-name: "io.micrometer:micrometer-core"
+        # compileOnly dependency on old micrometer-core version is intentional
+        versions: [ "(1.1.0,)" ]
     registries:
       - gradle-plugin-portal
     schedule:
