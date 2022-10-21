@@ -56,7 +56,6 @@ jobs:
       - integration-test
     outputs:
       jmx-metrics-version: ${{ steps.create-github-release.outputs.jmx-metrics-version }}
-      jmx-metrics-sha256: ${{ steps.create-github-release.outputs.jmx-metrics-sha256 }}
     steps:
       - run: |
           if [[ $GITHUB_REF_NAME != release/* ]]; then
@@ -182,7 +181,6 @@ jobs:
                             opentelemetry-jmx-metrics.jar
 
           echo "::set-output name=jmx-metrics-version::$jmx_metrics_version"
-          echo "::set-output name=jmx-metrics-sha256::$(sha256sum opentelemetry-jmx-metrics.jar | cut -d ' ' -f 1)"
 
       - uses: actions/checkout@v3
         with:
@@ -266,6 +264,5 @@ jobs:
     uses: ./.github/workflows/reusable-create-collector-contrib-pull-request.yml
     with:
       jmx-metrics-version: ${{ needs.release.outputs.jmx-metrics-version }}
-      jmx-metrics-sha256: ${{ needs.release.outputs.jmx-metrics-sha256 }}
     secrets:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
