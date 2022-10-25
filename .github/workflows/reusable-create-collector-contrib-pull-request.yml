@@ -6,9 +6,6 @@ on:
       jmx-metrics-version:
         type: string
         required: true
-      jmx-metrics-sha256:
-        type: string
-        required: true
     secrets:
       BOT_TOKEN:
         required: true
@@ -17,9 +14,6 @@ on:
     inputs:
       jmx-metrics-version:
         description: "JMX metrics version"
-        required: true
-      jmx-metrics-sha256:
-        description: "JMX metrics hash (sha256)"
         required: true
 
 jobs:
@@ -42,12 +36,36 @@ jobs:
 
       - name: Update version
         env:
-          VERSION: ${{ inputs.jmx-metrics-version }}
-          HASH: ${{ inputs.jmx-metrics-sha256 }}
+          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
         run: |
+          if [[ ! $JMX_METRICS_VERSION =~ -alpha$ ]]; then
+            echo currently expecting jmx metrics version to end with "-alpha"
+            exit 1
+          fi
+
+          version=${JMX_METRICS_VERSION//-alpha/}
+          hash=$(curl -L https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/v$version/opentelemetry-jmx-metrics.jar \
+                         | sha256sum \
+                         | cut -d ' ' -f 1)
+
           # NOTE there are intentional tab characters in the line below
-          sed -i "/^var jmxMetricsGathererVersions/a \	\"$HASH\": {\n		version: \"$VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
+          sed -i "/^var jmxMetricsGathererVersions/a \	\"$hash\": {\n		version: \"$JMX_METRICS_VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
           git diff
+
+      - name: Add change log entry
+        env:
+          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
+        run: |
+          # see the template for change log entry file at
+          # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/.chloggen/TEMPLATE.yaml
+          cat > .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml << EOF
+          change_type: enhancement
+          component: jmxreceiver
+          note: Add the JMX metrics gatherer version $JMX_METRICS_VERSION to the supported jars hash list
+          issues: []
+          EOF
+
+          git add .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml
 
       - name: Use CLA approved github bot
         run: |
