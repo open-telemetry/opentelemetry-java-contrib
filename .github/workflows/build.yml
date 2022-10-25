@@ -62,13 +62,12 @@ jobs:
           path: jmx-metrics/build/reports/tests/integrationTest
 
   markdown-link-check:
-    # release branches are excluded to avoid unnecessary maintenance if external links break
-    if: ${{ !startsWith(github.ref_name, 'release/') }}
+    # release branches are excluded to avoid unnecessary maintenance
+    if: "!startsWith(github.ref_name, 'release/')"
     uses: ./.github/workflows/reusable-markdown-link-check.yml
 
   misspell-check:
-    # release branches are excluded to avoid unnecessary maintenance if new misspellings are added
-    # to the misspell dictionary
+    # release branches are excluded to avoid unnecessary maintenance
     if: ${{ !startsWith(github.ref_name, 'release/') }}
     uses: ./.github/workflows/reusable-misspell-check.yml
 
@@ -111,15 +110,13 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
 
   required-status-check:
+    # markdown-link-check is not required so pull requests are not blocked if external links break
+    # misspell-check is not required so pull requests are not blocked if new misspellings are added
     needs:
-      # markdown-link-check is not required so that pull requests will not be blocked if external
-      # links break
-      # similarly misspell-check is not required so that pull requests will not be blocked if new
-      # misspellings are added to the misspell dictionary
       - build
       - integration-test
-    runs-on: ubuntu-latest
     if: always()
+    runs-on: ubuntu-latest
     steps:
       - if: |
           needs.build.result != 'success' ||

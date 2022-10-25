@@ -43,8 +43,13 @@ for component in */ ; do
   component_name=${component_names[$component]:=$component}
   echo "### $component_name"
   echo
-  git log --reverse --pretty=format:"- %s" $range $component \
-    | sed -r 's,\(#([0-9]+)\),\n  ([#\1](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/\1)),'
+  git log --reverse \
+          --perl-regexp \
+          --author='^(?!dependabot\[bot\] )' \
+          --pretty=format:"- %s" \
+          "$range" \
+          "$component" \
+    | sed -E 's,\(#([0-9]+)\)$,\n  ([#\1](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/\1)),'
   echo
   echo
 done
