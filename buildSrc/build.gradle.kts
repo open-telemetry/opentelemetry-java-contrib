@@ -19,7 +19,7 @@ dependencies {
 
 spotless {
   kotlinGradle {
-    ktlint().editorConfigOverride(mapOf("indent_size" to "2", "continuation_indent_size" to "2", "disabled_rules" to "no-wildcard-imports"))
+    ktlint().editorConfigOverride(mapOf("indent_size" to "2", "continuation_indent_size" to "2", "ktlint_disabled_rules" to "no-wildcard-imports"))
     target("**/*.gradle.kts")
   }
 }
