@@ -1,15 +1,18 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resourceproviders;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class DelegatingServiceNameDetectorTest {
 
@@ -51,7 +54,5 @@ class DelegatingServiceNameDetectorTest {
     String result = detector.detect();
     assertThat(result).isEqualTo("bbb");
     verify(d1).detect();
-
   }
-
 }

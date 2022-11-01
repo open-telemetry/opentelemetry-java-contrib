@@ -16,12 +16,12 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
- * This class is a BeforeAgentListener that hooks into the agent lifecycle to determine
- * if the otel.service.name has been set. It will log a warning to help the user better
- * understand how to set their service name.
+ * This class is a BeforeAgentListener that hooks into the agent lifecycle to determine if the
+ * otel.service.name has been set. It will log a warning to help the user better understand how to
+ * set their service name.
  *
- * The serviceNameNotConfigured method is also used by some resource providers to
- * determine if they should apply (eg. don't change the service name if already set).
+ * <p>The serviceNameNotConfigured method is also used by some resource providers to determine if
+ * they should apply (eg. don't change the service name if already set).
  */
 @AutoService(BeforeAgentListener.class)
 public class ServiceNameChecker implements BeforeAgentListener {

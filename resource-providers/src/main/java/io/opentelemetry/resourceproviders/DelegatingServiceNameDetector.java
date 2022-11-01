@@ -25,7 +25,8 @@ final class DelegatingServiceNameDetector implements ServiceNameDetector {
   }
 
   @Override
-  public @Nullable String detect() throws Exception {
+  @Nullable
+  public String detect() {
     for (ServiceNameDetector detector : delegates) {
       try {
         String name = detector.detect();

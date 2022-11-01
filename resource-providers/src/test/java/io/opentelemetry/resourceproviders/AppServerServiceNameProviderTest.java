@@ -1,4 +1,13 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resourceproviders;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -9,15 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class AppServerServiceNameProviderTest {
 
-  @Mock
-  ServiceNameDetector detector;
+  @Mock ServiceNameDetector detector;
 
   @Test
   void createResource_empty() {
@@ -50,9 +54,10 @@ class AppServerServiceNameProviderTest {
 
   @Test
   void shouldApply() {
-    Resource existing = Resource.builder()
-        .put(ResourceAttributes.SERVICE_NAME.getKey(), "unknown_service:java")
-        .build();
+    Resource existing =
+        Resource.builder()
+            .put(ResourceAttributes.SERVICE_NAME.getKey(), "unknown_service:java")
+            .build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 
@@ -77,9 +82,8 @@ class AppServerServiceNameProviderTest {
 
   @Test
   void shouldApply_serviceNameAlreadyInResource() {
-    Resource existing = Resource.builder()
-        .put(ResourceAttributes.SERVICE_NAME.getKey(), "shemp")
-        .build();
+    Resource existing =
+        Resource.builder().put(ResourceAttributes.SERVICE_NAME.getKey(), "shemp").build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 
@@ -88,5 +92,4 @@ class AppServerServiceNameProviderTest {
     boolean result = provider.shouldApply(config, existing);
     assertThat(result).isFalse();
   }
-
 }

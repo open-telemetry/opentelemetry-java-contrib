@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
@@ -24,10 +25,10 @@ class ServiceNameCheckerTest {
   @Test
   void shouldLogWarnWhenNeitherServiceNameNorResourceAttributeIsConfigured() {
     // given
-    var autoConfiguredSdk =
+    AutoConfiguredOpenTelemetrySdk autoConfiguredSdk =
         AutoConfiguredOpenTelemetrySdk.builder().setResultAsGlobal(false).build();
 
-    var underTest = new ServiceNameChecker(logWarn);
+    ServiceNameChecker underTest = new ServiceNameChecker(logWarn);
 
     // when
     underTest.beforeAgent(autoConfiguredSdk);
@@ -39,13 +40,15 @@ class ServiceNameCheckerTest {
   @Test
   void shouldNotLogWarnWhenServiceNameIsConfigured() {
     // given
-    var autoConfiguredSdk =
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.service.name", "test");
+    AutoConfiguredOpenTelemetrySdk autoConfiguredSdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setResultAsGlobal(false)
-            .addPropertiesSupplier(() -> Map.of("otel.service.name", "test"))
+            .addPropertiesSupplier(() -> properties)
             .build();
 
-    var underTest = new ServiceNameChecker(logWarn);
+    ServiceNameChecker underTest = new ServiceNameChecker(logWarn);
 
     // when
     underTest.beforeAgent(autoConfiguredSdk);
@@ -57,13 +60,15 @@ class ServiceNameCheckerTest {
   @Test
   void shouldNotLogWarnWhenResourceAttributeIsConfigured() {
     // given
-    var autoConfiguredSdk =
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.resource.attributes", "service.name=test");
+    AutoConfiguredOpenTelemetrySdk autoConfiguredSdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setResultAsGlobal(false)
-            .addPropertiesSupplier(() -> Map.of("otel.resource.attributes", "service.name=test"))
+            .addPropertiesSupplier(() -> properties)
             .build();
 
-    var underTest = new ServiceNameChecker(logWarn);
+    ServiceNameChecker underTest = new ServiceNameChecker(logWarn);
 
     // when
     underTest.beforeAgent(autoConfiguredSdk);

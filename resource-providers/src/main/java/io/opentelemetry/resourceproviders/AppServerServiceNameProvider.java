@@ -20,17 +20,18 @@ import javax.annotation.Nullable;
 @AutoService(ResourceProvider.class)
 public class AppServerServiceNameProvider implements ConditionalResourceProvider {
 
-  private static final Logger logger = Logger.getLogger(AppServerServiceNameProvider.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(AppServerServiceNameProvider.class.getName());
   private final ServiceNameDetector detector;
-
 
   public AppServerServiceNameProvider() {
     this(CommonAppServersServiceNameDetector.create());
   }
 
   // Exists for testing
-  public AppServerServiceNameProvider(ServiceNameDetector detector) {this.detector = detector;}
-
+  public AppServerServiceNameProvider(ServiceNameDetector detector) {
+    this.detector = detector;
+  }
 
   @Override
   public Resource createResource(ConfigProperties config) {
