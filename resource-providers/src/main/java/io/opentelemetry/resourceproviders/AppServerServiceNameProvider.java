@@ -18,9 +18,19 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 @AutoService(ResourceProvider.class)
-public class WebXmlServiceNameProvider implements ConditionalResourceProvider {
+public class AppServerServiceNameProvider implements ConditionalResourceProvider {
 
-  private static final Logger logger = Logger.getLogger(WebXmlServiceNameProvider.class.getName());
+  private static final Logger logger = Logger.getLogger(AppServerServiceNameProvider.class.getName());
+  private final ServiceNameDetector detector;
+
+
+  public AppServerServiceNameProvider() {
+    this(CommonAppServersServiceNameDetector.create());
+  }
+
+  // Exists for testing
+  public AppServerServiceNameProvider(ServiceNameDetector detector) {this.detector = detector;}
+
 
   @Override
   public Resource createResource(ConfigProperties config) {
@@ -34,7 +44,6 @@ public class WebXmlServiceNameProvider implements ConditionalResourceProvider {
 
   @Nullable
   private String detectServiceName() {
-    ServiceNameDetector detector = CommonAppServersServiceNameDetector.create();
     try {
       return detector.detect();
     } catch (Exception e) {
