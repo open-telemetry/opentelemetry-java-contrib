@@ -18,5 +18,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-semconv")
   testImplementation("com.google.auto.service:auto-service")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling") {
+    exclude("io.opentelemetry.javaagent", "opentelemetry-javaagent-tooling-java9")
+  }
 }
