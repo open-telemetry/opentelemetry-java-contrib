@@ -12,5 +12,5 @@ resource attribute manually.
 
 It is capable of detecting common scenarios among the following popular application servers:
 
-* tbd
+* tbd (will be filled in as implementations are added)
 
