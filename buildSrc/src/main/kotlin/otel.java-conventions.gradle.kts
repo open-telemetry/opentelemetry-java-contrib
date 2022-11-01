@@ -22,10 +22,12 @@ java {
 }
 
 tasks {
+  compileJava {
+    options.release.set(8)
+  }
+
   withType<JavaCompile>().configureEach {
     with(options) {
-      release.set(8)
-
       if (name != "jmhCompileGeneratedClasses") {
         compilerArgs.addAll(
           listOf(
