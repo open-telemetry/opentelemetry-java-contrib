@@ -29,7 +29,7 @@ public class AppServerServiceNameProvider implements ConditionalResourceProvider
   }
 
   // Exists for testing
-  public AppServerServiceNameProvider(ServiceNameDetector detector) {
+  AppServerServiceNameProvider(ServiceNameDetector detector) {
     this.detector = detector;
   }
 
