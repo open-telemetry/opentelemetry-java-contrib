@@ -23,4 +23,3 @@ It is capable of detecting common scenarios among the following popular applicat
 - [Ago Allikmaa](https://github.com/agoallikmaa), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
-
