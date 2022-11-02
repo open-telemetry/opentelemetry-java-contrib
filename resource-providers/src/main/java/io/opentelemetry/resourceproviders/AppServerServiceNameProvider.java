@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 @AutoService(ResourceProvider.class)
-public class AppServerServiceNameProvider implements ConditionalResourceProvider {
+public final class AppServerServiceNameProvider implements ConditionalResourceProvider {
 
   private static final Logger logger =
       Logger.getLogger(AppServerServiceNameProvider.class.getName());
