@@ -39,6 +39,11 @@ components:
     - HaloFour
   noop-api:
     - jack-berg
+  resource-providers:
+    - breedx-splk
+    - mateuszrzeszutek
+    - laurit
+    - agoallikmaa
   runtime-attach:
     - iNikem
     - jeanbisutti
