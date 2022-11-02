@@ -43,7 +43,6 @@ components:
     - breedx-splk
     - mateuszrzeszutek
     - laurit
-    - agoallikmaa
   runtime-attach:
     - iNikem
     - jeanbisutti
