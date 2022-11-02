@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -56,7 +57,11 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
 
   @Override
   public boolean shouldApply(ConfigProperties config, Resource existing) {
-    return ServiceNameChecker.serviceNameNotConfigured(config, existing);
+    String serviceName = config.getString("otel.service.name");
+    Map<String, String> resourceAttributes = config.getMap("otel.resource.attributes");
+    return serviceName == null
+        && !resourceAttributes.containsKey(SERVICE_NAME.getKey())
+        && "unknown_service:java".equals(existing.getAttribute(SERVICE_NAME));
   }
 
   @Override
