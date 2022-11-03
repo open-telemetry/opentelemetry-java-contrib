@@ -20,7 +20,7 @@ the second Monday of the month (roughly a couple of days after the monthly minor
 
 * Check that [dependabot has run](https://github.com/open-telemetry/opentelemetry-java-contrib/network/updates)
   sometime in the past day.
-  * Check that SDK and instrumentation dependency versions have been updated to the latest release.
+  * Check that the OpenTelemetry SDK and Instrumentation versions have been updated to the latest release.
 * Close the [release milestone](https://github.com/open-telemetry/opentelemetry-java-contrib/milestones)
   if there is one.
 * Merge a pull request to `main` updating the `CHANGELOG.md`.
