@@ -14,7 +14,7 @@ rootProject.extra["versions"] = dependencyVersions
 // this line is managed by .github/scripts/update-sdk-version.sh
 val otelSdkVersion = "1.19.0"
 // this line is managed by .github/scripts/update-instrumentation-version.sh
-val otelInstrumentationVersion = "1.19.2"
+val otelInstrumentationVersion = "1.19.0"
 
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.13.4.20221013",
