@@ -11,20 +11,14 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-// this line is managed by .github/scripts/update-sdk-version.sh
-val otelSdkVersion = "1.19.0"
-// this line is managed by .github/scripts/update-instrumentation-version.sh
-val otelInstrumentationVersion = "1.19.0"
-
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.13.4.20221013",
   "com.google.guava:guava-bom:31.1-jre",
   "com.linecorp.armeria:armeria-bom:1.20.1",
   "org.junit:junit-bom:5.9.1",
   "io.grpc:grpc-bom:1.50.2",
-  "io.opentelemetry:opentelemetry-bom:$otelSdkVersion",
-  "io.opentelemetry:opentelemetry-bom-alpha:${otelSdkVersion}-alpha",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}-alpha",
+  "io.opentelemetry:opentelemetry-bom-alpha:1.19.0-alpha",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.19.0-alpha",
   "org.testcontainers:testcontainers-bom:1.17.5"
 )
 
@@ -48,7 +42,7 @@ val CORE_DEPENDENCIES = listOf(
 )
 
 val DEPENDENCIES = listOf(
-  "io.opentelemetry.javaagent:opentelemetry-javaagent:$otelInstrumentationVersion",
+  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.19.0",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.10.0",
