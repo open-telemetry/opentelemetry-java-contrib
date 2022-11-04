@@ -22,9 +22,14 @@ public class AbstractMetricsTest {
 
   static SdkMeterProvider meterProvider;
   static InMemoryMetricReader metricReader;
+  static boolean isInitialized = false;
 
   @BeforeAll
   static void initializeOpenTelemetry() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     GlobalOpenTelemetry.set(OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build());
