@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
+package io.opentelemetry.contrib.jfr.metrics.internal.classLoading;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -13,20 +13,20 @@ import java.time.Duration;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
-public final class ThreadCountHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME = "process.runtime.jvm.cpu.active_threads";
-  private static final String EVENT_NAME = "jdk.JavaThreadStatistics";
-  private static final String METRIC_DESCRIPTION = "Number of active threads";
+public final class ClassesLoadedHandler implements RecordedEventHandler {
+  private static final String METRIC_NAME = "process.runtime.jvm.cpu.loaded_class_count";
+  private static final String EVENT_NAME = "jdk.ClassLoadingStatistics";
+  private static final String METRIC_DESCRIPTION = "Number of loaded classes";
 
   private volatile long value = 0;
 
-  public ThreadCountHandler() {
+  public ClassesLoadedHandler() {
     initializeMeter(defaultMeter());
   }
 
   @Override
   public void accept(RecordedEvent ev) {
-    value = ev.getLong("activeCount");
+    value = ev.getLong("loadedClassCount");
   }
 
   @Override

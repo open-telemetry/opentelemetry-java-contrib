@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.jfr.metrics;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.internal.classLoading.ClassesLoadedHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
@@ -70,7 +71,8 @@ final class HandlerRegistry {
             new OverallCPULoadHandler(),
             new ContainerConfigurationHandler(),
             new LongLockHandler(grouper),
-            new ThreadCountHandler());
+            new ThreadCountHandler(),
+            new ClassesLoadedHandler());
     handlers.addAll(basicHandlers);
 
     var meter =
