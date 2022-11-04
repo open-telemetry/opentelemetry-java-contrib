@@ -12,6 +12,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigur
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.OverallCPULoadHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ThreadCountHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
@@ -68,7 +69,8 @@ final class HandlerRegistry {
             new ContextSwitchRateHandler(),
             new OverallCPULoadHandler(),
             new ContainerConfigurationHandler(),
-            new LongLockHandler(grouper));
+            new LongLockHandler(grouper),
+            new ThreadCountHandler());
     handlers.addAll(basicHandlers);
 
     var meter =
