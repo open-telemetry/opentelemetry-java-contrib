@@ -44,6 +44,13 @@ class JfrClassesLoadedCountTest extends AbstractMetricsTest {
             metric
                 .hasName("process.runtime.jvm.classes.unloaded")
                 .hasDescription("Number of classes unloaded since JVM start")
-                .hasUnit(UNIT_CLASSES));
+                .hasUnit(UNIT_CLASSES)
+                .hasLongSumSatisfying(
+                    sum ->
+                        sum.hasPointsSatisfying(
+                            point ->
+                                point.satisfies(
+                                    pointData ->
+                                        Assertions.assertTrue(pointData.getValue() >= 0)))));
   }
 }

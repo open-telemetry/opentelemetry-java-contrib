@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.DAEMON;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.FALSE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TRUE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_THREADS;
 
 import io.opentelemetry.api.common.AttributeKey;
@@ -60,15 +63,15 @@ class JfrThreadCountTest extends AbstractMetricsTest {
                             && longPoint
                                 .getAttributes()
                                 .asMap()
-                                .get(AttributeKey.stringKey("daemon"))
-                                .equals("false")) {
+                                .get(AttributeKey.stringKey(DAEMON))
+                                .equals(FALSE)) {
                           foundNonDaemon = true;
                         } else if (longPoint.getValue() > 0
                             && longPoint
                                 .getAttributes()
                                 .asMap()
-                                .get(AttributeKey.stringKey("daemon"))
-                                .equals("true")) {
+                                .get(AttributeKey.stringKey(DAEMON))
+                                .equals(TRUE)) {
                           foundDaemon = true;
                         }
                       }
