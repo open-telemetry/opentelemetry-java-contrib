@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resourceproviders;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -15,12 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AppServerServiceNameDetectorTest {
 
-  @Mock
-  private AppServer appServer;
-  @Mock
-  private AppServerServiceNameDetector.DirectoryTool dirTool;
-  @Mock
-  private ParseBuddy parseBuddy;
+  @Mock private AppServer appServer;
+  @Mock private AppServerServiceNameDetector.DirectoryTool dirTool;
+  @Mock private ParseBuddy parseBuddy;
 
   @Test
   void detectNullServerClass() throws Exception {
@@ -43,7 +45,8 @@ class AppServerServiceNameDetectorTest {
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(dirTool.isDirectory(deploymentDir)).thenReturn(false);
 
-    AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer, null, dirTool);
+    AppServerServiceNameDetector detector =
+        new AppServerServiceNameDetector(appServer, null, dirTool);
     assertThat(detector.detect()).isNull();
   }
 
@@ -62,7 +65,8 @@ class AppServerServiceNameDetectorTest {
     when(dirTool.isDirectory(path2)).thenReturn(true);
     when(parseBuddy.handleExplodedApp(path2)).thenReturn("RadicalService99");
 
-    AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
+    AppServerServiceNameDetector detector =
+        new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
     assertThat(detector.detect()).isEqualTo("RadicalService99");
   }
 
@@ -81,7 +85,8 @@ class AppServerServiceNameDetectorTest {
     when(dirTool.isDirectory(path2)).thenReturn(false);
     when(parseBuddy.handlePackagedWar(path2)).thenReturn("WhatIsItGoodFor");
 
-    AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
+    AppServerServiceNameDetector detector =
+        new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
     assertThat(detector.detect()).isEqualTo("WhatIsItGoodFor");
   }
 
@@ -102,7 +107,8 @@ class AppServerServiceNameDetectorTest {
     when(dirTool.isDirectory(path2)).thenReturn(false);
     when(parseBuddy.handlePackagedEar(path2)).thenReturn("Cochlea");
 
-    AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
+    AppServerServiceNameDetector detector =
+        new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
     assertThat(detector.detect()).isEqualTo("Cochlea");
   }
 
@@ -119,8 +125,8 @@ class AppServerServiceNameDetectorTest {
     when(dirTool.isDirectory(deploymentDir)).thenReturn(true);
     when(dirTool.list(deploymentDir)).thenReturn(Stream.of(path1));
 
-    AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
+    AppServerServiceNameDetector detector =
+        new AppServerServiceNameDetector(appServer, parseBuddy, dirTool);
     assertThat(detector.detect()).isNull();
   }
-
 }

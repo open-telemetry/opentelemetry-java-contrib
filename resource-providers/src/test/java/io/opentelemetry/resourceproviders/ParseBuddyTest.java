@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.resourceproviders;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -23,15 +28,15 @@ class ParseBuddyTest {
   final Path path = Paths.get("dir/");
   final Path webXml = Paths.get("dir/WEB-INF/web.xml");
   final Path applicationXml = Paths.get("dir/META-INF/application.xml");
-  final InputStream webXmlStream = new ByteArrayInputStream(
-    "<web-app><display-name>goats</display-name></web-app>".getBytes(UTF_8));
-  final InputStream appXmlStream = new ByteArrayInputStream(
-      "<application><display-name>piglet</display-name></application>".getBytes(UTF_8));
+  final InputStream webXmlStream =
+      new ByteArrayInputStream(
+          "<web-app><display-name>goats</display-name></web-app>".getBytes(UTF_8));
+  final InputStream appXmlStream =
+      new ByteArrayInputStream(
+          "<application><display-name>piglet</display-name></application>".getBytes(UTF_8));
 
-  @Mock
-  private AppServer appServer;
-  @Mock
-  private ParseBuddy.Filesystem filesystem;
+  @Mock private AppServer appServer;
+  @Mock private ParseBuddy.Filesystem filesystem;
 
   @Test
   void explodedApp_war() throws Exception {

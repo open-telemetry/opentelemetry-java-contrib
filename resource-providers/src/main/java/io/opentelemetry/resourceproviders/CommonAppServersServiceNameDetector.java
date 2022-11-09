@@ -6,7 +6,6 @@
 package io.opentelemetry.resourceproviders;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,8 +24,7 @@ final class CommonAppServersServiceNameDetector {
   private static List<ServiceNameDetector> detectors() {
     ResourceLocator locator = new ResourceLocatorImpl();
     // Additional implementations will be added to this list.
-    return Collections.singletonList(
-        detectorFor(new GlassfishAppServer(locator)));
+    return Collections.singletonList(detectorFor(new GlassfishAppServer(locator)));
   }
 
   private static AppServerServiceNameDetector detectorFor(AppServer appServer) {
@@ -49,5 +47,4 @@ final class CommonAppServersServiceNameDetector {
       return clazz.getProtectionDomain().getCodeSource().getLocation();
     }
   }
-
 }

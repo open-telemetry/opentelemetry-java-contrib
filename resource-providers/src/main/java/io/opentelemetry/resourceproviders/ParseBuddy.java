@@ -1,17 +1,6 @@
 /*
- * Copyright Splunk Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.opentelemetry.resourceproviders;
@@ -93,8 +82,7 @@ class ParseBuddy {
   }
 
   String handleExplodedEar(Path path) {
-    return handleExploded(
-        path, path.resolve("META-INF/application.xml"), newAppXmlHandler());
+    return handleExploded(path, path.resolve("META-INF/application.xml"), newAppXmlHandler());
   }
 
   private String handleExploded(Path path, Path descriptor, DescriptorHandler handler) {
@@ -134,15 +122,15 @@ class ParseBuddy {
     InputStream supply() throws IOException;
   }
 
-  private static DescriptorHandler newWebXmlHandler(){
+  private static DescriptorHandler newWebXmlHandler() {
     return new DescriptorHandler("web-app");
   }
 
-  private static DescriptorHandler newAppXmlHandler(){
+  private static DescriptorHandler newAppXmlHandler() {
     return new DescriptorHandler("application");
   }
 
-  private final static class DescriptorHandler extends DefaultHandler {
+  private static final class DescriptorHandler extends DefaultHandler {
     private final String rootElementName;
     private final Deque<String> currentElement = new ArrayDeque<>();
     private boolean setDisplayName;
