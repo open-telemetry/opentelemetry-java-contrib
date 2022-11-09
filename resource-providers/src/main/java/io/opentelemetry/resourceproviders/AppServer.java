@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 /**
  * An interface that represents a single kind of application server and its specific configuration.
  */
-public interface AppServer {
+interface AppServer {
 
   /** Path to directory to be scanned for deployments. */
   Path getDeploymentDir() throws Exception;
