@@ -27,6 +27,8 @@ public final class Constants {
   public static final String REGION_COUNT = "region.count";
   public static final String COMMITTED = "committed";
   public static final String RESERVED = "reserved";
+  public static final String TRUE = "true";
+  public static final String FALSE = "false";
 
   public static final String METRIC_NAME_NETWORK_BYTES = "process.runtime.jvm.network.io";
   public static final String METRIC_DESCRIPTION_NETWORK_BYTES = "Network read/write bytes";
@@ -43,4 +45,8 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_ARENA_NAME = AttributeKey.stringKey("arena");
   public static final AttributeKey<String> ATTR_NETWORK_MODE = AttributeKey.stringKey("mode");
   public static final AttributeKey<String> ATTR_USAGE = AttributeKey.stringKey("usage.type");
+  public static final AttributeKey<String> ATTR_DAEMON = AttributeKey.stringKey("daemon");
+
+  public static final String UNIT_CLASSES = "{classes}";
+  public static final String UNIT_THREADS = "{threads}";
 }
