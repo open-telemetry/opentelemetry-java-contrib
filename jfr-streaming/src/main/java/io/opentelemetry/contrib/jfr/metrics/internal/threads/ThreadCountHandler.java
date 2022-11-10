@@ -48,8 +48,9 @@ public final class ThreadCountHandler implements RecordedEventHandler {
         .setUnit(UNIT_THREADS)
         .buildWithCallback(
             measurement -> {
-              measurement.record(daemonCount, ATTR_DAEMON_TRUE);
-              measurement.record(activeCount - daemonCount, ATTR_DAEMON_FALSE);
+              long d = daemonCount;
+              measurement.record(d, ATTR_DAEMON_TRUE);
+              measurement.record(activeCount - d, ATTR_DAEMON_FALSE);
             });
   }
 
