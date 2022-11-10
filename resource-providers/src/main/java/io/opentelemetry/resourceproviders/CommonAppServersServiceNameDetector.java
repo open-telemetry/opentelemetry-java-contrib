@@ -8,6 +8,7 @@ package io.opentelemetry.resourceproviders;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * This class is just a factory that provides a ServiceNameDetector that knows how to find and parse
@@ -34,6 +35,7 @@ final class CommonAppServersServiceNameDetector {
   private static class ResourceLocatorImpl implements ResourceLocator {
 
     @Override
+    @Nullable
     public Class<?> findClass(String className) {
       try {
         return Class.forName(className, false, ClassLoader.getSystemClassLoader());

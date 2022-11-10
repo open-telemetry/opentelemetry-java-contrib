@@ -17,6 +17,7 @@ import java.util.Deque;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import javax.annotation.Nullable;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -42,6 +43,7 @@ class ParseBuddy {
     this.filesystem = filesystem;
   }
 
+  @Nullable
   String handleExplodedApp(Path path) {
     String warResult = handleExplodedWar(path);
     if (warResult != null) {
@@ -53,14 +55,17 @@ class ParseBuddy {
     return null;
   }
 
+  @Nullable
   String handlePackagedWar(Path path) {
     return handlePackaged(path, "WEB-INF/web.xml", newWebXmlHandler());
   }
 
+  @Nullable
   String handlePackagedEar(Path path) {
     return handlePackaged(path, "META-INF/application.xml", newAppXmlHandler());
   }
 
+  @Nullable
   private String handlePackaged(Path path, String descriptorPath, DescriptorHandler handler) {
     try (ZipFile zip = filesystem.openZipFile(path)) {
       ZipEntry zipEntry = zip.getEntry(descriptorPath);
@@ -77,14 +82,17 @@ class ParseBuddy {
     return null;
   }
 
+  @Nullable
   String handleExplodedWar(Path path) {
     return handleExploded(path, path.resolve("WEB-INF/web.xml"), newWebXmlHandler());
   }
 
+  @Nullable
   String handleExplodedEar(Path path) {
     return handleExploded(path, path.resolve("META-INF/application.xml"), newAppXmlHandler());
   }
 
+  @Nullable
   private String handleExploded(Path path, Path descriptor, DescriptorHandler handler) {
     if (filesystem.isRegularFile(descriptor)) {
       return handle(() -> filesystem.newInputStream(descriptor), path, handler);
@@ -93,6 +101,7 @@ class ParseBuddy {
     return null;
   }
 
+  @Nullable
   private String handle(InputStreamSupplier supplier, Path path, DescriptorHandler handler) {
     try {
       try (InputStream inputStream = supplier.supply()) {
@@ -108,6 +117,7 @@ class ParseBuddy {
     return null;
   }
 
+  @Nullable
   private static String parseDescriptor(InputStream inputStream, DescriptorHandler handler)
       throws ParserConfigurationException, SAXException, IOException {
     if (SaxParserFactoryHolder.saxParserFactory == null) {
@@ -134,7 +144,7 @@ class ParseBuddy {
     private final String rootElementName;
     private final Deque<String> currentElement = new ArrayDeque<>();
     private boolean setDisplayName;
-    String displayName;
+    @Nullable private String displayName;
 
     DescriptorHandler(String rootElementName) {
       this.rootElementName = rootElementName;
@@ -171,8 +181,9 @@ class ParseBuddy {
   }
 
   private static class SaxParserFactoryHolder {
-    private static final SAXParserFactory saxParserFactory = getSaxParserFactory();
+    @Nullable private static final SAXParserFactory saxParserFactory = getSaxParserFactory();
 
+    @Nullable
     private static SAXParserFactory getSaxParserFactory() {
       try {
         return SAXParserFactory.newInstance();

@@ -7,16 +7,18 @@ package io.opentelemetry.resourceproviders;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.annotation.Nullable;
 
 class GlassfishAppServer implements AppServer {
 
-  private final String SERVICE_CLASS_NAME = "com.sun.enterprise.glassfish.bootstrap.ASMain";
+  private static final String SERVICE_CLASS_NAME = "com.sun.enterprise.glassfish.bootstrap.ASMain";
   private final ResourceLocator locator;
 
   GlassfishAppServer(ResourceLocator locator) {
     this.locator = locator;
   }
 
+  @Nullable
   @Override
   public Path getDeploymentDir() {
     String instanceRoot = System.getProperty("com.sun.aas.instanceRoot");
@@ -30,6 +32,7 @@ class GlassfishAppServer implements AppServer {
   }
 
   @Override
+  @Nullable
   public Class<?> getServerClass() {
     return locator.findClass(SERVICE_CLASS_NAME);
   }

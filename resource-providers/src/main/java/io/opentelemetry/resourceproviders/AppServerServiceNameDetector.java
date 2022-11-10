@@ -7,6 +7,7 @@ package io.opentelemetry.resourceproviders;
 
 import static java.util.logging.Level.FINE;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +37,8 @@ final class AppServerServiceNameDetector implements ServiceNameDetector {
   }
 
   @Override
-  public @Nullable String detect() throws Exception {
+  @Nullable
+  public String detect() throws Exception {
     if (appServer.getServerClass() == null) {
       return null;
     }
@@ -57,6 +59,7 @@ final class AppServerServiceNameDetector implements ServiceNameDetector {
     }
   }
 
+  @Nullable
   private String detectName(Path path) {
     if (!appServer.isValidAppName(path)) {
       logger.log(FINE, "Skipping '{0}'.", path);
@@ -84,6 +87,7 @@ final class AppServerServiceNameDetector implements ServiceNameDetector {
       return Files.isDirectory(path);
     }
 
+    @MustBeClosed
     Stream<Path> list(Path path) throws IOException {
       return Files.list(path);
     }
