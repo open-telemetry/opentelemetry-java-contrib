@@ -15,9 +15,19 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class ClassesLoadedHandler implements RecordedEventHandler {
+  /**
+   * process.runtime.jvm.classes.loaded is the total number of classes loaded since JVM start. See:
+   * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/runtime-environment-metrics.md#jvm-metrics
+   */
   private static final String METRIC_NAME_LOADED = "process.runtime.jvm.classes.loaded";
+
   private static final String METRIC_NAME_UNLOADED = "process.runtime.jvm.classes.unloaded";
+  /**
+   * process.runtime.jvm.classes.current_loaded is the number of classes loaded at the time of
+   * jdk.ClassLoadingStatistics event emission.
+   */
   private static final String METRIC_NAME_CURRENT = "process.runtime.jvm.classes.current_loaded";
+
   private static final String EVENT_NAME = "jdk.ClassLoadingStatistics";
   private static final String METRIC_DESCRIPTION_CURRENT = "Number of classes currently loaded";
   private static final String METRIC_DESCRIPTION_LOADED =

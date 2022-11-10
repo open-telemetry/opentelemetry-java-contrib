@@ -6,8 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.threads;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_DAEMON;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.FALSE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TRUE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_THREADS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -22,8 +20,8 @@ public final class ThreadCountHandler implements RecordedEventHandler {
   private static final String METRIC_NAME = "process.runtime.jvm.threads.count";
   private static final String EVENT_NAME = "jdk.JavaThreadStatistics";
   private static final String METRIC_DESCRIPTION = "Number of executing threads";
-  private static final Attributes ATTR_DAEMON_TRUE = Attributes.of(ATTR_DAEMON, TRUE);
-  private static final Attributes ATTR_DAEMON_FALSE = Attributes.of(ATTR_DAEMON, FALSE);
+  private static final Attributes ATTR_DAEMON_TRUE = Attributes.of(ATTR_DAEMON, true);
+  private static final Attributes ATTR_DAEMON_FALSE = Attributes.of(ATTR_DAEMON, false);
   private volatile long activeCount = 0;
   private volatile long daemonCount = 0;
 

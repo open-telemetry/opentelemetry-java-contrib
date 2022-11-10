@@ -6,15 +6,12 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.DAEMON;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.FALSE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TRUE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_THREADS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
-import io.opentelemetry.sdk.metrics.data.PointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class JfrThreadCountTest extends AbstractMetricsTest {
@@ -22,6 +19,10 @@ class JfrThreadCountTest extends AbstractMetricsTest {
 
   private static void doWork() throws InterruptedException {
     Thread.sleep(2 * SAMPLING_INTERVAL);
+  }
+
+  private static boolean isDaemon(LongPointData p) {
+    return p.getAttributes().asMap().get(AttributeKey.booleanKey(DAEMON)).equals(true);
   }
 
   @Test
@@ -55,27 +56,10 @@ class JfrThreadCountTest extends AbstractMetricsTest {
                 .satisfies(
                     metricData -> {
                       SumData<?> sumData = metricData.getLongSumData();
-                      boolean foundDaemon = false;
-                      boolean foundNonDaemon = false;
-                      for (PointData point : sumData.getPoints()) {
-                        LongPointData longPoint = (LongPointData) point;
-                        if (longPoint.getValue() > 0
-                            && longPoint
-                                .getAttributes()
-                                .asMap()
-                                .get(AttributeKey.stringKey(DAEMON))
-                                .equals(FALSE)) {
-                          foundNonDaemon = true;
-                        } else if (longPoint.getValue() > 0
-                            && longPoint
-                                .getAttributes()
-                                .asMap()
-                                .get(AttributeKey.stringKey(DAEMON))
-                                .equals(TRUE)) {
-                          foundDaemon = true;
-                        }
-                      }
-                      Assertions.assertTrue(foundDaemon && foundNonDaemon);
+                      assertThat(sumData.getPoints())
+                          .map(LongPointData.class::cast)
+                          .anyMatch(p -> p.getValue() > 0 && isDaemon(p))
+                          .anyMatch(p -> p.getValue() > 0 && !isDaemon(p));
                     }));
   }
 }
