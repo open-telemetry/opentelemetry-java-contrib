@@ -14,7 +14,7 @@ rootProject.extra["versions"] = dependencyVersions
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.14.0",
   "com.google.guava:guava-bom:31.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.20.2",
+  "com.linecorp.armeria:armeria-bom:1.20.3",
   "org.junit:junit-bom:5.9.1",
   "io.grpc:grpc-bom:1.50.2",
   "io.opentelemetry:opentelemetry-bom-alpha:1.19.0-alpha",
