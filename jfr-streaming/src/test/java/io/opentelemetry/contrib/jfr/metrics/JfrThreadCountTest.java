@@ -22,7 +22,9 @@ class JfrThreadCountTest extends AbstractMetricsTest {
   }
 
   private static boolean isDaemon(LongPointData p) {
-    return p.getAttributes().asMap().get(AttributeKey.booleanKey(DAEMON)).equals(true);
+    Boolean daemon = p.getAttributes().get(AttributeKey.booleanKey(DAEMON));
+    assertThat(daemon).isNotNull();
+    return daemon;
   }
 
   @Test
