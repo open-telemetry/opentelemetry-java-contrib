@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.jfr.metrics;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.internal.classes.ClassesLoadedHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
@@ -19,6 +20,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOuts
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.threads.ThreadCountHandler;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,7 +70,9 @@ final class HandlerRegistry {
             new ContextSwitchRateHandler(),
             new OverallCPULoadHandler(),
             new ContainerConfigurationHandler(),
-            new LongLockHandler(grouper));
+            new LongLockHandler(grouper),
+            new ThreadCountHandler(),
+            new ClassesLoadedHandler());
     handlers.addAll(basicHandlers);
 
     var meter =
