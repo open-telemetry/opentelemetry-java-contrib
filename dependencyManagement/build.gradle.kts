@@ -33,7 +33,7 @@ val CORE_DEPENDENCIES = listOf(
   "io.prometheus:simpleclient_common:0.16.0",
   "io.prometheus:simpleclient_httpserver:0.16.0",
   "org.mockito:mockito-core:4.8.1",
-  "org.mockito:mockito-junit-jupiter:4.8.1",
+  "org.mockito:mockito-junit-jupiter:4.9.0",
   "org.slf4j:slf4j-api:2.0.3",
   "org.slf4j:slf4j-simple:2.0.3",
   "org.slf4j:log4j-over-slf4j:2.0.3",
