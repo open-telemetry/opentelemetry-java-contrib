@@ -14,12 +14,14 @@ import javax.annotation.Nullable;
 interface AppServer {
 
   /** Path to directory to be scanned for deployments. */
+  @Nullable
   Path getDeploymentDir() throws Exception;
 
   /**
    * Returns a single class that, when present, determines that the given application server is
    * active/running.
    */
+  @Nullable
   Class<?> getServerClass();
 
   /**

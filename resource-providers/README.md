@@ -10,10 +10,14 @@ to populate the `service.name` resource attribute based on the runtime configura
 of an app server. This is useful when a user has not yet specified the `service.name`
 resource attribute manually.
 
-It is capable of detecting common scenarios among the following popular application servers:
+This `ResourceProvider` supports `.ear` and `.war` archives as well as exploded directory
+versions of each. For `.war` files, it attempts to parse the `<web-app>` element
+from `WEB-INF/web.xml`. For `.ear` files the `<application>` element of `META-INF/application.xml`.
 
-* tbd (will be filled in as implementations are added)
+It is capable of detecting common scenarios among the popular application servers listed below:
 
+* GlassFish
+* _remaining are tbd_
 
 ## Component owners
 
