@@ -6,7 +6,7 @@
 package io.opentelemetry.resourceproviders;
 
 import java.net.URL;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -24,8 +24,14 @@ final class CommonAppServersServiceNameDetector {
 
   private static List<ServiceNameDetector> detectors() {
     ResourceLocator locator = new ResourceLocatorImpl();
-    // Additional implementations will be added to this list.
-    return Collections.singletonList(detectorFor(new GlassfishAppServer(locator)));
+    return Arrays.asList(
+        detectorFor(new TomeeAppServer(locator)),
+        detectorFor(new TomcatAppServer(locator)),
+        detectorFor(new JettyAppServer(locator)),
+        detectorFor(new LibertyAppService(locator)),
+        detectorFor(new WildflyAppServer(locator)),
+        detectorFor(new GlassfishAppServer(locator)),
+        new WebSphereServiceNameDetector(new WebSphereAppServer(locator)));
   }
 
   private static AppServerServiceNameDetector detectorFor(AppServer appServer) {

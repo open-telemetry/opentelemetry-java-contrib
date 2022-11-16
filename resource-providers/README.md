@@ -16,8 +16,13 @@ from `WEB-INF/web.xml`. For `.ear` files the `<application>` element of `META-IN
 
 It is capable of detecting common scenarios among the popular application servers listed below:
 
+* Apache Tomcat
+* Apache TomEE
+* Eclipse Jetty
 * GlassFish
-* _remaining are tbd_
+* IBM Websphere
+* IBM Websphere Liberty
+* Wildfly
 
 ## Component owners
 
