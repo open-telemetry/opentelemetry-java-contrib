@@ -2,9 +2,28 @@
 
 ## Unreleased
 
+### AWS X-Ray propagator
+
+- Move io.opentelemetry:opentelemetry-extension-aws to contrib
+  ([#547](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/547))
+
+### JFR streaming
+
+- Thread count and classes loaded handlers
+  ([#571](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/571))
+
+### Resource providers
+
+- Webapp service name detector
+  ([#562](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/562))
+- Glassfish service name detector
+  ([#579](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/579))
+- Add remaining app server service name detectors
+  ([#583](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/583))
+
 ## Version 1.19.1 (2022-10-16)
 
-### aws-resources/
+### AWS resources
 
 - Fixed artifact `io.opentelemetry.contrib:opentelemetry-aws-resources` not being published to
   maven central
@@ -19,17 +38,17 @@
 
 ## Version 1.18.0 (2022-09-19)
 
-### aws-resources/
+### AWS resources
 
 Relocated from the opentelemetry-java repository, and now published under the coordinates
 `io.opentelemetry.contrib:opentelemetry-aws-resources`
 
-### jfr-events/
+### JFR events
 
 Relocated from the opentelemetry-java repository, and now published under the coordinates
 `io.opentelemetry.contrib:opentelemetry-jfr-events`
 
-### noop-api/
+### No-op API
 
 Relocated from the opentelemetry-java repository, and now published under the coordinates
 `io.opentelemetry.contrib:opentelemetry-noop-api`
