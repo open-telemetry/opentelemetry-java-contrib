@@ -22,23 +22,30 @@ val DEPENDENCY_BOMS = listOf(
   "org.testcontainers:testcontainers-bom:1.17.6"
 )
 
+val autoServiceVersion = "1.0.1"
+val autoValueVersion = "1.10"
+val errorProneVersion = "2.16"
+val prometheusVersion = "0.16.0"
+val mockitoVersion = "4.9.0"
+val slf4jVersion = "2.0.4"
+
 val CORE_DEPENDENCIES = listOf(
-  "com.google.auto.service:auto-service:1.0.1",
-  "com.google.auto.service:auto-service-annotations:1.0.1",
-  "com.google.auto.value:auto-value:1.10",
-  "com.google.auto.value:auto-value-annotations:1.10",
-  "com.google.errorprone:error_prone_annotations:2.16",
-  "com.google.errorprone:error_prone_core:2.16",
-  "io.prometheus:simpleclient:0.16.0",
-  "io.prometheus:simpleclient_common:0.16.0",
-  "io.prometheus:simpleclient_httpserver:0.16.0",
-  "org.mockito:mockito-core:4.9.0",
-  "org.mockito:mockito-junit-jupiter:4.9.0",
-  "org.slf4j:slf4j-api:2.0.3",
-  "org.slf4j:slf4j-simple:2.0.3",
-  "org.slf4j:log4j-over-slf4j:2.0.3",
-  "org.slf4j:jcl-over-slf4j:2.0.3",
-  "org.slf4j:jul-to-slf4j:2.0.3"
+  "com.google.auto.service:auto-service:${autoServiceVersion}",
+  "com.google.auto.service:auto-service-annotations:${autoServiceVersion}",
+  "com.google.auto.value:auto-value:${autoValueVersion}",
+  "com.google.auto.value:auto-value-annotations:${autoValueVersion}",
+  "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
+  "com.google.errorprone:error_prone_core:${errorProneVersion}",
+  "io.prometheus:simpleclient:${prometheusVersion}",
+  "io.prometheus:simpleclient_common:${prometheusVersion}",
+  "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
+  "org.mockito:mockito-core:${mockitoVersion}",
+  "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
+  "org.slf4j:slf4j-api:${slf4jVersion}",
+  "org.slf4j:slf4j-simple:${slf4jVersion}",
+  "org.slf4j:log4j-over-slf4j:${slf4jVersion}",
+  "org.slf4j:jcl-over-slf4j:${slf4jVersion}",
+  "org.slf4j:jul-to-slf4j:${slf4jVersion}"
 )
 
 val DEPENDENCIES = listOf(
