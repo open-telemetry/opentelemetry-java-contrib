@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.20.0 (2022-11-17)
+
 ### AWS X-Ray propagator
 
 - Move io.opentelemetry:opentelemetry-extension-aws to contrib
