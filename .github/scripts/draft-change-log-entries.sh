@@ -24,15 +24,18 @@ else
 fi
 
 declare -A component_names=()
-component_names["aws-resources/"]="AWS Resources"
-component_names["aws-xray/"]="AWS X-Ray SDK Support"
-component_names["aws-xray-propagator/"]="AWS X-Ray Propagator"
+component_names["aws-resources/"]="AWS resources"
+component_names["aws-xray/"]="AWS X-Ray SDK support"
+component_names["aws-xray-propagator/"]="AWS X-Ray propagator"
 component_names["consistent-sampling/"]="Consistent sampling"
+component_names["jfr-events/"]="JFR events"
 component_names["jfr-streaming/"]="JFR streaming"
 component_names["jmx-metrics/"]="JMX metrics"
 component_names["maven-extension/"]="Maven extension"
 component_names["micrometer-meter-provider/"]="Micrometer MeterProvider"
+component_names["noop-api/"]="No-op API"
 component_names["runtime-attach/"]="Runtime attach"
+component_names["resource-providers/"]="Resource providers"
 component_names["samplers/"]="Samplers"
 component_names["static-instrumenter/"]="Static instrumenter"
 
@@ -41,10 +44,17 @@ echo
 
 for component in */ ; do
   component_name=${component_names[$component]:=$component}
-  echo "### $component_name"
-  echo
-  git log --reverse --pretty=format:"- %s" $range $component \
-    | sed -r 's,\(#([0-9]+)\),\n  ([#\1](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/\1)),'
-  echo
-  echo
+  commits=$(git log --reverse \
+          --perl-regexp \
+          --author='^(?!dependabot\[bot\] )' \
+          --pretty=format:"- %s" \
+          "$range" \
+          "$component")
+  if [[ "$commits" != "" ]]; then
+    echo "### $component_name"
+    echo
+    echo "$commits" \
+      | sed -E 's,\(#([0-9]+)\)$,\n  ([#\1](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/\1)),'
+    echo
+  fi
 done

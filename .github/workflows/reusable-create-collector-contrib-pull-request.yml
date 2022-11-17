@@ -28,11 +28,11 @@ jobs:
 
       - name: Initialize pull request branch
         env:
-          VERSION: ${{ inputs.jmx-metrics-version }}
+          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
         run: |
           git remote add upstream https://github.com/open-telemetry/opentelemetry-collector-contrib.git
-          git fetch upstream
-          git checkout -b update-opentelemetry-jmx-metrics-to-${VERSION} upstream/main
+          git fetch upstream main
+          git checkout -b update-opentelemetry-jmx-metrics-to-${JMX_METRICS_VERSION} upstream/main
 
       - name: Update version
         env:
@@ -77,7 +77,7 @@ jobs:
         env:
           # this is the personal access token used for "gh pr create" below
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-          VERSION: ${{ inputs.jmx-metrics-version }}
+          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
         run: |
           message="Update the jmx-metrics version to $VERSION"
           # note that @open-telemetry/java-contrib-approvers cannot be used below
@@ -93,7 +93,7 @@ jobs:
           # repository if you set up a tracking branch
 
           git commit -a -m "$message"
-          git push --set-upstream origin HEAD:update-opentelemetry-jmx-metrics-to-${VERSION}
+          git push --set-upstream origin HEAD:update-opentelemetry-jmx-metrics-to-${JMX_METRICS_VERSION}
           gh pr create --title "$message" \
                        --body "$body" \
                        --repo open-telemetry/opentelemetry-collector-contrib \
