@@ -19,7 +19,7 @@ val DEPENDENCY_BOMS = listOf(
   "io.grpc:grpc-bom:1.50.2",
   "io.opentelemetry:opentelemetry-bom-alpha:1.20.1-alpha",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.19.2-alpha",
-  "org.testcontainers:testcontainers-bom:1.17.5"
+  "org.testcontainers:testcontainers-bom:1.17.6"
 )
 
 val CORE_DEPENDENCIES = listOf(
