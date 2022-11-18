@@ -23,7 +23,7 @@ val DEPENDENCY_BOMS = listOf(
 )
 
 val autoServiceVersion = "1.0.1"
-val autoValueVersion = "1.10"
+val autoValueVersion = "1.10.1"
 val errorProneVersion = "2.16"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.9.0"
