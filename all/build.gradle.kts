@@ -4,7 +4,7 @@ plugins {
   id("otel.java-conventions")
 }
 
-description = "OpenTelemetry Contrib Testing"
+description = "OpenTelemetry Contrib All"
 
 dependencies {
   rootProject.subprojects.forEach { subproject ->

@@ -5,7 +5,7 @@ and delegates the reporting of all metrics through Micrometer.  This enables pro
 rely on Micrometer and cannot currently migrate to OpenTelemetry Metrics to be able to report on
 metrics that are reported through the OpenTelemetry Metrics API.
 
-### Usage
+## Usage
 
 Create the `MicrometerMeterProvider` passing an existing instance of `MeterRegistry`.  Then you can
 use the OpenTelemetry Metrics `MeterProvider` API to create instruments.

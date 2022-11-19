@@ -49,6 +49,7 @@ public class SpringBootApp {
 ## Limitations
 
 The attachment will _not_ be initiated in the following cases:
+
 * The `otel.javaagent.enabled` property is set to `false`
 * The `OTEL_JAVAAGENT_ENABLED` environment variable is set to `false`
 * The attachment is not requested from the _main_ thread
@@ -56,7 +57,6 @@ The attachment will _not_ be initiated in the following cases:
 * The agent is already attached
 * The application is running on a JRE (a JDK is necessary, see [this issue](https://github.com/raphw/byte-buddy/issues/374))
 * The temporary directory should be writable
-
 
 ## Component owners
 
