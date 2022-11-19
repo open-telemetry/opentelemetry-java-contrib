@@ -76,6 +76,11 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
     uses: ./.github/workflows/reusable-misspell-check.yml
 
+  shell-script-check:
+    # release branches are excluded to avoid unnecessary maintenance
+    if: "!startsWith(github.ref_name, 'release/')"
+    uses: ./.github/workflows/reusable-shell-script-check.yml
+
   publish-snapshots:
     # the condition is on the steps below instead of here on the job, because skipping the job
     # causes the job to show up as canceled in the GitHub UI which prevents the build section from
@@ -121,6 +126,7 @@ jobs:
       - integration-test
       - markdown-lint
       - misspell-check
+      - shell-script-check
     if: always()
     runs-on: ubuntu-latest
     steps:
