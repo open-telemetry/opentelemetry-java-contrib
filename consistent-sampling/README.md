@@ -14,7 +14,7 @@ and <https://github.com/open-telemetry/opentelemetry-specification/pull/2047>.
   allows combining two consistent samplers and samples when both samplers would sample
 * **ConsistentComposedOrSampler**:
   allows combining two consistent sampler and samples when at least one of both samplers would sample,
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling>.md#requirement-combine-multiple-consistent-probability-samplers-using-the-minimum-p-value
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling.md#requirement-combine-multiple-consistent-probability-samplers-using-the-minimum-p-value>
 * **ConsistentParentBasedSampler**:
   see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling.md#parentconsistentprobabilitybased-sampler>
 * **ConsistentProbabilityBasedSampler**:
