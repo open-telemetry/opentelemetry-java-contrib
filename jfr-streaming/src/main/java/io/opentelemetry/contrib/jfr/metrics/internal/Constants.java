@@ -17,7 +17,6 @@ public final class Constants {
   public static final String PERCENTAGE = "%age";
   public static final String USER = "user";
   public static final String SYSTEM = "system";
-  public static final String MACHINE = "machine.total";
   public static final String G1 = "g1";
   public static final String TOTAL_USED = "total.used";
   public static final String EDEN_USED = "eden.used";

@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -59,7 +58,7 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
       process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);
     }
     if (ev.hasField(MACHINE_TOTAL)) {
-      machine = ev.getDouble(MACHINE);
+      machine = ev.getDouble(MACHINE_TOTAL);
     }
   }
 
