@@ -5,32 +5,29 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.TOTAL_USED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED_SIZE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_COMMITTED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
-import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapSummary JFR events. For GC purposes they come in pairs. */
 public final class GCHeapSummaryHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME_DURATION = "process.runtime.jvm.gc.time";
-  private static final String METRIC_DESCRIPTION_DURATION = "GC Duration";
-  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
-  private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.GCHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
@@ -38,16 +35,12 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
   private static final String WHEN = "when";
   private static final String HEAP_USED = "heapUsed";
   private static final String HEAP_SPACE = "heapSpace";
-  private static final String COMMITTED_SIZE = "committedSize";
-  private static final String RESERVED_SIZE = "reservedSize";
-  private static final Attributes ATTR_MEMORY_USED = Attributes.of(ATTR_USAGE, TOTAL_USED);
-  private static final Attributes ATTR_MEMORY_COMMITTED = Attributes.of(ATTR_USAGE, COMMITTED);
-  private static final Attributes ATTR_MEMORY_RESERVED = Attributes.of(ATTR_USAGE, RESERVED);
+  private static final Attributes ATTR =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space");
 
-  private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
-
-  private DoubleHistogram durationHistogram;
-  private LongHistogram memoryHistogram;
+  private volatile long usageBefore = 0;
+  private volatile long usageAfter = 0;
+  private volatile long committedSize = 0;
 
   public GCHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -55,19 +48,30 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    durationHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_DURATION)
-            .setDescription(METRIC_DESCRIPTION_DURATION)
-            .setUnit(MILLISECONDS)
-            .build();
-    memoryHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_MEMORY)
-            .setDescription(METRIC_DESCRIPTION_MEMORY)
-            .setUnit(BYTES)
-            .ofLongs()
-            .build();
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageBefore, ATTR);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
+        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageAfter, ATTR);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+        .setDescription(METRIC_DESCRIPTION_COMMITTED)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(committedSize, ATTR);
+            });
   }
 
   @Override
@@ -90,38 +94,31 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     if (!ev.hasField(GC_ID)) {
       return;
     }
-    long gcId = ev.getLong(GC_ID);
+    recordValues(ev, when != null ? when.equals(BEFORE) : false);
+  }
 
-    var pair = awaitingPairs.get(gcId);
-    if (pair == null) {
-      awaitingPairs.put(gcId, ev);
-    } else {
-      awaitingPairs.remove(gcId);
-      if (when != null && when.equals(BEFORE)) {
-        recordValues(ev, pair);
-      } else { //  i.e. when.equals(AFTER)
-        recordValues(pair, ev);
+  private void recordValues(RecordedEvent event, boolean before) {
+
+    if (event.hasField(HEAP_USED)) {
+      if (before) {
+        usageBefore = event.getLong(HEAP_USED);
+      } else {
+        usageAfter = event.getLong(HEAP_USED);
+      }
+    }
+    if (event.hasField(HEAP_SPACE)) {
+      Object heapSpaceValue = event.getValue(HEAP_SPACE);
+      if (heapSpaceValue instanceof RecordedObject) {
+        RecordedObject heapSpace = (RecordedObject) heapSpaceValue;
+        if (heapSpace.hasField(COMMITTED_SIZE)) {
+          committedSize = heapSpace.getLong(COMMITTED_SIZE);
+        }
       }
     }
   }
 
-  private void recordValues(RecordedEvent before, RecordedEvent after) {
-    durationHistogram.record(
-        DurationUtil.toMillis(Duration.between(before.getStartTime(), after.getStartTime())));
-    if (after.hasField(HEAP_USED)) {
-      memoryHistogram.record(after.getLong(HEAP_USED), ATTR_MEMORY_USED);
-    }
-    if (after.hasField(HEAP_SPACE)) {
-      Object heapSpaceValue = after.getValue(HEAP_SPACE);
-      if (heapSpaceValue instanceof RecordedObject) {
-        RecordedObject heapSpace = (RecordedObject) heapSpaceValue;
-        if (heapSpace.hasField(COMMITTED_SIZE)) {
-          memoryHistogram.record(heapSpace.getLong(COMMITTED_SIZE), ATTR_MEMORY_COMMITTED);
-        }
-        if (heapSpace.hasField(RESERVED_SIZE)) {
-          memoryHistogram.record(heapSpace.getLong(RESERVED_SIZE), ATTR_MEMORY_RESERVED);
-        }
-      }
-    }
+  @Override
+  public Optional<Duration> getPollingDuration() {
+    return Optional.of(Duration.ofSeconds(1));
   }
 }

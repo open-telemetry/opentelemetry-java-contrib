@@ -5,19 +5,23 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE_DELTA;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SURVIVOR_SIZE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED_SIZE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_COMMITTED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
@@ -28,23 +32,30 @@ import jdk.jfr.consumer.RecordedObject;
  */
 public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private static final Logger logger = Logger.getLogger(ParallelHeapSummaryHandler.class.getName());
-
-  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
-  private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.PSHeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
   private static final String WHEN = "when";
-  private static final Attributes ATTR_MEMORY_EDEN_SIZE = Attributes.of(ATTR_USAGE, EDEN_SIZE);
-  private static final Attributes ATTR_MEMORY_EDEN_SIZE_DELTA =
-      Attributes.of(ATTR_USAGE, EDEN_SIZE_DELTA);
-  private static final Attributes ATTR_MEMORY_SURVIVOR_SIZE =
-      Attributes.of(ATTR_USAGE, SURVIVOR_SIZE);
+  private static final Attributes ATTR_MEMORY_EDEN_USED =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space");
+  private static final Attributes ATTR_MEMORY_SURVIVOR_USED =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space");
+  private static final Attributes ATTR_MEMORY_OLD_USED =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
+  private static final Attributes ATTR_MEMORY_COMMITTED_OLD =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
+  private static final Attributes ATTR_MEMORY_COMMITTED_YOUNG =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space");
 
-  private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
-
-  private LongHistogram memoryHistogram;
+  private volatile long usageEden = 0;
+  private volatile long usageEdenAfter = 0;
+  private volatile long usageSurvivor = 0;
+  private volatile long usageSurvivorAfter = 0;
+  private volatile long usageOld = 0;
+  private volatile long usageOldAfter = 0;
+  private volatile long committedOld = 0;
+  private volatile long committedYoung = 0;
 
   public ParallelHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -52,13 +63,35 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    memoryHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_MEMORY)
-            .setDescription(METRIC_DESCRIPTION_MEMORY)
-            .setUnit(BYTES)
-            .ofLongs()
-            .build();
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageEden, ATTR_MEMORY_EDEN_USED);
+              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR_USED);
+              measurement.record(usageOld, ATTR_MEMORY_OLD_USED);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
+        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN_USED);
+              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR_USED);
+              measurement.record(usageOldAfter, ATTR_MEMORY_OLD_USED);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+        .setDescription(METRIC_DESCRIPTION_COMMITTED)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(committedOld, ATTR_MEMORY_COMMITTED_OLD);
+              measurement.record(committedYoung, ATTR_MEMORY_COMMITTED_YOUNG);
+            });
   }
 
   @Override
@@ -86,45 +119,68 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
       logger.fine(String.format("Parallel GC Event seen without GC ID: %s", ev));
       return;
     }
-    long gcId = ev.getLong(GC_ID);
-
-    var pair = awaitingPairs.remove(gcId);
-    if (pair == null) {
-      awaitingPairs.put(gcId, ev);
-    } else {
-      if (when.equals(BEFORE)) {
-        recordValues(ev, pair);
-      } else { //  i.e. when.equals(AFTER)
-        recordValues(pair, ev);
-      }
-    }
+    recordValues(ev, when != null ? when.equals(BEFORE) : false);
   }
 
-  private void recordValues(RecordedEvent before, RecordedEvent after) {
-    if (after.hasField("edenSpace")) {
-      Object edenSpaceObj = after.getValue("edenSpace");
+  private void recordValues(RecordedEvent event, boolean before) {
+    if (event.hasField("edenSpace")) {
+      Object edenSpaceObj = event.getValue("edenSpace");
       if (edenSpaceObj instanceof RecordedObject) {
         RecordedObject edenSpace = (RecordedObject) edenSpaceObj;
-        memoryHistogram.record(edenSpace.getLong("size"), ATTR_MEMORY_EDEN_SIZE);
-        if (before.hasField("edenSpace")) {
-          Object beforeSpaceObj = before.getValue("edenSpace");
-          if (beforeSpaceObj instanceof RecordedObject) {
-            RecordedObject beforeSpace = (RecordedObject) beforeSpaceObj;
-            if (edenSpace.hasField("size") && beforeSpace.hasField("size")) {
-              memoryHistogram.record(
-                  edenSpace.getLong("size") - beforeSpace.getLong("size"),
-                  ATTR_MEMORY_EDEN_SIZE_DELTA);
-            }
+        if (edenSpace.hasField(USED)) {
+          if (before) {
+            usageEden = edenSpace.getLong(USED);
+          } else {
+            usageEdenAfter = edenSpace.getLong(USED);
           }
         }
       }
     }
-    if (after.hasField("fromSpace")) {
-      Object fromSpaceObj = after.getValue("fromSpace");
-      if (after.getValue("fromSpace") instanceof RecordedObject) {
+
+    if (event.hasField("fromSpace")) {
+      Object fromSpaceObj = event.getValue("fromSpace");
+      if (fromSpaceObj instanceof RecordedObject) {
         RecordedObject fromSpace = (RecordedObject) fromSpaceObj;
-        if (fromSpace.hasField("size")) {
-          memoryHistogram.record(fromSpace.getLong("size"), ATTR_MEMORY_SURVIVOR_SIZE);
+        if (fromSpace.hasField(USED)) {
+          if (before) {
+            usageSurvivor = fromSpace.getLong(USED);
+          } else {
+            usageSurvivorAfter = fromSpace.getLong(USED);
+          }
+        }
+      }
+    }
+
+    if (event.hasField("oldObjectSpace")) {
+      Object oldObjectSpaceObj = event.getValue("oldObjectSpace");
+      if (oldObjectSpaceObj instanceof RecordedObject) {
+        RecordedObject oldObjectSpace = (RecordedObject) oldObjectSpaceObj;
+        if (oldObjectSpace.hasField(USED)) {
+          if (before) {
+            usageSurvivor = oldObjectSpace.getLong(USED);
+          } else {
+            usageSurvivorAfter = oldObjectSpace.getLong(USED);
+          }
+        }
+      }
+    }
+
+    if (event.hasField("oldSpace")) {
+      Object oldSpaceObj = event.getValue("oldSpace");
+      if (oldSpaceObj instanceof RecordedObject) {
+        RecordedObject oldSpace = (RecordedObject) oldSpaceObj;
+        if (oldSpace.hasField(COMMITTED_SIZE)) {
+          committedOld = oldSpace.getLong(COMMITTED_SIZE);
+        }
+      }
+    }
+
+    if (event.hasField("youngSpace")) {
+      Object youngSpaceObj = event.getValue("youngSpace");
+      if (youngSpaceObj instanceof RecordedObject) {
+        RecordedObject youngSpace = (RecordedObject) youngSpaceObj;
+        if (youngSpace.hasField(COMMITTED_SIZE)) {
+          committedYoung = youngSpace.getLong(COMMITTED_SIZE);
         }
       }
     }

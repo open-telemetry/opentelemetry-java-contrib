@@ -9,10 +9,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECON
 
 import org.junit.jupiter.api.Test;
 
-public class JfrCPUTest extends AbstractMetricsTest {
+public class JfrCPULockTest extends AbstractMetricsTest {
 
   @Test
-  public void shouldHaveGcAndLockEvents() throws Exception {
+  public void shouldHaveLockEvents() throws Exception {
     // This should generate some events
     System.gc();
     synchronized (this) {
@@ -23,11 +23,6 @@ public class JfrCPUTest extends AbstractMetricsTest {
         metric ->
             metric
                 .hasName("process.runtime.jvm.cpu.longlock")
-                .hasUnit(MILLISECONDS)
-                .hasHistogramSatisfying(histogram -> {}),
-        metric ->
-            metric
-                .hasName("process.runtime.jvm.gc.time")
                 .hasUnit(MILLISECONDS)
                 .hasHistogramSatisfying(histogram -> {}));
   }
