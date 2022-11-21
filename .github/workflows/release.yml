@@ -182,8 +182,8 @@ jobs:
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar
 
-          echo "::set-output name=version::$VERSION"
-          echo "::set-output name=jmx-metrics-version::$jmx_metrics_version"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "jmx-metrics-version=$jmx_metrics_version" >> $GITHUB_OUTPUT
 
   merge-change-log-to-main:
     runs-on: ubuntu-latest
