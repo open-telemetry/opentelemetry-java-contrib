@@ -5,11 +5,11 @@ Maven extension to observe Maven builds as distributed traces.
 ## Getting Started
 
 The Maven OpenTelemetry Extension is configured using environment variables or JVM system properties and can be added to a build using one of the following ways:
+
 * adding the extension jar to `${maven.home}/lib/ext`
 * adding the path to the extension jar to`-Dmaven.ext.class.path`,
 * adding the extension as a build extension in the `pom.xml`,
 * (since Maven 3.3.1) configuring the extension in `.mvn/extensions.xml`.
-
 
 ### Adding the extension to the classpath
 
@@ -25,7 +25,6 @@ mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-1.10.
 ```
 
 ### Declaring the extension in the `pom.xml` file
-
 
 Add the Maven OpenTelemetry Extension in the `pom.xml` file:
 
@@ -59,7 +58,6 @@ Without this setting, the traces won't be exported and the OpenTelemetry Maven E
 
 The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoconfiguration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-
 | System property                           <br /> Environment variable                      | Default value           | Description                                                                                                                                     |
 |--------------------------------------------------------------------------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | `otel.traces.exporter`                    <br /> `OTEL_TRACES_EXPORTER`                    | `none`                  | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
@@ -69,20 +67,19 @@ The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoco
 | `otel.resource.attributes`                <br /> `OTEL_RESOURCE_ATTRIBUTES`                |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3                                                              |
 | `otel.instrumentation.maven.mojo.enabled` <br /> `OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED` | `true`                  | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds.  |
 
-
 ℹ️ The `service.name` is set to `maven` and the `service.version` to the version of the Maven runtime in use.
 
 ## Examples
 
 Example of a trace of a Maven build.
 
-![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/maven-execution-trace-jaeger.png)
+![Execution trace of a Maven build](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/maven-execution-trace-jaeger.png)
 
 ### Example of a distributed trace of a Jenkins pipeline executing a Maven build
 
-Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the  [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
+Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
 
-![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
+![Execution trace of a Jenkins/Maven build](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
 
 ## Span attributes per Maven plugin goal execution
 
@@ -127,10 +124,9 @@ The `span.kind` is set to `client`
 
 The `span.kind` is set to `client`
 
-
 ### `snyk:monitor`
 
-See https://github.com/snyk/snyk-maven-plugin
+See <https://github.com/snyk/snyk-maven-plugin>.
 
 | Span attribute |  Type  | Description                                                                                    |
 |----------------|--------|------------------------------------------------------------------------------------------------|
@@ -143,7 +139,7 @@ The `span.kind` is set to `client`
 
 ### `snyk:test`
 
-See https://github.com/snyk/snyk-maven-plugin
+See <https://github.com/snyk/snyk-maven-plugin>.
 
 | Span attribute |  Type  | Description                                                          |
 |----------------|--------|----------------------------------------------------------------------|
@@ -151,7 +147,6 @@ See https://github.com/snyk/snyk-maven-plugin
 | `http.url`     | string | `https://snyk.io/api/v1/test-dep-graph`                              |
 | `rpc.method`   | string | `test`, the underlying Snyk CLI command invoked by the Maven plugin. |
 | `peer.service` | string | `snyk.io`                                                            |
-
 
 The `span.kind` is set to `client`
 
@@ -167,7 +162,6 @@ The `span.kind` is set to `client`
 | `peer.service`                                 | string   | Docker Registry hostname. Attribute only added when the `build-image` goal publishes the Docker image.                                      |
 
 The `span.kind` is set to `client`
-
 
 ## Other CI/CD Tools supporting OpenTelemetry traces
 

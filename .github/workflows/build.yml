@@ -66,10 +66,20 @@ jobs:
     if: "!startsWith(github.ref_name, 'release/')"
     uses: ./.github/workflows/reusable-markdown-link-check.yml
 
+  markdown-lint:
+    # release branches are excluded to avoid unnecessary maintenance
+    if: "!startsWith(github.ref_name, 'release/')"
+    uses: ./.github/workflows/reusable-markdown-lint.yml
+
   misspell-check:
     # release branches are excluded to avoid unnecessary maintenance
     if: ${{ !startsWith(github.ref_name, 'release/') }}
     uses: ./.github/workflows/reusable-misspell-check.yml
+
+  shell-script-check:
+    # release branches are excluded to avoid unnecessary maintenance
+    if: "!startsWith(github.ref_name, 'release/')"
+    uses: ./.github/workflows/reusable-shell-script-check.yml
 
   publish-snapshots:
     # the condition is on the steps below instead of here on the job, because skipping the job
@@ -111,14 +121,18 @@ jobs:
 
   required-status-check:
     # markdown-link-check is not required so pull requests are not blocked if external links break
-    # misspell-check is not required so pull requests are not blocked if new misspellings are added
     needs:
       - build
       - integration-test
+      - markdown-lint
+      - misspell-check
+      - shell-script-check
     if: always()
     runs-on: ubuntu-latest
     steps:
       - if: |
           needs.build.result != 'success' ||
-          needs.integration-test.result != 'success'
+          needs.integration-test.result != 'success' ||
+          needs.markdown-lint.result != 'success' ||
+          needs.misspell-check.result != 'success'
         run: exit 1
