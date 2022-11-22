@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### 🛠️ Bug fixes
+
+- Previously targeted OpenTelemetry Instrumentation version had never been updated to target
+  OpenTelemetry SDK 1.20
+
 ## Version 1.20.0 (2022-11-17)
 
 ### AWS X-Ray propagator
