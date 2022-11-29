@@ -22,6 +22,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
@@ -122,67 +123,74 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
     recordValues(ev, BEFORE.equals(when));
   }
 
+  private static void doIfAvailable(
+      RecordedEvent event, String field, Consumer<RecordedObject> closure) {
+    if (!event.hasField(field)) {
+      return;
+    }
+    Object value = event.getValue(field);
+    if (value instanceof RecordedObject) {
+      closure.accept((RecordedObject) value);
+    }
+  }
+
   private void recordValues(RecordedEvent event, boolean before) {
-    if (event.hasField("edenSpace")) {
-      Object edenSpaceObj = event.getValue("edenSpace");
-      if (edenSpaceObj instanceof RecordedObject) {
-        RecordedObject edenSpace = (RecordedObject) edenSpaceObj;
-        if (edenSpace.hasField(USED)) {
-          if (before) {
-            usageEden = edenSpace.getLong(USED);
-          } else {
-            usageEdenAfter = edenSpace.getLong(USED);
+
+    doIfAvailable(
+        event,
+        "edenSpace",
+        edenSpace -> {
+          if (edenSpace.hasField(USED)) {
+            if (before) {
+              usageEden = edenSpace.getLong(USED);
+            } else {
+              usageEdenAfter = edenSpace.getLong(USED);
+            }
           }
-        }
-      }
-    }
+        });
 
-    if (event.hasField("fromSpace")) {
-      Object fromSpaceObj = event.getValue("fromSpace");
-      if (fromSpaceObj instanceof RecordedObject) {
-        RecordedObject fromSpace = (RecordedObject) fromSpaceObj;
-        if (fromSpace.hasField(USED)) {
-          if (before) {
-            usageSurvivor = fromSpace.getLong(USED);
-          } else {
-            usageSurvivorAfter = fromSpace.getLong(USED);
+    doIfAvailable(
+        event,
+        "fromSpace",
+        fromSpace -> {
+          if (fromSpace.hasField(USED)) {
+            if (before) {
+              usageSurvivor = fromSpace.getLong(USED);
+            } else {
+              usageSurvivorAfter = fromSpace.getLong(USED);
+            }
           }
-        }
-      }
-    }
+        });
 
-    if (event.hasField("oldObjectSpace")) {
-      Object oldObjectSpaceObj = event.getValue("oldObjectSpace");
-      if (oldObjectSpaceObj instanceof RecordedObject) {
-        RecordedObject oldObjectSpace = (RecordedObject) oldObjectSpaceObj;
-        if (oldObjectSpace.hasField(USED)) {
-          if (before) {
-            usageSurvivor = oldObjectSpace.getLong(USED);
-          } else {
-            usageSurvivorAfter = oldObjectSpace.getLong(USED);
+    doIfAvailable(
+        event,
+        "oldObjectSpace",
+        oldObjectSpace -> {
+          if (oldObjectSpace.hasField(USED)) {
+            if (before) {
+              usageSurvivor = oldObjectSpace.getLong(USED);
+            } else {
+              usageSurvivorAfter = oldObjectSpace.getLong(USED);
+            }
           }
-        }
-      }
-    }
+        });
 
-    if (event.hasField("oldSpace")) {
-      Object oldSpaceObj = event.getValue("oldSpace");
-      if (oldSpaceObj instanceof RecordedObject) {
-        RecordedObject oldSpace = (RecordedObject) oldSpaceObj;
-        if (oldSpace.hasField(COMMITTED_SIZE)) {
-          committedOld = oldSpace.getLong(COMMITTED_SIZE);
-        }
-      }
-    }
+    doIfAvailable(
+        event,
+        "oldSpace",
+        oldSpace -> {
+          if (oldSpace.hasField(COMMITTED_SIZE)) {
+            committedOld = oldSpace.getLong(COMMITTED_SIZE);
+          }
+        });
 
-    if (event.hasField("youngSpace")) {
-      Object youngSpaceObj = event.getValue("youngSpace");
-      if (youngSpaceObj instanceof RecordedObject) {
-        RecordedObject youngSpace = (RecordedObject) youngSpaceObj;
-        if (youngSpace.hasField(COMMITTED_SIZE)) {
-          committedYoung = youngSpace.getLong(COMMITTED_SIZE);
-        }
-      }
-    }
+    doIfAvailable(
+        event,
+        "youngSpace",
+        youngSpace -> {
+          if (youngSpace.hasField(COMMITTED_SIZE)) {
+            committedYoung = youngSpace.getLong(COMMITTED_SIZE);
+          }
+        });
   }
 }
