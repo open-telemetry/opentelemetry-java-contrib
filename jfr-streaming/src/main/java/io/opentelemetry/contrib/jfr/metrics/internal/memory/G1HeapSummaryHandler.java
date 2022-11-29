@@ -96,7 +96,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
       logger.fine(String.format("G1 GC Event seen without GC ID: %s", ev));
       return;
     }
-    recordValues(ev, when != null ? when.equals(BEFORE) : false);
+    recordValues(ev, BEFORE.equals(when));
   }
 
   private void recordValues(RecordedEvent event, boolean before) {
