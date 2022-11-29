@@ -119,7 +119,7 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
       logger.fine(String.format("Parallel GC Event seen without GC ID: %s", ev));
       return;
     }
-    recordValues(ev, when != null ? when.equals(BEFORE) : false);
+    recordValues(ev, BEFORE.equals(when));
   }
 
   private void recordValues(RecordedEvent event, boolean before) {
