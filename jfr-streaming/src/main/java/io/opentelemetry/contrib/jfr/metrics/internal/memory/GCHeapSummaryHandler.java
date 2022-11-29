@@ -94,7 +94,7 @@ public final class GCHeapSummaryHandler implements RecordedEventHandler {
     if (!ev.hasField(GC_ID)) {
       return;
     }
-    recordValues(ev, when != null ? when.equals(BEFORE) : false);
+    recordValues(ev, BEFORE.equals(when));
   }
 
   private void recordValues(RecordedEvent event, boolean before) {
