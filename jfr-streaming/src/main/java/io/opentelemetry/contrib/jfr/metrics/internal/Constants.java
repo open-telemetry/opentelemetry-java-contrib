@@ -12,12 +12,11 @@ public final class Constants {
 
   public static final String ONE = "1";
   public static final String HERTZ = "Hz";
-  public static final String BYTES = "B";
+  public static final String BYTES = "By";
   public static final String MILLISECONDS = "ms";
   public static final String PERCENTAGE = "%age";
   public static final String USER = "user";
   public static final String SYSTEM = "system";
-  public static final String MACHINE = "machine.total";
   public static final String G1 = "g1";
   public static final String TOTAL_USED = "total.used";
   public static final String EDEN_USED = "eden.used";
@@ -27,15 +26,26 @@ public final class Constants {
   public static final String REGION_COUNT = "region.count";
   public static final String COMMITTED = "committed";
   public static final String RESERVED = "reserved";
+  public static final String USED = "used";
+  public static final String COMMITTED_SIZE = "committedSize";
+
   public static final String DAEMON = "daemon";
+  public static final String HEAP = "heap";
 
   public static final String METRIC_NAME_NETWORK_BYTES = "process.runtime.jvm.network.io";
   public static final String METRIC_DESCRIPTION_NETWORK_BYTES = "Network read/write bytes";
   public static final String METRIC_NAME_NETWORK_DURATION = "process.runtime.jvm.network.time";
   public static final String METRIC_DESCRIPTION_NETWORK_DURATION = "Network read/write duration";
+  public static final String METRIC_NAME_COMMITTED = "process.runtime.jvm.memory.committed";
+  public static final String METRIC_DESCRIPTION_COMMITTED = "Measure of memory committed";
   public static final String NETWORK_MODE_READ = "read";
   public static final String NETWORK_MODE_WRITE = "write";
-
+  public static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.usage";
+  public static final String METRIC_NAME_MEMORY_AFTER =
+      "process.runtime.jvm.memory.usage_after_last_gc";
+  public static final String METRIC_DESCRIPTION_MEMORY = "Measure of memory used";
+  public static final String METRIC_DESCRIPTION_MEMORY_AFTER =
+      "Measure of memory used, as measured after the most recent garbage collection event on this pool";
   public static final String METRIC_NAME_MEMORY_ALLOCATION =
       "process.runtime.jvm.memory.allocation";
   public static final String METRIC_DESCRIPTION_MEMORY_ALLOCATION = "Allocation";
@@ -43,8 +53,10 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_THREAD_NAME = AttributeKey.stringKey("thread.name");
   public static final AttributeKey<String> ATTR_ARENA_NAME = AttributeKey.stringKey("arena");
   public static final AttributeKey<String> ATTR_NETWORK_MODE = AttributeKey.stringKey("mode");
-  public static final AttributeKey<String> ATTR_USAGE = AttributeKey.stringKey("usage.type");
+  public static final AttributeKey<String> ATTR_TYPE = AttributeKey.stringKey("type");
+  public static final AttributeKey<String> ATTR_POOL = AttributeKey.stringKey("pool");
   public static final AttributeKey<Boolean> ATTR_DAEMON = AttributeKey.booleanKey(DAEMON);
   public static final String UNIT_CLASSES = "{classes}";
   public static final String UNIT_THREADS = "{threads}";
+  public static final String UNIT_UTILIZATION = "1";
 }

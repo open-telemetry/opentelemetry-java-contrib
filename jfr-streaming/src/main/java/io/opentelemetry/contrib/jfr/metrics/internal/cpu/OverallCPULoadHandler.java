@@ -5,15 +5,9 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MACHINE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.PERCENTAGE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SYSTEM;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
@@ -21,18 +15,18 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OverallCPULoadHandler implements RecordedEventHandler {
-  private static final String METRIC_NAME = "process.runtime.jvm.cpu.used";
-  private static final String METRIC_DESCRIPTION = "CPU Utilization";
+  private static final String METRIC_NAME_PROCESS = "process.runtime.jvm.cpu.utilization";
+  private static final String METRIC_NAME_MACHINE = "process.runtime.jvm.system.cpu.utilization";
+  private static final String METRIC_DESCRIPTION_PROCESS = "Recent CPU utilization for the process";
+  private static final String METRIC_DESCRIPTION_MACHINE =
+      "Recent CPU utilization for the whole system";
+
   private static final String EVENT_NAME = "jdk.CPULoad";
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
   private static final String MACHINE_TOTAL = "machineTotal";
-
-  private static final Attributes ATTR_USER = Attributes.of(ATTR_USAGE, USER);
-  private static final Attributes ATTR_SYSTEM = Attributes.of(ATTR_USAGE, SYSTEM);
-  private static final Attributes ATTR_MACHINE = Attributes.of(ATTR_USAGE, MACHINE);
-
-  private DoubleHistogram histogram;
+  private volatile double process = 0;
+  private volatile double machine = 0;
 
   public OverallCPULoadHandler() {
     initializeMeter(defaultMeter());
@@ -40,24 +34,31 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    histogram =
-        meter
-            .histogramBuilder(METRIC_NAME)
-            .setDescription(METRIC_DESCRIPTION)
-            .setUnit(PERCENTAGE)
-            .build();
+    meter
+        .gaugeBuilder(METRIC_NAME_PROCESS)
+        .setDescription(METRIC_DESCRIPTION_PROCESS)
+        .setUnit(UNIT_UTILIZATION)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(process);
+            });
+    meter
+        .gaugeBuilder(METRIC_NAME_MACHINE)
+        .setDescription(METRIC_DESCRIPTION_MACHINE)
+        .setUnit(UNIT_UTILIZATION)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(machine);
+            });
   }
 
   @Override
   public void accept(RecordedEvent ev) {
-    if (ev.hasField(JVM_USER)) {
-      histogram.record(ev.getDouble(JVM_USER), ATTR_USER);
-    }
-    if (ev.hasField(JVM_SYSTEM)) {
-      histogram.record(ev.getDouble(JVM_SYSTEM), ATTR_SYSTEM);
+    if (ev.hasField(JVM_USER) && ev.hasField(JVM_SYSTEM)) {
+      process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);
     }
     if (ev.hasField(MACHINE_TOTAL)) {
-      histogram.record(ev.getDouble(MACHINE_TOTAL), ATTR_MACHINE);
+      machine = ev.getDouble(MACHINE_TOTAL);
     }
   }
 

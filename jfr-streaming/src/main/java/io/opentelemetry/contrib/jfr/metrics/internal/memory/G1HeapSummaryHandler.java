@@ -5,21 +5,19 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_USAGE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_SIZE_DELTA;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.EDEN_USED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.REGION_COUNT;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SURVIVOR_SIZE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -30,24 +28,24 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private static final Logger logger = Logger.getLogger(G1HeapSummaryHandler.class.getName());
 
-  private static final String METRIC_NAME_MEMORY = "process.runtime.jvm.memory.used";
-  private static final String METRIC_DESCRIPTION_MEMORY = "Heap utilization";
   private static final String EVENT_NAME = "jdk.G1HeapSummary";
   private static final String BEFORE = "Before GC";
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
+  private static final String EDEN_USED_SIZE = "edenUsedSize";
+  private static final String SURVIVOR_USED_SIZE = "survivorUsedSize";
   private static final String WHEN = "when";
-  private static final Attributes ATTR_MEMORY_EDEN_USED = Attributes.of(ATTR_USAGE, EDEN_USED);
-  private static final Attributes ATTR_MEMORY_EDEN_SIZE = Attributes.of(ATTR_USAGE, EDEN_SIZE);
-  private static final Attributes ATTR_MEMORY_EDEN_SIZE_DELTA =
-      Attributes.of(ATTR_USAGE, EDEN_SIZE_DELTA);
-  private static final Attributes ATTR_MEMORY_SURVIVOR_SIZE =
-      Attributes.of(ATTR_USAGE, SURVIVOR_SIZE);
-  private static final Attributes ATTR_MEMORY_REGIONS = Attributes.of(ATTR_USAGE, REGION_COUNT);
+  private static final Attributes ATTR_MEMORY_EDEN_USED =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space");
+  private static final Attributes ATTR_MEMORY_SURVIVOR_USED =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space");
+  //  private static final Attributes ATTR_MEMORY_OLD_USED =
+  //      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Old Gen"); // TODO needs jdk JFR support
 
-  private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
-
-  private LongHistogram memoryHistogram;
+  private volatile long usageEden = 0;
+  private volatile long usageEdenAfter = 0;
+  private volatile long usageSurvivor = 0;
+  private volatile long usageSurvivorAfter = 0;
 
   public G1HeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -55,13 +53,24 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    memoryHistogram =
-        meter
-            .histogramBuilder(METRIC_NAME_MEMORY)
-            .setDescription(METRIC_DESCRIPTION_MEMORY)
-            .setUnit(BYTES)
-            .ofLongs()
-            .build();
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY)
+        .setDescription(METRIC_DESCRIPTION_MEMORY)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageEden, ATTR_MEMORY_EDEN_USED);
+              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR_USED);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
+        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN_USED);
+              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR_USED);
+            });
   }
 
   @Override
@@ -87,37 +96,24 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
       logger.fine(String.format("G1 GC Event seen without GC ID: %s", ev));
       return;
     }
-    long gcId = ev.getLong(GC_ID);
-
-    var pair = awaitingPairs.remove(gcId);
-    if (pair == null) {
-      awaitingPairs.put(gcId, ev);
-    } else {
-      if (when.equals(BEFORE)) {
-        recordValues(ev, pair);
-      } else { //  i.e. when.equals(AFTER)
-        recordValues(pair, ev);
-      }
-    }
+    recordValues(ev, BEFORE.equals(when));
   }
 
-  private void recordValues(RecordedEvent before, RecordedEvent after) {
-    if (after.hasField("edenUsedSize")) {
-      memoryHistogram.record(after.getLong("edenUsedSize"), ATTR_MEMORY_EDEN_USED);
-      if (before.hasField("edenUsedSize")) {
-        memoryHistogram.record(
-            after.getLong("edenUsedSize") - before.getLong("edenUsedSize"),
-            ATTR_MEMORY_EDEN_SIZE_DELTA);
+  private void recordValues(RecordedEvent event, boolean before) {
+    if (event.hasField(EDEN_USED_SIZE)) {
+      if (before) {
+        usageEden = event.getLong(EDEN_USED_SIZE);
+      } else {
+        usageEdenAfter = event.getLong(EDEN_USED_SIZE);
       }
     }
-    if (after.hasField("edenTotalSize")) {
-      memoryHistogram.record(after.getLong("edenTotalSize"), ATTR_MEMORY_EDEN_SIZE);
-    }
-    if (after.hasField("survivorUsedSize")) {
-      memoryHistogram.record(after.getLong("survivorUsedSize"), ATTR_MEMORY_SURVIVOR_SIZE);
-    }
-    if (after.hasField("numberOfRegions")) {
-      memoryHistogram.record(after.getLong("numberOfRegions"), ATTR_MEMORY_REGIONS);
+
+    if (event.hasField(SURVIVOR_USED_SIZE)) {
+      if (before) {
+        usageSurvivor = event.getLong(SURVIVOR_USED_SIZE);
+      } else {
+        usageSurvivorAfter = event.getLong(SURVIVOR_USED_SIZE);
+      }
     }
   }
 }
