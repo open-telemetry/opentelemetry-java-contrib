@@ -52,21 +52,6 @@ jobs:
           sed -i "/^var jmxMetricsGathererVersions/a \	\"$hash\": {\n		version: \"$JMX_METRICS_VERSION\",\n		jar:     \"JMX metrics gatherer\",\n	}," receiver/jmxreceiver/supported_jars.go
           git diff
 
-      - name: Add change log entry
-        env:
-          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
-        run: |
-          # see the template for change log entry file at
-          # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/.chloggen/TEMPLATE.yaml
-          cat > .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml << EOF
-          change_type: enhancement
-          component: jmxreceiver
-          note: Add the JMX metrics gatherer version $JMX_METRICS_VERSION to the supported jars hash list
-          issues: []
-          EOF
-
-          git add .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml
-
       - name: Use CLA approved github bot
         run: |
           # cannot run the use-cla-approved-github-bot.sh script here since in a different repo
@@ -75,9 +60,9 @@ jobs:
 
       - name: Create pull request against opentelemetry-collector-contrib
         env:
-          # this is the personal access token used for "gh pr create" below
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
           JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
+          # this is the personal access token used for "gh pr create" below
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           message="Update the jmx-metrics version to $JMX_METRICS_VERSION"
           # note that @open-telemetry/java-contrib-approvers cannot be used below
@@ -87,14 +72,36 @@ jobs:
 
           cc @jack-berg @mateuszrzeszutek @rmfitzpatrick @trask
           "
+          branch="update-opentelemetry-jmx-metrics-to-${JMX_METRICS_VERSION}"
 
           # gh pr create doesn't have a way to explicitly specify different head and base
           # repositories currently, but it will implicitly pick up the head from a different
           # repository if you set up a tracking branch
 
+          git checkout -b $branch
           git commit -a -m "$message"
-          git push --set-upstream origin HEAD:update-opentelemetry-jmx-metrics-to-${JMX_METRICS_VERSION}
+          git push --set-upstream origin $branch
           gh pr create --title "$message" \
                        --body "$body" \
                        --repo open-telemetry/opentelemetry-collector-contrib \
                        --base main
+
+      - name: Add change log entry
+        env:
+          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
+        run: |
+          pull_request_number=$(gh pr view --json number --jq .number)
+
+          # see the template for change log entry file at
+          # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/.chloggen/TEMPLATE.yaml
+          cat > .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml << EOF
+          change_type: enhancement
+          component: jmxreceiver
+          note: Add the JMX metrics gatherer version $JMX_METRICS_VERSION to the supported jars hash list
+          issues: [ $pull_request_number ]
+          EOF
+
+          git add .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml
+
+          git commit -m "Add change log entry"
+          git push
