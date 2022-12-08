@@ -17,9 +17,12 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String METRIC_NAME_PROCESS = "process.runtime.jvm.cpu.utilization";
   private static final String METRIC_NAME_MACHINE = "process.runtime.jvm.system.cpu.utilization";
+  private static final String METRIC_NAME_MACHINE_MINUTE = "process.runtime.jvm.system.cpu.load_1m";
   private static final String METRIC_DESCRIPTION_PROCESS = "Recent CPU utilization for the process";
   private static final String METRIC_DESCRIPTION_MACHINE =
       "Recent CPU utilization for the whole system";
+  private static final String METRIC_DESCRIPTION_MACHINE_MINUTE =
+      "Average CPU load of the whole system for the last minute";
 
   private static final String EVENT_NAME = "jdk.CPULoad";
   private static final String JVM_USER = "jvmUser";
@@ -27,6 +30,10 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String MACHINE_TOTAL = "machineTotal";
   private volatile double process = 0;
   private volatile double machine = 0;
+  private volatile double machineMinuteAverage = 0;
+  private static final int POLLING_INTERVAL_S = 1;
+  private int count = 0;
+  private double machineSum = 0;
 
   public OverallCPULoadHandler() {
     initializeMeter(defaultMeter());
@@ -50,16 +57,31 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
             measurement -> {
               measurement.record(machine);
             });
+    meter
+        .gaugeBuilder(METRIC_NAME_MACHINE_MINUTE)
+        .setDescription(METRIC_DESCRIPTION_MACHINE_MINUTE)
+        .setUnit(UNIT_UTILIZATION)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(machineMinuteAverage);
+            });
   }
 
   @Override
   public void accept(RecordedEvent ev) {
+    if (count % 60 == 0) {
+      machineMinuteAverage = machineSum / (60 / POLLING_INTERVAL_S);
+      count = 0;
+      machineSum = 0;
+    }
     if (ev.hasField(JVM_USER) && ev.hasField(JVM_SYSTEM)) {
       process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);
     }
     if (ev.hasField(MACHINE_TOTAL)) {
       machine = ev.getDouble(MACHINE_TOTAL);
+      machineSum += machine;
     }
+    count++;
   }
 
   @Override
@@ -69,6 +91,6 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   @Override
   public Optional<Duration> getPollingDuration() {
-    return Optional.of(Duration.ofSeconds(1));
+    return Optional.of(Duration.ofSeconds(POLLING_INTERVAL_S));
   }
 }
