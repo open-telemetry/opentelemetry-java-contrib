@@ -11,11 +11,12 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_LIMIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_LIMIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -25,30 +26,24 @@ import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 /** This class handles GCHeapConfiguration JFR events. */
 public final class MetaspaceSummaryHandler implements RecordedEventHandler {
-  private static final Logger logger = Logger.getLogger(ParallelHeapSummaryHandler.class.getName());
   private static final String EVENT_NAME = "jdk.MetaspaceSummary";
-  private static final String BEFORE = "Before GC";
-  private static final String AFTER = "After GC";
-  private static final String GC_ID = "gcId";
-  private static final String WHEN = "when";
 
   private static final Attributes ATTR_MEMORY_METASPACE =
       Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Metaspace");
   private static final Attributes ATTR_MEMORY_COMPRESSED_CLASS_SPACE =
       Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Compressed Class Space");
 
-  private volatile long classUsageBefore = 0;
-  private volatile long classUsageAfter = 0;
+  private volatile long classUsage = 0;
   private volatile long classCommitted = 0;
-  private volatile long totalUsageBefore = 0;
-  private volatile long totalUsageAfter = 0;
+  private volatile long totalUsage = 0;
   private volatile long totalCommitted = 0;
+  private volatile long classLimit = 0;
+  private volatile long totalLimit = 0;
 
   public MetaspaceSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -62,17 +57,8 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(classUsageBefore, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
-              measurement.record(totalUsageBefore, ATTR_MEMORY_METASPACE);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(classUsageAfter, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
-              measurement.record(totalUsageAfter, ATTR_MEMORY_METASPACE);
+              measurement.record(classUsage, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
+              measurement.record(totalUsage, ATTR_MEMORY_METASPACE);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_COMMITTED)
@@ -83,6 +69,15 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
               measurement.record(classCommitted, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
               measurement.record(totalCommitted, ATTR_MEMORY_METASPACE);
             });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
+        .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(classLimit, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
+              measurement.record(totalLimit, ATTR_MEMORY_METASPACE);
+            });
   }
 
   @Override
@@ -92,24 +87,8 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
 
   @Override
   public void accept(RecordedEvent ev) {
-    String when;
-    if (ev.hasField(WHEN)) {
-      when = ev.getString(WHEN);
-    } else {
-      logger.fine(String.format("Metaspace Event seen without when: %s", ev));
-      return;
-    }
-    if (!(BEFORE.equals(when) || AFTER.equals(when))) {
-      logger.fine(
-          String.format("Metaspace Event seen where when is neither before nor after: %s", ev));
-      return;
-    }
 
-    if (!ev.hasField(GC_ID)) {
-      logger.fine(String.format("Metaspace Event seen without GC ID: %s", ev));
-      return;
-    }
-    recordValues(ev, BEFORE.equals(when));
+    recordValues(ev);
   }
 
   private static void doIfAvailable(
@@ -123,7 +102,7 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
     }
   }
 
-  private void recordValues(RecordedEvent event, boolean before) {
+  private void recordValues(RecordedEvent event) {
 
     doIfAvailable(
         event,
@@ -133,27 +112,25 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
             classCommitted = classSpace.getLong(COMMITTED);
           }
           if (classSpace.hasField(USED)) {
-            if (before) {
-              classUsageBefore = classSpace.getLong(USED);
-            } else {
-              classUsageAfter = classSpace.getLong(USED);
-            }
+            classUsage = classSpace.getLong(USED);
+          }
+          if (classSpace.hasField(RESERVED)) {
+            classLimit = classSpace.getLong(RESERVED);
           }
         });
 
     doIfAvailable(
         event,
         "metaspace",
-        classSpace -> {
-          if (classSpace.hasField(COMMITTED)) {
-            totalCommitted = classSpace.getLong(COMMITTED);
+        metaspace -> {
+          if (metaspace.hasField(COMMITTED)) {
+            totalCommitted = metaspace.getLong(COMMITTED);
           }
-          if (classSpace.hasField(USED)) {
-            if (before) {
-              totalUsageBefore = classSpace.getLong(USED);
-            } else {
-              totalUsageAfter = classSpace.getLong(USED);
-            }
+          if (metaspace.hasField(USED)) {
+            totalUsage = metaspace.getLong(USED);
+          }
+          if (metaspace.hasField(RESERVED)) {
+            totalLimit = metaspace.getLong(RESERVED);
           }
         });
   }

@@ -26,6 +26,7 @@ public final class Constants {
   public static final String REGION_COUNT = "region.count";
   public static final String COMMITTED = "committed";
   public static final String RESERVED = "reserved";
+  public static final String INITIAL_SIZE = "initialSize";
   public static final String USED = "used";
   public static final String COMMITTED_SIZE = "committedSize";
 
@@ -34,6 +35,9 @@ public final class Constants {
   public static final String NON_HEAP = "nonheap";
   public static final String NETWORK_MODE_READ = "read";
   public static final String NETWORK_MODE_WRITE = "write";
+  public static final String DURATION = "duration";
+  public static final String END_OF_MINOR_GC = "end of minor GC";
+  public static final String END_OF_MAJOR_GC = "end of major GC";
 
   public static final String METRIC_NAME_NETWORK_BYTES = "process.runtime.jvm.network.io";
   public static final String METRIC_DESCRIPTION_NETWORK_BYTES = "Network read/write bytes";
@@ -54,12 +58,17 @@ public final class Constants {
   public static final String METRIC_DESCRIPTION_MEMORY_INIT = "Measure of initial memory requested";
   public static final String METRIC_NAME_MEMORY_LIMIT = "process.runtime.jvm.memory.limit";
   public static final String METRIC_DESCRIPTION_MEMORY_LIMIT = "Measure of max obtainable memory";
+  public static final String METRIC_NAME_GC_DURATION = "process.runtime.jvm.gc.duration";
+  public static final String METRIC_DESCRIPTION_GC_DURATION =
+      "Duration of JVM garbage collection actions";
 
   public static final AttributeKey<String> ATTR_THREAD_NAME = AttributeKey.stringKey("thread.name");
   public static final AttributeKey<String> ATTR_ARENA_NAME = AttributeKey.stringKey("arena");
   public static final AttributeKey<String> ATTR_NETWORK_MODE = AttributeKey.stringKey("mode");
   public static final AttributeKey<String> ATTR_TYPE = AttributeKey.stringKey("type");
   public static final AttributeKey<String> ATTR_POOL = AttributeKey.stringKey("pool");
+  public static final AttributeKey<String> ATTR_GC = AttributeKey.stringKey("pool");
+  public static final AttributeKey<String> ATTR_ACTION = AttributeKey.stringKey("pool");
   public static final AttributeKey<Boolean> ATTR_DAEMON = AttributeKey.booleanKey(DAEMON);
   public static final String UNIT_CLASSES = "{classes}";
   public static final String UNIT_THREADS = "{threads}";

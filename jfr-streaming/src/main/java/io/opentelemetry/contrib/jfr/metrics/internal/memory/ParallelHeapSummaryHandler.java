@@ -38,16 +38,13 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
   private static final String WHEN = "when";
-  private static final Attributes ATTR_MEMORY_EDEN_USED =
+  private static final String SIZE = "size";
+  private static final Attributes ATTR_MEMORY_EDEN =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space");
-  private static final Attributes ATTR_MEMORY_SURVIVOR_USED =
+  private static final Attributes ATTR_MEMORY_SURVIVOR =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space");
-  private static final Attributes ATTR_MEMORY_OLD_USED =
+  private static final Attributes ATTR_MEMORY_OLD =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
-  private static final Attributes ATTR_MEMORY_COMMITTED_OLD =
-      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
-  private static final Attributes ATTR_MEMORY_COMMITTED_YOUNG =
-      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space");
 
   private volatile long usageEden = 0;
   private volatile long usageEdenAfter = 0;
@@ -56,7 +53,8 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private volatile long usageOld = 0;
   private volatile long usageOldAfter = 0;
   private volatile long committedOld = 0;
-  private volatile long committedYoung = 0;
+  private volatile long committedSurvivor = 0;
+  private volatile long committedEden = 0;
 
   public ParallelHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -70,9 +68,9 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(usageEden, ATTR_MEMORY_EDEN_USED);
-              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR_USED);
-              measurement.record(usageOld, ATTR_MEMORY_OLD_USED);
+              measurement.record(usageEden, ATTR_MEMORY_EDEN);
+              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
+              measurement.record(usageOld, ATTR_MEMORY_OLD);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
@@ -80,9 +78,9 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN_USED);
-              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR_USED);
-              measurement.record(usageOldAfter, ATTR_MEMORY_OLD_USED);
+              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
+              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
+              measurement.record(usageOldAfter, ATTR_MEMORY_OLD);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_COMMITTED)
@@ -90,8 +88,9 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(committedOld, ATTR_MEMORY_COMMITTED_OLD);
-              measurement.record(committedYoung, ATTR_MEMORY_COMMITTED_YOUNG);
+              measurement.record(committedOld, ATTR_MEMORY_OLD);
+              measurement.record(committedEden, ATTR_MEMORY_EDEN);
+              measurement.record(committedSurvivor, ATTR_MEMORY_SURVIVOR);
             });
   }
 
@@ -147,6 +146,9 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
               usageEdenAfter = edenSpace.getLong(USED);
             }
           }
+          if (edenSpace.hasField(SIZE)) {
+            committedEden = edenSpace.getLong(SIZE);
+          }
         });
 
     doIfAvailable(
@@ -159,6 +161,9 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
             } else {
               usageSurvivorAfter = fromSpace.getLong(USED);
             }
+          }
+          if (fromSpace.hasField(SIZE)) {
+            committedSurvivor = fromSpace.getLong(SIZE);
           }
         });
 
@@ -181,15 +186,6 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
         oldSpace -> {
           if (oldSpace.hasField(COMMITTED_SIZE)) {
             committedOld = oldSpace.getLong(COMMITTED_SIZE);
-          }
-        });
-
-    doIfAvailable(
-        event,
-        "youngSpace",
-        youngSpace -> {
-          if (youngSpace.hasField(COMMITTED_SIZE)) {
-            committedYoung = youngSpace.getLong(COMMITTED_SIZE);
           }
         });
   }

@@ -8,12 +8,10 @@ package io.opentelemetry.contrib.jfr.metrics.internal.memory;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.INITIAL_SIZE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_INIT;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_LIMIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_INIT;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_LIMIT;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
@@ -23,18 +21,15 @@ import java.time.Duration;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
-/** This class handles GCHeapConfiguration JFR events. */
-public final class GCHeapConfigurationHandler implements RecordedEventHandler {
-  private static final String EVENT_NAME = "jdk.GCHeapConfiguration";
+/** Handles attributes with pool value CodeCache */
+public final class CodeCacheConfigurationHandler implements RecordedEventHandler {
+  private static final String EVENT_NAME = "jdk.CodeCacheConfiguration";
 
-  private static final String MAX_SIZE = "maxSize";
-  private static final Attributes ATTR =
-      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space");
+  private static final Attributes ATTR = Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "CodeCache");
 
-  private volatile long init = 0;
-  private volatile long limit = 0;
+  private volatile long initialSize = 0;
 
-  public GCHeapConfigurationHandler() {
+  public CodeCacheConfigurationHandler() {
     initializeMeter(defaultMeter());
   }
 
@@ -46,15 +41,7 @@ public final class GCHeapConfigurationHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(init, ATTR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(limit, ATTR);
+              measurement.record(initialSize, ATTR);
             });
   }
 
@@ -66,10 +53,7 @@ public final class GCHeapConfigurationHandler implements RecordedEventHandler {
   @Override
   public void accept(RecordedEvent event) {
     if (event.hasField(INITIAL_SIZE)) {
-      init = event.getLong(INITIAL_SIZE);
-    }
-    if (event.hasField(MAX_SIZE)) {
-      limit = event.getLong(MAX_SIZE);
+      initialSize = event.getLong(INITIAL_SIZE);
     }
   }
 

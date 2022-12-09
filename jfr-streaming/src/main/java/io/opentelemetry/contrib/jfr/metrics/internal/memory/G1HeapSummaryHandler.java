@@ -9,8 +9,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
@@ -33,11 +35,12 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private static final String AFTER = "After GC";
   private static final String GC_ID = "gcId";
   private static final String EDEN_USED_SIZE = "edenUsedSize";
+  private static final String EDEN_TOTAL_SIZE = "edenTotalSize";
   private static final String SURVIVOR_USED_SIZE = "survivorUsedSize";
   private static final String WHEN = "when";
-  private static final Attributes ATTR_MEMORY_EDEN_USED =
+  private static final Attributes ATTR_MEMORY_EDEN =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space");
-  private static final Attributes ATTR_MEMORY_SURVIVOR_USED =
+  private static final Attributes ATTR_MEMORY_SURVIVOR =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space");
   //  private static final Attributes ATTR_MEMORY_OLD_USED =
   //      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Old Gen"); // TODO needs jdk JFR support
@@ -46,6 +49,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private volatile long usageEdenAfter = 0;
   private volatile long usageSurvivor = 0;
   private volatile long usageSurvivorAfter = 0;
+  private volatile long committedEden = 0;
 
   public G1HeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -59,8 +63,8 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(usageEden, ATTR_MEMORY_EDEN_USED);
-              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR_USED);
+              measurement.record(usageEden, ATTR_MEMORY_EDEN);
+              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
@@ -68,8 +72,16 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN_USED);
-              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR_USED);
+              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
+              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+        .setDescription(METRIC_DESCRIPTION_COMMITTED)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(committedEden, ATTR_MEMORY_EDEN);
             });
   }
 
@@ -114,6 +126,10 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
       } else {
         usageSurvivorAfter = event.getLong(SURVIVOR_USED_SIZE);
       }
+    }
+
+    if (event.hasField(EDEN_TOTAL_SIZE)) {
+      committedEden = event.getLong(EDEN_TOTAL_SIZE);
     }
   }
 }
