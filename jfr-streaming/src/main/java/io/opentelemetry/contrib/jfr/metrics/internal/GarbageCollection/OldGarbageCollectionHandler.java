@@ -48,10 +48,12 @@ public final class OldGarbageCollectionHandler implements RecordedEventHandler {
   @Override
   public void initializeMeter(Meter meter) {
     // Set the attribute's GC based on which GC is being used.
-    if (HandlerRegistry.garbageCollectors.contains("Parallel")) {
+    if (HandlerRegistry.garbageCollectors.contains("PS MarkSweep")) {
       attributes = Attributes.of(ATTR_GC, "PS MarkSweep", ATTR_ACTION, END_OF_MAJOR_GC);
-    } else if (HandlerRegistry.garbageCollectors.contains("G1")) {
+    } else if (HandlerRegistry.garbageCollectors.contains("G1 Old Generation")) {
       attributes = Attributes.of(ATTR_GC, "G1 Old Generation", ATTR_ACTION, END_OF_MAJOR_GC);
+    } else if (HandlerRegistry.garbageCollectors.contains("MarkSweepCompact")) {
+      attributes = Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
     }
 
     histogram =

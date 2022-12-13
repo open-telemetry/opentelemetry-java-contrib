@@ -40,6 +40,7 @@ public final class HandlerRegistry {
   private final List<RecordedEventHandler> mappers;
 
   public static HashSet<String> garbageCollectors = new HashSet<String>();
+  public static HashSet<String> seen = new HashSet<String>();
 
   private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
       Map.of(
@@ -56,12 +57,13 @@ public final class HandlerRegistry {
     var handlers = new ArrayList<RecordedEventHandler>();
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
+      garbageCollectors.add(name);
       for (var gcType : HANDLERS_PER_GC.keySet()) {
         if (name.contains(gcType)
-            && !garbageCollectors.contains(gcType)
+            && !seen.contains(gcType)
             && HANDLERS_PER_GC.get(gcType) != null) {
           handlers.addAll(HANDLERS_PER_GC.get(gcType).stream().map(s -> s.get()).toList());
-          garbageCollectors.add(gcType);
+          seen.add(gcType);
         }
       }
     }
