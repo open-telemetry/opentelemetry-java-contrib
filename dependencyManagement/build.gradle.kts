@@ -27,7 +27,7 @@ val autoValueVersion = "1.10.1"
 val errorProneVersion = "2.16"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.9.0"
-val slf4jVersion = "2.0.5"
+val slf4jVersion = "2.0.6"
 
 val CORE_DEPENDENCIES = listOf(
   "com.google.auto.service:auto-service:${autoServiceVersion}",
