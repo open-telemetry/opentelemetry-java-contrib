@@ -17,10 +17,23 @@ import org.junit.jupiter.api.Test;
 
 class BufferMetricTest extends AbstractMetricsTest {
 
+  /**
+   * This is a basic test that allocates some buffers and tests to make sure the resulting JFR event
+   * was handled and turned into the expected metrics.
+   *
+   * <p>This test handles all 3 buffer related metrics defined in the OpenTelemetry Java runtime
+   * Semantic Conventions.
+   *
+   * <p>Currenly JFR only has support for the "direct" buffer pool. The "mapped" and "mapped -
+   * 'non-volatile memory'" pools do not have corresponding JFR events. TODO: In the future events
+   * should be added for these, if there is to capture their data in the
+   * process.runtime.jvm.buffer.count metric.
+   */
   @Test
   void shouldHaveJfrLoadedClassesCountEvents() throws Exception {
-    ByteBuffer buffer = ByteBuffer.allocateDirect(1000);
+    ByteBuffer buffer = ByteBuffer.allocateDirect(10000);
     buffer.put("test".getBytes(StandardCharsets.UTF_8));
+
     waitAndAssertMetrics(
         metric ->
             metric
