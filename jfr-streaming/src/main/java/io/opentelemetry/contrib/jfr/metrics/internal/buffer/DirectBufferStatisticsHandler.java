@@ -5,10 +5,12 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.buffer;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_BUFFERS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
@@ -27,7 +29,8 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
   private static final String MAX_CAPACITY = "maxCapacity";
   private static final String MEMORY_USED = "memoryUsed";
 
-  private static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
+  private static final String EVENT_NAME = "jdk.DirectBufferStatistics";
+  private static final Attributes ATTR = Attributes.of(ATTR_POOL, "direct");
 
   private volatile long usage = 0;
   private volatile long limit = 0;
@@ -63,7 +66,7 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(usage);
+              measurement.record(usage, ATTR);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_LIMIT)
@@ -71,7 +74,7 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
         .setUnit(BYTES)
         .buildWithCallback(
             measurement -> {
-              measurement.record(limit);
+              measurement.record(limit, ATTR);
             });
     meter
         .upDownCounterBuilder(METRIC_NAME_COUNT)
@@ -79,7 +82,7 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
         .setUnit(UNIT_BUFFERS)
         .buildWithCallback(
             measurement -> {
-              measurement.record(count);
+              measurement.record(count, ATTR);
             });
   }
 

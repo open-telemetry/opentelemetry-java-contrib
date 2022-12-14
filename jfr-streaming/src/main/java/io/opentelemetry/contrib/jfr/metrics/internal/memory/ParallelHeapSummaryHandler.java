@@ -13,9 +13,12 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_LIMIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_LIMIT;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED_SIZE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -55,6 +58,8 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private volatile long committedOld = 0;
   private volatile long committedSurvivor = 0;
   private volatile long committedEden = 0;
+  private volatile long limitOld = 0;
+  private volatile long limitYoung = 0;
 
   public ParallelHeapSummaryHandler() {
     initializeMeter(defaultMeter());
@@ -91,6 +96,16 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
               measurement.record(committedOld, ATTR_MEMORY_OLD);
               measurement.record(committedEden, ATTR_MEMORY_EDEN);
               measurement.record(committedSurvivor, ATTR_MEMORY_SURVIVOR);
+            });
+    meter
+        .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
+        .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
+        .setUnit(BYTES)
+        .buildWithCallback(
+            measurement -> {
+              measurement.record(limitOld, ATTR_MEMORY_OLD);
+              measurement.record(limitYoung, ATTR_MEMORY_EDEN);
+              measurement.record(limitYoung, ATTR_MEMORY_SURVIVOR);
             });
   }
 
@@ -186,6 +201,18 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
         oldSpace -> {
           if (oldSpace.hasField(COMMITTED_SIZE)) {
             committedOld = oldSpace.getLong(COMMITTED_SIZE);
+          }
+          if (oldSpace.hasField(RESERVED_SIZE)) {
+            limitOld = oldSpace.getLong(RESERVED_SIZE);
+          }
+        });
+
+    doIfAvailable(
+        event,
+        "youngSpace",
+        oldSpace -> {
+          if (oldSpace.hasField(RESERVED_SIZE)) {
+            limitYoung = oldSpace.getLong(RESERVED_SIZE);
           }
         });
   }

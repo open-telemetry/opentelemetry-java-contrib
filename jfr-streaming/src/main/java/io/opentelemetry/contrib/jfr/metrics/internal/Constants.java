@@ -29,6 +29,7 @@ public final class Constants {
   public static final String INITIAL_SIZE = "initialSize";
   public static final String USED = "used";
   public static final String COMMITTED_SIZE = "committedSize";
+  public static final String RESERVED_SIZE = "reservedSize";
 
   public static final String DAEMON = "daemon";
   public static final String HEAP = "heap";
