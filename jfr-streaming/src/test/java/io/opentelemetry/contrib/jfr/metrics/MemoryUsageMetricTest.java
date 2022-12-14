@@ -16,15 +16,75 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.sdk.metrics.data.PointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 class MemoryUsageMetricTest extends AbstractMetricsTest {
-  static class AttributeCheck implements ThrowingConsumer<PointData> {
+
+  static class G1AttributeCheck implements ThrowingConsumer<MetricData> {
     @Override
-    public void acceptThrows(PointData pointData) throws Throwable {}
+    public void acceptThrows(MetricData metricData) throws Throwable {
+      SumData<?> sumData = metricData.getLongSumData();
+      assertThat(sumData.getPoints())
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space")))
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space")));
+    }
+  }
+
+  static class PSAttributeCheck implements ThrowingConsumer<MetricData> {
+    @Override
+    public void acceptThrows(MetricData metricData) throws Throwable {
+      SumData<?> sumData = metricData.getLongSumData();
+      assertThat(sumData.getPoints())
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space")))
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space")))
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen")));
+    }
+  }
+
+  static class SerialAttributeCheck implements ThrowingConsumer<MetricData> {
+    @Override
+    public void acceptThrows(MetricData metricData) throws Throwable {
+      SumData<?> sumData = metricData.getLongSumData();
+      assertThat(sumData.getPoints())
+          .anyMatch(
+              p ->
+                  p.getAttributes()
+                      .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space")));
+    }
+  }
+
+  private void check(ThrowingConsumer<MetricData> attributeCheck) {
+    waitAndAssertMetrics(
+        metric ->
+            metric
+                .hasName(METRIC_NAME_MEMORY)
+                .hasUnit(BYTES)
+                .hasDescription(METRIC_DESCRIPTION_MEMORY)
+                .satisfies(attributeCheck),
+        metric ->
+            metric
+                .hasName(METRIC_NAME_MEMORY_AFTER)
+                .hasUnit(BYTES)
+                .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+                .satisfies(attributeCheck));
   }
 
   /**
@@ -33,151 +93,17 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
    */
   @Test
   void shouldHaveMemoryUsageMetrics() throws Exception {
-
     System.gc();
     if (HandlerRegistry.garbageCollectors.contains("G1 Young Generation")) {
       // Test to make sure there's metric data for both eden and survivor spaces.
       // TODO: once G1 old gen usage added to jdk.G1HeapSummary (in JDK 21), test for it here too.
-      waitAndAssertMetrics(
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space")));
-                      }),
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY_AFTER)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space")));
-                      }));
-
+      check(new G1AttributeCheck());
     } else if (HandlerRegistry.garbageCollectors.contains("PS Scavenge")) {
-      waitAndAssertMetrics(
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen")));
-                      }),
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY_AFTER)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space")))
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen")));
-                      }));
+      check(new PSAttributeCheck());
     } else if (HandlerRegistry.garbageCollectors.contains("Copy")) {
       // TODO: once more fine grained data is supported by JFR, this should test for young and old
       // space attributes.
-      waitAndAssertMetrics(
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space")));
-                      }),
-          metric ->
-              metric
-                  .hasName(METRIC_NAME_MEMORY_AFTER)
-                  .hasUnit(BYTES)
-                  .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-                  .satisfies(
-                      metricData -> {
-                        SumData<?> sumData = metricData.getLongSumData();
-                        assertThat(sumData.getPoints())
-                            .anyMatch(
-                                p ->
-                                    p.getAttributes()
-                                        .equals(
-                                            Attributes.of(
-                                                ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space")));
-                      }));
+      check(new SerialAttributeCheck());
     }
   }
 }
