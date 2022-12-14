@@ -39,7 +39,9 @@ public class JfrGCHeapSummaryHandlerTest extends AbstractMetricsTest {
   }
 
   @Test
-  public void shouldHaveGCEvents() throws Exception {
+  public void shouldHaveGCEvents()
+      throws Exception { // TODO Remove this test. Its replaced by MemoryUsageMetricTest
+
     System.gc();
 
     waitAndAssertMetrics(

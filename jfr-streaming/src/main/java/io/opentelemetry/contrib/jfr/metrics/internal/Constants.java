@@ -68,7 +68,7 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_TYPE = AttributeKey.stringKey("type");
   public static final AttributeKey<String> ATTR_POOL = AttributeKey.stringKey("pool");
   public static final AttributeKey<String> ATTR_GC = AttributeKey.stringKey("pool");
-  public static final AttributeKey<String> ATTR_ACTION = AttributeKey.stringKey("pool");
+  public static final AttributeKey<String> ATTR_ACTION = AttributeKey.stringKey("action");
   public static final AttributeKey<Boolean> ATTR_DAEMON = AttributeKey.booleanKey(DAEMON);
   public static final String UNIT_CLASSES = "{classes}";
   public static final String UNIT_THREADS = "{threads}";
