@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.OldGarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.YoungGarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import io.opentelemetry.contrib.jfr.metrics.internal.buffer.DirectBufferStatisticsHandler;
@@ -84,8 +86,13 @@ public final class HandlerRegistry {
             new GCHeapConfigurationHandler(),
             new DirectBufferStatisticsHandler(),
             new MetaspaceSummaryHandler(),
-            new CodeCacheConfigurationHandler());
+            new CodeCacheConfigurationHandler(),
+            new OldGarbageCollectionHandler());
     handlers.addAll(basicHandlers);
+
+    if (!garbageCollectors.contains("G1 Young Generation")) {
+      handlers.add(new YoungGarbageCollectionHandler());
+    }
 
     var meter =
         meterProvider

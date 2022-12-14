@@ -24,7 +24,7 @@ class BufferMetricTest extends AbstractMetricsTest {
    * <p>This test handles all 3 buffer related metrics defined in the OpenTelemetry Java runtime
    * Semantic Conventions.
    *
-   * <p>Currenly JFR only has support for the "direct" buffer pool. The "mapped" and "mapped -
+   * <p>Currently JFR only has support for the "direct" buffer pool. The "mapped" and "mapped -
    * 'non-volatile memory'" pools do not have corresponding JFR events. TODO: In the future events
    * should be added for these, if there is to capture their data in the
    * process.runtime.jvm.buffer.count metric.
