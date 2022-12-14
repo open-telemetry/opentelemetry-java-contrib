@@ -42,7 +42,6 @@ public final class HandlerRegistry {
   private final List<RecordedEventHandler> mappers;
 
   public static HashSet<String> garbageCollectors = new HashSet<String>();
-  public static HashSet<String> seen = new HashSet<String>();
 
   private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
       Map.of(
@@ -57,6 +56,7 @@ public final class HandlerRegistry {
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
+    var seen = new HashSet<String>();
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
       garbageCollectors.add(name);
