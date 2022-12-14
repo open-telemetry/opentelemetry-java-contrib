@@ -53,8 +53,7 @@ class GCDurationMetricTest extends AbstractMetricsTest {
 
   @Test
   void shouldHaveGCDurationMetrics() throws Exception {
-    // This test is only a smoke test for young GC
-    // TODO: Need a reliable way to test old gen GC.
+    // TODO: Need a reliable way to test old and young gen GC in isolation.
     System.gc();
     waitAndAssertMetrics(
         metric ->
