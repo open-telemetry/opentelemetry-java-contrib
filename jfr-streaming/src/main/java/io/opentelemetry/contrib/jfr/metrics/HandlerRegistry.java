@@ -7,8 +7,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.OldGarbageCollectionHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.YoungGarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import io.opentelemetry.contrib.jfr.metrics.internal.buffer.DirectBufferStatisticsHandler;
@@ -17,11 +15,8 @@ import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigur
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.OverallCPULoadHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.memory.CodeCacheConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.memory.MetaspaceSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
@@ -85,8 +80,6 @@ public final class HandlerRegistry {
             new ClassesLoadedHandler(),
             new DirectBufferStatisticsHandler());
     handlers.addAll(basicHandlers);
-
-
 
     var meter =
         meterProvider
