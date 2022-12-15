@@ -13,8 +13,11 @@ import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigur
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.OverallCPULoadHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.CodeCacheConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.MetaspaceSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
@@ -28,11 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-final class HandlerRegistry {
+public final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
   private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
 
   private final List<RecordedEventHandler> mappers;
+
+  public static HashSet<String> garbageCollectors = new HashSet<String>();
 
   private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
       Map.of(
@@ -50,6 +55,7 @@ final class HandlerRegistry {
     var seen = new HashSet<String>();
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
+      garbageCollectors.add(name);
       for (var gcType : HANDLERS_PER_GC.keySet()) {
         if (name.contains(gcType)
             && !seen.contains(gcType)
@@ -72,7 +78,10 @@ final class HandlerRegistry {
             new ContainerConfigurationHandler(),
             new LongLockHandler(grouper),
             new ThreadCountHandler(),
-            new ClassesLoadedHandler());
+            new ClassesLoadedHandler(),
+            new GCHeapConfigurationHandler(),
+            new MetaspaceSummaryHandler(),
+            new CodeCacheConfigurationHandler());
     handlers.addAll(basicHandlers);
 
     var meter =
