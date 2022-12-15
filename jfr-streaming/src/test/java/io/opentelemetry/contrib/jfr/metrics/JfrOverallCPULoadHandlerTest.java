@@ -25,6 +25,12 @@ public class JfrOverallCPULoadHandlerTest extends AbstractMetricsTest {
                 .hasName("process.runtime.jvm.system.cpu.utilization")
                 .hasUnit(UNIT_UTILIZATION)
                 .hasDescription("Recent CPU utilization for the whole system")
+                .hasDoubleGaugeSatisfying(gauge -> {}),
+        metric ->
+            metric
+                .hasName("process.runtime.jvm.system.cpu.load_1m")
+                .hasUnit(UNIT_UTILIZATION)
+                .hasDescription("Average CPU load of the whole system for the last minute")
                 .hasDoubleGaugeSatisfying(gauge -> {}));
   }
 }
