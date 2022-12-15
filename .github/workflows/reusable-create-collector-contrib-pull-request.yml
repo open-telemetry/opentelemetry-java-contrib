@@ -93,6 +93,8 @@ jobs:
       - name: Add change log entry
         env:
           JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
+          # this is the token used for "gh pr view" below
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pull_request_number=$(gh pr view --json number --jq .number)
 
