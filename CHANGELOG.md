@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### JFR streaming
+
+- Update handlers in jfr-streaming to match spec
+  ([#616](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/616))
+
 ## Version 1.20.1 (2022-11-22)
 
 ### 🛠️ Bug fixes
