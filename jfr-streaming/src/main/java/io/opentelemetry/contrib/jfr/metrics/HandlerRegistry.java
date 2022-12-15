@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
-import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import io.opentelemetry.contrib.jfr.metrics.internal.buffer.DirectBufferStatisticsHandler;
@@ -30,18 +29,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public final class HandlerRegistry {
+final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
   private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
 
   private final List<RecordedEventHandler> mappers;
 
-  public static HashSet<String> garbageCollectors = new HashSet<String>();
-
   private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
       Map.of(
           "G1",
-          List.of(G1HeapSummaryHandler::new, G1GarbageCollectionHandler::new),
+          List.of(G1HeapSummaryHandler::new),
           "Parallel",
           List.of(ParallelHeapSummaryHandler::new));
 
@@ -54,7 +51,6 @@ public final class HandlerRegistry {
     var seen = new HashSet<String>();
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
-      garbageCollectors.add(name);
       for (var gcType : HANDLERS_PER_GC.keySet()) {
         if (name.contains(gcType)
             && !seen.contains(gcType)
