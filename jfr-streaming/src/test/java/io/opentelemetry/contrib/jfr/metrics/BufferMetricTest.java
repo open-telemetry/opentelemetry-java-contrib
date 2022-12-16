@@ -25,9 +25,8 @@ class BufferMetricTest extends AbstractMetricsTest {
    * Semantic Conventions.
    *
    * <p>Currently JFR only has support for the "direct" buffer pool. The "mapped" and "mapped -
-   * 'non-volatile memory'" pools do not have corresponding JFR events. TODO: In the future, events
-   * should be added for these, if there is a need to capture their data in the
-   * process.runtime.jvm.buffer.count metric.
+   * 'non-volatile memory'" pools do not have corresponding JFR events. In the future, events should
+   * be added for those missing pools.
    */
   @Test
   void shouldHaveJfrLoadedClassesCountEvents() throws Exception {
