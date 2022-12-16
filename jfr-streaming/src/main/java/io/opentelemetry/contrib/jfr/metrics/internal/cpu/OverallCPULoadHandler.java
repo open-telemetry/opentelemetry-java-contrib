@@ -31,9 +31,8 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private volatile double process = 0;
   private volatile double machine = 0;
   private volatile double machineMinuteAverage = 0;
-  private static final int POLLING_INTERVAL_S = 1;
   private int count = 0;
-  private double machineSum = 0;
+  private volatile double machineSum = 0;
 
   public OverallCPULoadHandler() {
     initializeMeter(defaultMeter());
@@ -69,17 +68,21 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   @Override
   public void accept(RecordedEvent ev) {
-    if (count % 60 == 0) {
-      machineMinuteAverage = machineSum / (60 / POLLING_INTERVAL_S);
-      count = 0;
-      machineSum = 0;
+    // Synchronized to avoid races on machineSum
+    synchronized (this) {
+      if (count % 60 == 0) {
+        machineMinuteAverage = machineSum / 60;
+        count = 0;
+        machineSum = 0;
+      }
+      if (ev.hasField(MACHINE_TOTAL)) {
+        machine = ev.getDouble(MACHINE_TOTAL);
+        machineSum += machine;
+      }
     }
+
     if (ev.hasField(JVM_USER) && ev.hasField(JVM_SYSTEM)) {
       process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);
-    }
-    if (ev.hasField(MACHINE_TOTAL)) {
-      machine = ev.getDouble(MACHINE_TOTAL);
-      machineSum += machine;
     }
     count++;
   }
@@ -91,6 +94,6 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
 
   @Override
   public Optional<Duration> getPollingDuration() {
-    return Optional.of(Duration.ofSeconds(POLLING_INTERVAL_S));
+    return Optional.of(Duration.ofSeconds(1));
   }
 }
