@@ -85,19 +85,13 @@ jobs:
           git checkout -b $branch
           git commit -a -m "$message"
           git push --set-upstream origin $branch
-          gh pr create --title "$message" \
-                       --body "$body" \
-                       --repo open-telemetry/opentelemetry-collector-contrib \
-                       --base main
+          url=$(gh pr create --title "$message" \
+                             --body "$body" \
+                             --repo open-telemetry/opentelemetry-collector-contrib \
+                             --base main)
 
-      - name: Add change log entry
-        env:
-          JMX_METRICS_VERSION: ${{ inputs.jmx-metrics-version }}
-          # this is the token used for "gh pr view" below
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pull_request_number=$(gh pr view --json number --jq .number)
-
+          pull_request_number=${url//*\//}
+          
           # see the template for change log entry file at
           # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/.chloggen/TEMPLATE.yaml
           cat > .chloggen/add-jmx-metrics-gatherer-$JMX_METRICS_VERSION.yaml << EOF
