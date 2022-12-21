@@ -8,11 +8,11 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_BUFFERS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class BufferMetricTest extends AbstractMetricsTest {
@@ -29,7 +29,7 @@ class BufferMetricTest extends AbstractMetricsTest {
    * be added for those missing pools.
    */
   @Test
-  void shouldHaveJfrLoadedClassesCountEvents() throws Exception {
+  void shouldHaveJfrLoadedClassesCountEvents() {
     ByteBuffer buffer = ByteBuffer.allocateDirect(10000);
     buffer.put("test".getBytes(StandardCharsets.UTF_8));
 
@@ -45,11 +45,9 @@ class BufferMetricTest extends AbstractMetricsTest {
                             point ->
                                 point.satisfies(
                                     pointData -> {
-                                      Assertions.assertTrue(pointData.getValue() > 0);
-                                      Assertions.assertTrue(
-                                          pointData
-                                              .getAttributes()
-                                              .equals(Attributes.of(ATTR_POOL, "direct")));
+                                      assertThat(pointData.getValue()).isGreaterThan(0);
+                                      assertThat(pointData.getAttributes())
+                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
                                     }))),
         metric ->
             metric
@@ -62,11 +60,9 @@ class BufferMetricTest extends AbstractMetricsTest {
                             point ->
                                 point.satisfies(
                                     pointData -> {
-                                      Assertions.assertTrue(pointData.getValue() > 0);
-                                      Assertions.assertTrue(
-                                          pointData
-                                              .getAttributes()
-                                              .equals(Attributes.of(ATTR_POOL, "direct")));
+                                      assertThat(pointData.getValue()).isGreaterThan(0);
+                                      assertThat(pointData.getAttributes())
+                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
                                     }))),
         metric ->
             metric
@@ -79,11 +75,9 @@ class BufferMetricTest extends AbstractMetricsTest {
                             point ->
                                 point.satisfies(
                                     pointData -> {
-                                      Assertions.assertTrue(pointData.getValue() > 0);
-                                      Assertions.assertTrue(
-                                          pointData
-                                              .getAttributes()
-                                              .equals(Attributes.of(ATTR_POOL, "direct")));
+                                      assertThat(pointData.getValue()).isGreaterThan(0);
+                                      assertThat(pointData.getAttributes())
+                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
                                     }))));
   }
 }

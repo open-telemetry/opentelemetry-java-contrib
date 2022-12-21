@@ -80,10 +80,7 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
         .upDownCounterBuilder(METRIC_NAME_COUNT)
         .setDescription(METRIC_DESCRIPTION_COUNT)
         .setUnit(UNIT_BUFFERS)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(count, ATTR);
-            });
+        .buildWithCallback(measurement -> measurement.record(count, ATTR));
   }
 
   @Override
