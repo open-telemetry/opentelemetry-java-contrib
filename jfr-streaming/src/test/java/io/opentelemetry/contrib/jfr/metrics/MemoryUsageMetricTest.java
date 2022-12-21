@@ -5,18 +5,21 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_COMPRESSED_CLASS_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_G1_EDEN_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_G1_SURVIVOR_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_JAVA_HEAP_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_METASPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_EDEN_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_OLD_GEN;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_SURVIVOR_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_AFTER;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
@@ -45,54 +48,35 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
    * process.runtime.jvm.memory.usage_after_last_gc metrics.
    */
   @Test
-  void shouldHaveMemoryUsageMetrics() throws Exception {
+  void shouldHaveMemoryUsageMetrics() {
     System.gc();
-    if (HandlerRegistry.garbageCollectors.contains("G1 Young Generation")) {
+    if (garbageCollectors.contains("G1 Young Generation")) {
       // Test to make sure there's metric data for both eden and survivor spaces.
       // TODO: once G1 old gen usage added to jdk.G1HeapSummary (in JDK 21), test for it here too.
       check(
           metricData -> {
             SumData<?> sumData = metricData.getLongSumData();
             assertThat(sumData.getPoints())
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space")))
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(
-                                Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space")));
+                .anyMatch(p -> p.getAttributes().equals(ATTR_G1_EDEN_SPACE))
+                .anyMatch(p -> p.getAttributes().equals(ATTR_G1_SURVIVOR_SPACE));
           });
-    } else if (HandlerRegistry.garbageCollectors.contains("PS Scavenge")) {
+    } else if (garbageCollectors.contains("PS Scavenge")) {
       check(
           metricData -> {
             SumData<?> sumData = metricData.getLongSumData();
             assertThat(sumData.getPoints())
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space")))
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space")))
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen")));
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_EDEN_SPACE))
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_SURVIVOR_SPACE))
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_OLD_GEN));
           });
-    } else if (HandlerRegistry.garbageCollectors.contains("Copy")) {
+    } else if (garbageCollectors.contains("Copy")) {
       // TODO: once more fine grained data is supported by JFR, this should test for young and old
       // space attributes.
       check(
           metricData -> {
             SumData<?> sumData = metricData.getLongSumData();
             assertThat(sumData.getPoints())
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space")));
+                .anyMatch(p -> p.getAttributes().equals(ATTR_JAVA_HEAP_SPACE));
           });
     }
 
@@ -107,12 +91,7 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
                     metricData -> {
                       SumData<?> sumData = metricData.getLongSumData();
                       assertThat(sumData.getPoints())
-                          .anyMatch(
-                              p ->
-                                  p.getAttributes()
-                                      .equals(
-                                          Attributes.of(
-                                              ATTR_TYPE, NON_HEAP, ATTR_POOL, "Metaspace")));
+                          .anyMatch(p -> p.getAttributes().equals(ATTR_METASPACE));
                     }),
         metric ->
             metric
@@ -123,15 +102,7 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
                     metricData -> {
                       SumData<?> sumData = metricData.getLongSumData();
                       assertThat(sumData.getPoints())
-                          .anyMatch(
-                              p ->
-                                  p.getAttributes()
-                                      .equals(
-                                          Attributes.of(
-                                              ATTR_TYPE,
-                                              NON_HEAP,
-                                              ATTR_POOL,
-                                              "Compressed Class Space")));
+                          .anyMatch(p -> p.getAttributes().equals(ATTR_COMPRESSED_CLASS_SPACE));
                     }));
   }
 }

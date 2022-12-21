@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jfr.metrics.internal;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 
 public final class Constants {
   private Constants() {}
@@ -71,6 +72,25 @@ public final class Constants {
   public static final AttributeKey<String> ATTR_GC = AttributeKey.stringKey("pool");
   public static final AttributeKey<String> ATTR_ACTION = AttributeKey.stringKey("action");
   public static final AttributeKey<Boolean> ATTR_DAEMON = AttributeKey.booleanKey(DAEMON);
+  public static final Attributes ATTR_PS_EDEN_SPACE =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space");
+  public static final Attributes ATTR_PS_SURVIVOR_SPACE =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space");
+  public static final Attributes ATTR_PS_OLD_GEN =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
+  public static final Attributes ATTR_G1_SURVIVOR_SPACE =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space");
+  public static final Attributes ATTR_G1_EDEN_SPACE =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space");
+  public static final Attributes ATTR_JAVA_HEAP_SPACE =
+      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space");
+  public static final Attributes ATTR_METASPACE =
+      Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Metaspace");
+  public static final Attributes ATTR_COMPRESSED_CLASS_SPACE =
+      Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Compressed Class Space");
+  public static final Attributes ATTR_CODE_CACHE =
+      Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "CodeCache");
+
   public static final String UNIT_CLASSES = "{classes}";
   public static final String UNIT_THREADS = "{threads}";
   public static final String UNIT_BUFFERS = "{buffers}";

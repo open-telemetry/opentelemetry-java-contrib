@@ -79,10 +79,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
         .upDownCounterBuilder(METRIC_NAME_COMMITTED)
         .setDescription(METRIC_DESCRIPTION_COMMITTED)
         .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(committedEden, ATTR_MEMORY_EDEN);
-            });
+        .buildWithCallback(measurement -> measurement.record(committedEden, ATTR_MEMORY_EDEN));
   }
 
   @Override

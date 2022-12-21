@@ -5,15 +5,14 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_TYPE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_COMPRESSED_CLASS_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_EDEN_SPACE;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_OLD_GEN;
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_SURVIVOR_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_LIMIT;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
@@ -31,32 +30,23 @@ class MemoryLimitMetricTest extends AbstractMetricsTest {
   }
 
   @Test
-  void shouldHaveMemoryLimitMetrics() throws Exception {
+  void shouldHaveMemoryLimitMetrics() {
 
     System.gc();
 
-    if (HandlerRegistry.garbageCollectors.contains("G1 Young Generation")) {
+    if (garbageCollectors.contains("G1 Young Generation")) {
       // TODO: needs JFR support
 
-    } else if (HandlerRegistry.garbageCollectors.contains("PS Scavenge")) {
+    } else if (garbageCollectors.contains("PS Scavenge")) {
       check(
           metricData -> {
             SumData<?> sumData = metricData.getLongSumData();
             assertThat(sumData.getPoints())
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Eden Space")))
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Survivor Space")))
-                .anyMatch(
-                    p ->
-                        p.getAttributes()
-                            .equals(Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen")));
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_EDEN_SPACE))
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_SURVIVOR_SPACE))
+                .anyMatch(p -> p.getAttributes().equals(ATTR_PS_OLD_GEN));
           });
-    } else if (HandlerRegistry.garbageCollectors.contains("Copy")) {
+    } else if (garbageCollectors.contains("Copy")) {
       // TODO: Needs JFR support for more fine grained memory pools
     }
 
@@ -65,12 +55,7 @@ class MemoryLimitMetricTest extends AbstractMetricsTest {
         metricData -> {
           SumData<?> sumData = metricData.getLongSumData();
           assertThat(sumData.getPoints())
-              .anyMatch(
-                  p ->
-                      p.getAttributes()
-                          .equals(
-                              Attributes.of(
-                                  ATTR_TYPE, NON_HEAP, ATTR_POOL, "Compressed Class Space")));
+              .anyMatch(p -> p.getAttributes().equals(ATTR_COMPRESSED_CLASS_SPACE));
         });
   }
 }

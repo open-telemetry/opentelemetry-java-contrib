@@ -28,8 +28,6 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 public final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
@@ -37,32 +35,38 @@ public final class HandlerRegistry {
 
   private final List<RecordedEventHandler> mappers;
 
-  public static HashSet<String> garbageCollectors = new HashSet<String>();
-
-  private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
-      Map.of(
-          "G1",
-          List.of(G1HeapSummaryHandler::new),
-          "Parallel",
-          List.of(ParallelHeapSummaryHandler::new));
-
   private HandlerRegistry(List<? extends RecordedEventHandler> mappers) {
     this.mappers = new ArrayList<>(mappers);
   }
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
+    HashSet<String> garbageCollectors = new HashSet<>();
+
     var handlers = new ArrayList<RecordedEventHandler>();
-    var seen = new HashSet<String>();
+    // Must gather all GC names before creating GC handlers that require the list of active GC names
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-      var name = bean.getName();
-      garbageCollectors.add(name);
-      for (var gcType : HANDLERS_PER_GC.keySet()) {
-        if (name.contains(gcType)
-            && !seen.contains(gcType)
-            && HANDLERS_PER_GC.get(gcType) != null) {
-          handlers.addAll(HANDLERS_PER_GC.get(gcType).stream().map(s -> s.get()).toList());
-          seen.add(gcType);
-        }
+      garbageCollectors.add(bean.getName());
+    }
+
+    // Configure GC specific handlers
+    for (var name : garbageCollectors) {
+      switch (name) {
+        case "G1 Young Generation":
+          {
+            handlers.add(new G1HeapSummaryHandler());
+            break;
+          }
+        case "Copy":
+          {
+            break;
+          }
+        case "PS Scavenge":
+          {
+            handlers.add(new ParallelHeapSummaryHandler());
+            break;
+          }
+        default:
+          // If none of the above GCs are detected, no action.
       }
     }
     var grouper = new ThreadGrouper();

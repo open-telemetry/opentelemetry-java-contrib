@@ -39,10 +39,7 @@ public final class CodeCacheConfigurationHandler implements RecordedEventHandler
         .upDownCounterBuilder(METRIC_NAME_MEMORY_INIT)
         .setDescription(METRIC_DESCRIPTION_MEMORY_INIT)
         .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(initialSize, ATTR);
-            });
+        .buildWithCallback(measurement -> measurement.record(initialSize, ATTR));
   }
 
   @Override

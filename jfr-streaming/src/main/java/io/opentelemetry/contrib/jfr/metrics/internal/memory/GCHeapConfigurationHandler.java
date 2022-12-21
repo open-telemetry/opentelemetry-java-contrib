@@ -44,18 +44,12 @@ public final class GCHeapConfigurationHandler implements RecordedEventHandler {
         .upDownCounterBuilder(METRIC_NAME_MEMORY_INIT)
         .setDescription(METRIC_DESCRIPTION_MEMORY_INIT)
         .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(init, ATTR);
-            });
+        .buildWithCallback(measurement -> measurement.record(init, ATTR));
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
         .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
         .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(limit, ATTR);
-            });
+        .buildWithCallback(measurement -> measurement.record(limit, ATTR));
   }
 
   @Override
