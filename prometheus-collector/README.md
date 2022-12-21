@@ -6,7 +6,7 @@ Currently only registers with the Prometheus `defaultRegistry`.
 
 * Build it with `./gradlew :prometheus-collector:build`
 
-### Usage
+## Usage
 
 ```
 sdkMeterProvider.registerMetricReader(PrometheusCollector.create());
