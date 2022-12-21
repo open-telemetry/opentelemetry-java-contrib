@@ -25,25 +25,25 @@ class GCDurationMetricTest extends AbstractMetricsTest {
       // Each point must have attributes of one of the following variation:
       // First sort by Major/Minor, then by GC.
       if (pointData.getAttributes().get(ATTR_ACTION).equals(END_OF_MINOR_GC)) {
-        if (HandlerRegistry.garbageCollectors.contains("G1 Young Generation")) {
+        if (garbageCollectors.contains("G1 Young Generation")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(
                   Attributes.of(ATTR_GC, "G1 Young Generation", ATTR_ACTION, END_OF_MINOR_GC));
-        } else if (HandlerRegistry.garbageCollectors.contains("PS Scavenge")) {
+        } else if (garbageCollectors.contains("PS Scavenge")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC));
-        } else if (HandlerRegistry.garbageCollectors.contains("Copy")) {
+        } else if (garbageCollectors.contains("Copy")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(Attributes.of(ATTR_GC, "Copy", ATTR_ACTION, END_OF_MINOR_GC));
         }
       } else {
-        if (HandlerRegistry.garbageCollectors.contains("G1 Old Generation")) {
+        if (garbageCollectors.contains("G1 Old Generation")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(Attributes.of(ATTR_GC, "G1 Old Generation", ATTR_ACTION, END_OF_MAJOR_GC));
-        } else if (HandlerRegistry.garbageCollectors.contains("PS MarkSweep")) {
+        } else if (garbageCollectors.contains("PS MarkSweep")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(Attributes.of(ATTR_GC, "PS MarkSweep", ATTR_ACTION, END_OF_MAJOR_GC));
-        } else if (HandlerRegistry.garbageCollectors.contains("MarkSweepCompact")) {
+        } else if (garbageCollectors.contains("MarkSweepCompact")) {
           assertThat(pointData.getAttributes())
               .isEqualTo(Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC));
         }
