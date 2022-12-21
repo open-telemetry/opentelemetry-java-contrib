@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -31,8 +32,9 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private volatile double process = 0;
   private volatile double machine = 0;
   private volatile double machineMinuteAverage = 0;
-  private int count = 0;
   private volatile double machineSum = 0;
+
+  private final ArrayDeque<Double> machineMinuteQueue = new ArrayDeque<>();
 
   public OverallCPULoadHandler() {
     initializeMeter(defaultMeter());
@@ -70,21 +72,23 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   public void accept(RecordedEvent ev) {
     // Synchronized to avoid races on machineSum
     synchronized (this) {
-      if (count % 60 == 0) {
-        machineMinuteAverage = machineSum / 60;
-        count = 0;
-        machineSum = 0;
-      }
       if (ev.hasField(MACHINE_TOTAL)) {
         machine = ev.getDouble(MACHINE_TOTAL);
+        // Remove oldest data point if queue is at capacity
+        if (machineMinuteQueue.size() == 60) {
+          machineSum -= machineMinuteQueue.poll();
+        }
+        // Add new data point
         machineSum += machine;
+        machineMinuteQueue.add(machine);
+        // Compute new result
+        machineMinuteAverage = machineSum / machineMinuteQueue.size();
       }
     }
 
     if (ev.hasField(JVM_USER) && ev.hasField(JVM_SYSTEM)) {
       process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);
     }
-    count++;
   }
 
   @Override
