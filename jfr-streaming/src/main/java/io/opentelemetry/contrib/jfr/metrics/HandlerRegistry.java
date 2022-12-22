@@ -26,10 +26,9 @@ import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler
 import io.opentelemetry.contrib.jfr.metrics.internal.threads.ThreadCountHandler;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
-public final class HandlerRegistry {
+final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
   private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
 
@@ -40,31 +39,22 @@ public final class HandlerRegistry {
   }
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
-    HashSet<String> garbageCollectors = new HashSet<>();
-
     var handlers = new ArrayList<RecordedEventHandler>();
     // Must gather all GC names before creating GC handlers that require the list of active GC names
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-      garbageCollectors.add(bean.getName());
-    }
-
-    // Configure GC specific handlers
-    for (var name : garbageCollectors) {
+      var name = bean.getName();
       switch (name) {
         case "G1 Young Generation":
-          {
-            handlers.add(new G1HeapSummaryHandler());
-            break;
-          }
+          handlers.add(new G1HeapSummaryHandler());
+          break;
+
         case "Copy":
-          {
-            break;
-          }
+          break;
+
         case "PS Scavenge":
-          {
-            handlers.add(new ParallelHeapSummaryHandler());
-            break;
-          }
+          handlers.add(new ParallelHeapSummaryHandler());
+          break;
+
         default:
           // If none of the above GCs are detected, no action.
       }
