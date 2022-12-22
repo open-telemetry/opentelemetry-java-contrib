@@ -31,11 +31,7 @@ public final class YoungGarbageCollectionHandler implements RecordedEventHandler
   public YoungGarbageCollectionHandler(String gc) {
     // Set the attribute's GC based on which GC is being used.
     // G1 young collection is already handled by G1GarbageCollectionHandler.
-    if (gc.equals("PS Scavenge")) {
-      attributes = Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC);
-    } else if (gc.equals("Copy")) {
-      attributes = Attributes.of(ATTR_GC, "Copy", ATTR_ACTION, END_OF_MINOR_GC);
-    }
+    attributes = Attributes.of(ATTR_GC, gc, ATTR_ACTION, END_OF_MINOR_GC);
     initializeMeter(defaultMeter());
   }
 
