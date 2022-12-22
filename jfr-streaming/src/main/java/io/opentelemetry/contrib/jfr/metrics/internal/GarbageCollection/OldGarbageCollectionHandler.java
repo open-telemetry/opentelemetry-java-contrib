@@ -32,13 +32,7 @@ public final class OldGarbageCollectionHandler implements RecordedEventHandler {
 
   public OldGarbageCollectionHandler(String gc) {
     // Set the attribute's GC based on which GC is being used.
-    if (gc.equals("PS MarkSweep")) {
-      attributes = Attributes.of(ATTR_GC, "PS MarkSweep", ATTR_ACTION, END_OF_MAJOR_GC);
-    } else if (gc.equals("G1 Old Generation")) {
-      attributes = Attributes.of(ATTR_GC, "G1 Old Generation", ATTR_ACTION, END_OF_MAJOR_GC);
-    } else if (gc.equals("MarkSweepCompact")) {
-      attributes = Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
-    }
+    attributes = Attributes.of(ATTR_GC, gc, ATTR_ACTION, END_OF_MAJOR_GC);
     initializeMeter(defaultMeter());
   }
 
