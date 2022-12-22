@@ -19,12 +19,10 @@ import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class OldGarbageCollectionHandler implements RecordedEventHandler {
-  private final HashSet<String> garbageCollectors;
   private static final String EVENT_NAME = "jdk.OldGarbageCollection";
   // This could be changed later
   private Attributes attributes =
@@ -32,8 +30,15 @@ public final class OldGarbageCollectionHandler implements RecordedEventHandler {
 
   private LongHistogram histogram;
 
-  public OldGarbageCollectionHandler(HashSet<String> garbageCollectors) {
-    this.garbageCollectors = garbageCollectors;
+  public OldGarbageCollectionHandler(String gc) {
+    // Set the attribute's GC based on which GC is being used.
+    if (gc.equals("PS MarkSweep")) {
+      attributes = Attributes.of(ATTR_GC, "PS MarkSweep", ATTR_ACTION, END_OF_MAJOR_GC);
+    } else if (gc.equals("G1 Old Generation")) {
+      attributes = Attributes.of(ATTR_GC, "G1 Old Generation", ATTR_ACTION, END_OF_MAJOR_GC);
+    } else if (gc.equals("MarkSweepCompact")) {
+      attributes = Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
+    }
     initializeMeter(defaultMeter());
   }
 
@@ -49,15 +54,6 @@ public final class OldGarbageCollectionHandler implements RecordedEventHandler {
 
   @Override
   public void initializeMeter(Meter meter) {
-    // Set the attribute's GC based on which GC is being used.
-    if (garbageCollectors.contains("PS MarkSweep")) {
-      attributes = Attributes.of(ATTR_GC, "PS MarkSweep", ATTR_ACTION, END_OF_MAJOR_GC);
-    } else if (garbageCollectors.contains("G1 Old Generation")) {
-      attributes = Attributes.of(ATTR_GC, "G1 Old Generation", ATTR_ACTION, END_OF_MAJOR_GC);
-    } else if (garbageCollectors.contains("MarkSweepCompact")) {
-      attributes = Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
-    }
-
     histogram =
         meter
             .histogramBuilder(METRIC_NAME_GC_DURATION)

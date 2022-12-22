@@ -19,19 +19,23 @@ import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public final class YoungGarbageCollectionHandler implements RecordedEventHandler {
-  private final HashSet<String> garbageCollectors;
   private static final String EVENT_NAME = "jdk.YoungGarbageCollection";
   private Attributes attributes =
       Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC);
   private LongHistogram histogram;
 
-  public YoungGarbageCollectionHandler(HashSet<String> garbageCollectors) {
-    this.garbageCollectors = garbageCollectors;
+  public YoungGarbageCollectionHandler(String gc) {
+    // Set the attribute's GC based on which GC is being used.
+    // G1 young collection is already handled by G1GarbageCollectionHandler.
+    if (gc.equals("PS Scavenge")) {
+      attributes = Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC);
+    } else if (gc.equals("Copy")) {
+      attributes = Attributes.of(ATTR_GC, "Copy", ATTR_ACTION, END_OF_MINOR_GC);
+    }
     initializeMeter(defaultMeter());
   }
 
@@ -47,14 +51,6 @@ public final class YoungGarbageCollectionHandler implements RecordedEventHandler
 
   @Override
   public void initializeMeter(Meter meter) {
-    // Set the attribute's GC based on which GC is being used.
-    // G1 young collection is already handled by G1GarbageCollectionHandler.
-    if (garbageCollectors.contains("PS Scavenge")) {
-      attributes = Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC);
-    } else if (garbageCollectors.contains("Copy")) {
-      attributes = Attributes.of(ATTR_GC, "Copy", ATTR_ACTION, END_OF_MINOR_GC);
-    }
-
     histogram =
         meter
             .histogramBuilder(METRIC_NAME_GC_DURATION)
