@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
+import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.SECONDS_PER_MIN;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
@@ -46,45 +47,38 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
         .gaugeBuilder(METRIC_NAME_PROCESS)
         .setDescription(METRIC_DESCRIPTION_PROCESS)
         .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(process);
-            });
+        .buildWithCallback(measurement -> measurement.record(process));
     meter
         .gaugeBuilder(METRIC_NAME_MACHINE)
         .setDescription(METRIC_DESCRIPTION_MACHINE)
         .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(machine);
-            });
+        .buildWithCallback(measurement -> measurement.record(machine));
     meter
         .gaugeBuilder(METRIC_NAME_MACHINE_MINUTE)
         .setDescription(METRIC_DESCRIPTION_MACHINE_MINUTE)
         .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(machineMinuteAverage);
-            });
+        .buildWithCallback(measurement -> measurement.record(machineMinuteAverage));
+  }
+
+  public synchronized double updateMovingAverage(double newDataPoint) {
+    // Synchronized to avoid races on machineSum
+    if (machineMinuteQueue.size() == SECONDS_PER_MIN) {
+      machineSum -= machineMinuteQueue.poll();
+    }
+    // Add new data point
+    machineSum += newDataPoint;
+    machineMinuteQueue.add(newDataPoint);
+    // Compute new result
+    return machineSum / machineMinuteQueue.size();
   }
 
   @Override
   public void accept(RecordedEvent ev) {
-    // Synchronized to avoid races on machineSum
-    synchronized (this) {
-      if (ev.hasField(MACHINE_TOTAL)) {
-        machine = ev.getDouble(MACHINE_TOTAL);
-        // Remove oldest data point if queue is at capacity
-        if (machineMinuteQueue.size() == 60) {
-          machineSum -= machineMinuteQueue.poll();
-        }
-        // Add new data point
-        machineSum += machine;
-        machineMinuteQueue.add(machine);
-        // Compute new result
-        machineMinuteAverage = machineSum / machineMinuteQueue.size();
-      }
+    if (ev.hasField(MACHINE_TOTAL)) {
+      machine = ev.getDouble(MACHINE_TOTAL);
     }
+
+    machineMinuteAverage = updateMovingAverage(machine);
 
     if (ev.hasField(JVM_USER) && ev.hasField(JVM_SYSTEM)) {
       process = ev.getDouble(JVM_USER) + ev.getDouble(JVM_SYSTEM);

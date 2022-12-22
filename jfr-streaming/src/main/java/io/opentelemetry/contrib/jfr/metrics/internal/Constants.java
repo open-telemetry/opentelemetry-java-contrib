@@ -75,4 +75,5 @@ public final class Constants {
   public static final String UNIT_THREADS = "{threads}";
   public static final String UNIT_BUFFERS = "{buffers}";
   public static final String UNIT_UTILIZATION = "1";
+  public static final int SECONDS_PER_MIN = 60;
 }
