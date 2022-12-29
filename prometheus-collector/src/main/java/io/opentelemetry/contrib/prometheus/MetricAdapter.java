@@ -185,11 +185,11 @@ final class MetricAdapter {
             doubleSummaryPoint.getEpochNanos()));
 
     List<ValueAtQuantile> valueAtQuantiles = doubleSummaryPoint.getValues();
-    List<String> labelNamesWithQuantile = new ArrayList<>(labelNames.size());
+    List<String> labelNamesWithQuantile = new ArrayList<>(labelNames.size() + 1);
     labelNamesWithQuantile.addAll(labelNames);
     labelNamesWithQuantile.add(LABEL_NAME_QUANTILE);
     for (ValueAtQuantile valueAtQuantile : valueAtQuantiles) {
-      List<String> labelValuesWithQuantile = new ArrayList<>(labelValues.size());
+      List<String> labelValuesWithQuantile = new ArrayList<>(labelValues.size() + 1);
       labelValuesWithQuantile.addAll(labelValues);
       labelValuesWithQuantile.add(doubleToGoString(valueAtQuantile.getQuantile()));
       samples.add(
