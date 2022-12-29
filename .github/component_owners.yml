@@ -49,5 +49,4 @@ components:
     - iNikem
     - jeanbisutti
   static-instrumenter:
-    - kubawach
     - anosek-an
