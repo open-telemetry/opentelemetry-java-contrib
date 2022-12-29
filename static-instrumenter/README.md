@@ -62,7 +62,6 @@ contains statically instrumented class code.
 
 ## Component owners
 
-- [Jakub Wach](https://github.com/kubawach), Splunk
 - [Anna Nosek](https://github.com/anosek-an), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
