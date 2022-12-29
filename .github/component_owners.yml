@@ -39,6 +39,8 @@ components:
     - HaloFour
   noop-api:
     - jack-berg
+  prometheus-collector:
+    - jkwatson
   resource-providers:
     - breedx-splk
     - mateuszrzeszutek
