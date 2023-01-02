@@ -11,7 +11,7 @@ description = "Maven3 plugin for static instrumentation of projects code and dep
 base.archivesName.set("static-instrumentation-maven-plugin")
 
 dependencies {
-  implementation("org.apache.maven:maven-plugin-api:3.5.0") // do not auto-update this version
+  implementation("org.apache.maven:maven-plugin-api:3.8.7") // do not auto-update this version
   implementation("org.apache.maven:maven-project:2.2.1")
   compileOnly("org.apache.maven.plugin-tools:maven-plugin-annotations:3.7.0")
   compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update this version
