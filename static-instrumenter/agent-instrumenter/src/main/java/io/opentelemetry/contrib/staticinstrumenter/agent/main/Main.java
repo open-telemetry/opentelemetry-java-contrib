@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
@@ -41,7 +42,7 @@ public class Main {
 
     String classPath = System.getProperty("java.class.path");
     logger.debug("Classpath (jars list): {}", classPath);
-    String[] jarsList = classPath.split(File.pathSeparator);
+    List<String> jarsList = List.of(classPath.split(File.pathSeparator));
 
     getInstance().saveTransformedJarsTo(jarsList, outDir);
   }
@@ -83,7 +84,7 @@ public class Main {
    * @param outDir directory where jars will be written
    * @throws IOException in case of file operation problem
    */
-  public void saveTransformedJarsTo(String[] jarsList, File outDir) throws IOException {
+  public void saveTransformedJarsTo(List<String> jarsList, File outDir) throws IOException {
 
     for (String pathItem : jarsList) {
       logger.info("Classpath item processed: " + pathItem);
