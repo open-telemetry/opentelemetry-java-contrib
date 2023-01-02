@@ -40,8 +40,8 @@ tasks {
             "-Xlint:-options",
 
             // Fail build on any warning
-            "-Werror"
-          )
+            "-Werror",
+          ),
         )
       }
 
