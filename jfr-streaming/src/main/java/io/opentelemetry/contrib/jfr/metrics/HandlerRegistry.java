@@ -6,6 +6,9 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.OldGarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.YoungGarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import io.opentelemetry.contrib.jfr.metrics.internal.buffer.DirectBufferStatisticsHandler;
@@ -24,10 +27,7 @@ import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler
 import io.opentelemetry.contrib.jfr.metrics.internal.threads.ThreadCountHandler;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 final class HandlerRegistry {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
@@ -35,31 +35,47 @@ final class HandlerRegistry {
 
   private final List<RecordedEventHandler> mappers;
 
-  private static final Map<String, List<Supplier<RecordedEventHandler>>> HANDLERS_PER_GC =
-      Map.of(
-          "G1",
-          List.of(G1HeapSummaryHandler::new),
-          "Parallel",
-          List.of(ParallelHeapSummaryHandler::new));
-
   private HandlerRegistry(List<? extends RecordedEventHandler> mappers) {
     this.mappers = new ArrayList<>(mappers);
   }
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
-    var seen = new HashSet<String>();
+
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
-      for (var gcType : HANDLERS_PER_GC.keySet()) {
-        if (name.contains(gcType)
-            && !seen.contains(gcType)
-            && HANDLERS_PER_GC.get(gcType) != null) {
-          handlers.addAll(HANDLERS_PER_GC.get(gcType).stream().map(s -> s.get()).toList());
-          seen.add(gcType);
-        }
+      switch (name) {
+        case "G1 Young Generation":
+          handlers.add(new G1HeapSummaryHandler());
+          handlers.add(new G1GarbageCollectionHandler());
+          break;
+
+        case "Copy":
+          handlers.add(new YoungGarbageCollectionHandler(name));
+          break;
+
+        case "PS Scavenge":
+          handlers.add(new YoungGarbageCollectionHandler(name));
+          handlers.add(new ParallelHeapSummaryHandler());
+          break;
+
+        case "G1 Old Generation":
+          handlers.add(new OldGarbageCollectionHandler(name));
+          break;
+
+        case "PS MarkSweep":
+          handlers.add(new OldGarbageCollectionHandler(name));
+          break;
+
+        case "MarkSweepCompact":
+          handlers.add(new OldGarbageCollectionHandler(name));
+          break;
+
+        default:
+          // If none of the above GCs are detected, no action.
       }
     }
+
     var grouper = new ThreadGrouper();
     var basicHandlers =
         List.of(
