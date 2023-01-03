@@ -17,6 +17,12 @@ updates:
       - dependency-name: "io.micrometer:micrometer-core"
         # compileOnly dependency on old micrometer-core version is intentional
         versions: [ "(1.1.0,)" ]
+      - dependency-name: "org.apache.maven:maven-plugin-api"
+        # dependency on older maven version is intentional
+        versions: [ "(3.5.0,)" ]
+      - dependency-name: "org.apache.maven:maven-core"
+        # dependency on older maven version is intentional
+        versions: [ "(3.5.0,)" ]
     registries:
       - gradle-plugin-portal
     schedule:
