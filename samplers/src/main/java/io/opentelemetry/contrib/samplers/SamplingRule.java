@@ -11,9 +11,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
-/**
- * @see RuleBasedRoutingSampler
- */
 class SamplingRule {
   final AttributeKey<String> attributeKey;
   final Sampler delegate;

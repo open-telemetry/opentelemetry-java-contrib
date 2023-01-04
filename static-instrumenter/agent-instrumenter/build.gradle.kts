@@ -113,8 +113,8 @@ testing {
           jvmArgumentProviders.add(
             AgentJarsProvider(
               tasks.shadowJar.flatMap { it.archiveFile },
-              tasks.named<Jar>("createNoInstAgent").flatMap { it.archiveFile }
-            )
+              tasks.named<Jar>("createNoInstAgent").flatMap { it.archiveFile },
+            ),
           )
         }
       }
@@ -142,7 +142,7 @@ class AgentJarsProvider(
   val agentJar: Provider<RegularFile>,
   @InputFile
   @PathSensitive(PathSensitivity.RELATIVE)
-  val noInstAgentJar: Provider<RegularFile>
+  val noInstAgentJar: Provider<RegularFile>,
 ) : CommandLineArgumentProvider {
   override fun asArguments(): Iterable<String> = listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
 }

@@ -39,6 +39,8 @@ components:
     - HaloFour
   noop-api:
     - jack-berg
+  prometheus-collector:
+    - jkwatson
   resource-providers:
     - breedx-splk
     - mateuszrzeszutek
@@ -47,5 +49,4 @@ components:
     - iNikem
     - jeanbisutti
   static-instrumenter:
-    - kubawach
     - anosek-an

@@ -62,29 +62,21 @@ jobs:
           path: jmx-metrics/build/reports/tests/integrationTest
 
   markdown-link-check:
-    # release branches are excluded to avoid unnecessary maintenance
-    if: "!startsWith(github.ref_name, 'release/')"
     uses: ./.github/workflows/reusable-markdown-link-check.yml
 
-  markdown-lint:
-    # release branches are excluded to avoid unnecessary maintenance
-    if: "!startsWith(github.ref_name, 'release/')"
+  markdown-lint-check:
     uses: ./.github/workflows/reusable-markdown-lint.yml
 
   misspell-check:
-    # release branches are excluded to avoid unnecessary maintenance
-    if: ${{ !startsWith(github.ref_name, 'release/') }}
     uses: ./.github/workflows/reusable-misspell-check.yml
 
   shell-script-check:
-    # release branches are excluded to avoid unnecessary maintenance
-    if: "!startsWith(github.ref_name, 'release/')"
     uses: ./.github/workflows/reusable-shell-script-check.yml
 
   publish-snapshots:
     # the condition is on the steps below instead of here on the job, because skipping the job
-    # causes the job to show up as canceled in the GitHub UI which prevents the build section from
-    # collapsing when everything (else) is green
+    # causes the job to show up as canceled in the GitHub UI which prevents the PR build section
+    # from collapsing when everything (else) is green
     #
     # and the name is updated when the steps below are skipped which makes what's happening clearer
     # in the GitHub UI
@@ -120,19 +112,26 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
 
   required-status-check:
-    # markdown-link-check is not required so pull requests are not blocked if external links break
+    if: github.event_name == 'pull_request'
     needs:
       - build
       - integration-test
-      - markdown-lint
+      - markdown-lint-check
       - misspell-check
       - shell-script-check
-    if: always()
     runs-on: ubuntu-latest
     steps:
+      # only the "build" and "integration-test" checks are required for release branch PRs in order
+      # to avoid any unnecessary release branch maintenance (especially for patches)
       - if: |
           needs.build.result != 'success' ||
           needs.integration-test.result != 'success' ||
-          needs.markdown-lint.result != 'success' ||
-          needs.misspell-check.result != 'success'
-        run: exit 1
+          (
+            !startsWith(github.base_ref, 'release/') &&
+            (
+              needs.markdown-lint-check.result != 'success' ||
+              needs.misspell-check.result != 'success' ||
+              needs.shell-script-check.result != 'success'
+            )
+          )
+        run: exit 1 # fail

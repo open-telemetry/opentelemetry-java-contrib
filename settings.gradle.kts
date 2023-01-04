@@ -2,7 +2,7 @@ pluginManagement {
   plugins {
     id("com.github.ben-manes.versions") version "0.44.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("com.gradle.enterprise") version "3.12"
+    id("com.gradle.enterprise") version "3.12.1"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
   }
 }
@@ -50,6 +50,7 @@ include(":jmx-metrics")
 include(":maven-extension")
 include(":micrometer-meter-provider")
 include(":noop-api")
+include(":prometheus-collector")
 include(":resource-providers")
 include(":runtime-attach:runtime-attach")
 include(":runtime-attach:runtime-attach-core")

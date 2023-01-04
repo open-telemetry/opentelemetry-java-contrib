@@ -14,7 +14,7 @@ rootProject.extra["versions"] = dependencyVersions
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.14.1",
   "com.google.guava:guava-bom:31.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.20.3",
+  "com.linecorp.armeria:armeria-bom:1.21.0",
   "org.junit:junit-bom:5.9.1",
   "io.grpc:grpc-bom:1.51.1",
   "io.opentelemetry:opentelemetry-bom-alpha:1.21.0-alpha",
@@ -24,9 +24,9 @@ val DEPENDENCY_BOMS = listOf(
 
 val autoServiceVersion = "1.0.1"
 val autoValueVersion = "1.10.1"
-val errorProneVersion = "2.16"
+val errorProneVersion = "2.17.0"
 val prometheusVersion = "0.16.0"
-val mockitoVersion = "4.9.0"
+val mockitoVersion = "4.11.0"
 val slf4jVersion = "2.0.6"
 
 val CORE_DEPENDENCIES = listOf(
@@ -53,7 +53,7 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.10.0",
-  "com.uber.nullaway:nullaway:0.10.5",
+  "com.uber.nullaway:nullaway:0.10.6",
   "org.assertj:assertj-core:3.23.1",
   "org.awaitility:awaitility:4.2.0",
   "org.bouncycastle:bcpkix-jdk15on:1.70",

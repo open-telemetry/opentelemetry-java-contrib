@@ -43,7 +43,7 @@ afterEvaluate {
             !it.absolutePath.contains("META-INF/versions/") &&
               !it.absolutePath.contains("AutoValue_")
           }
-        }
+        },
       )
 
       reports {

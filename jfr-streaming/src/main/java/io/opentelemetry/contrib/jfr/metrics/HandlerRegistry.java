@@ -6,8 +6,12 @@
 package io.opentelemetry.contrib.jfr.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.OldGarbageCollectionHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.YoungGarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
+import io.opentelemetry.contrib.jfr.metrics.internal.buffer.DirectBufferStatisticsHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.classes.ClassesLoadedHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
@@ -40,25 +44,40 @@ final class HandlerRegistry {
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
-    // Must gather all GC names before creating GC handlers that require the list of active GC names
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
       switch (name) {
         case "G1 Young Generation":
           handlers.add(new G1HeapSummaryHandler());
+          handlers.add(new G1GarbageCollectionHandler());
           break;
 
         case "Copy":
+          handlers.add(new YoungGarbageCollectionHandler(name));
           break;
 
         case "PS Scavenge":
+          handlers.add(new YoungGarbageCollectionHandler(name));
           handlers.add(new ParallelHeapSummaryHandler());
+          break;
+
+        case "G1 Old Generation":
+          handlers.add(new OldGarbageCollectionHandler(name));
+          break;
+
+        case "PS MarkSweep":
+          handlers.add(new OldGarbageCollectionHandler(name));
+          break;
+
+        case "MarkSweepCompact":
+          handlers.add(new OldGarbageCollectionHandler(name));
           break;
 
         default:
           // If none of the above GCs are detected, no action.
       }
     }
+
     var grouper = new ThreadGrouper();
     var basicHandlers =
         List.of(
@@ -75,7 +94,8 @@ final class HandlerRegistry {
             new ClassesLoadedHandler(),
             new GCHeapConfigurationHandler(),
             new MetaspaceSummaryHandler(),
-            new CodeCacheConfigurationHandler());
+            new CodeCacheConfigurationHandler(),
+            new DirectBufferStatisticsHandler());
     handlers.addAll(basicHandlers);
 
     var meter =
@@ -88,9 +108,7 @@ final class HandlerRegistry {
     return new HandlerRegistry(handlers);
   }
 
-  /**
-   * @return all entries in this registry.
-   */
+  /** Returns all entries in this registry. */
   List<RecordedEventHandler> all() {
     return mappers;
   }
