@@ -82,8 +82,6 @@ public final class Constants {
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Survivor Space");
   public static final Attributes ATTR_G1_EDEN_SPACE =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Eden Space");
-  public static final Attributes ATTR_JAVA_HEAP_SPACE =
-      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "Java heap space");
   public static final Attributes ATTR_METASPACE =
       Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Metaspace");
   public static final Attributes ATTR_COMPRESSED_CLASS_SPACE =

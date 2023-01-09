@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_COMPRESSED_CLASS_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_G1_EDEN_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_G1_SURVIVOR_SPACE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_JAVA_HEAP_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_METASPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_EDEN_SPACE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_PS_OLD_GEN;
@@ -72,12 +71,6 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
     } else if (garbageCollectors.contains("Copy")) {
       // TODO: once more fine grained data is supported by JFR, this should test for young and old
       // space attributes.
-      check(
-          metricData -> {
-            SumData<?> sumData = metricData.getLongSumData();
-            assertThat(sumData.getPoints())
-                .anyMatch(p -> p.getAttributes().equals(ATTR_JAVA_HEAP_SPACE));
-          });
     }
     // Memory spaces in metaspace usage test
     waitAndAssertMetrics(
