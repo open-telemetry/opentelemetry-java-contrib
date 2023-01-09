@@ -86,24 +86,7 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
   }
 
   @Override
-  public void accept(RecordedEvent ev) {
-
-    recordValues(ev);
-  }
-
-  private static void doIfAvailable(
-      RecordedEvent event, String field, Consumer<RecordedObject> closure) {
-    if (!event.hasField(field)) {
-      return;
-    }
-    Object value = event.getValue(field);
-    if (value instanceof RecordedObject) {
-      closure.accept((RecordedObject) value);
-    }
-  }
-
-  private void recordValues(RecordedEvent event) {
-
+  public void accept(RecordedEvent event) {
     doIfAvailable(
         event,
         "classSpace",
@@ -133,6 +116,17 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
             totalLimit = metaspace.getLong(RESERVED);
           }
         });
+  }
+
+  private static void doIfAvailable(
+      RecordedEvent event, String field, Consumer<RecordedObject> closure) {
+    if (!event.hasField(field)) {
+      return;
+    }
+    Object value = event.getValue(field);
+    if (value instanceof RecordedObject) {
+      closure.accept((RecordedObject) value);
+    }
   }
 
   @Override

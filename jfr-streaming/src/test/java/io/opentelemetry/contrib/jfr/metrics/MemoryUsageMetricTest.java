@@ -79,7 +79,6 @@ class MemoryUsageMetricTest extends AbstractMetricsTest {
                 .anyMatch(p -> p.getAttributes().equals(ATTR_JAVA_HEAP_SPACE));
           });
     }
-
     // Memory spaces in metaspace usage test
     waitAndAssertMetrics(
         metric ->

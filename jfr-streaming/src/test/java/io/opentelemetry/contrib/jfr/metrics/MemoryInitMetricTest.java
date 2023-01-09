@@ -19,7 +19,6 @@ class MemoryInitMetricTest extends AbstractMetricsTest {
 
   @Test
   void shouldHaveMemoryInitMetrics() {
-
     waitAndAssertMetrics(
         metric ->
             metric

@@ -33,9 +33,7 @@ class MemoryCommittedMetricTest extends AbstractMetricsTest {
 
   @Test
   void shouldHaveMemoryCommittedMetrics() {
-
     System.gc();
-
     if (garbageCollectors.contains("G1 Young Generation")) {
       // TODO: need JFR support for the other G1 pools
       check(
@@ -44,7 +42,6 @@ class MemoryCommittedMetricTest extends AbstractMetricsTest {
             assertThat(sumData.getPoints())
                 .anyMatch(p -> p.getAttributes().equals(ATTR_G1_EDEN_SPACE));
           });
-
     } else if (garbageCollectors.contains("PS Scavenge")) {
       check(
           metricData -> {
@@ -57,7 +54,6 @@ class MemoryCommittedMetricTest extends AbstractMetricsTest {
     } else if (garbageCollectors.contains("Copy")) {
       // TODO: Needs JFR support for more fine grained memory pools
     }
-
     // Metaspace related:
     check(
         metricData -> {

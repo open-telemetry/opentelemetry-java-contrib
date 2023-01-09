@@ -19,24 +19,11 @@ import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 class MemoryLimitMetricTest extends AbstractMetricsTest {
-  private void check(ThrowingConsumer<MetricData> attributeCheck) {
-    waitAndAssertMetrics(
-        metric ->
-            metric
-                .hasName("process.runtime.jvm.memory.limit")
-                .hasUnit(BYTES)
-                .hasDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
-                .satisfies(attributeCheck));
-  }
-
   @Test
   void shouldHaveMemoryLimitMetrics() {
-
     System.gc();
-
     if (garbageCollectors.contains("G1 Young Generation")) {
       // TODO: needs JFR support
-
     } else if (garbageCollectors.contains("PS Scavenge")) {
       check(
           metricData -> {
@@ -49,7 +36,6 @@ class MemoryLimitMetricTest extends AbstractMetricsTest {
     } else if (garbageCollectors.contains("Copy")) {
       // TODO: Needs JFR support for more fine grained memory pools
     }
-
     // Metaspace related:
     check(
         metricData -> {
@@ -57,5 +43,15 @@ class MemoryLimitMetricTest extends AbstractMetricsTest {
           assertThat(sumData.getPoints())
               .anyMatch(p -> p.getAttributes().equals(ATTR_COMPRESSED_CLASS_SPACE));
         });
+  }
+
+  private void check(ThrowingConsumer<MetricData> attributeCheck) {
+    waitAndAssertMetrics(
+        metric ->
+            metric
+                .hasName("process.runtime.jvm.memory.limit")
+                .hasUnit(BYTES)
+                .hasDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
+                .satisfies(attributeCheck));
   }
 }
