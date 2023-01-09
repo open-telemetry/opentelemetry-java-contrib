@@ -109,7 +109,7 @@ dependencies {
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project)
+      implementation(project(project.path))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
