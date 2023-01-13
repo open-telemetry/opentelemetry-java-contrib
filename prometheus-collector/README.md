@@ -1,10 +1,10 @@
-# Prometheus Collector
+# Prometheus simpleclient bridge
 
-This module is useful for exposing OpenTelemetry metrics to a Prometheus registry.
+This module can be used to bridge OpenTelemetry metrics to the `prometheus-simpleclient` library.
 
-Currently only registers with the Prometheus `defaultRegistry`.
+Currently only registers with the CollectorRegistry's `defaultRegistry`.
 
-* Build it with `./gradlew :prometheus-collector:build`
+* Build it with `./gradlew :prometheus-simpleclient-bridge:build`
 
 ## Usage
 
