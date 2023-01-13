@@ -11,13 +11,7 @@
 
 ### Prometheus client bridge - New 🌟
 
-This utility provides an implementation of `MeterProvider` which wraps a Micrometer `MeterRegistry`
-and delegates the reporting of all metrics through Micrometer. This enables projects which already
-rely on Micrometer and cannot currently migrate to OpenTelemetry Metrics to be able to report on
-metrics that are reported through the OpenTelemetry Metrics API.
-
-- Add the prometheus-collector as a new module
-  ([#660](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/660))
+This module can be used to bridge OpenTelemetry metrics into the `prometheus-simpleclient` library.
 
 ## Version 1.21.0 (2022-12-15)
 
