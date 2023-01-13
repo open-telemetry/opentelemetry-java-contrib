@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.clientbridge;
+package io.opentelemetry.contrib.metrics.prometheus.clientbridge;
 
 import static io.prometheus.client.Collector.doubleToGoString;
 
