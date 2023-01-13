@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.prometheus;
+package io.opentelemetry.contrib.metrics.prometheus.clientbridge;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

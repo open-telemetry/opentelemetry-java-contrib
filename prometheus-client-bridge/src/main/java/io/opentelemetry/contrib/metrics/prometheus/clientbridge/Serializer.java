@@ -19,7 +19,7 @@
  * Ocelli project by Netflix Inc. (https://github.com/Netflix/ocelli/).
  */
 
-package io.opentelemetry.contrib.prometheus;
+package io.opentelemetry.contrib.metrics.prometheus.clientbridge;
 
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;

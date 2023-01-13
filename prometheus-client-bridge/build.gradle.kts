@@ -3,11 +3,12 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "Prometheus Collector - exposes OTel metrics to a Prometheus registry"
+description = "Prometheus client bridge"
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-metrics")
-  implementation("io.prometheus:simpleclient_httpserver")
+  implementation("io.prometheus:simpleclient")
 
   testImplementation("com.google.guava:guava")
+  testImplementation("io.prometheus:simpleclient_httpserver")
 }

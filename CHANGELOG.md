@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### JFR streaming
+
+- Add buffer handlers and implement buffer metrics
+  ([#650](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/650))
+- Implement GC duration metric
+  ([#653](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/653))
+
+### Prometheus client bridge - New 🌟
+
+This module can be used to bridge OpenTelemetry metrics into the `prometheus-simpleclient` library.
+
 ## Version 1.21.0 (2022-12-15)
 
 ### JFR streaming
