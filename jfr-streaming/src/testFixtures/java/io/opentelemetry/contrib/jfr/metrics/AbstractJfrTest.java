@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeAll;
 
-public class AbstractMetricsTest {
+public class AbstractJfrTest {
 
   static SdkMeterProvider meterProvider;
   static InMemoryMetricReader metricReader;

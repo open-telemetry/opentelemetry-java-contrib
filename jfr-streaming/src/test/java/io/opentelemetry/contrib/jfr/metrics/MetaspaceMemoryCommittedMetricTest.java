@@ -16,7 +16,7 @@ import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
-class MetaspaceMemoryCommittedMetricTest extends AbstractMetricsTest {
+class MetaspaceMemoryCommittedMetricTest extends AbstractJfrTest {
   private void check(ThrowingConsumer<MetricData> attributeCheck) {
     waitAndAssertMetrics(
         metric ->

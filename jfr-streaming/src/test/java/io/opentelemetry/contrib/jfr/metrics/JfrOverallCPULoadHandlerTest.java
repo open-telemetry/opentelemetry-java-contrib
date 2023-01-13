@@ -9,7 +9,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILI
 
 import org.junit.jupiter.api.Test;
 
-public class JfrOverallCPULoadHandlerTest extends AbstractMetricsTest {
+public class JfrOverallCPULoadHandlerTest extends AbstractJfrTest {
 
   @Test
   public void shouldHaveCPULoadEvents() throws Exception {

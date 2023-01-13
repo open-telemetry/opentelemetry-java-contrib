@@ -29,7 +29,7 @@ import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
-class G1GcMemoryMetricTest extends AbstractMetricsTest {
+class G1GcMemoryMetricTest extends AbstractJfrTest {
   private void usageCheck(ThrowingConsumer<MetricData> attributeCheck) {
     waitAndAssertMetrics(
         metric ->
@@ -46,10 +46,6 @@ class G1GcMemoryMetricTest extends AbstractMetricsTest {
                 .satisfies(attributeCheck));
   }
 
-  /**
-   * This is a basic test for process.runtime.jvm.memory.usage and
-   * process.runtime.jvm.memory.usage_after_last_gc metrics.
-   */
   @Test
   void shouldHaveMemoryUsageMetrics() {
     System.gc();

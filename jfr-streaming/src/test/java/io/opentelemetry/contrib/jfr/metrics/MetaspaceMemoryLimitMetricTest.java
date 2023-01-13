@@ -15,7 +15,7 @@ import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
-class MetaspaceMemoryLimitMetricTest extends AbstractMetricsTest {
+class MetaspaceMemoryLimitMetricTest extends AbstractJfrTest {
   @Test
   void shouldHaveMemoryLimitMetrics() {
     System.gc();

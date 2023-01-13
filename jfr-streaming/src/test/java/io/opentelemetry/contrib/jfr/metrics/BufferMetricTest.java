@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-class BufferMetricTest extends AbstractMetricsTest {
+class BufferMetricTest extends AbstractJfrTest {
 
   /**
    * This is a basic test that allocates some buffers and tests to make sure the resulting JFR event

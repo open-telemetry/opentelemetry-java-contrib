@@ -10,7 +10,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_CLASS
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class JfrClassesLoadedCountTest extends AbstractMetricsTest {
+class JfrClassesLoadedCountTest extends AbstractJfrTest {
 
   @Test
   void shouldHaveJfrLoadedClassesCountEvents() throws Exception {

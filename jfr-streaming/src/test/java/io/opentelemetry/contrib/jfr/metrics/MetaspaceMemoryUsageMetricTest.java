@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
 
-class MetaspaceMemoryUsageMetricTest extends AbstractMetricsTest {
+class MetaspaceMemoryUsageMetricTest extends AbstractJfrTest {
 
   /**
    * This is a basic test for process.runtime.jvm.memory.usage and

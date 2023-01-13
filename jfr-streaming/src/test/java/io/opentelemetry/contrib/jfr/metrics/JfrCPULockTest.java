@@ -9,7 +9,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECON
 
 import org.junit.jupiter.api.Test;
 
-public class JfrCPULockTest extends AbstractMetricsTest {
+public class JfrCPULockTest extends AbstractJfrTest {
 
   @Test
   public void shouldHaveLockEvents() throws Exception {

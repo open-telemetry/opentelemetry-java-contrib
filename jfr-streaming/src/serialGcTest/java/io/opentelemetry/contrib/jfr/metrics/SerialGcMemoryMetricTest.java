@@ -18,16 +18,12 @@ import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.junit.jupiter.api.Test;
 
-class SerialGcMemoryMetricTest extends AbstractMetricsTest {
+class SerialGcMemoryMetricTest extends AbstractJfrTest {
   @Test
   void shouldHaveMemoryLimitMetrics() {
     // TODO: needs JFR support. Placeholder.
   }
 
-  /**
-   * This is a basic test for process.runtime.jvm.memory.usage and
-   * process.runtime.jvm.memory.usage_after_last_gc metrics.
-   */
   @Test
   void shouldHaveMemoryUsageMetrics() {
     System.gc();
