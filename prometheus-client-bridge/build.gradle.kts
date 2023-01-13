@@ -3,7 +3,7 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "Prometheus simpleclient bridge"
+description = "Prometheus client bridge"
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-metrics")

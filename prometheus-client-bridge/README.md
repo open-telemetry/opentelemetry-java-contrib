@@ -1,6 +1,6 @@
-# Prometheus simpleclient bridge
+# Prometheus client bridge
 
-This module can be used to bridge OpenTelemetry metrics to the `prometheus-simpleclient` library.
+This module can be used to bridge OpenTelemetry metrics into the `prometheus-simpleclient` library.
 
 Currently only registers with the CollectorRegistry's `defaultRegistry`.
 
