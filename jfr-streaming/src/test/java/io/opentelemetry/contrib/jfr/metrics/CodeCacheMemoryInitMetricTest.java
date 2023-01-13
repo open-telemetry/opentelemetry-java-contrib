@@ -15,7 +15,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
 
-class MemoryInitMetricTest extends AbstractMetricsTest {
+class CodeCacheMemoryInitMetricTest extends AbstractMetricsTest {
 
   @Test
   void shouldHaveMemoryInitMetrics() {
