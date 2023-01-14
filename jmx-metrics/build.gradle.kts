@@ -69,6 +69,8 @@ testing {
 
 tasks {
   shadowJar {
+    mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }
