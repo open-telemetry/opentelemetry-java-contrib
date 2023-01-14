@@ -17,8 +17,9 @@ import io.opentelemetry.contrib.jfr.metrics.internal.container.ContainerConfigur
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.ContextSwitchRateHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.LongLockHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.cpu.OverallCPULoadHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.CodeCacheConfigurationHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.G1HeapSummaryHandler;
-import io.opentelemetry.contrib.jfr.metrics.internal.memory.GCHeapSummaryHandler;
+import io.opentelemetry.contrib.jfr.metrics.internal.memory.MetaspaceSummaryHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationInNewTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ObjectAllocationOutsideTLABHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryHandler;
@@ -41,7 +42,6 @@ final class HandlerRegistry {
 
   static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
-
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
       switch (name) {
@@ -83,13 +83,14 @@ final class HandlerRegistry {
             new ObjectAllocationOutsideTLABHandler(grouper),
             new NetworkReadHandler(grouper),
             new NetworkWriteHandler(grouper),
-            new GCHeapSummaryHandler(),
             new ContextSwitchRateHandler(),
             new OverallCPULoadHandler(),
             new ContainerConfigurationHandler(),
             new LongLockHandler(grouper),
             new ThreadCountHandler(),
             new ClassesLoadedHandler(),
+            new MetaspaceSummaryHandler(),
+            new CodeCacheConfigurationHandler(),
             new DirectBufferStatisticsHandler());
     handlers.addAll(basicHandlers);
 

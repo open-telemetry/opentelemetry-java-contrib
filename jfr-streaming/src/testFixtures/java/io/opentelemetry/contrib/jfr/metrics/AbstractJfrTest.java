@@ -14,18 +14,15 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.testing.assertj.MetricAssert;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
-import java.lang.management.ManagementFactory;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeAll;
 
-public class AbstractMetricsTest {
+public class AbstractJfrTest {
 
   static SdkMeterProvider meterProvider;
   static InMemoryMetricReader metricReader;
   static boolean isInitialized = false;
-  static HashSet<String> garbageCollectors = new HashSet<String>();
 
   @BeforeAll
   static void initializeOpenTelemetry() {
@@ -37,10 +34,6 @@ public class AbstractMetricsTest {
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     GlobalOpenTelemetry.set(OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build());
     JfrMetrics.enable(meterProvider);
-
-    for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-      garbageCollectors.add(bean.getName());
-    }
   }
 
   @SafeVarargs

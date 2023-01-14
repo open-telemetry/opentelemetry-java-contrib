@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
 
-class JfrThreadCountTest extends AbstractMetricsTest {
+class JfrThreadCountTest extends AbstractJfrTest {
   private static final int SAMPLING_INTERVAL = 1000;
 
   private static void doWork() throws InterruptedException {
