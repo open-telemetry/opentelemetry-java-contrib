@@ -68,6 +68,9 @@ final class JarTest {
             resultAppPath + File.pathSeparator + noInstAgentPath,
             APP_MAIN);
 
+    // TODO autoconfigure GlobalOpenTelemetry explicitly in static instrumentation
+    runtimeProcessBuilder.environment().put("OTEL_JAVA_GLOBAL_AUTOCONFIGURE_ENABLED", "true");
+
     Process runtimeProcess = runtimeProcessBuilder.start();
     runtimeProcess.waitFor(10, TimeUnit.SECONDS);
 
