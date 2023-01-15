@@ -8,6 +8,8 @@
   ([#650](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/650))
 - Implement GC duration metric
   ([#653](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/653))
+- Implement memory metrics
+  ([#652](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/652))
 
 ### Prometheus client bridge - New 🌟
 
