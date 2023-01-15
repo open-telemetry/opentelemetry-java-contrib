@@ -37,6 +37,10 @@ class OpenTelemetryInstrumenterMojoTest extends AbstractTempDirTest {
   private static void verifyApplicationByExampleRun(Path instrumentedApp) throws Exception {
     ProcessBuilder pb =
         new ProcessBuilder("java", "-jar", instrumentedApp.toString()).redirectErrorStream(true);
+
+    // TODO autoconfigure GlobalOpenTelemetry explicitly in static instrumentation
+    pb.environment().put("OTEL_JAVA_GLOBAL_AUTOCONFIGURE_ENABLED", "true");
+
     Process process = pb.start();
     process.waitFor();
     String output = new String(process.getInputStream().readAllBytes(), Charset.defaultCharset());
