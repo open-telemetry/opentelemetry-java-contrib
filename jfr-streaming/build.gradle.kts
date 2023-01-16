@@ -10,7 +10,7 @@ dependencies {
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  testFixturesImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+  testFixturesImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
   testFixturesImplementation("io.opentelemetry:opentelemetry-api")
   testFixturesImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testFixturesImplementation("org.awaitility:awaitility")
