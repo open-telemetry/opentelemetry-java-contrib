@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.22.0 (2023-01-17)
+
 ### JFR streaming
 
 - Add buffer handlers and implement buffer metrics
