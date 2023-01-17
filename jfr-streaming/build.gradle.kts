@@ -14,7 +14,7 @@ dependencies {
   testFixturesImplementation("io.opentelemetry:opentelemetry-api")
   testFixturesImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testFixturesImplementation("org.awaitility:awaitility")
-  testFixturesImplementation("org.assertj:assertj-core:3.24.1")
+  testFixturesImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 tasks {
