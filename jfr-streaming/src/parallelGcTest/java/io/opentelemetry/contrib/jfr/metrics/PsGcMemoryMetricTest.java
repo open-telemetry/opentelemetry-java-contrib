@@ -30,10 +30,14 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class PsGcMemoryMetricTest extends AbstractJfrTest {
+class PsGcMemoryMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+
   private void usageCheck(ThrowingConsumer<MetricData> attributeCheck) {
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY)
@@ -64,7 +68,7 @@ class PsGcMemoryMetricTest extends AbstractJfrTest {
   @Test
   void shouldHaveMemoryLimitMetrics() {
     System.gc();
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.memory.limit")
@@ -83,7 +87,7 @@ class PsGcMemoryMetricTest extends AbstractJfrTest {
   @Test
   void shouldHaveMemoryCommittedMetrics() {
     System.gc();
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.memory.committed")
@@ -103,7 +107,7 @@ class PsGcMemoryMetricTest extends AbstractJfrTest {
   void shouldHaveGCDurationMetrics() throws Exception {
     // TODO: Need a reliable way to test old and young gen GC in isolation.
     System.gc();
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.gc.duration")

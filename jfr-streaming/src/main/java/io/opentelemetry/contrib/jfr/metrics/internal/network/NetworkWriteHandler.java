@@ -14,7 +14,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_NETWORK_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NETWORK_MODE_WRITE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -47,21 +46,11 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.SocketWrite";
 
-  private LongHistogram bytesHistogram;
-  private DoubleHistogram durationHistogram;
+  private final LongHistogram bytesHistogram;
+  private final DoubleHistogram durationHistogram;
 
-  public NetworkWriteHandler(ThreadGrouper nameNormalizer) {
+  public NetworkWriteHandler(Meter meter, ThreadGrouper nameNormalizer) {
     super(nameNormalizer);
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public String getEventName() {
-    return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
     bytesHistogram =
         meter
             .histogramBuilder(METRIC_NAME_NETWORK_BYTES)
@@ -75,6 +64,11 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
             .setDescription(METRIC_DESCRIPTION_NETWORK_DURATION)
             .setUnit(MILLISECONDS)
             .build();
+  }
+
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
   }
 
   @Override

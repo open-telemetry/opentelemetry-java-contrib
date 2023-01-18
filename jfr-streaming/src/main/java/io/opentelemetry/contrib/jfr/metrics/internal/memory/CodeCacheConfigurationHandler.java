@@ -12,7 +12,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.INITIAL_SI
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_INIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_INIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -29,12 +28,7 @@ public final class CodeCacheConfigurationHandler implements RecordedEventHandler
 
   private volatile long initialSize = 0;
 
-  public CodeCacheConfigurationHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public CodeCacheConfigurationHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY_INIT)
         .setDescription(METRIC_DESCRIPTION_MEMORY_INIT)

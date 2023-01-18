@@ -12,7 +12,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.END_OF_MAJ
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
@@ -24,16 +23,20 @@ import jdk.jfr.consumer.RecordedEvent;
 
 public final class OldGarbageCollectionHandler implements RecordedEventHandler {
   private static final String EVENT_NAME = "jdk.OldGarbageCollection";
-  // This could be changed later
-  private Attributes attributes =
-      Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
 
-  private LongHistogram histogram;
+  private final LongHistogram histogram;
+  private final Attributes attributes;
 
-  public OldGarbageCollectionHandler(String gc) {
+  public OldGarbageCollectionHandler(Meter meter, String gc) {
+    histogram =
+        meter
+            .histogramBuilder(METRIC_NAME_GC_DURATION)
+            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
+            .setUnit(MILLISECONDS)
+            .ofLongs()
+            .build();
     // Set the attribute's GC based on which GC is being used.
     attributes = Attributes.of(ATTR_GC, gc, ATTR_ACTION, END_OF_MAJOR_GC);
-    initializeMeter(defaultMeter());
   }
 
   @Override
@@ -44,17 +47,6 @@ public final class OldGarbageCollectionHandler implements RecordedEventHandler {
   @Override
   public String getEventName() {
     return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
-    histogram =
-        meter
-            .histogramBuilder(METRIC_NAME_GC_DURATION)
-            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
-            .setUnit(MILLISECONDS)
-            .ofLongs()
-            .build();
   }
 
   @Override

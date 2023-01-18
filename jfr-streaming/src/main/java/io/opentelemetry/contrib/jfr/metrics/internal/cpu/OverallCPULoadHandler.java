@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
@@ -28,28 +27,17 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private volatile double process = 0;
   private volatile double machine = 0;
 
-  public OverallCPULoadHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public OverallCPULoadHandler(Meter meter) {
     meter
         .gaugeBuilder(METRIC_NAME_PROCESS)
         .setDescription(METRIC_DESCRIPTION_PROCESS)
         .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(process);
-            });
+        .buildWithCallback(measurement -> measurement.record(process));
     meter
         .gaugeBuilder(METRIC_NAME_MACHINE)
         .setDescription(METRIC_DESCRIPTION_MACHINE)
         .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(machine);
-            });
+        .buildWithCallback(measurement -> measurement.record(machine));
   }
 
   @Override

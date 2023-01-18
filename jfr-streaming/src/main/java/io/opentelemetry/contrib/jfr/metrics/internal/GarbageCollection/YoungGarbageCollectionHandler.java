@@ -12,7 +12,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.END_OF_MIN
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
@@ -24,15 +23,21 @@ import jdk.jfr.consumer.RecordedEvent;
 
 public final class YoungGarbageCollectionHandler implements RecordedEventHandler {
   private static final String EVENT_NAME = "jdk.YoungGarbageCollection";
-  private Attributes attributes =
-      Attributes.of(ATTR_GC, "PS Scavenge", ATTR_ACTION, END_OF_MINOR_GC);
-  private LongHistogram histogram;
 
-  public YoungGarbageCollectionHandler(String gc) {
+  private final LongHistogram histogram;
+  private final Attributes attributes;
+
+  public YoungGarbageCollectionHandler(Meter meter, String gc) {
+    histogram =
+        meter
+            .histogramBuilder(METRIC_NAME_GC_DURATION)
+            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
+            .setUnit(MILLISECONDS)
+            .ofLongs()
+            .build();
     // Set the attribute's GC based on which GC is being used.
     // G1 young collection is already handled by G1GarbageCollectionHandler.
     attributes = Attributes.of(ATTR_GC, gc, ATTR_ACTION, END_OF_MINOR_GC);
-    initializeMeter(defaultMeter());
   }
 
   @Override
@@ -43,17 +48,6 @@ public final class YoungGarbageCollectionHandler implements RecordedEventHandler
   @Override
   public String getEventName() {
     return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
-    histogram =
-        meter
-            .histogramBuilder(METRIC_NAME_GC_DURATION)
-            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
-            .setUnit(MILLISECONDS)
-            .ofLongs()
-            .build();
   }
 
   @Override

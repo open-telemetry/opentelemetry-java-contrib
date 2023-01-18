@@ -14,8 +14,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class MetaspaceMemoryUsageMetricTest extends AbstractJfrTest {
+class MetaspaceMemoryUsageMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   /**
    * This is a basic test for process.runtime.jvm.memory.usage and
@@ -26,7 +29,7 @@ class MetaspaceMemoryUsageMetricTest extends AbstractJfrTest {
     System.gc();
 
     // Memory spaces in metaspace usage test
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY)

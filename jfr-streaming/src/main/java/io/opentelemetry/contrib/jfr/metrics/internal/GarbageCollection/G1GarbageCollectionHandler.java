@@ -12,7 +12,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.END_OF_MIN
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_GC_DURATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
@@ -26,10 +25,16 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   private static final String EVENT_NAME = "jdk.G1GarbageCollection";
   private static final Attributes ATTR =
       Attributes.of(ATTR_GC, "G1 Young Generation", ATTR_ACTION, END_OF_MINOR_GC);
-  private LongHistogram histogram;
+  private final LongHistogram histogram;
 
-  public G1GarbageCollectionHandler() {
-    initializeMeter(defaultMeter());
+  public G1GarbageCollectionHandler(Meter meter) {
+    histogram =
+        meter
+            .histogramBuilder(METRIC_NAME_GC_DURATION)
+            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
+            .setUnit(MILLISECONDS)
+            .ofLongs()
+            .build();
   }
 
   @Override
@@ -40,17 +45,6 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   @Override
   public String getEventName() {
     return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
-    histogram =
-        meter
-            .histogramBuilder(METRIC_NAME_GC_DURATION)
-            .setDescription(METRIC_DESCRIPTION_GC_DURATION)
-            .setUnit(MILLISECONDS)
-            .ofLongs()
-            .build();
   }
 
   @Override

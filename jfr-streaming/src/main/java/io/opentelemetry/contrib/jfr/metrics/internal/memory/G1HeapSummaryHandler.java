@@ -15,7 +15,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DES
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_COMMITTED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_AFTER;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -51,12 +50,7 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private volatile long usageSurvivorAfter = 0;
   private volatile long committedEden = 0;
 
-  public G1HeapSummaryHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public G1HeapSummaryHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY)
         .setDescription(METRIC_DESCRIPTION_MEMORY)

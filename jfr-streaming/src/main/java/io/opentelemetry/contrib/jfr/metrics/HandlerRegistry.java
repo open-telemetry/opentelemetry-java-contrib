@@ -5,7 +5,8 @@
 
 package io.opentelemetry.contrib.jfr.metrics;
 
-import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.G1GarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.OldGarbageCollectionHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.GarbageCollection.YoungGarbageCollectionHandler;
@@ -31,44 +32,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class HandlerRegistry {
-  private static final String INSTRUMENTATION_NAME = "io.opentelemetry.contrib.jfr";
-  private static final String INSTRUMENTATION_VERSION = "1.7.0-SNAPSHOT";
+  private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr";
+  // TODO(jack-berg): read from version.properties
+  private static final String SCOPE_VERSION = "1.7.0-SNAPSHOT";
 
-  private final List<RecordedEventHandler> mappers;
+  private HandlerRegistry() {}
 
-  private HandlerRegistry(List<? extends RecordedEventHandler> mappers) {
-    this.mappers = new ArrayList<>(mappers);
-  }
+  static List<RecordedEventHandler> getHandlers(OpenTelemetry openTelemetry) {
+    Meter meter =
+        openTelemetry
+            .getMeterProvider()
+            .meterBuilder(SCOPE_NAME)
+            .setInstrumentationVersion(SCOPE_VERSION)
+            .build();
 
-  static HandlerRegistry createDefault(MeterProvider meterProvider) {
     var handlers = new ArrayList<RecordedEventHandler>();
     for (var bean : ManagementFactory.getGarbageCollectorMXBeans()) {
       var name = bean.getName();
       switch (name) {
         case "G1 Young Generation":
-          handlers.add(new G1HeapSummaryHandler());
-          handlers.add(new G1GarbageCollectionHandler());
+          handlers.add(new G1HeapSummaryHandler(meter));
+          handlers.add(new G1GarbageCollectionHandler(meter));
           break;
 
         case "Copy":
-          handlers.add(new YoungGarbageCollectionHandler(name));
+          handlers.add(new YoungGarbageCollectionHandler(meter, name));
           break;
 
         case "PS Scavenge":
-          handlers.add(new YoungGarbageCollectionHandler(name));
-          handlers.add(new ParallelHeapSummaryHandler());
+          handlers.add(new YoungGarbageCollectionHandler(meter, name));
+          handlers.add(new ParallelHeapSummaryHandler(meter));
           break;
 
         case "G1 Old Generation":
-          handlers.add(new OldGarbageCollectionHandler(name));
-          break;
-
         case "PS MarkSweep":
-          handlers.add(new OldGarbageCollectionHandler(name));
-          break;
-
         case "MarkSweepCompact":
-          handlers.add(new OldGarbageCollectionHandler(name));
+          handlers.add(new OldGarbageCollectionHandler(meter, name));
           break;
 
         default:
@@ -79,33 +78,21 @@ final class HandlerRegistry {
     var grouper = new ThreadGrouper();
     var basicHandlers =
         List.of(
-            new ObjectAllocationInNewTLABHandler(grouper),
-            new ObjectAllocationOutsideTLABHandler(grouper),
-            new NetworkReadHandler(grouper),
-            new NetworkWriteHandler(grouper),
-            new ContextSwitchRateHandler(),
-            new OverallCPULoadHandler(),
-            new ContainerConfigurationHandler(),
-            new LongLockHandler(grouper),
-            new ThreadCountHandler(),
-            new ClassesLoadedHandler(),
-            new MetaspaceSummaryHandler(),
-            new CodeCacheConfigurationHandler(),
-            new DirectBufferStatisticsHandler());
+            new ObjectAllocationInNewTLABHandler(meter, grouper),
+            new ObjectAllocationOutsideTLABHandler(meter, grouper),
+            new NetworkReadHandler(meter, grouper),
+            new NetworkWriteHandler(meter, grouper),
+            new ContextSwitchRateHandler(meter),
+            new OverallCPULoadHandler(meter),
+            new ContainerConfigurationHandler(meter),
+            new LongLockHandler(meter, grouper),
+            new ThreadCountHandler(meter),
+            new ClassesLoadedHandler(meter),
+            new MetaspaceSummaryHandler(meter),
+            new CodeCacheConfigurationHandler(meter),
+            new DirectBufferStatisticsHandler(meter));
     handlers.addAll(basicHandlers);
 
-    var meter =
-        meterProvider
-            .meterBuilder(INSTRUMENTATION_NAME)
-            .setInstrumentationVersion(INSTRUMENTATION_VERSION)
-            .build();
-    handlers.forEach(handler -> handler.initializeMeter(meter));
-
-    return new HandlerRegistry(handlers);
-  }
-
-  /** Returns all entries in this registry. */
-  List<RecordedEventHandler> all() {
-    return mappers;
+    return handlers;
   }
 }

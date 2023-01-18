@@ -9,14 +9,17 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_CLASS
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class JfrClassesLoadedCountTest extends AbstractJfrTest {
+class JfrClassesLoadedCountTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   @Test
   void shouldHaveJfrLoadedClassesCountEvents() throws Exception {
     Thread.sleep(2000);
 
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.classes.loaded")
