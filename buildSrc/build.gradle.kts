@@ -12,14 +12,25 @@ repositories {
 
 dependencies {
   // When updating, update above in plugins too
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.12.1")
+  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.13.0")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:3.0.1")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:1.5.0")
 }
 
 spotless {
   kotlinGradle {
-    ktlint().editorConfigOverride(mapOf("indent_size" to "2", "continuation_indent_size" to "2", "disabled_rules" to "no-wildcard-imports"))
-    target("**/*.gradle.kts")
+    ktlint().editorConfigOverride(mapOf(
+      "indent_size" to "2",
+      "continuation_indent_size" to "2",
+      "max_line_length" to "160",
+      "ktlint_standard_no-wildcard-imports" to "disabled",
+      // ktlint does not break up long lines, it just fails on them
+      "ktlint_standard_max-line-length" to "disabled",
+      // ktlint makes it *very* hard to locate where this actually happened
+      "ktlint_standard_trailing-comma-on-call-site" to "disabled",
+      // also very hard to find out where this happens
+      "ktlint_standard_wrapping" to "disabled"
+    ))
+    target("**/*.gradle.kts",)
   }
 }
