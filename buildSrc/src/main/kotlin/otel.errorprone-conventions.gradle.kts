@@ -75,6 +75,10 @@ tasks {
         // allow UPPERCASE type parameter names
         disable("TypeParameterNaming")
 
+        // YodaConditions may improve safety in some cases. The argument of increased
+        // cognitive load is dubious.
+        disable("YodaCondition")
+
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names
           disable("MemberName")
