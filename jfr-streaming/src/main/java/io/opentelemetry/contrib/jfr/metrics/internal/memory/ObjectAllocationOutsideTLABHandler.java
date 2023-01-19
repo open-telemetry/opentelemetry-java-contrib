@@ -10,7 +10,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_THREA
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_DESCRIPTION_MEMORY_ALLOCATION;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_ALLOCATION;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
@@ -27,15 +26,10 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class ObjectAllocationOutsideTLABHandler extends AbstractThreadDispatchingHandler {
   private static final String EVENT_NAME = "jdk.ObjectAllocationOutsideTLAB";
 
-  private LongHistogram histogram;
+  private final LongHistogram histogram;
 
-  public ObjectAllocationOutsideTLABHandler(ThreadGrouper grouper) {
+  public ObjectAllocationOutsideTLABHandler(Meter meter, ThreadGrouper grouper) {
     super(grouper);
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
     histogram =
         meter
             .histogramBuilder(METRIC_NAME_MEMORY_ALLOCATION)

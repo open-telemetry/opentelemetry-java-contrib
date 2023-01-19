@@ -20,7 +20,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAME_MEMORY_LIMIT;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED_SIZE;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -61,12 +60,7 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private volatile long limitOld = 0;
   private volatile long limitYoung = 0;
 
-  public ParallelHeapSummaryHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public ParallelHeapSummaryHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY)
         .setDescription(METRIC_DESCRIPTION_MEMORY)

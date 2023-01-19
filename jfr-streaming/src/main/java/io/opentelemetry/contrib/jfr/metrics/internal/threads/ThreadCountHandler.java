@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.jfr.metrics.internal.threads;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_DAEMON;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_THREADS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -25,8 +24,17 @@ public final class ThreadCountHandler implements RecordedEventHandler {
   private volatile long activeCount = 0;
   private volatile long daemonCount = 0;
 
-  public ThreadCountHandler() {
-    initializeMeter(defaultMeter());
+  public ThreadCountHandler(Meter meter) {
+    meter
+        .upDownCounterBuilder(METRIC_NAME)
+        .setDescription(METRIC_DESCRIPTION)
+        .setUnit(UNIT_THREADS)
+        .buildWithCallback(
+            measurement -> {
+              long d = daemonCount;
+              measurement.record(d, ATTR_DAEMON_TRUE);
+              measurement.record(activeCount - d, ATTR_DAEMON_FALSE);
+            });
   }
 
   @Override
@@ -38,20 +46,6 @@ public final class ThreadCountHandler implements RecordedEventHandler {
   @Override
   public String getEventName() {
     return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME)
-        .setDescription(METRIC_DESCRIPTION)
-        .setUnit(UNIT_THREADS)
-        .buildWithCallback(
-            measurement -> {
-              long d = daemonCount;
-              measurement.record(d, ATTR_DAEMON_TRUE);
-              measurement.record(activeCount - d, ATTR_DAEMON_FALSE);
-            });
   }
 
   @Override

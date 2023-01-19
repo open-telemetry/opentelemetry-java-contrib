@@ -13,8 +13,12 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class JfrThreadCountTest extends AbstractJfrTest {
+class JfrThreadCountTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+
   private static final int SAMPLING_INTERVAL = 1000;
 
   private static void doWork() throws InterruptedException {
@@ -50,7 +54,7 @@ class JfrThreadCountTest extends AbstractJfrTest {
     userThread.join();
     daemonThread.join();
 
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.threads.count")

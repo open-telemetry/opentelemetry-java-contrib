@@ -14,12 +14,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class CodeCacheMemoryInitMetricTest extends AbstractJfrTest {
+class CodeCacheMemoryInitMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   @Test
   void shouldHaveMemoryInitMetrics() {
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY_INIT)

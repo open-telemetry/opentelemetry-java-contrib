@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -16,24 +15,28 @@ import io.opentelemetry.sdk.testing.assertj.MetricAssert;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import java.util.Collection;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class AbstractJfrTest {
+public class JfrExtension implements BeforeEachCallback, AfterEachCallback {
 
-  static SdkMeterProvider meterProvider;
-  static InMemoryMetricReader metricReader;
-  static boolean isInitialized = false;
+  private SdkMeterProvider meterProvider;
+  private InMemoryMetricReader metricReader;
+  private JfrTelemetry jfrTelemetry;
 
-  @BeforeAll
-  static void initializeOpenTelemetry() {
-    if (isInitialized) {
-      return;
-    }
-    isInitialized = true;
+  @Override
+  public void beforeEach(ExtensionContext context) {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
-    GlobalOpenTelemetry.set(OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build());
-    JfrMetrics.enable(meterProvider);
+    OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build();
+    jfrTelemetry = JfrTelemetry.create(sdk);
+  }
+
+  @Override
+  public void afterEach(ExtensionContext context) {
+    meterProvider.close();
+    jfrTelemetry.close();
   }
 
   @SafeVarargs

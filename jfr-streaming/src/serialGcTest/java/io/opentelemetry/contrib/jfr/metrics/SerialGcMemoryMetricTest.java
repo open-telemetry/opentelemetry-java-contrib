@@ -17,8 +17,12 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class SerialGcMemoryMetricTest extends AbstractJfrTest {
+class SerialGcMemoryMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+
   @Test
   void shouldHaveMemoryLimitMetrics() {
     // TODO: needs JFR support. Placeholder.
@@ -34,7 +38,7 @@ class SerialGcMemoryMetricTest extends AbstractJfrTest {
   void shouldHaveGCDurationMetrics() throws Exception {
     // TODO: Need a reliable way to test old and young gen GC in isolation.
     System.gc();
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.gc.duration")

@@ -8,12 +8,15 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class JfrOverallCPULoadHandlerTest extends AbstractJfrTest {
+public class JfrOverallCPULoadHandlerTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   @Test
   public void shouldHaveCPULoadEvents() throws Exception {
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.cpu.utilization")

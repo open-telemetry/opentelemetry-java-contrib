@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.jfr.metrics.internal.buffer;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ATTR_POOL;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.BYTES;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_BUFFERS;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -36,30 +35,7 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
   private volatile long limit = 0;
   private volatile long count = 0;
 
-  public DirectBufferStatisticsHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void accept(RecordedEvent ev) {
-    if (ev.hasField(COUNT)) {
-      count = ev.getLong(COUNT);
-    }
-    if (ev.hasField(MAX_CAPACITY)) {
-      limit = ev.getLong(MAX_CAPACITY);
-    }
-    if (ev.hasField(MEMORY_USED)) {
-      usage = ev.getLong(MEMORY_USED);
-    }
-  }
-
-  @Override
-  public String getEventName() {
-    return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public DirectBufferStatisticsHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_USAGE)
         .setDescription(METRIC_DESCRIPTION_USAGE)
@@ -81,6 +57,24 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
         .setDescription(METRIC_DESCRIPTION_COUNT)
         .setUnit(UNIT_BUFFERS)
         .buildWithCallback(measurement -> measurement.record(count, ATTR));
+  }
+
+  @Override
+  public void accept(RecordedEvent ev) {
+    if (ev.hasField(COUNT)) {
+      count = ev.getLong(COUNT);
+    }
+    if (ev.hasField(MAX_CAPACITY)) {
+      limit = ev.getLong(MAX_CAPACITY);
+    }
+    if (ev.hasField(MEMORY_USED)) {
+      usage = ev.getLong(MEMORY_USED);
+    }
+  }
+
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
   }
 
   @Override

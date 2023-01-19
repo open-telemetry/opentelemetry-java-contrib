@@ -14,8 +14,11 @@ import io.opentelemetry.api.common.Attributes;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class BufferMetricTest extends AbstractJfrTest {
+class BufferMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   /**
    * This is a basic test that allocates some buffers and tests to make sure the resulting JFR event
@@ -33,7 +36,7 @@ class BufferMetricTest extends AbstractJfrTest {
     ByteBuffer buffer = ByteBuffer.allocateDirect(10000);
     buffer.put("test".getBytes(StandardCharsets.UTF_8));
 
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.buffer.count")

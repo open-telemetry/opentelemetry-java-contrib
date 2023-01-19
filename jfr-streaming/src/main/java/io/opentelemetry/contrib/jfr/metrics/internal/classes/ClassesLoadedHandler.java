@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.classes;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_CLASSES;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
@@ -37,23 +36,7 @@ public final class ClassesLoadedHandler implements RecordedEventHandler {
   private volatile long loaded = 0;
   private volatile long unloaded = 0;
 
-  public ClassesLoadedHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void accept(RecordedEvent ev) {
-    loaded = ev.getLong("loadedClassCount");
-    unloaded = ev.getLong("unloadedClassCount");
-  }
-
-  @Override
-  public String getEventName() {
-    return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public ClassesLoadedHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_CURRENT)
         .setDescription(METRIC_DESCRIPTION_CURRENT)
@@ -69,6 +52,17 @@ public final class ClassesLoadedHandler implements RecordedEventHandler {
         .setDescription(METRIC_DESCRIPTION_UNLOADED)
         .setUnit(UNIT_CLASSES)
         .buildWithCallback(measurement -> measurement.record(unloaded));
+  }
+
+  @Override
+  public void accept(RecordedEvent ev) {
+    loaded = ev.getLong("loadedClassCount");
+    unloaded = ev.getLong("unloadedClassCount");
+  }
+
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
   }
 
   @Override

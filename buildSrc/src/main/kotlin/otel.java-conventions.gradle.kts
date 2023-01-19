@@ -121,6 +121,7 @@ testing {
       implementation("org.mockito:mockito-junit-jupiter")
       implementation("org.assertj:assertj-core")
       implementation("org.awaitility:awaitility")
+      implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
     }

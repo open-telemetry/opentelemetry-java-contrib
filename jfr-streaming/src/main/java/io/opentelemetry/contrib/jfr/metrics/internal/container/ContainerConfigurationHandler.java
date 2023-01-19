@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.container;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.ONE;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
@@ -19,12 +18,7 @@ public final class ContainerConfigurationHandler implements RecordedEventHandler
 
   private volatile long value = 0L;
 
-  public ContainerConfigurationHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public ContainerConfigurationHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME)
         .setUnit(ONE)

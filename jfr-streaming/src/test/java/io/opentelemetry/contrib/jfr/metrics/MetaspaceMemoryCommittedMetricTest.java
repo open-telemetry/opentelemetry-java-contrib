@@ -15,10 +15,14 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-class MetaspaceMemoryCommittedMetricTest extends AbstractJfrTest {
+class MetaspaceMemoryCommittedMetricTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+
   private void check(ThrowingConsumer<MetricData> attributeCheck) {
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.memory.committed")

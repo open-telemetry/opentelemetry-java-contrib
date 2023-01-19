@@ -8,8 +8,11 @@ package io.opentelemetry.contrib.jfr.metrics;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECONDS;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class JfrCPULockTest extends AbstractJfrTest {
+public class JfrCPULockTest {
+
+  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
 
   @Test
   public void shouldHaveLockEvents() throws Exception {
@@ -19,7 +22,7 @@ public class JfrCPULockTest extends AbstractJfrTest {
       Thread.sleep(1000);
     }
 
-    waitAndAssertMetrics(
+    jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName("process.runtime.jvm.cpu.longlock")

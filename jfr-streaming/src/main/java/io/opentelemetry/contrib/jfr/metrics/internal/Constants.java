@@ -15,16 +15,6 @@ public final class Constants {
   public static final String HERTZ = "Hz";
   public static final String BYTES = "By";
   public static final String MILLISECONDS = "ms";
-  public static final String PERCENTAGE = "%age";
-  public static final String USER = "user";
-  public static final String SYSTEM = "system";
-  public static final String G1 = "g1";
-  public static final String TOTAL_USED = "total.used";
-  public static final String EDEN_USED = "eden.used";
-  public static final String EDEN_SIZE = "eden.size";
-  public static final String EDEN_SIZE_DELTA = "eden.delta";
-  public static final String SURVIVOR_SIZE = "survivor.size";
-  public static final String REGION_COUNT = "region.count";
   public static final String COMMITTED = "committed";
   public static final String RESERVED = "reserved";
   public static final String INITIAL_SIZE = "initialSize";

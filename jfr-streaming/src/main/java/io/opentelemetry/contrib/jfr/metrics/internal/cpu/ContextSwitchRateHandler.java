@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.HERTZ;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
@@ -20,8 +19,12 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
 
   private volatile double value = 0;
 
-  public ContextSwitchRateHandler() {
-    initializeMeter(defaultMeter());
+  public ContextSwitchRateHandler(Meter meter) {
+    meter
+        .upDownCounterBuilder(METRIC_NAME)
+        .ofDoubles()
+        .setUnit(HERTZ)
+        .buildWithCallback(codm -> codm.record(value));
   }
 
   @Override
@@ -32,15 +35,6 @@ public final class ContextSwitchRateHandler implements RecordedEventHandler {
   @Override
   public String getEventName() {
     return EVENT_NAME;
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME)
-        .ofDoubles()
-        .setUnit(HERTZ)
-        .buildWithCallback(codm -> codm.record(value));
   }
 
   @Override

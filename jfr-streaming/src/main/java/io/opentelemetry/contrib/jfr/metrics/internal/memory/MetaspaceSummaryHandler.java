@@ -18,7 +18,6 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.RESERVED;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
-import static io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler.defaultMeter;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
@@ -45,12 +44,7 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
   private volatile long classLimit = 0;
   private volatile long totalLimit = 0;
 
-  public MetaspaceSummaryHandler() {
-    initializeMeter(defaultMeter());
-  }
-
-  @Override
-  public void initializeMeter(Meter meter) {
+  public MetaspaceSummaryHandler(Meter meter) {
     meter
         .upDownCounterBuilder(METRIC_NAME_MEMORY)
         .setDescription(METRIC_DESCRIPTION_MEMORY)
