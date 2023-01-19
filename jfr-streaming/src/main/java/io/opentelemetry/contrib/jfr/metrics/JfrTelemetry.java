@@ -52,6 +52,11 @@ public final class JfrTelemetry implements Closeable {
     return new JfrTelemetry(openTelemetry);
   }
 
+  // Visible for testing
+  RecordingStream getRecordingStream() {
+    return recordingStream;
+  }
+
   /** Stop recording JFR events. */
   @Override
   public void close() {

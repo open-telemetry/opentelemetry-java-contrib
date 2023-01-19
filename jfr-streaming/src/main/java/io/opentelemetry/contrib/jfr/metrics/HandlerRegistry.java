@@ -34,7 +34,7 @@ import java.util.List;
 final class HandlerRegistry {
   private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr";
   // TODO(jack-berg): read from version.properties
-  private static final String SCOPE_VERSION = "1.7.0-SNAPSHOT";
+  private static final String SCOPE_VERSION = "1.22.0-SNAPSHOT";
 
   private HandlerRegistry() {}
 

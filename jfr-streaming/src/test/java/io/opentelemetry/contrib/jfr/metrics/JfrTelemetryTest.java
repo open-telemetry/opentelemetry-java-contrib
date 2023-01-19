@@ -12,6 +12,7 @@ import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,9 +52,14 @@ class JfrTelemetryTest {
   @Test
   void close() {
     try (JfrTelemetry jfrTelemetry = JfrTelemetry.create(sdk)) {
+      // Track whether RecordingStream has been closed
+      AtomicBoolean recordingStreamClosed = new AtomicBoolean(false);
+      jfrTelemetry.getRecordingStream().onClose(() -> recordingStreamClosed.set(true));
+
       jfrTelemetry.close();
       logs.assertContains("Closing JfrTelemetry");
       logs.assertDoesNotContain("JfrTelemetry is already closed");
+      assertThat(recordingStreamClosed.get()).isTrue();
 
       jfrTelemetry.close();
       logs.assertContains("JfrTelemetry is already closed");

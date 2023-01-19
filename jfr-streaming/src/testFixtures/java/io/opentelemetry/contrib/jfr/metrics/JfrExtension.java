@@ -29,8 +29,8 @@ public class JfrExtension implements BeforeEachCallback, AfterEachCallback {
   public void beforeEach(ExtensionContext context) {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
-    jfrTelemetry =
-        JfrTelemetry.create(OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build());
+    OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build();
+    jfrTelemetry = JfrTelemetry.create(sdk);
   }
 
   @Override
