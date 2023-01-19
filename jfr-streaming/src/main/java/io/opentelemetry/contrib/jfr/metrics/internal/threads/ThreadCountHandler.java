@@ -10,8 +10,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_THREA
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -21,20 +24,24 @@ public final class ThreadCountHandler implements RecordedEventHandler {
   private static final String METRIC_DESCRIPTION = "Number of executing threads";
   private static final Attributes ATTR_DAEMON_TRUE = Attributes.of(ATTR_DAEMON, true);
   private static final Attributes ATTR_DAEMON_FALSE = Attributes.of(ATTR_DAEMON, false);
+
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long activeCount = 0;
   private volatile long daemonCount = 0;
 
   public ThreadCountHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME)
-        .setDescription(METRIC_DESCRIPTION)
-        .setUnit(UNIT_THREADS)
-        .buildWithCallback(
-            measurement -> {
-              long d = daemonCount;
-              measurement.record(d, ATTR_DAEMON_TRUE);
-              measurement.record(activeCount - d, ATTR_DAEMON_FALSE);
-            });
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME)
+            .setDescription(METRIC_DESCRIPTION)
+            .setUnit(UNIT_THREADS)
+            .buildWithCallback(
+                measurement -> {
+                  long d = daemonCount;
+                  measurement.record(d, ATTR_DAEMON_TRUE);
+                  measurement.record(activeCount - d, ATTR_DAEMON_FALSE);
+                }));
   }
 
   @Override
@@ -49,7 +56,17 @@ public final class ThreadCountHandler implements RecordedEventHandler {
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.THREAD_METRICS;
+  }
+
+  @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

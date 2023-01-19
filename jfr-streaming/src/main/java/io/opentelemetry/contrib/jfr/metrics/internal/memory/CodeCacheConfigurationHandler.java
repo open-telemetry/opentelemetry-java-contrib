@@ -15,8 +15,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.NON_HEAP;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -26,19 +29,27 @@ public final class CodeCacheConfigurationHandler implements RecordedEventHandler
 
   private static final Attributes ATTR = Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "CodeCache");
 
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long initialSize = 0;
 
   public CodeCacheConfigurationHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_INIT)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_INIT)
-        .setUnit(BYTES)
-        .buildWithCallback(measurement -> measurement.record(initialSize, ATTR));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY_INIT)
+            .setDescription(METRIC_DESCRIPTION_MEMORY_INIT)
+            .setUnit(BYTES)
+            .buildWithCallback(measurement -> measurement.record(initialSize, ATTR)));
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.MEMORY_POOL_METRICS;
   }
 
   @Override
@@ -51,5 +62,10 @@ public final class CodeCacheConfigurationHandler implements RecordedEventHandler
   @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

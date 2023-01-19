@@ -8,8 +8,11 @@ package io.opentelemetry.contrib.jfr.metrics.internal.classes;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_CLASSES;
 
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -33,25 +36,31 @@ public final class ClassesLoadedHandler implements RecordedEventHandler {
       "Number of classes loaded since JVM start";
   private static final String METRIC_DESCRIPTION_UNLOADED =
       "Number of classes unloaded since JVM start";
+
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long loaded = 0;
   private volatile long unloaded = 0;
 
   public ClassesLoadedHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_CURRENT)
-        .setDescription(METRIC_DESCRIPTION_CURRENT)
-        .setUnit(UNIT_CLASSES)
-        .buildWithCallback(measurement -> measurement.record(loaded - unloaded));
-    meter
-        .counterBuilder(METRIC_NAME_LOADED)
-        .setDescription(METRIC_DESCRIPTION_LOADED)
-        .setUnit(UNIT_CLASSES)
-        .buildWithCallback(measurement -> measurement.record(loaded));
-    meter
-        .counterBuilder(METRIC_NAME_UNLOADED)
-        .setDescription(METRIC_DESCRIPTION_UNLOADED)
-        .setUnit(UNIT_CLASSES)
-        .buildWithCallback(measurement -> measurement.record(unloaded));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_CURRENT)
+            .setDescription(METRIC_DESCRIPTION_CURRENT)
+            .setUnit(UNIT_CLASSES)
+            .buildWithCallback(measurement -> measurement.record(loaded - unloaded)));
+    observables.add(
+        meter
+            .counterBuilder(METRIC_NAME_LOADED)
+            .setDescription(METRIC_DESCRIPTION_LOADED)
+            .setUnit(UNIT_CLASSES)
+            .buildWithCallback(measurement -> measurement.record(loaded)));
+    observables.add(
+        meter
+            .counterBuilder(METRIC_NAME_UNLOADED)
+            .setDescription(METRIC_DESCRIPTION_UNLOADED)
+            .setUnit(UNIT_CLASSES)
+            .buildWithCallback(measurement -> measurement.record(unloaded)));
   }
 
   @Override
@@ -66,7 +75,17 @@ public final class ClassesLoadedHandler implements RecordedEventHandler {
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.CLASS_LOAD_METRICS;
+  }
+
+  @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

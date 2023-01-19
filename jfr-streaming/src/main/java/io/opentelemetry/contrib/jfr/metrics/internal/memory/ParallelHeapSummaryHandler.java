@@ -23,7 +23,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
@@ -48,6 +51,8 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private static final Attributes ATTR_MEMORY_OLD =
       Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "PS Old Gen");
 
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long usageEden = 0;
   private volatile long usageEdenAfter = 0;
   private volatile long usageSurvivor = 0;
@@ -61,51 +66,60 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
   private volatile long limitYoung = 0;
 
   public ParallelHeapSummaryHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY)
-        .setDescription(METRIC_DESCRIPTION_MEMORY)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(usageEden, ATTR_MEMORY_EDEN);
-              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
-              measurement.record(usageOld, ATTR_MEMORY_OLD);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
-              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
-              measurement.record(usageOldAfter, ATTR_MEMORY_OLD);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
-        .setDescription(METRIC_DESCRIPTION_COMMITTED)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(committedOld, ATTR_MEMORY_OLD);
-              measurement.record(committedEden, ATTR_MEMORY_EDEN);
-              measurement.record(committedSurvivor, ATTR_MEMORY_SURVIVOR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(limitOld, ATTR_MEMORY_OLD);
-              measurement.record(limitYoung, ATTR_MEMORY_EDEN);
-              measurement.record(limitYoung, ATTR_MEMORY_SURVIVOR);
-            });
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY)
+            .setDescription(METRIC_DESCRIPTION_MEMORY)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(usageEden, ATTR_MEMORY_EDEN);
+                  measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
+                  measurement.record(usageOld, ATTR_MEMORY_OLD);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
+            .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
+                  measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
+                  measurement.record(usageOldAfter, ATTR_MEMORY_OLD);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+            .setDescription(METRIC_DESCRIPTION_COMMITTED)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(committedOld, ATTR_MEMORY_OLD);
+                  measurement.record(committedEden, ATTR_MEMORY_EDEN);
+                  measurement.record(committedSurvivor, ATTR_MEMORY_SURVIVOR);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
+            .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(limitOld, ATTR_MEMORY_OLD);
+                  measurement.record(limitYoung, ATTR_MEMORY_EDEN);
+                  measurement.record(limitYoung, ATTR_MEMORY_SURVIVOR);
+                }));
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.MEMORY_POOL_METRICS;
   }
 
   @Override
@@ -209,5 +223,10 @@ public final class ParallelHeapSummaryHandler implements RecordedEventHandler {
             limitYoung = oldSpace.getLong(RESERVED_SIZE);
           }
         });
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

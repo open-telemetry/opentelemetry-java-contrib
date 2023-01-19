@@ -18,7 +18,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class BufferMetricTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.BUFFER_METRICS));
 
   /**
    * This is a basic test that allocates some buffers and tests to make sure the resulting JFR event

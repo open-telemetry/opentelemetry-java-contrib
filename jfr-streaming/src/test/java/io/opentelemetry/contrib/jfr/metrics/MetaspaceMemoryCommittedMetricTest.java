@@ -19,7 +19,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class MetaspaceMemoryCommittedMetricTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
   private void check(ThrowingConsumer<MetricData> attributeCheck) {
     jfrExtension.waitAndAssertMetrics(

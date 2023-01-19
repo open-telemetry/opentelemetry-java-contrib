@@ -5,14 +5,18 @@
 
 package io.opentelemetry.contrib.jfr.metrics.internal;
 
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
+import java.io.Closeable;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import jdk.jfr.consumer.RecordedEvent;
 
 /** Convenience/Tag interface for defining how JFR events should turn into metrics. */
-public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate<RecordedEvent> {
+public interface RecordedEventHandler
+    extends Consumer<RecordedEvent>, Predicate<RecordedEvent>, Closeable {
 
   /**
    * JFR event name (e.g. jdk.ObjectAllocationInNewTLAB)
@@ -20,6 +24,9 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
    * @return String representation of JFR event name
    */
   String getEventName();
+
+  /** Return the {@link JfrFeature} this handler is associated with. */
+  JfrFeature getFeature();
 
   /**
    * Test to see if this event is interesting to this mapper
@@ -50,5 +57,16 @@ public interface RecordedEventHandler extends Consumer<RecordedEvent>, Predicate
    */
   default Optional<Duration> getThreshold() {
     return Optional.empty();
+  }
+
+  default void closeObservables(List<AutoCloseable> observables) {
+    observables.forEach(
+        observable -> {
+          try {
+            observable.close();
+          } catch (Exception e) {
+            // Ignore
+          }
+        });
   }
 }

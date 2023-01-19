@@ -21,8 +21,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.USED;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordedEvent;
@@ -37,6 +40,8 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
   private static final Attributes ATTR_MEMORY_COMPRESSED_CLASS_SPACE =
       Attributes.of(ATTR_TYPE, NON_HEAP, ATTR_POOL, "Compressed Class Space");
 
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long classUsage = 0;
   private volatile long classCommitted = 0;
   private volatile long totalUsage = 0;
@@ -45,38 +50,46 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
   private volatile long totalLimit = 0;
 
   public MetaspaceSummaryHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY)
-        .setDescription(METRIC_DESCRIPTION_MEMORY)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(classUsage, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
-              measurement.record(totalUsage, ATTR_MEMORY_METASPACE);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
-        .setDescription(METRIC_DESCRIPTION_COMMITTED)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(classCommitted, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
-              measurement.record(totalCommitted, ATTR_MEMORY_METASPACE);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(classLimit, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
-              measurement.record(totalLimit, ATTR_MEMORY_METASPACE);
-            });
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY)
+            .setDescription(METRIC_DESCRIPTION_MEMORY)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(classUsage, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
+                  measurement.record(totalUsage, ATTR_MEMORY_METASPACE);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+            .setDescription(METRIC_DESCRIPTION_COMMITTED)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(classCommitted, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
+                  measurement.record(totalCommitted, ATTR_MEMORY_METASPACE);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY_LIMIT)
+            .setDescription(METRIC_DESCRIPTION_MEMORY_LIMIT)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(classLimit, ATTR_MEMORY_COMPRESSED_CLASS_SPACE);
+                  measurement.record(totalLimit, ATTR_MEMORY_METASPACE);
+                }));
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.MEMORY_POOL_METRICS;
   }
 
   @Override
@@ -126,5 +139,10 @@ public final class MetaspaceSummaryHandler implements RecordedEventHandler {
   @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }
