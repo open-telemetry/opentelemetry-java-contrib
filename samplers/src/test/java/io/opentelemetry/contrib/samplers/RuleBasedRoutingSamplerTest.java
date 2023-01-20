@@ -209,12 +209,9 @@ class RuleBasedRoutingSamplerTest {
         SpanKind spanKind,
         Attributes attributes,
         List<LinkData> parentLinks) {
-      if (switcher.get()) {
-        switcher.set(false);
-        return SamplingResult.recordAndSample();
-      }
-      switcher.set(true);
-      return SamplingResult.drop();
+      return switcher.getAndSet(!switcher.get())
+          ? SamplingResult.recordAndSample()
+          : SamplingResult.drop();
     }
 
     @Override
