@@ -23,11 +23,13 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.IdGenerator;
+import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +49,7 @@ class RuleBasedRoutingSamplerTest {
 
   private final List<SamplingRule> patterns = new ArrayList<>();
 
-  @Mock(lenient = true)
+  @Mock(strictness = Mock.Strictness.LENIENT)
   private Sampler delegate;
 
   @BeforeEach
@@ -166,6 +168,25 @@ class RuleBasedRoutingSamplerTest {
         .isEqualTo(SamplingDecision.DROP);
   }
 
+  @Test
+  void customSampler() {
+    Attributes attributes = Attributes.of(HTTP_TARGET, "/test");
+    RuleBasedRoutingSampler testSampler =
+        RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
+            .customize(HTTP_TARGET, ".*test", new AlternatingSampler())
+            .build();
+    assertThat(
+            testSampler
+                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .getDecision())
+        .isEqualTo(SamplingDecision.DROP);
+    assertThat(
+            testSampler
+                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .getDecision())
+        .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
   private SamplingResult shouldSample(Sampler sampler, String url) {
     Attributes attributes = Attributes.of(HTTP_URL, url);
     return sampler.shouldSample(
@@ -174,5 +195,28 @@ class RuleBasedRoutingSamplerTest {
 
   private static RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
     return builder.drop(HTTP_URL, ".*/healthcheck").drop(HTTP_TARGET, "/actuator");
+  }
+
+  /** Silly sampler that alternates decisions for testing. */
+  private static class AlternatingSampler implements Sampler {
+    private final AtomicBoolean switcher = new AtomicBoolean();
+
+    @Override
+    public SamplingResult shouldSample(
+        Context parentContext,
+        String traceId,
+        String name,
+        SpanKind spanKind,
+        Attributes attributes,
+        List<LinkData> parentLinks) {
+      return switcher.getAndSet(!switcher.get())
+          ? SamplingResult.recordAndSample()
+          : SamplingResult.drop();
+    }
+
+    @Override
+    public String getDescription() {
+      return "weird switching sampler for testing";
+    }
   }
 }

@@ -24,27 +24,41 @@ public final class RuleBasedRoutingSamplerBuilder {
     this.defaultDelegate = defaultDelegate;
   }
 
+  /**
+   * Drop all spans when the value of the provided {@link AttributeKey} matches the provided
+   * pattern.
+   */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
+    return customize(attributeKey, pattern, Sampler.alwaysOff());
+  }
+
+  /**
+   * Use the provided sampler when the value of the provided {@link AttributeKey} matches the
+   * provided pattern.
+   */
+  @CanIgnoreReturnValue
+  public RuleBasedRoutingSamplerBuilder customize(
+      AttributeKey<String> attributeKey, String pattern, Sampler sampler) {
     rules.add(
         new SamplingRule(
             requireNonNull(attributeKey, "attributeKey must not be null"),
             requireNonNull(pattern, "pattern must not be null"),
-            Sampler.alwaysOff()));
+            requireNonNull(sampler, "sampler must not be null")));
     return this;
   }
 
+  /**
+   * Record and sample all spans when the value of the provided {@link AttributeKey} matches the
+   * provided pattern.
+   */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder recordAndSample(
       AttributeKey<String> attributeKey, String pattern) {
-    rules.add(
-        new SamplingRule(
-            requireNonNull(attributeKey, "attributeKey must not be null"),
-            requireNonNull(pattern, "pattern must not be null"),
-            Sampler.alwaysOn()));
-    return this;
+    return customize(attributeKey, pattern, Sampler.alwaysOn());
   }
 
+  /** Build the sampler based on the rules provided. */
   public RuleBasedRoutingSampler build() {
     return new RuleBasedRoutingSampler(rules, kind, defaultDelegate);
   }
