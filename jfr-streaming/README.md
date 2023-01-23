@@ -4,7 +4,48 @@
 
 * Build it with `./gradlew :jfr-streaming:build`
 
-The main entry point is the `JfrMetrics` class in the package `io.opentelemetry.contrib.jfr.metrics`
+The main entry point is the `JfrTelemetry` class in the package `io.opentelemetry.contrib.jfr.metrics`:
+
+```java
+// Initialize JfrTelemetry
+JfrTelemetry jfrTelemetry = JfrTelemetry.create(openTelemetry);
+
+// Close JfrTelemetry to stop listening for JFR events
+jfrTelemetry.close();
+```
+
+`JfrTelemetry` works by subscribing to certain JFR events, and using relevant bits of information
+from the events to produce telemetry data like metrics. The code is divided into "handlers", which
+listen for specific events and produce relevant telemetry. The handlers are organized into
+features (i.e `JfrFeature`), which represent a category of telemetry and can be toggled on and
+off. `JfrTelemetry` evaluates which features are enabled, and only listens for the events required
+by the handlers associated with those features.
+
+Enable or disable a feature as follows:
+
+```
+JfrTelemetry jfrTelemetry = JfrTelemetry.builder(openTelemetry)
+  .enableFeature(JfrFeature.BUFFER_METRICS)
+  .disableFeature(JfrFeature.LOCK_METRICS)
+  .build();
+```
+
+The following table describes the set of `JfrFeatures` available, whether each is enabled by
+default, and the telemetry each produces:
+
+| JfrFeature                | Default Enabled | Metrics                                                                                                                                                                                                     |
+|---------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| BUFFER_METRICS            | false           | `process.runtime.jvm.buffer.usage`\n`process.runtime.jvm.buffer.limit`\n`process.runtime.jvm.buffer.count`                                                                                                  |
+| CLASS_LOAD_METRICS        | false           | `process.runtime.jvm.classes.current_loaded`\n`process.runtime.jvm.classes.loaded`\n`process.runtime.jvm.classes.unloaded`                                                                                  |
+| CONTEXT_SWITCH_METRICS    | true            | `process.runtime.jvm.cpu.context_switch`                                                                                                                                                                    |
+| CPU_COUNT_METRICS         | true            | `process.runtime.jvm.cpu.limit`                                                                                                                                                                             |
+| CPU_UTILIZATION_METRICS   | false           | `process.runtime.jvm.cpu.utilization`\n`process.runtime.jvm.system.cpu.utilization`                                                                                                                         |
+| GC_DURATION_METRICS       | false           | `process.runtime.jvm.gc.duration`                                                                                                                                                                           |
+| LOCK_METRICS              | true            | `process.runtime.jvm.cpu.longlock`                                                                                                                                                                          |
+| MEMORY_ALLOCATION_METRICS | true            | `process.runtime.jvm.memory.allocation`                                                                                                                                                                     |
+| MEMORY_POOL_METRICS       | false           | `process.runtime.jvm.memory.init`\n`process.runtime.jvm.memory.committed`\n`process.runtime.jvm.memory.usage`\n`process.runtime.jvm.memory.limit`\n``\n``\n`process.runtime.jvm.memory.usage_after_last_gc` |
+| NETWORK_IO_METRICS        | true            | `process.runtime.jvm.network.io`\n`process.runtime.jvm.network.time`                                                                                                                                        |
+| THREAD_METRICS            | false           | `process.runtime.jvm.threads.count`                                                                                                                                                                         |
 
 ## Component owners
 
