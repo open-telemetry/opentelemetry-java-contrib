@@ -65,7 +65,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
     if (serviceName != null) {
       logger.log(
           INFO,
-          "Skipping AppServerServiceName detection, service name is already set to {0}",
+          "Skipping AppServerServiceName detection, otel.service.name is already set to {0}",
           serviceName);
       return false;
     }
@@ -73,7 +73,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
     if (resourceAttributes.containsKey(SERVICE_NAME.getKey())) {
       logger.log(
           INFO,
-          "Skipping AppServerServiceName detection, resourceAttributes already contains {0}",
+          "Skipping AppServerServiceName detection, otel.resource.attributes already contains {0}",
           resourceAttributes.get(SERVICE_NAME.getKey()));
       return false;
     }
