@@ -39,7 +39,7 @@ class WebSphereServiceNameDetector implements ServiceNameDetector {
     }
 
     String programArguments = System.getProperty("sun.java.command");
-    logger.log(FINE, "Started with arguments '{0}'.", programArguments);
+    logger.log(FINE, "Started with arguments {0}.", programArguments);
     if (programArguments == null) {
       return null;
     }
@@ -53,7 +53,7 @@ class WebSphereServiceNameDetector implements ServiceNameDetector {
     // in docker image it is /opt/IBM/WebSphere/AppServer/profiles/AppSrv01/config
     Path configDirectory = Paths.get(matcher.group(2));
     if (!Files.isDirectory(configDirectory)) {
-      logger.log(FINE, "Missing configuration directory '{0}'.", configDirectory);
+      logger.log(FINE, "Missing configuration directory {0}.", configDirectory);
       return null;
     }
 
@@ -64,7 +64,7 @@ class WebSphereServiceNameDetector implements ServiceNameDetector {
     if (logger.isLoggable(FINE)) {
       logger.log(
           FINE,
-          "Parsed arguments: cell '{0}', node '{1}', server '{2}', configuration directory '{3}'.",
+          "Parsed arguments: cell {0}, node {1}, server {2}, configuration directory {3}.",
           new Object[] {cell, node, server, configDirectory});
     }
 
@@ -78,17 +78,17 @@ class WebSphereServiceNameDetector implements ServiceNameDetector {
     }
     Path cellApplications = parent.resolve("installedApps").resolve(cell);
     if (Files.isDirectory(cellApplications)) {
-      logger.log(FINE, "Looking for deployments in '{0}'.", cellApplications);
+      logger.log(FINE, "Looking for deployments in {0}.", cellApplications);
 
       try (Stream<Path> stream = Files.list(cellApplications)) {
         for (Path path : stream.collect(Collectors.toList())) {
           String fullName = path.getFileName().toString();
           // websphere deploys all applications as ear
           if (!fullName.endsWith(".ear") || !appServer.isValidAppName(path)) {
-            logger.log(FINE, "Skipping '{0}'.", path);
+            logger.log(FINE, "Skipping {0}.", path);
             continue;
           }
-          logger.log(FINE, "Attempting service name detection in '{0}'.", path);
+          logger.log(FINE, "Attempting service name detection in {0}.", path);
 
           // strip ear suffix
           String name = fullName.substring(0, fullName.length() - 4);

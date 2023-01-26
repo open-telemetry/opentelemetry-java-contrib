@@ -38,7 +38,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
   public Resource createResource(ConfigProperties config) {
     String serviceName = detectServiceName();
     if (serviceName != null) {
-      logger.log(INFO, "Auto-detected service name '{0}'.", serviceName);
+      logger.log(INFO, "Auto-detected service name {0}.", serviceName);
       return Resource.create(Attributes.of(SERVICE_NAME, serviceName));
     }
     return Resource.empty();
