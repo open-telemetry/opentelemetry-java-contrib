@@ -147,7 +147,7 @@ class ParseBuddy {
   private static final class DescriptorHandler extends DefaultHandler {
     private final String rootElementName;
     private final Deque<String> currentElement = new ArrayDeque<>();
-    private String key;
+    @Nullable private String key;
     private final Map<String, String> names = new HashMap<>();
 
     DescriptorHandler(String rootElementName) {
@@ -168,7 +168,7 @@ class ParseBuddy {
       currentElement.push(qName);
     }
 
-    private boolean isEn(Attributes attributes) {
+    private static boolean isEn(Attributes attributes) {
       String lang = attributes.getValue("xml:lang");
       if (lang == null || "".equals(lang)) {
         return true; // en is the default language
@@ -189,6 +189,7 @@ class ParseBuddy {
       }
     }
 
+    @Nullable
     public String getName() {
       String displayName = names.get("display-name");
       return displayName == null ? names.get("servlet-name") : displayName;
