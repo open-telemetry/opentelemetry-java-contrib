@@ -31,6 +31,21 @@ class ParseBuddyTest {
   final InputStream webXmlStream =
       new ByteArrayInputStream(
           "<web-app><display-name>goats</display-name></web-app>".getBytes(UTF_8));
+
+  final InputStream webXmlStreamServletName =
+      new ByteArrayInputStream(
+          "<web-app><servlet-name>sheep</servlet-name></web-app>".getBytes(UTF_8));
+
+  final InputStream webXmlStreamBoth =
+      new ByteArrayInputStream(
+          ("<web-app>"
+                  + "<servlet-name>pony</servlet-name>"
+                  + "<display-name>buck</display-name>"
+                  + "<display-name>huck</display-name>"
+                  + "<display-name>shuck</display-name>"
+                  + "</web-app>")
+              .getBytes(UTF_8));
+
   final InputStream appXmlStream =
       new ByteArrayInputStream(
           "<application><display-name>piglet</display-name></application>".getBytes(UTF_8));
@@ -39,7 +54,7 @@ class ParseBuddyTest {
   @Mock private ParseBuddy.Filesystem filesystem;
 
   @Test
-  void explodedApp_war() throws Exception {
+  void explodedApp_warUsesDisplayName() throws Exception {
 
     when(filesystem.isRegularFile(webXml)).thenReturn(true);
     when(filesystem.newInputStream(webXml)).thenReturn(webXmlStream);
@@ -49,6 +64,30 @@ class ParseBuddyTest {
 
     String result = parseBuddy.handleExplodedApp(path);
     assertThat(result).isEqualTo("goats");
+  }
+
+  @Test
+  void explodedApp_warUsesServletName() throws Exception {
+    when(filesystem.isRegularFile(webXml)).thenReturn(true);
+    when(filesystem.newInputStream(webXml)).thenReturn(webXmlStreamServletName);
+    when(appServer.isValidResult(path, "sheep")).thenReturn(true);
+
+    ParseBuddy parseBuddy = new ParseBuddy(appServer, filesystem);
+
+    String result = parseBuddy.handleExplodedApp(path);
+    assertThat(result).isEqualTo("sheep");
+  }
+
+  @Test
+  void prefersDisplayNameOverServletName() throws Exception {
+    when(filesystem.isRegularFile(webXml)).thenReturn(true);
+    when(filesystem.newInputStream(webXml)).thenReturn(webXmlStreamBoth);
+    when(appServer.isValidResult(path, "buck")).thenReturn(true);
+
+    ParseBuddy parseBuddy = new ParseBuddy(appServer, filesystem);
+
+    String result = parseBuddy.handleExplodedApp(path);
+    assertThat(result).isEqualTo("buck");
   }
 
   @Test

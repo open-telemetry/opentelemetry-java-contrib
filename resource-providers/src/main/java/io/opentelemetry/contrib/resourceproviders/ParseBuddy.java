@@ -13,7 +13,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -125,7 +129,7 @@ class ParseBuddy {
     }
     SAXParser saxParser = SaxParserFactoryHolder.saxParserFactory.newSAXParser();
     saxParser.parse(inputStream, handler);
-    return handler.displayName;
+    return handler.getName();
   }
 
   private interface InputStreamSupplier {
@@ -143,8 +147,8 @@ class ParseBuddy {
   private static final class DescriptorHandler extends DefaultHandler {
     private final String rootElementName;
     private final Deque<String> currentElement = new ArrayDeque<>();
-    private boolean setDisplayName;
-    @Nullable private String displayName;
+    private String key;
+    private final Map<String, String> names = new HashMap<>();
 
     DescriptorHandler(String rootElementName) {
       this.rootElementName = rootElementName;
@@ -152,31 +156,42 @@ class ParseBuddy {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) {
-      if (displayName == null
-          && rootElementName.equals(currentElement.peek())
-          && "display-name".equals(qName)) {
-        String lang = attributes.getValue("xml:lang");
-        if (lang == null || "".equals(lang)) {
-          lang = "en"; // en is the default language
-        }
-        if ("en".equals(lang)) {
-          setDisplayName = true;
+      List<String> nameElements = Arrays.asList("display-name", "servlet-name");
+      if ((names.size() < 2) // If we haven't already found both names
+          && rootElementName.equals(
+              currentElement.peekLast()) // And we're scoped to our root element
+          && nameElements.contains(qName)) { // And this element is one of the two we like
+        if (isEn(attributes)) {
+          key = qName;
         }
       }
       currentElement.push(qName);
     }
 
+    private boolean isEn(Attributes attributes) {
+      String lang = attributes.getValue("xml:lang");
+      if (lang == null || "".equals(lang)) {
+        return true; // en is the default language
+      }
+      return "en".equals(lang);
+    }
+
     @Override
     public void endElement(String uri, String localName, String qName) {
       currentElement.pop();
-      setDisplayName = false;
+      key = null;
     }
 
     @Override
     public void characters(char[] ch, int start, int length) {
-      if (setDisplayName) {
-        displayName = new String(ch, start, length);
+      if (key != null) {
+        names.putIfAbsent(key, new String(ch, start, length));
       }
+    }
+
+    public String getName() {
+      String displayName = names.get("display-name");
+      return displayName == null ? names.get("servlet-name") : displayName;
     }
   }
 
