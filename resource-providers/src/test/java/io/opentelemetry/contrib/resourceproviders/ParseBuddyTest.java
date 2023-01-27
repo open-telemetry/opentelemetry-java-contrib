@@ -30,19 +30,23 @@ class ParseBuddyTest {
   final Path applicationXml = Paths.get("dir/META-INF/application.xml");
   final InputStream webXmlStream =
       new ByteArrayInputStream(
-          "<web-app><display-name>goats</display-name></web-app>".getBytes(UTF_8));
+          "<web-app><servlet><display-name>goats</display-name></servlet></web-app>"
+              .getBytes(UTF_8));
 
   final InputStream webXmlStreamServletName =
       new ByteArrayInputStream(
-          "<web-app><servlet-name>sheep</servlet-name></web-app>".getBytes(UTF_8));
+          "<web-app><servlet><servlet-name>sheep</servlet-name></servlet></web-app>"
+              .getBytes(UTF_8));
 
   final InputStream webXmlStreamBoth =
       new ByteArrayInputStream(
           ("<web-app>"
+                  + "<servlet>"
                   + "<servlet-name>pony</servlet-name>"
                   + "<display-name>buck</display-name>"
                   + "<display-name>huck</display-name>"
                   + "<display-name>shuck</display-name>"
+                  + "</servlet>"
                   + "</web-app>")
               .getBytes(UTF_8));
 
