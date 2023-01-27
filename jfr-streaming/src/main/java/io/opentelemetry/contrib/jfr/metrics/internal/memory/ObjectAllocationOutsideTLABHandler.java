@@ -14,6 +14,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
 import java.util.function.Consumer;
@@ -45,9 +46,17 @@ public final class ObjectAllocationOutsideTLABHandler extends AbstractThreadDisp
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.MEMORY_ALLOCATION_METRICS;
+  }
+
+  @Override
   public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
     return new PerThreadObjectAllocationOutsideTLABHandler(histogram, threadName);
   }
+
+  @Override
+  public void close() {}
 
   /** This class aggregates all non-TLAB allocation JFR events for a single thread */
   private static class PerThreadObjectAllocationOutsideTLABHandler

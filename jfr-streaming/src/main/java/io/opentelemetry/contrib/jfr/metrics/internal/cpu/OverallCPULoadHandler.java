@@ -8,8 +8,11 @@ package io.opentelemetry.contrib.jfr.metrics.internal.cpu;
 import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_UTILIZATION;
 
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -24,20 +27,25 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   private static final String JVM_USER = "jvmUser";
   private static final String JVM_SYSTEM = "jvmSystem";
   private static final String MACHINE_TOTAL = "machineTotal";
+
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile double process = 0;
   private volatile double machine = 0;
 
   public OverallCPULoadHandler(Meter meter) {
-    meter
-        .gaugeBuilder(METRIC_NAME_PROCESS)
-        .setDescription(METRIC_DESCRIPTION_PROCESS)
-        .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(measurement -> measurement.record(process));
-    meter
-        .gaugeBuilder(METRIC_NAME_MACHINE)
-        .setDescription(METRIC_DESCRIPTION_MACHINE)
-        .setUnit(UNIT_UTILIZATION)
-        .buildWithCallback(measurement -> measurement.record(machine));
+    observables.add(
+        meter
+            .gaugeBuilder(METRIC_NAME_PROCESS)
+            .setDescription(METRIC_DESCRIPTION_PROCESS)
+            .setUnit(UNIT_UTILIZATION)
+            .buildWithCallback(measurement -> measurement.record(process)));
+    observables.add(
+        meter
+            .gaugeBuilder(METRIC_NAME_MACHINE)
+            .setDescription(METRIC_DESCRIPTION_MACHINE)
+            .setUnit(UNIT_UTILIZATION)
+            .buildWithCallback(measurement -> measurement.record(machine)));
   }
 
   @Override
@@ -56,7 +64,17 @@ public final class OverallCPULoadHandler implements RecordedEventHandler {
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.CPU_UTILIZATION_METRICS;
+  }
+
+  @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

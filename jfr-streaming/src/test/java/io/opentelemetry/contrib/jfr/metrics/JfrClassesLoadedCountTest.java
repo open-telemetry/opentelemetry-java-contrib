@@ -13,7 +13,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class JfrClassesLoadedCountTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.CLASS_LOAD_METRICS));
 
   @Test
   void shouldHaveJfrLoadedClassesCountEvents() throws Exception {

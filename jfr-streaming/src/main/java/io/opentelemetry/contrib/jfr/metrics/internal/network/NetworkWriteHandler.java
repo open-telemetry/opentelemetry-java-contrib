@@ -19,6 +19,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
@@ -72,9 +73,17 @@ public final class NetworkWriteHandler extends AbstractThreadDispatchingHandler 
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.NETWORK_IO_METRICS;
+  }
+
+  @Override
   public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
     return new PerThreadNetworkWriteHandler(bytesHistogram, durationHistogram, threadName);
   }
+
+  @Override
+  public void close() {}
 
   private static final class PerThreadNetworkWriteHandler implements Consumer<RecordedEvent> {
     private static final String BYTES_WRITTEN = "bytesWritten";

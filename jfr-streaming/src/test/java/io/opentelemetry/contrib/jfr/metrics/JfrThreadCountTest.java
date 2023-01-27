@@ -17,7 +17,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class JfrThreadCountTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.THREAD_METRICS));
 
   private static final int SAMPLING_INTERVAL = 1000;
 

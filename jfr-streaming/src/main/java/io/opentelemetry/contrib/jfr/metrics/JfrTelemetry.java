@@ -8,8 +8,10 @@ package io.opentelemetry.contrib.jfr.metrics;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordingStream;
@@ -20,15 +22,18 @@ public final class JfrTelemetry implements Closeable {
   private static final Logger logger = Logger.getLogger(JfrTelemetry.class.getName());
 
   private final AtomicBoolean isClosed = new AtomicBoolean();
+  private final OpenTelemetry openTelemetry;
+  private final List<RecordedEventHandler> recordedEventHandlers;
   private final RecordingStream recordingStream;
 
   @SuppressWarnings("CatchingUnchecked")
-  private JfrTelemetry(OpenTelemetry openTelemetry) {
-    List<RecordedEventHandler> handlers = HandlerRegistry.getHandlers(openTelemetry);
+  JfrTelemetry(OpenTelemetry openTelemetry, Predicate<JfrFeature> featurePredicate) {
+    this.openTelemetry = openTelemetry;
+    this.recordedEventHandlers = HandlerRegistry.getHandlers(openTelemetry, featurePredicate);
     try {
       logger.log(Level.INFO, "Starting JfrTelemetry");
       recordingStream = new RecordingStream();
-      handlers.forEach(
+      recordedEventHandlers.forEach(
           handler -> {
             var eventSettings = recordingStream.enable(handler.getEventName());
             handler.getPollingDuration().ifPresent(eventSettings::withPeriod);
@@ -43,13 +48,34 @@ public final class JfrTelemetry implements Closeable {
   }
 
   /**
-   * Create and start {@link JfrTelemetry}.
+   * Create and start {@link JfrTelemetry}, configured with the default {@link JfrFeature}s.
    *
    * <p>Listens for select JFR events, extracts data, and records to various metrics. Recording will
    * continue until {@link #close()} is called.
+   *
+   * @param openTelemetry the {@link OpenTelemetry} instance used to record telemetry
    */
   public static JfrTelemetry create(OpenTelemetry openTelemetry) {
-    return new JfrTelemetry(openTelemetry);
+    return new JfrTelemetryBuilder(openTelemetry).build();
+  }
+
+  /**
+   * Create a builder for configuring {@link JfrTelemetry}.
+   *
+   * @param openTelemetry the {@link OpenTelemetry} instance used to record telemetry
+   */
+  public static JfrTelemetryBuilder builder(OpenTelemetry openTelemetry) {
+    return new JfrTelemetryBuilder(openTelemetry);
+  }
+
+  // Visible for testing
+  OpenTelemetry getOpenTelemetry() {
+    return openTelemetry;
+  }
+
+  // Visible for testing
+  List<RecordedEventHandler> getRecordedEventHandlers() {
+    return recordedEventHandlers;
   }
 
   // Visible for testing
@@ -66,5 +92,13 @@ public final class JfrTelemetry implements Closeable {
     }
     logger.log(Level.INFO, "Closing JfrTelemetry");
     recordingStream.close();
+    recordedEventHandlers.forEach(
+        handler -> {
+          try {
+            handler.close();
+          } catch (IOException e) {
+            // Ignore
+          }
+        });
   }
 }

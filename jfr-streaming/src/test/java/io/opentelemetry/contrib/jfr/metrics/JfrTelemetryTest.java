@@ -27,7 +27,7 @@ class JfrTelemetryTest {
 
   @BeforeEach
   void setup() {
-    reader = InMemoryMetricReader.create();
+    reader = InMemoryMetricReader.createDelta();
     sdk =
         OpenTelemetrySdk.builder()
             .setMeterProvider(SdkMeterProvider.builder().registerMetricReader(reader).build())
@@ -40,12 +40,32 @@ class JfrTelemetryTest {
   }
 
   @Test
-  void create() {
+  void create_Default() {
     try (JfrTelemetry unused = JfrTelemetry.create(sdk)) {
       assertThat(logs.getEvents()).hasSize(1);
       logs.assertContains("Starting JfrTelemetry");
 
       await().untilAsserted(() -> assertThat(reader.collectAllMetrics()).isNotEmpty());
+    }
+  }
+
+  @Test
+  void create_AllDisabled() {
+    try (JfrTelemetry unused = JfrTelemetry.builder(sdk).disableAllFeatures().build()) {
+      assertThat(logs.getEvents()).hasSize(1);
+      logs.assertContains("Starting JfrTelemetry");
+
+      assertThat(reader.collectAllMetrics()).isEmpty();
+    }
+  }
+
+  @Test
+  void builder() {
+    try (var jfrTelemetry = JfrTelemetry.builder(sdk).build()) {
+      assertThat(jfrTelemetry.getOpenTelemetry()).isSameAs(sdk);
+      assertThat(jfrTelemetry.getRecordedEventHandlers())
+          .hasSizeGreaterThan(0)
+          .allSatisfy(handler -> assertThat(handler.getFeature().isDefaultEnabled()).isTrue());
     }
   }
 
@@ -56,10 +76,13 @@ class JfrTelemetryTest {
       AtomicBoolean recordingStreamClosed = new AtomicBoolean(false);
       jfrTelemetry.getRecordingStream().onClose(() -> recordingStreamClosed.set(true));
 
+      assertThat(reader.collectAllMetrics()).isNotEmpty();
+
       jfrTelemetry.close();
       logs.assertContains("Closing JfrTelemetry");
       logs.assertDoesNotContain("JfrTelemetry is already closed");
       assertThat(recordingStreamClosed.get()).isTrue();
+      assertThat(reader.collectAllMetrics()).isEmpty();
 
       jfrTelemetry.close();
       logs.assertContains("JfrTelemetry is already closed");

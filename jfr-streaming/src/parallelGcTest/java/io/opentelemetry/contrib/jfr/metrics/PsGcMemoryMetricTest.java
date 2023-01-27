@@ -34,7 +34,14 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class PsGcMemoryMetricTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder ->
+              builder
+                  .disableAllFeatures()
+                  .enableFeature(JfrFeature.GC_DURATION_METRICS)
+                  .enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
   private void usageCheck(ThrowingConsumer<MetricData> attributeCheck) {
     jfrExtension.waitAndAssertMetrics(

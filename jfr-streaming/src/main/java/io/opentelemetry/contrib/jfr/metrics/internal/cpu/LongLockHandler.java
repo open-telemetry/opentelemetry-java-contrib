@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECON
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.AbstractThreadDispatchingHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.DurationUtil;
 import io.opentelemetry.contrib.jfr.metrics.internal.ThreadGrouper;
@@ -42,6 +43,11 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.LOCK_METRICS;
+  }
+
+  @Override
   public Consumer<RecordedEvent> createPerThreadSummarizer(String threadName) {
     return new PerThreadLongLockHandler(histogram, threadName);
   }
@@ -50,6 +56,9 @@ public final class LongLockHandler extends AbstractThreadDispatchingHandler {
   public Optional<Duration> getThreshold() {
     return Optional.empty();
   }
+
+  @Override
+  public void close() {}
 
   private static class PerThreadLongLockHandler implements Consumer<RecordedEvent> {
     private static final String EVENT_THREAD = "eventThread";

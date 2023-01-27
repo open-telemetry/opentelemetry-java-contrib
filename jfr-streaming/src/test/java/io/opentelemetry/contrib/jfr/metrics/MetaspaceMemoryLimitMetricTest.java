@@ -18,7 +18,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class MetaspaceMemoryLimitMetricTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
   @Test
   void shouldHaveMemoryLimitMetrics() {

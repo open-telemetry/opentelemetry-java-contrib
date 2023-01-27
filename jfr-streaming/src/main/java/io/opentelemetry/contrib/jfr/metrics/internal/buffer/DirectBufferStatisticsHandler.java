@@ -11,8 +11,11 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.UNIT_BUFFE
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -31,32 +34,31 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
   private static final String EVENT_NAME = "jdk.DirectBufferStatistics";
   private static final Attributes ATTR = Attributes.of(ATTR_POOL, "direct");
 
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long usage = 0;
   private volatile long limit = 0;
   private volatile long count = 0;
 
   public DirectBufferStatisticsHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_USAGE)
-        .setDescription(METRIC_DESCRIPTION_USAGE)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(usage, ATTR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_LIMIT)
-        .setDescription(METRIC_DESCRIPTION_LIMIT)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(limit, ATTR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_COUNT)
-        .setDescription(METRIC_DESCRIPTION_COUNT)
-        .setUnit(UNIT_BUFFERS)
-        .buildWithCallback(measurement -> measurement.record(count, ATTR));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_USAGE)
+            .setDescription(METRIC_DESCRIPTION_USAGE)
+            .setUnit(BYTES)
+            .buildWithCallback(measurement -> measurement.record(usage, ATTR)));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_LIMIT)
+            .setDescription(METRIC_DESCRIPTION_LIMIT)
+            .setUnit(BYTES)
+            .buildWithCallback(measurement -> measurement.record(limit, ATTR)));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_COUNT)
+            .setDescription(METRIC_DESCRIPTION_COUNT)
+            .setUnit(UNIT_BUFFERS)
+            .buildWithCallback(measurement -> measurement.record(count, ATTR)));
   }
 
   @Override
@@ -78,7 +80,17 @@ public final class DirectBufferStatisticsHandler implements RecordedEventHandler
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.BUFFER_METRICS;
+  }
+
+  @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

@@ -12,7 +12,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class JfrOverallCPULoadHandlerTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder ->
+              builder.disableAllFeatures().enableFeature(JfrFeature.CPU_UTILIZATION_METRICS));
 
   @Test
   public void shouldHaveCPULoadEvents() throws Exception {

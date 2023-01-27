@@ -12,7 +12,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class JfrCPULockTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.LOCK_METRICS));
 
   @Test
   public void shouldHaveLockEvents() throws Exception {

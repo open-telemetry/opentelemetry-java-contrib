@@ -27,9 +27,12 @@ import io.opentelemetry.contrib.jfr.metrics.internal.memory.ParallelHeapSummaryH
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkReadHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.network.NetworkWriteHandler;
 import io.opentelemetry.contrib.jfr.metrics.internal.threads.ThreadCountHandler;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 final class HandlerRegistry {
   private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr";
@@ -38,7 +41,8 @@ final class HandlerRegistry {
 
   private HandlerRegistry() {}
 
-  static List<RecordedEventHandler> getHandlers(OpenTelemetry openTelemetry) {
+  static List<RecordedEventHandler> getHandlers(
+      OpenTelemetry openTelemetry, Predicate<JfrFeature> featurePredicate) {
     Meter meter =
         openTelemetry
             .getMeterProvider()
@@ -92,6 +96,20 @@ final class HandlerRegistry {
             new CodeCacheConfigurationHandler(meter),
             new DirectBufferStatisticsHandler(meter));
     handlers.addAll(basicHandlers);
+
+    // Filter and close disabled handlers
+    Iterator<RecordedEventHandler> iter = handlers.iterator();
+    while (iter.hasNext()) {
+      var handler = iter.next();
+      if (!featurePredicate.test(handler.getFeature())) {
+        try {
+          handler.close();
+        } catch (IOException e) {
+          // Ignored
+        }
+        iter.remove();
+      }
+    }
 
     return handlers;
   }

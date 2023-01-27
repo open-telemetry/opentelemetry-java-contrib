@@ -18,7 +18,10 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.METRIC_NAM
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -44,6 +47,8 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
   //  private static final Attributes ATTR_MEMORY_OLD_USED =
   //      Attributes.of(ATTR_TYPE, HEAP, ATTR_POOL, "G1 Old Gen"); // TODO needs jdk JFR support
 
+  private final List<AutoCloseable> observables = new ArrayList<>();
+
   private volatile long usageEden = 0;
   private volatile long usageEdenAfter = 0;
   private volatile long usageSurvivor = 0;
@@ -51,34 +56,42 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
   private volatile long committedEden = 0;
 
   public G1HeapSummaryHandler(Meter meter) {
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY)
-        .setDescription(METRIC_DESCRIPTION_MEMORY)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(usageEden, ATTR_MEMORY_EDEN);
-              measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
-        .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-        .setUnit(BYTES)
-        .buildWithCallback(
-            measurement -> {
-              measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
-              measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
-            });
-    meter
-        .upDownCounterBuilder(METRIC_NAME_COMMITTED)
-        .setDescription(METRIC_DESCRIPTION_COMMITTED)
-        .setUnit(BYTES)
-        .buildWithCallback(measurement -> measurement.record(committedEden, ATTR_MEMORY_EDEN));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY)
+            .setDescription(METRIC_DESCRIPTION_MEMORY)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(usageEden, ATTR_MEMORY_EDEN);
+                  measurement.record(usageSurvivor, ATTR_MEMORY_SURVIVOR);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_MEMORY_AFTER)
+            .setDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
+            .setUnit(BYTES)
+            .buildWithCallback(
+                measurement -> {
+                  measurement.record(usageEdenAfter, ATTR_MEMORY_EDEN);
+                  measurement.record(usageSurvivorAfter, ATTR_MEMORY_SURVIVOR);
+                }));
+    observables.add(
+        meter
+            .upDownCounterBuilder(METRIC_NAME_COMMITTED)
+            .setDescription(METRIC_DESCRIPTION_COMMITTED)
+            .setUnit(BYTES)
+            .buildWithCallback(measurement -> measurement.record(committedEden, ATTR_MEMORY_EDEN)));
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.MEMORY_POOL_METRICS;
   }
 
   @Override
@@ -122,5 +135,10 @@ public final class G1HeapSummaryHandler implements RecordedEventHandler {
     if (event.hasField(EDEN_TOTAL_SIZE)) {
       committedEden = event.getLong(EDEN_TOTAL_SIZE);
     }
+  }
+
+  @Override
+  public void close() {
+    closeObservables(observables);
   }
 }

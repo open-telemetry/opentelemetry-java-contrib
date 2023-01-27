@@ -16,6 +16,7 @@ import static io.opentelemetry.contrib.jfr.metrics.internal.Constants.MILLISECON
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.jfr.metrics.JfrFeature;
 import io.opentelemetry.contrib.jfr.metrics.internal.RecordedEventHandler;
 import java.time.Duration;
 import java.util.Optional;
@@ -48,7 +49,15 @@ public final class G1GarbageCollectionHandler implements RecordedEventHandler {
   }
 
   @Override
+  public JfrFeature getFeature() {
+    return JfrFeature.GC_DURATION_METRICS;
+  }
+
+  @Override
   public Optional<Duration> getPollingDuration() {
     return Optional.of(Duration.ofSeconds(1));
   }
+
+  @Override
+  public void close() {}
 }

@@ -21,16 +21,24 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class JfrExtension implements BeforeEachCallback, AfterEachCallback {
 
+  private final Consumer<JfrTelemetryBuilder> builderConsumer;
+
   private SdkMeterProvider meterProvider;
   private InMemoryMetricReader metricReader;
   private JfrTelemetry jfrTelemetry;
+
+  public JfrExtension(Consumer<JfrTelemetryBuilder> builderConsumer) {
+    this.builderConsumer = builderConsumer;
+  }
 
   @Override
   public void beforeEach(ExtensionContext context) {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setMeterProvider(meterProvider).build();
-    jfrTelemetry = JfrTelemetry.create(sdk);
+    JfrTelemetryBuilder builder = JfrTelemetry.builder(sdk);
+    builderConsumer.accept(builder);
+    jfrTelemetry = builder.build();
   }
 
   @Override

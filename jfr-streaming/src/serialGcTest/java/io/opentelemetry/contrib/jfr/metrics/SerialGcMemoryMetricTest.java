@@ -21,7 +21,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class SerialGcMemoryMetricTest {
 
-  @RegisterExtension JfrExtension jfrExtension = new JfrExtension();
+  @RegisterExtension
+  JfrExtension jfrExtension =
+      new JfrExtension(
+          builder -> builder.disableAllFeatures().enableFeature(JfrFeature.GC_DURATION_METRICS));
 
   @Test
   void shouldHaveMemoryLimitMetrics() {
