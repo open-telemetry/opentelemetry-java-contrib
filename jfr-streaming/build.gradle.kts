@@ -1,11 +1,18 @@
 plugins {
   id("otel.java-conventions")
-  id("java-library")
   id("java-test-fixtures")
+
+  id("otel.publish-conventions")
 }
+
+// Disable publishing test fixtures
+val javaComponent = components["java"] as AdhocComponentWithVariants
+javaComponent.withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }
+javaComponent.withVariantsFromConfiguration(configurations["testFixturesRuntimeElements"]) { skip() }
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
+
   testImplementation(testFixtures(project))
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
