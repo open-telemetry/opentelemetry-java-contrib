@@ -6,6 +6,7 @@
 package io.opentelemetry.resourceproviders;
 
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 
@@ -64,7 +65,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
     String serviceName = config.getString("otel.service.name");
     if (serviceName != null) {
       logger.log(
-          INFO,
+          FINE,
           "Skipping AppServerServiceName detection, otel.service.name is already set to {0}",
           serviceName);
       return false;
@@ -72,7 +73,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
     Map<String, String> resourceAttributes = config.getMap("otel.resource.attributes");
     if (resourceAttributes.containsKey(SERVICE_NAME.getKey())) {
       logger.log(
-          INFO,
+          FINE,
           "Skipping AppServerServiceName detection, otel.resource.attributes already contains {0}",
           resourceAttributes.get(SERVICE_NAME.getKey()));
       return false;
@@ -80,7 +81,7 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
     String existingName = existing.getAttribute(SERVICE_NAME);
     if (!"unknown_service:java".equals(existingName)) {
       logger.log(
-          INFO,
+          FINE,
           "Skipping AppServerServiceName detection, resource already contains {0}",
           existingName);
       return false;
