@@ -6,7 +6,9 @@
 package io.opentelemetry.resourceproviders;
 
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
@@ -37,11 +39,14 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
   @Override
   public Resource createResource(ConfigProperties config) {
     String serviceName = detectServiceName();
-    if (serviceName != null) {
-      logger.log(INFO, "Auto-detected service name '{0}'.", serviceName);
-      return Resource.create(Attributes.of(SERVICE_NAME, serviceName));
+    if (serviceName == null) {
+      logger.log(
+          WARNING,
+          "Service name could not be detected using common application server strategies.");
+      return Resource.empty();
     }
-    return Resource.empty();
+    logger.log(INFO, "Auto-detected service name {0}.", serviceName);
+    return Resource.create(Attributes.of(SERVICE_NAME, serviceName));
   }
 
   @Nullable
@@ -58,10 +63,30 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
   @Override
   public boolean shouldApply(ConfigProperties config, Resource existing) {
     String serviceName = config.getString("otel.service.name");
+    if (serviceName != null) {
+      logger.log(
+          FINE,
+          "Skipping AppServerServiceName detection, otel.service.name is already set to {0}",
+          serviceName);
+      return false;
+    }
     Map<String, String> resourceAttributes = config.getMap("otel.resource.attributes");
-    return serviceName == null
-        && !resourceAttributes.containsKey(SERVICE_NAME.getKey())
-        && "unknown_service:java".equals(existing.getAttribute(SERVICE_NAME));
+    if (resourceAttributes.containsKey(SERVICE_NAME.getKey())) {
+      logger.log(
+          FINE,
+          "Skipping AppServerServiceName detection, otel.resource.attributes already contains {0}",
+          resourceAttributes.get(SERVICE_NAME.getKey()));
+      return false;
+    }
+    String existingName = existing.getAttribute(SERVICE_NAME);
+    if (!"unknown_service:java".equals(existingName)) {
+      logger.log(
+          FINE,
+          "Skipping AppServerServiceName detection, resource already contains {0}",
+          existingName);
+      return false;
+    }
+    return true;
   }
 
   @Override

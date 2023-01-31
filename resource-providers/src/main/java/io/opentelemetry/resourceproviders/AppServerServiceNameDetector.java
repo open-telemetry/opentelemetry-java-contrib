@@ -49,11 +49,11 @@ final class AppServerServiceNameDetector implements ServiceNameDetector {
     }
 
     if (!dirTool.isDirectory(deploymentDir)) {
-      logger.log(FINE, "Deployment dir '{0}' doesn't exist.", deploymentDir);
+      logger.log(FINE, "Deployment dir {0} doesn't exist.", deploymentDir);
       return null;
     }
 
-    logger.log(FINE, "Looking for deployments in '{0}'.", deploymentDir);
+    logger.log(FINE, "Looking for deployments in {0}.", deploymentDir);
     try (Stream<Path> stream = dirTool.list(deploymentDir)) {
       return stream.map(this::detectName).filter(Objects::nonNull).findFirst().orElse(null);
     }
@@ -62,11 +62,11 @@ final class AppServerServiceNameDetector implements ServiceNameDetector {
   @Nullable
   private String detectName(Path path) {
     if (!appServer.isValidAppName(path)) {
-      logger.log(FINE, "Skipping '{0}'.", path);
+      logger.log(FINE, "Skipping {0}.", path);
       return null;
     }
 
-    logger.log(FINE, "Attempting service name detection in '{0}'.", path);
+    logger.log(FINE, "Attempting service name detection in {0}.", path);
     String name = path.getFileName().toString();
     if (dirTool.isDirectory(path)) {
       return parseBuddy.handleExplodedApp(path);

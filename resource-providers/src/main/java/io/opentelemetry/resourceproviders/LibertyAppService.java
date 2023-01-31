@@ -41,7 +41,7 @@ class LibertyAppService implements AppServer {
     if (logger.isLoggable(FINE)) {
       logger.log(
           FINE,
-          "Using WLP_USER_DIR '{0}', WLP_OUTPUT_DIR '{1}'.",
+          "Using WLP_USER_DIR {0}, WLP_OUTPUT_DIR {1}.",
           new Object[] {wlpUserDir, wlpOutputDir});
     }
     if (wlpUserDir != null

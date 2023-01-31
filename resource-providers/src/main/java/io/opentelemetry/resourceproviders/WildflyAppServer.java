@@ -29,7 +29,7 @@ class WildflyAppServer implements AppServer {
   @Override
   public Path getDeploymentDir() throws URISyntaxException {
     String programArguments = System.getProperty("sun.java.command");
-    logger.log(FINE, "Started with arguments '{0}'.", programArguments);
+    logger.log(FINE, "Started with arguments {0}.", programArguments);
     if (programArguments == null) {
       return null;
     }
@@ -42,7 +42,7 @@ class WildflyAppServer implements AppServer {
     // environment variable JBOSS_BASE_DIR to avoid parsing program arguments
     String jbossBaseDir = System.getenv("JBOSS_BASE_DIR");
     if (jbossBaseDir != null) {
-      logger.log(FINE, "Using JBOSS_BASE_DIR '{0}'.", jbossBaseDir);
+      logger.log(FINE, "Using JBOSS_BASE_DIR {0}.", jbossBaseDir);
       return Paths.get(jbossBaseDir, "deployments");
     }
 
