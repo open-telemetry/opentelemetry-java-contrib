@@ -8,6 +8,7 @@ plugins {
 }
 
 description = "Maven3 plugin for static instrumentation of projects code and dependencies"
+otelJava.moduleName.set("io.opentelemetry.contrib.staticinstrumenter.plugin.maven")
 base.archivesName.set("static-instrumentation-maven-plugin")
 
 dependencies {

@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry Noop API"
+otelJava.moduleName.set("io.opentelemetry.contrib.noopapi")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")

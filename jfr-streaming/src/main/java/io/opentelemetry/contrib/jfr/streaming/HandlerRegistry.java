@@ -32,12 +32,12 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 
 final class HandlerRegistry {
   private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr";
-  // TODO(jack-berg): read from version.properties
-  private static final String SCOPE_VERSION = "1.22.0-SNAPSHOT";
+  private static final String SCOPE_VERSION = readVersion();
 
   private HandlerRegistry() {}
 
@@ -112,5 +112,16 @@ final class HandlerRegistry {
     }
 
     return handlers;
+  }
+
+  private static String readVersion() {
+    Properties properties = new Properties();
+    try {
+      properties.load(HandlerRegistry.class.getResourceAsStream("version.properties"));
+    } catch (Exception e) {
+      // we left the attribute empty
+      return "unknown";
+    }
+    return properties.getProperty("contrib.version", "unknown");
   }
 }

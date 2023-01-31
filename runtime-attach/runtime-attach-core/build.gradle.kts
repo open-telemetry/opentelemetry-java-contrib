@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "To help in create an OpenTelemetry distro able to runtime attach an OpenTelemetry Java Instrumentation agent"
+otelJava.moduleName.set("io.opentelemetry.contrib.attach")
 
 dependencies {
   implementation("net.bytebuddy:byte-buddy-agent:1.12.22")
