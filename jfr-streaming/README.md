@@ -33,7 +33,7 @@ JfrTelemetry jfrTelemetry = JfrTelemetry.builder(openTelemetry)
 The following table describes the set of `JfrFeatures` available, whether each is enabled by
 default, and the telemetry each produces:
 
-<!-- Regenerate table following changes to instrumentation using ./gradlew generateDocs -->
+<!-- DO NOT MANUALLY EDIT. Regenerate table following changes to instrumentation using ./gradlew generateDocs -->
 <!-- generateDocsStart -->
 
 | JfrFeature | Default Enabled | Metrics |
