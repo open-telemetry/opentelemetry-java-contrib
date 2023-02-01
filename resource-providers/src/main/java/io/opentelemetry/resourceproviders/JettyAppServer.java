@@ -41,11 +41,11 @@ class JettyAppServer implements AppServer {
     // would be located in /dir/webapps.
 
     String programArguments = System.getProperty("sun.java.command");
-    logger.log(FINE, "Started with arguments '{0}'.", programArguments);
+    logger.log(FINE, "Started with arguments {0}.", programArguments);
     if (programArguments != null) {
       Path jettyBase = parseJettyBase(programArguments);
       if (jettyBase != null) {
-        logger.log(FINE, "Using jetty.base '{0}'.", jettyBase);
+        logger.log(FINE, "Using jetty.base {0}.", jettyBase);
         return jettyBase.resolve("webapps");
       }
     }
