@@ -36,7 +36,7 @@ import java.util.Properties;
 import java.util.function.Predicate;
 
 final class HandlerRegistry {
-  private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr";
+  private static final String SCOPE_NAME = "io.opentelemetry.contrib.jfr.streaming";
   private static final String SCOPE_VERSION = readVersion();
 
   private HandlerRegistry() {}
