@@ -4,7 +4,7 @@ plugins {
 }
 
 description = "Sampler which makes its decision based on semantic attributes values"
-otelJava.moduleName.set("io.opentelemetry.contrib.samplers")
+otelJava.moduleName.set("io.opentelemetry.contrib.sampler")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")

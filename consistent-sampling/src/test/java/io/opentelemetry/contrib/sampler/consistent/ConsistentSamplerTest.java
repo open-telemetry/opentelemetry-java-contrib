@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.samplers;
+package io.opentelemetry.contrib.sampler.consistent;
 
-import static io.opentelemetry.contrib.samplers.OtelTraceState.getInvalidP;
-import static io.opentelemetry.contrib.samplers.OtelTraceState.getInvalidR;
+import static io.opentelemetry.contrib.sampler.consistent.OtelTraceState.getInvalidP;
+import static io.opentelemetry.contrib.sampler.consistent.OtelTraceState.getInvalidR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

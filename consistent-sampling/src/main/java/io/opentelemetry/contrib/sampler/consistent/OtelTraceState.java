@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.samplers;
+package io.opentelemetry.contrib.sampler.consistent;
 
 import java.util.ArrayList;
 import java.util.Collections;

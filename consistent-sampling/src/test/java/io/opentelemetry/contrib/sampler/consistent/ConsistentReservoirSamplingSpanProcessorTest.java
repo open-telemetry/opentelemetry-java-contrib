@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.samplers;
+package io.opentelemetry.contrib.sampler.consistent;
 
-import static io.opentelemetry.contrib.samplers.ConsistentReservoirSamplingSpanProcessor.DEFAULT_EXPORT_TIMEOUT_NANOS;
-import static io.opentelemetry.contrib.util.TestUtil.verifyObservedPvaluesUsingGtest;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentReservoirSamplingSpanProcessor.DEFAULT_EXPORT_TIMEOUT_NANOS;
+import static io.opentelemetry.contrib.sampler.consistent.TestUtil.verifyObservedPvaluesUsingGtest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;

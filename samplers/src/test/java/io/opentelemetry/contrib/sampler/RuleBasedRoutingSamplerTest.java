@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.samplers;
+package io.opentelemetry.contrib.sampler;
 
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
