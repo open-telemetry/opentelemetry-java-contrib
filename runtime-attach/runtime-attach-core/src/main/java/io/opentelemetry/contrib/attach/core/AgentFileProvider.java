@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.attach;
+package io.opentelemetry.contrib.attach.core;
 
 import java.io.File;
 import java.io.IOException;

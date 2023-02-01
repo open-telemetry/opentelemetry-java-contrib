@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.attach;
+package io.opentelemetry.contrib.attach.core;
 
 /**
  * Exception that gets thrown if a problem occurs during the attachment of the OpenTelemetry agent.

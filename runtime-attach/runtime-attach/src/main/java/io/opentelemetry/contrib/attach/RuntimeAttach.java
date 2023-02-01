@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.attach;
 
+import io.opentelemetry.contrib.attach.core.CoreRuntimeAttach;
+
 /** This class allows you to attach the OpenTelemetry Java agent at runtime. */
 public final class RuntimeAttach {
 
