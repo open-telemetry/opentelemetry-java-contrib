@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+/** Called from {@code ./gradlew generateDocs} to generate the markdown table in README.md. */
 public class GenerateDocs {
 
   private static final Logger LOGGER = Logger.getLogger(GenerateDocs.class.getName());
