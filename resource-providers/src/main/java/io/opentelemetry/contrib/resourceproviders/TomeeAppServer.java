@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.resourceproviders;
+package io.opentelemetry.contrib.resourceproviders;
 
 import java.net.URISyntaxException;
 import java.net.URL;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.resourceproviders;
+package io.opentelemetry.contrib.resourceproviders;
 
 import static java.util.logging.Level.FINE;
 

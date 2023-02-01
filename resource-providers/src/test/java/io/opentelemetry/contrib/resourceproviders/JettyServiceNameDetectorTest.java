@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.resourceproviders;
+package io.opentelemetry.contrib.resourceproviders;
 
-import static io.opentelemetry.resourceproviders.JettyAppServer.parseJettyBase;
+import static io.opentelemetry.contrib.resourceproviders.JettyAppServer.parseJettyBase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
