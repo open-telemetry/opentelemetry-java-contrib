@@ -42,10 +42,10 @@ class ParseBuddyTest {
       new ByteArrayInputStream(
           ("<web-app>"
                   + "<servlet>"
-                  + "<servlet-name>pony</servlet-name>"
-                  + "<display-name>buck</display-name>"
-                  + "<display-name>huck</display-name>"
-                  + "<display-name>shuck</display-name>"
+                  + "<servlet-name>NOT-ME</servlet-name>"
+                  + "<display-name>USE-ME</display-name>"
+                  + "<display-name>ME-NEITHER</display-name>"
+                  + "<display-name>NOT-THIS-ONE</display-name>"
                   + "</servlet>"
                   + "</web-app>")
               .getBytes(UTF_8));
@@ -109,12 +109,12 @@ class ParseBuddyTest {
   void prefersDisplayNameOverServletName() throws Exception {
     when(filesystem.isRegularFile(webXml)).thenReturn(true);
     when(filesystem.newInputStream(webXml)).thenReturn(webXmlStreamBoth);
-    when(appServer.isValidResult(path, "buck")).thenReturn(true);
+    when(appServer.isValidResult(path, "USE-ME")).thenReturn(true);
 
     ParseBuddy parseBuddy = new ParseBuddy(appServer, filesystem);
 
     String result = parseBuddy.handleExplodedApp(path);
-    assertThat(result).isEqualTo("buck");
+    assertThat(result).isEqualTo("USE-ME");
   }
 
   @Test
