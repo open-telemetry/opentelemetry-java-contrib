@@ -1,11 +1,18 @@
 plugins {
   id("otel.java-conventions")
-  id("java-library")
   id("java-test-fixtures")
+
+  id("otel.publish-conventions")
 }
+
+// Disable publishing test fixtures
+val javaComponent = components["java"] as AdhocComponentWithVariants
+javaComponent.withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }
+javaComponent.withVariantsFromConfiguration(configurations["testFixturesRuntimeElements"]) { skip() }
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
+
   testImplementation(testFixtures(project))
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
@@ -37,7 +44,7 @@ tasks.create("generateDocs", JavaExec::class) {
   group = "build"
   description = "Generate table for README.md"
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("io.opentelemetry.contrib.jfr.metrics.GenerateDocs")
+  mainClass.set("io.opentelemetry.contrib.jfr.streaming.GenerateDocs")
   systemProperties.set("jfr.readme.path", project.projectDir.toString() + "/README.md")
 }
 tasks.getByName("build").dependsOn("generateDocs")
