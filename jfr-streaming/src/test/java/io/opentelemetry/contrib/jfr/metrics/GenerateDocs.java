@@ -46,13 +46,13 @@ public class GenerateDocs {
     }
 
     LOGGER.info("Generating JFR docs. Writing to " + jfrReadmePath);
-    String markdownTable = generateMarkdownTable1();
+    String markdownTable = generateMarkdownTable();
     LOGGER.info("Markdown table: " + System.lineSeparator() + markdownTable);
     writeReadme(markdownTable, jfrReadmePath);
     LOGGER.info("Done");
   }
 
-  private static String generateMarkdownTable1() throws InterruptedException {
+  private static String generateMarkdownTable() throws InterruptedException {
     // Create new JfrTelemetry for each JfrFeature
     Map<JfrFeature, JfrTelemetryWithFeature> map = new HashMap<>();
     for (JfrFeature feature : JfrFeature.values()) {
