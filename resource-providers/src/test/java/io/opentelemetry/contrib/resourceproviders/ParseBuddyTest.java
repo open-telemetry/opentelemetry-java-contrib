@@ -30,7 +30,7 @@ class ParseBuddyTest {
   final Path applicationXml = Paths.get("dir/META-INF/application.xml");
   final InputStream webXmlStream =
       new ByteArrayInputStream(
-          "<web-app><servlet><display-name>goats</display-name></servlet></web-app>"
+          "<web-app><display-name>goats</display-name><servlet><servlet-name>xxx</servlet-name></servlet></web-app>"
               .getBytes(UTF_8));
 
   final InputStream webXmlStreamServletName =
@@ -46,6 +46,17 @@ class ParseBuddyTest {
                   + "<display-name>buck</display-name>"
                   + "<display-name>huck</display-name>"
                   + "<display-name>shuck</display-name>"
+                  + "</servlet>"
+                  + "</web-app>")
+              .getBytes(UTF_8));
+
+  final InputStream multipleDisplayNames =
+      new ByteArrayInputStream(
+          ("<web-app>"
+              + "<display-name>USEME</display-name>"
+                  + "<servlet>"
+                  + "<servlet-name>NOT-SERVLET-NAME</servlet-name>"
+                  + "<display-name>NOT-INNER-DISPLAY-NAME</display-name>"
                   + "</servlet>"
                   + "</web-app>")
               .getBytes(UTF_8));
@@ -68,6 +79,18 @@ class ParseBuddyTest {
 
     String result = parseBuddy.handleExplodedApp(path);
     assertThat(result).isEqualTo("goats");
+  }
+
+  @Test
+  void webXmlUsesOuterDisplayName() throws Exception {
+    when(filesystem.isRegularFile(webXml)).thenReturn(true);
+    when(filesystem.newInputStream(webXml)).thenReturn(multipleDisplayNames);
+    when(appServer.isValidResult(path, "USEME")).thenReturn(true);
+
+    ParseBuddy parseBuddy = new ParseBuddy(appServer, filesystem);
+
+    String result = parseBuddy.handleExplodedApp(path);
+    assertThat(result).isEqualTo("USEME");
   }
 
   @Test
