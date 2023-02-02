@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry AWS X-Ray Support"
+otelJava.moduleName.set("io.opentelemetry.contrib.awsxray")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")

@@ -10,6 +10,7 @@ plugins {
 // equivalent to the Maven plugin `plexus-component-metadata:generate-metadata`
 
 description = "Maven extension to observe Maven builds with distributed traces using OpenTelemetry SDK"
+otelJava.moduleName.set("io.opentelemetry.maven")
 
 dependencies {
   implementation("org.codehaus.plexus:plexus-component-annotations:2.1.1")

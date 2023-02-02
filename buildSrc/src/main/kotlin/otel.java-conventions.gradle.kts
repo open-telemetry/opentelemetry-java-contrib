@@ -1,3 +1,4 @@
+import io.opentelemetry.gradle.OtelJavaExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
@@ -7,6 +8,8 @@ plugins {
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
 }
+
+val otelJava = extensions.create<OtelJavaExtension>("otelJava")
 
 group = "io.opentelemetry.contrib"
 
@@ -82,6 +85,29 @@ tasks {
       // links("https://docs.oracle.com/javase/8/docs/api/")
 
       addBooleanOption("Xdoclint:all,-missing", true)
+    }
+  }
+}
+
+// Add version information to published artifacts.
+plugins.withId("otel.publish-conventions") {
+  tasks {
+    register("generateVersionResource") {
+      val moduleName = otelJava.moduleName
+      val propertiesDir = moduleName.map { File(buildDir, "generated/properties/${it.replace('.', '/')}") }
+
+      inputs.property("project.version", project.version.toString())
+      outputs.dir(propertiesDir)
+
+      doLast {
+        File(propertiesDir.get(), "version.properties").writeText("contrib.version=${project.version}")
+      }
+    }
+  }
+
+  sourceSets {
+    main {
+      output.dir("$buildDir/generated/properties", "builtBy" to "generateVersionResource")
     }
   }
 }

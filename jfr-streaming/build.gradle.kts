@@ -5,6 +5,9 @@ plugins {
   id("otel.publish-conventions")
 }
 
+description = "OpenTelemetry JFR Streaming"
+otelJava.moduleName.set("io.opentelemetry.contrib.jfr.streaming")
+
 // Disable publishing test fixtures
 val javaComponent = components["java"] as AdhocComponentWithVariants
 javaComponent.withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }

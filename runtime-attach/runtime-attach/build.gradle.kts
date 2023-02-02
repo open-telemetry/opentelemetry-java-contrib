@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "To runtime attach the OpenTelemetry Java Instrumentation agent"
+otelJava.moduleName.set("io.opentelemetry.contrib.attach")
 
 val agent: Configuration by configurations.creating {
   isCanBeResolved = true

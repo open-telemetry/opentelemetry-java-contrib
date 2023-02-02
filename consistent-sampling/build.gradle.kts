@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "Sampler and exporter implementations for consistent sampling"
+otelJava.moduleName.set("io.opentelemetry.contrib.sampler.consistent")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")

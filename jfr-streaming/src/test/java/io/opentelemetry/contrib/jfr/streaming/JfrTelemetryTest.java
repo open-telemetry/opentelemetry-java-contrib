@@ -5,8 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.streaming;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -45,7 +44,16 @@ class JfrTelemetryTest {
       assertThat(logs.getEvents()).hasSize(1);
       logs.assertContains("Starting JfrTelemetry");
 
-      await().untilAsserted(() -> assertThat(reader.collectAllMetrics()).isNotEmpty());
+      assertThat(reader.collectAllMetrics())
+          .isNotEmpty()
+          .allSatisfy(
+              metric -> {
+                assertThat(metric.getInstrumentationScopeInfo().getName())
+                    .isEqualTo("io.opentelemetry.contrib.jfr.streaming");
+                assertThat(metric.getInstrumentationScopeInfo().getVersion())
+                    .matches("1\\..*-alpha.*");
+              });
+      ;
     }
   }
 

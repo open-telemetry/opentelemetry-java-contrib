@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "Prometheus client bridge"
+otelJava.moduleName.set("io.opentelemetry.contrib.metrics.prometheus.clientbridge")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-metrics")

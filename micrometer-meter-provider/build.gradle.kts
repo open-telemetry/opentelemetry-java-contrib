@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry Micrometer MeterProvider"
+otelJava.moduleName.set("io.opentelemetry.contrib.metrics.micrometer")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
