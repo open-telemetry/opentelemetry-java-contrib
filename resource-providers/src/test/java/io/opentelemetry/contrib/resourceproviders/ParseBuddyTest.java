@@ -53,7 +53,7 @@ class ParseBuddyTest {
   final InputStream multipleDisplayNames =
       new ByteArrayInputStream(
           ("<web-app>"
-              + "<display-name>USEME</display-name>"
+                  + "<display-name>USEME</display-name>"
                   + "<servlet>"
                   + "<servlet-name>NOT-SERVLET-NAME</servlet-name>"
                   + "<display-name>NOT-INNER-DISPLAY-NAME</display-name>"
