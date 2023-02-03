@@ -7,6 +7,7 @@ plugins {
 }
 
 description = "JMX metrics gathering Groovy script runner"
+otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
@@ -69,6 +70,8 @@ testing {
 
 tasks {
   shadowJar {
+    mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }

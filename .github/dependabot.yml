@@ -17,6 +17,12 @@ updates:
       - dependency-name: "io.micrometer:micrometer-core"
         # compileOnly dependency on old micrometer-core version is intentional
         versions: [ "(1.1.0,)" ]
+      - dependency-name: "org.apache.maven:maven-plugin-api"
+        # static instrumenter maven plugin uses old maven API version for better compatibility
+        versions: [ "(3.5.0,)" ]
+      - dependency-name: "org.apache.maven:maven-core"
+        # compileOnly dependency that matches the maven-plugin-api version in the static instrumenter maven plugin
+        versions: [ "(3.5.0,)" ]
       - dependency-name: "org.junit-pioneer:junit-pioneer"
         # junit-pioneer 2.x requires Java 11
         versions: [ "[1,)" ]

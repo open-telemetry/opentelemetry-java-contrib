@@ -1,3 +1,4 @@
+import io.opentelemetry.gradle.OtelJavaExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
@@ -7,6 +8,8 @@ plugins {
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
 }
+
+val otelJava = extensions.create<OtelJavaExtension>("otelJava")
 
 group = "io.opentelemetry.contrib"
 
@@ -40,8 +43,8 @@ tasks {
             "-Xlint:-options",
 
             // Fail build on any warning
-            "-Werror"
-          )
+            "-Werror",
+          ),
         )
       }
 
@@ -86,6 +89,29 @@ tasks {
   }
 }
 
+// Add version information to published artifacts.
+plugins.withId("otel.publish-conventions") {
+  tasks {
+    register("generateVersionResource") {
+      val moduleName = otelJava.moduleName
+      val propertiesDir = moduleName.map { File(buildDir, "generated/properties/${it.replace('.', '/')}") }
+
+      inputs.property("project.version", project.version.toString())
+      outputs.dir(propertiesDir)
+
+      doLast {
+        File(propertiesDir.get(), "version.properties").writeText("contrib.version=${project.version}")
+      }
+    }
+  }
+
+  sourceSets {
+    main {
+      output.dir("$buildDir/generated/properties", "builtBy" to "generateVersionResource")
+    }
+  }
+}
+
 val dependencyManagement by configurations.creating {
   isCanBeConsumed = false
   isCanBeResolved = false
@@ -109,7 +135,7 @@ dependencies {
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project)
+      implementation(project(project.path))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
@@ -121,6 +147,7 @@ testing {
       implementation("org.mockito:mockito-junit-jupiter")
       implementation("org.assertj:assertj-core")
       implementation("org.awaitility:awaitility")
+      implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
     }

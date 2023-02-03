@@ -12,7 +12,7 @@ public class AbstractAttachmentTest {
 
   @BeforeAll
   static void disableMainThreadCheck() {
-    System.setProperty(CoreRuntimeAttach.MAIN_METHOD_CHECK_PROP, "false");
+    System.setProperty("otel.javaagent.testing.runtime-attach.main-method-check", "false");
   }
 
   boolean isAttached() {

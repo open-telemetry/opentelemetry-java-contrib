@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry Micrometer MeterProvider"
+otelJava.moduleName.set("io.opentelemetry.contrib.metrics.micrometer")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
@@ -25,7 +26,7 @@ testing {
   suites {
     val integrationTest by registering(JvmTestSuite::class) {
       dependencies {
-        implementation("io.micrometer:micrometer-registry-prometheus:1.10.2")
+        implementation("io.micrometer:micrometer-registry-prometheus:1.10.3")
       }
     }
   }

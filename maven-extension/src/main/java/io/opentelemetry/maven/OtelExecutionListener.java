@@ -269,7 +269,9 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
       // we already capture the context, no need to capture it again
       exception = executionException.getCause();
     }
-    mojoExecutionSpan.recordException(exception);
+    if (exception != null) {
+      mojoExecutionSpan.recordException(exception);
+    }
     mojoExecutionSpan.end();
   }
 

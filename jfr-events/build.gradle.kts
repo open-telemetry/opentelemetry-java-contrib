@@ -4,6 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry JFR Events"
+otelJava.moduleName.set("io.opentelemetry.contrib.jfrevent")
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk")

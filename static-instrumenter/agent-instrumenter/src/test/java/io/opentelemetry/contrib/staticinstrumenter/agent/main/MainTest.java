@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -30,7 +31,7 @@ public class MainTest {
     AdditionalClasses.put("additionalTwo.class", new byte[0]);
 
     // when
-    underTest.saveTransformedJarsTo(new String[] {getResourcePath("test.jar")}, destination);
+    underTest.saveTransformedJarsTo(List.of(getResourcePath("test.jar")), destination);
 
     // then
     JarTestUtil.assertJar(

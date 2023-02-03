@@ -5,6 +5,7 @@ plugins {
 }
 
 description = "OpenTelemetry AWS Resources Support"
+otelJava.moduleName.set("io.opentelemetry.contrib.aws.resource")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
