@@ -17,6 +17,9 @@ updates:
       - dependency-name: "io.micrometer:micrometer-core"
         # compileOnly dependency on old micrometer-core version is intentional
         versions: [ "(1.1.0,)" ]
+      - dependency-name: "org.junit-pioneer:junit-pioneer"
+        # junit-pioneer 2.x requires Java 11
+        versions: [ "[1,)" ]
     registries:
       - gradle-plugin-portal
     schedule:
