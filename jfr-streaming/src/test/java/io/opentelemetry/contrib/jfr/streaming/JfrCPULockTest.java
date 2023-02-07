@@ -10,7 +10,7 @@ import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.MILLISEC
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class JfrCPULockTest {
+class JfrCPULockTest {
 
   @RegisterExtension
   JfrExtension jfrExtension =
@@ -18,7 +18,7 @@ public class JfrCPULockTest {
           builder -> builder.disableAllFeatures().enableFeature(JfrFeature.LOCK_METRICS));
 
   @Test
-  public void shouldHaveLockEvents() throws Exception {
+  void shouldHaveLockEvents() throws Exception {
     // This should generate some events
     System.gc();
     synchronized (this) {

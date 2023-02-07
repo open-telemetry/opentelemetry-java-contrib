@@ -24,9 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
-import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
-import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -41,34 +39,32 @@ class G1GcMemoryMetricTest {
                   .enableFeature(JfrFeature.GC_DURATION_METRICS)
                   .enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
-  private void usageCheck(ThrowingConsumer<MetricData> attributeCheck) {
+  @Test
+  void shouldHaveMemoryUsageMetrics() {
+    System.gc();
+    // Test to make sure there's metric data for both eden and survivor spaces.
+    // TODO: once G1 old gen usage added to jdk.G1HeapSummary (in JDK 21), test for it here too.
     jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY)
                 .hasUnit(BYTES)
                 .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                .satisfies(attributeCheck),
+                .satisfies(
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_G1_EDEN_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_G1_SURVIVOR_SPACE))),
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY_AFTER)
                 .hasUnit(BYTES)
                 .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-                .satisfies(attributeCheck));
-  }
-
-  @Test
-  void shouldHaveMemoryUsageMetrics() {
-    System.gc();
-    // Test to make sure there's metric data for both eden and survivor spaces.
-    // TODO: once G1 old gen usage added to jdk.G1HeapSummary (in JDK 21), test for it here too.
-    usageCheck(
-        metricData -> {
-          SumData<?> sumData = metricData.getLongSumData();
-          assertThat(sumData.getPoints())
-              .anyMatch(p -> p.getAttributes().equals(ATTR_G1_EDEN_SPACE))
-              .anyMatch(p -> p.getAttributes().equals(ATTR_G1_SURVIVOR_SPACE));
-        });
+                .satisfies(
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_G1_EDEN_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_G1_SURVIVOR_SPACE))));
   }
 
   @Test

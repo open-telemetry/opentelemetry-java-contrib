@@ -26,9 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
-import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
-import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -43,33 +41,32 @@ class PsGcMemoryMetricTest {
                   .enableFeature(JfrFeature.GC_DURATION_METRICS)
                   .enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
-  private void usageCheck(ThrowingConsumer<MetricData> attributeCheck) {
+  @Test
+  void shouldHaveMemoryUsageMetrics() {
+    System.gc();
     jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY)
                 .hasUnit(BYTES)
                 .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                .satisfies(attributeCheck),
+                .satisfies(
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_EDEN_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_SURVIVOR_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_OLD_GEN))),
         metric ->
             metric
                 .hasName(METRIC_NAME_MEMORY_AFTER)
                 .hasUnit(BYTES)
                 .hasDescription(METRIC_DESCRIPTION_MEMORY_AFTER)
-                .satisfies(attributeCheck));
-  }
-
-  @Test
-  void shouldHaveMemoryUsageMetrics() {
-    System.gc();
-    usageCheck(
-        metricData -> {
-          SumData<?> sumData = metricData.getLongSumData();
-          assertThat(sumData.getPoints())
-              .anyMatch(p -> p.getAttributes().equals(ATTR_PS_EDEN_SPACE))
-              .anyMatch(p -> p.getAttributes().equals(ATTR_PS_SURVIVOR_SPACE))
-              .anyMatch(p -> p.getAttributes().equals(ATTR_PS_OLD_GEN));
-        });
+                .satisfies(
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_EDEN_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_SURVIVOR_SPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_PS_OLD_GEN))));
   }
 
   @Test
@@ -111,7 +108,7 @@ class PsGcMemoryMetricTest {
   }
 
   @Test
-  void shouldHaveGCDurationMetrics() throws Exception {
+  void shouldHaveGCDurationMetrics() {
     // TODO: Need a reliable way to test old and young gen GC in isolation.
     System.gc();
     jfrExtension.waitAndAssertMetrics(

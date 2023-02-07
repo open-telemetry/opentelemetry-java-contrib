@@ -39,6 +39,7 @@ class BufferMetricTest {
     ByteBuffer buffer = ByteBuffer.allocateDirect(10000);
     buffer.put("test".getBytes(StandardCharsets.UTF_8));
 
+    Attributes directBuffer = Attributes.of(ATTR_POOL, "direct");
     jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
@@ -52,8 +53,7 @@ class BufferMetricTest {
                                 point.satisfies(
                                     pointData -> {
                                       assertThat(pointData.getValue()).isGreaterThan(0);
-                                      assertThat(pointData.getAttributes())
-                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
+                                      assertThat(pointData.getAttributes()).isEqualTo(directBuffer);
                                     }))),
         metric ->
             metric
@@ -67,8 +67,7 @@ class BufferMetricTest {
                                 point.satisfies(
                                     pointData -> {
                                       assertThat(pointData.getValue()).isGreaterThan(0);
-                                      assertThat(pointData.getAttributes())
-                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
+                                      assertThat(pointData.getAttributes()).isEqualTo(directBuffer);
                                     }))),
         metric ->
             metric
@@ -82,8 +81,7 @@ class BufferMetricTest {
                                 point.satisfies(
                                     pointData -> {
                                       assertThat(pointData.getValue()).isGreaterThan(0);
-                                      assertThat(pointData.getAttributes())
-                                          .isEqualTo(Attributes.of(ATTR_POOL, "direct"));
+                                      assertThat(pointData.getAttributes()).isEqualTo(directBuffer);
                                     }))));
   }
 }

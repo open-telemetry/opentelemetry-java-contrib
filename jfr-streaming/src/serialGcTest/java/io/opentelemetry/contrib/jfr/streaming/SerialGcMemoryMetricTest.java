@@ -14,8 +14,6 @@ import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.MILLISEC
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.sdk.metrics.data.HistogramData;
-import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -48,27 +46,24 @@ class SerialGcMemoryMetricTest {
                 .hasUnit(MILLISECONDS)
                 .hasDescription(METRIC_DESCRIPTION_GC_DURATION)
                 .satisfies(
-                    metricData -> {
-                      HistogramData data = metricData.getHistogramData();
-                      assertThat(data.getPoints())
-                          .map(HistogramPointData.class::cast)
-                          .anyMatch(
-                              p ->
-                                  p.getSum() > 0
-                                      && (p.getAttributes()
-                                              .equals(
-                                                  Attributes.of(
-                                                      ATTR_GC,
-                                                      "Copy",
-                                                      ATTR_ACTION,
-                                                      END_OF_MINOR_GC))
-                                          || p.getAttributes()
-                                              .equals(
-                                                  Attributes.of(
-                                                      ATTR_GC,
-                                                      "MarkSweepCompact",
-                                                      ATTR_ACTION,
-                                                      END_OF_MAJOR_GC))));
-                    }));
+                    data ->
+                        assertThat(data.getHistogramData().getPoints())
+                            .anyMatch(
+                                p ->
+                                    p.getSum() > 0
+                                        && (p.getAttributes()
+                                                .equals(
+                                                    Attributes.of(
+                                                        ATTR_GC,
+                                                        "Copy",
+                                                        ATTR_ACTION,
+                                                        END_OF_MINOR_GC))
+                                            || p.getAttributes()
+                                                .equals(
+                                                    Attributes.of(
+                                                        ATTR_GC,
+                                                        "MarkSweepCompact",
+                                                        ATTR_ACTION,
+                                                        END_OF_MAJOR_GC))))));
   }
 }
