@@ -25,7 +25,7 @@ repositories {
   mavenLocal()
 }
 
-val groovyVersion = "3.0.14"
+val groovyVersion = "3.0.15"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
