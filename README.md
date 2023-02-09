@@ -62,7 +62,6 @@ Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/
 
 Emeritus maintainers:
 
-- [Anuraag Agrawal](https://github.com/anuraaga), AWS
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
