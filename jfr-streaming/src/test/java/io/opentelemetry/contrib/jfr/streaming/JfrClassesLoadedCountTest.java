@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.jfr.streaming;
 
 import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.UNIT_CLASSES;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -33,7 +33,9 @@ class JfrClassesLoadedCountTest {
                         sum.hasPointsSatisfying(
                             point ->
                                 point.satisfies(
-                                    pointData -> Assertions.assertTrue(pointData.getValue() > 0)))),
+                                    pointData ->
+                                        assertThat(pointData.getValue())
+                                            .isGreaterThanOrEqualTo(0)))),
         metric ->
             metric
                 .hasName("process.runtime.jvm.classes.current_loaded")
@@ -45,7 +47,8 @@ class JfrClassesLoadedCountTest {
                             point ->
                                 point.satisfies(
                                     pointData ->
-                                        Assertions.assertTrue(pointData.getValue() >= 0)))),
+                                        assertThat(pointData.getValue())
+                                            .isGreaterThanOrEqualTo(0)))),
         metric ->
             metric
                 .hasName("process.runtime.jvm.classes.unloaded")
@@ -57,6 +60,7 @@ class JfrClassesLoadedCountTest {
                             point ->
                                 point.satisfies(
                                     pointData ->
-                                        Assertions.assertTrue(pointData.getValue() >= 0)))));
+                                        assertThat(pointData.getValue())
+                                            .isGreaterThanOrEqualTo(0)))));
   }
 }

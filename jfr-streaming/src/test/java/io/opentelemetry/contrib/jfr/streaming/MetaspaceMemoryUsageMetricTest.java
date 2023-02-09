@@ -12,7 +12,6 @@ import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.METRIC_D
 import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.METRIC_NAME_MEMORY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -23,10 +22,7 @@ class MetaspaceMemoryUsageMetricTest {
       new JfrExtension(
           builder -> builder.disableAllFeatures().enableFeature(JfrFeature.MEMORY_POOL_METRICS));
 
-  /**
-   * This is a basic test for process.runtime.jvm.memory.usage and
-   * process.runtime.jvm.memory.usage_after_last_gc metrics.
-   */
+  /** This is a basic test for process.runtime.jvm.memory.usage. */
   @Test
   void shouldHaveMemoryUsageMetrics() {
     System.gc();
@@ -39,21 +35,9 @@ class MetaspaceMemoryUsageMetricTest {
                 .hasUnit(BYTES)
                 .hasDescription(METRIC_DESCRIPTION_MEMORY)
                 .satisfies(
-                    metricData -> {
-                      SumData<?> sumData = metricData.getLongSumData();
-                      assertThat(sumData.getPoints())
-                          .anyMatch(p -> p.getAttributes().equals(ATTR_METASPACE));
-                    }),
-        metric ->
-            metric
-                .hasName(METRIC_NAME_MEMORY)
-                .hasUnit(BYTES)
-                .hasDescription(METRIC_DESCRIPTION_MEMORY)
-                .satisfies(
-                    metricData -> {
-                      SumData<?> sumData = metricData.getLongSumData();
-                      assertThat(sumData.getPoints())
-                          .anyMatch(p -> p.getAttributes().equals(ATTR_COMPRESSED_CLASS_SPACE));
-                    }));
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_METASPACE))
+                            .anyMatch(p -> p.getAttributes().equals(ATTR_COMPRESSED_CLASS_SPACE))));
   }
 }

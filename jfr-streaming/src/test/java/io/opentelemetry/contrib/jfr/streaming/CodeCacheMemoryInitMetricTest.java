@@ -11,8 +11,6 @@ import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.METRIC_D
 import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.METRIC_NAME_MEMORY_INIT;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.sdk.metrics.data.LongPointData;
-import io.opentelemetry.sdk.metrics.data.SumData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -32,14 +30,11 @@ class CodeCacheMemoryInitMetricTest {
                 .hasDescription(METRIC_DESCRIPTION_MEMORY_INIT)
                 .hasUnit(BYTES)
                 .satisfies(
-                    metricData -> {
-                      SumData<?> sumData = metricData.getLongSumData();
-                      assertThat(sumData.getPoints())
-                          .map(LongPointData.class::cast)
-                          .anyMatch(
-                              pointData ->
-                                  pointData.getValue() > 0
-                                      && pointData.getAttributes().equals(ATTR_CODE_CACHE));
-                    }));
+                    data ->
+                        assertThat(data.getLongSumData().getPoints())
+                            .anyMatch(
+                                pointData ->
+                                    pointData.getValue() > 0
+                                        && pointData.getAttributes().equals(ATTR_CODE_CACHE))));
   }
 }

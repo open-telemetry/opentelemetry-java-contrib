@@ -10,7 +10,7 @@ import static io.opentelemetry.contrib.jfr.streaming.internal.Constants.UNIT_UTI
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class JfrOverallCPULoadHandlerTest {
+class JfrOverallCPULoadHandlerTest {
 
   @RegisterExtension
   JfrExtension jfrExtension =
@@ -19,7 +19,7 @@ public class JfrOverallCPULoadHandlerTest {
               builder.disableAllFeatures().enableFeature(JfrFeature.CPU_UTILIZATION_METRICS));
 
   @Test
-  public void shouldHaveCPULoadEvents() throws Exception {
+  void shouldHaveCPULoadEvents() {
     jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
