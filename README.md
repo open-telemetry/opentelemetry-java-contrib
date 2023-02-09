@@ -58,8 +58,11 @@ Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
+
+Emeritus maintainers:
+
+- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
 
