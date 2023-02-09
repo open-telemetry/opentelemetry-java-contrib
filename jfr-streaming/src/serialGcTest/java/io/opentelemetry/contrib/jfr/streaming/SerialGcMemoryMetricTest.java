@@ -25,20 +25,17 @@ class SerialGcMemoryMetricTest {
           builder -> builder.disableAllFeatures().enableFeature(JfrFeature.GC_DURATION_METRICS));
 
   @Test
-  void shouldHaveMemoryLimitMetrics() {
+  void shouldHaveMemoryMetrics() {
     // TODO: needs JFR support. Placeholder.
   }
 
   @Test
-  void shouldHaveMemoryUsageMetrics() {
-    System.gc();
-    // TODO: needs JFR support. Placeholder.
-  }
-
-  @Test
-  void shouldHaveGCDurationMetrics() throws Exception {
+  void shouldHaveGCDurationMetrics() {
     // TODO: Need a reliable way to test old and young gen GC in isolation.
     System.gc();
+    Attributes minorGcAttributes = Attributes.of(ATTR_GC, "Copy", ATTR_ACTION, END_OF_MINOR_GC);
+    Attributes majorGcAttributes =
+        Attributes.of(ATTR_GC, "MarkSweepCompact", ATTR_ACTION, END_OF_MAJOR_GC);
     jfrExtension.waitAndAssertMetrics(
         metric ->
             metric
@@ -51,19 +48,7 @@ class SerialGcMemoryMetricTest {
                             .anyMatch(
                                 p ->
                                     p.getSum() > 0
-                                        && (p.getAttributes()
-                                                .equals(
-                                                    Attributes.of(
-                                                        ATTR_GC,
-                                                        "Copy",
-                                                        ATTR_ACTION,
-                                                        END_OF_MINOR_GC))
-                                            || p.getAttributes()
-                                                .equals(
-                                                    Attributes.of(
-                                                        ATTR_GC,
-                                                        "MarkSweepCompact",
-                                                        ATTR_ACTION,
-                                                        END_OF_MAJOR_GC))))));
+                                        && (p.getAttributes().equals(minorGcAttributes)
+                                            || p.getAttributes().equals(majorGcAttributes)))));
   }
 }

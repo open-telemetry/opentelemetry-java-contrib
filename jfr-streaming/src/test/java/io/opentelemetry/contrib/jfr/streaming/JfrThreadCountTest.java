@@ -24,10 +24,10 @@ class JfrThreadCountTest {
 
   @Test
   void shouldHaveJfrThreadCountEvents() throws Exception {
-    // This should generate some events
     Runnable work =
         () -> {
           try {
+            // Sleep enough to produce events, based on ThreadCountHandler#getPollingDuration()
             Thread.sleep(2000);
           } catch (InterruptedException e) {
             throw new RuntimeException(e);
