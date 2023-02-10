@@ -32,6 +32,7 @@ components:
     - dehaansa
     - Mrod1598
     - rmfitzpatrick
+    - breedx-splk
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
