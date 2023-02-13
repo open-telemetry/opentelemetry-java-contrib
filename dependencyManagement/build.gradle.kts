@@ -17,7 +17,7 @@ val DEPENDENCY_BOMS = listOf(
   "com.linecorp.armeria:armeria-bom:1.22.0",
   "org.junit:junit-bom:5.9.2",
   "io.grpc:grpc-bom:1.53.0",
-  "io.opentelemetry:opentelemetry-bom-alpha:1.22.0-alpha",
+  "io.opentelemetry:opentelemetry-bom-alpha:1.23.0-alpha",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.22.1-alpha",
   "org.testcontainers:testcontainers-bom:1.17.6"
 )
