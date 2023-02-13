@@ -6,6 +6,7 @@
 package io.opentelemetry.maven;
 
 import com.google.auto.value.AutoValue;
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,9 @@ import org.slf4j.LoggerFactory;
 @Component(role = SpanRegistry.class)
 public final class SpanRegistry {
 
+  static final boolean FAIL_ON_ILLEGAL_STATE =
+      Boolean.parseBoolean(System.getenv("OTEL_SPAN_REGISTRY_FAIL_ON_ILLEGAL_STATE"));
+
   private static final Logger logger = LoggerFactory.getLogger(SpanRegistry.class);
 
   private final Map<MojoExecutionKey, Span> mojoExecutionKeySpanMap = new ConcurrentHashMap<>();
@@ -42,7 +46,16 @@ public final class SpanRegistry {
    */
   public void setRootSpan(Span rootSpan) {
     if (this.rootSpan != null) {
-      throw new IllegalStateException("Root span already defined " + this.rootSpan);
+      String message =
+          "Root span already defined "
+              + this.rootSpan
+              + ", can't overwrite root span with "
+              + rootSpan;
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
     }
     this.rootSpan = rootSpan;
   }
@@ -52,11 +65,17 @@ public final class SpanRegistry {
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span span = this.mavenProjectKeySpanMap.get(key);
     if (span == null) {
-      throw new IllegalStateException(
+      String message =
           "Span not started for project "
               + mavenProject.getGroupId()
               + ":"
-              + mavenProject.getArtifactId());
+              + mavenProject.getArtifactId();
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
+      return getInvalidSpan();
     }
     return span;
   }
@@ -64,22 +83,43 @@ public final class SpanRegistry {
   public Span getRootSpanNotNull() {
     Span rootSpan = this.rootSpan;
     if (rootSpan == null) {
-      throw new IllegalStateException("Root span not defined");
+      String message = "Root span not defined";
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
+      return getInvalidSpan();
     }
     return rootSpan;
+  }
+
+  private static Span getInvalidSpan() {
+    return OpenTelemetry.noop().getTracer("invalid").spanBuilder("invalid").startSpan();
   }
 
   public Span removeRootSpan() {
     Span rootSpan = this.rootSpan;
     if (rootSpan == null) {
-      throw new IllegalStateException("Root span not defined");
+      String message = "Root span not defined";
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
+      return getInvalidSpan();
     }
     if (!this.mojoExecutionKeySpanMap.isEmpty()) {
-      throw new IllegalStateException(
+      String message =
           "Remaining children spans: "
               + this.mojoExecutionKeySpanMap.keySet().stream()
                   .map(MojoExecutionKey::toString)
-                  .collect(Collectors.joining(", ")));
+                  .collect(Collectors.joining(", "));
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
     }
     this.rootSpan = null;
     return rootSpan;
@@ -90,7 +130,12 @@ public final class SpanRegistry {
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span previousSpanForKey = mavenProjectKeySpanMap.put(key, span);
     if (previousSpanForKey != null) {
-      throw new IllegalStateException("A span has already been started for " + mavenProject);
+      String message = "A span has already been started for " + mavenProject;
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
     }
   }
 
@@ -99,8 +144,12 @@ public final class SpanRegistry {
     MojoExecutionKey key = MojoExecutionKey.fromMojoExecution(mojoExecution, project);
     Span previousSpanForKey = mojoExecutionKeySpanMap.put(key, span);
     if (previousSpanForKey != null) {
-      throw new IllegalStateException(
-          "A span has already been started for " + mojoExecution + ", " + project);
+      String message = "A span has already been started for " + mojoExecution + ", " + project;
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
     }
   }
 
@@ -109,7 +158,13 @@ public final class SpanRegistry {
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span span = mavenProjectKeySpanMap.remove(key);
     if (span == null) {
-      throw new IllegalStateException("No span found for " + mavenProject);
+      String message = "No span found for " + mavenProject;
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
+      return getInvalidSpan();
     }
     return span;
   }
@@ -120,7 +175,13 @@ public final class SpanRegistry {
     MojoExecutionKey key = MojoExecutionKey.fromMojoExecution(mojoExecution, project);
     Span span = mojoExecutionKeySpanMap.remove(key);
     if (span == null) {
-      throw new IllegalStateException("No span found for " + mojoExecution + " " + project);
+      String message = "No span found for " + mojoExecution + " " + project;
+      if (FAIL_ON_ILLEGAL_STATE) {
+        throw new IllegalStateException(message);
+      } else {
+        logger.warn(message);
+      }
+      return getInvalidSpan();
     }
     return span;
   }
