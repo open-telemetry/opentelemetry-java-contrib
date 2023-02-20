@@ -21,7 +21,7 @@ This module can be used to bridge OpenTelemetry metrics into the `prometheus-sim
 
 ### JFR metrics
 
-- Update handlers in jfr-streaming to match spec
+- Update handlers in jfr-metrics to match spec
   ([#616](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/616))
 
 ## Version 1.20.1 (2022-11-22)
@@ -250,7 +250,7 @@ All components updated to target OpenTelemetry SDK 1.9.1.
 
 ### JFR metrics
 
-- Tidy up jfr-streaming
+- Tidy up jfr-metrics
   ([#127](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/127))
 - Fix units for some metrics
   ([#140](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/140))

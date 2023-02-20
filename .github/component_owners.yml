@@ -24,7 +24,7 @@ components:
     - trask
   jfr-events:
     - sfriberg
-  jfr-streaming:
+  jfr-metrics:
     - breedx-splk
     - jack-berg
     - kittylyst

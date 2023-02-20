@@ -18,7 +18,7 @@ feature or via instrumentation, this project is hopefully for you.
 * [AWS X-Ray SDK Support](./aws-xray/README.md)
 * [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
 * [Consistent sampling](./consistent-sampling/README.md)
-* [JFR Metrics](./jfr-streaming/README.md)
+* [JFR Metrics](./jfr-metrics/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
 * [Runtime Attach](./runtime-attach/README.md)
@@ -57,6 +57,7 @@ exist.
 Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-telemetry/teams/java-contrib-triagers)):
 
 -
+
 All [component owners](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/component_owners.yml)
 are given Triager permissions to this repository.
 
