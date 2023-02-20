@@ -5,7 +5,7 @@
 * Build it with `./gradlew :jfr-metrics:build`
 
 The main entry point is the `JfrTelemetry` class in the
-package `io.opentelemetry.contrib.jfr.streaming`:
+package `io.opentelemetry.contrib.jfr.metrics`:
 
 ```java
 // Initialize JfrTelemetry

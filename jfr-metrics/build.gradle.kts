@@ -6,7 +6,7 @@ plugins {
 }
 
 description = "OpenTelemetry JFR Metrics"
-otelJava.moduleName.set("io.opentelemetry.contrib.jfr.streaming")
+otelJava.moduleName.set("io.opentelemetry.contrib.jfr.metrics")
 
 // Disable publishing test fixtures
 val javaComponent = components["java"] as AdhocComponentWithVariants
@@ -47,7 +47,7 @@ tasks.create("generateDocs", JavaExec::class) {
   group = "build"
   description = "Generate table for README.md"
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("io.opentelemetry.contrib.jfr.streaming.GenerateDocs")
+  mainClass.set("io.opentelemetry.contrib.jfr.metrics.GenerateDocs")
   systemProperties.set("jfr.readme.path", project.projectDir.toString() + "/README.md")
 }
 tasks.getByName("build").dependsOn("generateDocs")
