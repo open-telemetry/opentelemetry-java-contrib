@@ -5,7 +5,7 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "OpenTelemetry JFR Streaming"
+description = "OpenTelemetry JFR Metrics"
 otelJava.moduleName.set("io.opentelemetry.contrib.jfr.streaming")
 
 // Disable publishing test fixtures

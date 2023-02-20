@@ -4,7 +4,7 @@
 
 ## Version 1.22.0 (2023-01-17)
 
-### JFR streaming
+### JFR metrics
 
 - Add buffer handlers and implement buffer metrics
   ([#650](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/650))
@@ -19,7 +19,7 @@ This module can be used to bridge OpenTelemetry metrics into the `prometheus-sim
 
 ## Version 1.21.0 (2022-12-15)
 
-### JFR streaming
+### JFR metrics
 
 - Update handlers in jfr-streaming to match spec
   ([#616](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/616))
@@ -38,7 +38,7 @@ This module can be used to bridge OpenTelemetry metrics into the `prometheus-sim
 - Move io.opentelemetry:opentelemetry-extension-aws to contrib
   ([#547](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/547))
 
-### JFR streaming
+### JFR metrics
 
 - Thread count and classes loaded handlers
   ([#571](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/571))
@@ -162,7 +162,7 @@ All components updated to target OpenTelemetry SDK 1.12.0.
 
 All components updated to target OpenTelemetry SDK 1.11.0.
 
-### JFR streaming
+### JFR metrics
 
 - Split up GC Handlers, add support for Parallel
   ([#201](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/201))
@@ -248,7 +248,7 @@ All components updated to target OpenTelemetry SDK 1.9.1.
 - X-Ray Sampler: Match rule's HTTP path against http.url attribute if t
   ([#141](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/141))
 
-### JFR streaming
+### JFR metrics
 
 - Tidy up jfr-streaming
   ([#127](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/127))
@@ -267,7 +267,7 @@ All components updated to target OpenTelemetry SDK 1.7.0.
 
 Moved from SDK repo.
 
-### JFR streaming - New 🌟
+### JFR metrics - New 🌟
 
 Listens for JFR events (using the Streaming API) and converts them to OpenTelemetry metrics.
 

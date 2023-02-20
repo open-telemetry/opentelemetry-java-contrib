@@ -1,17 +1,18 @@
-# JFR Streaming
+# JFR Metrics
 
 * Java 17 only.
 
 * Build it with `./gradlew :jfr-streaming:build`
 
-The main entry point is the `JfrTelemetry` class in the package `io.opentelemetry.contrib.jfr.streaming`:
+The main entry point is the `JfrTelemetry` class in the
+package `io.opentelemetry.contrib.jfr.streaming`:
 
 ```java
 // Initialize JfrTelemetry
-JfrTelemetry jfrTelemetry = JfrTelemetry.create(openTelemetry);
+JfrTelemetry jfrTelemetry=JfrTelemetry.create(openTelemetry);
 
 // Close JfrTelemetry to stop listening for JFR events
-jfrTelemetry.close();
+    jfrTelemetry.close();
 ```
 
 `JfrTelemetry` works by subscribing to certain JFR events, and using relevant bits of information
