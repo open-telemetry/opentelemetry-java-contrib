@@ -50,8 +50,9 @@ class JfrTelemetryTest {
               metric -> {
                 assertThat(metric.getInstrumentationScopeInfo().getName())
                     .isEqualTo("io.opentelemetry.contrib.jfr.streaming");
-                assertThat(metric.getInstrumentationScopeInfo().getVersion())
-                    .matches("1\\..*-alpha.*");
+                // TODO (trask) uncomment after moving to instrumentation repo
+                //                assertThat(metric.getInstrumentationScopeInfo().getVersion())
+                //                    .matches("1\\..*-alpha.*");
               });
       ;
     }

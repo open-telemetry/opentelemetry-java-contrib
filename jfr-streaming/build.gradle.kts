@@ -1,8 +1,6 @@
 plugins {
   id("otel.java-conventions")
   id("java-test-fixtures")
-
-  id("otel.publish-conventions")
 }
 
 description = "OpenTelemetry JFR Streaming"
