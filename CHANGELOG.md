@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.23.0 (2023-02-22)
+
 ### JFR streaming
 
 - JFR features can be enabled and disabled
