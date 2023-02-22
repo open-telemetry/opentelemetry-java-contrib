@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### JFR streaming
+
+- JFR features can be enabled and disabled
+  ([#709](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/709))
+- Generate JFR telemetry table
+  ([#715](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/715))
+
+### Resource providers
+
+- Fix and enhance resource detection logging.
+  ([#711](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/711))
+
+### Samplers
+
+- Allow providing a custom sampler as an option for the RuleBasedRoutingSampler
+  ([#710](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/710))
+
 ## Version 1.22.0 (2023-01-17)
 
 ### JFR streaming
