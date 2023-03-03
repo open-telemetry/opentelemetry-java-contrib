@@ -59,3 +59,5 @@ tasks {
     dependsOn(shadowJar)
   }
 }
+
+tasks.getByName("test").dependsOn("shadowJar")
