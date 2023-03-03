@@ -34,7 +34,7 @@ The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderC
 ```
 
 ---
-**Note on Oracle JDK 8**
+Note on Oracle JDK 8:
 
 For Oracle JDK 8, it may be necessary to unlock the Java Flight Recorder
 commercial feature with the JVM arg `-XX:+UnlockCommercialFeatures -XX:+FlightRecorder`.
