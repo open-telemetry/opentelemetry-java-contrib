@@ -22,6 +22,10 @@ components:
   samplers:
     - iNikem
     - trask
+  jfr-connection:
+    - trask
+    - jeanbisutti
+    - dsgrieve
   jfr-events:
     - sfriberg
   jfr-streaming:
