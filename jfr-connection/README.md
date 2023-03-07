@@ -30,7 +30,6 @@ The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderC
   } catch (InstanceNotFoundException | IOException | JfrStreamingException | InterruptedException e) {
       e.printStackTrace();
   }
-
 ```
 
 ---
