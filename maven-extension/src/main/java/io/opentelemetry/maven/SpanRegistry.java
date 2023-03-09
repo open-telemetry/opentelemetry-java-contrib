@@ -43,12 +43,11 @@ public final class SpanRegistry {
    */
   public void setRootSpan(Span rootSpan) {
     if (this.rootSpan != null) {
-      String message =
+      logger.warn(
           "Root span already defined "
               + this.rootSpan
               + ", can't overwrite root span with "
-              + rootSpan;
-      logger.warn(message);
+              + rootSpan);
     }
     this.rootSpan = rootSpan;
   }
@@ -58,12 +57,11 @@ public final class SpanRegistry {
     MavenProjectKey key = MavenProjectKey.fromMavenProject(mavenProject);
     Span span = this.mavenProjectKeySpanMap.get(key);
     if (span == null) {
-      String message =
+      logger.warn(
           "Span not started for project "
               + mavenProject.getGroupId()
               + ":"
-              + mavenProject.getArtifactId();
-      logger.warn(message);
+              + mavenProject.getArtifactId());
       return getInvalidSpan();
     }
     return span;
