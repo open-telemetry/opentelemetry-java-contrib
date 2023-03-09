@@ -6,7 +6,6 @@
 package io.opentelemetry.maven;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,7 +61,7 @@ public final class SpanRegistry {
               + mavenProject.getGroupId()
               + ":"
               + mavenProject.getArtifactId());
-      return getInvalidSpan();
+      return Span.getInvalid();
     }
     return span;
   }
@@ -71,20 +70,16 @@ public final class SpanRegistry {
     Span rootSpan = this.rootSpan;
     if (rootSpan == null) {
       logger.warn("Root span not defined");
-      return getInvalidSpan();
+      return Span.getInvalid();
     }
     return rootSpan;
-  }
-
-  private static Span getInvalidSpan() {
-    return OpenTelemetry.noop().getTracer("invalid").spanBuilder("invalid").startSpan();
   }
 
   public Span removeRootSpan() {
     Span rootSpan = this.rootSpan;
     if (rootSpan == null) {
       logger.warn("Root span not defined");
-      return getInvalidSpan();
+      return Span.getInvalid();
     }
     if (!this.mojoExecutionKeySpanMap.isEmpty()) {
 
@@ -122,7 +117,7 @@ public final class SpanRegistry {
     Span span = mavenProjectKeySpanMap.remove(key);
     if (span == null) {
       logger.warn("No span found for " + mavenProject);
-      return getInvalidSpan();
+      return Span.getInvalid();
     }
     return span;
   }
@@ -134,7 +129,7 @@ public final class SpanRegistry {
     Span span = mojoExecutionKeySpanMap.remove(key);
     if (span == null) {
       logger.warn("No span found for " + mojoExecution + " " + project);
-      return getInvalidSpan();
+      return Span.getInvalid();
     }
     return span;
   }
