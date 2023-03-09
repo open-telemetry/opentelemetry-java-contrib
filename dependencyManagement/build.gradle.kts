@@ -54,7 +54,7 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.10.0",
-  "com.uber.nullaway:nullaway:0.10.9",
+  "com.uber.nullaway:nullaway:0.10.10",
   "org.assertj:assertj-core:3.24.2",
   "org.awaitility:awaitility:4.2.0",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
