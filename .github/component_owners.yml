@@ -24,6 +24,7 @@ components:
     - trask
   jfr-connection:
     - trask
+    - breedx-splk
     - jeanbisutti
     - dsgrieve
   jfr-events:

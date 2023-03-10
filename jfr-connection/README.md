@@ -41,6 +41,7 @@ Starting with JDK 8u262, Java Flight Recorder is available for all OpenJDK distr
 ## Component owners
 
 - [Trask Stalnaker](https://github.com/trask), Microsoft
+- [Jason Plumb](https://github.com/breedx-splk), Splunk
 - [Jean Bisutti](https://github.com/jeanbisutti), Microsoft
 - [David Grieve](https://github.com/dsgrieve), Microsoft
 
