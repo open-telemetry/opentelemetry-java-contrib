@@ -95,12 +95,12 @@ public class RecordingTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     deleteJfrFiles();
   }
 
   @Test
-  public void assertNewRecordingInitialValues() {
+  void assertNewRecordingInitialValues() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       assertEquals(Recording.State.NEW, recording.getState());
       assertEquals(-1, recording.getId());
@@ -110,7 +110,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertRecordingStartIdAndState() {
+  void assertRecordingStartIdAndState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
       assertEquals(id, recording.getId());
@@ -121,7 +121,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertRecordingStopState() {
+  void assertRecordingStopState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
       assertEquals(id, recording.getId());
@@ -133,7 +133,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertRecordingCloseState() {
+  void assertRecordingCloseState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
       assertEquals(id, recording.getId());
@@ -216,8 +216,7 @@ public class RecordingTest {
 
   @ParameterizedTest
   @MethodSource
-  public void assertValidStateChangeNoException(
-      @AggregateWith(VarArgsAggregator.class) Object... states) {
+  void assertValidStateChangeNoException(@AggregateWith(VarArgsAggregator.class) Object... states) {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       reflectivelyInvokeMethods(recording, states);
     } catch (Exception e) {
@@ -244,7 +243,7 @@ public class RecordingTest {
 
   @ParameterizedTest
   @MethodSource
-  public void assertInvalidStateChangeThrowsIllegalStateException(
+  void assertInvalidStateChangeThrowsIllegalStateException(
       @AggregateWith(VarArgsAggregator.class) Object... args) {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       reflectivelyInvokeMethods(recording, args);
@@ -278,7 +277,7 @@ public class RecordingTest {
   @ParameterizedTest
   @MethodSource
   @SuppressWarnings("unchecked")
-  public void assertRecordingOptionsAreSetInFlightRecorderMXBean(
+  void assertRecordingOptionsAreSetInFlightRecorderMXBean(
       @AggregateWith(VarArgsAggregator.class) Object... options) {
     MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
     ObjectName flightRecorder = null;
@@ -367,7 +366,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertFileExistsAfterRecordingDump() {
+  void assertFileExistsAfterRecordingDump() {
     RecordingOptions recordingOptions = new RecordingOptions.Builder().disk("true").build();
     try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, null)) {
       recording.start();
@@ -391,7 +390,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertFileExistsAfterRecordingStream() {
+  void assertFileExistsAfterRecordingStream() {
     RecordingOptions recordingOptions = new RecordingOptions.Builder().disk("true").build();
     try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, null)) {
       recording.start();
@@ -426,7 +425,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertStreamedFileEqualsDumpedFile() {
+  void assertStreamedFileEqualsDumpedFile() {
 
     Path dumpedFile = Paths.get(System.getProperty("user.dir"), "testRecordingStream_dumped.jfr");
     ;
@@ -480,7 +479,7 @@ public class RecordingTest {
   }
 
   @Test
-  public void assertRecordingCloneState() {
+  void assertRecordingCloneState() {
     // Recording#clone returns a clone of the recording with the same state, but clone has its own
     // id.
     // Recording#clone with 'true' causes clone to close before returning.

@@ -21,23 +21,16 @@ import org.junit.jupiter.api.Test;
 
 public class FlightRecorderDiagnosticCommandConnectionTest {
 
-  public MBeanServerConnection mockMbeanServer(
-      ObjectName objectName, String vmCheckCommercialFeaturesResponse) throws Exception {
-    MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
-    when(mBeanServerConnection.invoke(objectName, "vmCheckCommercialFeatures", null, null))
-        .thenReturn(vmCheckCommercialFeaturesResponse);
-    return mBeanServerConnection;
-  }
-
   @Test
-  public void assertCommercialFeaturesUnlocked() throws Exception {
+  void assertCommercialFeaturesUnlocked() throws Exception {
     ObjectName objectName = mock(ObjectName.class);
     MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "unlocked");
     FlightRecorderDiagnosticCommandConnection.assertCommercialFeaturesUnlocked(
         mBeanServerConnection, objectName);
   }
 
-  public void assertCommercialFeaturesLockedThrows() throws Exception {
+  @Test
+  void assertCommercialFeaturesLockedThrows() throws Exception {
     assertThrows(
         JfrStreamingException.class,
         () -> {
@@ -48,29 +41,26 @@ public class FlightRecorderDiagnosticCommandConnectionTest {
         });
   }
 
-  private FlightRecorderDiagnosticCommandConnection createconnection() throws Exception {
-    ObjectName objectName = mock(ObjectName.class);
-    MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "locked");
-    return new FlightRecorderDiagnosticCommandConnection(mBeanServerConnection, objectName);
-  }
-
-  public void closeRecording() throws Exception {
+  @Test
+  void closeRecording() throws Exception {
     assertThrows(UnsupportedOperationException.class, () -> createconnection().closeRecording(1));
   }
 
-  public void testGetStream() throws Exception {
+  @Test
+  void testGetStream() throws Exception {
     assertThrows(
         UnsupportedOperationException.class,
         () -> createconnection().getStream(1L, null, null, 0L));
   }
 
-  public void testCloneRecording() throws Exception {
+  @Test
+  void testCloneRecording() throws Exception {
     assertThrows(
         UnsupportedOperationException.class, () -> createconnection().cloneRecording(1, false));
   }
 
   @Test
-  public void startRecordingParsesIdCorrectly() throws Exception {
+  void startRecordingParsesIdCorrectly() throws Exception {
     ObjectName objectName = mock(ObjectName.class);
     MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "unlocked");
     when(mBeanServerConnection.invoke(
@@ -82,5 +72,19 @@ public class FlightRecorderDiagnosticCommandConnectionTest {
         connection.startRecording(
             new RecordingOptions.Builder().build(), RecordingConfiguration.PROFILE_CONFIGURATION);
     assertEquals(id, 99);
+  }
+
+  MBeanServerConnection mockMbeanServer(
+      ObjectName objectName, String vmCheckCommercialFeaturesResponse) throws Exception {
+    MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
+    when(mBeanServerConnection.invoke(objectName, "vmCheckCommercialFeatures", null, null))
+        .thenReturn(vmCheckCommercialFeaturesResponse);
+    return mBeanServerConnection;
+  }
+
+  private FlightRecorderDiagnosticCommandConnection createconnection() throws Exception {
+    ObjectName objectName = mock(ObjectName.class);
+    MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "locked");
+    return new FlightRecorderDiagnosticCommandConnection(mBeanServerConnection, objectName);
   }
 }

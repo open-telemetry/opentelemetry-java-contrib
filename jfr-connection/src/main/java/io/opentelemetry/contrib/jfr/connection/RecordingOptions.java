@@ -229,43 +229,44 @@ public class RecordingOptions {
      * @return A {@code RecordingOptions}, never {@code null}.
      */
     public RecordingOptions build() {
-      return new RecordingOptions(this);
+
+      // Convert from Map<Option<?>,String> to Map<String,String>
+      //
+      // For each option,
+      //    if the option is not the default value
+      //    add the option name and value to recordingOptions
+      // An option is the default value if
+      //     it was not set in the builder,
+      //     it was not set as a system property,
+      //     or was set in the builder, but to a default value (builder.setDuration(null), for
+      // example)
+      // This stream does not modify builder.options.
+      Map<String, String> initRecordingOptions =
+          Stream.of(Option.values())
+              .filter(
+                  option ->
+                      !option.defaultValue.equals(
+                          options.getOrDefault(option, option.defaultValue)))
+              .collect(Collectors.toMap(option -> option.name, options::get));
+
+      // Due to a bug, some JVMs default "disk=true". So include "disk=false" (the documented
+      // default)
+      // to ensure consistent behaviour.
+      if (!initRecordingOptions.containsKey(Option.DISK.name)) {
+        initRecordingOptions.put(Option.DISK.name, Option.DISK.defaultValue);
+      }
+
+      return new RecordingOptions(initRecordingOptions);
     }
   }
 
   /**
    * Constructor is private. Only the Builder can construct a RecordingOptions.
    *
-   * @param builder The builder that was used to parameterize the options.
+   * @param recordingOptions The normalized options from the builder.
    */
-  private RecordingOptions(Builder builder) {
-
-    // Note we're converting from Map<Option<?>,String> to Map<String,String>
-    Map<Option, String> options = builder.options;
-
-    //
-    // For each option,
-    //    if the option is not the default value
-    //    add the option name and value to recordingOptions
-    // An option is the default value if
-    //     it was not set in the builder,
-    //     it was not set as a system property,
-    //     or was set in the builder, but to a default value (builder.setDuration(null), for
-    // example)
-    // This stream does not modify builder.options.
-    Map<String, String> initRecordingOptions =
-        Stream.of(Option.values())
-            .filter(
-                option ->
-                    !option.defaultValue.equals(options.getOrDefault(option, option.defaultValue)))
-            .collect(Collectors.toMap(option -> option.name, options::get));
-
-    // Due to a bug, some JVMs default "disk=true". So include "disk=false" (the documented default)
-    // to insure consistent behaviour.
-    if (!initRecordingOptions.containsKey(Option.DISK.name)) {
-      initRecordingOptions.put(Option.DISK.name, Option.DISK.defaultValue);
-    }
-    this.recordingOptions = Collections.unmodifiableMap(initRecordingOptions);
+  private RecordingOptions(Map<String, String> recordingOptions) {
+    this.recordingOptions = Collections.unmodifiableMap(recordingOptions);
   }
 
   /**

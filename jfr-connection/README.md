@@ -15,22 +15,18 @@ The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderC
 ```java
   // The MBeanServerConnection can be local or remote
   MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
-  try {
-      FlightRecorderConnection flightRecorderConnection = FlightRecorderConnection.connect(mBeanServer);
-      RecordingOptions recordingOptions = new RecordingOptions.Builder().disk("true").build();
-      RecordingConfiguration recordingConfiguration = RecordingConfiguration.PROFILE_CONFIGURATION;
 
-      try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, recordingConfiguration)) {
-          recording.start();
-          TimeUnit.SECONDS.sleep(10);
-          recording.stop();
+  FlightRecorderConnection flightRecorderConnection = FlightRecorderConnection.connect(mBeanServer);
+  RecordingOptions recordingOptions = new RecordingOptions.Builder().disk("true").build();
+  RecordingConfiguration recordingConfiguration = RecordingConfiguration.PROFILE_CONFIGURATION;
 
-          recording.dump(Paths.get(System.getProperty("user.dir"), "recording.jfr").toString());
-      }
-  } catch (InstanceNotFoundException | IOException | JfrStreamingException | InterruptedException e) {
-      e.printStackTrace();
+  try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, recordingConfiguration)) {
+      recording.start();
+      TimeUnit.SECONDS.sleep(10);
+      recording.stop();
+
+      recording.dump(Paths.get(System.getProperty("user.dir"), "recording.jfr").toString());
   }
-
 ```
 
 ---

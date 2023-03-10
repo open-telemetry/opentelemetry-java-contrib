@@ -32,36 +32,36 @@ public class RecordingConfigurationTest {
   FlightRecorderConnection flightRecorderConnection = null;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     RecordingTest.deleteJfrFiles();
     flightRecorderConnection = RecordingTest.getFlightRecorderConnection();
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     RecordingTest.deleteJfrFiles();
   }
 
   @Test
-  public void nullConfigThrows() {
+  void nullConfigThrows() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new RecordingConfiguration.JfcFileConfiguration(null));
   }
 
   @Test
-  public void brokenJfcConfigFileThrowsError() {
+  void brokenJfcConfigFileThrowsError() {
     assertThrows(RuntimeMBeanException.class, () -> executeRecording("brokenJfcFile.jfc"));
   }
 
   @Test
-  public void jfcFileFromInputStreamCanBeRead() {
+  void jfcFileFromInputStreamCanBeRead() {
     IItemCollection recordingContent = executeRecording("sampleJfcFile.jfc");
     assertTrue(containsEvent(recordingContent, "jdk.ThreadAllocationStatistics"));
   }
 
   @Test
-  public void mapConfiguration() {
+  void mapConfiguration() {
 
     Map<String, String> recordingConfigAsMap = new HashMap<>();
     recordingConfigAsMap.put("jdk.ObjectAllocationInNewTLAB#enabled", "true");
