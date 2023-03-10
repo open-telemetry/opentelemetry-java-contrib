@@ -27,7 +27,7 @@ import org.openjdk.jmc.common.item.IItemIterable;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
 
-public class RecordingConfigurationTest {
+class RecordingConfigurationTest {
 
   FlightRecorderConnection flightRecorderConnection = null;
 

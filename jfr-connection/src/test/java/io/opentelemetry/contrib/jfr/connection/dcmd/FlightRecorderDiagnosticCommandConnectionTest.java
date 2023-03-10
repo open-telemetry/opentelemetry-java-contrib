@@ -19,7 +19,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;
 
-public class FlightRecorderDiagnosticCommandConnectionTest {
+class FlightRecorderDiagnosticCommandConnectionTest {
 
   @Test
   void assertCommercialFeaturesUnlocked() throws Exception {

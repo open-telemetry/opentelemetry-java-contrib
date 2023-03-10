@@ -49,7 +49,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
-public class RecordingTest {
+class RecordingTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RecordingTest.class);
 
