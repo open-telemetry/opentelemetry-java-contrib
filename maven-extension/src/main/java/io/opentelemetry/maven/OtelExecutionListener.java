@@ -11,13 +11,15 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.ContextStorage;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandlerConfiguration;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
@@ -45,6 +47,8 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);
 
+  private static final ThreadLocal<Scope> MOJO_EXECUTION_SCOPE = new ThreadLocal<>();
+
   @SuppressWarnings("NullAway") // Automatically initialized by DI
   @Requirement
   private SpanRegistry spanRegistry;
@@ -53,7 +57,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   @Requirement
   private OpenTelemetrySdkService openTelemetrySdkService;
 
-  private Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
+  private final Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers;
 
   public OtelExecutionListener() {
     this.mojoGoalExecutionHandlers =
@@ -66,6 +70,28 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
               + mojoGoalExecutionHandlers.entrySet().stream()
                   .map(entry -> entry.getKey().toString() + ": " + entry.getValue().toString())
                   .collect(Collectors.joining(", ")));
+
+      // help debugging class loader issues when the OTel APIs used in
+      // Maven plugin mojos are mistakenly not loaded by the OTel Maven extension
+      // causing the lack of context propagation from the OTel Maven extension to the plugin mojos
+      ContextStorage contextStorage = ContextStorage.get();
+      logger.debug(
+          "ContextStorage: "
+              + contextStorage
+              + ", identity="
+              + System.identityHashCode(contextStorage));
+      Class<? extends ContextStorage> contextStorageClass = contextStorage.getClass();
+      logger.debug(
+          "ContextStorageClass="
+              + contextStorageClass.getName()
+              + ", identity="
+              + System.identityHashCode(contextStorageClass)
+              + " classloader="
+              + contextStorageClass.getClassLoader()
+              + " codeLocation="
+              + Optional.of(contextStorageClass.getProtectionDomain().getCodeSource())
+                  .map(source -> source.getLocation().toString())
+                  .orElse("#unknown#"));
     }
   }
 
@@ -232,7 +258,28 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     }
 
     Span span = spanBuilder.startSpan();
+    @SuppressWarnings("MustBeClosedChecker")
+    Scope scope = span.makeCurrent();
     spanRegistry.putSpan(span, mojoExecution, executionEvent.getProject());
+    Optional.ofNullable(MOJO_EXECUTION_SCOPE.get())
+        .ifPresent(
+            previousScope ->
+                logger.warn(
+                    "OpenTelemetry: Scope "
+                        + System.identityHashCode(previousScope)
+                        + "already attached to thread '"
+                        + Thread.currentThread().getName()
+                        + "'"));
+    MOJO_EXECUTION_SCOPE.set(scope);
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "OpenTelemetry: Attach scope "
+              + System.identityHashCode(scope)
+              + " to thread '"
+              + Thread.currentThread().getName()
+              + "' for "
+              + mojoExecution);
+    }
   }
 
   @Override
@@ -247,8 +294,27 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
         executionEvent.getProject());
     Span mojoExecutionSpan = spanRegistry.removeSpan(mojoExecution, executionEvent.getProject());
     mojoExecutionSpan.setStatus(StatusCode.OK);
-
     mojoExecutionSpan.end();
+    Scope scope = MOJO_EXECUTION_SCOPE.get();
+    if (scope == null) {
+      logger.warn(
+          "OpenTelemetry: No scope found on thread '"
+              + Thread.currentThread().getName()
+              + "' for succeeded "
+              + mojoExecution);
+    } else {
+      scope.close();
+      MOJO_EXECUTION_SCOPE.remove();
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "OpenTelemetry: Remove scope "
+                + System.identityHashCode(scope)
+                + " on thread '"
+                + Thread.currentThread().getName()
+                + "' for succeeded "
+                + mojoExecution);
+      }
+    }
   }
 
   @Override
@@ -273,6 +339,26 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
       mojoExecutionSpan.recordException(exception);
     }
     mojoExecutionSpan.end();
+    Scope scope = MOJO_EXECUTION_SCOPE.get();
+    if (scope == null) {
+      logger.warn(
+          "OpenTelemetry: No scope found on thread '"
+              + Thread.currentThread().getName()
+              + "' for failed "
+              + mojoExecution);
+    } else {
+      scope.close();
+      MOJO_EXECUTION_SCOPE.remove();
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "OpenTelemetry: Remove scope "
+                + System.identityHashCode(scope)
+                + " on thread '"
+                + Thread.currentThread().getName()
+                + "' for failed "
+                + mojoExecution);
+      }
+    }
   }
 
   @Override
