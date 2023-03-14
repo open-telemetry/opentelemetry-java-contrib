@@ -3,13 +3,12 @@
         <!-- opentelemetry.api.* -->
         <exportedPackage>io.opentelemetry.api</exportedPackage>
         <exportedPackage>io.opentelemetry.api.*</exportedPackage>
+        <exportedPackage>io.opentelemetry.api.baggage</exportedPackage>
+        <exportedPackage>io.opentelemetry.api.baggage.propagation</exportedPackage>
+        <exportedPackage>io.opentelemetry.api.common</exportedPackage>
+        <exportedPackage>io.opentelemetry.api.internal</exportedPackage>
+        <exportedPackage>io.opentelemetry.api.metrics</exportedPackage>
         <exportedPackage>io.opentelemetry.api.trace</exportedPackage>
-        <exportedPackage>io.opentelemetry.api.trace.*</exportedPackage>
         <exportedPackage>io.opentelemetry.context</exportedPackage>
-        <exportedPackage>io.opentelemetry.context.*</exportedPackage>
     </exportedPackages>
-
-    <exportedArtifacts>
-        <exportedArtifact>io.opentelemetry:opentelemetry-api</exportedArtifact>
-    </exportedArtifacts>
 </extension>
