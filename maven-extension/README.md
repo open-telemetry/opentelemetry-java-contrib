@@ -177,7 +177,7 @@ The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wra
 
 ## Instrumenting Maven Mojos for better visibility in Maven builds
 
-Maven plugin authors can instrument Mojos for better visibility in Maven builds. 
+Maven plugin authors can instrument Mojos for better visibility in Maven builds.
 
 Common instrumentation patterns include:
 * Adding contextual data as attributes on the spans created by the OpenTelemetry Maven Extension,
@@ -186,18 +186,18 @@ Common instrumentation patterns include:
 Note that the instrumentation of a plugin is enabled when the OpenTelemetry Maven extension is added to the build and activated.
 Otherwise, the instrumentation of the Maven plugin is noop.
 
-It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) 
-to improve the visualization and analysis inObservability products. 
+It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
+to improve the visualization and analysis inObservability products.
 The [HTTP](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/http/)
-and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/) 
+and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/)
 conventions are particularly useful when  invoking external systems.
 
 Steps to instrument a Maven Mojo:
- 
+
 * Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
 ````xml
 <project>
-    ...    
+    ...
     <dependencies>
         <dependency>
             <groupId>io.opentelemetry</groupId>
@@ -206,7 +206,7 @@ Steps to instrument a Maven Mojo:
         </dependency>
         ...
     </dependencies>
-</project>        
+</project>
 
 ````
 
@@ -224,7 +224,7 @@ public class TestMojo extends AbstractMojo {
             mojoExecuteSpan.setAttribute("an-attribute", "a-value");
 
             // ... some logic
-          
+
             // CREATE SUB SPANS TO CAPTURE FINE GRAINED DETAILS OF THE MOJO EXECUTION
             Tracer tracer = GlobalOpenTelemetry.get().getTracer("com.example.maven.otel_aware_plugin");
             Span childSpan = tracer.spanBuilder("otel-aware-goal-sub-span").setAttribute("another-attribute", "another-value").startSpan();

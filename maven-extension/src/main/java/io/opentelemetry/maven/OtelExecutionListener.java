@@ -47,6 +47,14 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);
 
+  /**
+   * Note that using a thread local around the mojo goal execution to carry the {@link Scope }
+   * works even when using Maven build parallelization.
+   * {@link Span#current()} invoked in {@link org.apache.maven.plugin.Mojo#execute()} returns as
+   * expected the span set in {@link ExecutionListener#mojoStarted(ExecutionEvent)} using
+   * {@link Span#makeCurrent()}. For this reason, we can carry over the {@link Scope} in a thread
+   * local variable.
+   */
   private static final ThreadLocal<Scope> MOJO_EXECUTION_SCOPE = new ThreadLocal<>();
 
   @SuppressWarnings("NullAway") // Automatically initialized by DI
