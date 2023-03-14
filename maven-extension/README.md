@@ -180,6 +180,7 @@ The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wra
 Maven plugin authors can instrument Mojos for better visibility in Maven builds.
 
 Common instrumentation patterns include:
+
 * Adding contextual data as attributes on the spans created by the OpenTelemetry Maven Extension,
 * Creating additional sub spans to breakdown long mojo goal executions in finer grained steps
 
@@ -195,7 +196,8 @@ conventions are particularly useful when  invoking external systems.
 Steps to instrument a Maven Mojo:
 
 * Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
-````xml
+
+```xml
 <project>
     ...
     <dependencies>
@@ -207,10 +209,10 @@ Steps to instrument a Maven Mojo:
         ...
     </dependencies>
 </project>
-
 ````
 
 * Instrument the Mojo:
+
 ```java
 @Mojo(name = "test", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
 public class TestMojo extends AbstractMojo {
@@ -237,7 +239,6 @@ public class TestMojo extends AbstractMojo {
     }
 }
 ```
-
 
 ## Component owners
 
