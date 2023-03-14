@@ -26,7 +26,7 @@ testing {
   suites {
     val integrationTest by registering(JvmTestSuite::class) {
       dependencies {
-        implementation("io.micrometer:micrometer-registry-prometheus:1.10.4")
+        implementation("io.micrometer:micrometer-registry-prometheus:1.10.5")
       }
     }
   }
