@@ -188,7 +188,7 @@ Note that the instrumentation of a plugin is enabled when the OpenTelemetry Mave
 Otherwise, the instrumentation of the Maven plugin is noop.
 
 It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
-to improve the visualization and analysis inObservability products.
+to improve the visualization and analysis in Observability products.
 The [HTTP](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/http/)
 and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/)
 conventions are particularly useful when  invoking external systems.
