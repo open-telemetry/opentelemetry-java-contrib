@@ -204,7 +204,7 @@ Steps to instrument a Maven Mojo:
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>1.23.0</version>
+            <version>LATEST</version>
         </dependency>
         ...
     </dependencies>
