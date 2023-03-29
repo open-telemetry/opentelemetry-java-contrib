@@ -23,8 +23,6 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-semconv")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
-  implementation("io.grpc:grpc-netty-shaded")
-
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
