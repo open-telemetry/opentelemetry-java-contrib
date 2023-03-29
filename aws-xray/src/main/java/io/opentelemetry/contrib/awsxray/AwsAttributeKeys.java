@@ -12,6 +12,10 @@ final class AwsAttributeKeys {
 
   private AwsAttributeKeys() {}
 
+  static final AttributeKey<String> AWS_SPAN_KIND = AttributeKey.stringKey("aws.span.kind");
+
+  static final AttributeKey<String> AWS_LOCAL_SERVICE = AttributeKey.stringKey("aws.local.service");
+
   static final AttributeKey<String> AWS_LOCAL_OPERATION =
       AttributeKey.stringKey("aws.local.operation");
 
