@@ -220,7 +220,7 @@ public class TestMojo extends AbstractMojo {
   @Override
   public void execute() {
     Span mojoExecuteSpan = Span.current();
- 
+
     // ENRICH THE DEFAULT SPAN OF THE MOJO EXECUTION
     // (this span is created by the opentelemetry-maven-extension)
     mojoExecuteSpan.setAttribute("an-attribute", "a-value");
