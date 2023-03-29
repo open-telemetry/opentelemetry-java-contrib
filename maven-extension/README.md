@@ -36,7 +36,7 @@ Add the Maven OpenTelemetry Extension in the `pom.xml` file:
       <extension>
           <groupId>io.opentelemetry.contrib</groupId>
           <artifactId>opentelemetry-maven-extension</artifactId>
-          <version>1.10.0-alpha</version>
+          <version>1.23.0-alpha</version>
       </extension>
     </extensions>
   </build>
@@ -174,6 +174,70 @@ The [Jenkins OpenTelemetry Plugin](https://plugins.jenkins.io/opentelemetry/) ex
 ### Otel CLI
 
 The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wrapper to observe the execution of a shell command as an OpenTelemetry trace.
+
+## Instrumenting Maven Mojos for better visibility in Maven builds
+
+Maven plugin authors can instrument Mojos for better visibility in Maven builds.
+
+Common instrumentation patterns include:
+
+* Adding contextual data as attributes on the spans created by the OpenTelemetry Maven Extension,
+* Creating additional sub spans to breakdown long mojo goal executions in finer grained steps
+
+Note that the instrumentation of a plugin is enabled when the OpenTelemetry Maven extension is added to the build and activated.
+Otherwise, the instrumentation of the Maven plugin is noop.
+
+It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
+to improve the visualization and analysis in Observability products.
+The [HTTP](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/http/)
+and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/)
+conventions are particularly useful when  invoking external systems.
+
+Steps to instrument a Maven Mojo:
+
+* Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
+
+```xml
+<project>
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        ...
+    </dependencies>
+</project>
+````
+
+* Instrument the Mojo:
+
+```java
+@Mojo(name = "test", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+public class TestMojo extends AbstractMojo {
+
+  @Override
+  public void execute() {
+    Span mojoExecuteSpan = Span.current();
+
+    // ENRICH THE DEFAULT SPAN OF THE MOJO EXECUTION
+    // (this span is created by the opentelemetry-maven-extension)
+    mojoExecuteSpan.setAttribute("an-attribute", "a-value");
+
+    // ... some logic
+
+    // CREATE SUB SPANS TO CAPTURE FINE GRAINED DETAILS OF THE MOJO EXECUTION
+    Tracer tracer = GlobalOpenTelemetry.get().getTracer("com.example.maven.otel_aware_plugin");
+    Span childSpan = tracer.spanBuilder("otel-aware-goal-sub-span").setAttribute("another-attribute", "another-value").startSpan();
+    try (Scope ignored2 = childSpan.makeCurrent()) {
+      // ... mojo sub operation
+    } finally {
+      childSpan.end();
+    }
+  }
+}
+```
 
 ## Component owners
 
