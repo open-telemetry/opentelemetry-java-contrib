@@ -36,7 +36,7 @@ Add the Maven OpenTelemetry Extension in the `pom.xml` file:
       <extension>
           <groupId>io.opentelemetry.contrib</groupId>
           <artifactId>opentelemetry-maven-extension</artifactId>
-          <version>1.23.0-alpha</version>
+          <version>1.24.0-alpha</version>
       </extension>
     </extensions>
   </build>
