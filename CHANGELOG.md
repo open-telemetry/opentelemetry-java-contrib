@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.24.0 (2023-04-03)
+
 ### Maven extension
 
 - [maven-extension] Emit a warning rather than failing the build with an exception on illegal state
