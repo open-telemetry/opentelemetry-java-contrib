@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Maven extension
+
+- [maven-extension] Emit a warning rather than failing the build with an exception on illegal state
+  ([#776](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/776))
+- [maven-extension] Remove dependency to grpc-netty-shaded as opentelemetry-exporter-otlp pulls
+  okhttp3
+  ([#785](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/785))
+- [maven-extension] Propagate OTel context to plugin mojos
+  ([#786](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/786))
+
 ## Version 1.23.0 (2023-02-22)
 
 ### JFR streaming
