@@ -84,7 +84,7 @@ public class Recording implements AutoCloseable {
   private final RecordingConfiguration recordingConfiguration;
 
   private volatile long id = -1;
-  private final AtomicReference<State> state;
+  private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
   /**
    * Create a {@code Recording}. Recordings are created from {@link
@@ -101,7 +101,6 @@ public class Recording implements AutoCloseable {
     this.connection = connection;
     this.recordingOptions = recordingOptions;
     this.recordingConfiguration = recordingConfiguration;
-    this.state = new AtomicReference<>(State.NEW);
   }
 
   /**
@@ -118,10 +117,10 @@ public class Recording implements AutoCloseable {
    *
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException This {@code Recording} is closed.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    * @return The recording id.
    */
-  public long start() throws IOException, JfrStreamingException {
+  public long start() throws IOException, JfrConnectionException {
     // state transitions: NEW -> RECORDING or STOPPED -> RECORDING, otherwise remain in state
     State oldState =
         state.getAndUpdate(s -> s == State.NEW || s == State.STOPPED ? State.RECORDING : s);
@@ -140,9 +139,9 @@ public class Recording implements AutoCloseable {
    *
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException If the {@code Recording} is closed.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    */
-  public void stop() throws IOException, JfrStreamingException {
+  public void stop() throws IOException, JfrConnectionException {
     // state transitions:  RECORDING -> STOPPED, otherwise remain in state
     State oldState = state.getAndUpdate(s -> s == State.RECORDING ? State.STOPPED : s);
     if (oldState == State.RECORDING) {
@@ -161,10 +160,10 @@ public class Recording implements AutoCloseable {
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException If the {@code Recording} has not been started, or has been
    *     closed.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    * @throws NullPointerException If the {@code outputFile} argument is null.
    */
-  public void dump(String outputFile) throws IOException, JfrStreamingException {
+  public void dump(String outputFile) throws IOException, JfrConnectionException {
     Objects.requireNonNull(outputFile, "outputFile may not be null");
     State currentState = state.get();
     if (currentState == State.RECORDING || currentState == State.STOPPED) {
@@ -185,9 +184,9 @@ public class Recording implements AutoCloseable {
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException If the {@code Recording} has not been started, or has been
    *     closed.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    */
-  public Recording clone(boolean stop) throws IOException, JfrStreamingException {
+  public Recording clone(boolean stop) throws IOException, JfrConnectionException {
     State currentState = state.get();
     if (currentState == State.RECORDING || currentState == State.STOPPED) {
       long newId = connection.cloneRecording(id, stop);
@@ -213,11 +212,11 @@ public class Recording implements AutoCloseable {
    * @return An {@code InputStream}, or {@code null} if no data is available in the interval.
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException If the {@code Recording} has not been stopped.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    * @see JfrStream#getDefaultBlockSize()
    */
   public InputStream getStream(Instant startTime, Instant endTime)
-      throws IOException, JfrStreamingException {
+      throws IOException, JfrConnectionException {
     return getStream(startTime, endTime, JfrStream.getDefaultBlockSize());
   }
 
@@ -237,10 +236,10 @@ public class Recording implements AutoCloseable {
    * @return An {@code InputStream}, or {@code null} if no data is available in the interval.
    * @throws IOException A communication problem occurred when talking to the MBean server.
    * @throws IllegalStateException If the {@code Recording} has not been stopped.
-   * @throws JfrStreamingException Wraps a {@code javax.management.JMException}.
+   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
    */
   public InputStream getStream(Instant startTime, Instant endTime, long blockSize)
-      throws IOException, JfrStreamingException {
+      throws IOException, JfrConnectionException {
     // state transitions: remain in state
     State currentState = state.get();
     if (currentState == State.STOPPED) {
@@ -263,15 +262,16 @@ public class Recording implements AutoCloseable {
 
   /** {@inheritDoc} */
   @Override
-  public void close() throws IOException {
+  public void close() throws IOException, JfrConnectionException {
     // state transitions:  any -> CLOSED
     State oldState = state.getAndSet(State.CLOSED);
     if (oldState == State.RECORDING) {
       try {
         connection.stopRecording(id);
+      } catch (IOException | JfrConnectionException ignored) {
+        // Stopping the recording is best-effort
+      } finally {
         connection.closeRecording(id);
-      } catch (Throwable ignored) {
-        // closing the recording is best effort
       }
     }
   }

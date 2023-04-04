@@ -8,11 +8,11 @@ package io.opentelemetry.contrib.jfr.connection;
 import javax.annotation.Nullable;
 
 /**
- * An JfrStreamingException is a wrapper around specific {@code javax.management.JMException}
- * instances which might be thrown, either directly or indirectly, by methods of this package.
- * Exceptions of this type are not expected from a well behaved JVM.
+ * An JfrConnectionException is a wrapper around exceptions which might be thrown, either directly
+ * or indirectly, by methods of this package.
  *
- * <p>The cause of an {@code JfrStreamingException} will be one of the following:
+ * <p>The {@link JfrConnectionException#getCause() cause} of a {@code JfrConnectionException} may
+ * be, but is not limited to, one of the following:
  *
  * <dl>
  *   <dt><em>javax.management.InstanceNotFoundException</em>
@@ -36,26 +36,26 @@ import javax.annotation.Nullable;
  *       This cause indicates a bug in the com.microsoft.jfr package code.
  * </dl>
  */
-public class JfrStreamingException extends Exception {
+public class JfrConnectionException extends Exception {
 
   private static final long serialVersionUID = 7394612902107510439L;
 
   /**
-   * Construct a {@code JfrStreamingException} with a message and cause.
+   * Construct a {@code JfrConnectionException} with a message and cause.
    *
    * @param message The exception message.
    * @param cause The cause of the exception.
    */
-  public JfrStreamingException(@Nullable String message, Exception cause) {
+  public JfrConnectionException(@Nullable String message, Exception cause) {
     super(message, cause);
   }
 
   /**
-   * Construct a {@code JfrStreamingException} with a message only.
+   * Construct a {@code JfrConnectionException} with a message only.
    *
    * @param message The exception message.
    */
-  public JfrStreamingException(@Nullable String message) {
+  public JfrConnectionException(@Nullable String message) {
     super(message);
   }
 }

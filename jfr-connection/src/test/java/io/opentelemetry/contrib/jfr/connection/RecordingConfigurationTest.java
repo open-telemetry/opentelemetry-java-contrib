@@ -44,9 +44,7 @@ class RecordingConfigurationTest {
 
   @Test
   void nullConfigThrows() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new RecordingConfiguration.JfcFileConfiguration(null));
+    assertThrows(IllegalArgumentException.class, () -> new JfcFileConfiguration(null));
   }
 
   @Test
@@ -67,8 +65,7 @@ class RecordingConfigurationTest {
     recordingConfigAsMap.put("jdk.ObjectAllocationInNewTLAB#enabled", "true");
     recordingConfigAsMap.put("jdk.ObjectAllocationOutsideTLAB#enabled", "true");
 
-    RecordingConfiguration recordingConfiguration =
-        new RecordingConfiguration.MapConfiguration(recordingConfigAsMap);
+    RecordingConfiguration recordingConfiguration = new MapConfiguration(recordingConfigAsMap);
 
     IItemCollection recordingContent = excecuteRecordingWithConfig(recordingConfiguration);
     assertNotNull(recordingContent, "excecuteRecordingWithConfig returned null");
@@ -89,8 +86,8 @@ class RecordingConfigurationTest {
   }
 
   private IItemCollection executeRecording(String configFile) {
-    RecordingConfiguration.JfcFileConfiguration configuration =
-        new RecordingConfiguration.JfcFileConfiguration(
+    JfcFileConfiguration configuration =
+        new JfcFileConfiguration(
             RecordingConfigurationTest.class.getClassLoader().getResourceAsStream(configFile));
     return excecuteRecordingWithConfig(configuration);
   }
@@ -126,7 +123,7 @@ class RecordingConfigurationTest {
     } catch (IOException ioe) {
       // possible that this can be thrown, but should not happen in this context
       fail("IOException not expected: ", ioe);
-    } catch (JfrStreamingException badBean) {
+    } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     } finally {
       try {

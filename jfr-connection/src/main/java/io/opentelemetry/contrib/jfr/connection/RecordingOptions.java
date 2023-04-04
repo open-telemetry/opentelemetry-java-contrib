@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 /**
  * Options for the recording that control maximum recording size, age and duration, and whether to
@@ -56,7 +57,7 @@ public class RecordingOptions {
     DISK("disk", "false"),
     DURATION("duration", NO_LIMIT);
 
-    Option(String name, String defaultValue) {
+    Option(String name, @Nonnull String defaultValue) {
       this.name = name;
       this.defaultValue = defaultValue;
     }
@@ -276,7 +277,7 @@ public class RecordingOptions {
    * @return The {@code name} recording option, or an empty String.
    */
   public String getName() {
-    return recordingOptions.getOrDefault(Option.NAME.name, Option.NAME.defaultValue);
+    return getOrDefault(Option.NAME);
   }
 
   /**
@@ -286,7 +287,7 @@ public class RecordingOptions {
    * @return The {@code maxAge} recording option.
    */
   public String getMaxAge() {
-    return recordingOptions.getOrDefault(Option.MAX_AGE.name, Option.MAX_AGE.defaultValue);
+    return getOrDefault(Option.MAX_AGE);
   }
 
   /**
@@ -296,7 +297,7 @@ public class RecordingOptions {
    * @return The {@code maxSize} recording option.
    */
   public String getMaxSize() {
-    return recordingOptions.getOrDefault(Option.MAX_SIZE.name, Option.MAX_SIZE.defaultValue);
+    return getOrDefault(Option.MAX_SIZE);
   }
 
   /**
@@ -316,7 +317,7 @@ public class RecordingOptions {
    * @return The path to where recording data is written.
    */
   public String getDestination() {
-    return recordingOptions.getOrDefault(Option.DESTINATION.name, Option.DESTINATION.defaultValue);
+    return getOrDefault(Option.DESTINATION);
   }
 
   /**
@@ -325,7 +326,7 @@ public class RecordingOptions {
    * @return {@code "true"} if flight recordings are saved to disk.
    */
   public String getDisk() {
-    return recordingOptions.getOrDefault(Option.DISK.name, Option.DISK.defaultValue);
+    return getOrDefault(Option.DISK);
   }
 
   /**
@@ -335,7 +336,7 @@ public class RecordingOptions {
    * @return The {@code duration} for a recording.
    */
   public String getDuration() {
-    return recordingOptions.getOrDefault(Option.DURATION.name, Option.DURATION.defaultValue);
+    return getOrDefault(Option.DURATION);
   }
 
   /**
@@ -398,5 +399,9 @@ public class RecordingOptions {
     // TODO: i18n
     throw new IllegalArgumentException(
         "bad format: " + option.name + " = \"" + durationString + "\"");
+  }
+
+  private String getOrDefault(Option option) {
+    return recordingOptions.getOrDefault(option.name, option.defaultValue);
   }
 }

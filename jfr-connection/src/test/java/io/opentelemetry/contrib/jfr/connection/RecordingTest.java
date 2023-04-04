@@ -6,6 +6,8 @@
 package io.opentelemetry.contrib.jfr.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -57,13 +59,17 @@ class RecordingTest {
     MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
     try {
       return FlightRecorderConnection.connect(mBeanServer);
-    } catch (InstanceNotFoundException e) {
-      fail("Either JVM does not support JFR, or experimental options need to be enabled", e);
     } catch (IOException e) {
       // possible that this can be thrown, but should not happen in this context
       fail("IOException not expected", e);
-    } catch (JfrStreamingException reallyBad) {
-      fail("something really bad happened", reallyBad);
+    } catch (JfrConnectionException reallyBad) {
+      if (reallyBad.getCause() instanceof InstanceNotFoundException) {
+        fail(
+            "Either JVM does not support JFR, or experimental options need to be enabled",
+            reallyBad.getCause());
+      } else {
+        fail("something really bad happened", reallyBad);
+      }
     }
     return null;
   }
@@ -104,7 +110,7 @@ class RecordingTest {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       assertEquals(Recording.State.NEW, recording.getState());
       assertEquals(-1, recording.getId());
-    } catch (IOException | IllegalStateException exception) {
+    } catch (IOException | IllegalStateException | JfrConnectionException exception) {
       fail("assertNewRecordingInitialValues caught exception", exception);
     }
   }
@@ -115,7 +121,7 @@ class RecordingTest {
       long id = recording.start();
       assertEquals(id, recording.getId());
       assertEquals(Recording.State.RECORDING, recording.getState());
-    } catch (IOException | IllegalStateException | JfrStreamingException e) {
+    } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingStartIdAndState caught exception", e);
     }
   }
@@ -127,7 +133,7 @@ class RecordingTest {
       assertEquals(id, recording.getId());
       recording.stop();
       assertEquals(Recording.State.STOPPED, recording.getState());
-    } catch (IOException | IllegalStateException | JfrStreamingException e) {
+    } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingStopState caught exception", e);
     }
   }
@@ -139,7 +145,7 @@ class RecordingTest {
       assertEquals(id, recording.getId());
       recording.close();
       assertEquals(Recording.State.CLOSED, recording.getState());
-    } catch (IOException | IllegalStateException | JfrStreamingException e) {
+    } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingCloseState caught exception", e);
     }
   }
@@ -315,6 +321,7 @@ class RecordingTest {
                   "getRecordingOptions",
                   new Object[] {id},
                   new String[] {long.class.getName()});
+      assertFalse(flightRecorderMXBeanOptions.isEmpty());
       ((Collection<CompositeData>) flightRecorderMXBeanOptions.values())
           .forEach(
               compositeData -> {
@@ -343,7 +350,7 @@ class RecordingTest {
       fail("IOException not expected: ", ioe);
     } catch (IllegalArgumentException badData) {
       fail("Issue in test data: " + badData.getMessage());
-    } catch (JfrStreamingException | ReflectionException | MBeanException badBean) {
+    } catch (JfrConnectionException | ReflectionException | MBeanException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     } catch (InstanceNotFoundException badJvm) {
       fail("Either JVM does not support JFR, or experimental options need to be enabled");
@@ -384,7 +391,7 @@ class RecordingTest {
     } catch (IOException ioe) {
       // possible that this can be thrown, but should not happen in this context
       fail("IOException not expected: ", ioe);
-    } catch (JfrStreamingException badBean) {
+    } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     }
   }
@@ -419,7 +426,7 @@ class RecordingTest {
       fail("Issue in test data: " + badData.getMessage());
     } catch (IOException ioe) {
       fail("IOException not expected: ", ioe);
-    } catch (JfrStreamingException badBean) {
+    } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     }
   }
@@ -473,7 +480,7 @@ class RecordingTest {
     } catch (IOException ioe) {
       // possible that this can be thrown, but should not happen in this context
       fail("IOException not expected: ", ioe);
-    } catch (JfrStreamingException badBean) {
+    } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     }
   }
@@ -489,12 +496,12 @@ class RecordingTest {
       Recording clone = recording.clone(true);
       assertSame(recording.getState(), Recording.State.RECORDING);
       assertSame(clone.getState(), Recording.State.STOPPED);
-      assertTrue(recording.getId() != clone.getId());
+      assertNotEquals(recording.getId(), clone.getId());
       recording.stop();
     } catch (IOException ioe) {
       // possible that this can be thrown, but should not happen in this context
       fail("IOException not expected: ", ioe);
-    } catch (JfrStreamingException badBean) {
+    } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
     }
   }

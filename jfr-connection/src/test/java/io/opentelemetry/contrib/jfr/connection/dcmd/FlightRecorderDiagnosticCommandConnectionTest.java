@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.contrib.jfr.connection.JfrStreamingException;
+import io.opentelemetry.contrib.jfr.connection.JfrConnectionException;
 import io.opentelemetry.contrib.jfr.connection.RecordingConfiguration;
 import io.opentelemetry.contrib.jfr.connection.RecordingOptions;
 import javax.management.MBeanServerConnection;
@@ -32,7 +32,7 @@ class FlightRecorderDiagnosticCommandConnectionTest {
   @Test
   void assertCommercialFeaturesLockedThrows() throws Exception {
     assertThrows(
-        JfrStreamingException.class,
+        JfrConnectionException.class,
         () -> {
           ObjectName objectName = mock(ObjectName.class);
           MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "locked");
