@@ -51,7 +51,7 @@ public class JfcFileConfiguration implements RecordingConfiguration {
       String[] argTypes = new String[] {long.class.getName(), String.class.getName()};
       mBeanServerConnection.invoke(objectName, "setConfiguration", args, argTypes);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
-      throw FlightRecorderConnection.canonicalJfrConnectionException(
+      throw JfrConnectionException.canonicalJfrConnectionException(
           getClass(), "invokeSetConfiguration", e);
     }
   }

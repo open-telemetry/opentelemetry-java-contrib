@@ -3,14 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.connection.dcmd;
+package io.opentelemetry.contrib.jfr.connection;
 
-import io.opentelemetry.contrib.jfr.connection.FlightRecorderConnection;
-import io.opentelemetry.contrib.jfr.connection.JfrConnectionException;
-import io.opentelemetry.contrib.jfr.connection.PredefinedConfiguration;
-import io.opentelemetry.contrib.jfr.connection.Recording;
-import io.opentelemetry.contrib.jfr.connection.RecordingConfiguration;
-import io.opentelemetry.contrib.jfr.connection.RecordingOptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -30,26 +24,14 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 /**
- * Represents a connection to the {@code com.sun.management DiagnosticCommand} MBean of a JVM. This
- * is the same mechanism used by the Java <i>jcmd</i> tool. {@code
- * FlightRecorderDiagnosticCommandConnection} provides {@link #newRecording(RecordingOptions,
- * RecordingConfiguration) API} to create Java flight {@link Recording recordings}. More than one
- * {@code Recording} can be created.
+ * This class is the implementation detail of the {@link FlightRecorderConnection} interface which
+ * uses a connection to a {@code com.sun.management DiagnosticCommand} MBean of a JVM. Because it is
+ * implementation detail, it is not part of the public API of this library.
  *
- * <p>To use this class, a {@code javax.management.MBeanServerConnection} is needed. This class uses
- * the connection to make calls to the MBean server and does not change the state of the connection.
- * Management of the connection is the concern of the caller and use of a {@code
- * FlightRecorderConnection} for an MBean server connection that is no longer valid will result in
- * {@code IOException} being thrown.
- *
- * <p>The {@code MBeanServerConnection} can be a connection to any MBean server. Typically, the
- * connection is to the platform MBean server obtained by calling {@code
- * java.lang.management.ManagementFactory.getPlatformMBeanServer()}. The connection can also be to a
- * remote MBean server via {@code javax.management.remote.JMXConnector}. Refer to the summary in the
- * javadoc of the {@code javax.management} package and of the {@code javax.management.remote}
- * package for details.
+ * @see FlightRecorderConnection#diagnosticCommandConnection(MBeanServerConnection)
  */
-public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderConnection {
+/* package scope */ final class FlightRecorderDiagnosticCommandConnection
+    implements FlightRecorderConnection {
   private static final String DIAGNOSTIC_COMMAND_OBJECT_NAME =
       "com.sun.management:type=DiagnosticCommand";
   private static final String JFR_START_REGEX = "Started recording (.+?)\\. .*";
@@ -59,21 +41,17 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
   private static final String[] signature = new String[] {"[Ljava.lang.String;"};
 
   /**
-   * Create a connection to the {@code FlightRecorder} via JMX. This method either returns a {@code
-   * FlightRecorderConnection}, or throws an exception. An {@code IOException} indicates a problem
-   * with the connection to the MBean server. An {@code InstanceNotFoundException} indicates that
-   * the FlightRecorder MBean is not registered on the target JVM. This could happen if the target
-   * JVM does not support Java Flight Recorder, or if expermental features need to be enabled on the
-   * target JVM.
+   * Create a connection to the {@code DiagnosticCommand} MBean.
    *
    * @param mBeanServerConnection The {@code MBeanServerConnection} to the JVM.
    * @return A {@code FlightRecorderConnection}.
    * @throws IOException A communication problem occurred when talking to the MBean server.
-   * @throws JfrConnectionException Indicates an issue with the FlightRecorderMXBean in the JVM.
+   * @throws JfrConnectionException Indicates an issue with the DiagnosticCommand MBean in the JVM.
    * @throws NullPointerException The {@code mBeanServerConnection} parameter is {@code null}.
+   * @see FlightRecorderConnection#diagnosticCommandConnection(MBeanServerConnection)
    */
-  public static FlightRecorderConnection connect(MBeanServerConnection mBeanServerConnection)
-      throws IOException, JfrConnectionException {
+  /* package scope */ static FlightRecorderConnection connect(
+      MBeanServerConnection mBeanServerConnection) throws IOException, JfrConnectionException {
     Objects.requireNonNull(mBeanServerConnection);
     try {
       ObjectInstance objectInstance =
@@ -87,14 +65,28 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
       // DIAGNOSTIC_COMMAND_OBJECT_NAME is malformed, then this is an internal bug.
       throw new JfrConnectionException(DIAGNOSTIC_COMMAND_OBJECT_NAME, e);
     } catch (InstanceNotFoundException e) {
-      throw canonicalJfrConnectionException(
+      throw JfrConnectionException.canonicalJfrConnectionException(
           FlightRecorderDiagnosticCommandConnection.class, "connect", e);
     }
   }
 
   /* package scope for testing */ FlightRecorderDiagnosticCommandConnection(
       MBeanServerConnection mBeanServerConnection, ObjectName objectName) {
-    super(mBeanServerConnection, objectName);
+    this.mBeanServerConnection = mBeanServerConnection;
+    this.objectName = objectName;
+  }
+
+  /** The MBeanServerConnection. */
+  private final MBeanServerConnection mBeanServerConnection;
+
+  /** The ObjectName of the MBean we are connecting to. */
+  private final ObjectName objectName;
+
+  /** {@inheritDoc} */
+  @Override
+  public Recording newRecording(
+      RecordingOptions recordingOptions, RecordingConfiguration recordingConfiguration) {
+    return new Recording(this, recordingOptions, recordingConfiguration);
   }
 
   /**
@@ -115,7 +107,7 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
       throws IOException, JfrConnectionException {
 
     if (!(recordingConfiguration instanceof PredefinedConfiguration)) {
-      throw canonicalJfrConnectionException(
+      throw JfrConnectionException.canonicalJfrConnectionException(
           getClass(),
           "startRecording",
           new UnsupportedOperationException(
@@ -136,9 +128,9 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
         return Long.parseLong(name);
       }
     } catch (InstanceNotFoundException | ReflectionException | MBeanException e) {
-      throw canonicalJfrConnectionException(getClass(), "startRecording", e);
+      throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "startRecording", e);
     }
-    throw canonicalJfrConnectionException(
+    throw JfrConnectionException.canonicalJfrConnectionException(
         getClass(), "startRecording", new IllegalStateException("Failed to parse jfrStart output"));
   }
 
@@ -172,7 +164,7 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
       Object[] params = mkParams("name=" + id);
       mBeanServerConnection.invoke(objectName, "jfrStop", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException | IOException e) {
-      throw canonicalJfrConnectionException(getClass(), "stopRecording", e);
+      throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "stopRecording", e);
     }
   }
 
@@ -190,7 +182,7 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
       Object[] params = mkParams("filename=" + outputFile, "recording=" + id, "compress=true");
       mBeanServerConnection.invoke(objectName, "jfrDump", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
-      throw canonicalJfrConnectionException(getClass(), "dumpRecording", e);
+      throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "dumpRecording", e);
     }
   }
 
@@ -236,7 +228,7 @@ public class FlightRecorderDiagnosticCommandConnection extends FlightRecorderCon
         | MBeanException
         | ReflectionException
         | UnsupportedOperationException e) {
-      throw canonicalJfrConnectionException(
+      throw JfrConnectionException.canonicalJfrConnectionException(
           FlightRecorderDiagnosticCommandConnection.class, "assertCommercialFeaturesUnlocked", e);
     }
   }

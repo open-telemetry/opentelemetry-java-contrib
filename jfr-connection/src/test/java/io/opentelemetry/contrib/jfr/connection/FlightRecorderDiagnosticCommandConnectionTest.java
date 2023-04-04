@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jfr.connection.dcmd;
+package io.opentelemetry.contrib.jfr.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,9 +12,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.contrib.jfr.connection.JfrConnectionException;
-import io.opentelemetry.contrib.jfr.connection.RecordingConfiguration;
-import io.opentelemetry.contrib.jfr.connection.RecordingOptions;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;

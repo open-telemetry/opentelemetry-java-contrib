@@ -44,7 +44,7 @@ public class MapConfiguration implements RecordingConfiguration {
           | InstanceNotFoundException
           | MBeanException
           | ReflectionException e) {
-        throw FlightRecorderConnection.canonicalJfrConnectionException(
+        throw JfrConnectionException.canonicalJfrConnectionException(
             getClass(), "invokeSetConfiguration", e);
       }
     }

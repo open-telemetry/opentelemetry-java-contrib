@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -29,11 +30,11 @@ import javax.annotation.Nullable;
  *       to invoke methods on MBeans. It "wraps" the actual java.lang.Exception thrown.
  *   <dt><em>javax.management.MalformedObjectNameException</em>
  *   <dd>The format of the string does not correspond to a valid ObjectName. This cause indicates a
- *       bug in the com.microsoft.jfr package code.
+ *       bug in the io.opentelemetry.contrib.jfr.connection package code.
  *   <dt><em>javax.management.openmbean.OpenDataException</em>
  *   <dd>This exception is thrown when an open type, an open data or an open MBean metadata info
  *       instance could not be constructed because one or more validity constraints were not met.
- *       This cause indicates a bug in the com.microsoft.jfr package code.
+ *       This cause indicates a bug in the io.opentelemetry.contrib.jfr.connection package code.
  * </dl>
  */
 public class JfrConnectionException extends Exception {
@@ -57,5 +58,20 @@ public class JfrConnectionException extends Exception {
    */
   public JfrConnectionException(@Nullable String message) {
     super(message);
+  }
+
+  /**
+   * Convenience method to create a JfrConnectionException with a canonical message and a cause.
+   *
+   * @param clazz The class that caught the {@code cause}.
+   * @param methodName The name of the method that caught the {@code cause}.
+   * @param cause The exception that was caught.
+   * @return A JfrConnectionException with a canonical message.
+   */
+  /* package scope */ static JfrConnectionException canonicalJfrConnectionException(
+      @Nonnull Class<?> clazz, @Nonnull String methodName, @Nonnull Exception cause) {
+    String canonicalMessage =
+        String.format("%1s.%2s caught: %3s", clazz.getSimpleName(), methodName, cause.getMessage());
+    return new JfrConnectionException(canonicalMessage, cause);
   }
 }
