@@ -17,9 +17,9 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A Sampler that uses the sampled flag of the parent Span, if present. If the span has no parent,
- * this Sampler will use the "root" sampler that it is built with. See documentation on the {@link
- * ParentBasedSamplerBuilder} methods for the details on the various configurable options.
+ * A Sampler that uses the sampled flag of the span links, if present. If at least one span link is
+ * sampled then, this span will be sampled. Otherwise, it is not sampled.
+ * If the span has no span links, this Sampler will use the "root" sampler that it is built with.
  */
 @Immutable
 final class LinksBasedSampler implements Sampler {
@@ -32,9 +32,7 @@ final class LinksBasedSampler implements Sampler {
   LinksBasedSampler(Sampler root) {
     this.root = root;
   }
-
-  // If a parent is set, always follows the same sampling decision as the parent.
-  // Otherwise, uses the delegateSampler provided at initialization to make a decision.
+  
   @Override
   public SamplingResult shouldSample(
       Context parentContext,
