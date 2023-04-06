@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
   // When updating, update above in plugins too
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.17.0")
+  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.18.0")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:3.0.1")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:1.5.0")
 }
