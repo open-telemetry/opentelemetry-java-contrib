@@ -28,7 +28,7 @@ final class LinksBasedSampler implements Sampler {
   private static final SamplingResult POSITIVE_SAMPLING_RESULT = SamplingResult.recordAndSample();
   private static final SamplingResult NEGATIVE_SAMPLING_RESULT = SamplingResult.drop();
 
-  LinksBasedSampler(Sampler root) {
+  public LinksBasedSampler(Sampler root) {
     this.root = root;
   }
 
@@ -60,24 +60,5 @@ final class LinksBasedSampler implements Sampler {
   @Override
   public String toString() {
     return getDescription();
-  }
-
-  @Override
-  public boolean equals(@Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof LinksBasedSampler)) {
-      return false;
-    }
-
-    LinksBasedSampler that = (LinksBasedSampler) o;
-
-    return root.equals(that.root);
-  }
-
-  @Override
-  public int hashCode() {
-    return root.hashCode();
   }
 }
