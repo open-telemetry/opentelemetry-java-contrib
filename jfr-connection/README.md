@@ -1,7 +1,7 @@
 # JFR Connection
 
 The `jfr-connection` module provides a core library for configuring, starting, stopping,
-and reading [Java Flight Recording](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170)
+and reading [Java Flight Recording](https://docs.oracle.com/en/java/java-components/jdk-mission-control/8/user-guide/using-jdk-flight-recorder.html#GUID-D38849B6-61C7-4ED6-A395-EA4BC32A9FD6)
 files from a JVM. The code does not depend on the `jdk.jfr`
 module and will compile and run against JDK 8 or higher. It uses a connection to an MBean
 server, which can be the platform MBean server, or a remote MBean server connected by
