@@ -556,22 +556,22 @@ class MetricAdapterTest {
                     ImmutableList.of(
                         ImmutableDoubleExemplarData.create(
                             Attributes.empty(),
-                            /*recordTime=*/ 0,
+                            /* recordTime= */ 0,
                             SpanContext.create(
                                 "00000000000000000000000000000004",
                                 "0000000000000003",
                                 TraceFlags.getDefault(),
                                 TraceState.getDefault()),
-                            /*value=*/ 0),
+                            /* value= */ 0),
                         ImmutableDoubleExemplarData.create(
                             Attributes.empty(),
-                            /*recordTime=*/ TimeUnit.MILLISECONDS.toNanos(2),
+                            /* recordTime= */ TimeUnit.MILLISECONDS.toNanos(2),
                             SpanContext.create(
                                 "00000000000000000000000000000001",
                                 "0000000000000002",
                                 TraceFlags.getDefault(),
                                 TraceState.getDefault()),
-                            /*value=*/ 2)))));
+                            /* value= */ 2)))));
     assertThat(result)
         .withRepresentation(new ExemplarFriendlyRepresentation())
         .containsExactly(
