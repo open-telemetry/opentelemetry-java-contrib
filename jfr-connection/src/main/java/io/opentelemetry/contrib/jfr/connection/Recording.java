@@ -94,7 +94,7 @@ public class Recording implements AutoCloseable {
    * @param recordingOptions The options to be used for the recording
    * @param recordingConfiguration The settings for events to be collected by the recording
    */
-  /* package scope */ Recording(
+  Recording(
       FlightRecorderConnection connection,
       RecordingOptions recordingOptions,
       RecordingConfiguration recordingConfiguration) {

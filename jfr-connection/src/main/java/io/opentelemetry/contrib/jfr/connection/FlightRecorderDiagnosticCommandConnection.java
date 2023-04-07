@@ -30,8 +30,7 @@ import javax.management.ReflectionException;
  *
  * @see FlightRecorderConnection#diagnosticCommandConnection(MBeanServerConnection)
  */
-/* package scope */ final class FlightRecorderDiagnosticCommandConnection
-    implements FlightRecorderConnection {
+final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderConnection {
   private static final String DIAGNOSTIC_COMMAND_OBJECT_NAME =
       "com.sun.management:type=DiagnosticCommand";
   private static final String JFR_START_REGEX = "Started recording (.+?)\\. .*";
@@ -50,8 +49,8 @@ import javax.management.ReflectionException;
    * @throws NullPointerException The {@code mBeanServerConnection} parameter is {@code null}.
    * @see FlightRecorderConnection#diagnosticCommandConnection(MBeanServerConnection)
    */
-  /* package scope */ static FlightRecorderConnection connect(
-      MBeanServerConnection mBeanServerConnection) throws IOException, JfrConnectionException {
+  static FlightRecorderConnection connect(MBeanServerConnection mBeanServerConnection)
+      throws IOException, JfrConnectionException {
     Objects.requireNonNull(mBeanServerConnection);
     try {
       ObjectInstance objectInstance =
@@ -70,7 +69,8 @@ import javax.management.ReflectionException;
     }
   }
 
-  /* package scope for testing */ FlightRecorderDiagnosticCommandConnection(
+  /* package scope for testing */
+  FlightRecorderDiagnosticCommandConnection(
       MBeanServerConnection mBeanServerConnection, ObjectName objectName) {
     this.mBeanServerConnection = mBeanServerConnection;
     this.objectName = objectName;

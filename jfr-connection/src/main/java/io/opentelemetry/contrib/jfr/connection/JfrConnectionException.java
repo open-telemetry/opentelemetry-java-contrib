@@ -68,7 +68,7 @@ public class JfrConnectionException extends Exception {
    * @param cause The exception that was caught.
    * @return A JfrConnectionException with a canonical message.
    */
-  /* package scope */ static JfrConnectionException canonicalJfrConnectionException(
+  static JfrConnectionException canonicalJfrConnectionException(
       @Nonnull Class<?> clazz, @Nonnull String methodName, @Nonnull Exception cause) {
     String canonicalMessage =
         String.format("%1s.%2s caught: %3s", clazz.getSimpleName(), methodName, cause.getMessage());

@@ -44,8 +44,7 @@ class JfrStream extends InputStream {
   private final MBeanServerConnection connection;
   private final ObjectName flightRecorder;
 
-  /* package scope */ JfrStream(
-      MBeanServerConnection connection, ObjectName flightRecorder, long streamid) {
+  JfrStream(MBeanServerConnection connection, ObjectName flightRecorder, long streamid) {
     this.streamid = streamid;
     this.connection = connection;
     this.flightRecorder = flightRecorder;

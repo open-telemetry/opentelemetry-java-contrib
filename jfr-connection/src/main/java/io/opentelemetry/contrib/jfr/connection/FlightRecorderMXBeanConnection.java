@@ -28,7 +28,7 @@ import javax.management.openmbean.TabularData;
  *
  * @see FlightRecorderConnection#connectToFlightRecorderMXBean(MBeanServerConnection)
  */
-/* package scope */ final class FlightRecorderMXBeanConnection implements FlightRecorderConnection {
+final class FlightRecorderMXBeanConnection implements FlightRecorderConnection {
 
   private static final String JFR_OBJECT_NAME = "jdk.management.jfr:type=FlightRecorder";
 
@@ -43,8 +43,8 @@ import javax.management.openmbean.TabularData;
    * @throws NullPointerException The {@code mBeanServerConnection} parameter is {@code null}.
    * @see FlightRecorderConnection#connect(MBeanServerConnection)
    */
-  /* package access */ static FlightRecorderConnection connect(
-      MBeanServerConnection mBeanServerConnection) throws IOException, JfrConnectionException {
+  static FlightRecorderConnection connect(MBeanServerConnection mBeanServerConnection)
+      throws IOException, JfrConnectionException {
     Objects.requireNonNull(mBeanServerConnection);
     try {
       ObjectName objectName = new ObjectName(JFR_OBJECT_NAME);
