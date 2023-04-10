@@ -196,6 +196,8 @@ conventions are particularly useful when  invoking external systems.
 Steps to instrument a Maven Mojo:
 
 * Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
+  Replace `OPENTELEMETRY_VERSION` with the [latest
+  release](https://search.maven.org/search?q=g:io.opentelemetry%20AND%20a:opentelemetry-api).
 
 ```xml
 <project>
@@ -204,7 +206,7 @@ Steps to instrument a Maven Mojo:
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>LATEST</version>
+            <version>OPENTELEMETRY_VERSION</version>
         </dependency>
         ...
     </dependencies>
