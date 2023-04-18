@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- Breakout ResourceHolder from AwsXrayRemoteSamplerProvider
+  ([#801](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/801))
+
+### JFR connection - New 🌟
+
+- JFR connection is a library to allow configuration and control of JFR
+  without depending on jdk.jfr.
+  This is a contribution of https://github.com/microsoft/jfr-streaming.
+
 ## Version 1.24.0 (2023-04-03)
 
 ### Maven extension
