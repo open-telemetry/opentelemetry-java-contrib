@@ -246,7 +246,7 @@ public class TestMojo extends AbstractMojo {
 
 ## Component owners
 
-- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Elastic
+- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Grafana Labs
 - [Ken Finnigan](https://github.com/kenfinnigan), Workday
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
