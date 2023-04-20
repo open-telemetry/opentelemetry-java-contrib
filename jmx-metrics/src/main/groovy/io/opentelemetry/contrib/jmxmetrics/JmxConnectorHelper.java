@@ -59,7 +59,7 @@ public class JmxConnectorHelper {
     }
 
     if (stub == null) {
-      getStub(hostName, port);
+      stub = getStub(hostName, port);
     }
     JMXConnector jmxConn = new RMIConnector(stub, null);
     jmxConn.connect(env);
