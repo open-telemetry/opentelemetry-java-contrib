@@ -66,10 +66,10 @@ public class JmxConnectorHelper {
     return jmxConn;
   }
 
-  private static void getStub(String hostName, int port) throws IOException {
+  private static RMIServer getStub(String hostName, int port) throws IOException {
     try {
       Registry registry = LocateRegistry.getRegistry(hostName, port, sslRMIClientSocketFactory);
-      stub = (RMIServer) registry.lookup("jmxrmi");
+      return (RMIServer) registry.lookup("jmxrmi");
     } catch (NotBoundException nbe) {
       throw new IOException(nbe);
     }
