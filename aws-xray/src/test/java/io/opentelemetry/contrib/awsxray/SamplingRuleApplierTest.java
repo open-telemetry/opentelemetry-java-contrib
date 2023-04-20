@@ -500,7 +500,9 @@ class SamplingRuleApplierTest {
             .put(
                 ResourceAttributes.CLOUD_PLATFORM,
                 ResourceAttributes.CloudPlatformValues.AWS_LAMBDA)
-            .put(ResourceAttributes.FAAS_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
+            .put(
+                ResourceAttributes.CLOUD_RESOURCE_ID,
+                "arn:aws:xray:us-east-1:595986152929:my-service")
             .build();
 
     private final Attributes attributes =
@@ -521,10 +523,12 @@ class SamplingRuleApplierTest {
     void spanFaasIdMatches() {
       Resource resource =
           Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.FAAS_ID));
+              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_RESOURCE_ID));
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(ResourceAttributes.FAAS_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
+              .put(
+                  ResourceAttributes.CLOUD_RESOURCE_ID,
+                  "arn:aws:xray:us-east-1:595986152929:my-service")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
