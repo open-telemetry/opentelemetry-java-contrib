@@ -343,11 +343,11 @@ final class SamplingRuleApplier {
 
   @Nullable
   private static String getLambdaArn(Attributes attributes, Resource resource) {
-    String arn = resource.getAttributes().get(ResourceAttributes.FAAS_ID);
+    String arn = resource.getAttributes().get(ResourceAttributes.CLOUD_RESOURCE_ID);
     if (arn != null) {
       return arn;
     }
-    return attributes.get(ResourceAttributes.FAAS_ID);
+    return attributes.get(ResourceAttributes.CLOUD_RESOURCE_ID);
   }
 
   @Nullable
