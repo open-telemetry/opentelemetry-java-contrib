@@ -19,7 +19,9 @@ the second Monday of the month (roughly a couple of days after the monthly minor
 ## Preparing a new major or minor release
 
 * Check that [dependabot has run](https://github.com/open-telemetry/opentelemetry-java-contrib/network/updates)
-  sometime in the past day.
+  sometime in the past day and that all
+  [dependabot PRs](https://github.com/open-telemetry/opentelemetry-java-contrib/pulls/app%2Fdependabot)
+  have been merged. 
   * Check that the OpenTelemetry SDK and Instrumentation versions have been updated to the latest release.
 * Close the [release milestone](https://github.com/open-telemetry/opentelemetry-java-contrib/milestones)
   if there is one.
