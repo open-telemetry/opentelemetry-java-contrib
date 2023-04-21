@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.25.1 (2023-04-21)
 
 ### 🛠️ Bug fixes
 
