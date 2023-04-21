@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## Version 1.25.1 (2023-04-21)
+
+### 🛠️ Bug fixes
+
+- Previously targeted OpenTelemetry SDK and Instrumentation versions had never been updated to
+  target OpenTelemetry SDK 1.25
+
 ## Version 1.25.0 (2023-04-18)
 
 ### AWS X-Ray SDK support
