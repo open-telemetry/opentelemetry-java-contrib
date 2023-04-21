@@ -19,7 +19,7 @@ class JmxConfig {
   static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
   static final String METRICS_EXPORTER_TYPE = PREFIX + "metrics.exporter";
   static final String EXPORTER = PREFIX + "exporter.";
-
+  static final String REGISTRY_SSL = PREFIX + "jmx.remote.registry.ssl";
   static final String EXPORTER_INTERVAL = PREFIX + "metric.export.interval";
 
   static final String OTLP_ENDPOINT = EXPORTER + "otlp.endpoint";
@@ -74,7 +74,7 @@ class JmxConfig {
   final String password;
   final String realm;
   final String remoteProfile;
-
+  final boolean registrySsl;
   final Properties properties;
 
   JmxConfig(final Properties props) {
@@ -110,6 +110,8 @@ class JmxConfig {
 
     remoteProfile = properties.getProperty(JMX_REMOTE_PROFILE);
     realm = properties.getProperty(JMX_REALM);
+
+    registrySsl = Boolean.valueOf(properties.getProperty(REGISTRY_SSL));
 
     // For the list of System Properties, if they have been set in the properties file
     // they need to be set in Java System Properties.

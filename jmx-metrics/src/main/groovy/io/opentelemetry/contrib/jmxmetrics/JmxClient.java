@@ -20,7 +20,6 @@ import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 public class JmxClient {
@@ -31,6 +30,7 @@ public class JmxClient {
   private final String password;
   private final String realm;
   private final String remoteProfile;
+  private final boolean registrySsl;
   @Nullable private JMXConnector jmxConn;
 
   JmxClient(final JmxConfig config) throws MalformedURLException {
@@ -39,6 +39,7 @@ public class JmxClient {
     this.password = config.password;
     this.realm = config.realm;
     this.remoteProfile = config.remoteProfile;
+    this.registrySsl = config.registrySsl;
   }
 
   public MBeanServerConnection getConnection() {
@@ -68,7 +69,7 @@ public class JmxClient {
         logger.warning("SASL unsupported in current environment: " + e.getMessage());
       }
 
-      jmxConn = JMXConnectorFactory.connect(url, env);
+      jmxConn = JmxConnectorHelper.connect(url, env, registrySsl);
       return jmxConn.getMBeanServerConnection();
     } catch (IOException e) {
       logger.log(Level.WARNING, "Could not connect to remote JMX server: ", e);
