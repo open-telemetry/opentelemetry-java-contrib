@@ -29,10 +29,6 @@ components:
     - dsgrieve
   jfr-events:
     - sfriberg
-  jfr-streaming:
-    - breedx-splk
-    - jack-berg
-    - kittylyst
   jmx-metrics:
     - dehaansa
     - Mrod1598
