@@ -12,23 +12,24 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * A Sampler that uses the sampled flag of the span links if present. If at least one span link is
  * sampled, then this span will be sampled. Otherwise, it is not sampled. If the span has no span
  * links, this Sampler will use the "root" sampler that it is built with.
  */
-@Immutable
-final class LinksBasedSampler implements Sampler {
-
+public final class LinksBasedSampler implements Sampler {
   private final Sampler root;
 
   private static final SamplingResult POSITIVE_SAMPLING_RESULT = SamplingResult.recordAndSample();
   private static final SamplingResult NEGATIVE_SAMPLING_RESULT = SamplingResult.drop();
 
-  public LinksBasedSampler(Sampler root) {
+  private LinksBasedSampler(Sampler root) {
     this.root = root;
+  }
+
+  public static LinksBasedSampler create(Sampler root) {
+    return new LinksBasedSampler(root);
   }
 
   @Override

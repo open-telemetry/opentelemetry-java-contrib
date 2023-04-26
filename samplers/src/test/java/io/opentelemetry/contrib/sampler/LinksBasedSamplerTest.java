@@ -47,7 +47,7 @@ class LinksBasedSamplerTest {
   @Test
   void testEmptyAlwaysTrueRoot() {
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOn())
+        LinksBasedSampler.create(Sampler.alwaysOn())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -62,7 +62,7 @@ class LinksBasedSamplerTest {
   @Test
   void testEmptyAlwaysFalseRoot() {
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOff())
+        LinksBasedSampler.create(Sampler.alwaysOff())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -80,7 +80,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(sampledSpanContext1));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOff())
+        LinksBasedSampler.create(Sampler.alwaysOff())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -98,7 +98,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(unsampledSpanContext1));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOn())
+        LinksBasedSampler.create(Sampler.alwaysOn())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -117,7 +117,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(unsampledSpanContext1));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOff())
+        LinksBasedSampler.create(Sampler.alwaysOff())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -136,7 +136,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(sampledSpanContext1));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOff())
+        LinksBasedSampler.create(Sampler.alwaysOff())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -155,7 +155,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(sampledSpanContext2));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOff())
+        LinksBasedSampler.create(Sampler.alwaysOff())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
@@ -174,7 +174,7 @@ class LinksBasedSamplerTest {
     linkData.add(LinkData.create(unsampledSpanContext2));
 
     assertThat(
-            new LinksBasedSampler(Sampler.alwaysOn())
+        LinksBasedSampler.create(Sampler.alwaysOn())
                 .shouldSample(
                     sampledParentContext,
                     traceId,
