@@ -15,8 +15,8 @@ final class AwsAttributeKeys {
   static final AttributeKey<String> AWS_LOCAL_OPERATION =
       AttributeKey.stringKey("aws.local.operation");
 
-  static final AttributeKey<String> AWS_REMOTE_APPLICATION =
-      AttributeKey.stringKey("aws.remote.application");
+  static final AttributeKey<String> AWS_REMOTE_SERVICE =
+      AttributeKey.stringKey("aws.remote.service");
 
   static final AttributeKey<String> AWS_REMOTE_OPERATION =
       AttributeKey.stringKey("aws.remote.operation");
