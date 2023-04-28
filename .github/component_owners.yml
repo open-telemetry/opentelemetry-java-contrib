@@ -11,11 +11,14 @@
 # `comp:*` labels
 components:
   aws-resources:
-    - willarmiros
+    - wangzlei
+    - srprash
   aws-xray:
-    - willarmiros
+    - wangzlei
+    - srprash
   aws-xray-propagator:
-    - willarmiros
+    - wangzlei
+    - srprash
   consistent-sampling:
     - oertl
     - PeterF778
