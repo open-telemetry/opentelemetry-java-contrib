@@ -40,7 +40,6 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
   static final long DEFAULT_TARGET_INTERVAL_NANOS = TimeUnit.SECONDS.toNanos(10);
 
-  private static final Random RANDOM = new Random();
   private static final Logger logger = Logger.getLogger(AwsXrayRemoteSampler.class.getName());
 
   private final Resource resource;
@@ -97,7 +96,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
     this.pollingIntervalNanos = pollingIntervalNanos;
     // Add ~1% of jitter
-    jitterNanos = RANDOM.longs(0, pollingIntervalNanos / 100).iterator();
+    jitterNanos = new Random().longs(0, pollingIntervalNanos / 100).iterator();
 
     // Execute first update right away on the executor thread.
     executor.execute(this::getAndUpdateSampler);
