@@ -16,6 +16,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-semconv")
 
   annotationProcessor("com.google.auto.service:auto-service")
+  testImplementation("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
 
   annotationProcessor("com.google.auto.value:auto-value")

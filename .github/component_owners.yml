@@ -1,4 +1,4 @@
-# this file is used by .github/workflows/component-codeowners.yml
+# this file is used by .github/workflows/assign-reviewers.yml
 #
 # NOTE component owners must be members of the GitHub OpenTelemetry organization
 # so that they can be added to @open-telemetry/java-contrib-triagers
@@ -11,23 +11,27 @@
 # `comp:*` labels
 components:
   aws-resources:
-    - willarmiros
+    - wangzlei
+    - srprash
   aws-xray:
-    - willarmiros
+    - wangzlei
+    - srprash
   aws-xray-propagator:
-    - willarmiros
+    - wangzlei
+    - srprash
   consistent-sampling:
     - oertl
     - PeterF778
   samplers:
     - iNikem
     - trask
+  jfr-connection:
+    - trask
+    - breedx-splk
+    - jeanbisutti
+    - dsgrieve
   jfr-events:
     - sfriberg
-  jfr-streaming:
-    - breedx-splk
-    - jack-berg
-    - kittylyst
   jmx-metrics:
     - dehaansa
     - Mrod1598

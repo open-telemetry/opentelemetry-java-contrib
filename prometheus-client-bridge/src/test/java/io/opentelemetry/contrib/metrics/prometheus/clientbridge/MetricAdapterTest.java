@@ -209,8 +209,10 @@ class MetricAdapterTest {
                       1633950672000000000L,
                       KP_VP_ATTR,
                       1.0,
-                      null,
-                      null,
+                      false,
+                      0.0,
+                      false,
+                      0.0,
                       Collections.emptyList(),
                       Collections.singletonList(2L),
                       Collections.singletonList(
@@ -545,29 +547,31 @@ class MetricAdapterTest {
                     1633943350000000000L,
                     KP_VP_ATTR,
                     18.3,
+                    false,
                     0.0,
+                    false,
                     0.0,
                     ImmutableList.of(1.0),
                     ImmutableList.of(4L, 9L),
                     ImmutableList.of(
                         ImmutableDoubleExemplarData.create(
                             Attributes.empty(),
-                            /*recordTime=*/ 0,
+                            /* recordTime= */ 0,
                             SpanContext.create(
                                 "00000000000000000000000000000004",
                                 "0000000000000003",
                                 TraceFlags.getDefault(),
                                 TraceState.getDefault()),
-                            /*value=*/ 0),
+                            /* value= */ 0),
                         ImmutableDoubleExemplarData.create(
                             Attributes.empty(),
-                            /*recordTime=*/ TimeUnit.MILLISECONDS.toNanos(2),
+                            /* recordTime= */ TimeUnit.MILLISECONDS.toNanos(2),
                             SpanContext.create(
                                 "00000000000000000000000000000001",
                                 "0000000000000002",
                                 TraceFlags.getDefault(),
                                 TraceState.getDefault()),
-                            /*value=*/ 2)))));
+                            /* value= */ 2)))));
     assertThat(result)
         .withRepresentation(new ExemplarFriendlyRepresentation())
         .containsExactly(

@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## Version 1.25.1 (2023-04-21)
+
+### 🛠️ Bug fixes
+
+- Previously targeted OpenTelemetry SDK and Instrumentation versions had never been updated to
+  target OpenTelemetry SDK 1.25
+
+## Version 1.25.0 (2023-04-18)
+
+### AWS X-Ray SDK support
+
+- Breakout ResourceHolder from AwsXrayRemoteSamplerProvider
+  ([#801](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/801))
+
+### JFR connection - New 🌟
+
+- JFR connection is a library to allow configuration and control of JFR
+  without depending on jdk.jfr.
+  This is a contribution of https://github.com/microsoft/jfr-streaming.
+
+## Version 1.24.0 (2023-04-03)
+
+### Maven extension
+
+- [maven-extension] Emit a warning rather than failing the build with an exception on illegal state
+  ([#776](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/776))
+- [maven-extension] Remove dependency to grpc-netty-shaded as opentelemetry-exporter-otlp pulls
+  okhttp3
+  ([#785](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/785))
+- [maven-extension] Propagate OTel context to plugin mojos
+  ([#786](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/786))
+
 ## Version 1.23.0 (2023-02-22)
 
 ### JFR streaming
