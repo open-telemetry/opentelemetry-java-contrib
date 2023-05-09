@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -96,7 +97,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
     this.pollingIntervalNanos = pollingIntervalNanos;
     // Add ~1% of jitter
-    jitterNanos = new Random().longs(0, pollingIntervalNanos / 100).iterator();
+    jitterNanos = ThreadLocalRandom.current().longs(0, pollingIntervalNanos / 100).iterator();
 
     // Execute first update right away on the executor thread.
     executor.execute(this::getAndUpdateSampler);
