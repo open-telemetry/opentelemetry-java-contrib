@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -148,7 +149,7 @@ public final class EcsResource {
           attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_ARN, value);
           break;
         case "LaunchType":
-          attrBuilders.put(ResourceAttributes.AWS_ECS_LAUNCHTYPE, value.toLowerCase());
+          attrBuilders.put(ResourceAttributes.AWS_ECS_LAUNCHTYPE, value.toLowerCase(Locale.ROOT));
           break;
         case "Family":
           attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_FAMILY, value);
