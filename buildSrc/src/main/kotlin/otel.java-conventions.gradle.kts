@@ -1,3 +1,4 @@
+import com.gradle.enterprise.gradleplugin.testretry.retry
 import io.opentelemetry.gradle.OtelJavaExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
@@ -65,6 +66,13 @@ tasks {
       showExceptions = true
       showCauses = true
       showStackTraces = true
+    }
+
+    retry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      if (System.getenv().containsKey("CI") || rootProject.hasProperty("retryTests")) {
+        maxRetries.set(5)
+      }
     }
   }
 
