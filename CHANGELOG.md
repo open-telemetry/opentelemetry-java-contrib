@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- Add AttributePropagatingSpanProcessor component to AWS X-Ray
+  ([#856](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/856))
+- Add new components to allow for generating metrics from 100% of spans without impacting sampling
+  ([#802](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/802))
+
+### JMX metrics
+
+- Adding support for scenarios where the RMI registry has SSL enabled
+  ([#835](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/835))
+
 ## Version 1.25.1 (2023-04-21)
 
 ### 🛠️ Bug fixes
