@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.26.0 (2023-05-17)
 
 ### AWS X-Ray SDK support
 
