@@ -15,6 +15,7 @@ dependencies {
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.18.0")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:3.1.0")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:1.6.0")
+  implementation("com.gradle.enterprise:com.gradle.enterprise.gradle.plugin:3.13.2")
 }
 
 spotless {
@@ -32,6 +33,6 @@ spotless {
       // also very hard to find out where this happens
       "ktlint_standard_wrapping" to "disabled"
     ))
-    target("**/*.gradle.kts",)
+    target("**/*.gradle.kts")
   }
 }
