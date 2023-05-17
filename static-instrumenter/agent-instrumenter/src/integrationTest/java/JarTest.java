@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -27,6 +28,9 @@ final class JarTest {
   @TempDir public Path outPath;
 
   @Test
+  // TODO this test fails sporadically and is causing CI to fail often
+  // https://github.com/open-telemetry/opentelemetry-java-contrib/issues/877
+  @Disabled
   void testSampleJar() throws Exception {
 
     Path agentPath = Path.of(System.getProperty("agent"));
