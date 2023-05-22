@@ -10,6 +10,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    labels: # overriding the default which is to add both "dependencies" and "github_actions"
+      - "dependencies"
 
   - package-ecosystem: "gradle"
     directory: "/"
@@ -30,4 +32,6 @@ updates:
       - gradle-plugin-portal
     schedule:
       interval: "daily"
+    labels: # overriding the default which is to add both "dependencies" and "java"
+      - "dependencies"
     open-pull-requests-limit: 10
