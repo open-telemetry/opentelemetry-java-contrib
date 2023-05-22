@@ -1,0 +1,54 @@
+name: Bug report
+description: Create a report to help us improve
+labels: [ bug ]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component(s)
+      description: Which component(s) does your bug report concern?
+      multiple: true
+      options:
+        - aws-resources
+        - aws-xray
+        - aws-xray-propagator
+        - consistent-sampling
+        - jfr-connection
+        - jfr-events
+        - jmx-metrics
+        - maven-extension
+        - micrometer-meter-provider
+        - noop-api
+        - prometheus-client-bridge
+        - resource-providers
+        - samplers
+        - static-instrumenter
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Please provide as much detail as you reasonably can.
+      value: |
+        ## Description
+
+        ## Steps to Reproduce
+
+        ## Expected Result
+
+        ## Actual Result
+
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Component version
+      description: What version did you use? (e.g., `v1.26.0`, `1eb551b`, etc)
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment information
+      description: Please provide any additional information about your installation.
+      value: |
+        ## Environment
+        OS: (e.g., "Ubuntu 20.04")
+        Compiler(if manually compiled): (e.g., "OpenJDK 1.8.0_252")
