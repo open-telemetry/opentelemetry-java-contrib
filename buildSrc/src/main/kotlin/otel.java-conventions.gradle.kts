@@ -33,7 +33,7 @@ java {
 tasks {
   withType<JavaCompile>().configureEach {
     with(options) {
-      release.set(8)
+      release.set(otelJava.minJavaVersionSupported.map { it.majorVersion.toInt() })
 
       if (name!="jmhCompileGeneratedClasses") {
         compilerArgs.addAll(

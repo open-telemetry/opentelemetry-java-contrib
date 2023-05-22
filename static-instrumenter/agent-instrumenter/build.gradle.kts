@@ -21,6 +21,10 @@ val javaagent: Configuration by configurations.creating {
 }
 configurations.getByName("implementation").extendsFrom(javaagent)
 
+otelJava {
+  minJavaVersionSupported.set(JavaVersion.VERSION_11)
+}
+
 dependencies {
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service")
@@ -90,12 +94,6 @@ tasks {
     relocate("io.opentelemetry.instrumentation.api", "io.opentelemetry.javaagent.shaded.instrumentation.api")
   }
 
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
-    }
-  }
-
   assemble {
     dependsOn(shadowJar, createNoInstAgent)
   }
@@ -144,5 +142,6 @@ class AgentJarsProvider(
   @PathSensitive(PathSensitivity.RELATIVE)
   val noInstAgentJar: Provider<RegularFile>,
 ) : CommandLineArgumentProvider {
-  override fun asArguments(): Iterable<String> = listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
+  override fun asArguments(): Iterable<String> =
+    listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
 }
