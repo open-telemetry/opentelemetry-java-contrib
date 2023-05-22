@@ -16,9 +16,14 @@ group = "io.opentelemetry.contrib"
 
 base.archivesName.set("opentelemetry-${project.name}")
 
+// Version to use to compile code and run tests.
+val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
+
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
+    languageVersion.set(
+      otelJava.minJavaVersionSupported.map { JavaLanguageVersion.of(Math.max(it.majorVersion.toInt(), DEFAULT_JAVA_VERSION.majorVersion.toInt())) }
+    )
   }
 
   withJavadocJar()
@@ -30,7 +35,7 @@ tasks {
     with(options) {
       release.set(8)
 
-      if (name != "jmhCompileGeneratedClasses") {
+      if (name!="jmhCompileGeneratedClasses") {
         compilerArgs.addAll(
           listOf(
             "-Xlint:all",
@@ -158,6 +163,44 @@ testing {
       implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    }
+  }
+}
+
+fun isJavaVersionAllowed(version: JavaVersion): Boolean {
+  if (otelJava.minJavaVersionSupported.get() > version) {
+    return false
+  }
+  if (otelJava.maxJavaVersionForTests.isPresent && otelJava.maxJavaVersionForTests.get().compareTo(version) < 0) {
+    return false
+  }
+  return true
+}
+
+afterEvaluate {
+  val testJavaVersion = gradle.startParameter.projectProperties["testJavaVersion"]?.let(JavaVersion::toVersion)
+  val useJ9 = gradle.startParameter.projectProperties["testJavaVM"]?.run { this=="openj9" }
+    ?: false
+  tasks.withType<Test>().configureEach {
+    if (testJavaVersion!=null) {
+      javaLauncher.set(
+        javaToolchains.launcherFor {
+          languageVersion.set(JavaLanguageVersion.of(testJavaVersion.majorVersion))
+          implementation.set(if (useJ9) JvmImplementation.J9 else JvmImplementation.VENDOR_SPECIFIC)
+        }
+      )
+      isEnabled = isEnabled && isJavaVersionAllowed(testJavaVersion)
+    } else {
+      // We default to testing with Java 11 for most tests, but some tests don't support it, where we change
+      // the default test task's version so commands like `./gradlew check` can test all projects regardless
+      // of Java version.
+      if (!isJavaVersionAllowed(DEFAULT_JAVA_VERSION) && otelJava.maxJavaVersionForTests.isPresent) {
+        javaLauncher.set(
+          javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(otelJava.maxJavaVersionForTests.get().majorVersion))
+          }
+        )
+      }
     }
   }
 }
