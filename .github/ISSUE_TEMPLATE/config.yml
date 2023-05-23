@@ -1,0 +1,7 @@
+contact_links:
+  - name: StackOverflow
+    url: https://stackoverflow.com/questions/ask?tags=open-telemetry+java
+    about: Please ask questions here.
+  - name: Slack
+    url: https://cloud-native.slack.com/archives/C014L2KCTE3
+    about: Or here.
