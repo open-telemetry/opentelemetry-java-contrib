@@ -4,6 +4,10 @@ plugins {
 
 description = "Extension for OpenTelemetry Java Agent"
 
+otelJava {
+  minJavaVersionSupported.set(JavaVersion.VERSION_11)
+}
+
 dependencies {
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service")
@@ -15,12 +19,4 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-muzzle")
 
   compileOnly(project(":static-instrumenter:bootstrap"))
-}
-
-tasks {
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
-    }
-  }
 }

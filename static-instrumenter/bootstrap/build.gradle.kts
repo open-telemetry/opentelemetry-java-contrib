@@ -4,10 +4,6 @@ plugins {
 
 description = "Bootstrap classes for static agent"
 
-tasks {
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
-    }
-  }
+otelJava {
+  minJavaVersionSupported.set(JavaVersion.VERSION_11)
 }

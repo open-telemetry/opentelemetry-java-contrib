@@ -11,6 +11,10 @@ description = "Maven3 plugin for static instrumentation of projects code and dep
 otelJava.moduleName.set("io.opentelemetry.contrib.staticinstrumenter.plugin.maven")
 base.archivesName.set("static-instrumentation-maven-plugin")
 
+otelJava {
+  minJavaVersionSupported.set(JavaVersion.VERSION_11)
+}
+
 dependencies {
   implementation("org.apache.maven:maven-plugin-api:3.5.0") // do not auto-update this version
   implementation("org.apache.maven:maven-project:2.2.1")
@@ -29,17 +33,6 @@ tasks {
     dependsOn(agentJar)
     from(agentJar.archiveFile) {
       rename { "opentelemetry-agent.jar" }
-    }
-  }
-
-  withType<JavaCompile>().configureEach {
-    with(options) {
-      release.set(11)
-    }
-  }
-  withType<Javadoc>().configureEach {
-    with(options as StandardJavadocDocletOptions) {
-      source = "11"
     }
   }
 }
