@@ -21,9 +21,6 @@ import java.util.List;
 public final class LinksBasedSampler implements Sampler {
   private final Sampler root;
 
-  private static final SamplingResult POSITIVE_SAMPLING_RESULT = SamplingResult.recordAndSample();
-  private static final SamplingResult NEGATIVE_SAMPLING_RESULT = SamplingResult.drop();
-
   private LinksBasedSampler(Sampler root) {
     this.root = root;
   }
@@ -43,10 +40,10 @@ public final class LinksBasedSampler implements Sampler {
     if (parentLinks.size() > 0) {
       for (LinkData linkData : parentLinks) {
         if (linkData.getSpanContext().isSampled()) {
-          return POSITIVE_SAMPLING_RESULT;
+          return SamplingResult.recordAndSample();
         }
       }
-      return NEGATIVE_SAMPLING_RESULT;
+      return SamplingResult.drop();
     }
 
     return this.root.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
