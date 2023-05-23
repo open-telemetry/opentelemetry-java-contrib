@@ -6,7 +6,7 @@ plugins {
 description = "OpenTelemetry Java Static Instrumentation Test Application"
 
 dependencies {
-  implementation("org.apache.httpcomponents:httpclient:4.5.13")
+  implementation("org.apache.httpcomponents:httpclient:4.5.14")
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 }

@@ -1,9 +1,9 @@
 pluginManagement {
   plugins {
-    id("com.github.ben-manes.versions") version "0.42.0"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("com.gradle.enterprise") version "3.9"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("com.github.ben-manes.versions") version "0.46.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradle.enterprise") version "3.13.2"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
   }
 }
 
@@ -38,17 +38,24 @@ gradleEnterprise {
 rootProject.name = "opentelemetry-java-contrib"
 
 include(":all")
+include(":aws-resources")
 include(":aws-xray")
+include(":aws-xray-propagator")
 include(":consistent-sampling")
 include(":dependencyManagement")
 include(":example")
-include(":jfr-streaming")
+include(":jfr-events")
+include(":jfr-connection")
 include(":jmx-metrics")
 include(":maven-extension")
-include(":runtime-attach")
+include(":micrometer-meter-provider")
+include(":noop-api")
+include(":prometheus-client-bridge")
+include(":resource-providers")
+include(":runtime-attach:runtime-attach")
+include(":runtime-attach:runtime-attach-core")
 include(":samplers")
 include(":static-instrumenter:agent-instrumenter")
-include(":static-instrumenter:gradle-plugin")
 include(":static-instrumenter:maven-plugin")
 include(":static-instrumenter:agent-extension")
 include(":static-instrumenter:bootstrap")

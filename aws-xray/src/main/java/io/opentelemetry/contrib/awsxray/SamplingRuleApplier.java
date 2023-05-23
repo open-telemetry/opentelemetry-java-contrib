@@ -153,6 +153,7 @@ final class SamplingRuleApplier {
     this.nextSnapshotTimeNanos = nextSnapshotTimeNanos;
   }
 
+  @SuppressWarnings("deprecation") // TODO
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
     String httpTarget = null;
@@ -167,7 +168,10 @@ final class SamplingRuleApplier {
         httpUrl = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_METHOD)) {
         httpMethod = (String) entry.getValue();
+      } else if (entry.getKey().equals(SemanticAttributes.NET_HOST_NAME)) {
+        host = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_HOST)) {
+        // TODO (trask) remove support for deprecated http.host attribute
         host = (String) entry.getValue();
       }
 
@@ -339,11 +343,11 @@ final class SamplingRuleApplier {
 
   @Nullable
   private static String getLambdaArn(Attributes attributes, Resource resource) {
-    String arn = resource.getAttributes().get(ResourceAttributes.FAAS_ID);
+    String arn = resource.getAttributes().get(ResourceAttributes.CLOUD_RESOURCE_ID);
     if (arn != null) {
       return arn;
     }
-    return attributes.get(ResourceAttributes.FAAS_ID);
+    return attributes.get(ResourceAttributes.CLOUD_RESOURCE_ID);
   }
 
   @Nullable

@@ -31,8 +31,7 @@ public final class HttpClientTest {
         if (entity != null) {
           Header traceparent = request.getFirstHeader("traceparent");
           if (traceparent != null) {
-            System.out.println("SUCCESS");
-            System.out.println("Traceparent value: " + traceparent.getValue());
+            System.out.println("SUCCESS - Trace parent value: " + traceparent.getValue());
             return;
           }
         }

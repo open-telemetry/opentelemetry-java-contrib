@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.awsxray;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -36,6 +37,7 @@ public final class AwsXrayRemoteSamplerBuilder {
    * OpenTelemetry Collector configured for proxying X-Ray sampling requests. If unset, defaults to
    * {@value DEFAULT_ENDPOINT}.
    */
+  @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setEndpoint(String endpoint) {
     requireNonNull(endpoint, "endpoint");
     this.endpoint = endpoint;
@@ -46,6 +48,7 @@ public final class AwsXrayRemoteSamplerBuilder {
    * Sets the polling interval for configuration updates. If unset, defaults to {@value
    * DEFAULT_POLLING_INTERVAL_SECS}s. Must be positive.
    */
+  @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setPollingInterval(Duration delay) {
     requireNonNull(delay, "delay");
     return setPollingInterval(delay.toNanos(), TimeUnit.NANOSECONDS);
@@ -55,6 +58,7 @@ public final class AwsXrayRemoteSamplerBuilder {
    * Sets the polling interval for configuration updates. If unset, defaults to {@value
    * DEFAULT_POLLING_INTERVAL_SECS}s. Must be positive.
    */
+  @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setPollingInterval(long delay, TimeUnit unit) {
     requireNonNull(unit, "unit");
     if (delay < 0) {
@@ -68,6 +72,7 @@ public final class AwsXrayRemoteSamplerBuilder {
    * Sets the initial sampler that is used before sampling configuration is obtained. If unset,
    * defaults to a parent-based always-on sampler.
    */
+  @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setInitialSampler(Sampler initialSampler) {
     requireNonNull(initialSampler, "initialSampler");
     this.initialSampler = initialSampler;
@@ -78,6 +83,7 @@ public final class AwsXrayRemoteSamplerBuilder {
    * Sets the {@link Clock} used for time measurements for sampling, such as rate limiting or quota
    * expiry.
    */
+  @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setClock(Clock clock) {
     requireNonNull(clock, "clock");
     this.clock = clock;

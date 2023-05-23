@@ -15,7 +15,10 @@ val javaagentLibs: Configuration by configurations.creating {
 val bootstrapLibs: Configuration by configurations.creating
 configurations.getByName("implementation").extendsFrom(bootstrapLibs)
 
-val javaagent: Configuration by configurations.creating
+val javaagent: Configuration by configurations.creating {
+  isCanBeResolved = true
+  isCanBeConsumed = false
+}
 configurations.getByName("implementation").extendsFrom(javaagent)
 
 dependencies {
@@ -25,8 +28,7 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 
-  // TODO: remove snapshot once new agent is released
-  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.14.0-SNAPSHOT")
+  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))
@@ -111,8 +113,8 @@ testing {
           jvmArgumentProviders.add(
             AgentJarsProvider(
               tasks.shadowJar.flatMap { it.archiveFile },
-              tasks.named<Jar>("createNoInstAgent").flatMap { it.archiveFile }
-            )
+              tasks.named<Jar>("createNoInstAgent").flatMap { it.archiveFile },
+            ),
           )
         }
       }
@@ -140,7 +142,7 @@ class AgentJarsProvider(
   val agentJar: Provider<RegularFile>,
   @InputFile
   @PathSensitive(PathSensitivity.RELATIVE)
-  val noInstAgentJar: Provider<RegularFile>
+  val noInstAgentJar: Provider<RegularFile>,
 ) : CommandLineArgumentProvider {
   override fun asArguments(): Iterable<String> = listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
 }

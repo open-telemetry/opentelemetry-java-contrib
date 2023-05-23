@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.staticinstrumenter.extension;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.instrumentation.api.config.Config;
 import io.opentelemetry.javaagent.tooling.BeforeAgentListener;
 import io.opentelemetry.javaagent.tooling.HelperInjector;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
@@ -20,8 +19,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 public class AdditionalClassesInjectorListenerInstaller implements BeforeAgentListener {
 
   @Override
-  public void beforeAgent(
-      Config config, AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
+  public void beforeAgent(AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
     HelperInjector.setHelperInjectorListener(new AdditionalClassesInjectorListener());
   }
 }

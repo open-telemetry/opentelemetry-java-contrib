@@ -9,9 +9,10 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-* [AWS X-Ray Support](./aws-xray/README.md)
+* [AWS Resources](./aws-resources/README.md)
+* [AWS X-Ray SDK Support](./aws-xray/README.md)
+* [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
 * [Consistent sampling](./consistent-sampling/README.md)
-* [JFR Streaming](./jfr-streaming/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
 * [Runtime Attach](./runtime-attach/README.md)
@@ -48,18 +49,19 @@ Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-t
 
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
-- [John Watson](https://github.com/jkwatson), Splunk
+- [John Watson](https://github.com/jkwatson), Verta.ai
 - [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Pablo Collins](https://github.com/pmcollins), Splunk
 
 Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
 
-- [Anuraag Agrawal](https://github.com/anuraaga), AWS
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
+
+Emeritus maintainers:
+
+- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
 

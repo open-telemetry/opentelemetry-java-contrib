@@ -7,6 +7,7 @@ plugins {
 }
 
 description = "JMX metrics gathering Groovy script runner"
+otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
@@ -24,7 +25,7 @@ repositories {
   mavenLocal()
 }
 
-val groovyVersion = "3.0.8"
+val groovyVersion = "3.0.17"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
@@ -40,7 +41,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
-  implementation("io.opentelemetry:opentelemetry-exporter-otlp-metrics")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-exporter-prometheus")
   implementation("org.slf4j:slf4j-api")
   implementation("org.slf4j:slf4j-simple")
@@ -60,7 +61,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:0.11.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:0.19.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
       }
     }
@@ -69,6 +70,8 @@ testing {
 
 tasks {
   shadowJar {
+    mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }

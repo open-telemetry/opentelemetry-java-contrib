@@ -1,3 +1,5 @@
+import com.gradle.enterprise.gradleplugin.testretry.retry
+import io.opentelemetry.gradle.OtelJavaExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
@@ -7,6 +9,8 @@ plugins {
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
 }
+
+val otelJava = extensions.create<OtelJavaExtension>("otelJava")
 
 group = "io.opentelemetry.contrib"
 
@@ -40,8 +44,8 @@ tasks {
             "-Xlint:-options",
 
             // Fail build on any warning
-            "-Werror"
-          )
+            "-Werror",
+          ),
         )
       }
 
@@ -63,6 +67,13 @@ tasks {
       showCauses = true
       showStackTraces = true
     }
+
+    retry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      if (System.getenv().containsKey("CI") || rootProject.hasProperty("retryTests")) {
+        maxRetries.set(5)
+      }
+    }
   }
 
   withType<Javadoc>().configureEach {
@@ -76,8 +87,35 @@ tasks {
 
       addBooleanOption("html5", true)
 
-      links("https://docs.oracle.com/javase/8/docs/api/")
+      // TODO (trask) revisit to see if url is fixed
+      // currently broken because https://docs.oracle.com/javase/8/docs/api/element-list is missing
+      // and redirects
+      // links("https://docs.oracle.com/javase/8/docs/api/")
+
       addBooleanOption("Xdoclint:all,-missing", true)
+    }
+  }
+}
+
+// Add version information to published artifacts.
+plugins.withId("otel.publish-conventions") {
+  tasks {
+    register("generateVersionResource") {
+      val moduleName = otelJava.moduleName
+      val propertiesDir = moduleName.map { File(buildDir, "generated/properties/${it.replace('.', '/')}") }
+
+      inputs.property("project.version", project.version.toString())
+      outputs.dir(propertiesDir)
+
+      doLast {
+        File(propertiesDir.get(), "version.properties").writeText("contrib.version=${project.version}")
+      }
+    }
+  }
+
+  sourceSets {
+    main {
+      output.dir("$buildDir/generated/properties", "builtBy" to "generateVersionResource")
     }
   }
 }
@@ -99,12 +137,13 @@ dependencies {
   }
 
   compileOnly("com.google.code.findbugs:jsr305")
+  compileOnly("com.google.errorprone:error_prone_annotations")
 }
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project)
+      implementation(project(project.path))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
@@ -116,6 +155,7 @@ testing {
       implementation("org.mockito:mockito-junit-jupiter")
       implementation("org.assertj:assertj-core")
       implementation("org.awaitility:awaitility")
+      implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
     }

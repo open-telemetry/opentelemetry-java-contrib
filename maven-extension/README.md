@@ -5,11 +5,14 @@ Maven extension to observe Maven builds as distributed traces.
 ## Getting Started
 
 The Maven OpenTelemetry Extension is configured using environment variables or JVM system properties and can be added to a build using one of the following ways:
+
 * adding the extension jar to `${maven.home}/lib/ext`
 * adding the path to the extension jar to`-Dmaven.ext.class.path`,
 * adding the extension as a build extension in the `pom.xml`,
 * (since Maven 3.3.1) configuring the extension in `.mvn/extensions.xml`.
 
+In the code snippets below, replace `OPENTELEMETRY_MAVEN_VERSION` with the [latest
+release](https://search.maven.org/search?q=g:io.opentelemetry.contrib%20AND%20a:opentelemetry-maven-extension).
 
 ### Adding the extension to the classpath
 
@@ -21,11 +24,10 @@ mvn dependency:copy -Dartifact=io.opentelemetry.contrib:opentelemetry-maven-exte
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel.example.com:4317"
 
-mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-1.10.0-alpha.jar verify
+mvn -Dmaven.ext.class.path=target/dependency/opentelemetry-maven-extension-OPENTELEMETRY_MAVEN_VERSION.jar verify
 ```
 
 ### Declaring the extension in the `pom.xml` file
-
 
 Add the Maven OpenTelemetry Extension in the `pom.xml` file:
 
@@ -37,7 +39,7 @@ Add the Maven OpenTelemetry Extension in the `pom.xml` file:
       <extension>
           <groupId>io.opentelemetry.contrib</groupId>
           <artifactId>opentelemetry-maven-extension</artifactId>
-          <version>1.10.0-alpha</version>
+          <version>OPENTELEMETRY_MAVEN_VERSION</version>
       </extension>
     </extensions>
   </build>
@@ -59,7 +61,6 @@ Without this setting, the traces won't be exported and the OpenTelemetry Maven E
 
 The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoconfiguration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-
 | System property                           <br /> Environment variable                      | Default value           | Description                                                                                                                                     |
 |--------------------------------------------------------------------------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | `otel.traces.exporter`                    <br /> `OTEL_TRACES_EXPORTER`                    | `none`                  | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
@@ -69,20 +70,19 @@ The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoco
 | `otel.resource.attributes`                <br /> `OTEL_RESOURCE_ATTRIBUTES`                |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3                                                              |
 | `otel.instrumentation.maven.mojo.enabled` <br /> `OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED` | `true`                  | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds.  |
 
-
 ℹ️ The `service.name` is set to `maven` and the `service.version` to the version of the Maven runtime in use.
 
 ## Examples
 
 Example of a trace of a Maven build.
 
-![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/maven-execution-trace-jaeger.png)
+![Execution trace of a Maven build](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/maven-execution-trace-jaeger.png)
 
 ### Example of a distributed trace of a Jenkins pipeline executing a Maven build
 
-Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the  [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
+Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
 
-![](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
+![Execution trace of a Jenkins/Maven build](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
 
 ## Span attributes per Maven plugin goal execution
 
@@ -127,10 +127,9 @@ The `span.kind` is set to `client`
 
 The `span.kind` is set to `client`
 
-
 ### `snyk:monitor`
 
-See https://github.com/snyk/snyk-maven-plugin
+See <https://github.com/snyk/snyk-maven-plugin>.
 
 | Span attribute |  Type  | Description                                                                                    |
 |----------------|--------|------------------------------------------------------------------------------------------------|
@@ -143,7 +142,7 @@ The `span.kind` is set to `client`
 
 ### `snyk:test`
 
-See https://github.com/snyk/snyk-maven-plugin
+See <https://github.com/snyk/snyk-maven-plugin>.
 
 | Span attribute |  Type  | Description                                                          |
 |----------------|--------|----------------------------------------------------------------------|
@@ -151,7 +150,6 @@ See https://github.com/snyk/snyk-maven-plugin
 | `http.url`     | string | `https://snyk.io/api/v1/test-dep-graph`                              |
 | `rpc.method`   | string | `test`, the underlying Snyk CLI command invoked by the Maven plugin. |
 | `peer.service` | string | `snyk.io`                                                            |
-
 
 The `span.kind` is set to `client`
 
@@ -168,7 +166,6 @@ The `span.kind` is set to `client`
 
 The `span.kind` is set to `client`
 
-
 ## Other CI/CD Tools supporting OpenTelemetry traces
 
 List of other CI/CD tools that support OpenTelemetry traces and integrate with the Maven OpenTelemetry Extension creating a distributed traces providing end to end visibility.
@@ -181,9 +178,75 @@ The [Jenkins OpenTelemetry Plugin](https://plugins.jenkins.io/opentelemetry/) ex
 
 The [`otel-cli`](https://github.com/equinix-labs/otel-cli) is a command line wrapper to observe the execution of a shell command as an OpenTelemetry trace.
 
+## Instrumenting Maven Mojos for better visibility in Maven builds
+
+Maven plugin authors can instrument Mojos for better visibility in Maven builds.
+
+Common instrumentation patterns include:
+
+* Adding contextual data as attributes on the spans created by the OpenTelemetry Maven Extension,
+* Creating additional sub spans to breakdown long mojo goal executions in finer grained steps
+
+Note that the instrumentation of a plugin is enabled when the OpenTelemetry Maven extension is added to the build and activated.
+Otherwise, the instrumentation of the Maven plugin is noop.
+
+It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
+to improve the visualization and analysis in Observability products.
+The [HTTP](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/http/)
+and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/)
+conventions are particularly useful when  invoking external systems.
+
+Steps to instrument a Maven Mojo:
+
+* Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
+  Replace `OPENTELEMETRY_VERSION` with the [latest
+  release](https://search.maven.org/search?q=g:io.opentelemetry%20AND%20a:opentelemetry-api).
+
+```xml
+<project>
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>OPENTELEMETRY_VERSION</version>
+        </dependency>
+        ...
+    </dependencies>
+</project>
+````
+
+* Instrument the Mojo:
+
+```java
+@Mojo(name = "test", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+public class TestMojo extends AbstractMojo {
+
+  @Override
+  public void execute() {
+    Span mojoExecuteSpan = Span.current();
+
+    // ENRICH THE DEFAULT SPAN OF THE MOJO EXECUTION
+    // (this span is created by the opentelemetry-maven-extension)
+    mojoExecuteSpan.setAttribute("an-attribute", "a-value");
+
+    // ... some logic
+
+    // CREATE SUB SPANS TO CAPTURE FINE GRAINED DETAILS OF THE MOJO EXECUTION
+    Tracer tracer = GlobalOpenTelemetry.get().getTracer("com.example.maven.otel_aware_plugin");
+    Span childSpan = tracer.spanBuilder("otel-aware-goal-sub-span").setAttribute("another-attribute", "another-value").startSpan();
+    try (Scope ignored2 = childSpan.makeCurrent()) {
+      // ... mojo sub operation
+    } finally {
+      childSpan.end();
+    }
+  }
+}
+```
+
 ## Component owners
 
-- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Elastic
+- [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Grafana Labs
 - [Ken Finnigan](https://github.com/kenfinnigan), Workday
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

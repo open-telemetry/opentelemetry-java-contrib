@@ -62,7 +62,7 @@ class SamplingRuleApplierTest {
     private final Attributes attributes =
         Attributes.builder()
             .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.HTTP_HOST, "opentelemetry.io")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
             .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
@@ -142,7 +142,9 @@ class SamplingRuleApplierTest {
       // Replacing dot with character makes sure we're not accidentally treating dot as regex
       // wildcard.
       Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_HOST, "opentelemetryfio").build();
+          this.attributes.toBuilder()
+              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -235,7 +237,7 @@ class SamplingRuleApplierTest {
     private final Attributes attributes =
         Attributes.builder()
             .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.HTTP_HOST, "opentelemetry.io")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
             .put(SemanticAttributes.HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
@@ -331,41 +333,49 @@ class SamplingRuleApplierTest {
     void hostMatches() {
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_HOST, "alpha.opentelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "alpha.opentelemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_HOST, "opfdnqtelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opfdnqtelemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_HOST, "opentglemetry.io").build();
+          this.attributes.toBuilder()
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_HOST, "opentglemry.io").build();
+          this.attributes.toBuilder()
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_HOST, "opentglemrz.io").build();
+          this.attributes.toBuilder()
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemrz.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void hostNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_HOST, "opentelemetryfio").build();
-      assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_HOST, "opentgalemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_HOST, "alpha.oentelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentgalemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_HOST);
+      attributes =
+          this.attributes.toBuilder()
+              .put(SemanticAttributes.NET_HOST_NAME, "alpha.oentelemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(this.attributes, SemanticAttributes.NET_HOST_NAME);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -490,13 +500,15 @@ class SamplingRuleApplierTest {
             .put(
                 ResourceAttributes.CLOUD_PLATFORM,
                 ResourceAttributes.CloudPlatformValues.AWS_LAMBDA)
-            .put(ResourceAttributes.FAAS_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
+            .put(
+                ResourceAttributes.CLOUD_RESOURCE_ID,
+                "arn:aws:xray:us-east-1:595986152929:my-service")
             .build();
 
     private final Attributes attributes =
         Attributes.builder()
             .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.HTTP_HOST, "opentelemetry.io")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
             .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
@@ -511,10 +523,12 @@ class SamplingRuleApplierTest {
     void spanFaasIdMatches() {
       Resource resource =
           Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.FAAS_ID));
+              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_RESOURCE_ID));
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(ResourceAttributes.FAAS_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
+              .put(
+                  ResourceAttributes.CLOUD_RESOURCE_ID,
+                  "arn:aws:xray:us-east-1:595986152929:my-service")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
