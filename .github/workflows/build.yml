@@ -85,6 +85,13 @@ jobs:
           arguments: integrationTest
           cache-read-only: ${{ github.event_name == 'pull_request' }}
 
+      - name: Save integration test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results
+          path: jmx-metrics/build/reports/tests/integrationTest
+
   markdown-link-check:
     uses: ./.github/workflows/reusable-markdown-link-check.yml
 
