@@ -4,7 +4,6 @@ plugins {
   id("com.github.johnrengelman.shadow")
 
   id("otel.java-conventions")
-  id("otel.publish-conventions")
 }
 
 description = "Maven3 plugin for static instrumentation of projects code and dependencies"
