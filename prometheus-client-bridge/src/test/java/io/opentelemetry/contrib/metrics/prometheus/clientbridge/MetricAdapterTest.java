@@ -806,6 +806,7 @@ class MetricAdapterTest {
       }
       return "null";
     }
+
     /** Convert an exemplar into a human readable string. */
     private static String exemplarToString(Exemplar exemplar) {
       StringBuilder sb = new StringBuilder("Exemplar{ value=");

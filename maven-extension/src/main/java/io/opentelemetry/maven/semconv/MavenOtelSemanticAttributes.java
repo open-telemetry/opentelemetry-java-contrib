@@ -23,6 +23,7 @@ public class MavenOtelSemanticAttributes {
   /** See {@link ResourceAttributes#CONTAINER_IMAGE_NAME} */
   public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_IMAGE_NAME =
       stringKey("maven.build.container.image.name");
+
   /** See {@link ResourceAttributes#CONTAINER_IMAGE_TAG} */
   public static final AttributeKey<List<String>> MAVEN_BUILD_CONTAINER_IMAGE_TAGS =
       stringArrayKey("maven.build.container.image.tags");

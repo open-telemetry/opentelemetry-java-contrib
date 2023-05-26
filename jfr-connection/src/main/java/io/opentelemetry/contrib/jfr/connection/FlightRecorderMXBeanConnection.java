@@ -213,6 +213,7 @@ final class FlightRecorderMXBeanConnection implements FlightRecorderConnection {
 
   /** The MBeanServerConnection. */
   private final MBeanServerConnection mBeanServerConnection;
+
   /** The ObjectName of the MBean we are connecting to. */
   private final ObjectName objectName;
 }
