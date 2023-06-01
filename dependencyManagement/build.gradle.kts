@@ -18,7 +18,7 @@ val DEPENDENCY_BOMS = listOf(
   "org.junit:junit-bom:5.9.3",
   "io.grpc:grpc-bom:1.55.1",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.26.0-alpha",
-  "org.testcontainers:testcontainers-bom:1.18.2"
+  "org.testcontainers:testcontainers-bom:1.18.3"
 )
 
 val autoServiceVersion = "1.1.0"
