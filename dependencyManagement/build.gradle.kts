@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.auto.value:auto-value-annotations:${autoValueVersion}",
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
-  "io.github.netmikey.logunit:logunit-jul:1.1.3",
+  "io.github.netmikey.logunit:logunit-jul:2.0.0",
   "io.prometheus:simpleclient:${prometheusVersion}",
   "io.prometheus:simpleclient_common:${prometheusVersion}",
   "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
