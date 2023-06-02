@@ -1,4 +1,4 @@
-package org.example;
+package io.opentelemetry.contrib.exporters.storage;
 
 public class Main {
   public static void main(String[] args) {
