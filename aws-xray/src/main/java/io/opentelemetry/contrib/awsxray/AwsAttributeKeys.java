@@ -24,4 +24,12 @@ final class AwsAttributeKeys {
 
   static final AttributeKey<String> AWS_REMOTE_OPERATION =
       AttributeKey.stringKey("aws.remote.operation");
+
+  static final AttributeKey<String> AWS_REMOTE_TARGET = AttributeKey.stringKey("aws.remote.target");
+
+  // use the same AWS Resource attribute name defined by OTel java auto-instr for aws_sdk_v_1_1
+  static final AttributeKey<String> AWS_BUCKET_NAME = AttributeKey.stringKey("aws.bucket.name");
+  static final AttributeKey<String> AWS_QUEUE_NAME = AttributeKey.stringKey("aws.queue.name");
+  static final AttributeKey<String> AWS_STREAM_NAME = AttributeKey.stringKey("aws.stream.name");
+  static final AttributeKey<String> AWS_TABLE_NAME = AttributeKey.stringKey("aws.table.name");
 }

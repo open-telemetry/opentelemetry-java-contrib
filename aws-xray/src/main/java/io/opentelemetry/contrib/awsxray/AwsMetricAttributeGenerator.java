@@ -5,19 +5,31 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_BUCKET_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_OPERATION;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_SERVICE;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_QUEUE_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_OPERATION;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_SERVICE;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_TARGET;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_OPERATION;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_SYSTEM;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_NAME;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_PROVIDER;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_TRIGGER;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_ADDR;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_PORT;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.PEER_SERVICE;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_METHOD;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_SERVICE;
@@ -30,6 +42,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,12 +86,37 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
         setService(resource, span, builder);
         setEgressOperation(span, builder);
         setRemoteServiceAndOperation(span, builder);
+        setRemoteTarget(span, builder);
         setSpanKind(span, builder);
         break;
       default:
         // Add no attributes, signalling no metrics should be emitted.
     }
     return builder.build();
+  }
+
+  private static void setRemoteTarget(SpanData span, AttributesBuilder builder) {
+    Optional<String> remoteTarget = getRemoteTarget(span);
+    remoteTarget.ifPresent(s -> builder.put(AWS_REMOTE_TARGET, s));
+  }
+
+  /**
+   * RemoteTarget attribute {@link AwsAttributeKeys#AWS_REMOTE_TARGET} is used to store the resource
+   * name of the remote invokes, such as S3 bucket name, mysql table name, etc. TODO: currently only
+   * support AWS resource name, will be extended to support the general remote targets, such as
+   * ActiveMQ name, etc.
+   */
+  private static Optional<String> getRemoteTarget(SpanData span) {
+    if (isKeyPresent(span, AWS_BUCKET_NAME)) {
+      return Optional.ofNullable(span.getAttributes().get(AWS_BUCKET_NAME));
+    } else if (isKeyPresent(span, AWS_QUEUE_NAME)) {
+      return Optional.ofNullable(span.getAttributes().get(AWS_QUEUE_NAME));
+    } else if (isKeyPresent(span, AWS_STREAM_NAME)) {
+      return Optional.ofNullable(span.getAttributes().get(AWS_STREAM_NAME));
+    } else if (isKeyPresent(span, AWS_TABLE_NAME)) {
+      return Optional.ofNullable(span.getAttributes().get(AWS_TABLE_NAME));
+    }
+    return Optional.empty();
   }
 
   /** Service is always derived from {@link ResourceAttributes#SERVICE_NAME} */
@@ -94,12 +134,32 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    * name.
    */
   private static void setIngressOperation(SpanData span, AttributesBuilder builder) {
-    String operation = span.getName();
-    if (operation == null) {
+    String operation;
+    if (!isValidOperation(span)) {
+      operation = generateIngressOperation(span);
+    } else {
+      operation = span.getName();
+    }
+    if (operation.equals(UNKNOWN_OPERATION)) {
       logUnknownAttribute(AWS_LOCAL_OPERATION, span);
-      operation = UNKNOWN_OPERATION;
     }
     builder.put(AWS_LOCAL_OPERATION, operation);
+  }
+
+  /**
+   * When Span name is null, UnknownOperation or HttpMethod value, it will be treated as invalid
+   * local operation value that needs to be further processed
+   */
+  private static boolean isValidOperation(SpanData span) {
+    String operation = span.getName();
+    if (operation == null || operation.equals(UNKNOWN_OPERATION)) {
+      return false;
+    }
+    if (isKeyPresent(span, HTTP_METHOD)) {
+      String httpMethod = span.getAttributes().get(HTTP_METHOD);
+      return !operation.equals(httpMethod);
+    }
+    return true;
   }
 
   /**
@@ -152,35 +212,132 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    * and RPC attributes to use here, but this is a sufficient starting point.
    */
   private static void setRemoteServiceAndOperation(SpanData span, AttributesBuilder builder) {
+    String remoteService = UNKNOWN_REMOTE_SERVICE;
+    String remoteOperation = UNKNOWN_REMOTE_OPERATION;
     if (isKeyPresent(span, AWS_REMOTE_SERVICE) || isKeyPresent(span, AWS_REMOTE_OPERATION)) {
-      setRemoteService(span, builder, AWS_REMOTE_SERVICE);
-      setRemoteOperation(span, builder, AWS_REMOTE_OPERATION);
+      remoteService = getRemoteService(span, AWS_REMOTE_SERVICE);
+      remoteOperation = getRemoteOperation(span, AWS_REMOTE_OPERATION);
     } else if (isKeyPresent(span, RPC_SERVICE) || isKeyPresent(span, RPC_METHOD)) {
-      setRemoteService(span, builder, RPC_SERVICE);
-      setRemoteOperation(span, builder, RPC_METHOD);
+      remoteService = getRemoteService(span, RPC_SERVICE);
+      remoteOperation = getRemoteOperation(span, RPC_METHOD);
     } else if (isKeyPresent(span, DB_SYSTEM) || isKeyPresent(span, DB_OPERATION)) {
-      setRemoteService(span, builder, DB_SYSTEM);
-      setRemoteOperation(span, builder, DB_OPERATION);
-    } else if (isKeyPresent(span, FAAS_INVOKED_PROVIDER) || isKeyPresent(span, FAAS_INVOKED_NAME)) {
-      setRemoteService(span, builder, FAAS_INVOKED_PROVIDER);
-      setRemoteOperation(span, builder, FAAS_INVOKED_NAME);
+      remoteService = getRemoteService(span, DB_SYSTEM);
+      remoteOperation = getRemoteOperation(span, DB_OPERATION);
+    } else if (isKeyPresent(span, FAAS_INVOKED_NAME) || isKeyPresent(span, FAAS_TRIGGER)) {
+      remoteService = getRemoteService(span, FAAS_INVOKED_NAME);
+      remoteOperation = getRemoteOperation(span, FAAS_TRIGGER);
     } else if (isKeyPresent(span, MESSAGING_SYSTEM) || isKeyPresent(span, MESSAGING_OPERATION)) {
-      setRemoteService(span, builder, MESSAGING_SYSTEM);
-      setRemoteOperation(span, builder, MESSAGING_OPERATION);
+      remoteService = getRemoteService(span, MESSAGING_SYSTEM);
+      remoteOperation = getRemoteOperation(span, MESSAGING_OPERATION);
     } else if (isKeyPresent(span, GRAPHQL_OPERATION_TYPE)) {
-      builder.put(AWS_REMOTE_SERVICE, GRAPHQL);
-      setRemoteOperation(span, builder, GRAPHQL_OPERATION_TYPE);
-    } else {
-      logUnknownAttribute(AWS_REMOTE_SERVICE, span);
-      builder.put(AWS_REMOTE_SERVICE, UNKNOWN_REMOTE_SERVICE);
-      logUnknownAttribute(AWS_REMOTE_OPERATION, span);
-      builder.put(AWS_REMOTE_OPERATION, UNKNOWN_REMOTE_OPERATION);
+      remoteService = GRAPHQL;
+      remoteOperation = getRemoteOperation(span, GRAPHQL_OPERATION_TYPE);
     }
 
     // Peer service takes priority as RemoteService over everything but AWS Remote.
     if (isKeyPresent(span, PEER_SERVICE) && !isKeyPresent(span, AWS_REMOTE_SERVICE)) {
-      setRemoteService(span, builder, PEER_SERVICE);
+      remoteService = getRemoteService(span, PEER_SERVICE);
     }
+
+    // try to derive RemoteService and RemoteOperation from the other un-directive attributes
+    if (remoteService.equals(UNKNOWN_REMOTE_SERVICE)) {
+      remoteService = generateRemoteService(span);
+    }
+    if (remoteOperation.equals(UNKNOWN_REMOTE_OPERATION)) {
+      remoteOperation = generateRemoteOperation(span);
+    }
+
+    builder.put(AWS_REMOTE_SERVICE, remoteService);
+    builder.put(AWS_REMOTE_OPERATION, remoteOperation);
+  }
+
+  /**
+   * When span name is not meaningful(null, unknown or http_method value) as operation name for http
+   * use cases. Will try to extract the operation name from http target string
+   */
+  private static String generateIngressOperation(SpanData span) {
+    String operation = UNKNOWN_OPERATION;
+    if (isKeyPresent(span, HTTP_TARGET)) {
+      String httpTarget = span.getAttributes().get(HTTP_TARGET);
+      // get the first part from API path string as operation value
+      // the more levels/parts we get from API path the higher chance for getting high cardinality
+      // data
+      if (httpTarget != null) {
+        operation = extractAPIPathValue(httpTarget);
+      }
+      if (isKeyPresent(span, HTTP_METHOD)) {
+        String httpMethod = span.getAttributes().get(HTTP_METHOD);
+        if (httpMethod != null) {
+          operation = httpMethod + " " + operation;
+        }
+      }
+    }
+    return operation;
+  }
+
+  /**
+   * When the remote call operation is undetermined for http use cases, will try to extract the
+   * remote operation name from http url string
+   */
+  private static String generateRemoteOperation(SpanData span) {
+    String remoteOperation = UNKNOWN_REMOTE_OPERATION;
+    if (isKeyPresent(span, HTTP_URL)) {
+      String httpUrl = span.getAttributes().get(HTTP_URL);
+      try {
+        URL url;
+        if (httpUrl != null) {
+          url = new URL(httpUrl);
+          remoteOperation = extractAPIPathValue(url.getPath());
+        }
+      } catch (MalformedURLException e) {
+        logger.log(Level.FINEST, "invalid http.url attribute: ", httpUrl);
+      }
+    }
+    if (isKeyPresent(span, HTTP_METHOD)) {
+      String httpMethod = span.getAttributes().get(HTTP_METHOD);
+      remoteOperation = httpMethod + " " + remoteOperation;
+    }
+    if (remoteOperation.equals(UNKNOWN_REMOTE_OPERATION)) {
+      logUnknownAttribute(AWS_REMOTE_OPERATION, span);
+    }
+    return remoteOperation;
+  }
+
+  /**
+   * Extract the first part from API http target if it exists
+   *
+   * @param httpTarget http request target string value. Eg, /payment/1234
+   * @return the first part from the http target. Eg, /payment
+   */
+  private static String extractAPIPathValue(String httpTarget) {
+    if (httpTarget.isEmpty()) {
+      return "/";
+    }
+    String[] paths = httpTarget.split("/");
+    if (paths.length > 1) {
+      return "/" + paths[1];
+    }
+    return "/";
+  }
+
+  private static String generateRemoteService(SpanData span) {
+    String remoteService = UNKNOWN_REMOTE_SERVICE;
+    if (isKeyPresent(span, NET_PEER_NAME)) {
+      remoteService = getRemoteService(span, NET_PEER_NAME);
+      if (isKeyPresent(span, NET_PEER_PORT)) {
+        Long port = span.getAttributes().get(NET_PEER_PORT);
+        remoteService += ":" + port;
+      }
+    } else if (isKeyPresent(span, NET_SOCK_PEER_ADDR)) {
+      remoteService = getRemoteService(span, NET_SOCK_PEER_ADDR);
+      if (isKeyPresent(span, NET_SOCK_PEER_PORT)) {
+        Long port = span.getAttributes().get(NET_SOCK_PEER_PORT);
+        remoteService += ":" + port;
+      }
+    } else {
+      logUnknownAttribute(AWS_REMOTE_SERVICE, span);
+    }
+    return remoteService;
   }
 
   /** Span kind is needed for differentiating metrics in the EMF exporter */
@@ -189,28 +346,24 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
     builder.put(AWS_SPAN_KIND, spanKind);
   }
 
-  private static boolean isKeyPresent(SpanData span, AttributeKey<String> key) {
+  private static boolean isKeyPresent(SpanData span, AttributeKey<?> key) {
     return span.getAttributes().get(key) != null;
   }
 
-  private static void setRemoteService(
-      SpanData span, AttributesBuilder builder, AttributeKey<String> remoteServiceKey) {
+  private static String getRemoteService(SpanData span, AttributeKey<String> remoteServiceKey) {
     String remoteService = span.getAttributes().get(remoteServiceKey);
     if (remoteService == null) {
-      logUnknownAttribute(AWS_REMOTE_SERVICE, span);
       remoteService = UNKNOWN_REMOTE_SERVICE;
     }
-    builder.put(AWS_REMOTE_SERVICE, remoteService);
+    return remoteService;
   }
 
-  private static void setRemoteOperation(
-      SpanData span, AttributesBuilder builder, AttributeKey<String> remoteOperationKey) {
+  private static String getRemoteOperation(SpanData span, AttributeKey<String> remoteOperationKey) {
     String remoteOperation = span.getAttributes().get(remoteOperationKey);
     if (remoteOperation == null) {
-      logUnknownAttribute(AWS_REMOTE_OPERATION, span);
       remoteOperation = UNKNOWN_REMOTE_OPERATION;
     }
-    builder.put(AWS_REMOTE_OPERATION, remoteOperation);
+    return remoteOperation;
   }
 
   private static void logUnknownAttribute(AttributeKey<String> attributeKey, SpanData span) {

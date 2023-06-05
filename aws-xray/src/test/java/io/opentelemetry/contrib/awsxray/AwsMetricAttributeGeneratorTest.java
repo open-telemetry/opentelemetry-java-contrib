@@ -5,19 +5,32 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_BUCKET_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_OPERATION;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_SERVICE;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_QUEUE_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_OPERATION;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_SERVICE;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_TARGET;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
+import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_OPERATION;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_SYSTEM;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_NAME;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_PROVIDER;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_TRIGGER;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_ADDR;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_PORT;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.PEER_SERVICE;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_METHOD;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_SERVICE;
@@ -141,6 +154,54 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
+  public void testServerSpanWithNullSpanName() {
+    updateResourceWithServiceName();
+    when(spanDataMock.getName()).thenReturn(null);
+
+    Attributes expectedAttributes =
+        Attributes.of(
+            AWS_SPAN_KIND, SpanKind.SERVER.name(),
+            AWS_LOCAL_SERVICE, SERVICE_NAME_VALUE,
+            AWS_LOCAL_OPERATION, UNKNOWN_OPERATION);
+    validateAttributesProducedForSpanOfKind(expectedAttributes, SpanKind.SERVER);
+  }
+
+  @Test
+  public void testServerSpanWithSpanNameAsHttpMethod() {
+    updateResourceWithServiceName();
+    when(spanDataMock.getName()).thenReturn("GET");
+    mockAttribute(HTTP_METHOD, "GET");
+
+    Attributes expectedAttributes =
+        Attributes.of(
+            AWS_SPAN_KIND, SpanKind.SERVER.name(),
+            AWS_LOCAL_SERVICE, SERVICE_NAME_VALUE,
+            AWS_LOCAL_OPERATION, UNKNOWN_OPERATION);
+    validateAttributesProducedForSpanOfKind(expectedAttributes, SpanKind.SERVER);
+    mockAttribute(HTTP_METHOD, null);
+  }
+
+  @Test
+  public void testServerSpanWithSpanNameWithHttpTarget() {
+    updateResourceWithServiceName();
+    when(spanDataMock.getName()).thenReturn("POST");
+    mockAttribute(HTTP_METHOD, "POST");
+    mockAttribute(HTTP_TARGET, "/payment/123");
+
+    Attributes expectedAttributes =
+        Attributes.of(
+            AWS_SPAN_KIND,
+            SpanKind.SERVER.name(),
+            AWS_LOCAL_SERVICE,
+            SERVICE_NAME_VALUE,
+            AWS_LOCAL_OPERATION,
+            "POST /payment");
+    validateAttributesProducedForSpanOfKind(expectedAttributes, SpanKind.SERVER);
+    mockAttribute(HTTP_METHOD, null);
+    mockAttribute(HTTP_TARGET, null);
+  }
+
+  @Test
   public void testProducerSpanWithAttributes() {
     updateResourceWithServiceName();
     mockAttribute(AWS_LOCAL_OPERATION, AWS_LOCAL_OPERATION_VALUE);
@@ -210,7 +271,7 @@ class AwsMetricAttributeGeneratorTest {
 
     // Validate behaviour of various combinations of FAAS attributes, then remove them.
     validateAndRemoveRemoteAttributes(
-        FAAS_INVOKED_PROVIDER, "FAAS invoked provider", FAAS_INVOKED_NAME, "FAAS invoked name");
+        FAAS_INVOKED_NAME, "FAAS invoked name", FAAS_TRIGGER, "FAAS trigger name");
 
     // Validate behaviour of various combinations of Messaging attributes, then remove them.
     validateAndRemoveRemoteAttributes(
@@ -220,6 +281,46 @@ class AwsMetricAttributeGeneratorTest {
     mockAttribute(GRAPHQL_OPERATION_TYPE, "GraphQL operation type");
     validateExpectedRemoteAttributes("graphql", "GraphQL operation type");
     mockAttribute(GRAPHQL_OPERATION_TYPE, null);
+
+    // Validate behaviour of extracting Remote Service from net.peer.name
+    mockAttribute(NET_PEER_NAME, "www.example.com");
+    validateExpectedRemoteAttributes("www.example.com", UNKNOWN_REMOTE_OPERATION);
+    mockAttribute(NET_PEER_NAME, null);
+
+    // Validate behaviour of extracting Remote Service from net.peer.name and net.peer.port
+    mockAttribute(NET_PEER_NAME, "192.168.0.0");
+    mockAttribute(NET_PEER_PORT, 8081L);
+    validateExpectedRemoteAttributes("192.168.0.0:8081", UNKNOWN_REMOTE_OPERATION);
+    mockAttribute(NET_PEER_NAME, null);
+    mockAttribute(NET_PEER_PORT, null);
+
+    // Validate behaviour of extracting Remote Service from net.peer.socket.addr
+    mockAttribute(NET_SOCK_PEER_ADDR, "www.example.com");
+    validateExpectedRemoteAttributes("www.example.com", UNKNOWN_REMOTE_OPERATION);
+    mockAttribute(NET_SOCK_PEER_ADDR, null);
+
+    // Validate behaviour of extracting Remote Service from net.peer.socket.addr and
+    // net.sock.peer.port
+    mockAttribute(NET_SOCK_PEER_ADDR, "192.168.0.0");
+    mockAttribute(NET_SOCK_PEER_PORT, 8081L);
+    validateExpectedRemoteAttributes("192.168.0.0:8081", UNKNOWN_REMOTE_OPERATION);
+    mockAttribute(NET_SOCK_PEER_ADDR, null);
+    mockAttribute(NET_SOCK_PEER_PORT, null);
+
+    // Validate behavior of Remote Operation from HttpTarget - with 1st api part, then remove it
+    mockAttribute(HTTP_URL, "http://www.example.com/payment/123");
+    validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, "/payment");
+    mockAttribute(HTTP_URL, null);
+
+    // Validate behavior of Remote Operation from HttpTarget - without 1st api part, then remove it
+    mockAttribute(HTTP_URL, "http://www.example.com");
+    validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, "/");
+    mockAttribute(HTTP_URL, null);
+
+    // Validate behavior of Remote Operation from HttpTarget - invalid url, then remove it
+    mockAttribute(HTTP_URL, "abc");
+    validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, UNKNOWN_REMOTE_OPERATION);
+    mockAttribute(HTTP_URL, null);
 
     // Validate behaviour of Peer service attribute, then remove it.
     mockAttribute(PEER_SERVICE, "Peer service");
@@ -237,6 +338,8 @@ class AwsMetricAttributeGeneratorTest {
     validatePeerServiceDoesOverride(FAAS_INVOKED_PROVIDER);
     validatePeerServiceDoesOverride(MESSAGING_SYSTEM);
     validatePeerServiceDoesOverride(GRAPHQL_OPERATION_TYPE);
+    validatePeerServiceDoesOverride(NET_PEER_NAME);
+    validatePeerServiceDoesOverride(NET_SOCK_PEER_ADDR);
     // Actually testing that peer service overrides "UnknownRemoteService".
     validatePeerServiceDoesOverride(AttributeKey.stringKey("unknown.service.key"));
   }
@@ -252,7 +355,30 @@ class AwsMetricAttributeGeneratorTest {
     assertThat(actualAttributes.get(AWS_REMOTE_SERVICE)).isEqualTo("TestString");
   }
 
-  private void mockAttribute(AttributeKey<String> key, String value) {
+  @Test
+  public void testClientSpanWithRemoteTargetAttributes() {
+    // Validate behaviour of aws bucket name attribute, then remove it.
+    mockAttribute(AWS_BUCKET_NAME, "aws_s3_bucket_name");
+    validateRemoteTargetAttributes(AWS_REMOTE_TARGET, "aws_s3_bucket_name");
+    mockAttribute(AWS_BUCKET_NAME, null);
+
+    // Validate behaviour of AWS_QUEUE_NAME attribute, then remove it.
+    mockAttribute(AWS_QUEUE_NAME, "aws_queue_name");
+    validateRemoteTargetAttributes(AWS_REMOTE_TARGET, "aws_queue_name");
+    mockAttribute(AWS_QUEUE_NAME, null);
+
+    // Validate behaviour of AWS_STREAM_NAME attribute, then remove it.
+    mockAttribute(AWS_STREAM_NAME, "aws_stream_name");
+    validateRemoteTargetAttributes(AWS_REMOTE_TARGET, "aws_stream_name");
+    mockAttribute(AWS_STREAM_NAME, null);
+
+    // Validate behaviour of AWS_TABLE_NAME attribute, then remove it.
+    mockAttribute(AWS_TABLE_NAME, "aws_table_name");
+    validateRemoteTargetAttributes(AWS_REMOTE_TARGET, "aws_table_name");
+    mockAttribute(AWS_TABLE_NAME, null);
+  }
+
+  private <T> void mockAttribute(AttributeKey<T> key, T value) {
     when(attributesMock.get(key)).thenReturn(value);
   }
 
@@ -315,5 +441,27 @@ class AwsMetricAttributeGeneratorTest {
 
     mockAttribute(remoteServiceKey, null);
     mockAttribute(PEER_SERVICE, null);
+  }
+
+  private void validateRemoteTargetAttributes(
+      AttributeKey<String> remoteTargetKey, String remoteTarget) {
+    // Client and Producer spans should generate the expected RemoteTarget attribute
+    when(spanDataMock.getKind()).thenReturn(SpanKind.CLIENT);
+    Attributes actualAttributes =
+        GENERATOR.generateMetricAttributesFromSpan(spanDataMock, resource);
+    assertThat(actualAttributes.get(remoteTargetKey)).isEqualTo(remoteTarget);
+
+    when(spanDataMock.getKind()).thenReturn(SpanKind.PRODUCER);
+    actualAttributes = GENERATOR.generateMetricAttributesFromSpan(spanDataMock, resource);
+    assertThat(actualAttributes.get(remoteTargetKey)).isEqualTo(remoteTarget);
+
+    // Server and Consumer span should not generate RemoteTarget attribute
+    when(spanDataMock.getKind()).thenReturn(SpanKind.SERVER);
+    actualAttributes = GENERATOR.generateMetricAttributesFromSpan(spanDataMock, resource);
+    assertThat(actualAttributes.get(remoteTargetKey)).isEqualTo(null);
+
+    when(spanDataMock.getKind()).thenReturn(SpanKind.CONSUMER);
+    actualAttributes = GENERATOR.generateMetricAttributesFromSpan(spanDataMock, resource);
+    assertThat(actualAttributes.get(remoteTargetKey)).isEqualTo(null);
   }
 }
