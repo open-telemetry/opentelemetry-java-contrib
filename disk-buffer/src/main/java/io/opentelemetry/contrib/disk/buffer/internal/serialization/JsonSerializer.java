@@ -8,12 +8,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public final class Serializer {
+public final class JsonSerializer {
 
   private static final DslJson<Object> dslJson =
       new DslJson<>(Settings.basicSetup().skipDefaultValues(true));
 
-  private Serializer() {}
+  private JsonSerializer() {}
 
   public static <T> JsonReader.ReadObject<T> tryFindReader(Class<T> manifest) {
     return dslJson.tryFindReader(manifest);

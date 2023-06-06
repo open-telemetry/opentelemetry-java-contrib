@@ -1,7 +1,7 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.ResourceMetricsDataMapper;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.JsonSerializer;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.ResourceMetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public byte[] serialize(List<MetricData> metricData) {
     try {
-      return Serializer.serialize(ResourceMetricsDataMapper.INSTANCE.toJsonDto(metricData));
+      return JsonSerializer.serialize(ResourceMetricsDataMapper.INSTANCE.toJsonDto(metricData));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -33,7 +33,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   public List<MetricData> deserialize(byte[] source) {
     try {
       return ResourceMetricsDataMapper.INSTANCE.fromJsonDto(
-          Serializer.deserialize(ResourceMetricsData.class, source));
+          JsonSerializer.deserialize(ResourceMetricsData.class, source));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
