@@ -17,7 +17,6 @@ public final class LinkDataJson {
   @JsonAttribute(name = "attributes")
   public Attributes attributes = Attributes.empty();
 
-  @Nullable
   @JsonAttribute(name = "droppedAttributesCount")
-  public Integer droppedAttributesCount;
+  public Integer droppedAttributesCount = 0;
 }

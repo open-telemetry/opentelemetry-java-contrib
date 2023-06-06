@@ -37,17 +37,14 @@ public final class SpanDataJson {
   @JsonAttribute(name = "attributes")
   public Attributes attributes = Attributes.empty();
 
-  @Nullable
   @JsonAttribute(name = "droppedAttributesCount")
-  public Integer droppedAttributesCount;
+  public Integer droppedAttributesCount = 0;
 
-  @Nullable
   @JsonAttribute(name = "droppedEventsCount")
-  public Integer droppedEventsCount;
+  public Integer droppedEventsCount = 0;
 
-  @Nullable
   @JsonAttribute(name = "droppedLinksCount")
-  public Integer droppedLinksCount;
+  public Integer droppedLinksCount = 0;
 
   @Nullable
   @JsonAttribute(name = "events")
