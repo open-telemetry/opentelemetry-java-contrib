@@ -1,6 +1,18 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data;
 
+import com.google.auto.value.AutoValue;
 import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 
-public final class SummaryDataImpl extends DataImpl<SummaryPointData> implements SummaryData {}
+@AutoValue
+public abstract class SummaryDataImpl implements SummaryData {
+
+  public static Builder builder() {
+    return new AutoValue_SummaryDataImpl.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder implements DataBuilder<SummaryPointData, Builder> {
+    public abstract SummaryDataImpl build();
+  }
+}

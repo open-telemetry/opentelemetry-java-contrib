@@ -1,15 +1,21 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data;
 
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.Constants;
+import com.google.auto.value.AutoValue;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 
-public final class HistogramDataImpl extends DataImpl<HistogramPointData> implements HistogramData {
-  public AggregationTemporality aggregationTemporality = Constants.DEFAULT_AGGREGATION_TEMPORALITY;
+@AutoValue
+public abstract class HistogramDataImpl implements HistogramData {
 
-  @Override
-  public AggregationTemporality getAggregationTemporality() {
-    return aggregationTemporality;
+  public static Builder builder() {
+    return new AutoValue_HistogramDataImpl.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder implements DataBuilder<HistogramPointData, Builder> {
+    public abstract Builder setAggregationTemporality(AggregationTemporality value);
+
+    public abstract HistogramDataImpl build();
   }
 }
