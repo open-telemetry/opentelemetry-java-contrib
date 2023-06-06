@@ -4,7 +4,7 @@ plugins {
 }
 
 description = "Exporter implementations that store signals in disk"
-otelJava.moduleName.set("io.opentelemetry.contrib.exporters.storage")
+otelJava.moduleName.set("io.opentelemetry.contrib.disk.buffer")
 
 tasks {
   withType<JavaCompile>().configureEach {
