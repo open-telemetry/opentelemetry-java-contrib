@@ -1,6 +1,7 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data;
 
 import com.google.auto.value.AutoValue;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.DataBuilder;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.GaugeData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;

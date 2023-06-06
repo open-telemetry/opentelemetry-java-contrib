@@ -1,7 +1,9 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.AggregationTemporalityBuilder;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.DataBuilder;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.MonotonicBuilder;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.PointData;
@@ -16,11 +18,10 @@ public abstract class SumDataImpl<T extends PointData> implements SumData<T> {
     }
 
     @AutoValue.Builder
-    public abstract static class Builder implements DataBuilder<LongPointData, Builder> {
-      public abstract Builder setMonotonic(Boolean value);
-
-      public abstract Builder setAggregationTemporality(AggregationTemporality value);
-
+    public abstract static class Builder
+        implements DataBuilder<LongPointData, Builder>,
+            AggregationTemporalityBuilder<Builder>,
+            MonotonicBuilder<Builder> {
       public abstract LongData build();
     }
   }
@@ -33,11 +34,10 @@ public abstract class SumDataImpl<T extends PointData> implements SumData<T> {
     }
 
     @AutoValue.Builder
-    public abstract static class Builder implements DataBuilder<DoublePointData, Builder> {
-      public abstract Builder setMonotonic(Boolean value);
-
-      public abstract Builder setAggregationTemporality(AggregationTemporality value);
-
+    public abstract static class Builder
+        implements DataBuilder<DoublePointData, Builder>,
+            AggregationTemporalityBuilder<Builder>,
+            MonotonicBuilder<Builder> {
       public abstract DoubleData build();
     }
   }

@@ -1,7 +1,8 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.AggregationTemporalityBuilder;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.data.base.DataBuilder;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramPointData;
 
@@ -14,9 +15,8 @@ public abstract class ExponentialHistogramDataImpl implements ExponentialHistogr
 
   @AutoValue.Builder
   public abstract static class Builder
-      implements DataBuilder<ExponentialHistogramPointData, Builder> {
-    public abstract Builder setAggregationTemporality(AggregationTemporality value);
-
+      implements DataBuilder<ExponentialHistogramPointData, Builder>,
+          AggregationTemporalityBuilder<Builder> {
     public abstract ExponentialHistogramDataImpl build();
   }
 }
