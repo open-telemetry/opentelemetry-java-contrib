@@ -15,7 +15,7 @@ public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
     return getSerializer().deserialize(source);
   }
 
-  protected void assertItemsMapping(SIGNAL_SDK_ITEM... targets) {
+  protected void assertSerialization(SIGNAL_SDK_ITEM... targets) {
     byte[] serialized = serialize(targets);
     List<SIGNAL_SDK_ITEM> deserialized = deserialize(serialized);
 

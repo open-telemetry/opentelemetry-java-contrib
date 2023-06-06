@@ -39,7 +39,7 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
 
   @Test
   public void verifySerialization() {
-    assertItemsMapping(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_TEXT);
+    assertSerialization(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_TEXT);
   }
 
   @Override
