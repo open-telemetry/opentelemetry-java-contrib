@@ -1,6 +1,6 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffer.internal.mapping.logs.ResourceLogsDataMapper;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.logs.ResourceLogsDataMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.logs.ResourceLogsData;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
