@@ -10,4 +10,5 @@ import org.mapstruct.Mapping;
 @Target(ElementType.METHOD)
 @Mapping(target = "resource", source = "resource")
 @Mapping(target = "schemaUrl", source = "resource.schemaUrl")
+@Mapping(target = "scopeSignals", ignore = true)
 public @interface ResourceMapping {}

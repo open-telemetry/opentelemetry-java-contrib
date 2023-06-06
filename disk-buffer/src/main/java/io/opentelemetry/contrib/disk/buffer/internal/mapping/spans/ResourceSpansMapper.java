@@ -14,7 +14,6 @@ public interface ResourceSpansMapper {
   ResourceSpansMapper INSTANCE = Mappers.getMapper(ResourceSpansMapper.class);
 
   @ResourceMapping
-  @Mapping(target = "scopeSignals", ignore = true)
   @Mapping(target = "scopeSpans", ignore = true)
   ResourceSpans resourceSpansToJson(Resource resource);
 }
