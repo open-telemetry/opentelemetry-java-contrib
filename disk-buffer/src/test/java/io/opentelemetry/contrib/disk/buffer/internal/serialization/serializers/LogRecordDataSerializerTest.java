@@ -1,16 +1,15 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffer.internal.mapping.logs.models.LogRecordDataImpl;
+import io.opentelemetry.contrib.disk.buffer.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffer.testutils.TestData;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import org.junit.jupiter.api.Test;
 
-class LogRecordDataSerializerTest {
+class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData> {
   private static final LogRecordData LOG_RECORD =
       LogRecordDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)
@@ -41,5 +40,10 @@ class LogRecordDataSerializerTest {
   @Test
   public void verifySerialization() {
     assertItemsMapping(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_TEXT);
+  }
+
+  @Override
+  protected SignalSerializer<LogRecordData> getSerializer() {
+    return SignalSerializer.ofLogs();
   }
 }

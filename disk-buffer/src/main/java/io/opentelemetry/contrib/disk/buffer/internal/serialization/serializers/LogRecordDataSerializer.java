@@ -6,17 +6,18 @@ import io.opentelemetry.contrib.disk.buffer.internal.serialization.logs.Resource
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
-  private static LogRecordDataSerializer INSTANCE;
+  @Nullable private static LogRecordDataSerializer instance;
 
   private LogRecordDataSerializer() {}
 
   static LogRecordDataSerializer get() {
-    if (INSTANCE == null) {
-      INSTANCE = new LogRecordDataSerializer();
+    if (instance == null) {
+      instance = new LogRecordDataSerializer();
     }
-    return INSTANCE;
+    return instance;
   }
 
   @Override
@@ -24,17 +25,17 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
     try {
       return Serializer.serialize(ResourceLogsDataMapper.INSTANCE.toJsonDto(logRecordData));
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException(e);
     }
   }
 
   @Override
   public List<LogRecordData> deserialize(byte[] source) {
     try {
-      ResourceLogsData deserialized = Serializer.deserialize(ResourceLogsData.class, source);
-      return ResourceLogsDataMapper.INSTANCE.fromJsonDto(deserialized);
+      return ResourceLogsDataMapper.INSTANCE.fromJsonDto(
+          Serializer.deserialize(ResourceLogsData.class, source));
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException(e);
     }
   }
 }

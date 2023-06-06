@@ -1,27 +1,41 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
+import io.opentelemetry.contrib.disk.buffer.internal.mapping.spans.ResourceSpansDataMapper;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.ResourceSpansData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import java.io.IOException;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public final class SpanDataSerializer implements SignalSerializer<SpanData> {
-  private static SpanDataSerializer INSTANCE;
+  @Nullable private static SpanDataSerializer instance;
 
   private SpanDataSerializer() {}
 
   static SpanDataSerializer get() {
-    if (INSTANCE == null) {
-      INSTANCE = new SpanDataSerializer();
+    if (instance == null) {
+      instance = new SpanDataSerializer();
     }
-    return INSTANCE;
+    return instance;
   }
 
   @Override
   public byte[] serialize(List<SpanData> spanData) {
-    return new byte[0];
+    try {
+      return Serializer.serialize(ResourceSpansDataMapper.INSTANCE.toJsonDto(spanData));
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   @Override
   public List<SpanData> deserialize(byte[] source) {
-    return null;
+    try {
+      return ResourceSpansDataMapper.INSTANCE.fromJsonDto(
+          Serializer.deserialize(ResourceSpansData.class, source));
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 }
