@@ -13,7 +13,6 @@ public interface ScopeSpansMapper {
   ScopeSpansMapper INSTANCE = Mappers.getMapper(ScopeSpansMapper.class);
 
   @ScopeMapping
-  @Mapping(target = "signalItems", ignore = true)
   @Mapping(target = "spans", ignore = true)
   ScopeSpan scopeInfoToJson(InstrumentationScopeInfo source);
 }

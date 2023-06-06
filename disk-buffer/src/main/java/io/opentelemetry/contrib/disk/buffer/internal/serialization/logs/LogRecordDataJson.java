@@ -8,7 +8,11 @@ public final class LogRecordDataJson {
 
   @Nullable
   @JsonAttribute(name = "timeUnixNano")
-  public String epochNanos;
+  public String timestampEpochNanos;
+
+  @Nullable
+  @JsonAttribute(name = "observedTimeUnixNano")
+  public String observedTimestampEpochNanos;
 
   @Nullable
   @JsonAttribute(name = "severityNumber")
@@ -25,9 +29,8 @@ public final class LogRecordDataJson {
   @JsonAttribute(name = "attributes")
   public Attributes attributes = Attributes.empty();
 
-  @Nullable
   @JsonAttribute(name = "droppedAttributesCount")
-  public Integer droppedAttributesCount;
+  public Integer droppedAttributesCount = 0;
 
   @Nullable
   @JsonAttribute(name = "flags")

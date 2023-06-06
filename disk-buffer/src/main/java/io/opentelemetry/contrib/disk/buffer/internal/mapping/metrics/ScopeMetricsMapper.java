@@ -13,7 +13,6 @@ public interface ScopeMetricsMapper {
   ScopeMetricsMapper INSTANCE = Mappers.getMapper(ScopeMetricsMapper.class);
 
   @ScopeMapping
-  @Mapping(target = "signalItems", ignore = true)
   @Mapping(target = "metrics", ignore = true)
   ScopeMetrics scopeInfoToJson(InstrumentationScopeInfo source);
 }

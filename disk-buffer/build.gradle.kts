@@ -19,6 +19,7 @@ val mapStructVersion = "1.5.5.Final"
 val autovalueVersion = "1.10.1"
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
+  api("io.opentelemetry:opentelemetry-sdk-logs")
   implementation("com.dslplatform:dsl-json-java8:$dslJsonVersion")
   implementation("org.mapstruct:mapstruct:$mapStructVersion")
   implementation("com.google.auto.value:auto-value-annotations:$autovalueVersion")
