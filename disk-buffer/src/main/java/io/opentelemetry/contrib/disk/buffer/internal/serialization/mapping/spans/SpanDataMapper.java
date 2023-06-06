@@ -9,10 +9,10 @@ import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.commo
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.models.data.EventDataImpl;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.models.data.LinkDataImpl;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.EventDataJson;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.LinkDataJson;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.SpanDataJson;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.StatusDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.EventDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.LinkDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.SpanDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.StatusDataJson;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.EventData;

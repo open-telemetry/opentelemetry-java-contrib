@@ -1,10 +1,10 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans;
 
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.BaseResourceSignalsDataMapper;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.ResourceSpans;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.ResourceSpansData;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.ScopeSpan;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.SpanDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.ResourceSpans;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.ResourceSpansData;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.ScopeSpan;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.SpanDataJson;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;

@@ -3,17 +3,17 @@ package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.conv
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.MetricDataJson;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.data.ExponentialHistogram;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.data.Gauge;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.data.Histogram;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.data.Sum;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.data.Summary;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.impl.ExponentialHistogramMetric;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.impl.GaugeMetric;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.impl.HistogramMetric;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.impl.SumMetric;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.impl.SummaryMetric;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.MetricDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.ExponentialHistogram;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.Gauge;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.Histogram;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.Sum;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.Summary;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.impl.ExponentialHistogramMetric;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.impl.GaugeMetric;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.impl.HistogramMetric;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.impl.SumMetric;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.impl.SummaryMetric;
 import io.opentelemetry.contrib.disk.buffer.testutils.BaseJsonSerializationTest;
 import org.junit.jupiter.api.Test;
 

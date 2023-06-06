@@ -1,10 +1,10 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics;
 
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.BaseResourceSignalsDataMapper;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.MetricDataJson;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.ResourceMetrics;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.ResourceMetricsData;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.metrics.ScopeMetrics;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.MetricDataJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.ResourceMetrics;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.ResourceMetricsData;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.ScopeMetrics;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;

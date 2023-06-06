@@ -1,7 +1,7 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans;
 
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.ScopeMapping;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.spans.ScopeSpan;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.ScopeSpan;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

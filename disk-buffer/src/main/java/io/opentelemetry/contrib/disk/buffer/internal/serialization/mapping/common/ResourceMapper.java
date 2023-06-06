@@ -1,6 +1,6 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common;
 
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.common.ResourceJson;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.common.ResourceJson;
 import javax.annotation.Nullable;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;

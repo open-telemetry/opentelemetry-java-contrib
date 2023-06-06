@@ -2,7 +2,7 @@ package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.logs
 
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.ResourceMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.ResourceMapping;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.logs.ResourceLogs;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.logs.ResourceLogs;
 import io.opentelemetry.sdk.resources.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
