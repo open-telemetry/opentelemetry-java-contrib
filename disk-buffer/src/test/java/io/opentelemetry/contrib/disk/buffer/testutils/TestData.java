@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.resources.Resource;
 public final class TestData {
   public static final String TRACE_ID = "b535b3b5232b5dabced5b0ab8037eb78";
   public static final String SPAN_ID = "f3fc364fb6b77cff";
+  public static final String PARENT_SPAN_ID = "d3fc364fb6b77cfa";
   public static final Attributes ATTRIBUTES =
       Attributes.builder()
           .put("bear", "mya")
@@ -30,6 +31,9 @@ public final class TestData {
 
   public static final SpanContext SPAN_CONTEXT =
       SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
+  public static final SpanContext PARENT_SPAN_CONTEXT =
+      SpanContext.create(
+          TRACE_ID, PARENT_SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
   public static final InstrumentationScopeInfo INSTRUMENTATION_SCOPE_INFO_FULL =
       InstrumentationScopeInfo.builder("Instrumentation scope name")
           .setVersion("1.2.3")
