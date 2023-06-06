@@ -17,9 +17,7 @@ public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
 
   protected void assertSerialization(SIGNAL_SDK_ITEM... targets) {
     byte[] serialized = serialize(targets);
-    List<SIGNAL_SDK_ITEM> deserialized = deserialize(serialized);
-
-    assertThat(deserialized).containsExactly(targets);
+    assertThat(deserialize(serialized)).containsExactly(targets);
   }
 
   protected abstract SignalSerializer<SIGNAL_SDK_ITEM> getSerializer();
