@@ -2,7 +2,6 @@ package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.span
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.contrib.disk.buffer.internal.mapping.spans.models.data.AutoValue_EventDataImpl;
 import io.opentelemetry.sdk.trace.data.EventData;
 
 @AutoValue

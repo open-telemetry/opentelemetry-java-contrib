@@ -3,7 +3,6 @@ package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.span
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.contrib.disk.buffer.internal.mapping.spans.models.data.AutoValue_LinkDataImpl;
 import io.opentelemetry.sdk.trace.data.LinkData;
 
 @AutoValue

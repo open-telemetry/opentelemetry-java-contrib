@@ -1,7 +1,6 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.datapoints.data;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.contrib.disk.buffer.internal.mapping.metrics.models.datapoints.data.AutoValue_ExponentialHistogramBucketsImpl;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramBuckets;
 import java.util.List;
 

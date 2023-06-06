@@ -1,7 +1,6 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.models.datapoints;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.contrib.disk.buffer.internal.mapping.metrics.models.datapoints.AutoValue_HistogramPointDataImpl;
 import io.opentelemetry.sdk.metrics.data.DoubleExemplarData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import java.util.List;
