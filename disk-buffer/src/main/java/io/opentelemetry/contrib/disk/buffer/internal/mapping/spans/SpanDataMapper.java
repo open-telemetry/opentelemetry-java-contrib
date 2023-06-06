@@ -122,15 +122,11 @@ public abstract class SpanDataMapper {
     target.setTotalRecordedLinks(calculateRecordedItems(source.droppedLinksCount, source.links));
   }
 
-  private static int calculateRecordedItems(Integer droppedCount, @Nullable List<?> items) {
+  private static int calculateRecordedItems(int droppedCount, @Nullable List<?> items) {
     if (items == null) {
       return 0;
     }
-    if (droppedCount != null) {
-      return droppedCount + items.size();
-    }
-
-    return items.size();
+    return droppedCount + items.size();
   }
 
   @AfterMapping
