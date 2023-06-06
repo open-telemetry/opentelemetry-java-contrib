@@ -7,7 +7,6 @@ import com.dslplatform.json.runtime.Settings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public final class Serializer {
 
@@ -24,17 +23,16 @@ public final class Serializer {
     return dslJson.tryFindWriter(manifest);
   }
 
-  public static <T> T deserialize(Class<T> type, String value) throws IOException {
-    try (ByteArrayInputStream in =
-        new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8))) {
+  public static <T> T deserialize(Class<T> type, byte[] value) throws IOException {
+    try (ByteArrayInputStream in = new ByteArrayInputStream(value)) {
       return dslJson.deserialize(type, in);
     }
   }
 
-  public static String serialize(Object object) throws IOException {
+  public static byte[] serialize(Object object) throws IOException {
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       dslJson.serialize(object, out);
-      return new String(out.toByteArray(), StandardCharsets.UTF_8);
+      return out.toByteArray();
     }
   }
 }
