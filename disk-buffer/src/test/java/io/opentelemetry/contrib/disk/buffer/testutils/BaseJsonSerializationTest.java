@@ -1,6 +1,6 @@
 package io.opentelemetry.contrib.disk.buffer.testutils;
 
-import io.opentelemetry.contrib.disk.buffer.serialization.Serializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
 import java.io.IOException;
 
 public abstract class BaseJsonSerializationTest<T> {
