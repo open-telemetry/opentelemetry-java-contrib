@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.converters;
+package io.opentelemetry.contrib.disk.buffer.internal.serialization.converters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

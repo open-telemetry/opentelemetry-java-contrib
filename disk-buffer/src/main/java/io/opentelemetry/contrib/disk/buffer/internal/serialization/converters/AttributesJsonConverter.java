@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.converters;
+package io.opentelemetry.contrib.disk.buffer.internal.serialization.converters;
 
 import com.dslplatform.json.BoolConverter;
 import com.dslplatform.json.JsonConverter;
