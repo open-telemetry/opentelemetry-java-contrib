@@ -3,7 +3,7 @@ package io.opentelemetry.contrib.disk.buffer.internal.serialization.converters;
 import com.dslplatform.json.JsonConverter;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.JsonWriter;
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.JsonSerializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.MetricDataJson;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.ExponentialHistogram;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.data.Gauge;
@@ -101,7 +101,7 @@ public final class MetricDataJsonConverter {
   private static <T> JsonReader.ReadObject<T> getReader(Class<T> type) {
     JsonReader.ReadObject<?> reader = READERS.get(type);
     if (reader == null) {
-      reader = JsonSerializer.tryFindReader(type);
+      reader = Serializer.tryFindReader(type);
       READERS.put(type, reader);
     }
 
@@ -111,7 +111,7 @@ public final class MetricDataJsonConverter {
   private static <T> JsonWriter.WriteObject<T> getWriter(Class<T> type) {
     JsonWriter.WriteObject<?> writer = WRITERS.get(type);
     if (writer == null) {
-      writer = JsonSerializer.tryFindWriter(type);
+      writer = Serializer.tryFindWriter(type);
       WRITERS.put(type, writer);
     }
 
