@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Collection;
 
-public class ResourceMetricsDataMapper
+public final class ResourceMetricsDataMapper
     extends BaseResourceSignalsDataMapper<
         MetricData, MetricDataJson, ScopeMetrics, ResourceMetrics, ResourceMetricsData> {
 

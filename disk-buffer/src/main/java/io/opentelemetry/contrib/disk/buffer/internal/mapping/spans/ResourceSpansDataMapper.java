@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.Collection;
 
-public class ResourceSpansDataMapper
+public final class ResourceSpansDataMapper
     extends BaseResourceSignalsDataMapper<
         SpanData, SpanDataJson, ScopeSpan, ResourceSpans, ResourceSpansData> {
 

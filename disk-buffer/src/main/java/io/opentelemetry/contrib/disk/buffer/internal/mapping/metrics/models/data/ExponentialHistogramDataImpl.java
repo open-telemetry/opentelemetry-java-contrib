@@ -5,7 +5,7 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramPointData;
 
-public class ExponentialHistogramDataImpl extends DataImpl<ExponentialHistogramPointData>
+public final class ExponentialHistogramDataImpl extends DataImpl<ExponentialHistogramPointData>
     implements ExponentialHistogramData {
   public AggregationTemporality aggregationTemporality = Constants.DEFAULT_AGGREGATION_TEMPORALITY;
 
