@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+@SuppressWarnings("FieldCanBeLocal") // todo delete
 public final class FileProvider {
   private final File rootDir;
   private final TimeProvider timeProvider;
@@ -31,14 +32,11 @@ public final class FileProvider {
   }
 
   public synchronized WritableFile getWritableFile() throws IOException {
-    if (currentWritableFile != null) {
-      return currentWritableFile;
-    }
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
-      if (existingFile != null && hasNotReachedMaxSize(existingFile.length())) {
+      if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
         return createWritableFile(existingFile);
       }
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
@@ -142,7 +140,7 @@ public final class FileProvider {
         < (createdTimeInMillis + configuration.maxFileAgeForWriteInMillis);
   }
 
-  private boolean hasNotReachedMaxSize(long fileSize) {
-    return fileSize < configuration.maxFileSize;
+  private boolean hasNotReachedMaxSize(File file) {
+    return file.length() < configuration.maxFileSize;
   }
 }
