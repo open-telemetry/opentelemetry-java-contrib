@@ -1,5 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -18,28 +20,28 @@ public final class FileProvider {
   }
 
   @Nullable
-  public synchronized FileHolder getReadableFile() {
+  public synchronized ReadableFile getReadableFile() {
     File readableFile = findReadableFile();
     if (readableFile != null) {
-      return new SimpleFileHolder(readableFile);
+      return new ReadableFile(readableFile);
     }
     return null;
   }
 
-  public synchronized FileHolder getWritableFile() throws IOException {
+  public synchronized WritableFile getWritableFile() throws IOException {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
       if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
-        return new SimpleFileHolder(existingFile);
+        return new WritableFile(existingFile);
       }
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
         removeOldestFileIfSpaceIsNeeded(existingFiles);
       }
     }
     File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
-    return new SimpleFileHolder(file);
+    return new WritableFile(file);
   }
 
   @Nullable
@@ -132,18 +134,5 @@ public final class FileProvider {
 
   private boolean hasNotReachedMaxSize(File file) {
     return file.length() < configuration.maxFileSize;
-  }
-
-  public static final class SimpleFileHolder implements FileHolder {
-    private final File file;
-
-    public SimpleFileHolder(File file) {
-      this.file = file;
-    }
-
-    @Override
-    public File getFile() {
-      return file;
-    }
   }
 }

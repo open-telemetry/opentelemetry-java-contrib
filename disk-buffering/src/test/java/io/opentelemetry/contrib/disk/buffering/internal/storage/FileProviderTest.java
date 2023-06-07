@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.FileHolder;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertEquals("1000", file.getFile().getName());
+    assertEquals("1000", file.file.getName());
   }
 
   @Test
@@ -61,7 +62,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertEquals(existingFile, file.getFile());
+    assertEquals(existingFile, file.file);
   }
 
   @Test
@@ -72,7 +73,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertNotEquals(existingFile, file.getFile());
+    assertNotEquals(existingFile, file.file);
   }
 
   @Test
@@ -84,7 +85,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertNotEquals(existingFile, file.getFile());
+    assertNotEquals(existingFile, file.file);
   }
 
   @Test
@@ -101,9 +102,9 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertNotEquals(existingFile1, file.getFile());
-    assertNotEquals(existingFile2, file.getFile());
-    assertNotEquals(existingFile3, file.getFile());
+    assertNotEquals(existingFile1, file.file);
+    assertNotEquals(existingFile2, file.file);
+    assertNotEquals(existingFile3, file.file);
     assertTrue(existingFile2.exists());
     assertTrue(existingFile3.exists());
     assertFalse(existingFile1.exists());
@@ -124,9 +125,9 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getWritableFile();
 
-    assertNotEquals(existingFile1, file.getFile());
-    assertNotEquals(existingFile2, file.getFile());
-    assertNotEquals(existingFile3, file.getFile());
+    assertNotEquals(existingFile1, file.file);
+    assertNotEquals(existingFile2, file.file);
+    assertNotEquals(existingFile3, file.file);
     assertTrue(existingFile2.exists());
     assertTrue(existingFile1.exists());
     assertFalse(existingFile3.exists());
@@ -145,7 +146,7 @@ class FileProviderTest {
 
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());
-    assertNotEquals(expiredWritableFile, file.getFile());
+    assertNotEquals(expiredWritableFile, file.file);
   }
 
   @Test
@@ -159,7 +160,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getReadableFile();
 
-    assertEquals(readableFile, file.getFile());
+    assertEquals(readableFile, file.file);
   }
 
   @Test
@@ -175,7 +176,7 @@ class FileProviderTest {
 
     FileHolder file = fileProvider.getReadableFile();
 
-    assertEquals(readableFileOlder, file.getFile());
+    assertEquals(readableFileOlder, file.file);
   }
 
   @Test
