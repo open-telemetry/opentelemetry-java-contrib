@@ -1,5 +1,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -9,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.FileHolder;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.StorageFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -24,32 +27,18 @@ class FileProviderTest {
   @TempDir File rootDir;
   private FileProvider fileProvider;
   private TimeProvider timeProvider;
-  private static final long MAX_FILE_AGE_FOR_WRITE_MILLIS = 1000;
-  private static final long MIN_FILE_AGE_FOR_READ_MILLIS = MAX_FILE_AGE_FOR_WRITE_MILLIS + 500;
-  private static final long MAX_FILE_AGE_FOR_READ_MILLIS = 10_000;
-  private static final int MAX_FILE_SIZE = 100;
-  private static final int MAX_FOLDER_SIZE = 300;
 
   @BeforeEach
   public void setUp() {
     timeProvider = mock();
-    fileProvider =
-        new FileProvider(
-            rootDir,
-            timeProvider,
-            new Configuration(
-                MAX_FILE_AGE_FOR_WRITE_MILLIS,
-                MIN_FILE_AGE_FOR_READ_MILLIS,
-                MAX_FILE_AGE_FOR_READ_MILLIS,
-                MAX_FILE_SIZE,
-                MAX_FOLDER_SIZE));
+    fileProvider = new FileProvider(rootDir, timeProvider, TestData.CONFIGURATION);
   }
 
   @Test
   public void createWritableFile_withTimeMillisAsName() throws IOException {
     doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertEquals("1000", file.file.getName());
   }
@@ -60,7 +49,7 @@ class FileProviderTest {
     createFiles(existingFile);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertEquals(existingFile, file.file);
   }
@@ -71,7 +60,7 @@ class FileProviderTest {
     createFiles(existingFile);
     doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -83,7 +72,7 @@ class FileProviderTest {
     fillWithBytes(existingFile, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -100,7 +89,7 @@ class FileProviderTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -123,7 +112,7 @@ class FileProviderTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(11_000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -142,7 +131,7 @@ class FileProviderTest {
     createFiles(expiredReadableFile, expiredWritableFile);
     doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    FileHolder file = fileProvider.getWritableFile();
+    StorageFile file = fileProvider.getWritableFile();
 
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());
@@ -158,7 +147,7 @@ class FileProviderTest {
     File readableFile = new File(rootDir, String.valueOf(readableFileCreationTime));
     createFiles(writableFile, readableFile);
 
-    FileHolder file = fileProvider.getReadableFile();
+    StorageFile file = fileProvider.getReadableFile();
 
     assertEquals(readableFile, file.file);
   }
@@ -174,7 +163,7 @@ class FileProviderTest {
     File readableFileNewer = new File(rootDir, String.valueOf(newerReadableFileCreationTime));
     createFiles(writableFile, readableFileNewer, readableFileOlder);
 
-    FileHolder file = fileProvider.getReadableFile();
+    StorageFile file = fileProvider.getReadableFile();
 
     assertEquals(readableFileOlder, file.file);
   }

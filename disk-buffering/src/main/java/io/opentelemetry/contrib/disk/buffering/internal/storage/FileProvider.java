@@ -48,7 +48,7 @@ public final class FileProvider {
   }
 
   private WritableFile createWritableFile(File existingFile) {
-    currentWritableFile = new WritableFile(existingFile);
+    currentWritableFile = new WritableFile(existingFile, configuration, timeProvider);
     return currentWritableFile;
   }
 
