@@ -48,7 +48,7 @@ import java.io.IOException;
 
 public final class JsonSerializer {
 
-  private static final DslJson<Object> dslJson =
+  private static final DslJson<Object> DSL_JSON =
       new DslJson<>(
           Settings.withAnalyzers(/* unknownReader= */ false, /* unknownWriter= */ false)
               .skipDefaultValues(true)
@@ -94,22 +94,22 @@ public final class JsonSerializer {
   private JsonSerializer() {}
 
   public static <T> JsonReader.ReadObject<T> tryFindReader(Class<T> manifest) {
-    return dslJson.tryFindReader(manifest);
+    return DSL_JSON.tryFindReader(manifest);
   }
 
   public static <T> JsonWriter.WriteObject<T> tryFindWriter(Class<T> manifest) {
-    return dslJson.tryFindWriter(manifest);
+    return DSL_JSON.tryFindWriter(manifest);
   }
 
   public static <T> T deserialize(Class<T> type, byte[] value) throws IOException {
     try (ByteArrayInputStream in = new ByteArrayInputStream(value)) {
-      return dslJson.deserialize(type, in);
+      return DSL_JSON.deserialize(type, in);
     }
   }
 
   public static byte[] serialize(Object object) throws IOException {
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      dslJson.serialize(object, out);
+      DSL_JSON.serialize(object, out);
       return out.toByteArray();
     }
   }
