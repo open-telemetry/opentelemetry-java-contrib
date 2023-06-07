@@ -98,6 +98,22 @@ class FileProviderTest {
     assertEquals(readableFile, file.getFile());
   }
 
+  @Test
+  public void provideOldestFileForRead_whenMultipleReadableFilesAreAvailable() throws IOException {
+    long newerReadableFileCreationTime = 1000;
+    long olderReadableFileCreationTime = 900;
+    long currentTime = newerReadableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
+    doReturn(currentTime).when(timeProvider).getSystemCurrentTimeMillis();
+    File writableFile = new File(rootDir, String.valueOf(currentTime));
+    File readableFileOlder = new File(rootDir, String.valueOf(olderReadableFileCreationTime));
+    File readableFileNewer = new File(rootDir, String.valueOf(newerReadableFileCreationTime));
+    createFiles(writableFile, readableFileNewer, readableFileOlder);
+
+    FileHolder file = fileProvider.getReadableFile();
+
+    assertEquals(readableFileOlder, file.getFile());
+  }
+
   private static void createFiles(File... files) throws IOException {
     for (File file : files) {
       if (!file.createNewFile()) {

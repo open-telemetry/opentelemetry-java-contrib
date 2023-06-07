@@ -50,14 +50,21 @@ public final class FileProvider {
   private File findReadableFile() {
     long currentTime = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = rootDir.listFiles();
+    File oldestFileAvailable = null;
+    long oldestFileCreationTimeMillis = 0;
     if (existingFiles != null) {
       for (File existingFile : existingFiles) {
-        if (isReadyToBeRead(currentTime, Long.parseLong(existingFile.getName()))) {
-          return existingFile;
+        long existingFileCreationTimeMillis = Long.parseLong(existingFile.getName());
+        if (isReadyToBeRead(currentTime, existingFileCreationTimeMillis)) {
+          if (oldestFileAvailable == null
+              || existingFileCreationTimeMillis < oldestFileCreationTimeMillis) {
+            oldestFileCreationTimeMillis = existingFileCreationTimeMillis;
+            oldestFileAvailable = existingFile;
+          }
         }
       }
     }
-    return null;
+    return oldestFileAvailable;
   }
 
   @Nullable
