@@ -27,7 +27,7 @@ class FileProviderTest {
   private static final long MAX_FILE_AGE_FOR_WRITE_MILLIS = 1000;
   private static final long MIN_FILE_AGE_FOR_READ_MILLIS = MAX_FILE_AGE_FOR_WRITE_MILLIS + 500;
   private static final long MAX_FILE_AGE_FOR_READ_MILLIS = 10_000;
-  private static final long MAX_FILE_SIZE = 100;
+  private static final int MAX_FILE_SIZE = 100;
 
   @BeforeEach
   public void setUp() {
@@ -78,7 +78,7 @@ class FileProviderTest {
   public void createWritableFile_whenNonExpiredOneReachedTheSizeLimit() throws IOException {
     File existingFile = new File(rootDir, "1000");
     createFiles(existingFile);
-    fillWithBytes(existingFile, 100);
+    fillWithBytes(existingFile, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
