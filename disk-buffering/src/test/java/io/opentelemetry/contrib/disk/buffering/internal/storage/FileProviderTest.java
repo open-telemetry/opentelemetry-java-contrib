@@ -13,7 +13,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvid
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,6 +27,7 @@ class FileProviderTest {
   private static final long MIN_FILE_AGE_FOR_READ_MILLIS = MAX_FILE_AGE_FOR_WRITE_MILLIS + 500;
   private static final long MAX_FILE_AGE_FOR_READ_MILLIS = 10_000;
   private static final int MAX_FILE_SIZE = 100;
+  private static final int MAX_FOLDER_SIZE = 300;
 
   @BeforeEach
   public void setUp() {
@@ -40,11 +40,12 @@ class FileProviderTest {
                 MAX_FILE_AGE_FOR_WRITE_MILLIS,
                 MIN_FILE_AGE_FOR_READ_MILLIS,
                 MAX_FILE_AGE_FOR_READ_MILLIS,
-                MAX_FILE_SIZE));
+                MAX_FILE_SIZE,
+                MAX_FOLDER_SIZE));
   }
 
   @Test
-  public void createWritableFile_withTimeMillisAsName() {
+  public void createWritableFile_withTimeMillisAsName() throws IOException {
     doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
@@ -84,6 +85,28 @@ class FileProviderTest {
     FileHolder file = fileProvider.getWritableFile();
 
     assertNotEquals(existingFile, file.getFile());
+  }
+
+  @Test
+  public void createWritableFile_andRemoveOldestOne_whenNonExpiredOneReachedTheSizeLimit()
+      throws IOException {
+    File existingFile1 = new File(rootDir, "1000");
+    File existingFile2 = new File(rootDir, "1400");
+    File existingFile3 = new File(rootDir, "1100");
+    createFiles(existingFile3, existingFile2, existingFile1);
+    fillWithBytes(existingFile1, MAX_FILE_SIZE);
+    fillWithBytes(existingFile2, MAX_FILE_SIZE);
+    fillWithBytes(existingFile3, MAX_FILE_SIZE);
+    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
+
+    FileHolder file = fileProvider.getWritableFile();
+
+    assertNotEquals(existingFile1, file.getFile());
+    assertNotEquals(existingFile2, file.getFile());
+    assertNotEquals(existingFile3, file.getFile());
+    assertTrue(existingFile2.exists());
+    assertTrue(existingFile3.exists());
+    assertFalse(existingFile1.exists());
   }
 
   @Test
@@ -160,9 +183,7 @@ class FileProviderTest {
   }
 
   private static void fillWithBytes(File file, int size) throws IOException {
-    byte[] bytes = new byte[size];
-    Arrays.fill(bytes, (byte) 1);
-    Files.write(file.toPath(), bytes);
+    Files.write(file.toPath(), new byte[size]);
   }
 
   private static void createFiles(File... files) throws IOException {

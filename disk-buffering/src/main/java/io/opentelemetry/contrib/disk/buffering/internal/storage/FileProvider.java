@@ -2,6 +2,8 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 public final class FileProvider {
@@ -24,13 +26,17 @@ public final class FileProvider {
     return null;
   }
 
-  public synchronized FileHolder getWritableFile() {
+  public synchronized FileHolder getWritableFile() throws IOException {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
-    File existingFile = findExistingWritableFile(systemCurrentTimeMillis);
-    if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
-      return new SimpleFileHolder(existingFile);
+    File[] existingFiles = rootDir.listFiles();
+    if (existingFiles != null) {
+      File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
+      if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
+        return new SimpleFileHolder(existingFile);
+      }
+      purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis);
+      removeOldestFileIfSpaceIsNeeded(existingFiles);
     }
-    purgeExpiredFilesIfAny(systemCurrentTimeMillis);
     File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
     return new SimpleFileHolder(file);
   }
@@ -58,28 +64,49 @@ public final class FileProvider {
   }
 
   @Nullable
-  private File findExistingWritableFile(long systemCurrentTimeMillis) {
-    File[] existingFiles = rootDir.listFiles();
-    if (existingFiles != null) {
-      for (File existingFile : existingFiles) {
-        if (hasNotExpiredForWriting(
-            systemCurrentTimeMillis, Long.parseLong(existingFile.getName()))) {
-          return existingFile;
-        }
+  private File findExistingWritableFile(File[] existingFiles, long systemCurrentTimeMillis) {
+    for (File existingFile : existingFiles) {
+      if (hasNotExpiredForWriting(
+          systemCurrentTimeMillis, Long.parseLong(existingFile.getName()))) {
+        return existingFile;
       }
     }
     return null;
   }
 
-  private void purgeExpiredFilesIfAny(long currentTimeMillis) {
-    File[] existingFiles = rootDir.listFiles();
-    if (existingFiles != null) {
-      for (File existingFile : existingFiles) {
-        if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
-          existingFile.delete();
-        }
+  private void purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis) {
+    for (File existingFile : existingFiles) {
+      if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+        existingFile.delete();
       }
     }
+  }
+
+  private void removeOldestFileIfSpaceIsNeeded(File[] existingFiles) throws IOException {
+    if (neededToClearSpaceForNewFile(existingFiles)) {
+      File oldest = getOldest(existingFiles);
+      if (!oldest.delete()) {
+        throw new IOException("Could not delete the file: " + oldest);
+      }
+    }
+  }
+
+  private static File getOldest(File[] existingFiles) {
+    File oldest = null;
+    for (File existingFile : existingFiles) {
+      if (oldest == null || existingFile.getName().compareTo(oldest.getName()) < 0) {
+        oldest = existingFile;
+      }
+    }
+    return Objects.requireNonNull(oldest);
+  }
+
+  private boolean neededToClearSpaceForNewFile(File[] existingFiles) {
+    int currentFolderSize = 0;
+    for (File existingFile : existingFiles) {
+      currentFolderSize += (int) existingFile.length();
+    }
+    return (currentFolderSize + configuration.maxFileSize) > configuration.maxFolderSize;
   }
 
   private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
