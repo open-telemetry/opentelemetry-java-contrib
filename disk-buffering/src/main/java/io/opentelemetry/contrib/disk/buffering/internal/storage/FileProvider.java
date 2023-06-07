@@ -34,8 +34,9 @@ public final class FileProvider {
       if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
         return new SimpleFileHolder(existingFile);
       }
-      purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis);
-      removeOldestFileIfSpaceIsNeeded(rootDir.listFiles());
+      if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
+        removeOldestFileIfSpaceIsNeeded(existingFiles);
+      }
     }
     File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
     return new SimpleFileHolder(file);
@@ -74,16 +75,20 @@ public final class FileProvider {
     return null;
   }
 
-  private void purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis) {
+  private int purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis) {
+    int filesDeleted = 0;
     for (File existingFile : existingFiles) {
       if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
-        existingFile.delete();
+        if (existingFile.delete()) {
+          filesDeleted++;
+        }
       }
     }
+    return filesDeleted;
   }
 
   private void removeOldestFileIfSpaceIsNeeded(File[] existingFiles) throws IOException {
-    if (existingFiles != null && existingFiles.length > 0) {
+    if (existingFiles.length > 0) {
       if (neededToClearSpaceForNewFile(existingFiles)) {
         File oldest = getOldest(existingFiles);
         if (!oldest.delete()) {
