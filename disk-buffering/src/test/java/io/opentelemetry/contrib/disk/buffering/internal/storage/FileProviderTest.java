@@ -49,9 +49,7 @@ class FileProviderTest {
   @Test
   public void reuseWritableFile_whenItHasNotExpired() throws IOException {
     File existingFile = new File(rootDir, "1000");
-    if (!existingFile.createNewFile()) {
-      fail("Could not create temporary file");
-    }
+    createFiles(existingFile);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
@@ -62,9 +60,7 @@ class FileProviderTest {
   @Test
   public void createWritableFile_ifExistingOnesAlreadyExpired() throws IOException {
     File existingFile = new File(rootDir, "1000");
-    if (!existingFile.createNewFile()) {
-      fail("Could not create temporary file");
-    }
+    createFiles(existingFile);
     doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
@@ -78,9 +74,7 @@ class FileProviderTest {
     File expiredReadableFile = new File(rootDir, "1000");
     // Files that cannot be written, but can still be read, aren't ready to be deleted.
     File expiredWritableFile = new File(rootDir, "10000");
-    if (!expiredReadableFile.createNewFile() || !expiredWritableFile.createNewFile()) {
-      fail("Could not create temporary files");
-    }
+    createFiles(expiredReadableFile, expiredWritableFile);
     doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
@@ -88,5 +82,27 @@ class FileProviderTest {
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());
     assertNotEquals(expiredWritableFile, file.getFile());
+  }
+
+  @Test
+  public void provideFileForRead_afterItsMinFileAgeForReadTimePassed() throws IOException {
+    long readableFileCreationTime = 1000;
+    long currentTime = readableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
+    doReturn(currentTime).when(timeProvider).getSystemCurrentTimeMillis();
+    File writableFile = new File(rootDir, String.valueOf(currentTime));
+    File readableFile = new File(rootDir, String.valueOf(readableFileCreationTime));
+    createFiles(writableFile, readableFile);
+
+    FileHolder file = fileProvider.getReadableFile();
+
+    assertEquals(readableFile, file.getFile());
+  }
+
+  private static void createFiles(File... files) throws IOException {
+    for (File file : files) {
+      if (!file.createNewFile()) {
+        fail("Could not create temporary file: " + file);
+      }
+    }
   }
 }

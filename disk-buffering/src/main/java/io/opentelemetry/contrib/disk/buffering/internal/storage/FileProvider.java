@@ -1,11 +1,10 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import com.google.errorprone.annotations.DoNotCall;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import javax.annotation.Nullable;
 
-public class FileProvider {
+public final class FileProvider {
   private final File rootDir;
   private final TimeProvider timeProvider;
   private final Configuration configuration;
@@ -16,14 +15,18 @@ public class FileProvider {
     this.configuration = configuration;
   }
 
-  @DoNotCall
-  public final FileHolder getReadableFile() {
-    throw new UnsupportedOperationException();
+  @Nullable
+  public synchronized FileHolder getReadableFile() {
+    File readableFile = findReadableFile();
+    if (readableFile != null) {
+      return new SimpleFileHolder(readableFile);
+    }
+    return null;
   }
 
   public synchronized FileHolder getWritableFile() {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
-    File existingFile = findExistingUnexpiredFile(systemCurrentTimeMillis);
+    File existingFile = findExistingWritableFile(systemCurrentTimeMillis);
     if (existingFile != null) {
       return new SimpleFileHolder(existingFile);
     }
@@ -44,7 +47,21 @@ public class FileProvider {
   }
 
   @Nullable
-  private File findExistingUnexpiredFile(long systemCurrentTimeMillis) {
+  private File findReadableFile() {
+    long currentTime = timeProvider.getSystemCurrentTimeMillis();
+    File[] existingFiles = rootDir.listFiles();
+    if (existingFiles != null) {
+      for (File existingFile : existingFiles) {
+        if (isReadyToBeRead(currentTime, Long.parseLong(existingFile.getName()))) {
+          return existingFile;
+        }
+      }
+    }
+    return null;
+  }
+
+  @Nullable
+  private File findExistingWritableFile(long systemCurrentTimeMillis) {
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       for (File existingFile : existingFiles) {
@@ -55,6 +72,10 @@ public class FileProvider {
       }
     }
     return null;
+  }
+
+  private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
+    return currentTimeMillis >= (createdTimeInMillis + configuration.minFileAgeForReadInMillis);
   }
 
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
