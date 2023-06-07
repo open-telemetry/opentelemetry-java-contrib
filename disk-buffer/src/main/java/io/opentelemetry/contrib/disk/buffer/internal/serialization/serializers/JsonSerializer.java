@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffer.internal.serialization;
+package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
@@ -46,7 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public final class Serializer {
+public final class JsonSerializer {
 
   private static final DslJson<Object> dslJson =
       new DslJson<>(
@@ -91,7 +91,7 @@ public final class Serializer {
               .with(new _SummaryMetric_DslJsonConverter())
               .with(new _Summary_DslJsonConverter()));
 
-  private Serializer() {}
+  private JsonSerializer() {}
 
   public static <T> JsonReader.ReadObject<T> tryFindReader(Class<T> manifest) {
     return dslJson.tryFindReader(manifest);
