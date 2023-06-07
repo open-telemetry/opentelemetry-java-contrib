@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.api.trace.propagation.internal.W3CTraceContextEncoding;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.common.SpanContextMapping;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.models.data.EventDataImpl;
@@ -42,6 +43,7 @@ public abstract class SpanDataMapper {
 
   @SpanContextMapping
   @Mapping(target = "droppedAttributesCount", ignore = true)
+  @Mapping(target = "traceState", ignore = true)
   protected abstract LinkDataJson linkDataToJson(LinkData source);
 
   @AfterMapping
@@ -59,8 +61,10 @@ public abstract class SpanDataMapper {
   }
 
   @AfterMapping
-  protected void addDroppedAttributesCount(LinkData source, @MappingTarget LinkDataJson target) {
+  protected void addLinkExtras(LinkData source, @MappingTarget LinkDataJson target) {
     target.droppedAttributesCount = source.getTotalAttributeCount() - source.getAttributes().size();
+    target.traceState =
+        W3CTraceContextEncoding.encodeTraceState(source.getSpanContext().getTraceState());
   }
 
   protected Integer mapSpanKindToJson(SpanKind value) {
@@ -140,9 +144,12 @@ public abstract class SpanDataMapper {
       LinkDataJson source, @MappingTarget LinkDataImpl.Builder target) {
     target.setTotalAttributeCount(source.droppedAttributesCount + source.attributes.size());
     if (source.traceId != null && source.spanId != null) {
+      TraceState traceState =
+          (source.traceState == null || source.traceState.isEmpty())
+              ? TraceState.getDefault()
+              : W3CTraceContextEncoding.decodeTraceState(source.traceState);
       target.setSpanContext(
-          SpanContext.create(
-              source.traceId, source.spanId, TraceFlags.getSampled(), TraceState.getDefault()));
+          SpanContext.create(source.traceId, source.spanId, TraceFlags.getSampled(), traceState));
     }
   }
 

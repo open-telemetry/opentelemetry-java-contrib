@@ -31,6 +31,12 @@ public final class TestData {
 
   public static final SpanContext SPAN_CONTEXT =
       SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
+  public static final SpanContext SPAN_CONTEXT_WITH_TRACE_STATE =
+      SpanContext.create(
+          TRACE_ID,
+          SPAN_ID,
+          TraceFlags.getSampled(),
+          TraceState.builder().put("aaa", "bbb").put("ccc", "ddd").build());
   public static final SpanContext PARENT_SPAN_CONTEXT =
       SpanContext.create(
           TRACE_ID, PARENT_SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());

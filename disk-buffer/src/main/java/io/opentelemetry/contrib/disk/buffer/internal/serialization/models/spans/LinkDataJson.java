@@ -14,6 +14,10 @@ public final class LinkDataJson {
   @JsonAttribute(name = "spanId")
   public String spanId;
 
+  @Nullable
+  @JsonAttribute(name = "traceState")
+  public String traceState;
+
   @JsonAttribute(name = "attributes")
   public Attributes attributes = Attributes.empty();
 

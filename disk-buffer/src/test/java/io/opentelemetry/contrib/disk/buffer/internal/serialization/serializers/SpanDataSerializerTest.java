@@ -10,6 +10,7 @@ import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
+import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,13 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
           .setTotalAttributeCount(20)
           .build();
 
+  private static final LinkData LINK_DATA_WITH_TRACE_STATE =
+      LinkDataImpl.builder()
+          .setAttributes(TestData.ATTRIBUTES)
+          .setSpanContext(TestData.SPAN_CONTEXT_WITH_TRACE_STATE)
+          .setTotalAttributeCount(20)
+          .build();
+
   private static final SpanData SPAN_DATA =
       SpanDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)
@@ -43,7 +51,7 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
           .setKind(SpanKind.CLIENT)
           .setStatus(StatusData.error())
           .setEvents(Collections.singletonList(EVENT_DATA))
-          .setLinks(Collections.singletonList(LINK_DATA))
+          .setLinks(Arrays.asList(LINK_DATA, LINK_DATA_WITH_TRACE_STATE))
           .setTotalAttributeCount(10)
           .setTotalRecordedEvents(2)
           .setTotalRecordedLinks(2)
