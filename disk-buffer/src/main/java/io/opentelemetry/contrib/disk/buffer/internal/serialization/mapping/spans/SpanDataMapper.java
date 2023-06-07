@@ -63,8 +63,10 @@ public abstract class SpanDataMapper {
   @AfterMapping
   protected void addLinkExtras(LinkData source, @MappingTarget LinkDataJson target) {
     target.droppedAttributesCount = source.getTotalAttributeCount() - source.getAttributes().size();
-    target.traceState =
-        W3CTraceContextEncoding.encodeTraceState(source.getSpanContext().getTraceState());
+    TraceState traceState = source.getSpanContext().getTraceState();
+    if (!traceState.isEmpty()) {
+      target.traceState = W3CTraceContextEncoding.encodeTraceState(traceState);
+    }
   }
 
   protected Integer mapSpanKindToJson(SpanKind value) {
