@@ -110,6 +110,29 @@ class FileProviderTest {
   }
 
   @Test
+  public void
+      createWritableFile_andDoNotRemoveOldestOne_whenNonExpiredOneReachedTheSizeLimit_andExpiredFilesArePurged()
+          throws IOException {
+    File existingFile1 = new File(rootDir, "1100");
+    File existingFile2 = new File(rootDir, "1400");
+    File existingFile3 = new File(rootDir, "900");
+    createFiles(existingFile3, existingFile2, existingFile1);
+    fillWithBytes(existingFile1, MAX_FILE_SIZE);
+    fillWithBytes(existingFile2, MAX_FILE_SIZE);
+    fillWithBytes(existingFile3, MAX_FILE_SIZE);
+    doReturn(11_000L).when(timeProvider).getSystemCurrentTimeMillis();
+
+    FileHolder file = fileProvider.getWritableFile();
+
+    assertNotEquals(existingFile1, file.getFile());
+    assertNotEquals(existingFile2, file.getFile());
+    assertNotEquals(existingFile3, file.getFile());
+    assertTrue(existingFile2.exists());
+    assertTrue(existingFile1.exists());
+    assertFalse(existingFile3.exists());
+  }
+
+  @Test
   public void purgeExpiredForReadFiles_whenCreatingNewOne() throws IOException {
     // Files that cannot be read from are considered fully expired.
     File expiredReadableFile = new File(rootDir, "1000");
