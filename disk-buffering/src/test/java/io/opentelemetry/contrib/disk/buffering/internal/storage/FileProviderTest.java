@@ -12,10 +12,13 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+@SuppressWarnings("SystemOut")
 class FileProviderTest {
 
   @TempDir File rootDir;
@@ -24,6 +27,7 @@ class FileProviderTest {
   private static final long MAX_FILE_AGE_FOR_WRITE_MILLIS = 1000;
   private static final long MIN_FILE_AGE_FOR_READ_MILLIS = MAX_FILE_AGE_FOR_WRITE_MILLIS + 500;
   private static final long MAX_FILE_AGE_FOR_READ_MILLIS = 10_000;
+  private static final long MAX_FILE_SIZE = 100;
 
   @BeforeEach
   public void setUp() {
@@ -35,7 +39,8 @@ class FileProviderTest {
             new Configuration(
                 MAX_FILE_AGE_FOR_WRITE_MILLIS,
                 MIN_FILE_AGE_FOR_READ_MILLIS,
-                MAX_FILE_AGE_FOR_READ_MILLIS));
+                MAX_FILE_AGE_FOR_READ_MILLIS,
+                MAX_FILE_SIZE));
   }
 
   @Test
@@ -63,6 +68,18 @@ class FileProviderTest {
     File existingFile = new File(rootDir, "1000");
     createFiles(existingFile);
     doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
+
+    FileHolder file = fileProvider.getWritableFile();
+
+    assertNotEquals(existingFile, file.getFile());
+  }
+
+  @Test
+  public void createWritableFile_whenNonExpiredOneReachedTheSizeLimit() throws IOException {
+    File existingFile = new File(rootDir, "1000");
+    createFiles(existingFile);
+    fillWithBytes(existingFile, 100);
+    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
     FileHolder file = fileProvider.getWritableFile();
 
@@ -140,6 +157,12 @@ class FileProviderTest {
         .getSystemCurrentTimeMillis();
 
     assertNull(fileProvider.getReadableFile());
+  }
+
+  private static void fillWithBytes(File file, int size) throws IOException {
+    byte[] bytes = new byte[size];
+    Arrays.fill(bytes, (byte) 1);
+    Files.write(file.toPath(), bytes);
   }
 
   private static void createFiles(File... files) throws IOException {

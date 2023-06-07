@@ -27,7 +27,7 @@ public final class FileProvider {
   public synchronized FileHolder getWritableFile() {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File existingFile = findExistingWritableFile(systemCurrentTimeMillis);
-    if (existingFile != null) {
+    if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
       return new SimpleFileHolder(existingFile);
     }
     purgeExpiredFilesIfAny(systemCurrentTimeMillis);
@@ -94,6 +94,10 @@ public final class FileProvider {
   private boolean hasNotExpiredForWriting(long systemCurrentTimeMillis, long createdTimeInMillis) {
     return systemCurrentTimeMillis
         < (createdTimeInMillis + configuration.maxFileAgeForWriteInMillis);
+  }
+
+  private boolean hasNotReachedMaxSize(File file) {
+    return file.length() < configuration.maxFileSize;
   }
 
   public static final class SimpleFileHolder implements FileHolder {
