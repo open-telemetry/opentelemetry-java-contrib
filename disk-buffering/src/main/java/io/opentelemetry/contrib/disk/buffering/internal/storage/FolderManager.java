@@ -9,15 +9,15 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("FieldCanBeLocal") // todo delete
-public final class FileProvider {
-  private final File rootDir;
+public final class FolderManager {
+  private final File folder;
   private final TimeProvider timeProvider;
   private final Configuration configuration;
   @Nullable private WritableFile currentWritableFile;
   //  private ReadableFile currentReadableFile;
 
-  public FileProvider(File rootDir, TimeProvider timeProvider, Configuration configuration) {
-    this.rootDir = rootDir;
+  public FolderManager(File folder, TimeProvider timeProvider, Configuration configuration) {
+    this.folder = folder;
     this.timeProvider = timeProvider;
     this.configuration = configuration;
   }
@@ -33,7 +33,7 @@ public final class FileProvider {
 
   public synchronized WritableFile getWritableFile() throws IOException {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
-    File[] existingFiles = rootDir.listFiles();
+    File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
       File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
       if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
@@ -43,7 +43,7 @@ public final class FileProvider {
         removeOldestFileIfSpaceIsNeeded(existingFiles);
       }
     }
-    File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
+    File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
     return createWritableFile(file);
   }
 
@@ -55,7 +55,7 @@ public final class FileProvider {
   @Nullable
   private File findReadableFile() {
     long currentTime = timeProvider.getSystemCurrentTimeMillis();
-    File[] existingFiles = rootDir.listFiles();
+    File[] existingFiles = folder.listFiles();
     File oldestFileAvailable = null;
     long oldestFileCreationTimeMillis = 0;
     if (existingFiles != null) {

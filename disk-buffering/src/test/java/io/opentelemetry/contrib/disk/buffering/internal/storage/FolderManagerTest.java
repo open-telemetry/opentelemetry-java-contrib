@@ -22,23 +22,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @SuppressWarnings("SystemOut")
-class FileProviderTest {
+class FolderManagerTest {
 
   @TempDir File rootDir;
-  private FileProvider fileProvider;
+  private FolderManager folderManager;
   private TimeProvider timeProvider;
 
   @BeforeEach
   public void setUp() {
     timeProvider = mock();
-    fileProvider = new FileProvider(rootDir, timeProvider, TestData.CONFIGURATION);
+    folderManager = new FolderManager(rootDir, timeProvider, TestData.CONFIGURATION);
   }
 
   @Test
   public void createWritableFile_withTimeMillisAsName() throws IOException {
     doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertEquals("1000", file.file.getName());
   }
@@ -49,7 +49,7 @@ class FileProviderTest {
     createFiles(existingFile);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertEquals(existingFile, file.file);
   }
@@ -60,7 +60,7 @@ class FileProviderTest {
     createFiles(existingFile);
     doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -72,7 +72,7 @@ class FileProviderTest {
     fillWithBytes(existingFile, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -89,7 +89,7 @@ class FileProviderTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -112,7 +112,7 @@ class FileProviderTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(11_000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -131,7 +131,7 @@ class FileProviderTest {
     createFiles(expiredReadableFile, expiredWritableFile);
     doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = fileProvider.getWritableFile();
+    StorageFile file = folderManager.getWritableFile();
 
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());
@@ -147,7 +147,7 @@ class FileProviderTest {
     File readableFile = new File(rootDir, String.valueOf(readableFileCreationTime));
     createFiles(writableFile, readableFile);
 
-    StorageFile file = fileProvider.getReadableFile();
+    StorageFile file = folderManager.getReadableFile();
 
     assertEquals(readableFile, file.file);
   }
@@ -163,14 +163,14 @@ class FileProviderTest {
     File readableFileNewer = new File(rootDir, String.valueOf(newerReadableFileCreationTime));
     createFiles(writableFile, readableFileNewer, readableFileOlder);
 
-    StorageFile file = fileProvider.getReadableFile();
+    StorageFile file = folderManager.getReadableFile();
 
     assertEquals(readableFileOlder, file.file);
   }
 
   @Test
   public void provideNullFileForRead_whenNoFilesAreAvailable() {
-    assertNull(fileProvider.getReadableFile());
+    assertNull(folderManager.getReadableFile());
   }
 
   @Test
@@ -179,7 +179,7 @@ class FileProviderTest {
     File writableFile = new File(rootDir, String.valueOf(currentTime));
     createFiles(writableFile);
 
-    assertNull(fileProvider.getReadableFile());
+    assertNull(folderManager.getReadableFile());
   }
 
   @Test
@@ -192,7 +192,7 @@ class FileProviderTest {
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
 
-    assertNull(fileProvider.getReadableFile());
+    assertNull(folderManager.getReadableFile());
   }
 
   private static void fillWithBytes(File file, int size) throws IOException {
