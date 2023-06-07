@@ -1,7 +1,7 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.ResourceSpansDataMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.spans.ResourceSpansDataMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.spans.ResourceSpansData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;

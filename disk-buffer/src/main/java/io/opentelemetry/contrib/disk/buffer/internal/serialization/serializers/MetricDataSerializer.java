@@ -1,7 +1,7 @@
 package io.opentelemetry.contrib.disk.buffer.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.ResourceMetricsDataMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.Serializer;
+import io.opentelemetry.contrib.disk.buffer.internal.serialization.mapping.metrics.ResourceMetricsDataMapper;
 import io.opentelemetry.contrib.disk.buffer.internal.serialization.models.metrics.ResourceMetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.IOException;
