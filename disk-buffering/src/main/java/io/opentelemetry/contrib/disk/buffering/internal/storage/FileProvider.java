@@ -12,6 +12,8 @@ public final class FileProvider {
   private final File rootDir;
   private final TimeProvider timeProvider;
   private final Configuration configuration;
+  @Nullable private WritableFile currentWritableFile;
+  //  private ReadableFile currentReadableFile;
 
   public FileProvider(File rootDir, TimeProvider timeProvider, Configuration configuration) {
     this.rootDir = rootDir;
@@ -29,19 +31,27 @@ public final class FileProvider {
   }
 
   public synchronized WritableFile getWritableFile() throws IOException {
+    if (currentWritableFile != null) {
+      return currentWritableFile;
+    }
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
-      if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
-        return new WritableFile(existingFile);
+      if (existingFile != null && hasNotReachedMaxSize(existingFile.length())) {
+        return createWritableFile(existingFile);
       }
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
         removeOldestFileIfSpaceIsNeeded(existingFiles);
       }
     }
     File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
-    return new WritableFile(file);
+    return createWritableFile(file);
+  }
+
+  private WritableFile createWritableFile(File existingFile) {
+    currentWritableFile = new WritableFile(existingFile);
+    return currentWritableFile;
   }
 
   @Nullable
@@ -132,7 +142,7 @@ public final class FileProvider {
         < (createdTimeInMillis + configuration.maxFileAgeForWriteInMillis);
   }
 
-  private boolean hasNotReachedMaxSize(File file) {
-    return file.length() < configuration.maxFileSize;
+  private boolean hasNotReachedMaxSize(long fileSize) {
+    return fileSize < configuration.maxFileSize;
   }
 }

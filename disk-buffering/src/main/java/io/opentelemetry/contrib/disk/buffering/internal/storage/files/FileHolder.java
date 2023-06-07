@@ -9,4 +9,6 @@ public abstract class FileHolder implements Closeable {
   public FileHolder(File file) {
     this.file = file;
   }
+
+  public abstract long getSize();
 }

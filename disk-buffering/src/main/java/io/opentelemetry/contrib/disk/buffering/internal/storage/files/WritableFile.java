@@ -8,5 +8,10 @@ public final class WritableFile extends FileHolder {
   }
 
   @Override
+  public long getSize() {
+    return file.length();
+  }
+
+  @Override
   public void close() {}
 }

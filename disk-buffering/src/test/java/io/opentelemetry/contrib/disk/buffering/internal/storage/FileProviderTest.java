@@ -66,6 +66,17 @@ class FileProviderTest {
   }
 
   @Test
+  public void reuseWritableFile_fromMemory() throws IOException {
+    File existingFile = new File(rootDir, "1000");
+    createFiles(existingFile);
+    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
+
+    FileHolder reusedFile = fileProvider.getWritableFile();
+
+    assertEquals(reusedFile, fileProvider.getWritableFile());
+  }
+
+  @Test
   public void createWritableFile_ifExistingOnesAlreadyExpired() throws IOException {
     File existingFile = new File(rootDir, "1000");
     createFiles(existingFile);
