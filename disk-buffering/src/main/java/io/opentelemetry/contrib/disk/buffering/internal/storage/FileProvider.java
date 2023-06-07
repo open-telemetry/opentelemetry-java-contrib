@@ -55,7 +55,8 @@ public final class FileProvider {
     if (existingFiles != null) {
       for (File existingFile : existingFiles) {
         long existingFileCreationTimeMillis = Long.parseLong(existingFile.getName());
-        if (isReadyToBeRead(currentTime, existingFileCreationTimeMillis)) {
+        if (isReadyToBeRead(currentTime, existingFileCreationTimeMillis)
+            && !hasExpiredForReading(currentTime, existingFileCreationTimeMillis)) {
           if (oldestFileAvailable == null
               || existingFileCreationTimeMillis < oldestFileCreationTimeMillis) {
             oldestFileCreationTimeMillis = existingFileCreationTimeMillis;

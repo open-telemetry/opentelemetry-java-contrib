@@ -3,6 +3,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
@@ -112,6 +113,33 @@ class FileProviderTest {
     FileHolder file = fileProvider.getReadableFile();
 
     assertEquals(readableFileOlder, file.getFile());
+  }
+
+  @Test
+  public void provideNullFileForRead_whenNoFilesAreAvailable() {
+    assertNull(fileProvider.getReadableFile());
+  }
+
+  @Test
+  public void provideNullFileForRead_whenOnlyReadableFilesAreAvailable() throws IOException {
+    long currentTime = 1000;
+    File writableFile = new File(rootDir, String.valueOf(currentTime));
+    createFiles(writableFile);
+
+    assertNull(fileProvider.getReadableFile());
+  }
+
+  @Test
+  public void provideNullFileForRead_whenReadableFilesAreExpired() throws IOException {
+    long creationReferenceTime = 1000;
+    File expiredReadableFile1 = new File(rootDir, String.valueOf(creationReferenceTime - 1));
+    File expiredReadableFile2 = new File(rootDir, String.valueOf(creationReferenceTime - 10));
+    createFiles(expiredReadableFile1, expiredReadableFile2);
+    doReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS)
+        .when(timeProvider)
+        .getSystemCurrentTimeMillis();
+
+    assertNull(fileProvider.getReadableFile());
   }
 
   private static void createFiles(File... files) throws IOException {
