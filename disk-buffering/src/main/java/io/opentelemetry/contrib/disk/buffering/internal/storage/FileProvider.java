@@ -35,17 +35,6 @@ public final class FileProvider {
     return new SimpleFileHolder(file);
   }
 
-  private void purgeExpiredFilesIfAny(long currentTimeMillis) {
-    File[] existingFiles = rootDir.listFiles();
-    if (existingFiles != null) {
-      for (File existingFile : existingFiles) {
-        if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
-          existingFile.delete();
-        }
-      }
-    }
-  }
-
   @Nullable
   private File findReadableFile() {
     long currentTime = timeProvider.getSystemCurrentTimeMillis();
@@ -80,6 +69,17 @@ public final class FileProvider {
       }
     }
     return null;
+  }
+
+  private void purgeExpiredFilesIfAny(long currentTimeMillis) {
+    File[] existingFiles = rootDir.listFiles();
+    if (existingFiles != null) {
+      for (File existingFile : existingFiles) {
+        if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+          existingFile.delete();
+        }
+      }
+    }
   }
 
   private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
