@@ -76,7 +76,7 @@ class FileProviderTest {
   public void purgeExpiredForReadFiles_whenCreatingNewOne() throws IOException {
     // Files that cannot be read from are considered fully expired.
     File expiredReadableFile = new File(rootDir, "1000");
-    // Files that cannot be written, but can still be read, aren't expired.
+    // Files that cannot be written, but can still be read, aren't ready to be deleted.
     File expiredWritableFile = new File(rootDir, "10000");
     if (!expiredReadableFile.createNewFile() || !expiredWritableFile.createNewFile()) {
       fail("Could not create temporary files");
