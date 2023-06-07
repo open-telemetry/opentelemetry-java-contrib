@@ -57,9 +57,28 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
           .setTotalRecordedLinks(2)
           .build();
 
+  private static final SpanData SPAN_DATA_WITH_TRACE_STATE =
+      SpanDataImpl.builder()
+          .setResource(TestData.RESOURCE_FULL)
+          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+          .setName("Span name2")
+          .setSpanContext(TestData.SPAN_CONTEXT_WITH_TRACE_STATE)
+          .setParentSpanContext(TestData.PARENT_SPAN_CONTEXT)
+          .setAttributes(TestData.ATTRIBUTES)
+          .setStartEpochNanos(1L)
+          .setEndEpochNanos(2L)
+          .setKind(SpanKind.CLIENT)
+          .setStatus(StatusData.error())
+          .setEvents(Collections.singletonList(EVENT_DATA))
+          .setLinks(Collections.singletonList(LINK_DATA))
+          .setTotalAttributeCount(10)
+          .setTotalRecordedEvents(2)
+          .setTotalRecordedLinks(2)
+          .build();
+
   @Test
   public void verifySerialization() {
-    assertSerialization(SPAN_DATA);
+    assertSerialization(SPAN_DATA, SPAN_DATA_WITH_TRACE_STATE);
   }
 
   @Override

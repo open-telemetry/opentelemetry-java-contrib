@@ -19,6 +19,10 @@ public final class SpanDataJson {
   public String parentSpanId;
 
   @Nullable
+  @JsonAttribute(name = "traceState")
+  public String traceState;
+
+  @Nullable
   @JsonAttribute(name = "name")
   public String name;
 

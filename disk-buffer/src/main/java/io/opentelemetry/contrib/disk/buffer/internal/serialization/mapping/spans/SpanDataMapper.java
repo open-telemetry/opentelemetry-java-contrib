@@ -39,6 +39,7 @@ public abstract class SpanDataMapper {
   @Mapping(target = "droppedAttributesCount", ignore = true)
   @Mapping(target = "droppedEventsCount", ignore = true)
   @Mapping(target = "droppedLinksCount", ignore = true)
+  @Mapping(target = "traceState", ignore = true)
   public abstract SpanDataJson spanDataToJson(SpanData source);
 
   @SpanContextMapping
@@ -47,10 +48,11 @@ public abstract class SpanDataMapper {
   protected abstract LinkDataJson linkDataToJson(LinkData source);
 
   @AfterMapping
-  protected void addDroppedCount(SpanData source, @MappingTarget SpanDataJson target) {
+  protected void addSpanDataJsonExtras(SpanData source, @MappingTarget SpanDataJson target) {
     target.droppedAttributesCount = source.getTotalAttributeCount() - source.getAttributes().size();
     target.droppedEventsCount = source.getTotalRecordedEvents() - getListSize(source.getEvents());
     target.droppedLinksCount = source.getTotalRecordedLinks() - getListSize(source.getLinks());
+    target.traceState = encodeTraceState(source.getSpanContext().getTraceState());
   }
 
   private static int getListSize(List<?> list) {
@@ -63,10 +65,15 @@ public abstract class SpanDataMapper {
   @AfterMapping
   protected void addLinkExtras(LinkData source, @MappingTarget LinkDataJson target) {
     target.droppedAttributesCount = source.getTotalAttributeCount() - source.getAttributes().size();
-    TraceState traceState = source.getSpanContext().getTraceState();
+    target.traceState = encodeTraceState(source.getSpanContext().getTraceState());
+  }
+
+  @Nullable
+  private static String encodeTraceState(TraceState traceState) {
     if (!traceState.isEmpty()) {
-      target.traceState = W3CTraceContextEncoding.encodeTraceState(traceState);
+      return W3CTraceContextEncoding.encodeTraceState(traceState);
     }
+    return null;
   }
 
   protected Integer mapSpanKindToJson(SpanKind value) {
@@ -101,7 +108,7 @@ public abstract class SpanDataMapper {
   protected abstract EventData jsonToEventData(EventDataJson source);
 
   @AfterMapping
-  protected void addSpanDataJsonExtras(
+  protected void addSpanDataExtras(
       SpanDataJson source,
       @MappingTarget SpanDataImpl.Builder target,
       @Context Resource resource,
@@ -112,7 +119,10 @@ public abstract class SpanDataMapper {
       if (source.spanId != null) {
         target.setSpanContext(
             SpanContext.create(
-                source.traceId, source.spanId, TraceFlags.getSampled(), TraceState.getDefault()));
+                source.traceId,
+                source.spanId,
+                TraceFlags.getSampled(),
+                decodeTraceState(source.traceState)));
       }
       if (source.parentSpanId != null) {
         target.setParentSpanContext(
@@ -146,13 +156,19 @@ public abstract class SpanDataMapper {
       LinkDataJson source, @MappingTarget LinkDataImpl.Builder target) {
     target.setTotalAttributeCount(source.droppedAttributesCount + source.attributes.size());
     if (source.traceId != null && source.spanId != null) {
-      TraceState traceState =
-          (source.traceState == null || source.traceState.isEmpty())
-              ? TraceState.getDefault()
-              : W3CTraceContextEncoding.decodeTraceState(source.traceState);
       target.setSpanContext(
-          SpanContext.create(source.traceId, source.spanId, TraceFlags.getSampled(), traceState));
+          SpanContext.create(
+              source.traceId,
+              source.spanId,
+              TraceFlags.getSampled(),
+              decodeTraceState(source.traceState)));
     }
+  }
+
+  private static TraceState decodeTraceState(@Nullable String source) {
+    return (source == null || source.isEmpty())
+        ? TraceState.getDefault()
+        : W3CTraceContextEncoding.decodeTraceState(source);
   }
 
   protected StatusData jsonToStatusData(StatusDataJson source) {
