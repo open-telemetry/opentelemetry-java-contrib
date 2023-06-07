@@ -27,8 +27,20 @@ public class FileProvider {
     if (existingFile != null) {
       return new SimpleFileHolder(existingFile);
     }
+    purgeExpiredFilesIfAny(systemCurrentTimeMillis);
     File file = new File(rootDir, String.valueOf(systemCurrentTimeMillis));
     return new SimpleFileHolder(file);
+  }
+
+  private void purgeExpiredFilesIfAny(long currentTimeMillis) {
+    File[] existingFiles = rootDir.listFiles();
+    if (existingFiles != null) {
+      for (File existingFile : existingFiles) {
+        if (hasExpired(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+          existingFile.delete();
+        }
+      }
+    }
   }
 
   @Nullable
@@ -42,6 +54,10 @@ public class FileProvider {
       }
     }
     return null;
+  }
+
+  private boolean hasExpired(long systemCurrentTimeMillis, long createdTimeInMillis) {
+    return !hasNotExpired(systemCurrentTimeMillis, createdTimeInMillis);
   }
 
   private boolean hasNotExpired(long systemCurrentTimeMillis, long createdTimeInMillis) {
