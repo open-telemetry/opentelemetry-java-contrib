@@ -3,6 +3,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -19,12 +20,21 @@ class FileProviderTest {
   @TempDir File rootDir;
   private FileProvider fileProvider;
   private TimeProvider timeProvider;
-  private static final long MAX_FILE_AGE_MILLIS = 1000;
+  private static final long MAX_FILE_AGE_FOR_WRITE_MILLIS = 1000;
+  private static final long MIN_FILE_AGE_FOR_READ_MILLIS = MAX_FILE_AGE_FOR_WRITE_MILLIS + 500;
+  private static final long MAX_FILE_AGE_FOR_READ_MILLIS = 10_000;
 
   @BeforeEach
   public void setUp() {
     timeProvider = mock();
-    fileProvider = new FileProvider(rootDir, timeProvider, new Configuration(MAX_FILE_AGE_MILLIS));
+    fileProvider =
+        new FileProvider(
+            rootDir,
+            timeProvider,
+            new Configuration(
+                MAX_FILE_AGE_FOR_WRITE_MILLIS,
+                MIN_FILE_AGE_FOR_READ_MILLIS,
+                MAX_FILE_AGE_FOR_READ_MILLIS));
   }
 
   @Test
@@ -63,17 +73,20 @@ class FileProviderTest {
   }
 
   @Test
-  public void purgeExpiredFiles_whenCreatingNewOne() throws IOException {
-    File expiredFile1 = new File(rootDir, "1000");
-    File expiredFile2 = new File(rootDir, "1100");
-    if (!expiredFile1.createNewFile() || !expiredFile2.createNewFile()) {
+  public void purgeExpiredForReadFiles_whenCreatingNewOne() throws IOException {
+    // Files that cannot be read from are considered fully expired.
+    File expiredReadableFile = new File(rootDir, "1000");
+    // Files that cannot be written, but can still be read, aren't expired.
+    File expiredWritableFile = new File(rootDir, "10000");
+    if (!expiredReadableFile.createNewFile() || !expiredWritableFile.createNewFile()) {
       fail("Could not create temporary files");
     }
-    doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    fileProvider.getWritableFile();
+    FileHolder file = fileProvider.getWritableFile();
 
-    assertFalse(expiredFile1.exists());
-    assertFalse(expiredFile2.exists());
+    assertFalse(expiredReadableFile.exists());
+    assertTrue(expiredWritableFile.exists());
+    assertNotEquals(expiredWritableFile, file.getFile());
   }
 }

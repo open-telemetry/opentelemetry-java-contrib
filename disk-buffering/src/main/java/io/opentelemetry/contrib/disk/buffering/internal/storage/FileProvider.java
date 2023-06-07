@@ -36,7 +36,7 @@ public class FileProvider {
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       for (File existingFile : existingFiles) {
-        if (hasExpired(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+        if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
           existingFile.delete();
         }
       }
@@ -48,7 +48,8 @@ public class FileProvider {
     File[] existingFiles = rootDir.listFiles();
     if (existingFiles != null) {
       for (File existingFile : existingFiles) {
-        if (hasNotExpired(systemCurrentTimeMillis, Long.parseLong(existingFile.getName()))) {
+        if (hasNotExpiredForWriting(
+            systemCurrentTimeMillis, Long.parseLong(existingFile.getName()))) {
           return existingFile;
         }
       }
@@ -56,12 +57,14 @@ public class FileProvider {
     return null;
   }
 
-  private boolean hasExpired(long systemCurrentTimeMillis, long createdTimeInMillis) {
-    return !hasNotExpired(systemCurrentTimeMillis, createdTimeInMillis);
+  private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
+    return systemCurrentTimeMillis
+        > (createdTimeInMillis + configuration.maxFileAgeForReadInMillis);
   }
 
-  private boolean hasNotExpired(long systemCurrentTimeMillis, long createdTimeInMillis) {
-    return systemCurrentTimeMillis < (createdTimeInMillis + configuration.maxFileAgeInMillis);
+  private boolean hasNotExpiredForWriting(long systemCurrentTimeMillis, long createdTimeInMillis) {
+    return systemCurrentTimeMillis
+        < (createdTimeInMillis + configuration.maxFileAgeForWriteInMillis);
   }
 
   public static final class SimpleFileHolder implements FileHolder {
