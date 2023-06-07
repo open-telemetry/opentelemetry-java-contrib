@@ -1,7 +1,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import java.io.File;
-import java.io.IOException;
 
 public final class ReadableFile extends FileHolder {
   public ReadableFile(File file) {
@@ -9,5 +8,5 @@ public final class ReadableFile extends FileHolder {
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() {}
 }
