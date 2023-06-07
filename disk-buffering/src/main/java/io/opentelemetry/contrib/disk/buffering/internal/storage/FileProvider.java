@@ -21,7 +21,7 @@ public class FileProvider {
     throw new UnsupportedOperationException();
   }
 
-  public FileHolder getWritableFile() {
+  public synchronized FileHolder getWritableFile() {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File existingFile = findExistingUnexpiredFile(systemCurrentTimeMillis);
     if (existingFile != null) {
