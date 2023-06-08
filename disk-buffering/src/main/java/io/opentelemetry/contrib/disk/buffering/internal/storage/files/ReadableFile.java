@@ -53,6 +53,16 @@ public final class ReadableFile extends StorageFile {
         new BufferedReader(new InputStreamReader(tempInputStream, StandardCharsets.UTF_8));
   }
 
+  /**
+   * Reads the next line available in the file and provides it to a {@link Function consumer} which
+   * will determine whether to remove the provided line or not.
+   *
+   * @param consumer - A function that receives the line that has been read and returns a boolean.
+   *     If the consumer function returns TRUE, then the provided line will be deleted from the
+   *     source file. If the function returns FALSE, no changes will be applied to the source file.
+   * @throws ReadingTimeoutException If the configured reading time for the file has ended.
+   * @throws NoMoreLinesToReadException If there are no more lines to be read from the file.
+   */
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
     if (hasExpired()) {
       throw new ReadingTimeoutException();
