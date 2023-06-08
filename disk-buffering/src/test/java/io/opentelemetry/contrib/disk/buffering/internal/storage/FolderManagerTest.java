@@ -38,20 +38,9 @@ class FolderManagerTest {
   public void createWritableFile_withTimeMillisAsName() throws IOException {
     doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertEquals("1000", file.file.getName());
-  }
-
-  @Test
-  public void reuseWritableFile_whenItHasNotExpired() throws IOException {
-    File existingFile = new File(rootDir, "1000");
-    createFiles(existingFile);
-    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
-
-    StorageFile file = folderManager.getWritableFile();
-
-    assertEquals(existingFile, file.file);
   }
 
   @Test
@@ -60,7 +49,7 @@ class FolderManagerTest {
     createFiles(existingFile);
     doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -72,7 +61,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertNotEquals(existingFile, file.file);
   }
@@ -89,7 +78,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -112,7 +101,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     doReturn(11_000L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertNotEquals(existingFile1, file.file);
     assertNotEquals(existingFile2, file.file);
@@ -131,7 +120,7 @@ class FolderManagerTest {
     createFiles(expiredReadableFile, expiredWritableFile);
     doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
 
-    StorageFile file = folderManager.getWritableFile();
+    StorageFile file = folderManager.createWritableFile();
 
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());

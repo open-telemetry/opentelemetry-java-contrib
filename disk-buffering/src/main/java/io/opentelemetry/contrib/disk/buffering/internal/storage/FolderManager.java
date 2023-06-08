@@ -31,14 +31,10 @@ public final class FolderManager {
     return null;
   }
 
-  public synchronized WritableFile getWritableFile() throws IOException {
+  public synchronized WritableFile createWritableFile() throws IOException {
     long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
-      File existingFile = findExistingWritableFile(existingFiles, systemCurrentTimeMillis);
-      if (existingFile != null && hasNotReachedMaxSize(existingFile)) {
-        return createWritableFile(existingFile);
-      }
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
         removeOldestFileIfSpaceIsNeeded(existingFiles);
       }
@@ -72,17 +68,6 @@ public final class FolderManager {
       }
     }
     return oldestFileAvailable;
-  }
-
-  @Nullable
-  private File findExistingWritableFile(File[] existingFiles, long systemCurrentTimeMillis) {
-    for (File existingFile : existingFiles) {
-      if (hasNotExpiredForWriting(
-          systemCurrentTimeMillis, Long.parseLong(existingFile.getName()))) {
-        return existingFile;
-      }
-    }
-    return null;
   }
 
   private int purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis) {
@@ -133,14 +118,5 @@ public final class FolderManager {
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
     return systemCurrentTimeMillis
         > (createdTimeInMillis + configuration.maxFileAgeForReadInMillis);
-  }
-
-  private boolean hasNotExpiredForWriting(long systemCurrentTimeMillis, long createdTimeInMillis) {
-    return systemCurrentTimeMillis
-        < (createdTimeInMillis + configuration.maxFileAgeForWriteInMillis);
-  }
-
-  private boolean hasNotReachedMaxSize(File file) {
-    return file.length() < configuration.maxFileSize;
   }
 }
