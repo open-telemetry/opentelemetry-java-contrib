@@ -1,6 +1,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-public class Configuration {
+public final class Configuration {
   public final long maxFileAgeForWriteInMillis;
   public final long minFileAgeForReadInMillis;
   public final long maxFileAgeForReadInMillis;

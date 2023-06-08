@@ -2,7 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils;
 
 import java.nio.charset.StandardCharsets;
 
-public class Constants {
+public final class Constants {
 
   public static final byte[] NEW_LINE_BYTES =
       System.lineSeparator().getBytes(StandardCharsets.UTF_8);
