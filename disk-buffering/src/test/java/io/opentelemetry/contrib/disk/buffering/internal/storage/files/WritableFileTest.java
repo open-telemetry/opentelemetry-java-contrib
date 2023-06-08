@@ -28,7 +28,7 @@ class WritableFileTest {
   private static final long CREATED_TIME_MILLIS = 1000L;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     timeProvider = mock();
     writableFile =
         new WritableFile(
@@ -54,7 +54,6 @@ class WritableFileTest {
 
   @Test
   public void appendDataInNewLines() throws IOException {
-    writableFile.open();
     writableFile.append("First line".getBytes(StandardCharsets.UTF_8));
     writableFile.append("Second line".getBytes(StandardCharsets.UTF_8));
     writableFile.close();
@@ -69,7 +68,6 @@ class WritableFileTest {
   @Test
   public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
       throws IOException {
-    writableFile.open();
     writableFile.append(
         new byte[MAX_FILE_SIZE - System.lineSeparator().getBytes(StandardCharsets.UTF_8).length]);
     try {
