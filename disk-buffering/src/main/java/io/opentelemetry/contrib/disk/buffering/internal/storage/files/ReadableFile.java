@@ -2,8 +2,11 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,14 +24,26 @@ public final class ReadableFile extends StorageFile {
   private final BufferedReader bufferedReader;
   private final FileChannel tempInChannel;
   private final File temporaryFile;
+  private final TimeProvider timeProvider;
+  private final long expireTimeMillis;
   private int readBytes = 0;
 
-  public ReadableFile(File file) throws IOException {
-    this(file, TemporaryFileProvider.INSTANCE);
+  public ReadableFile(
+      File file, long createdTimeMillis, TimeProvider timeProvider, Configuration configuration)
+      throws IOException {
+    this(file, createdTimeMillis, timeProvider, configuration, TemporaryFileProvider.INSTANCE);
   }
 
-  public ReadableFile(File file, TemporaryFileProvider temporaryFileProvider) throws IOException {
+  public ReadableFile(
+      File file,
+      long createdTimeMillis,
+      TimeProvider timeProvider,
+      Configuration configuration,
+      TemporaryFileProvider temporaryFileProvider)
+      throws IOException {
     super(file);
+    this.timeProvider = timeProvider;
+    expireTimeMillis = createdTimeMillis + configuration.maxFileAgeForReadInMillis;
     originalFileSize = (int) file.length();
     temporaryFile = temporaryFileProvider.createTemporaryFile();
     Files.copy(file.toPath(), temporaryFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -39,6 +54,9 @@ public final class ReadableFile extends StorageFile {
   }
 
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
+    if (hasExpired()) {
+      throw new ReadingTimeoutException();
+    }
     String lineString = bufferedReader.readLine();
     if (lineString == null) {
       throw new NoMoreLinesToReadException();
@@ -59,7 +77,7 @@ public final class ReadableFile extends StorageFile {
 
   @Override
   public boolean hasExpired() {
-    return false;
+    return timeProvider.getSystemCurrentTimeMillis() >= expireTimeMillis;
   }
 
   @Override

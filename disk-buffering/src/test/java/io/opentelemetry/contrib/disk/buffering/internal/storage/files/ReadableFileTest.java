@@ -1,5 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.CONFIGURATION;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -7,7 +9,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,8 +28,10 @@ class ReadableFileTest {
   private File source;
   private File temporaryFile;
   private ReadableFile readableFile;
+  private TimeProvider timeProvider;
   private static final List<String> LINES =
       Arrays.asList("First line", "Second line", "Third line");
+  private static final long CREATED_TIME_MILLIS = 1000L;
 
   @BeforeEach
   public void setUp() throws IOException {
@@ -34,7 +40,10 @@ class ReadableFileTest {
     Files.write(source.toPath(), LINES);
     TemporaryFileProvider temporaryFileProvider = mock();
     doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile();
-    readableFile = new ReadableFile(source, temporaryFileProvider);
+    timeProvider = mock();
+    readableFile =
+        new ReadableFile(
+            source, CREATED_TIME_MILLIS, timeProvider, CONFIGURATION, temporaryFileProvider);
   }
 
   @Test
@@ -116,6 +125,20 @@ class ReadableFileTest {
       readableFile.readLine(bytes -> true);
       fail();
     } catch (NoMoreLinesToReadException ignored) {
+    }
+  }
+
+  @Test
+  public void whenReadingAfterTheConfiguredReadingTimeExpired_throwException() throws IOException {
+    readableFile.readLine(bytes -> true);
+    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
+        .when(timeProvider)
+        .getSystemCurrentTimeMillis();
+
+    try {
+      readableFile.readLine(bytes -> true);
+      fail();
+    } catch (ReadingTimeoutException ignored) {
     }
   }
 

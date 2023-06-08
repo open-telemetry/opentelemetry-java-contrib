@@ -26,7 +26,8 @@ public final class FolderManager {
   public synchronized ReadableFile getReadableFile() throws IOException {
     File readableFile = findReadableFile();
     if (readableFile != null) {
-      return new ReadableFile(readableFile);
+      return new ReadableFile(
+          readableFile, Long.parseLong(readableFile.getName()), timeProvider, configuration);
     }
     return null;
   }
