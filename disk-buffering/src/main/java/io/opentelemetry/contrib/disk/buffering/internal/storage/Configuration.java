@@ -1,6 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import com.google.auto.value.AutoValue;
+import java.util.concurrent.TimeUnit;
 
 @AutoValue
 public abstract class Configuration {
@@ -14,8 +15,17 @@ public abstract class Configuration {
 
   public abstract int getMaxFolderSize();
 
+  public static Configuration getDefault() {
+    return builder().build();
+  }
+
   public static Builder builder() {
-    return new AutoValue_Configuration.Builder();
+    return new AutoValue_Configuration.Builder()
+        .setMaxFileSize(1024 * 1024) // 1MB
+        .setMaxFolderSize(20 * 1024 * 1024) // 20MB
+        .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(5))
+        .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(6))
+        .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18));
   }
 
   @AutoValue.Builder
