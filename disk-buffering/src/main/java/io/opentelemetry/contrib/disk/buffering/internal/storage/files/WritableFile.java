@@ -32,6 +32,16 @@ public final class WritableFile extends StorageFile {
     out = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
   }
 
+  /**
+   * Adds a new line to the file. If {@link WritingTimeoutException} or {@link
+   * NoSpaceAvailableException} are thrown, the file stream is closed with the contents available in
+   * the buffer before attempting to append the new data.
+   *
+   * @param data - The new data line to add.
+   * @throws IllegalStateException If it's closed.
+   * @throws WritingTimeoutException If the configured writing time for the file has ended.
+   * @throws NoSpaceAvailableException If the configured max file size has been reached.
+   */
   public synchronized void append(byte[] data) throws IOException {
     if (isClosed.get()) {
       throw new IllegalStateException();
