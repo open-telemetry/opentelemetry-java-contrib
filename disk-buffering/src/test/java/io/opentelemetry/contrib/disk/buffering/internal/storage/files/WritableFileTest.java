@@ -1,12 +1,15 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -56,10 +59,28 @@ class WritableFileTest {
     writableFile.append("Second line".getBytes(StandardCharsets.UTF_8));
     writableFile.close();
 
-    List<String> lines = Files.readAllLines(writableFile.file.toPath());
+    List<String> lines = getWrittenLines();
 
     assertEquals(2, lines.size());
     assertEquals("First line", lines.get(0));
     assertEquals("Second line", lines.get(1));
+  }
+
+  @Test
+  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
+      throws IOException {
+    writableFile.open();
+    writableFile.append(
+        new byte[MAX_FILE_SIZE - System.lineSeparator().getBytes(StandardCharsets.UTF_8).length]);
+    try {
+      writableFile.append(new byte[1]);
+      fail();
+    } catch (NoSpaceAvailableException e) {
+      assertEquals(1, getWrittenLines().size());
+    }
+  }
+
+  private List<String> getWrittenLines() throws IOException {
+    return Files.readAllLines(writableFile.file.toPath());
   }
 }

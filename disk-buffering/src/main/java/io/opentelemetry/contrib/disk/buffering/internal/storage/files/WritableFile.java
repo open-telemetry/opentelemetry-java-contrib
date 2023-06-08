@@ -1,6 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -9,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"UnusedVariable", "FieldCanBeLocal"})
 public final class WritableFile extends StorageFile {
   private final Configuration configuration;
   private final TimeProvider timeProvider;
@@ -34,6 +34,10 @@ public final class WritableFile extends StorageFile {
       throw new IllegalStateException();
     }
     int futureSize = size + data.length + newLineBytes.length;
+    if (futureSize > configuration.maxFileSize) {
+      close();
+      throw new NoSpaceAvailableException();
+    }
     out.write(data);
     out.write(newLineBytes);
     size = futureSize;
