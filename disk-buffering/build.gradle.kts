@@ -14,6 +14,11 @@ tasks {
   }
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 val dslJsonVersion = "1.10.0"
 val mapStructVersion = "1.5.5.Final"
 val autovalueVersion = "1.10.1"

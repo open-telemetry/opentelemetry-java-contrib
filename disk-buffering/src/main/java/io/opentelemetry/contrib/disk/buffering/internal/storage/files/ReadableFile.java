@@ -13,9 +13,12 @@ public final class ReadableFile extends StorageFile {
   }
 
   @Override
-  public boolean isValid() {
+  public boolean hasExpired() {
     return true;
   }
+
+  @Override
+  public void open() {}
 
   @Override
   public void close() {}
