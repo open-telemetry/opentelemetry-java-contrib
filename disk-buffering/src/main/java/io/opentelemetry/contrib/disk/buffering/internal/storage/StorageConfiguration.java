@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import java.util.concurrent.TimeUnit;
 
 @AutoValue
-public abstract class Configuration {
+public abstract class StorageConfiguration {
   public abstract long getMaxFileAgeForWriteMillis();
 
   public abstract long getMinFileAgeForReadMillis();
@@ -15,12 +15,12 @@ public abstract class Configuration {
 
   public abstract int getMaxFolderSize();
 
-  public static Configuration getDefault() {
+  public static StorageConfiguration getDefault() {
     return builder().build();
   }
 
   public static Builder builder() {
-    return new AutoValue_Configuration.Builder()
+    return new AutoValue_StorageConfiguration.Builder()
         .setMaxFileSize(1024 * 1024) // 1MB
         .setMaxFolderSize(20 * 1024 * 1024) // 20MB
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(5))
@@ -40,6 +40,6 @@ public abstract class Configuration {
 
     public abstract Builder setMaxFolderSize(int value);
 
-    public abstract Configuration build();
+    public abstract StorageConfiguration build();
   }
 }

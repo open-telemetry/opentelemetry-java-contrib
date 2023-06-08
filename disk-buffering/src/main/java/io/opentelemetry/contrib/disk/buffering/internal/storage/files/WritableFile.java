@@ -2,7 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WritableFile extends StorageFile {
-  private final Configuration configuration;
+  private final StorageConfiguration configuration;
   private final TimeProvider timeProvider;
   private final long expireTimeMillis;
   private final BufferedOutputStream out;
@@ -22,7 +22,7 @@ public final class WritableFile extends StorageFile {
   private int size;
 
   public WritableFile(
-      File file, long createdTimeMillis, Configuration configuration, TimeProvider timeProvider)
+      File file, long createdTimeMillis, StorageConfiguration configuration, TimeProvider timeProvider)
       throws IOException {
     super(file);
     this.configuration = configuration;

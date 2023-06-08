@@ -2,7 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
@@ -32,7 +32,7 @@ public final class ReadableFile extends StorageFile {
   private int readBytes = 0;
 
   public ReadableFile(
-      File file, long createdTimeMillis, TimeProvider timeProvider, Configuration configuration)
+      File file, long createdTimeMillis, TimeProvider timeProvider, StorageConfiguration configuration)
       throws IOException {
     this(file, createdTimeMillis, timeProvider, configuration, TemporaryFileProvider.INSTANCE);
   }
@@ -41,7 +41,7 @@ public final class ReadableFile extends StorageFile {
       File file,
       long createdTimeMillis,
       TimeProvider timeProvider,
-      Configuration configuration,
+      StorageConfiguration configuration,
       TemporaryFileProvider temporaryFileProvider)
       throws IOException {
     super(file);

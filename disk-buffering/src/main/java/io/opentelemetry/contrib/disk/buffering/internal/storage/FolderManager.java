@@ -11,10 +11,10 @@ import javax.annotation.Nullable;
 public final class FolderManager {
   private final File folder;
   private final TimeProvider timeProvider;
-  private final Configuration configuration;
+  private final StorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
 
-  public FolderManager(File folder, TimeProvider timeProvider, Configuration configuration) {
+  public FolderManager(File folder, TimeProvider timeProvider, StorageConfiguration configuration) {
     this.folder = folder;
     this.timeProvider = timeProvider;
     this.configuration = configuration;
