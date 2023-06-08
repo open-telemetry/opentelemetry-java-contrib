@@ -13,4 +13,6 @@ public abstract class StorageFile implements Closeable {
   public abstract long getSize();
 
   public abstract boolean hasExpired();
+
+  public abstract boolean isClosed();
 }

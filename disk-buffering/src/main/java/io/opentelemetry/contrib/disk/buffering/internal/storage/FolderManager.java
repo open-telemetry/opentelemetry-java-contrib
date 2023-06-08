@@ -12,7 +12,7 @@ public final class FolderManager {
   private final File folder;
   private final TimeProvider timeProvider;
   private final Configuration configuration;
-  //  private ReadableFile currentReadableFile;
+  @Nullable private ReadableFile currentReadableFile;
 
   public FolderManager(File folder, TimeProvider timeProvider, Configuration configuration) {
     this.folder = folder;
@@ -22,10 +22,13 @@ public final class FolderManager {
 
   @Nullable
   public synchronized ReadableFile getReadableFile() throws IOException {
+    currentReadableFile = null;
     File readableFile = findReadableFile();
     if (readableFile != null) {
-      return new ReadableFile(
-          readableFile, Long.parseLong(readableFile.getName()), timeProvider, configuration);
+      currentReadableFile =
+          new ReadableFile(
+              readableFile, Long.parseLong(readableFile.getName()), timeProvider, configuration);
+      return currentReadableFile;
     }
     return null;
   }
@@ -64,10 +67,16 @@ public final class FolderManager {
     return oldestFileAvailable;
   }
 
-  private int purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis) {
+  private int purgeExpiredFilesIfAny(File[] existingFiles, long currentTimeMillis)
+      throws IOException {
     int filesDeleted = 0;
     for (File existingFile : existingFiles) {
       if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+        if (currentReadableFile != null) {
+          if (existingFile.equals(currentReadableFile.file)) {
+            currentReadableFile.close();
+          }
+        }
         if (existingFile.delete()) {
           filesDeleted++;
         }

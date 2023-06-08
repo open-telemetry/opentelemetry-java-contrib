@@ -97,6 +97,11 @@ public final class ReadableFile extends StorageFile {
   }
 
   @Override
+  public synchronized boolean isClosed() {
+    return isClosed.get();
+  }
+
+  @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       bufferedReader.close();

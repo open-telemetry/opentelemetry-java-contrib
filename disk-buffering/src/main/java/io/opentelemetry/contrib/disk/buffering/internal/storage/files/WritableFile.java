@@ -70,6 +70,11 @@ public final class WritableFile extends StorageFile {
   }
 
   @Override
+  public synchronized boolean isClosed() {
+    return isClosed.get();
+  }
+
+  @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       out.close();

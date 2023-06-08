@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.StorageFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
@@ -100,6 +101,29 @@ class FolderManagerTest {
     assertFalse(expiredReadableFile.exists());
     assertTrue(expiredWritableFile.exists());
     assertNotEquals(expiredWritableFile, file.file);
+  }
+
+  @Test
+  public void closeExpiredReadableFileInUseIfAny_whenPurgingExpiredForReadFiles_whenCreatingNewOne()
+      throws IOException {
+    File expiredReadableFileBeingRead = new File(rootDir, "900");
+    File expiredReadableFile = new File(rootDir, "1000");
+    File expiredWritableFile = new File(rootDir, "10000");
+    createFiles(expiredReadableFile, expiredWritableFile, expiredReadableFileBeingRead);
+
+    doReturn(900 + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+    ReadableFile readableFile = folderManager.getReadableFile();
+    assertEquals(expiredReadableFileBeingRead, readableFile.file);
+
+    doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
+
+    StorageFile file = folderManager.createWritableFile();
+
+    assertFalse(expiredReadableFile.exists());
+    assertFalse(expiredReadableFileBeingRead.exists());
+    assertTrue(expiredWritableFile.exists());
+    assertNotEquals(expiredWritableFile, file.file);
+    assertTrue(readableFile.isClosed());
   }
 
   @Test
