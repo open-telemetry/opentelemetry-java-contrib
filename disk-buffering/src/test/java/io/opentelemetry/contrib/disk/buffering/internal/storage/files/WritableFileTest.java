@@ -26,6 +26,8 @@ class WritableFileTest {
   private TimeProvider timeProvider;
   private WritableFile writableFile;
   private static final long CREATED_TIME_MILLIS = 1000L;
+  private static final int NEW_LINE_SIZE =
+      System.lineSeparator().getBytes(StandardCharsets.UTF_8).length;
 
   @BeforeEach
   public void setUp() throws IOException {
@@ -53,9 +55,11 @@ class WritableFileTest {
   }
 
   @Test
-  public void appendDataInNewLines() throws IOException {
-    writableFile.append("First line".getBytes(StandardCharsets.UTF_8));
-    writableFile.append("Second line".getBytes(StandardCharsets.UTF_8));
+  public void appendDataInNewLines_andIncreaseSize() throws IOException {
+    byte[] line1 = "First line".getBytes(StandardCharsets.UTF_8);
+    byte[] line2 = "Second line".getBytes(StandardCharsets.UTF_8);
+    writableFile.append(line1);
+    writableFile.append(line2);
     writableFile.close();
 
     List<String> lines = getWrittenLines();
@@ -63,18 +67,19 @@ class WritableFileTest {
     assertEquals(2, lines.size());
     assertEquals("First line", lines.get(0));
     assertEquals("Second line", lines.get(1));
+    assertEquals(line1.length + line2.length + NEW_LINE_SIZE * 2L, writableFile.getSize());
   }
 
   @Test
   public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
       throws IOException {
-    writableFile.append(
-        new byte[MAX_FILE_SIZE - System.lineSeparator().getBytes(StandardCharsets.UTF_8).length]);
+    writableFile.append(new byte[MAX_FILE_SIZE - NEW_LINE_SIZE]);
     try {
       writableFile.append(new byte[1]);
       fail();
     } catch (NoSpaceAvailableException e) {
       assertEquals(1, getWrittenLines().size());
+      assertEquals(MAX_FILE_SIZE, writableFile.getSize());
     }
   }
 
