@@ -1,5 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.Constants.NEW_LINE_BYTES;
+
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
@@ -7,7 +9,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvid
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -15,7 +16,6 @@ public final class WritableFile extends StorageFile {
   private final Configuration configuration;
   private final TimeProvider timeProvider;
   private final long expireTimeMillis;
-  private final byte[] newLineBytes;
   private final BufferedOutputStream out;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int size;
@@ -28,7 +28,6 @@ public final class WritableFile extends StorageFile {
     this.timeProvider = timeProvider;
     expireTimeMillis = createdTimeMillis + configuration.maxFileAgeForWriteInMillis;
     size = (int) file.length();
-    newLineBytes = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
     out = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
   }
 
@@ -50,13 +49,13 @@ public final class WritableFile extends StorageFile {
       close();
       throw new WritingTimeoutException();
     }
-    int futureSize = size + data.length + newLineBytes.length;
+    int futureSize = size + data.length + NEW_LINE_BYTES.length;
     if (futureSize > configuration.maxFileSize) {
       close();
       throw new NoSpaceAvailableException();
     }
     out.write(data);
-    out.write(newLineBytes);
+    out.write(NEW_LINE_BYTES);
     size = futureSize;
   }
 

@@ -2,6 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.Constants.NEW_LINE_BYTES_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,8 +29,6 @@ class WritableFileTest {
   private TimeProvider timeProvider;
   private WritableFile writableFile;
   private static final long CREATED_TIME_MILLIS = 1000L;
-  private static final int NEW_LINE_SIZE =
-      System.lineSeparator().getBytes(StandardCharsets.UTF_8).length;
 
   @BeforeEach
   public void setUp() throws IOException {
@@ -69,13 +68,13 @@ class WritableFileTest {
     assertEquals(2, lines.size());
     assertEquals("First line", lines.get(0));
     assertEquals("Second line", lines.get(1));
-    assertEquals(line1.length + line2.length + NEW_LINE_SIZE * 2L, writableFile.getSize());
+    assertEquals(line1.length + line2.length + NEW_LINE_BYTES_SIZE * 2L, writableFile.getSize());
   }
 
   @Test
   public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
       throws IOException {
-    writableFile.append(new byte[MAX_FILE_SIZE - NEW_LINE_SIZE]);
+    writableFile.append(new byte[MAX_FILE_SIZE - NEW_LINE_BYTES_SIZE]);
     try {
       writableFile.append(new byte[1]);
       fail();
