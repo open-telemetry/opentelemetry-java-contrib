@@ -2,6 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.Constants.NEW_LINE_BYTES_SIZE;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +34,11 @@ public final class ReadableFile extends StorageFile {
   }
 
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
-    byte[] line = bufferedReader.readLine().getBytes(StandardCharsets.UTF_8);
+    String lineString = bufferedReader.readLine();
+    if (lineString == null) {
+      throw new NoMoreLinesToReadException();
+    }
+    byte[] line = lineString.getBytes(StandardCharsets.UTF_8);
     if (consumer.apply(line)) {
       readBytes += line.length + NEW_LINE_BYTES_SIZE;
       try (FileOutputStream out = new FileOutputStream(file, false)) {
