@@ -44,30 +44,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void createWritableFile_ifExistingOnesAlreadyExpired() throws IOException {
-    File existingFile = new File(rootDir, "1000");
-    createFiles(existingFile);
-    doReturn(2500L).when(timeProvider).getSystemCurrentTimeMillis();
-
-    StorageFile file = folderManager.createWritableFile();
-
-    assertNotEquals(existingFile, file.file);
-  }
-
-  @Test
-  public void createWritableFile_whenNonExpiredOneReachedTheSizeLimit() throws IOException {
-    File existingFile = new File(rootDir, "1000");
-    createFiles(existingFile);
-    fillWithBytes(existingFile, MAX_FILE_SIZE);
-    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
-
-    StorageFile file = folderManager.createWritableFile();
-
-    assertNotEquals(existingFile, file.file);
-  }
-
-  @Test
-  public void createWritableFile_andRemoveOldestOne_whenNonExpiredOneReachedTheSizeLimit()
+  public void createWritableFile_andRemoveOldestOne_whenTheAvailableFolderSpaceIsNotEnough()
       throws IOException {
     File existingFile1 = new File(rootDir, "1000");
     File existingFile2 = new File(rootDir, "1400");
@@ -89,9 +66,8 @@ class FolderManagerTest {
   }
 
   @Test
-  public void
-      createWritableFile_andDoNotRemoveOldestOne_whenNonExpiredOneReachedTheSizeLimit_andExpiredFilesArePurged()
-          throws IOException {
+  public void createWritableFile_andDoNotRemoveOldestOne_ifAtLeastOneExpiredFileIsPurged()
+      throws IOException {
     File existingFile1 = new File(rootDir, "1100");
     File existingFile2 = new File(rootDir, "1400");
     File existingFile3 = new File(rootDir, "900");
