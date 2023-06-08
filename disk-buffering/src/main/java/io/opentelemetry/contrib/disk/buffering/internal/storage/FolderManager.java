@@ -23,7 +23,7 @@ public final class FolderManager {
   }
 
   @Nullable
-  public synchronized ReadableFile getReadableFile() {
+  public synchronized ReadableFile getReadableFile() throws IOException {
     File readableFile = findReadableFile();
     if (readableFile != null) {
       return new ReadableFile(readableFile);

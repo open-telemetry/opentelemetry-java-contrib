@@ -134,7 +134,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void provideNullFileForRead_whenNoFilesAreAvailable() {
+  public void provideNullFileForRead_whenNoFilesAreAvailable() throws IOException {
     assertNull(folderManager.getReadableFile());
   }
 
