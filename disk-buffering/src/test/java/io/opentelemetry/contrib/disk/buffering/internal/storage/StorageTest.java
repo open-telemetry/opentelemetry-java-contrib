@@ -12,9 +12,12 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAttemptsReachedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import java.io.IOException;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +28,14 @@ class StorageTest {
   private Storage storage;
   private Function<byte[], Boolean> consumer;
   private ReadableFile readableFile;
+  private WritableFile writableFile;
 
   @BeforeEach
   public void setUp() {
     folderManager = mock();
     consumer = mock();
     readableFile = mock();
+    writableFile = mock();
     storage = new Storage(folderManager);
   }
 
@@ -79,7 +84,8 @@ class StorageTest {
   }
 
   @Test
-  public void whenEveryNewFileFoundCannotBeRead_stopAfterMaxAttempts() throws IOException {
+  public void whenEveryNewFileFoundCannotBeRead_throwExceptionAfterMaxAttempts()
+      throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
     doThrow(StorageClosedException.class).when(readableFile).readLine(consumer);
 
@@ -87,7 +93,73 @@ class StorageTest {
       assertFalse(storage.read(consumer));
       fail();
     } catch (MaxAttemptsReachedException e) {
-      verify(folderManager, times(10)).getReadableFile();
+      verify(folderManager, times(3)).getReadableFile();
+    }
+  }
+
+  @Test
+  public void appendLineToFile() throws IOException {
+    doReturn(writableFile).when(folderManager).createWritableFile();
+    byte[] data = new byte[1];
+
+    storage.write(data);
+
+    verify(writableFile).append(data);
+  }
+
+  @Test
+  public void whenWritingTimeoutExceptionHappens_retryWithNewFile() throws IOException {
+    byte[] data = new byte[1];
+    WritableFile workingWritableFile = mock();
+    when(folderManager.createWritableFile())
+        .thenReturn(writableFile)
+        .thenReturn(workingWritableFile);
+    doThrow(WritingTimeoutException.class).when(writableFile).append(data);
+
+    storage.write(data);
+
+    verify(folderManager, times(2)).createWritableFile();
+  }
+
+  @Test
+  public void whenNoSpaceAvailableExceptionHappens_retryWithNewFile() throws IOException {
+    byte[] data = new byte[1];
+    WritableFile workingWritableFile = mock();
+    when(folderManager.createWritableFile())
+        .thenReturn(writableFile)
+        .thenReturn(workingWritableFile);
+    doThrow(NoSpaceAvailableException.class).when(writableFile).append(data);
+
+    storage.write(data);
+
+    verify(folderManager, times(2)).createWritableFile();
+  }
+
+  @Test
+  public void whenStorageClosedExceptionHappens_retryWithNewFile() throws IOException {
+    byte[] data = new byte[1];
+    WritableFile workingWritableFile = mock();
+    when(folderManager.createWritableFile())
+        .thenReturn(writableFile)
+        .thenReturn(workingWritableFile);
+    doThrow(StorageClosedException.class).when(writableFile).append(data);
+
+    storage.write(data);
+
+    verify(folderManager, times(2)).createWritableFile();
+  }
+
+  @Test
+  public void whenEveryAttemptToWriteFails_throwExceptionAfterMaxAttempts() throws IOException {
+    byte[] data = new byte[1];
+    when(folderManager.createWritableFile()).thenReturn(writableFile);
+    doThrow(StorageClosedException.class).when(writableFile).append(data);
+
+    try {
+      storage.write(data);
+      fail();
+    } catch (MaxAttemptsReachedException e) {
+      verify(folderManager, times(3)).createWritableFile();
     }
   }
 }
