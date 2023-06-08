@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAttemptsReachedException;
@@ -46,6 +47,33 @@ class StorageTest {
     assertTrue(storage.read(consumer));
 
     verify(readableFile).readLine(consumer);
+  }
+
+  @Test
+  public void whenReadingMultipleTimes_reuseReader() throws IOException {
+    ReadableFile anotherReadable = mock();
+    when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
+
+    assertTrue(storage.read(consumer));
+    assertTrue(storage.read(consumer));
+
+    verify(readableFile, times(2)).readLine(consumer);
+    verify(folderManager, times(1)).getReadableFile();
+    verifyNoInteractions(anotherReadable);
+  }
+
+  @Test
+  public void whenWritingMultipleTimes_reuseWriter() throws IOException {
+    byte[] data = new byte[1];
+    WritableFile anotherWriter = mock();
+    when(folderManager.createWritableFile()).thenReturn(writableFile).thenReturn(anotherWriter);
+
+    storage.write(data);
+    storage.write(data);
+
+    verify(writableFile, times(2)).append(data);
+    verify(folderManager, times(1)).createWritableFile();
+    verifyNoInteractions(anotherWriter);
   }
 
   @Test
@@ -181,5 +209,18 @@ class StorageTest {
     } catch (MaxAttemptsReachedException e) {
       verify(folderManager, times(3)).createWritableFile();
     }
+  }
+
+  @Test
+  public void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
+    doReturn(writableFile).when(folderManager).createWritableFile();
+    doReturn(readableFile).when(folderManager).getReadableFile();
+    storage.write(new byte[1]);
+    storage.read(consumer);
+
+    storage.close();
+
+    verify(writableFile).close();
+    verify(readableFile).close();
   }
 }
