@@ -1,22 +1,35 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-public final class Configuration {
-  public final long maxFileAgeForWriteInMillis;
-  public final long minFileAgeForReadInMillis;
-  public final long maxFileAgeForReadInMillis;
-  public final int maxFileSize;
-  public final int maxFolderSize;
+import com.google.auto.value.AutoValue;
 
-  public Configuration(
-      long maxFileAgeForWriteInMillis,
-      long minFileAgeForReadInMillis,
-      long maxFileAgeForReadInMillis,
-      int maxFileSize,
-      int maxFolderSize) {
-    this.maxFileAgeForWriteInMillis = maxFileAgeForWriteInMillis;
-    this.minFileAgeForReadInMillis = minFileAgeForReadInMillis;
-    this.maxFileAgeForReadInMillis = maxFileAgeForReadInMillis;
-    this.maxFileSize = maxFileSize;
-    this.maxFolderSize = maxFolderSize;
+@AutoValue
+public abstract class Configuration {
+  public abstract long getMaxFileAgeForWriteMillis();
+
+  public abstract long getMinFileAgeForReadMillis();
+
+  public abstract long getMaxFileAgeForReadMillis();
+
+  public abstract int getMaxFileSize();
+
+  public abstract int getMaxFolderSize();
+
+  public static Builder builder() {
+    return new AutoValue_Configuration.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setMaxFileAgeForWriteMillis(long value);
+
+    public abstract Builder setMinFileAgeForReadMillis(long value);
+
+    public abstract Builder setMaxFileAgeForReadMillis(long value);
+
+    public abstract Builder setMaxFileSize(int value);
+
+    public abstract Builder setMaxFolderSize(int value);
+
+    public abstract Configuration build();
   }
 }

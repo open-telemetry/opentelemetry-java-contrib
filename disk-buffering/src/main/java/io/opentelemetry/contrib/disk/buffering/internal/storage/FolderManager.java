@@ -112,15 +112,16 @@ public final class FolderManager {
     for (File existingFile : existingFiles) {
       currentFolderSize += (int) existingFile.length();
     }
-    return (currentFolderSize + configuration.maxFileSize) > configuration.maxFolderSize;
+    return (currentFolderSize + configuration.getMaxFileSize()) > configuration.getMaxFolderSize();
   }
 
   private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
-    return currentTimeMillis >= (createdTimeInMillis + configuration.minFileAgeForReadInMillis);
+    return currentTimeMillis
+        >= (createdTimeInMillis + configuration.getMinFileAgeForReadMillis());
   }
 
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
     return systemCurrentTimeMillis
-        > (createdTimeInMillis + configuration.maxFileAgeForReadInMillis);
+        > (createdTimeInMillis + configuration.getMaxFileAgeForReadMillis());
   }
 }

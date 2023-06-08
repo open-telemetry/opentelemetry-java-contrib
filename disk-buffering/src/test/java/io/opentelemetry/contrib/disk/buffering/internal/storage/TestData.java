@@ -8,12 +8,13 @@ public final class TestData {
   public static final int MAX_FILE_SIZE = 100;
   public static final int MAX_FOLDER_SIZE = 300;
   public static final Configuration CONFIGURATION =
-      new Configuration(
-          MAX_FILE_AGE_FOR_WRITE_MILLIS,
-          MIN_FILE_AGE_FOR_READ_MILLIS,
-          MAX_FILE_AGE_FOR_READ_MILLIS,
-          MAX_FILE_SIZE,
-          MAX_FOLDER_SIZE);
+      Configuration.builder()
+          .setMaxFileAgeForWriteMillis(MAX_FILE_AGE_FOR_WRITE_MILLIS)
+          .setMinFileAgeForReadMillis(MIN_FILE_AGE_FOR_READ_MILLIS)
+          .setMaxFileAgeForReadMillis(MAX_FILE_AGE_FOR_READ_MILLIS)
+          .setMaxFileSize(MAX_FILE_SIZE)
+          .setMaxFolderSize(MAX_FOLDER_SIZE)
+          .build();
 
   private TestData() {}
 }

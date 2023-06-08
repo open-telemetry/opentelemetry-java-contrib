@@ -27,7 +27,7 @@ public final class WritableFile extends StorageFile {
     super(file);
     this.configuration = configuration;
     this.timeProvider = timeProvider;
-    expireTimeMillis = createdTimeMillis + configuration.maxFileAgeForWriteInMillis;
+    expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
     size = (int) file.length();
     out = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
   }
@@ -51,7 +51,7 @@ public final class WritableFile extends StorageFile {
       throw new WritingTimeoutException();
     }
     int futureSize = size + data.length + NEW_LINE_BYTES.length;
-    if (futureSize > configuration.maxFileSize) {
+    if (futureSize > configuration.getMaxFileSize()) {
       close();
       throw new NoSpaceAvailableException();
     }
