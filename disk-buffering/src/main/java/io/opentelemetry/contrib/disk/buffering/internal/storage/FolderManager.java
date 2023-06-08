@@ -40,11 +40,7 @@ public final class FolderManager {
       }
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
-    return createWritableFile(file);
-  }
-
-  private WritableFile createWritableFile(File existingFile) {
-    currentWritableFile = new WritableFile(existingFile, configuration, timeProvider);
+    currentWritableFile = new WritableFile(file, configuration, timeProvider);
     return currentWritableFile;
   }
 
@@ -84,7 +80,7 @@ public final class FolderManager {
 
   private void removeOldestFileIfSpaceIsNeeded(File[] existingFiles) throws IOException {
     if (existingFiles.length > 0) {
-      if (neededToClearSpaceForNewFile(existingFiles)) {
+      if (isNeededToClearSpaceForNewFile(existingFiles)) {
         File oldest = getOldest(existingFiles);
         if (!oldest.delete()) {
           throw new IOException("Could not delete the file: " + oldest);
@@ -103,7 +99,7 @@ public final class FolderManager {
     return Objects.requireNonNull(oldest);
   }
 
-  private boolean neededToClearSpaceForNewFile(File[] existingFiles) {
+  private boolean isNeededToClearSpaceForNewFile(File[] existingFiles) {
     int currentFolderSize = 0;
     for (File existingFile : existingFiles) {
       currentFolderSize += (int) existingFile.length();
