@@ -4,7 +4,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.uti
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.BufferedOutputStream;
@@ -38,13 +38,13 @@ public final class WritableFile extends StorageFile {
    * the buffer before attempting to append the new data.
    *
    * @param data - The new data line to add.
-   * @throws StorageClosedException If it's closed.
+   * @throws ResourceClosedException If it's closed.
    * @throws WritingTimeoutException If the configured writing time for the file has ended.
    * @throws NoSpaceAvailableException If the configured max file size has been reached.
    */
   public synchronized void append(byte[] data) throws IOException {
     if (isClosed.get()) {
-      throw new StorageClosedException();
+      throw new ResourceClosedException();
     }
     if (hasExpired()) {
       close();

@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
@@ -107,7 +107,7 @@ class WritableFileTest {
     try {
       writableFile.append(new byte[2]);
       fail();
-    } catch (StorageClosedException ignored) {
+    } catch (ResourceClosedException ignored) {
     }
   }
 

@@ -4,12 +4,13 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAt
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
@@ -18,6 +19,7 @@ public final class Storage implements Closeable {
   @Nullable private WritableFile writableFile;
   @Nullable private ReadableFile readableFile;
   private static final int MAX_ATTEMPTS = 3;
+  private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
   public Storage(FolderManager folderManager) {
     this.folderManager = folderManager;
@@ -28,6 +30,7 @@ public final class Storage implements Closeable {
    *
    * @param line - The data that would be appended to the file.
    * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
+   * @throws ResourceClosedException If it's closed.
    * @throws IOException If an unexpected error happens.
    */
   public void write(byte[] line) throws IOException {
@@ -35,6 +38,9 @@ public final class Storage implements Closeable {
   }
 
   private void write(byte[] line, int attemptNumber) throws IOException {
+    if (isClosed.get()) {
+      throw new ResourceClosedException();
+    }
     if (attemptNumber > MAX_ATTEMPTS) {
       throw new MaxAttemptsReachedException();
     }
@@ -43,7 +49,7 @@ public final class Storage implements Closeable {
     }
     try {
       writableFile.append(line);
-    } catch (WritingTimeoutException | NoSpaceAvailableException | StorageClosedException e) {
+    } catch (WritingTimeoutException | NoSpaceAvailableException | ResourceClosedException e) {
       // Retry with new file
       writableFile = null;
       write(line, ++attemptNumber);
@@ -56,6 +62,7 @@ public final class Storage implements Closeable {
    * @param consumer Is passed over to {@link ReadableFile#readLine(Function)}.
    * @return TRUE if data was found and read, FALSE if there is no data available to read.
    * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
+   * @throws ResourceClosedException If it's closed.
    * @throws IOException If an unexpected error happens.
    */
   public boolean read(Function<byte[], Boolean> consumer) throws IOException {
@@ -63,6 +70,9 @@ public final class Storage implements Closeable {
   }
 
   private boolean read(Function<byte[], Boolean> consumer, int attemptNumber) throws IOException {
+    if (isClosed.get()) {
+      throw new ResourceClosedException();
+    }
     if (attemptNumber > MAX_ATTEMPTS) {
       throw new MaxAttemptsReachedException();
     }
@@ -75,7 +85,7 @@ public final class Storage implements Closeable {
     try {
       readableFile.readLine(consumer);
       return true;
-    } catch (ReadingTimeoutException | NoMoreLinesToReadException | StorageClosedException e) {
+    } catch (ReadingTimeoutException | NoMoreLinesToReadException | ResourceClosedException e) {
       // Retry with new file
       readableFile = null;
       return read(consumer, ++attemptNumber);
@@ -84,11 +94,13 @@ public final class Storage implements Closeable {
 
   @Override
   public void close() throws IOException {
-    if (writableFile != null) {
-      writableFile.close();
-    }
-    if (readableFile != null) {
-      readableFile.close();
+    if (isClosed.compareAndSet(false, true)) {
+      if (writableFile != null) {
+        writableFile.close();
+      }
+      if (readableFile != null) {
+        readableFile.close();
+      }
     }
   }
 }

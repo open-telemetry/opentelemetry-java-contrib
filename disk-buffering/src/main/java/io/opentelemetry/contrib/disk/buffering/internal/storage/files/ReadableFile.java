@@ -5,7 +5,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.uti
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.BufferedReader;
@@ -65,11 +65,11 @@ public final class ReadableFile extends StorageFile {
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    * @throws ReadingTimeoutException If the configured reading time for the file has ended.
    * @throws NoMoreLinesToReadException If there are no more lines to be read from the file.
-   * @throws StorageClosedException If it's closed.
+   * @throws ResourceClosedException If it's closed.
    */
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
     if (isClosed.get()) {
-      throw new StorageClosedException();
+      throw new ResourceClosedException();
     }
     if (hasExpired()) {
       throw new ReadingTimeoutException();

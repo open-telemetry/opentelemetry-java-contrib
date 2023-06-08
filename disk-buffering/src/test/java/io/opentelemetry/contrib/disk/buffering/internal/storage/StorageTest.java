@@ -14,7 +14,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAt
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
@@ -49,6 +49,26 @@ class StorageTest {
   }
 
   @Test
+  public void whenAttemptingToReadAfterClosed_throwException() throws IOException {
+    storage.close();
+    try {
+      storage.read(consumer);
+      fail();
+    } catch (ResourceClosedException ignored) {
+    }
+  }
+
+  @Test
+  public void whenAttemptingToWriteAfterClosed_throwException() throws IOException {
+    storage.close();
+    try {
+      storage.write(new byte[1]);
+      fail();
+    } catch (ResourceClosedException ignored) {
+    }
+  }
+
+  @Test
   public void whenNoFileAvailableForReading_returnFalse() throws IOException {
     assertFalse(storage.read(consumer));
   }
@@ -74,9 +94,9 @@ class StorageTest {
   }
 
   @Test
-  public void whenStorageClosedExceptionHappens_lookForNewFileToRead() throws IOException {
+  public void whenResourceClosedExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(StorageClosedException.class).when(readableFile).readLine(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readLine(consumer);
 
     assertFalse(storage.read(consumer));
 
@@ -87,7 +107,7 @@ class StorageTest {
   public void whenEveryNewFileFoundCannotBeRead_throwExceptionAfterMaxAttempts()
       throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doThrow(StorageClosedException.class).when(readableFile).readLine(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readLine(consumer);
 
     try {
       assertFalse(storage.read(consumer));
@@ -136,13 +156,13 @@ class StorageTest {
   }
 
   @Test
-  public void whenStorageClosedExceptionHappens_retryWithNewFile() throws IOException {
+  public void whenResourceClosedExceptionHappens_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
     WritableFile workingWritableFile = mock();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doThrow(StorageClosedException.class).when(writableFile).append(data);
+    doThrow(ResourceClosedException.class).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -153,7 +173,7 @@ class StorageTest {
   public void whenEveryAttemptToWriteFails_throwExceptionAfterMaxAttempts() throws IOException {
     byte[] data = new byte[1];
     when(folderManager.createWritableFile()).thenReturn(writableFile);
-    doThrow(StorageClosedException.class).when(writableFile).append(data);
+    doThrow(ResourceClosedException.class).when(writableFile).append(data);
 
     try {
       storage.write(data);
