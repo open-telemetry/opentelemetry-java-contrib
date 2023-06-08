@@ -66,6 +66,30 @@ class FolderManagerTest {
   }
 
   @Test
+  public void
+      closeCurrentlyReadableFileIfAny_whenItIsTheOldestOne_andRemoveIt_whenTheAvailableFolderSpaceIsNotEnough()
+          throws IOException {
+    File existingFile1 = new File(rootDir, "1000");
+    File existingFile2 = new File(rootDir, "1400");
+    File existingFile3 = new File(rootDir, "1100");
+    createFiles(existingFile3, existingFile2, existingFile1);
+    fillWithBytes(existingFile1, MAX_FILE_SIZE);
+    fillWithBytes(existingFile2, MAX_FILE_SIZE);
+    fillWithBytes(existingFile3, MAX_FILE_SIZE);
+    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+
+    ReadableFile readableFile = folderManager.getReadableFile();
+    assertEquals(existingFile1, readableFile.file);
+
+    folderManager.createWritableFile();
+
+    assertTrue(existingFile2.exists());
+    assertTrue(existingFile3.exists());
+    assertFalse(existingFile1.exists());
+    assertTrue(readableFile.isClosed());
+  }
+
+  @Test
   public void createWritableFile_andDoNotRemoveOldestOne_ifAtLeastOneExpiredFileIsPurged()
       throws IOException {
     File existingFile1 = new File(rootDir, "1100");

@@ -72,10 +72,8 @@ public final class FolderManager {
     int filesDeleted = 0;
     for (File existingFile : existingFiles) {
       if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
-        if (currentReadableFile != null) {
-          if (existingFile.equals(currentReadableFile.file)) {
-            currentReadableFile.close();
-          }
+        if (currentReadableFile != null && existingFile.equals(currentReadableFile.file)) {
+          currentReadableFile.close();
         }
         if (existingFile.delete()) {
           filesDeleted++;
@@ -89,6 +87,9 @@ public final class FolderManager {
     if (existingFiles.length > 0) {
       if (isNeededToClearSpaceForNewFile(existingFiles)) {
         File oldest = getOldest(existingFiles);
+        if (currentReadableFile != null && oldest.equals(currentReadableFile.file)) {
+          currentReadableFile.close();
+        }
         if (!oldest.delete()) {
           throw new IOException("Could not delete the file: " + oldest);
         }
