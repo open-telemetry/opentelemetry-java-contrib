@@ -1,6 +1,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.Constants.NEW_LINE_BYTES;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;

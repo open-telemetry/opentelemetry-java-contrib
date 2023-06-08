@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
+package io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils;
 
 import java.nio.charset.StandardCharsets;
 

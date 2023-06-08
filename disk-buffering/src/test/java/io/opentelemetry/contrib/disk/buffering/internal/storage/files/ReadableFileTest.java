@@ -1,9 +1,13 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +22,7 @@ class ReadableFileTest {
 
   @TempDir File dir;
   private File source;
+  private File temporaryFile;
   private ReadableFile readableFile;
   private static final List<String> LINES =
       Arrays.asList("First line", "Second line", "Third line");
@@ -25,8 +30,11 @@ class ReadableFileTest {
   @BeforeEach
   public void setUp() throws IOException {
     source = new File(dir, "sourceFile");
+    temporaryFile = new File(dir, "temporaryFile");
     Files.write(source.toPath(), LINES);
-    readableFile = new ReadableFile(source);
+    TemporaryFileProvider temporaryFileProvider = mock();
+    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile();
+    readableFile = new ReadableFile(source, temporaryFileProvider);
   }
 
   @Test
@@ -43,6 +51,19 @@ class ReadableFileTest {
     assertEquals(2, sourceLines.size());
     assertEquals("Second line", sourceLines.get(0));
     assertEquals("Third line", sourceLines.get(1));
+  }
+
+  @Test
+  public void deleteTemporaryFileWhenClosing() throws IOException {
+    readableFile.readLine(
+        bytes -> {
+          String lineRead = new String(bytes, StandardCharsets.UTF_8);
+          assertEquals("First line", lineRead);
+          return true;
+        });
+    readableFile.close();
+
+    assertFalse(temporaryFile.exists());
   }
 
   @Test
@@ -82,7 +103,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenNoMoreFilesAvailableToRead_throwException() throws IOException {
+  public void whenNoMoreLinesAvailableToRead_throwException() throws IOException {
     for (String line : LINES) {
       readableFile.readLine(
           bytes -> {
@@ -95,7 +116,6 @@ class ReadableFileTest {
       readableFile.readLine(bytes -> true);
       fail();
     } catch (NoMoreLinesToReadException ignored) {
-
     }
   }
 
