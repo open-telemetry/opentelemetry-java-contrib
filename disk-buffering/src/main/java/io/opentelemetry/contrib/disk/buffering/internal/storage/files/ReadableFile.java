@@ -17,6 +17,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public final class ReadableFile extends StorageFile {
@@ -26,6 +27,7 @@ public final class ReadableFile extends StorageFile {
   private final File temporaryFile;
   private final TimeProvider timeProvider;
   private final long expireTimeMillis;
+  private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int readBytes = 0;
 
   public ReadableFile(
@@ -62,8 +64,12 @@ public final class ReadableFile extends StorageFile {
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    * @throws ReadingTimeoutException If the configured reading time for the file has ended.
    * @throws NoMoreLinesToReadException If there are no more lines to be read from the file.
+   * @throws IllegalStateException If it's closed.
    */
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
+    if (isClosed.get()) {
+      throw new IllegalStateException();
+    }
     if (hasExpired()) {
       throw new ReadingTimeoutException();
     }
@@ -86,13 +92,15 @@ public final class ReadableFile extends StorageFile {
   }
 
   @Override
-  public boolean hasExpired() {
+  public synchronized boolean hasExpired() {
     return timeProvider.getSystemCurrentTimeMillis() >= expireTimeMillis;
   }
 
   @Override
   public synchronized void close() throws IOException {
-    bufferedReader.close();
-    temporaryFile.delete();
+    if (isClosed.compareAndSet(false, true)) {
+      bufferedReader.close();
+      temporaryFile.delete();
+    }
   }
 }

@@ -142,6 +142,18 @@ class ReadableFileTest {
     }
   }
 
+  @Test
+  public void whenReadingAfterClosed_throwException() throws IOException {
+    readableFile.readLine(bytes -> true);
+    readableFile.close();
+
+    try {
+      readableFile.readLine(bytes -> true);
+      fail();
+    } catch (IllegalStateException ignored) {
+    }
+  }
+
   private List<String> getSourceLines() throws IOException {
     return Files.readAllLines(source.toPath());
   }
