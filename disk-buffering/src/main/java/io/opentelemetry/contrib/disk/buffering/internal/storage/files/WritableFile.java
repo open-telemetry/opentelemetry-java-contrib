@@ -2,12 +2,14 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Configuration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WritableFile extends StorageFile {
   private final Configuration configuration;
@@ -15,6 +17,7 @@ public final class WritableFile extends StorageFile {
   private final long expireTimeMillis;
   private final byte[] newLineBytes;
   private final BufferedOutputStream out;
+  private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int size;
 
   public WritableFile(
@@ -30,6 +33,13 @@ public final class WritableFile extends StorageFile {
   }
 
   public synchronized void append(byte[] data) throws IOException {
+    if (isClosed.get()) {
+      throw new IllegalStateException();
+    }
+    if (hasExpired()) {
+      close();
+      throw new WritingTimeoutException();
+    }
     int futureSize = size + data.length + newLineBytes.length;
     if (futureSize > configuration.maxFileSize) {
       close();
@@ -52,6 +62,8 @@ public final class WritableFile extends StorageFile {
 
   @Override
   public synchronized void close() throws IOException {
-    out.close();
+    if (isClosed.compareAndSet(false, true)) {
+      out.close();
+    }
   }
 }

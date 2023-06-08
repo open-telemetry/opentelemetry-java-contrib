@@ -1,5 +1,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +82,32 @@ class WritableFileTest {
     } catch (NoSpaceAvailableException e) {
       assertEquals(1, getWrittenLines().size());
       assertEquals(MAX_FILE_SIZE, writableFile.getSize());
+    }
+  }
+
+  @Test
+  public void whenAppendingData_andHasExpired_closeAndThrowException() throws IOException {
+    writableFile.append(new byte[2]);
+    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS)
+        .when(timeProvider)
+        .getSystemCurrentTimeMillis();
+    try {
+      writableFile.append(new byte[1]);
+      fail();
+    } catch (WritingTimeoutException e) {
+      assertEquals(1, getWrittenLines().size());
+    }
+  }
+
+  @Test
+  public void whenAppendingData_andIsAlreadyClosed_throwException() throws IOException {
+    writableFile.append(new byte[1]);
+    writableFile.close();
+
+    try {
+      writableFile.append(new byte[2]);
+      fail();
+    } catch (IllegalStateException ignored) {
     }
   }
 
