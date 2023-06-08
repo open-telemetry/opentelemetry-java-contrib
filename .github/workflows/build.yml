@@ -29,6 +29,8 @@ jobs:
         with:
           arguments: build -x test
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
   test:
     name: test (${{ matrix.test-java-version }})
@@ -67,6 +69,8 @@ jobs:
             -Porg.gradle.java.installations.paths=${{ steps.setup-test-java.outputs.path }}
             -Porg.gradle.java.installations.auto-download=false
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
   integration-test:
     runs-on: ubuntu-latest
@@ -84,6 +88,8 @@ jobs:
         with:
           arguments: integrationTest
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
       - name: Save integration test results
         uses: actions/upload-artifact@v3
