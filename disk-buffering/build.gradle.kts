@@ -31,4 +31,5 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value:$autovalueVersion")
   annotationProcessor("com.dslplatform:dsl-json-java8:$dslJsonVersion")
   annotationProcessor("org.mapstruct:mapstruct-processor:$mapStructVersion")
+  testImplementation("org.mockito:mockito-inline:4.11.0")
 }

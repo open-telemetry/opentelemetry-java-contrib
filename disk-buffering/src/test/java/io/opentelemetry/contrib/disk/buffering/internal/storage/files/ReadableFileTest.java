@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.StorageClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
@@ -150,7 +151,7 @@ class ReadableFileTest {
     try {
       readableFile.readLine(bytes -> true);
       fail();
-    } catch (IllegalStateException ignored) {
+    } catch (StorageClosedException ignored) {
     }
   }
 
