@@ -8,7 +8,7 @@ public class TemporaryFileProvider {
 
   private TemporaryFileProvider() {}
 
-  public File createTemporaryFile() throws IOException {
-    return File.createTempFile("", "");
+  public File createTemporaryFile(String prefix) throws IOException {
+    return File.createTempFile(prefix + "_", ".tmp");
   }
 }

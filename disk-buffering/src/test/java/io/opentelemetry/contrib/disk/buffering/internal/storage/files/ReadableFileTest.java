@@ -39,7 +39,7 @@ class ReadableFileTest {
     temporaryFile = new File(dir, "temporaryFile");
     Files.write(source.toPath(), LINES);
     TemporaryFileProvider temporaryFileProvider = mock();
-    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile();
+    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile("sourceFile");
     timeProvider = mock();
     readableFile =
         new ReadableFile(

@@ -8,12 +8,10 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("FieldCanBeLocal") // todo delete
 public final class FolderManager {
   private final File folder;
   private final TimeProvider timeProvider;
   private final Configuration configuration;
-  @Nullable private WritableFile currentWritableFile;
   //  private ReadableFile currentReadableFile;
 
   public FolderManager(File folder, TimeProvider timeProvider, Configuration configuration) {
@@ -41,9 +39,7 @@ public final class FolderManager {
       }
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
-    currentWritableFile =
-        new WritableFile(file, systemCurrentTimeMillis, configuration, timeProvider);
-    return currentWritableFile;
+    return new WritableFile(file, systemCurrentTimeMillis, configuration, timeProvider);
   }
 
   @Nullable

@@ -45,7 +45,7 @@ public final class ReadableFile extends StorageFile {
     this.timeProvider = timeProvider;
     expireTimeMillis = createdTimeMillis + configuration.maxFileAgeForReadInMillis;
     originalFileSize = (int) file.length();
-    temporaryFile = temporaryFileProvider.createTemporaryFile();
+    temporaryFile = temporaryFileProvider.createTemporaryFile(file.getName());
     Files.copy(file.toPath(), temporaryFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     FileInputStream tempInputStream = new FileInputStream(temporaryFile);
     tempInChannel = tempInputStream.getChannel();
