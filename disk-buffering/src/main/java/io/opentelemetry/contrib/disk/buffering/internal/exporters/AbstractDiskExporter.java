@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
