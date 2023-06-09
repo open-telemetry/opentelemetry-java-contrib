@@ -1,5 +1,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface SignalSerializer<SDK_ITEM> {
@@ -16,7 +17,7 @@ public interface SignalSerializer<SDK_ITEM> {
     return LogRecordDataSerializer.get();
   }
 
-  byte[] serialize(List<SDK_ITEM> items);
+  byte[] serialize(Collection<SDK_ITEM> items);
 
   List<SDK_ITEM> deserialize(byte[] source);
 }

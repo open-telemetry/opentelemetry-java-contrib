@@ -4,6 +4,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.sp
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.spans.ResourceSpansData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -20,7 +21,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   }
 
   @Override
-  public byte[] serialize(List<SpanData> spanData) {
+  public byte[] serialize(Collection<SpanData> spanData) {
     try {
       return JsonSerializer.serialize(ResourceSpansDataMapper.INSTANCE.toJsonDto(spanData));
     } catch (IOException e) {

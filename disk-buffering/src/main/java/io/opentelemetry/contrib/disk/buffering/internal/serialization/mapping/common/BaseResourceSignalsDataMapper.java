@@ -22,7 +22,7 @@ public abstract class BaseResourceSignalsDataMapper<
     JSON_RESOURCE extends ResourceSignals<JSON_SCOPE>,
     JSON_RESOURCE_DATA extends ResourceSignalsData<JSON_RESOURCE>> {
 
-  public JSON_RESOURCE_DATA toJsonDto(List<SDK_ITEM> sourceItems) {
+  public JSON_RESOURCE_DATA toJsonDto(Collection<SDK_ITEM> sourceItems) {
     Map<Resource, JSON_RESOURCE> itemsByResourceAndScope = new HashMap<>();
     Map<InstrumentationScopeInfo, JSON_SCOPE> scopeInfoToScopeSignals = new HashMap<>();
     sourceItems.forEach(

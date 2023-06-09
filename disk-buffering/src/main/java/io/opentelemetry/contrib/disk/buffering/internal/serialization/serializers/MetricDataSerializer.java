@@ -4,6 +4,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.ResourceMetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -20,7 +21,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   }
 
   @Override
-  public byte[] serialize(List<MetricData> metricData) {
+  public byte[] serialize(Collection<MetricData> metricData) {
     try {
       return JsonSerializer.serialize(ResourceMetricsDataMapper.INSTANCE.toJsonDto(metricData));
     } catch (IOException e) {

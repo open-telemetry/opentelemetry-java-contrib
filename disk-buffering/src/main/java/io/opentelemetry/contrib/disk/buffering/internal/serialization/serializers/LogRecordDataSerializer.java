@@ -4,6 +4,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.lo
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.logs.ResourceLogsData;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -20,7 +21,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   }
 
   @Override
-  public byte[] serialize(List<LogRecordData> logRecordData) {
+  public byte[] serialize(Collection<LogRecordData> logRecordData) {
     try {
       return JsonSerializer.serialize(ResourceLogsDataMapper.INSTANCE.toJsonDto(logRecordData));
     } catch (IOException e) {

@@ -14,10 +14,14 @@ public final class FolderManager {
   private final StorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
 
-  public FolderManager(File folder, TimeProvider timeProvider, StorageConfiguration configuration) {
+  public FolderManager(File folder, StorageConfiguration configuration) {
+    this(folder, configuration, TimeProvider.get());
+  }
+
+  public FolderManager(File folder, StorageConfiguration configuration, TimeProvider timeProvider) {
     this.folder = folder;
-    this.timeProvider = timeProvider;
     this.configuration = configuration;
+    this.timeProvider = timeProvider;
   }
 
   @Nullable
@@ -116,8 +120,7 @@ public final class FolderManager {
   }
 
   private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
-    return currentTimeMillis
-        >= (createdTimeInMillis + configuration.getMinFileAgeForReadMillis());
+    return currentTimeMillis >= (createdTimeInMillis + configuration.getMinFileAgeForReadMillis());
   }
 
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
