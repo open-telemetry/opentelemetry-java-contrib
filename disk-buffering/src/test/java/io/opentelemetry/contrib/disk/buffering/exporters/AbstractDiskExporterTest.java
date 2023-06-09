@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageConfiguration;
@@ -87,6 +89,27 @@ class AbstractDiskExporterTest {
       fail();
     } catch (ResourceClosedException ignored) {
     }
+  }
+
+  @Test
+  public void whenWritingSucceedsOnExport_returnSuccessfulResultCode() {
+    doReturn(new byte[2]).when(serializer).serialize(deserializedData);
+
+    CompletableResultCode completableResultCode = exporter.onExport(deserializedData);
+
+    assertTrue(completableResultCode.isSuccess());
+    verifyNoInteractions(wrapped);
+  }
+
+  @Test
+  public void whenWritingFailsOnExport_doExportRightAway() throws IOException {
+    doReturn(CompletableResultCode.ofSuccess()).when(wrapped).export(deserializedData);
+    exporter.onShutDown();
+
+    CompletableResultCode completableResultCode = exporter.onExport(deserializedData);
+
+    assertTrue(completableResultCode.isSuccess());
+    verify(wrapped).export(deserializedData);
   }
 
   private File createDummyFile(long createdTimeMillis, String... lines) throws IOException {
