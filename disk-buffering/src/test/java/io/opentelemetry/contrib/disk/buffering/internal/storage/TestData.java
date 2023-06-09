@@ -1,5 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
+
 public final class TestData {
 
   public static final long MAX_FILE_AGE_FOR_WRITE_MILLIS = 1000;

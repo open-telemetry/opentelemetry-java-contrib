@@ -1,4 +1,4 @@
-package io.opentelemetry.contrib.disk.buffering.internal.storage;
+package io.opentelemetry.contrib.disk.buffering.storage;
 
 import com.google.auto.value.AutoValue;
 import java.util.concurrent.TimeUnit;

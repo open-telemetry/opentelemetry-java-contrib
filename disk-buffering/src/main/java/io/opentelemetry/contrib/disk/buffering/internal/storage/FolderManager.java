@@ -3,6 +3,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
