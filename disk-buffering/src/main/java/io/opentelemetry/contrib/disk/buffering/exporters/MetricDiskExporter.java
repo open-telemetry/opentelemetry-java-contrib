@@ -43,7 +43,7 @@ public final class MetricDiskExporter extends AbstractDiskExporter<MetricData>
 
   @Override
   public CompletableResultCode flush() {
-    return CompletableResultCode.ofSuccess();
+    return wrapped.flush();
   }
 
   @Override

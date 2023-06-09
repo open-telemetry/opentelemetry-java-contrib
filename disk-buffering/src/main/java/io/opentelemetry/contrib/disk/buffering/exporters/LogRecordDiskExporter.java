@@ -41,7 +41,7 @@ public final class LogRecordDiskExporter extends AbstractDiskExporter<LogRecordD
 
   @Override
   public CompletableResultCode flush() {
-    return CompletableResultCode.ofSuccess();
+    return wrapped.flush();
   }
 
   @Override

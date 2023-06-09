@@ -51,6 +51,6 @@ public final class SpanDiskExporter extends AbstractDiskExporter<SpanData> imple
 
   @Override
   public CompletableResultCode flush() {
-    return CompletableResultCode.ofSuccess();
+    return wrapped.flush();
   }
 }
