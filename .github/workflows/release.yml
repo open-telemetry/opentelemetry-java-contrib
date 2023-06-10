@@ -56,7 +56,6 @@ jobs:
       - integration-test
     outputs:
       version: ${{ steps.create-github-release.outputs.version }}
-      jmx-metrics-version: ${{ steps.create-github-release.outputs.jmx-metrics-version }}
     steps:
       - run: |
           if [[ $GITHUB_REF_NAME != release/* ]]; then
@@ -173,8 +172,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          jmx_metrics_version=$VERSION-alpha
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$jmx_metrics_version.jar opentelemetry-jmx-metrics.jar
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
@@ -183,7 +181,6 @@ jobs:
                             opentelemetry-jmx-metrics.jar
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "jmx-metrics-version=$jmx_metrics_version" >> $GITHUB_OUTPUT
 
   merge-change-log-to-main:
     runs-on: ubuntu-latest
@@ -240,12 +237,3 @@ jobs:
           gh pr create --title "$message" \
                        --body "$body" \
                        --base main
-
-  create-collector-contrib-pull-request:
-    needs:
-      - release
-    uses: ./.github/workflows/reusable-create-collector-contrib-pull-request.yml
-    with:
-      jmx-metrics-version: ${{ needs.release.outputs.jmx-metrics-version }}
-    secrets:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
