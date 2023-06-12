@@ -26,11 +26,11 @@ In order to use it, you need to wrap your own exporter with a new instance of
 the ones provided in here:
 
 * For a LogRecordExporter, it must be wrapped within
-  a [LogRecordDiskExporter](src%2Fmain%2Fjava%2Fio%2Fopentelemetry%2Fcontrib%2Fdisk%2Fbuffering%2Fexporters%2FLogRecordDiskExporter.java).
+  a [LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/LogRecordDiskExporter.java).
 * For a MetricExporter, it must be wrapped within
-  a [MetricDiskExporter](src%2Fmain%2Fjava%2Fio%2Fopentelemetry%2Fcontrib%2Fdisk%2Fbuffering%2Fexporters%2FMetricDiskExporter.java).
+  a [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/MetricDiskExporter.java).
 * For a SpanExporter, it must be wrapped within
-  a [SpanDiskExporter](src%2Fmain%2Fjava%2Fio%2Fopentelemetry%2Fcontrib%2Fdisk%2Fbuffering%2Fexporters%2FSpanDiskExporter.java).
+  a [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/SpanDiskExporter.java).
 
 Each wrapper will need the following when instantiating them:
 
@@ -38,7 +38,7 @@ Each wrapper will need the following when instantiating them:
 * A File instance of the root directory where all the data is going to be written. The same root dir
   can be used for all the wrappers, since each will create their own folder inside it.
 * An instance
-  of [StorageConfiguration](src%2Fmain%2Fjava%2Fio%2Fopentelemetry%2Fcontrib%2Fdisk%2Fbuffering%2Fstorage%2FStorageConfiguration.java)
+  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/StorageConfiguration.java)
   with the desired parameters. You can create one with default values by
   calling `StorageConfiguration.getDefault()`.
 
