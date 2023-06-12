@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseResourceSignalsDataMapper;
@@ -12,7 +17,7 @@ import java.util.Collection;
 
 public final class ResourceLogsDataMapper
     extends BaseResourceSignalsDataMapper<
-            LogRecordData, LogRecordDataJson, ScopeLogs, ResourceLogs, ResourceLogsData> {
+        LogRecordData, LogRecordDataJson, ScopeLogs, ResourceLogs, ResourceLogsData> {
 
   public static final ResourceLogsDataMapper INSTANCE = new ResourceLogsDataMapper();
 

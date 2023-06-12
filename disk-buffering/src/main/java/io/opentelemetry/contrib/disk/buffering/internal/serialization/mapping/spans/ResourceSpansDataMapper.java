@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseResourceSignalsDataMapper;
@@ -12,7 +17,7 @@ import java.util.Collection;
 
 public final class ResourceSpansDataMapper
     extends BaseResourceSignalsDataMapper<
-            SpanData, SpanDataJson, ScopeSpan, ResourceSpans, ResourceSpansData> {
+        SpanData, SpanDataJson, ScopeSpan, ResourceSpans, ResourceSpansData> {
 
   public static final ResourceSpansDataMapper INSTANCE = new ResourceSpansDataMapper();
 

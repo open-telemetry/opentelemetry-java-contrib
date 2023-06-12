@@ -1,9 +1,13 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.converters;
 
 import com.dslplatform.json.JsonConverter;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.JsonWriter;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.JsonSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.MetricDataJson;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.data.ExponentialHistogram;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.data.Gauge;
@@ -15,6 +19,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.met
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.impl.HistogramMetric;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.impl.SumMetric;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.impl.SummaryMetric;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.JsonSerializer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ResourceMetricsDataMapper;

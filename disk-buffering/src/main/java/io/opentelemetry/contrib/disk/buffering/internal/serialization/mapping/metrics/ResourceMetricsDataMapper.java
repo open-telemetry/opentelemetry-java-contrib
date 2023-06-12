@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseResourceSignalsDataMapper;
@@ -12,7 +17,7 @@ import java.util.Collection;
 
 public final class ResourceMetricsDataMapper
     extends BaseResourceSignalsDataMapper<
-            MetricData, MetricDataJson, ScopeMetrics, ResourceMetrics, ResourceMetricsData> {
+        MetricData, MetricDataJson, ScopeMetrics, ResourceMetrics, ResourceMetricsData> {
 
   public static final ResourceMetricsDataMapper INSTANCE = new ResourceMetricsDataMapper();
 
