@@ -8,9 +8,9 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.Writi
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WritableFile extends StorageFile {
@@ -32,7 +32,7 @@ public final class WritableFile extends StorageFile {
     this.timeProvider = timeProvider;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
     size = (int) file.length();
-    out = Files.newOutputStream(file.toPath());
+    out = new FileOutputStream(file);
   }
 
   /**

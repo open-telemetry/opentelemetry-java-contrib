@@ -8,16 +8,17 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.Resou
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -52,7 +53,7 @@ public final class ReadableFile extends StorageFile {
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
     originalFileSize = (int) file.length();
     temporaryFile = temporaryFileProvider.createTemporaryFile(file.getName());
-    Files.copy(file.toPath(), temporaryFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    copyFile(file, temporaryFile);
     FileInputStream tempInputStream = new FileInputStream(temporaryFile);
     tempInChannel = tempInputStream.getChannel();
     bufferedReader =
@@ -121,6 +122,18 @@ public final class ReadableFile extends StorageFile {
     if (isClosed.compareAndSet(false, true)) {
       bufferedReader.close();
       temporaryFile.delete();
+    }
+  }
+
+  private static void copyFile(File from, File to) throws IOException {
+    try (InputStream in = new BufferedInputStream(new FileInputStream(from));
+        OutputStream out = new FileOutputStream(to, false)) {
+
+      byte[] buffer = new byte[1024];
+      int lengthRead;
+      while ((lengthRead = in.read(buffer)) > 0) {
+        out.write(buffer, 0, lengthRead);
+      }
     }
   }
 }
