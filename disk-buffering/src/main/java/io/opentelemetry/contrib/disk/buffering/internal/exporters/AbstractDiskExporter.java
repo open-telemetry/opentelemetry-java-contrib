@@ -10,9 +10,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class AbstractDiskExporter<EXPORT_DATA> {
   private final Storage storage;
+  private static final Logger logger = Logger.getLogger(AbstractDiskExporter.class.getName());
 
   public AbstractDiskExporter(File rootDir, StorageConfiguration configuration) {
     this.storage = new Storage(new FolderManager(getSignalFolder(rootDir), configuration));
@@ -28,10 +31,12 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
    * @throws IOException If an unexpected error happens.
    */
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
+    logger.log(Level.INFO, "Attempting to export batch from disk.");
     AtomicBoolean exportSucceeded = new AtomicBoolean(false);
     boolean foundDataToExport =
         storage.read(
             bytes -> {
+              logger.log(Level.INFO, "About to export stored batch.");
               CompletableResultCode join =
                   doExport(getSerializer().deserialize(bytes)).join(timeout, unit);
               exportSucceeded.set(join.isSuccess());
@@ -50,12 +55,14 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
     storage.close();
   }
 
-  protected CompletableResultCode onExport(Collection<EXPORT_DATA> spans) {
+  protected CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
+    logger.log(Level.INFO, "Intercepting exporter batch.");
     try {
-      storage.write(getSerializer().serialize(spans));
+      storage.write(getSerializer().serialize(data));
       return CompletableResultCode.ofSuccess();
     } catch (IOException e) {
-      return doExport(spans);
+      logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
+      return doExport(data);
     }
   }
 
