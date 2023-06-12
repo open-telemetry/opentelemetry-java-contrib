@@ -8,11 +8,11 @@ sent later on demand.
 The configurable parameters are provided **per exporter**, the available ones are:
 
 * Max file size, defaults to 1MB.
-* Max folder size, defaults to 20MB. All files are stored in a single folder per-signal, therefore
+* Max folder size, defaults to 10MB. All files are stored in a single folder per-signal, therefore
   if all 3 types of signals are stored, the total amount of space from disk to be taken by default
-  would be of 60MB.
-* Max age for file writing, defaults to 5 seconds.
-* Min age for file reading, defaults to 6 seconds. It must be greater that the max age for file
+  would be of 30MB.
+* Max age for file writing, defaults to 30 seconds.
+* Min age for file reading, defaults to 33 seconds. It must be greater that the max age for file
   writing.
 * Max age for file reading, defaults to 18 hours. After 18 passed, the file would be considered
   stale and will be removed when new files are created. No more data will be read from a file past

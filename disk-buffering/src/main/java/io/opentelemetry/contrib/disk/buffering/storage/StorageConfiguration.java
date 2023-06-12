@@ -42,9 +42,9 @@ public abstract class StorageConfiguration {
   public static Builder builder() {
     return new AutoValue_StorageConfiguration.Builder()
         .setMaxFileSize(1024 * 1024) // 1MB
-        .setMaxFolderSize(20 * 1024 * 1024) // 20MB
-        .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(5))
-        .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(6))
+        .setMaxFolderSize(10 * 1024 * 1024) // 10MB
+        .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
+        .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
         .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18));
   }
 
