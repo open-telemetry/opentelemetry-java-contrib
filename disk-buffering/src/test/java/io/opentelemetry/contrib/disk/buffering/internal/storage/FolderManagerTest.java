@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.StorageFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,25 @@ class FolderManagerTest {
     assertTrue(existingFile2.exists());
     assertTrue(existingFile3.exists());
     assertFalse(existingFile1.exists());
+  }
+
+  @Test
+  public void closeCurrentlyWritableFile_whenItIsReadyToBeRead_anNoOtherReadableFilesAreAvailable()
+      throws IOException {
+    long createdFileTime = 1000L;
+    doReturn(createdFileTime).when(timeProvider).getSystemCurrentTimeMillis();
+
+    WritableFile writableFile = folderManager.createWritableFile();
+    writableFile.append(new byte[3]);
+
+    doReturn(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS)
+        .when(timeProvider)
+        .getSystemCurrentTimeMillis();
+
+    ReadableFile readableFile = folderManager.getReadableFile();
+
+    assertEquals(writableFile.file, readableFile.file);
+    assertTrue(writableFile.isClosed());
   }
 
   @Test

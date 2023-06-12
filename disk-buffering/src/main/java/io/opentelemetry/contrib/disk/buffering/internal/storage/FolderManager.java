@@ -14,6 +14,7 @@ public final class FolderManager {
   private final TimeProvider timeProvider;
   private final StorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
+  @Nullable private WritableFile currentWritableFile;
 
   public FolderManager(File folder, StorageConfiguration configuration) {
     this(folder, configuration, TimeProvider.get());
@@ -47,11 +48,13 @@ public final class FolderManager {
       }
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
-    return new WritableFile(file, systemCurrentTimeMillis, configuration, timeProvider);
+    currentWritableFile =
+        new WritableFile(file, systemCurrentTimeMillis, configuration, timeProvider);
+    return currentWritableFile;
   }
 
   @Nullable
-  private File findReadableFile() {
+  private File findReadableFile() throws IOException {
     long currentTime = timeProvider.getSystemCurrentTimeMillis();
     File[] existingFiles = folder.listFiles();
     File oldestFileAvailable = null;
@@ -68,6 +71,12 @@ public final class FolderManager {
           }
         }
       }
+    }
+    // Checking if the oldest available file is currently the writable file.
+    if (oldestFileAvailable != null
+        && currentWritableFile != null
+        && oldestFileAvailable.equals(currentWritableFile.file)) {
+      currentWritableFile.close();
     }
     return oldestFileAvailable;
   }
