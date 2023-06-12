@@ -1,6 +1,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -57,6 +58,25 @@ class AbstractDiskExporterTest {
     doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
 
     assertTrue(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
+  }
+
+  @Test
+  public void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
+    try {
+      new TestDiskExporter(
+          wrapped,
+          rootDir,
+          StorageConfiguration.builder()
+              .setMaxFileAgeForWriteMillis(2)
+              .setMinFileAgeForReadMillis(1)
+              .build(),
+          serializer);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals(
+          "The configured max file age for writing must be lower than the configured min file age for reading",
+          e.getMessage());
+    }
   }
 
   @Test

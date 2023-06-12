@@ -18,6 +18,7 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
   private static final Logger logger = Logger.getLogger(AbstractDiskExporter.class.getName());
 
   public AbstractDiskExporter(File rootDir, StorageConfiguration configuration) {
+    validateConfiguration(configuration);
     this.storage = new Storage(new FolderManager(getSignalFolder(rootDir), configuration));
   }
 
@@ -74,5 +75,12 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
       }
     }
     return folder;
+  }
+
+  private static void validateConfiguration(StorageConfiguration configuration) {
+    if (configuration.getMinFileAgeForReadMillis() <= configuration.getMaxFileAgeForWriteMillis()) {
+      throw new IllegalArgumentException(
+          "The configured max file age for writing must be lower than the configured min file age for reading");
+    }
   }
 }
