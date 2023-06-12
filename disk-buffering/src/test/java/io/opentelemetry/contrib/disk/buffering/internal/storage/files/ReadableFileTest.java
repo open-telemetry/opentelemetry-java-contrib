@@ -6,14 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,6 +33,7 @@ class ReadableFileTest {
   private File temporaryFile;
   private ReadableFile readableFile;
   private TimeProvider timeProvider;
+  private TemporaryFileProvider temporaryFileProvider;
   private static final List<String> LINES =
       Arrays.asList("First line", "Second line", "Third line");
   private static final long CREATED_TIME_MILLIS = 1000L;
@@ -39,8 +43,8 @@ class ReadableFileTest {
     source = new File(dir, "sourceFile");
     temporaryFile = new File(dir, "temporaryFile");
     Files.write(source.toPath(), LINES);
-    TemporaryFileProvider temporaryFileProvider = mock();
-    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile("sourceFile");
+    temporaryFileProvider = mock();
+    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile(anyString());
     timeProvider = mock();
     readableFile =
         new ReadableFile(
@@ -127,19 +131,20 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenNoMoreLinesAvailableToRead_throwException() throws IOException {
-    for (String line : LINES) {
-      readableFile.readLine(
-          bytes -> {
-            assertEquals(line, new String(bytes, StandardCharsets.UTF_8));
-            return true;
-          });
-    }
+  public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_throwException()
+      throws IOException {
+    File emptyFile = new File(dir, "emptyFile");
+    try (FileOutputStream ignored = new FileOutputStream(emptyFile)) {}
 
+    ReadableFile emptyReadableFile =
+        new ReadableFile(
+            emptyFile, CREATED_TIME_MILLIS, timeProvider, CONFIGURATION, temporaryFileProvider);
     try {
-      readableFile.readLine(bytes -> true);
+      emptyReadableFile.readLine(bytes -> true);
       fail();
-    } catch (ResourceClosedException ignored) {
+    } catch (NoMoreLinesToReadException ignored) {
+      assertTrue(emptyReadableFile.isClosed());
+      assertFalse(emptyFile.exists());
     }
   }
 

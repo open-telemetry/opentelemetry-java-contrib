@@ -79,6 +79,7 @@ public final class ReadableFile extends StorageFile {
     }
     String lineString = bufferedReader.readLine();
     if (lineString == null) {
+      cleanUp();
       throw new NoMoreLinesToReadException();
     }
     byte[] line = lineString.getBytes(StandardCharsets.UTF_8);
@@ -89,11 +90,15 @@ public final class ReadableFile extends StorageFile {
         if (amountOfBytesToTransfer > 0) {
           tempInChannel.transferTo(readBytes, amountOfBytesToTransfer, out.getChannel());
         } else {
-          file.delete();
-          close();
+          cleanUp();
         }
       }
     }
+  }
+
+  private void cleanUp() throws IOException {
+    file.delete();
+    close();
   }
 
   @Override
