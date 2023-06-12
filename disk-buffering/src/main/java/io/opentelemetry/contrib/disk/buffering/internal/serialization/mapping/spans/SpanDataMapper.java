@@ -33,12 +33,11 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper
 public abstract class SpanDataMapper {
 
-  public static final SpanDataMapper INSTANCE = Mappers.getMapper(SpanDataMapper.class);
+  public static final SpanDataMapper INSTANCE = new SpanDataMapperImpl();
 
   @SpanContextMapping
   @Mapping(target = "droppedAttributesCount", ignore = true)

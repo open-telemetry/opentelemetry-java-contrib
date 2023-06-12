@@ -10,12 +10,11 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.spa
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface ScopeSpansMapper {
 
-  ScopeSpansMapper INSTANCE = Mappers.getMapper(ScopeSpansMapper.class);
+  ScopeSpansMapper INSTANCE = new ScopeSpansMapperImpl();
 
   @ScopeMapping
   @Mapping(target = "spans", ignore = true)

@@ -23,12 +23,11 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper
 public abstract class LogRecordMapper {
 
-  public static final LogRecordMapper INSTANCE = Mappers.getMapper(LogRecordMapper.class);
+  public static final LogRecordMapper INSTANCE = new LogRecordMapperImpl();
 
   @SpanContextMapping
   @Mapping(

@@ -10,12 +10,11 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.log
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface ScopeLogsMapper {
 
-  ScopeLogsMapper INSTANCE = Mappers.getMapper(ScopeLogsMapper.class);
+  ScopeLogsMapper INSTANCE = new ScopeLogsMapperImpl();
 
   @ScopeMapping
   @Mapping(target = "logRecords", ignore = true)

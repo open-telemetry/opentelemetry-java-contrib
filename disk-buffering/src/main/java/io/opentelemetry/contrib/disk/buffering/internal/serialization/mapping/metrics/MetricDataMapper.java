@@ -30,14 +30,13 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.SubclassExhaustiveStrategy;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(
     uses = DataPointMapper.class,
     subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
 public abstract class MetricDataMapper {
 
-  public static final MetricDataMapper INSTANCE = Mappers.getMapper(MetricDataMapper.class);
+  public static final MetricDataMapper INSTANCE = new MetricDataMapperImpl();
 
   @SuppressWarnings("unchecked")
   public DataJson<?> metricDataToJson(Data<?> data, @Context MetricDataType type) {

@@ -45,14 +45,13 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(
     subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION,
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class DataPointMapper {
 
-  public static final DataPointMapper INSTANCE = Mappers.getMapper(DataPointMapper.class);
+  public static final DataPointMapper INSTANCE = new DataPointMapperImpl();
 
   @SubclassMapping(source = LongPointData.class, target = NumberDataPoint.class)
   @SubclassMapping(source = DoublePointData.class, target = NumberDataPoint.class)

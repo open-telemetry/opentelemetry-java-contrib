@@ -11,12 +11,11 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.met
 import io.opentelemetry.sdk.resources.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {ResourceMapper.class})
 public interface ResourceMetricsMapper {
 
-  ResourceMetricsMapper INSTANCE = Mappers.getMapper(ResourceMetricsMapper.class);
+  ResourceMetricsMapper INSTANCE = new ResourceMetricsMapperImpl();
 
   @ResourceMapping
   @Mapping(target = "scopeMetrics", ignore = true)

@@ -30,12 +30,11 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = MetricDataMapper.class)
 public abstract class MetricMapper {
 
-  public static final MetricMapper INSTANCE = Mappers.getMapper(MetricMapper.class);
+  public static final MetricMapper INSTANCE = new MetricMapperImpl();
 
   public MetricDataJson metricToJson(MetricData source) {
     MetricDataType type = source.getType();
