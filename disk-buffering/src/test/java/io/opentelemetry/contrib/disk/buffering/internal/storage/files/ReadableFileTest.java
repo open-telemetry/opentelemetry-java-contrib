@@ -16,7 +16,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.Resou
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -134,7 +133,9 @@ class ReadableFileTest {
   public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_throwException()
       throws IOException {
     File emptyFile = new File(dir, "emptyFile");
-    try (FileOutputStream ignored = new FileOutputStream(emptyFile)) {}
+    if (!emptyFile.createNewFile()) {
+      fail("Could not create file for tests");
+    }
 
     ReadableFile emptyReadableFile =
         new ReadableFile(
