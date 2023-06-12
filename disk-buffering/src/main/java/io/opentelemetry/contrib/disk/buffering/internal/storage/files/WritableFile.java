@@ -2,14 +2,14 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
 
-import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
-import java.io.BufferedOutputStream;
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -17,19 +17,22 @@ public final class WritableFile extends StorageFile {
   private final StorageConfiguration configuration;
   private final TimeProvider timeProvider;
   private final long expireTimeMillis;
-  private final BufferedOutputStream out;
+  private final OutputStream out;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int size;
 
   public WritableFile(
-      File file, long createdTimeMillis, StorageConfiguration configuration, TimeProvider timeProvider)
+      File file,
+      long createdTimeMillis,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider)
       throws IOException {
     super(file);
     this.configuration = configuration;
     this.timeProvider = timeProvider;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
     size = (int) file.length();
-    out = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
+    out = Files.newOutputStream(file.toPath());
   }
 
   /**
