@@ -4,11 +4,11 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
@@ -113,6 +113,20 @@ class ReadableFileTest {
   }
 
   @Test
+  public void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
+    for (String line : LINES) {
+      readableFile.readLine(
+          bytes -> {
+            assertEquals(line, new String(bytes, StandardCharsets.UTF_8));
+            return true;
+          });
+    }
+
+    assertFalse(source.exists());
+    assertTrue(readableFile.isClosed());
+  }
+
+  @Test
   public void whenNoMoreLinesAvailableToRead_throwException() throws IOException {
     for (String line : LINES) {
       readableFile.readLine(
@@ -125,7 +139,7 @@ class ReadableFileTest {
     try {
       readableFile.readLine(bytes -> true);
       fail();
-    } catch (NoMoreLinesToReadException ignored) {
+    } catch (ResourceClosedException ignored) {
     }
   }
 

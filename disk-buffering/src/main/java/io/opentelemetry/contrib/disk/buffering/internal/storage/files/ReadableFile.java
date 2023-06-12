@@ -2,12 +2,12 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
 
-import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +32,10 @@ public final class ReadableFile extends StorageFile {
   private int readBytes = 0;
 
   public ReadableFile(
-      File file, long createdTimeMillis, TimeProvider timeProvider, StorageConfiguration configuration)
+      File file,
+      long createdTimeMillis,
+      TimeProvider timeProvider,
+      StorageConfiguration configuration)
       throws IOException {
     this(file, createdTimeMillis, timeProvider, configuration, TemporaryFileProvider.INSTANCE);
   }
@@ -82,7 +85,13 @@ public final class ReadableFile extends StorageFile {
     if (consumer.apply(line)) {
       readBytes += line.length + NEW_LINE_BYTES_SIZE;
       try (FileOutputStream out = new FileOutputStream(file, false)) {
-        tempInChannel.transferTo(readBytes, originalFileSize - readBytes, out.getChannel());
+        int amountOfBytesToTransfer = originalFileSize - readBytes;
+        if (amountOfBytesToTransfer > 0) {
+          tempInChannel.transferTo(readBytes, amountOfBytesToTransfer, out.getChannel());
+        } else {
+          file.delete();
+          close();
+        }
       }
     }
   }
