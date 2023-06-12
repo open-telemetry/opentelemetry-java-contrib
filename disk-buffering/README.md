@@ -14,9 +14,9 @@ The configurable parameters are provided **per exporter**, the available ones ar
 * Max age for file writing, defaults to 30 seconds.
 * Min age for file reading, defaults to 33 seconds. It must be greater that the max age for file
   writing.
-* Max age for file reading, defaults to 18 hours. After 18 passed, the file would be considered
-  stale and will be removed when new files are created. No more data will be read from a file past
-  this time.
+* Max age for file reading, defaults to 18 hours. After that time passes, the file will be
+  considered stale and will be removed when new files are created. No more data will be read from a
+  file past this time.
 
 ## Usage
 
