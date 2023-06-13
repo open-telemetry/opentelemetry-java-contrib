@@ -130,8 +130,9 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
   }
 
   /**
-   * Ingress operation (i.e. operation for Server and Consumer spans) is always derived from span
-   * name.
+   * Ingress operation (i.e. operation for Server and Consumer spans) will be generated from
+   * "http.method + http.target/with the first API path parameter" if the default span name equals
+   * null, UnknownOperation or http.method value.
    */
   private static void setIngressOperation(SpanData span, AttributesBuilder builder) {
     String operation;
@@ -208,8 +209,10 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    *   <li>Attributes are confirmed to have low-cardinality values, based on code analysis.
    * </ul>
    *
-   * TODO: This specific logic may change in future. Specifically, we are still deciding which HTTP
-   * and RPC attributes to use here, but this is a sufficient starting point.
+   * if the selected attributes are still producing the UnknownRemoteService or
+   * UnknownRemoteOperation, `net.peer.name`, `net.peer.port`, `net.peer.sock.addr` and
+   * `net.peer.sock.port` will be used to derive the RemoteService. And `http.method` and `http.url`
+   * will be used to derive the RemoteOperation.
    */
   private static void setRemoteServiceAndOperation(SpanData span, AttributesBuilder builder) {
     String remoteService = UNKNOWN_REMOTE_SERVICE;
@@ -239,7 +242,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
       remoteService = getRemoteService(span, PEER_SERVICE);
     }
 
-    // try to derive RemoteService and RemoteOperation from the other un-directive attributes
+    // try to derive RemoteService and RemoteOperation from the other related attributes
     if (remoteService.equals(UNKNOWN_REMOTE_SERVICE)) {
       remoteService = generateRemoteService(span);
     }
@@ -264,11 +267,11 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
       // data
       if (httpTarget != null) {
         operation = extractAPIPathValue(httpTarget);
-      }
-      if (isKeyPresent(span, HTTP_METHOD)) {
-        String httpMethod = span.getAttributes().get(HTTP_METHOD);
-        if (httpMethod != null) {
-          operation = httpMethod + " " + operation;
+        if (isKeyPresent(span, HTTP_METHOD)) {
+          String httpMethod = span.getAttributes().get(HTTP_METHOD);
+          if (httpMethod != null) {
+            operation = httpMethod + " " + operation;
+          }
         }
       }
     }
@@ -310,7 +313,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    * @return the first part from the http target. Eg, /payment
    */
   private static String extractAPIPathValue(String httpTarget) {
-    if (httpTarget.isEmpty()) {
+    if (httpTarget == null || httpTarget.isEmpty()) {
       return "/";
     }
     String[] paths = httpTarget.split("/");

@@ -28,6 +28,10 @@ final class AwsAttributeKeys {
   static final AttributeKey<String> AWS_REMOTE_TARGET = AttributeKey.stringKey("aws.remote.target");
 
   // use the same AWS Resource attribute name defined by OTel java auto-instr for aws_sdk_v_1_1
+  // TODO: all AWS specific attributes should be defined in semconv package and reused cross all
+  // otel packages. Related sim -
+  // https://github.com/open-telemetry/opentelemetry-java-instrumentation/issues/8710
+
   static final AttributeKey<String> AWS_BUCKET_NAME = AttributeKey.stringKey("aws.bucket.name");
   static final AttributeKey<String> AWS_QUEUE_NAME = AttributeKey.stringKey("aws.queue.name");
   static final AttributeKey<String> AWS_STREAM_NAME = AttributeKey.stringKey("aws.stream.name");
