@@ -32,9 +32,8 @@ public final class ExponentialHistogramDataPoint extends DataPoint {
   @JsonAttribute(name = "max")
   public Double max;
 
-  @Nullable
   @JsonAttribute(name = "scale")
-  public Integer scale;
+  public Integer scale = 0;
 
   @Nullable
   @JsonAttribute(name = "zeroCount")

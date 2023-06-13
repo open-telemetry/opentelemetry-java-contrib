@@ -37,6 +37,8 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.PointData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
+import java.util.ArrayList;
+import java.util.List;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -88,6 +90,8 @@ public abstract class DataPointMapper {
   public abstract SummaryPointData jsonSummaryToPointData(SummaryDataPoint source);
 
   @BeanMapping(resultType = ExponentialHistogramPointDataImpl.class)
+  @Mapping(target = "positiveBuckets", ignore = true)
+  @Mapping(target = "negativeBuckets", ignore = true)
   public abstract ExponentialHistogramPointData jsonExponentialHistogramToPointData(
       ExponentialHistogramDataPoint source);
 
@@ -99,8 +103,33 @@ public abstract class DataPointMapper {
   @Mapping(target = "value", source = "doubleValue")
   protected abstract DoubleExemplarData jsonToDoubleExemplar(Exemplar source);
 
-  @BeanMapping(resultType = ExponentialHistogramBucketsImpl.class)
-  protected abstract ExponentialHistogramBuckets jsonToExponentialBuckets(Buckets source);
+  @AfterMapping
+  protected void addBuckets(
+      ExponentialHistogramDataPoint source,
+      @MappingTarget ExponentialHistogramPointDataImpl.Builder target) {
+    if (source.positiveBuckets != null) {
+      target.setPositiveBuckets(jsonToExponentialBuckets(source.positiveBuckets, source.scale));
+    }
+    if (source.negativeBuckets != null) {
+      target.setNegativeBuckets(jsonToExponentialBuckets(source.negativeBuckets, source.scale));
+    }
+  }
+
+  protected ExponentialHistogramBuckets jsonToExponentialBuckets(Buckets source, Integer scale) {
+    List<Long> bucketCounts = new ArrayList<>();
+    long totalCount = 0;
+    for (String bucketCount : source.bucketCounts) {
+      long countValue = Long.parseLong(bucketCount);
+      bucketCounts.add(countValue);
+      totalCount += countValue;
+    }
+    return ExponentialHistogramBucketsImpl.builder()
+        .setOffset(source.offset)
+        .setBucketCounts(bucketCounts)
+        .setTotalCount(totalCount)
+        .setScale(scale)
+        .build();
+  }
 
   @BeanMapping(resultType = ValueAtQuantileImpl.class)
   protected abstract ValueAtQuantile jsonToQuantile(QuantileValue source);
