@@ -51,6 +51,25 @@ Each wrapper will need the following when instantiating them:
 After wrapping your exporters, you must register the wrapper as the exporter you'll use. It will
 take care of always storing the data it receives.
 
+#### Set up example for spans
+
+```java
+// Creating the SpanExporter of our choice.
+SpanExporter mySpanExporter = OtlpGrpcSpanExporter.getDefault();
+
+// Wrapping our exporter with its disk exporter.
+SpanDiskExporter diskExporter = new SpanDiskExporter(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
+
+ // Registering the disk exporter within our OpenTelemetry instance.
+SdkTracerProvider myTraceProvider = SdkTracerProvider.builder()
+        .addSpanProcessor(SimpleSpanProcessor.create(diskExporter))
+        .build();
+OpenTelemetrySdk.builder()
+        .setTracerProvider(myTraceProvider)
+        .buildAndRegisterGlobal();
+
+```
+
 ### Reading data
 
 Each of the exporter wrappers can read from the disk and send the retrieved data over to their
@@ -58,8 +77,8 @@ wrapped exporter by calling this method from them:
 
 ```java
 try {
-    if(exporter.exportStoredBatch(1, TimeUnit.SECONDS)) {
-        // A batch was successfully exported. You can call this method for as long as it keeps returning true.
+    if(diskExporter.exportStoredBatch(1, TimeUnit.SECONDS)) {
+        // A batch was successfully exported and removed from disk. You can call this method for as long as it keeps returning true.
     } else {
         // Either there was no data in the disk or the wrapped exporter returned CompletableResultCode.ofFailure().
     }
