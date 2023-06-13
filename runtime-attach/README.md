@@ -61,6 +61,5 @@ The attachment will _not_ be initiated in the following cases:
 ## Component owners
 
 - [Jean Bisutti](https://github.com/jeanbisutti), Microsoft
-- [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
