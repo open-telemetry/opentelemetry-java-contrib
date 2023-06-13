@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.CONFIGURATION;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -52,7 +52,7 @@ class ReadableFileTest {
     timeProvider = mock();
     readableFile =
         new ReadableFile(
-            source, CREATED_TIME_MILLIS, timeProvider, CONFIGURATION, temporaryFileProvider);
+            source, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
   }
 
   @Test
@@ -144,7 +144,7 @@ class ReadableFileTest {
 
     ReadableFile emptyReadableFile =
         new ReadableFile(
-            emptyFile, CREATED_TIME_MILLIS, timeProvider, CONFIGURATION, temporaryFileProvider);
+            emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
     try {
       emptyReadableFile.readLine(bytes -> true);
       fail();

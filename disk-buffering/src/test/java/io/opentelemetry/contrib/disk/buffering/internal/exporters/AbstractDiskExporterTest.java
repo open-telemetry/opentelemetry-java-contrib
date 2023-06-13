@@ -51,7 +51,8 @@ class AbstractDiskExporterTest {
     setUpTimeProvider();
     setUpSerializer();
     wrapped = mock();
-    exporter = new TestDiskExporter(wrapped, rootDir, TestData.CONFIGURATION, serializer);
+    exporter =
+        new TestDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration(), serializer);
   }
 
   @Test

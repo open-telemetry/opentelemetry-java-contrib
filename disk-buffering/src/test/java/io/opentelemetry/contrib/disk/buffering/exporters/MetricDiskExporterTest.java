@@ -33,7 +33,7 @@ class MetricDiskExporterTest {
   @BeforeEach
   public void setUp() {
     wrapped = mock();
-    exporter = new MetricDiskExporter(wrapped, rootDir, TestData.CONFIGURATION);
+    exporter = new MetricDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration());
   }
 
   @Test

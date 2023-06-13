@@ -10,7 +10,6 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.uti
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
@@ -43,21 +42,11 @@ public final class ReadableFile extends StorageFile {
       TimeProvider timeProvider,
       StorageConfiguration configuration)
       throws IOException {
-    this(file, createdTimeMillis, timeProvider, configuration, TemporaryFileProvider.INSTANCE);
-  }
-
-  public ReadableFile(
-      File file,
-      long createdTimeMillis,
-      TimeProvider timeProvider,
-      StorageConfiguration configuration,
-      TemporaryFileProvider temporaryFileProvider)
-      throws IOException {
     super(file);
     this.timeProvider = timeProvider;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
     originalFileSize = (int) file.length();
-    temporaryFile = temporaryFileProvider.createTemporaryFile(file.getName());
+    temporaryFile = configuration.getTemporaryFileProvider().createTemporaryFile(file.getName());
     copyFile(file, temporaryFile);
     FileInputStream tempInputStream = new FileInputStream(temporaryFile);
     tempInChannel = tempInputStream.getChannel();

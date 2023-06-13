@@ -30,7 +30,7 @@ class SpanDiskExporterTest {
   @BeforeEach
   public void setUp() {
     wrapped = mock();
-    exporter = new SpanDiskExporter(wrapped, rootDir, TestData.CONFIGURATION);
+    exporter = new SpanDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration());
   }
 
   @Test

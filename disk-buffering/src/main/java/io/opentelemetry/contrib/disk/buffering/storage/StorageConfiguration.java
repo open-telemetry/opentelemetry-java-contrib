@@ -6,6 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.storage;
 
 import com.google.auto.value.AutoValue;
+import io.opentelemetry.contrib.disk.buffering.storage.files.DefaultTemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
 import java.util.concurrent.TimeUnit;
 
 /** Defines how the storage should be managed. */
@@ -40,6 +42,9 @@ public abstract class StorageConfiguration {
    */
   public abstract int getMaxFolderSize();
 
+  /** A creator of temporary files needed to do the disk reading process. */
+  public abstract TemporaryFileProvider getTemporaryFileProvider();
+
   public static StorageConfiguration getDefault() {
     return builder().build();
   }
@@ -50,7 +55,8 @@ public abstract class StorageConfiguration {
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
-        .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18));
+        .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18))
+        .setTemporaryFileProvider(DefaultTemporaryFileProvider.INSTANCE);
   }
 
   @AutoValue.Builder
@@ -64,6 +70,8 @@ public abstract class StorageConfiguration {
     public abstract Builder setMaxFileSize(int value);
 
     public abstract Builder setMaxFolderSize(int value);
+
+    public abstract Builder setTemporaryFileProvider(TemporaryFileProvider value);
 
     public abstract StorageConfiguration build();
   }

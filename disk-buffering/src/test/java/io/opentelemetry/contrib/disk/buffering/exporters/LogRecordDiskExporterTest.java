@@ -30,7 +30,7 @@ class LogRecordDiskExporterTest {
   @BeforeEach
   public void setUp() {
     wrapped = mock();
-    exporter = new LogRecordDiskExporter(wrapped, rootDir, TestData.CONFIGURATION);
+    exporter = new LogRecordDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration());
   }
 
   @Test

@@ -37,7 +37,7 @@ class FolderManagerTest {
   @BeforeEach
   public void setUp() {
     timeProvider = mock();
-    folderManager = new FolderManager(rootDir, TestData.CONFIGURATION, timeProvider);
+    folderManager = new FolderManager(rootDir, TestData.getDefaultConfiguration(), timeProvider);
   }
 
   @Test
