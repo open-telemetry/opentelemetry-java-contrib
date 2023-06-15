@@ -15,7 +15,11 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.internal.data.ExceptionEventData;
+import java.lang.reflect.Method;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -92,7 +96,7 @@ public final class AwsSpanMetricsProcessor implements SpanProcessor {
 
     // Only record metrics if non-empty attributes are returned.
     if (!attributes.isEmpty()) {
-      recordErrorOrFault(span, attributes);
+      recordErrorOrFault(spanData, attributes);
       recordLatency(span, attributes);
     }
   }
@@ -102,10 +106,14 @@ public final class AwsSpanMetricsProcessor implements SpanProcessor {
     return true;
   }
 
-  private void recordErrorOrFault(ReadableSpan span, Attributes attributes) {
-    Long httpStatusCode = span.getAttribute(HTTP_STATUS_CODE);
+  private void recordErrorOrFault(SpanData spanData, Attributes attributes) {
+    Long httpStatusCode = spanData.getAttributes().get(HTTP_STATUS_CODE);
     if (httpStatusCode == null) {
-      return;
+      httpStatusCode = getAwsStatusCode(spanData);
+
+      if (httpStatusCode == null || httpStatusCode < 100L || httpStatusCode > 599L) {
+        return;
+      }
     }
 
     if (httpStatusCode >= ERROR_CODE_LOWER_BOUND && httpStatusCode <= ERROR_CODE_UPPER_BOUND) {
@@ -114,6 +122,52 @@ public final class AwsSpanMetricsProcessor implements SpanProcessor {
         && httpStatusCode <= FAULT_CODE_UPPER_BOUND) {
       faultCounter.add(1, attributes);
     }
+  }
+
+  /**
+   * Attempt to pull status code from spans produced by AWS SDK instrumentation (both v1 and v2).
+   * AWS SDK instrumentation does not populate http.status_code when non-200 status codes are
+   * returned, as the AWS SDK throws exceptions rather than returning responses with status codes.
+   * To work around this, we are attempting to get the exception out of the events, then calling
+   * getStatusCode (for AWS SDK V1) and statusCode (for AWS SDK V2) to get the status code fromt the
+   * exception. We rely on reflection here because we cannot cast the throwable to
+   * AmazonServiceExceptions (V1) or AwsServiceExceptions (V2) because the throwable comes from a
+   * separate class loader and attempts to cast will fail with ClassCastException.
+   *
+   * <p>TODO: Short term workaround. This can be completely removed once
+   * https://github.com/open-telemetry/opentelemetry-java-contrib/issues/919 is resolved.
+   */
+  @Nullable
+  private static Long getAwsStatusCode(SpanData spanData) {
+    String scopeName = spanData.getInstrumentationScopeInfo().getName();
+    if (!scopeName.contains("aws-sdk")) {
+      return null;
+    }
+
+    for (EventData event : spanData.getEvents()) {
+      if (event instanceof ExceptionEventData) {
+        ExceptionEventData exceptionEvent = (ExceptionEventData) event;
+        Throwable throwable = exceptionEvent.getException();
+
+        try {
+          Method method = throwable.getClass().getMethod("getStatusCode", new Class<?>[] {});
+          Object code = method.invoke(throwable, new Object[] {});
+          return Long.valueOf((Integer) code);
+        } catch (Exception e) {
+          // Take no action
+        }
+
+        try {
+          Method method = throwable.getClass().getMethod("statusCode", new Class<?>[] {});
+          Object code = method.invoke(throwable, new Object[] {});
+          return Long.valueOf((Integer) code);
+        } catch (Exception e) {
+          // Take no action
+        }
+      }
+    }
+
+    return null;
   }
 
   private void recordLatency(ReadableSpan span, Attributes attributes) {
