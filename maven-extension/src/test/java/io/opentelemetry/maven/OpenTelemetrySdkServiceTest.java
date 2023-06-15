@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.events.GlobalEventEmitterProvider;
-import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,6 @@ public class OpenTelemetrySdkServiceTest {
     } finally {
       openTelemetrySdkService.dispose();
       GlobalOpenTelemetry.resetForTest();
-      GlobalLoggerProvider.resetForTest();
       GlobalEventEmitterProvider.resetForTest();
     }
   }
