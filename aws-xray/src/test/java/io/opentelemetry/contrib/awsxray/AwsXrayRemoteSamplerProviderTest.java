@@ -58,7 +58,7 @@ class AwsXrayRemoteSamplerProviderTest {
     props.put("otel.service.name", "cat-service");
     props.put("otel.traces.exporter", "none");
     props.put("otel.metrics.exporter", "none");
-    props.put("otel.metrics.exporter", "none");
+    props.put("otel.logs.exporter", "none");
     try (SdkTracerProvider tracerProvider =
         AutoConfiguredOpenTelemetrySdk.builder()
             .addPropertiesSupplier(() -> props)
