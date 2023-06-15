@@ -10,6 +10,6 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-semconv")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
-  api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 }
