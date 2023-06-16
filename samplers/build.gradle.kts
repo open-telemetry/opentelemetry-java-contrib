@@ -9,4 +9,6 @@ otelJava.moduleName.set("io.opentelemetry.contrib.sampler")
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-semconv")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 }
