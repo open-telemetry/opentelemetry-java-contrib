@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- Enhance AWS APM metrics mapping implementation
+  ([#906](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/906))
+
+### Samplers
+
+- Links based sampler
+  ([#813](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/813),
+   [#903](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/903))
+
 ## Version 1.26.0 (2023-05-17)
 
 ### AWS X-Ray SDK support
