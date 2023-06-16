@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.27.0 (2023-06-16)
+
 ### AWS X-Ray SDK support
 
 - Enhance AWS APM metrics mapping implementation
