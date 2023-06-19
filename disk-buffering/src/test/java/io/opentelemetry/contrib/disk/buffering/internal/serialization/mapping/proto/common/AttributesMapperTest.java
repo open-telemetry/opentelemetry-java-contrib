@@ -27,7 +27,7 @@ class AttributesMapperTest {
   }
 
   @Test
-  public void verifyArraySerialization() {
+  public void verifyArrayMapping() {
     Attributes attributes =
         Attributes.builder()
             .put(
