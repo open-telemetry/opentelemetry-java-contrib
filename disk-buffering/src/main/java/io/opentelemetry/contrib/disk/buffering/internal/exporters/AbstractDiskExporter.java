@@ -62,7 +62,7 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
   }
 
   protected CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
-    logger.log(Level.DEBUG, "Intercepting exporter batch.");
+    logger.log(Level.FINER, "Intercepting exporter batch.");
     try {
       storage.write(getSerializer().serialize(data));
       return CompletableResultCode.ofSuccess();
