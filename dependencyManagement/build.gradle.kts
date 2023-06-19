@@ -13,15 +13,15 @@ rootProject.extra["versions"] = dependencyVersions
 
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.15.2",
-  "com.google.guava:guava-bom:32.0.0-jre",
-  "com.linecorp.armeria:armeria-bom:1.23.1",
+  "com.google.guava:guava-bom:32.0.1-jre",
+  "com.linecorp.armeria:armeria-bom:1.24.0",
   "org.junit:junit-bom:5.9.3",
-  "io.grpc:grpc-bom:1.55.1",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.26.0-alpha",
+  "io.grpc:grpc-bom:1.56.0",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.27.0-alpha",
   "org.testcontainers:testcontainers-bom:1.18.3"
 )
 
-val autoServiceVersion = "1.1.0"
+val autoServiceVersion = "1.1.1"
 val autoValueVersion = "1.10.1"
 val errorProneVersion = "2.19.1"
 val prometheusVersion = "0.16.0"
@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.auto.value:auto-value-annotations:${autoValueVersion}",
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
-  "io.github.netmikey.logunit:logunit-jul:1.1.3",
+  "io.github.netmikey.logunit:logunit-jul:2.0.0",
   "io.prometheus:simpleclient:${prometheusVersion}",
   "io.prometheus:simpleclient_common:${prometheusVersion}",
   "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
@@ -49,7 +49,7 @@ val CORE_DEPENDENCIES = listOf(
 )
 
 val DEPENDENCIES = listOf(
-  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.26.0",
+  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.27.0",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.11.0",

@@ -16,6 +16,7 @@ dependencies {
   implementation("org.codehaus.plexus:plexus-component-annotations:2.1.1")
 
   implementation("io.opentelemetry:opentelemetry-api")
+  implementation("io.opentelemetry:opentelemetry-api-events")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-trace")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
