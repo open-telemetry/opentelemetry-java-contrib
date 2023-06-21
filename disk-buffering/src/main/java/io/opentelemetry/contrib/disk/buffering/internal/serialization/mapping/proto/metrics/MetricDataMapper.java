@@ -19,6 +19,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.DoubleExemplarDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ExemplarDataBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ExponentialHistogramBucketsImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.LongExemplarDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ValueAtQuantileImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.proto.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.proto.common.ByteStringMapper;
@@ -36,6 +37,7 @@ import io.opentelemetry.proto.metrics.v1.Sum;
 import io.opentelemetry.proto.metrics.v1.Summary;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.Data;
 import io.opentelemetry.sdk.metrics.data.DoubleExemplarData;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.ExemplarData;
@@ -45,14 +47,17 @@ import io.opentelemetry.sdk.metrics.data.ExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.data.GaugeData;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
+import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.PointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
@@ -71,6 +76,8 @@ import org.mapstruct.ValueMapping;
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class MetricDataMapper {
+
+  public static final MetricDataMapper INSTANCE = new MetricDataMapperImpl();
 
   public abstract Metric mapToProto(MetricData source);
 
@@ -105,26 +112,38 @@ public abstract class MetricDataMapper {
             mapExponentialHistogramToProto((ExponentialHistogramData) source.getData()));
         break;
     }
-    throw new UnsupportedOperationException();
   }
 
   @AfterMapping
-  protected void addDataToSdk(Metric source, @MappingTarget MetricDataImpl.Builder target) {
+  protected void addDataToSdk(
+      Metric source,
+      @MappingTarget MetricDataImpl.Builder target,
+      @Context Resource resource,
+      @Context InstrumentationScopeInfo scope) {
+    target.setResource(resource);
+    target.setInstrumentationScopeInfo(scope);
     switch (source.getDataCase()) {
       case GAUGE:
-        target.setData(mapGaugeToSdk(source.getGauge()));
+        DataWithType gaugeDataWithType = mapGaugeToSdk(source.getGauge());
+        target.setData(gaugeDataWithType.data);
+        target.setType(gaugeDataWithType.type);
         break;
       case SUM:
-        target.setData(mapSumToSdk(source.getSum()));
+        DataWithType sumDataWithType = mapSumToSdk(source.getSum());
+        target.setData(sumDataWithType.data);
+        target.setType(sumDataWithType.type);
         break;
       case SUMMARY:
         target.setData(mapSummaryToSdk(source.getSummary()));
+        target.setType(MetricDataType.SUMMARY);
         break;
       case HISTOGRAM:
         target.setData(mapHistogramToSdk(source.getHistogram()));
+        target.setType(MetricDataType.HISTOGRAM);
         break;
       case EXPONENTIAL_HISTOGRAM:
         target.setData(mapExponentialHistogramToSdk(source.getExponentialHistogram()));
+        target.setType(MetricDataType.EXPONENTIAL_HISTOGRAM);
         break;
       default:
         throw new UnsupportedOperationException();
@@ -158,11 +177,13 @@ public abstract class MetricDataMapper {
   @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
   @Mapping(target = "timeUnixNano", source = "epochNanos")
   @Mapping(target = "asInt", source = "value")
+  @Mapping(target = "exemplarsList", source = "exemplars")
   protected abstract NumberDataPoint longPointDataToNumberDataPoint(LongPointData source);
 
   @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
   @Mapping(target = "timeUnixNano", source = "epochNanos")
   @Mapping(target = "asDouble", source = "value")
+  @Mapping(target = "exemplarsList", source = "exemplars")
   protected abstract NumberDataPoint doublePointDataToNumberDataPoint(DoublePointData source);
 
   @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
@@ -171,12 +192,16 @@ public abstract class MetricDataMapper {
   protected abstract SummaryDataPoint summaryPointDataToSummaryDataPoint(
       SummaryPointData summaryPointData);
 
+  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
+  @Mapping(target = "timeUnixNano", source = "epochNanos")
   @Mapping(target = "bucketCountsList", source = "counts")
   @Mapping(target = "explicitBoundsList", source = "boundaries")
   @Mapping(target = "exemplarsList", source = "exemplars")
   protected abstract HistogramDataPoint histogramPointDataToHistogramDataPoint(
       HistogramPointData histogramPointData);
 
+  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
+  @Mapping(target = "timeUnixNano", source = "epochNanos")
   @Mapping(target = "positive", source = "negativeBuckets")
   @Mapping(target = "negative", source = "positiveBuckets")
   @Mapping(target = "exemplarsList", source = "exemplars")
@@ -184,9 +209,17 @@ public abstract class MetricDataMapper {
       exponentialHistogramPointDataToExponentialHistogramDataPoint(
           ExponentialHistogramPointData exponentialHistogramPointData);
 
+  @Mapping(target = "bucketCountsList", source = "bucketCounts")
+  protected abstract ExponentialHistogramDataPoint.Buckets exponentialHistogramBucketsToBuckets(
+      ExponentialHistogramBuckets source);
+
   @Mapping(target = "timeUnixNano", source = "epochNanos")
   @Mapping(target = "asDouble", source = "value")
   protected abstract Exemplar doubleExemplarDataToExemplar(DoubleExemplarData doubleExemplarData);
+
+  @Mapping(target = "timeUnixNano", source = "epochNanos")
+  @Mapping(target = "asInt", source = "value")
+  protected abstract Exemplar longExemplarDataToExemplar(LongExemplarData doubleExemplarData);
 
   @AfterMapping
   protected void addAttributesToNumberDataPoint(
@@ -208,6 +241,19 @@ public abstract class MetricDataMapper {
     target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
   }
 
+  @AfterMapping
+  protected void addAttributesToExponentialHistogramDataPoint(
+      ExponentialHistogramPointData source,
+      @MappingTarget ExponentialHistogramDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  @AfterMapping
+  protected void addAttributesToHistogramDataPoint(
+      HistogramPointData source, @MappingTarget HistogramDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
   @EnumMapping(
       nameTransformationStrategy = MappingConstants.PREFIX_TRANSFORMATION,
       configuration = "AGGREGATION_TEMPORALITY_")
@@ -215,28 +261,28 @@ public abstract class MetricDataMapper {
       io.opentelemetry.sdk.metrics.data.AggregationTemporality source);
 
   // FROM PROTO
-  private GaugeData<?> mapGaugeToSdk(Gauge gauge) {
+  private DataWithType mapGaugeToSdk(Gauge gauge) {
     if (gauge.getDataPointsCount() > 0) {
       NumberDataPoint dataPoint = gauge.getDataPoints(0);
       if (dataPoint.hasAsInt()) {
-        return mapLongGaugeToSdk(gauge);
+        return new DataWithType(mapLongGaugeToSdk(gauge), MetricDataType.LONG_GAUGE);
       } else if (dataPoint.hasAsDouble()) {
-        return mapDoubleGaugeToSdk(gauge);
+        return new DataWithType(mapDoubleGaugeToSdk(gauge), MetricDataType.DOUBLE_GAUGE);
       }
     }
-    return mapDoubleGaugeToSdk(gauge);
+    return new DataWithType(mapDoubleGaugeToSdk(gauge), MetricDataType.DOUBLE_GAUGE);
   }
 
-  private SumData<?> mapSumToSdk(Sum sum) {
+  private DataWithType mapSumToSdk(Sum sum) {
     if (sum.getDataPointsCount() > 0) {
       NumberDataPoint dataPoint = sum.getDataPoints(0);
       if (dataPoint.hasAsInt()) {
-        return mapLongSumToSdk(sum);
+        return new DataWithType(mapLongSumToSdk(sum), MetricDataType.LONG_SUM);
       } else if (dataPoint.hasAsDouble()) {
-        return mapDoubleSumToSdk(sum);
+        return new DataWithType(mapDoubleSumToSdk(sum), MetricDataType.DOUBLE_SUM);
       }
     }
-    return mapDoubleSumToSdk(sum);
+    return new DataWithType(mapDoubleSumToSdk(sum), MetricDataType.DOUBLE_SUM);
   }
 
   @InheritInverseConfiguration
@@ -252,15 +298,11 @@ public abstract class MetricDataMapper {
   protected abstract ExponentialHistogramData mapExponentialHistogramToSdk(
       ExponentialHistogram source);
 
-  @InheritInverseConfiguration
+  @Mapping(target = "exemplars", source = "exemplarsList")
   @BeanMapping(resultType = ExponentialHistogramPointDataImpl.class)
   protected abstract ExponentialHistogramPointData
       exponentialHistogramDataPointToExponentialHistogramPointData(
           ExponentialHistogramDataPoint source);
-
-  @BeanMapping(resultType = ExponentialHistogramBucketsImpl.class)
-  protected abstract ExponentialHistogramBuckets mapProtoBucketsToSdk(
-      ExponentialHistogramDataPoint.Buckets value);
 
   @InheritInverseConfiguration
   @BeanMapping(resultType = HistogramPointDataImpl.class)
@@ -270,6 +312,10 @@ public abstract class MetricDataMapper {
   @InheritInverseConfiguration
   @BeanMapping(resultType = DoubleExemplarDataImpl.class)
   protected abstract DoubleExemplarData exemplarToDoubleExemplarData(Exemplar source);
+
+  @InheritInverseConfiguration
+  @BeanMapping(resultType = LongExemplarDataImpl.class)
+  protected abstract LongExemplarData exemplarToLongExemplarData(Exemplar source);
 
   @InheritInverseConfiguration
   @BeanMapping(resultType = SummaryPointDataImpl.class)
@@ -323,6 +369,12 @@ public abstract class MetricDataMapper {
   }
 
   @AfterMapping
+  protected void addAttributesFromHistogramDataPoint(
+      HistogramDataPoint source, @MappingTarget HistogramPointDataImpl.Builder target) {
+    target.setAttributes(protoToAttributes(source.getAttributesList()));
+  }
+
+  @AfterMapping
   protected void addExtrasFromExemplar(
       Exemplar source, @MappingTarget ExemplarDataBuilder<?> target) {
     target.setFilteredAttributes(protoToAttributes(source.getFilteredAttributesList()));
@@ -334,11 +386,52 @@ public abstract class MetricDataMapper {
             TraceState.getDefault()));
   }
 
+  @AfterMapping
+  protected void addBucketsExtrasFromProto(
+      ExponentialHistogramDataPoint source,
+      @MappingTarget ExponentialHistogramPointDataImpl.Builder target) {
+    target.setAttributes(protoToAttributes(source.getAttributesList()));
+    target.setStartEpochNanos(source.getStartTimeUnixNano());
+    target.setEpochNanos(source.getTimeUnixNano());
+    if (source.hasPositive()) {
+      target.setPositiveBuckets(mapBucketsFromProto(source.getPositive(), source.getScale()));
+    }
+    if (source.hasNegative()) {
+      target.setNegativeBuckets(mapBucketsFromProto(source.getNegative(), source.getScale()));
+    }
+  }
+
+  protected ExponentialHistogramBuckets mapBucketsFromProto(
+      ExponentialHistogramDataPoint.Buckets source, Integer scale) {
+    List<Long> bucketCounts = new ArrayList<>();
+    long totalCount = 0;
+    for (Long bucketCount : source.getBucketCountsList()) {
+      bucketCounts.add(bucketCount);
+      totalCount += bucketCount;
+    }
+    return ExponentialHistogramBucketsImpl.builder()
+        .setOffset(source.getOffset())
+        .setBucketCounts(bucketCounts)
+        .setTotalCount(totalCount)
+        .setScale(scale)
+        .build();
+  }
+
   private static List<KeyValue> attributesToProto(Attributes source) {
     return AttributesMapper.INSTANCE.attributesToProto(source);
   }
 
   private static Attributes protoToAttributes(List<KeyValue> source) {
     return AttributesMapper.INSTANCE.protoToAttributes(source);
+  }
+
+  private static final class DataWithType {
+    public final Data<?> data;
+    public final MetricDataType type;
+
+    private DataWithType(Data<?> data, MetricDataType type) {
+      this.data = data;
+      this.type = type;
+    }
   }
 }
