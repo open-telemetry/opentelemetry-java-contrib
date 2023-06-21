@@ -1,6 +1,5 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.proto.logs;
 
-import com.google.protobuf.ByteString;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
@@ -8,6 +7,7 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.proto.common.AttributesMapper;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.proto.common.ByteStringMapper;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.proto.logs.v1.SeverityNumber;
@@ -48,8 +48,8 @@ public abstract class LogRecordDataMapper {
       LogRecordData source, @MappingTarget LogRecord.Builder target) {
     target.addAllAttributes(AttributesMapper.INSTANCE.attributesToProto(source.getAttributes()));
     SpanContext spanContext = source.getSpanContext();
-    target.setSpanId(stringToProto(spanContext.getSpanId()));
-    target.setTraceId(stringToProto(spanContext.getTraceId()));
+    target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
+    target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
     target.setDroppedAttributesCount(
         source.getTotalAttributeCount() - source.getAttributes().size());
   }
@@ -64,8 +64,8 @@ public abstract class LogRecordDataMapper {
     target.setAttributes(attributes);
     target.setSpanContext(
         SpanContext.create(
-            protoToString(source.getTraceId()),
-            protoToString(source.getSpanId()),
+            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
+            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
             TraceFlags.getSampled(),
             TraceState.getDefault()));
     target.setTotalAttributeCount(source.getDroppedAttributesCount() + attributes.size());
@@ -79,10 +79,6 @@ public abstract class LogRecordDataMapper {
 
   protected SeverityNumber severityToProto(Severity severity) {
     return SeverityNumber.forNumber(severity.getSeverityNumber());
-  }
-
-  private static ByteString stringToProto(String source) {
-    return ByteString.copyFromUtf8(source);
   }
 
   protected Body anyValueToBody(AnyValue source) {
@@ -100,9 +96,5 @@ public abstract class LogRecordDataMapper {
       }
     }
     throw new IllegalArgumentException();
-  }
-
-  private static String protoToString(ByteString source) {
-    return source.toStringUtf8();
   }
 }
