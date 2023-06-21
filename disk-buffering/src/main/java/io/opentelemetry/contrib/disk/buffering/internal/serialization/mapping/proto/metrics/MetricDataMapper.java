@@ -202,14 +202,15 @@ public abstract class MetricDataMapper {
 
   @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
   @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "positive", source = "negativeBuckets")
-  @Mapping(target = "negative", source = "positiveBuckets")
+  @Mapping(target = "positive", source = "positiveBuckets")
+  @Mapping(target = "negative", source = "negativeBuckets")
   @Mapping(target = "exemplarsList", source = "exemplars")
   protected abstract ExponentialHistogramDataPoint
       exponentialHistogramPointDataToExponentialHistogramDataPoint(
           ExponentialHistogramPointData exponentialHistogramPointData);
 
   @Mapping(target = "bucketCountsList", source = "bucketCounts")
+  @Mapping(target = "offset")
   protected abstract ExponentialHistogramDataPoint.Buckets exponentialHistogramBucketsToBuckets(
       ExponentialHistogramBuckets source);
 
