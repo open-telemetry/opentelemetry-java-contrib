@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("UnusedVariable")
 class MetricDataMapperTest {
 
   private static final LongExemplarData LONG_EXEMPLAR_DATA =
