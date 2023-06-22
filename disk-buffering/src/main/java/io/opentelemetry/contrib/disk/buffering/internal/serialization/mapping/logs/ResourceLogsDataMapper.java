@@ -24,23 +24,23 @@ public final class ResourceLogsDataMapper
   private ResourceLogsDataMapper() {}
 
   @Override
-  protected LogRecordDataJson signalItemToJson(LogRecordData sourceData) {
+  protected LogRecordDataJson signalItemToDto(LogRecordData sourceData) {
     return LogRecordMapper.INSTANCE.logToJson(sourceData);
   }
 
   @Override
-  protected ResourceLogs resourceSignalToJson(Resource resource) {
+  protected ResourceLogs resourceSignalToDto(Resource resource) {
     return ResourceLogsMapper.INSTANCE.resourceLogsToJson(resource);
   }
 
   @Override
-  protected ScopeLogs instrumentationScopeToJson(
+  protected ScopeLogs instrumentationScopeToDto(
       InstrumentationScopeInfo instrumentationScopeInfo) {
     return ScopeLogsMapper.INSTANCE.scopeInfoToJson(instrumentationScopeInfo);
   }
 
   @Override
-  protected LogRecordData jsonToSignalItem(
+  protected LogRecordData dtoToSignalItem(
       LogRecordDataJson jsonItem, Resource resource, InstrumentationScopeInfo scopeInfo) {
     return LogRecordMapper.INSTANCE.jsonToLog(jsonItem, resource, scopeInfo);
   }

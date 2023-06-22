@@ -28,7 +28,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   @Override
   public byte[] serialize(Collection<LogRecordData> logRecordData) {
     try {
-      return JsonSerializer.serialize(ResourceLogsDataMapper.INSTANCE.toJsonDto(logRecordData));
+      return JsonSerializer.serialize(ResourceLogsDataMapper.INSTANCE.toDtoItems(logRecordData));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -37,7 +37,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   @Override
   public List<LogRecordData> deserialize(byte[] source) {
     try {
-      return ResourceLogsDataMapper.INSTANCE.fromJsonDto(
+      return ResourceLogsDataMapper.INSTANCE.fromDtoItems(
           JsonSerializer.deserialize(ResourceLogsData.class, source));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);

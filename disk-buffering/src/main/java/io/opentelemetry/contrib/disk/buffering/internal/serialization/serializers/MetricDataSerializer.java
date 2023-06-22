@@ -28,7 +28,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public byte[] serialize(Collection<MetricData> metricData) {
     try {
-      return JsonSerializer.serialize(ResourceMetricsDataMapper.INSTANCE.toJsonDto(metricData));
+      return JsonSerializer.serialize(ResourceMetricsDataMapper.INSTANCE.toDtoItems(metricData));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -37,7 +37,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public List<MetricData> deserialize(byte[] source) {
     try {
-      return ResourceMetricsDataMapper.INSTANCE.fromJsonDto(
+      return ResourceMetricsDataMapper.INSTANCE.fromDtoItems(
           JsonSerializer.deserialize(ResourceMetricsData.class, source));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);

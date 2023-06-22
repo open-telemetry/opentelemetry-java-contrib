@@ -22,52 +22,52 @@ import javax.annotation.Nullable;
 
 public abstract class BaseResourceSignalsDataMapper<
     SDK_ITEM,
-    JSON_ITEM,
-    JSON_SCOPE extends ScopeSignals<JSON_ITEM>,
-    JSON_RESOURCE extends ResourceSignals<JSON_SCOPE>,
-    JSON_RESOURCE_DATA extends ResourceSignalsData<JSON_RESOURCE>> {
+    DTO_ITEM,
+    DTO_SCOPE extends ScopeSignals<DTO_ITEM>,
+    DTO_RESOURCE extends ResourceSignals<DTO_SCOPE>,
+    DTO_RESOURCE_DATA extends ResourceSignalsData<DTO_RESOURCE>> {
 
-  public JSON_RESOURCE_DATA toJsonDto(Collection<SDK_ITEM> sourceItems) {
-    Map<Resource, JSON_RESOURCE> itemsByResourceAndScope = new HashMap<>();
-    Map<InstrumentationScopeInfo, JSON_SCOPE> scopeInfoToScopeSignals = new HashMap<>();
+  public DTO_RESOURCE_DATA toDtoItems(Collection<SDK_ITEM> sourceItems) {
+    Map<Resource, DTO_RESOURCE> itemsByResourceAndScope = new HashMap<>();
+    Map<InstrumentationScopeInfo, DTO_SCOPE> scopeInfoToScopeSignals = new HashMap<>();
     sourceItems.forEach(
         sourceData -> {
           Resource resource = getResource(sourceData);
           InstrumentationScopeInfo instrumentationScopeInfo =
               getInstrumentationScopeInfo(sourceData);
 
-          JSON_RESOURCE itemsByResource = itemsByResourceAndScope.get(resource);
+          DTO_RESOURCE itemsByResource = itemsByResourceAndScope.get(resource);
           if (itemsByResource == null) {
-            itemsByResource = resourceSignalToJson(resource);
+            itemsByResource = resourceSignalToDto(resource);
             itemsByResourceAndScope.put(resource, itemsByResource);
           }
 
-          JSON_SCOPE scopeSignals = scopeInfoToScopeSignals.get(instrumentationScopeInfo);
+          DTO_SCOPE scopeSignals = scopeInfoToScopeSignals.get(instrumentationScopeInfo);
           if (scopeSignals == null) {
-            scopeSignals = instrumentationScopeToJson(instrumentationScopeInfo);
+            scopeSignals = instrumentationScopeToDto(instrumentationScopeInfo);
             scopeInfoToScopeSignals.put(instrumentationScopeInfo, scopeSignals);
             itemsByResource.addScopeSignalsItem(scopeSignals);
           }
 
-          scopeSignals.addSignalItem(signalItemToJson(sourceData));
+          scopeSignals.addSignalItem(signalItemToDto(sourceData));
         });
 
     return createResourceData(itemsByResourceAndScope.values());
   }
 
-  public List<SDK_ITEM> fromJsonDto(JSON_RESOURCE_DATA json) {
+  public List<SDK_ITEM> fromDtoItems(DTO_RESOURCE_DATA dtoResourceData) {
     List<SDK_ITEM> result = new ArrayList<>();
-    for (ResourceSignals<? extends ScopeSignals<JSON_ITEM>> resourceSignal :
-        json.getResourceSignals()) {
+    for (ResourceSignals<? extends ScopeSignals<DTO_ITEM>> resourceSignal :
+        dtoResourceData.getResourceSignals()) {
       Resource resource =
           ResourceMapper.INSTANCE.jsonToResource(
               Objects.requireNonNull(resourceSignal.resource), resourceSignal.schemaUrl);
-      for (ScopeSignals<JSON_ITEM> scopeSignals : resourceSignal.getScopeSignals()) {
+      for (ScopeSignals<DTO_ITEM> scopeSignals : resourceSignal.getScopeSignals()) {
         InstrumentationScopeInfo scopeInfo =
             jsonToInstrumentationScopeInfo(
                 Objects.requireNonNull(scopeSignals.scope), scopeSignals.schemaUrl);
-        for (JSON_ITEM item : scopeSignals.getSignalItems()) {
-          result.add(jsonToSignalItem(item, resource, scopeInfo));
+        for (DTO_ITEM item : scopeSignals.getSignalItems()) {
+          result.add(dtoToSignalItem(item, resource, scopeInfo));
         }
       }
     }
@@ -89,17 +89,17 @@ public abstract class BaseResourceSignalsDataMapper<
     return builder.build();
   }
 
-  protected abstract JSON_ITEM signalItemToJson(SDK_ITEM sourceData);
+  protected abstract DTO_ITEM signalItemToDto(SDK_ITEM sourceData);
 
-  protected abstract JSON_RESOURCE resourceSignalToJson(Resource resource);
+  protected abstract DTO_RESOURCE resourceSignalToDto(Resource resource);
 
-  protected abstract JSON_SCOPE instrumentationScopeToJson(
+  protected abstract DTO_SCOPE instrumentationScopeToDto(
       InstrumentationScopeInfo instrumentationScopeInfo);
 
-  protected abstract SDK_ITEM jsonToSignalItem(
-      JSON_ITEM jsonItem, Resource resource, InstrumentationScopeInfo scopeInfo);
+  protected abstract SDK_ITEM dtoToSignalItem(
+      DTO_ITEM dtoItem, Resource resource, InstrumentationScopeInfo scopeInfo);
 
-  protected abstract JSON_RESOURCE_DATA createResourceData(Collection<JSON_RESOURCE> items);
+  protected abstract DTO_RESOURCE_DATA createResourceData(Collection<DTO_RESOURCE> items);
 
   protected abstract Resource getResource(SDK_ITEM source);
 

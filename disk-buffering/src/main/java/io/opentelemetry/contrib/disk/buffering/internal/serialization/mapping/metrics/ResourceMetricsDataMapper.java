@@ -24,23 +24,23 @@ public final class ResourceMetricsDataMapper
   private ResourceMetricsDataMapper() {}
 
   @Override
-  protected MetricDataJson signalItemToJson(MetricData sourceData) {
+  protected MetricDataJson signalItemToDto(MetricData sourceData) {
     return MetricMapper.INSTANCE.metricToJson(sourceData);
   }
 
   @Override
-  protected ResourceMetrics resourceSignalToJson(Resource resource) {
+  protected ResourceMetrics resourceSignalToDto(Resource resource) {
     return ResourceMetricsMapper.INSTANCE.resourceMetricsToJson(resource);
   }
 
   @Override
-  protected ScopeMetrics instrumentationScopeToJson(
+  protected ScopeMetrics instrumentationScopeToDto(
       InstrumentationScopeInfo instrumentationScopeInfo) {
     return ScopeMetricsMapper.INSTANCE.scopeInfoToJson(instrumentationScopeInfo);
   }
 
   @Override
-  protected MetricData jsonToSignalItem(
+  protected MetricData dtoToSignalItem(
       MetricDataJson jsonItem, Resource resource, InstrumentationScopeInfo scopeInfo) {
     return MetricMapper.INSTANCE.jsonMetricToMetric(jsonItem, resource, scopeInfo);
   }

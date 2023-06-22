@@ -28,7 +28,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   @Override
   public byte[] serialize(Collection<SpanData> spanData) {
     try {
-      return JsonSerializer.serialize(ResourceSpansDataMapper.INSTANCE.toJsonDto(spanData));
+      return JsonSerializer.serialize(ResourceSpansDataMapper.INSTANCE.toDtoItems(spanData));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -37,7 +37,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   @Override
   public List<SpanData> deserialize(byte[] source) {
     try {
-      return ResourceSpansDataMapper.INSTANCE.fromJsonDto(
+      return ResourceSpansDataMapper.INSTANCE.fromDtoItems(
           JsonSerializer.deserialize(ResourceSpansData.class, source));
     } catch (IOException e) {
       throw new IllegalArgumentException(e);

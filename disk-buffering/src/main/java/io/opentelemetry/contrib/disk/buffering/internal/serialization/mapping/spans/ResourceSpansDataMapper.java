@@ -24,23 +24,23 @@ public final class ResourceSpansDataMapper
   private ResourceSpansDataMapper() {}
 
   @Override
-  protected SpanDataJson signalItemToJson(SpanData sourceData) {
+  protected SpanDataJson signalItemToDto(SpanData sourceData) {
     return SpanDataMapper.INSTANCE.spanDataToJson(sourceData);
   }
 
   @Override
-  protected ResourceSpans resourceSignalToJson(Resource resource) {
+  protected ResourceSpans resourceSignalToDto(Resource resource) {
     return ResourceSpansMapper.INSTANCE.resourceSpansToJson(resource);
   }
 
   @Override
-  protected ScopeSpan instrumentationScopeToJson(
+  protected ScopeSpan instrumentationScopeToDto(
       InstrumentationScopeInfo instrumentationScopeInfo) {
     return ScopeSpansMapper.INSTANCE.scopeInfoToJson(instrumentationScopeInfo);
   }
 
   @Override
-  protected SpanData jsonToSignalItem(
+  protected SpanData dtoToSignalItem(
       SpanDataJson jsonItem, Resource resource, InstrumentationScopeInfo scopeInfo) {
     return SpanDataMapper.INSTANCE.jsonToSpanData(jsonItem, resource, scopeInfo);
   }
