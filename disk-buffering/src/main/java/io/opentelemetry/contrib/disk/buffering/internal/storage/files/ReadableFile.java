@@ -85,7 +85,7 @@ public final class ReadableFile extends StorageFile {
       throw new NoContentAvailableException();
     }
     if (consumer.apply(read.content)) {
-      readBytes += read.length;
+      readBytes += read.totalReadLength;
       try (FileOutputStream out = new FileOutputStream(file, false)) {
         int amountOfBytesToTransfer = originalFileSize - readBytes;
         if (amountOfBytesToTransfer > 0) {
