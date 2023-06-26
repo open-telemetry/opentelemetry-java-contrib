@@ -5,30 +5,27 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
-
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public final class ReadableFile extends StorageFile {
   private final int originalFileSize;
-  private final BufferedReader bufferedReader;
+  private final StreamReader reader;
   private final FileChannel tempInChannel;
   private final File temporaryFile;
   private final TimeProvider timeProvider;
@@ -40,7 +37,8 @@ public final class ReadableFile extends StorageFile {
       File file,
       long createdTimeMillis,
       TimeProvider timeProvider,
-      StorageConfiguration configuration)
+      StorageConfiguration configuration,
+      StreamReader.Factory readerFactory)
       throws IOException {
     super(file);
     this.timeProvider = timeProvider;
@@ -50,8 +48,7 @@ public final class ReadableFile extends StorageFile {
     copyFile(file, temporaryFile);
     FileInputStream tempInputStream = new FileInputStream(temporaryFile);
     tempInChannel = tempInputStream.getChannel();
-    bufferedReader =
-        new BufferedReader(new InputStreamReader(tempInputStream, StandardCharsets.UTF_8));
+    reader = readerFactory.create(tempInputStream);
   }
 
   /**
@@ -62,7 +59,7 @@ public final class ReadableFile extends StorageFile {
    *     If the consumer function returns TRUE, then the provided line will be deleted from the
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    * @throws ReadingTimeoutException If the configured reading time for the file has ended.
-   * @throws NoMoreLinesToReadException If there are no more lines to be read from the file.
+   * @throws NoContentAvailableException If there is no content to be read from the file.
    * @throws ResourceClosedException If it's closed.
    */
   public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
@@ -72,14 +69,13 @@ public final class ReadableFile extends StorageFile {
     if (hasExpired()) {
       throw new ReadingTimeoutException();
     }
-    String lineString = bufferedReader.readLine();
-    if (lineString == null) {
+    ReadResult read = reader.read();
+    if (read == null) {
       cleanUp();
-      throw new NoMoreLinesToReadException();
+      throw new NoContentAvailableException();
     }
-    byte[] line = lineString.getBytes(StandardCharsets.UTF_8);
-    if (consumer.apply(line)) {
-      readBytes += line.length + NEW_LINE_BYTES_SIZE;
+    if (consumer.apply(read.content)) {
+      readBytes += read.length;
       try (FileOutputStream out = new FileOutputStream(file, false)) {
         int amountOfBytesToTransfer = originalFileSize - readBytes;
         if (amountOfBytesToTransfer > 0) {
@@ -114,7 +110,7 @@ public final class ReadableFile extends StorageFile {
   @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
-      bufferedReader.close();
+      reader.close();
       temporaryFile.delete();
     }
   }

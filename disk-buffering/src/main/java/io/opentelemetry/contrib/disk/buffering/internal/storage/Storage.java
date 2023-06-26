@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAttemptsReachedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoMoreLinesToReadException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
@@ -90,7 +90,7 @@ public final class Storage implements Closeable {
     try {
       readableFile.readLine(consumer);
       return true;
-    } catch (ReadingTimeoutException | NoMoreLinesToReadException | ResourceClosedException e) {
+    } catch (ReadingTimeoutException | NoContentAvailableException | ResourceClosedException e) {
       // Retry with new file
       readableFile = null;
       return read(consumer, ++attemptNumber);
