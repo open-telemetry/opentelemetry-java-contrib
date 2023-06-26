@@ -15,16 +15,24 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.LogRecordDataSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.sdk.logs.data.Body;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,15 +46,55 @@ class ReadableFileTest {
   private ReadableFile readableFile;
   private TimeProvider timeProvider;
   private TemporaryFileProvider temporaryFileProvider;
-  private static final List<String> LINES =
-      Arrays.asList("First line", "Second line", "Third line");
   private static final long CREATED_TIME_MILLIS = 1000L;
+  private static final LogRecordDataSerializer SERIALIZER = SignalSerializer.ofLogs();
+  private static final LogRecordData FIRST_LOG_RECORD =
+      LogRecordDataImpl.builder()
+          .setResource(TestData.RESOURCE_FULL)
+          .setSpanContext(TestData.SPAN_CONTEXT)
+          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+          .setAttributes(TestData.ATTRIBUTES)
+          .setBody(Body.string("First log body"))
+          .setSeverity(Severity.DEBUG)
+          .setSeverityText("Log severity text")
+          .setTimestampEpochNanos(100L)
+          .setObservedTimestampEpochNanos(200L)
+          .setTotalAttributeCount(3)
+          .build();
+
+  private static final LogRecordData SECOND_LOG_RECORD =
+      LogRecordDataImpl.builder()
+          .setResource(TestData.RESOURCE_FULL)
+          .setSpanContext(TestData.SPAN_CONTEXT)
+          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+          .setAttributes(TestData.ATTRIBUTES)
+          .setBody(Body.string("Second log body"))
+          .setSeverity(Severity.DEBUG)
+          .setSeverityText("Log severity text")
+          .setTimestampEpochNanos(100L)
+          .setObservedTimestampEpochNanos(200L)
+          .setTotalAttributeCount(3)
+          .build();
+
+  private static final LogRecordData THIRD_LOG_RECORD =
+      LogRecordDataImpl.builder()
+          .setResource(TestData.RESOURCE_FULL)
+          .setSpanContext(TestData.SPAN_CONTEXT)
+          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+          .setAttributes(TestData.ATTRIBUTES)
+          .setBody(Body.string("Third log body"))
+          .setSeverity(Severity.DEBUG)
+          .setSeverityText("Log severity text")
+          .setTimestampEpochNanos(100L)
+          .setObservedTimestampEpochNanos(200L)
+          .setTotalAttributeCount(3)
+          .build();
 
   @BeforeEach
   public void setUp() throws IOException {
     source = new File(dir, "sourceFile");
     temporaryFile = new File(dir, "temporaryFile");
-    Files.write(source.toPath(), LINES);
+    addFileContents(source);
     temporaryFileProvider = mock();
     doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile(anyString());
     timeProvider = mock();
@@ -55,30 +103,38 @@ class ReadableFileTest {
             source, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
   }
 
+  private static void addFileContents(File source) throws IOException {
+    List<byte[]> lines = new ArrayList<>();
+    lines.add(SERIALIZER.serialize(Collections.singleton(FIRST_LOG_RECORD)));
+    lines.add(SERIALIZER.serialize(Collections.singleton(SECOND_LOG_RECORD)));
+    lines.add(SERIALIZER.serialize(Collections.singleton(THIRD_LOG_RECORD)));
+
+    try (FileOutputStream out = new FileOutputStream(source)) {
+      for (byte[] line : lines) {
+        out.write(line);
+        out.write(Constants.NEW_LINE_BYTES);
+      }
+    }
+  }
+
   @Test
   public void readSingleLineAndRemoveIt() throws IOException {
     readableFile.readLine(
         bytes -> {
-          String lineRead = new String(bytes, StandardCharsets.UTF_8);
-          assertEquals("First line", lineRead);
+          assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
           return true;
         });
-    readableFile.close();
 
-    List<String> sourceLines = getSourceLines();
-    assertEquals(2, sourceLines.size());
-    assertEquals("Second line", sourceLines.get(0));
-    assertEquals("Third line", sourceLines.get(1));
+    List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
+
+    assertEquals(2, logs.size());
+    assertEquals(SECOND_LOG_RECORD, logs.get(0));
+    assertEquals(THIRD_LOG_RECORD, logs.get(1));
   }
 
   @Test
   public void deleteTemporaryFileWhenClosing() throws IOException {
-    readableFile.readLine(
-        bytes -> {
-          String lineRead = new String(bytes, StandardCharsets.UTF_8);
-          assertEquals("First line", lineRead);
-          return true;
-        });
+    readableFile.readLine(bytes -> true);
     readableFile.close();
 
     assertFalse(temporaryFile.exists());
@@ -86,49 +142,27 @@ class ReadableFileTest {
 
   @Test
   public void readMultipleLinesAndRemoveThem() throws IOException {
-    readableFile.readLine(
-        bytes -> {
-          String lineRead = new String(bytes, StandardCharsets.UTF_8);
-          assertEquals("First line", lineRead);
-          return true;
-        });
-    readableFile.readLine(
-        bytes -> {
-          String lineRead = new String(bytes, StandardCharsets.UTF_8);
-          assertEquals("Second line", lineRead);
-          return true;
-        });
-    readableFile.close();
+    readableFile.readLine(bytes -> true);
+    readableFile.readLine(bytes -> true);
 
-    List<String> sourceLines = getSourceLines();
-    assertEquals(1, sourceLines.size());
-    assertEquals("Third line", sourceLines.get(0));
+    List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
+
+    assertEquals(1, logs.size());
+    assertEquals(THIRD_LOG_RECORD, logs.get(0));
   }
 
   @Test
   public void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
-    readableFile.readLine(
-        bytes -> {
-          String lineRead = new String(bytes, StandardCharsets.UTF_8);
-          assertEquals("First line", lineRead);
-          return false;
-        });
-    readableFile.close();
+    readableFile.readLine(bytes -> false);
 
-    List<String> sourceLines = getSourceLines();
-    assertEquals(3, sourceLines.size());
-    assertEquals(LINES, sourceLines);
+    List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
+
+    assertEquals(3, logs.size());
   }
 
   @Test
   public void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
-    for (String line : LINES) {
-      readableFile.readLine(
-          bytes -> {
-            assertEquals(line, new String(bytes, StandardCharsets.UTF_8));
-            return true;
-          });
-    }
+    getRemainingDataAndClose(readableFile);
 
     assertFalse(source.exists());
     assertTrue(readableFile.isClosed());
@@ -155,7 +189,9 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenReadingAfterTheConfiguredReadingTimeExpired_throwException() throws IOException {
+  public void
+      whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_throwException()
+          throws IOException {
     readableFile.readLine(bytes -> true);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
         .when(timeProvider)
@@ -165,6 +201,7 @@ class ReadableFileTest {
       readableFile.readLine(bytes -> true);
       fail();
     } catch (ReadingTimeoutException ignored) {
+      assertTrue(readableFile.isClosed());
     }
   }
 
@@ -180,7 +217,27 @@ class ReadableFileTest {
     }
   }
 
-  private List<String> getSourceLines() throws IOException {
-    return Files.readAllLines(source.toPath());
+  private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)
+      throws IOException {
+    List<LogRecordData> result = new ArrayList<>();
+    while (true) {
+      try {
+        readableFile.readLine(
+            bytes -> {
+              result.add(deserialize(bytes));
+              return true;
+            });
+      } catch (IOException ignored) {
+        break;
+      }
+    }
+
+    readableFile.close();
+
+    return result;
+  }
+
+  private static LogRecordData deserialize(byte[] data) {
+    return SERIALIZER.deserialize(data).get(0);
   }
 }

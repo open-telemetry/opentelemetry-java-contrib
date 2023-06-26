@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 public final class ReadableFile extends StorageFile {
   private final int originalFileSize;
@@ -33,6 +34,7 @@ public final class ReadableFile extends StorageFile {
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int readBytes = 0;
+  @Nullable private ReadResult unconsumedResult;
 
   public ReadableFile(
       File file,
@@ -77,14 +79,16 @@ public final class ReadableFile extends StorageFile {
       throw new ResourceClosedException();
     }
     if (hasExpired()) {
+      close();
       throw new ReadingTimeoutException();
     }
-    ReadResult read = reader.read();
+    ReadResult read = readNextItem();
     if (read == null) {
       cleanUp();
       throw new NoContentAvailableException();
     }
     if (consumer.apply(read.content)) {
+      unconsumedResult = null;
       readBytes += read.totalReadLength;
       try (FileOutputStream out = new FileOutputStream(file, false)) {
         int amountOfBytesToTransfer = originalFileSize - readBytes;
@@ -94,7 +98,17 @@ public final class ReadableFile extends StorageFile {
           cleanUp();
         }
       }
+    } else {
+      unconsumedResult = read;
     }
+  }
+
+  @Nullable
+  private ReadResult readNextItem() throws IOException {
+    if (unconsumedResult != null) {
+      return unconsumedResult;
+    }
+    return reader.read();
   }
 
   private void cleanUp() throws IOException {
@@ -120,6 +134,7 @@ public final class ReadableFile extends StorageFile {
   @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
+      unconsumedResult = null;
       reader.close();
       temporaryFile.delete();
     }
