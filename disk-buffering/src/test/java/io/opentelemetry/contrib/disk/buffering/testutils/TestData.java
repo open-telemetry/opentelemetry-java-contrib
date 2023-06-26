@@ -34,6 +34,9 @@ public final class TestData {
           Attributes.builder().put("resourceAttr", "resourceAttrValue").build(),
           "resourceSchemaUrl");
 
+  public static final Resource RESOURCE_WITHOUT_SCHEMA_URL =
+      Resource.create(Attributes.builder().put("resourceAttr", "resourceAttrValue").build());
+
   public static final SpanContext SPAN_CONTEXT =
       SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
   public static final SpanContext SPAN_CONTEXT_WITH_TRACE_STATE =
@@ -48,6 +51,15 @@ public final class TestData {
   public static final InstrumentationScopeInfo INSTRUMENTATION_SCOPE_INFO_FULL =
       InstrumentationScopeInfo.builder("Instrumentation scope name")
           .setVersion("1.2.3")
+          .setSchemaUrl("instrumentationScopeInfoSchemaUrl")
+          .setAttributes(
+              Attributes.builder()
+                  .put("instrumentationScopeInfoAttr", "instrumentationScopeInfoAttrValue")
+                  .build())
+          .build();
+
+  public static final InstrumentationScopeInfo INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION =
+      InstrumentationScopeInfo.builder("Instrumentation scope name")
           .setSchemaUrl("instrumentationScopeInfoSchemaUrl")
           .setAttributes(
               Attributes.builder()

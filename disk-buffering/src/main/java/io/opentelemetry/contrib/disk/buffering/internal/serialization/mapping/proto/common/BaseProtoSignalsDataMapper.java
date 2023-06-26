@@ -70,14 +70,16 @@ public abstract class BaseProtoSignalsDataMapper<
 
   protected Resource protoToResource(
       io.opentelemetry.proto.resource.v1.Resource protoResource, String schemaUrl) {
-    return ResourceMapper.INSTANCE.mapToSdk(protoResource, schemaUrl);
+    return ResourceMapper.INSTANCE.mapToSdk(protoResource, schemaUrl.isEmpty() ? null : schemaUrl);
   }
 
   protected InstrumentationScopeInfo protoToInstrumentationScopeInfo(
       InstrumentationScope scope, @Nullable String schemaUrl) {
     InstrumentationScopeInfoBuilder builder = InstrumentationScopeInfo.builder(scope.getName());
-    builder.setVersion(scope.getVersion());
     builder.setAttributes(protoToAttributes(scope.getAttributesList()));
+    if (!scope.getVersion().isEmpty()) {
+      builder.setVersion(scope.getVersion());
+    }
     if (schemaUrl != null) {
       builder.setSchemaUrl(schemaUrl);
     }

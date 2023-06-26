@@ -53,11 +53,21 @@ public class ProtoMetricsDataMapper
   }
 
   private ScopeMetrics.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {
-    return ScopeMetrics.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+    ScopeMetrics.Builder builder =
+        ScopeMetrics.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+    if (scopeInfo.getSchemaUrl() != null) {
+      builder.setSchemaUrl(scopeInfo.getSchemaUrl());
+    }
+    return builder;
   }
 
   private ResourceMetrics.Builder createProtoResourceBuilder(Resource resource) {
-    return ResourceMetrics.newBuilder().setResource(resourceToProto(resource));
+    ResourceMetrics.Builder builder =
+        ResourceMetrics.newBuilder().setResource(resourceToProto(resource));
+    if (resource.getSchemaUrl() != null) {
+      builder.setSchemaUrl(resource.getSchemaUrl());
+    }
+    return builder;
   }
 
   @Override

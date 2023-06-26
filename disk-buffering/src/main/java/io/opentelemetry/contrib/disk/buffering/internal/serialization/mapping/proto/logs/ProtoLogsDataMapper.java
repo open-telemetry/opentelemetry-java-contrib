@@ -53,11 +53,20 @@ public class ProtoLogsDataMapper
   }
 
   private ScopeLogs.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {
-    return ScopeLogs.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+    ScopeLogs.Builder builder =
+        ScopeLogs.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+    if (scopeInfo.getSchemaUrl() != null) {
+      builder.setSchemaUrl(scopeInfo.getSchemaUrl());
+    }
+    return builder;
   }
 
   private ResourceLogs.Builder createProtoResourceBuilder(Resource resource) {
-    return ResourceLogs.newBuilder().setResource(resourceToProto(resource));
+    ResourceLogs.Builder builder = ResourceLogs.newBuilder().setResource(resourceToProto(resource));
+    if (resource.getSchemaUrl() != null) {
+      builder.setSchemaUrl(resource.getSchemaUrl());
+    }
+    return builder;
   }
 
   @Override

@@ -82,11 +82,21 @@ public class ProtoSpansDataMapper
   }
 
   private ResourceSpans.Builder createProtoResourceBuilder(Resource resource) {
-    return ResourceSpans.newBuilder().setResource(resourceToProto(resource));
+    ResourceSpans.Builder builder =
+        ResourceSpans.newBuilder().setResource(resourceToProto(resource));
+    if (resource.getSchemaUrl() != null) {
+      builder.setSchemaUrl(resource.getSchemaUrl());
+    }
+    return builder;
   }
 
   private ScopeSpans.Builder createProtoScopeBuilder(
       InstrumentationScopeInfo instrumentationScopeInfo) {
-    return ScopeSpans.newBuilder().setScope(instrumentationScopeToProto(instrumentationScopeInfo));
+    ScopeSpans.Builder builder =
+        ScopeSpans.newBuilder().setScope(instrumentationScopeToProto(instrumentationScopeInfo));
+    if (instrumentationScopeInfo.getSchemaUrl() != null) {
+      builder.setSchemaUrl(instrumentationScopeInfo.getSchemaUrl());
+    }
+    return builder;
   }
 }

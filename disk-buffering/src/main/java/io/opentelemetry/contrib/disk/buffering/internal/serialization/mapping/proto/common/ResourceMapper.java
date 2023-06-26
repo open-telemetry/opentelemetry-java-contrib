@@ -2,6 +2,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.p
 
 import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
+import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -19,11 +20,10 @@ public abstract class ResourceMapper {
   }
 
   public abstract io.opentelemetry.sdk.resources.Resource mapToSdk(
-      Resource protoResource, String schemaUrl);
+      Resource protoResource, @Nullable String schemaUrl);
 
   @AfterMapping
-  protected static void addAttributes(
-      Resource protoResource, @MappingTarget ResourceBuilder builder) {
+  protected void addAttributes(Resource protoResource, @MappingTarget ResourceBuilder builder) {
     builder.putAll(AttributesMapper.INSTANCE.protoToAttributes(protoResource.getAttributesList()));
   }
 }
