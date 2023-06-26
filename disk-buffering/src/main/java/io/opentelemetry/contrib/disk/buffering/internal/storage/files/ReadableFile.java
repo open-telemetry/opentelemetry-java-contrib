@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.LineStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
@@ -32,6 +33,15 @@ public final class ReadableFile extends StorageFile {
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int readBytes = 0;
+
+  public ReadableFile(
+      File file,
+      long createdTimeMillis,
+      TimeProvider timeProvider,
+      StorageConfiguration configuration)
+      throws IOException {
+    this(file, createdTimeMillis, timeProvider, configuration, LineStreamReader.Factory.INSTANCE);
+  }
 
   public ReadableFile(
       File file,

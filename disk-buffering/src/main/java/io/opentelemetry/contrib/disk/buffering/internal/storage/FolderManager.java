@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
@@ -39,11 +38,7 @@ public final class FolderManager {
     if (readableFile != null) {
       currentReadableFile =
           new ReadableFile(
-              readableFile,
-              Long.parseLong(readableFile.getName()),
-              timeProvider,
-              configuration,
-              StreamReader.defaultFactory());
+              readableFile, Long.parseLong(readableFile.getName()), timeProvider, configuration);
       return currentReadableFile;
     }
     return null;

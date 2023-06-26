@@ -12,10 +12,6 @@ public abstract class StreamReader implements Closeable {
     this.inputStream = inputStream;
   }
 
-  public static Factory defaultFactory() {
-    return LineStreamReader.Factory.INSTANCE;
-  }
-
   @Nullable
   public abstract ReadResult read() throws IOException;
 

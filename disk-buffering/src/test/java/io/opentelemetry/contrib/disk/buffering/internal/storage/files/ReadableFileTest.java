@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
 import java.io.File;
@@ -53,11 +52,7 @@ class ReadableFileTest {
     timeProvider = mock();
     readableFile =
         new ReadableFile(
-            source,
-            CREATED_TIME_MILLIS,
-            timeProvider,
-            getConfiguration(temporaryFileProvider),
-            StreamReader.defaultFactory());
+            source, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
   }
 
   @Test
@@ -149,11 +144,7 @@ class ReadableFileTest {
 
     ReadableFile emptyReadableFile =
         new ReadableFile(
-            emptyFile,
-            CREATED_TIME_MILLIS,
-            timeProvider,
-            getConfiguration(temporaryFileProvider),
-            StreamReader.defaultFactory());
+            emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
     try {
       emptyReadableFile.readLine(bytes -> true);
       fail();
