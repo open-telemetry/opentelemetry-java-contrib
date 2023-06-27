@@ -37,6 +37,7 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .setAttributes(Attributes.empty())
           .setBody(Body.string("Log body"))
           .setSeverity(Severity.DEBUG)
+          .setSeverityText("")
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)

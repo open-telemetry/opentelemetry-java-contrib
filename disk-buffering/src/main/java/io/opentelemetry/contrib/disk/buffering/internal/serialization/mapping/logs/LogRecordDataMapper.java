@@ -22,9 +22,13 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(uses = AttributesMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    uses = AttributesMapper.class,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public abstract class LogRecordDataMapper {
 
   public static final LogRecordDataMapper INSTANCE = new LogRecordDataMapperImpl();

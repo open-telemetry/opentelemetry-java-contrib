@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.serialize
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.data.EventDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.data.LinkDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.trace.data.EventData;
@@ -30,18 +29,10 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
           .build();
 
   private static final LinkData LINK_DATA =
-      LinkDataImpl.builder()
-          .setAttributes(TestData.ATTRIBUTES)
-          .setSpanContext(TestData.SPAN_CONTEXT)
-          .setTotalAttributeCount(20)
-          .build();
+      LinkData.create(TestData.SPAN_CONTEXT, TestData.ATTRIBUTES, 20);
 
   private static final LinkData LINK_DATA_WITH_TRACE_STATE =
-      LinkDataImpl.builder()
-          .setAttributes(TestData.ATTRIBUTES)
-          .setSpanContext(TestData.SPAN_CONTEXT_WITH_TRACE_STATE)
-          .setTotalAttributeCount(20)
-          .build();
+      LinkData.create(TestData.SPAN_CONTEXT_WITH_TRACE_STATE, TestData.ATTRIBUTES, 20);
 
   private static final SpanData SPAN_DATA =
       SpanDataImpl.builder()
