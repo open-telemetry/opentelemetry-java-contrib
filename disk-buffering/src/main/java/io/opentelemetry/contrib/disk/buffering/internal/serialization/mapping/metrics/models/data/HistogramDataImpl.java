@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.base.AggregationTemporalityBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.base.DataBuilder;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.base.AggregationTemporalityBuilder;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 

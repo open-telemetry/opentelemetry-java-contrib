@@ -11,6 +11,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
   protected byte[] serialize(SIGNAL_SDK_ITEM... items) {
     return getSerializer().serialize(Arrays.asList(items));

@@ -29,6 +29,7 @@ import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("unchecked")
 class StorageTest {
   private FolderManager folderManager;
   private Storage storage;
