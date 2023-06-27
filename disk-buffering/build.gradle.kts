@@ -1,6 +1,7 @@
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
+  id("me.champeau.jmh") version "0.7.1"
 }
 
 description = "Exporter implementations that store signals in disk"
@@ -23,4 +24,12 @@ dependencies {
   annotationProcessor("org.mapstruct:mapstruct-processor:$mapStructVersion")
   testImplementation("org.mockito:mockito-inline:4.11.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+}
+
+jmh {
+  warmupIterations.set(0)
+  fork.set(2)
+  iterations.set(5)
+  timeOnIteration.set("5s")
+  timeUnit.set("ms")
 }
