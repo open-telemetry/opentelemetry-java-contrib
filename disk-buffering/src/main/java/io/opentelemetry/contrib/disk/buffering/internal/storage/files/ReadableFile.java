@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.LineStreamReader;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
@@ -42,7 +42,7 @@ public final class ReadableFile extends StorageFile {
       TimeProvider timeProvider,
       StorageConfiguration configuration)
       throws IOException {
-    this(file, createdTimeMillis, timeProvider, configuration, LineStreamReader.Factory.INSTANCE);
+    this(file, createdTimeMillis, timeProvider, configuration, DelimitedProtoStreamReader.Factory.INSTANCE);
   }
 
   public ReadableFile(
@@ -74,7 +74,7 @@ public final class ReadableFile extends StorageFile {
    * @throws NoContentAvailableException If there is no content to be read from the file.
    * @throws ResourceClosedException If it's closed.
    */
-  public synchronized void readLine(Function<byte[], Boolean> consumer) throws IOException {
+  public synchronized void readItem(Function<byte[], Boolean> consumer) throws IOException {
     if (isClosed.get()) {
       throw new ResourceClosedException();
     }

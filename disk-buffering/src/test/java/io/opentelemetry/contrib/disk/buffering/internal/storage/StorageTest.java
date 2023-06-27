@@ -52,7 +52,7 @@ class StorageTest {
 
     assertTrue(storage.read(consumer));
 
-    verify(readableFile).readLine(consumer);
+    verify(readableFile).readItem(consumer);
   }
 
   @Test
@@ -63,7 +63,7 @@ class StorageTest {
     assertTrue(storage.read(consumer));
     assertTrue(storage.read(consumer));
 
-    verify(readableFile, times(2)).readLine(consumer);
+    verify(readableFile, times(2)).readItem(consumer);
     verify(folderManager, times(1)).getReadableFile();
     verifyNoInteractions(anotherReadable);
   }
@@ -110,7 +110,7 @@ class StorageTest {
   @Test
   public void whenTimeoutExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ReadingTimeoutException.class).when(readableFile).readLine(consumer);
+    doThrow(ReadingTimeoutException.class).when(readableFile).readItem(consumer);
 
     assertFalse(storage.read(consumer));
 
@@ -120,7 +120,7 @@ class StorageTest {
   @Test
   public void whenNoMoreLinesToReadExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(NoContentAvailableException.class).when(readableFile).readLine(consumer);
+    doThrow(NoContentAvailableException.class).when(readableFile).readItem(consumer);
 
     assertFalse(storage.read(consumer));
 
@@ -130,7 +130,7 @@ class StorageTest {
   @Test
   public void whenResourceClosedExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ResourceClosedException.class).when(readableFile).readLine(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readItem(consumer);
 
     assertFalse(storage.read(consumer));
 
@@ -141,7 +141,7 @@ class StorageTest {
   public void whenEveryNewFileFoundCannotBeRead_throwExceptionAfterMaxAttempts()
       throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doThrow(ResourceClosedException.class).when(readableFile).readLine(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readItem(consumer);
 
     try {
       assertFalse(storage.read(consumer));

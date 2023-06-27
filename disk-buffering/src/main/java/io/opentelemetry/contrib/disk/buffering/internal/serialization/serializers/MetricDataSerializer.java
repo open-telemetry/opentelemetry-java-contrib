@@ -5,9 +5,11 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ResourceMetricsDataMapper;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.metrics.ResourceMetricsData;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ProtoMetricsDataMapper;
+import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -27,8 +29,10 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
 
   @Override
   public byte[] serialize(Collection<MetricData> metricData) {
-    try {
-      return JsonSerializer.serialize(ResourceMetricsDataMapper.INSTANCE.toDtoItems(metricData));
+    MetricsData proto = ProtoMetricsDataMapper.INSTANCE.toProto(metricData);
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      proto.writeDelimitedTo(out);
+      return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -37,9 +41,8 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public List<MetricData> deserialize(byte[] source) {
     try {
-      return ResourceMetricsDataMapper.INSTANCE.fromDtoItems(
-          JsonSerializer.deserialize(ResourceMetricsData.class, source));
-    } catch (IOException e) {
+      return ProtoMetricsDataMapper.INSTANCE.fromProto(MetricsData.parseFrom(source));
+    } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
     }
   }

@@ -5,9 +5,11 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.ResourceLogsDataMapper;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.models.logs.ResourceLogsData;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.ProtoLogsDataMapper;
+import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -27,8 +29,10 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
 
   @Override
   public byte[] serialize(Collection<LogRecordData> logRecordData) {
-    try {
-      return JsonSerializer.serialize(ResourceLogsDataMapper.INSTANCE.toDtoItems(logRecordData));
+    LogsData proto = ProtoLogsDataMapper.INSTANCE.toProto(logRecordData);
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      proto.writeDelimitedTo(out);
+      return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
@@ -37,9 +41,8 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   @Override
   public List<LogRecordData> deserialize(byte[] source) {
     try {
-      return ResourceLogsDataMapper.INSTANCE.fromDtoItems(
-          JsonSerializer.deserialize(ResourceLogsData.class, source));
-    } catch (IOException e) {
+      return ProtoLogsDataMapper.INSTANCE.fromProto(LogsData.parseFrom(source));
+    } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
     }
   }

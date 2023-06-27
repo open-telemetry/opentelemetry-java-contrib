@@ -64,7 +64,7 @@ public final class Storage implements Closeable {
   /**
    * Attempts to read a line from a ready-to-read file.
    *
-   * @param consumer Is passed over to {@link ReadableFile#readLine(Function)}.
+   * @param consumer Is passed over to {@link ReadableFile#readItem(Function)}.
    * @return TRUE if data was found and read, FALSE if there is no data available to read.
    * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
    * @throws ResourceClosedException If it's closed.
@@ -88,7 +88,7 @@ public final class Storage implements Closeable {
       }
     }
     try {
-      readableFile.readLine(consumer);
+      readableFile.readItem(consumer);
       return true;
     } catch (ReadingTimeoutException | NoContentAvailableException | ResourceClosedException e) {
       // Retry with new file
