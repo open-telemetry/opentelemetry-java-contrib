@@ -21,12 +21,12 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.testutils.FakeTimeProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,8 +48,8 @@ class AbstractDiskExporterTest {
   private static final String STORAGE_FOLDER_NAME = "testName";
 
   @BeforeEach
-  public void setUp() throws NoSuchFieldException, IllegalAccessException {
-    setUpTimeProvider();
+  public void setUp() {
+    timeProvider = FakeTimeProvider.createAndSetMock(1000L);
     setUpSerializer();
     wrapped = mock();
     exporter =
@@ -143,15 +143,6 @@ class AbstractDiskExporterTest {
     File file = new File(rootDir, exporter.getStorageFolderName() + "/" + createdTimeMillis);
     Files.write(file.toPath(), Arrays.asList(lines));
     return file;
-  }
-
-  private void setUpTimeProvider() throws NoSuchFieldException, IllegalAccessException {
-    timeProvider = mock();
-    Field field = TimeProvider.class.getDeclaredField("instance");
-    field.setAccessible(true);
-
-    field.set(null, timeProvider);
-    doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
   }
 
   private void setUpSerializer() {
