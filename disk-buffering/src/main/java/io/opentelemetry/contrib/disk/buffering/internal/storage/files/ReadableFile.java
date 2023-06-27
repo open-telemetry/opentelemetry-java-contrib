@@ -42,7 +42,12 @@ public final class ReadableFile extends StorageFile {
       TimeProvider timeProvider,
       StorageConfiguration configuration)
       throws IOException {
-    this(file, createdTimeMillis, timeProvider, configuration, DelimitedProtoStreamReader.Factory.INSTANCE);
+    this(
+        file,
+        createdTimeMillis,
+        timeProvider,
+        configuration,
+        DelimitedProtoStreamReader.Factory.INSTANCE);
   }
 
   public ReadableFile(
