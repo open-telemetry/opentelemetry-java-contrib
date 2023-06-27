@@ -11,6 +11,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.Resou
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
@@ -20,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 public final class ReadableFile extends StorageFile {
   private final int originalFileSize;
   private final StreamReader reader;
-  private final FileChannel tempInChannel;
+  private final FileTransferUtil fileTransferUtil;
   private final File temporaryFile;
   private final TimeProvider timeProvider;
   private final long expireTimeMillis;
@@ -64,7 +64,7 @@ public final class ReadableFile extends StorageFile {
     temporaryFile = configuration.getTemporaryFileProvider().createTemporaryFile(file.getName());
     copyFile(file, temporaryFile);
     FileInputStream tempInputStream = new FileInputStream(temporaryFile);
-    tempInChannel = tempInputStream.getChannel();
+    fileTransferUtil = new FileTransferUtil(tempInputStream, file);
     reader = readerFactory.create(tempInputStream);
   }
 
@@ -95,13 +95,11 @@ public final class ReadableFile extends StorageFile {
     if (consumer.apply(read.content)) {
       unconsumedResult = null;
       readBytes += read.totalReadLength;
-      try (FileOutputStream out = new FileOutputStream(file, false)) {
-        int amountOfBytesToTransfer = originalFileSize - readBytes;
-        if (amountOfBytesToTransfer > 0) {
-          tempInChannel.transferTo(readBytes, amountOfBytesToTransfer, out.getChannel());
-        } else {
-          cleanUp();
-        }
+      int amountOfBytesToTransfer = originalFileSize - readBytes;
+      if (amountOfBytesToTransfer > 0) {
+        fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
+      } else {
+        cleanUp();
       }
     } else {
       unconsumedResult = read;
@@ -140,6 +138,7 @@ public final class ReadableFile extends StorageFile {
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       unconsumedResult = null;
+      fileTransferUtil.close();
       reader.close();
       temporaryFile.delete();
     }
