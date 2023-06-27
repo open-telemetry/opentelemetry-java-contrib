@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
-
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
@@ -58,13 +56,12 @@ public final class WritableFile extends StorageFile {
       close();
       throw new WritingTimeoutException();
     }
-    int futureSize = size + data.length + NEW_LINE_BYTES.length;
+    int futureSize = size + data.length;
     if (futureSize > configuration.getMaxFileSize()) {
       close();
       throw new NoSpaceAvailableException();
     }
     out.write(data);
-    out.write(NEW_LINE_BYTES);
     size = futureSize;
   }
 

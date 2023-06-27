@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,8 +64,8 @@ class WritableFileTest {
 
   @Test
   public void appendDataInNewLines_andIncreaseSize() throws IOException {
-    byte[] line1 = "First line".getBytes(StandardCharsets.UTF_8);
-    byte[] line2 = "Second line".getBytes(StandardCharsets.UTF_8);
+    byte[] line1 = getByteArrayLine("First line");
+    byte[] line2 = getByteArrayLine("Second line");
     writableFile.append(line1);
     writableFile.append(line2);
     writableFile.close();
@@ -74,13 +75,13 @@ class WritableFileTest {
     assertEquals(2, lines.size());
     assertEquals("First line", lines.get(0));
     assertEquals("Second line", lines.get(1));
-    assertEquals(line1.length + line2.length + NEW_LINE_BYTES_SIZE * 2L, writableFile.getSize());
+    assertEquals(line1.length + line2.length, writableFile.getSize());
   }
 
   @Test
   public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
       throws IOException {
-    writableFile.append(new byte[MAX_FILE_SIZE - NEW_LINE_BYTES_SIZE]);
+    writableFile.append(new byte[MAX_FILE_SIZE]);
     try {
       writableFile.append(new byte[1]);
       fail();
@@ -114,6 +115,14 @@ class WritableFileTest {
       fail();
     } catch (ResourceClosedException ignored) {
     }
+  }
+
+  private static byte[] getByteArrayLine(String line) {
+    byte[] lineBytes = line.getBytes(StandardCharsets.UTF_8);
+    byte[] fullLine = new byte[lineBytes.length + NEW_LINE_BYTES_SIZE];
+    System.arraycopy(lineBytes, 0, fullLine, 0, lineBytes.length);
+    System.arraycopy(NEW_LINE_BYTES, 0, fullLine, lineBytes.length, NEW_LINE_BYTES_SIZE);
+    return fullLine;
   }
 
   private List<String> getWrittenLines() throws IOException {
