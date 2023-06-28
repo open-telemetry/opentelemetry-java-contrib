@@ -9,6 +9,8 @@ import io.opentelemetry.contrib.disk.buffering.exporters.StoredBatchExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.File;
@@ -32,9 +34,20 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       String folderName,
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction) {
+    this(rootDir, configuration, folderName, serializer, exportFunction, TimeProvider.get());
+  }
+
+  DiskExporter(
+      File rootDir,
+      StorageConfiguration configuration,
+      String folderName,
+      SignalSerializer<EXPORT_DATA> serializer,
+      Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
+      TimeProvider timeProvider) {
     validateConfiguration(configuration);
     this.storage =
-        new Storage(new FolderManager(getSignalFolder(rootDir, folderName), configuration));
+        new Storage(
+            new FolderManager(getSignalFolder(rootDir, folderName), configuration, timeProvider));
     this.serializer = serializer;
     this.exportFunction = exportFunction;
   }
@@ -43,14 +56,16 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
     AtomicBoolean exportSucceeded = new AtomicBoolean(false);
-    return storage.readAndProcess(
-        bytes -> {
-          logger.log(Level.INFO, "About to export stored batch.");
-          CompletableResultCode join =
-              exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
-          exportSucceeded.set(join.isSuccess());
-          return exportSucceeded.get();
-        });
+    ReadableResult result =
+        storage.readAndProcess(
+            bytes -> {
+              logger.log(Level.INFO, "About to export stored batch.");
+              CompletableResultCode join =
+                  exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
+              exportSucceeded.set(join.isSuccess());
+              return exportSucceeded.get();
+            });
+    return result == ReadableResult.SUCCEEDED;
   }
 
   public void onShutDown() throws IOException {
@@ -60,10 +75,17 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   public CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
     logger.log(Level.FINER, "Intercepting exporter batch.");
     try {
-      storage.write(serializer.serialize(data));
-      return CompletableResultCode.ofSuccess();
+      if (storage.write(serializer.serialize(data))) {
+        return CompletableResultCode.ofSuccess();
+      } else {
+        logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
+        return exportFunction.apply(data);
+      }
     } catch (IOException e) {
-      logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
+      logger.log(
+          Level.WARNING,
+          "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
+          e);
       return exportFunction.apply(data);
     }
   }

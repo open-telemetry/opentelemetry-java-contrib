@@ -5,9 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
@@ -39,30 +37,28 @@ public final class WritableFile extends StorageFile {
   }
 
   /**
-   * Adds a new line to the file. If {@link WritingTimeoutException} or {@link
-   * NoSpaceAvailableException} are thrown, the file stream is closed with the contents available in
-   * the buffer before attempting to append the new data.
+   * Adds a new line to the file. If {@link WritableResult#FILE_EXPIRED} or {@link
+   * WritableResult#FILE_IS_FULL} are returned, the file stream is closed with the contents
+   * available in the buffer before attempting to append the new data.
    *
    * @param data - The new data line to add.
-   * @throws ResourceClosedException If it's closed.
-   * @throws WritingTimeoutException If the configured writing time for the file has ended.
-   * @throws NoSpaceAvailableException If the configured max file size has been reached.
    */
-  public synchronized void append(byte[] data) throws IOException {
+  public synchronized WritableResult append(byte[] data) throws IOException {
     if (isClosed.get()) {
-      throw new ResourceClosedException();
+      return WritableResult.CLOSED;
     }
     if (hasExpired()) {
       close();
-      throw new WritingTimeoutException();
+      return WritableResult.FILE_EXPIRED;
     }
     int futureSize = size + data.length;
     if (futureSize > configuration.getMaxFileSize()) {
       close();
-      throw new NoSpaceAvailableException();
+      return WritableResult.FILE_IS_FULL;
     }
     out.write(data);
     size = futureSize;
+    return WritableResult.SUCCEEDED;
   }
 
   @Override

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.testutils.FakeTimeProvider;
@@ -110,17 +109,6 @@ class DiskExporterTest {
   @Test
   public void verifyStorageFolderIsCreated() {
     assertTrue(new File(rootDir, STORAGE_FOLDER_NAME).exists());
-  }
-
-  @Test
-  public void closeStorageOnShutDown() throws IOException {
-    exporter.onShutDown();
-
-    try {
-      exporter.exportStoredBatch(1, TimeUnit.SECONDS);
-      fail();
-    } catch (ResourceClosedException ignored) {
-    }
   }
 
   @Test

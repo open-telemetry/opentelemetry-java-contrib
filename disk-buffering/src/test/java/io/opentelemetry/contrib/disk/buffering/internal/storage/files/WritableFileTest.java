@@ -12,14 +12,11 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.uti
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import java.io.File;
 import java.io.IOException;
@@ -79,42 +76,34 @@ class WritableFileTest {
   }
 
   @Test
-  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndThrowException()
+  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnNoSpaceAvailable()
       throws IOException {
-    writableFile.append(new byte[MAX_FILE_SIZE]);
-    try {
-      writableFile.append(new byte[1]);
-      fail();
-    } catch (NoSpaceAvailableException e) {
-      assertEquals(1, getWrittenLines().size());
-      assertEquals(MAX_FILE_SIZE, writableFile.getSize());
-    }
+    assertEquals(WritableResult.SUCCEEDED, writableFile.append(new byte[MAX_FILE_SIZE]));
+
+    assertEquals(WritableResult.FILE_IS_FULL, writableFile.append(new byte[1]));
+
+    assertEquals(1, getWrittenLines().size());
+    assertEquals(MAX_FILE_SIZE, writableFile.getSize());
   }
 
   @Test
-  public void whenAppendingData_andHasExpired_closeAndThrowException() throws IOException {
+  public void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS)
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
-    try {
-      writableFile.append(new byte[1]);
-      fail();
-    } catch (WritingTimeoutException e) {
-      assertEquals(1, getWrittenLines().size());
-    }
+
+    assertEquals(WritableResult.FILE_EXPIRED, writableFile.append(new byte[1]));
+
+    assertEquals(1, getWrittenLines().size());
   }
 
   @Test
-  public void whenAppendingData_andIsAlreadyClosed_throwException() throws IOException {
+  public void whenAppendingData_andIsAlreadyClosed_returnClosedStatus() throws IOException {
     writableFile.append(new byte[1]);
     writableFile.close();
 
-    try {
-      writableFile.append(new byte[2]);
-      fail();
-    } catch (ResourceClosedException ignored) {
-    }
+    assertEquals(WritableResult.CLOSED, writableFile.append(new byte[2]));
   }
 
   private static byte[] getByteArrayLine(String line) {

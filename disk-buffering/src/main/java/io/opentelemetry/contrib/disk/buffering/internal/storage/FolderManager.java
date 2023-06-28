@@ -21,10 +21,6 @@ public final class FolderManager {
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
-  public FolderManager(File folder, StorageConfiguration configuration) {
-    this(folder, configuration, TimeProvider.get());
-  }
-
   public FolderManager(File folder, StorageConfiguration configuration, TimeProvider timeProvider) {
     this.folder = folder;
     this.configuration = configuration;

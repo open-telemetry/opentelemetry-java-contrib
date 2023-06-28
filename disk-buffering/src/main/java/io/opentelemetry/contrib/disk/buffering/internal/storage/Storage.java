@@ -5,14 +5,10 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAttemptsReachedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,67 +30,64 @@ public final class Storage implements Closeable {
    * Attempts to write a line into a writable file.
    *
    * @param line - The data that would be appended to the file.
-   * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
-   * @throws ResourceClosedException If it's closed.
    * @throws IOException If an unexpected error happens.
    */
-  public void write(byte[] line) throws IOException {
-    write(line, 1);
+  public boolean write(byte[] line) throws IOException {
+    return write(line, 1);
   }
 
-  private void write(byte[] line, int attemptNumber) throws IOException {
+  private boolean write(byte[] line, int attemptNumber) throws IOException {
     if (isClosed.get()) {
-      throw new ResourceClosedException();
+      return false;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
-      throw new MaxAttemptsReachedException();
+      return false;
     }
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
     }
-    try {
-      writableFile.append(line);
-    } catch (WritingTimeoutException | NoSpaceAvailableException | ResourceClosedException e) {
+    WritableResult result = writableFile.append(line);
+    if (result != WritableResult.SUCCEEDED) {
       // Retry with new file
       writableFile = null;
-      write(line, ++attemptNumber);
+      return write(line, ++attemptNumber);
     }
+    return true;
   }
 
   /**
    * Attempts to read a line from a ready-to-read file.
    *
    * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
-   * @return TRUE if data was found and processed, FALSE if either there was no data available or
-   *     there was but could not be processed.
-   * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
-   * @throws ResourceClosedException If it's closed.
    * @throws IOException If an unexpected error happens.
    */
-  public boolean readAndProcess(Function<byte[], Boolean> processing) throws IOException {
+  public ReadableResult readAndProcess(Function<byte[], Boolean> processing) throws IOException {
     return readAndProcess(processing, 1);
   }
 
-  private boolean readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
+  private ReadableResult readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
-      throw new ResourceClosedException();
+      return ReadableResult.CLOSED;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
-      throw new MaxAttemptsReachedException();
+      return ReadableResult.NO_CONTENT_AVAILABLE;
     }
     if (readableFile == null) {
       readableFile = folderManager.getReadableFile();
       if (readableFile == null) {
-        return false;
+        return ReadableResult.NO_CONTENT_AVAILABLE;
       }
     }
-    try {
-      return readableFile.readAndProcess(processing);
-    } catch (ReadingTimeoutException | NoContentAvailableException | ResourceClosedException e) {
-      // Retry with new file
-      readableFile = null;
-      return readAndProcess(processing, ++attemptNumber);
+    ReadableResult result = readableFile.readAndProcess(processing);
+    switch (result) {
+      case SUCCEEDED:
+      case PROCESSING_FAILED:
+        return result;
+      default:
+        // Retry with new file
+        readableFile = null;
+        return readAndProcess(processing, ++attemptNumber);
     }
   }
 

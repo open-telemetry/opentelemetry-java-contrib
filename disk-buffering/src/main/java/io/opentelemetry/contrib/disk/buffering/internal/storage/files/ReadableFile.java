@@ -5,13 +5,11 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
@@ -75,24 +73,20 @@ public final class ReadableFile extends StorageFile {
    * @param processing - A function that receives the line that has been read and returns a boolean.
    *     If the processing function returns TRUE, then the provided line will be deleted from the
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
-   * @throws ReadingTimeoutException If the configured reading time for the file has ended.
-   * @throws NoContentAvailableException If there is no content to be read from the file.
-   * @throws ResourceClosedException If it's closed.
-   * @return TRUE if the data is processed, FALSE otherwise.
    */
-  public synchronized boolean readAndProcess(Function<byte[], Boolean> processing)
+  public synchronized ReadableResult readAndProcess(Function<byte[], Boolean> processing)
       throws IOException {
     if (isClosed.get()) {
-      throw new ResourceClosedException();
+      return ReadableResult.CLOSED;
     }
     if (hasExpired()) {
       close();
-      throw new ReadingTimeoutException();
+      return ReadableResult.FILE_HAS_EXPIRED;
     }
     ReadResult read = readNextItem();
     if (read == null) {
       cleanUp();
-      throw new NoContentAvailableException();
+      return ReadableResult.NO_CONTENT_AVAILABLE;
     }
     if (processing.apply(read.content)) {
       unconsumedResult = null;
@@ -103,11 +97,11 @@ public final class ReadableFile extends StorageFile {
       } else {
         cleanUp();
       }
-      return true;
+      return ReadableResult.SUCCEEDED;
     } else {
       unconsumedResult = read;
+      return ReadableResult.PROCESSING_FAILED;
     }
-    return false;
   }
 
   @Nullable

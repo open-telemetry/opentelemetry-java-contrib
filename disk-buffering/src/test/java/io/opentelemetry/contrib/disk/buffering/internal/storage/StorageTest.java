@@ -5,25 +5,20 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.MaxAttemptsReachedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoSpaceAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.WritingTimeoutException;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import java.io.IOException;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,27 +36,27 @@ class StorageTest {
   public void setUp() throws IOException {
     folderManager = mock();
     readableFile = mock();
-    writableFile = mock();
+    writableFile = createWritableFile();
     processing = mock();
-    doReturn(true).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.SUCCEEDED).when(readableFile).readAndProcess(processing);
     storage = new Storage(folderManager);
   }
 
   @Test
-  public void whenReadingAndProcessingSuccessfully_returnTrue() throws IOException {
+  public void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
     doReturn(readableFile).when(folderManager).getReadableFile();
 
-    assertTrue(storage.readAndProcess(processing));
+    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
 
     verify(readableFile).readAndProcess(processing);
   }
 
   @Test
-  public void whenReadableFileProcessingFails_returnFalse() throws IOException {
+  public void whenReadableFileProcessingFails_returnFailed() throws IOException {
     doReturn(readableFile).when(folderManager).getReadableFile();
-    doReturn(false).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.PROCESSING_FAILED).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.readAndProcess(processing));
+    assertEquals(ReadableResult.PROCESSING_FAILED, storage.readAndProcess(processing));
 
     verify(readableFile).readAndProcess(processing);
   }
@@ -71,8 +66,8 @@ class StorageTest {
     ReadableFile anotherReadable = mock();
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
 
-    assertTrue(storage.readAndProcess(processing));
-    assertTrue(storage.readAndProcess(processing));
+    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
+    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
 
     verify(readableFile, times(2)).readAndProcess(processing);
     verify(folderManager, times(1)).getReadableFile();
@@ -82,7 +77,7 @@ class StorageTest {
   @Test
   public void whenWritingMultipleTimes_reuseWriter() throws IOException {
     byte[] data = new byte[1];
-    WritableFile anotherWriter = mock();
+    WritableFile anotherWriter = createWritableFile();
     when(folderManager.createWritableFile()).thenReturn(writableFile).thenReturn(anotherWriter);
 
     storage.write(data);
@@ -94,76 +89,64 @@ class StorageTest {
   }
 
   @Test
-  public void whenAttemptingToReadAfterClosed_throwException() throws IOException {
+  public void whenAttemptingToReadAfterClosed_returnClosed() throws IOException {
     storage.close();
-    try {
-      storage.readAndProcess(processing);
-      fail();
-    } catch (ResourceClosedException ignored) {
-    }
+    assertEquals(ReadableResult.CLOSED, storage.readAndProcess(processing));
   }
 
   @Test
-  public void whenAttemptingToWriteAfterClosed_throwException() throws IOException {
+  public void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
     storage.close();
-    try {
-      storage.write(new byte[1]);
-      fail();
-    } catch (ResourceClosedException ignored) {
-    }
+    assertFalse(storage.write(new byte[1]));
   }
 
   @Test
-  public void whenNoFileAvailableForReading_returnFalse() throws IOException {
-    assertFalse(storage.readAndProcess(processing));
+  public void whenNoFileAvailableForReading_returnNoContentAvailable() throws IOException {
+    assertEquals(ReadableResult.NO_CONTENT_AVAILABLE, storage.readAndProcess(processing));
   }
 
   @Test
-  public void whenTimeoutExceptionHappens_lookForNewFileToRead() throws IOException {
+  public void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ReadingTimeoutException.class).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.FILE_HAS_EXPIRED).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.readAndProcess(processing));
+    storage.readAndProcess(processing);
 
     verify(folderManager, times(2)).getReadableFile();
   }
 
   @Test
-  public void whenNoMoreLinesToReadExceptionHappens_lookForNewFileToRead() throws IOException {
+  public void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(NoContentAvailableException.class).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.NO_CONTENT_AVAILABLE).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.readAndProcess(processing));
+    storage.readAndProcess(processing);
 
     verify(folderManager, times(2)).getReadableFile();
   }
 
   @Test
-  public void whenResourceClosedExceptionHappens_lookForNewFileToRead() throws IOException {
+  public void whenResourceClosed_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ResourceClosedException.class).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.CLOSED).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.readAndProcess(processing));
+    storage.readAndProcess(processing);
 
     verify(folderManager, times(2)).getReadableFile();
   }
 
   @Test
-  public void whenEveryNewFileFoundCannotBeRead_throwExceptionAfterMaxAttempts()
-      throws IOException {
+  public void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doThrow(ResourceClosedException.class).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.CLOSED).when(readableFile).readAndProcess(processing);
 
-    try {
-      assertFalse(storage.readAndProcess(processing));
-      fail();
-    } catch (MaxAttemptsReachedException e) {
-      verify(folderManager, times(3)).getReadableFile();
-    }
+    assertEquals(ReadableResult.NO_CONTENT_AVAILABLE, storage.readAndProcess(processing));
+
+    verify(folderManager, times(3)).getReadableFile();
   }
 
   @Test
-  public void appendLineToFile() throws IOException {
+  public void appendDataToFile() throws IOException {
     doReturn(writableFile).when(folderManager).createWritableFile();
     byte[] data = new byte[1];
 
@@ -173,13 +156,13 @@ class StorageTest {
   }
 
   @Test
-  public void whenWritingTimeoutExceptionHappens_retryWithNewFile() throws IOException {
+  public void whenWritingTimeoutHappens_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
-    WritableFile workingWritableFile = mock();
+    WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doThrow(WritingTimeoutException.class).when(writableFile).append(data);
+    doReturn(WritableResult.FILE_EXPIRED).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -187,13 +170,13 @@ class StorageTest {
   }
 
   @Test
-  public void whenNoSpaceAvailableExceptionHappens_retryWithNewFile() throws IOException {
+  public void whenThereIsNoSpaceAvailableForWriting_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
-    WritableFile workingWritableFile = mock();
+    WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doThrow(NoSpaceAvailableException.class).when(writableFile).append(data);
+    doReturn(WritableResult.FILE_IS_FULL).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -201,13 +184,13 @@ class StorageTest {
   }
 
   @Test
-  public void whenResourceClosedExceptionHappens_retryWithNewFile() throws IOException {
+  public void whenWritingResourceIsClosed_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
-    WritableFile workingWritableFile = mock();
+    WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doThrow(ResourceClosedException.class).when(writableFile).append(data);
+    doReturn(WritableResult.CLOSED).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -215,17 +198,14 @@ class StorageTest {
   }
 
   @Test
-  public void whenEveryAttemptToWriteFails_throwExceptionAfterMaxAttempts() throws IOException {
+  public void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
     byte[] data = new byte[1];
     when(folderManager.createWritableFile()).thenReturn(writableFile);
-    doThrow(ResourceClosedException.class).when(writableFile).append(data);
+    doReturn(WritableResult.CLOSED).when(writableFile).append(data);
 
-    try {
-      storage.write(data);
-      fail();
-    } catch (MaxAttemptsReachedException e) {
-      verify(folderManager, times(3)).createWritableFile();
-    }
+    assertFalse(storage.write(data));
+
+    verify(folderManager, times(3)).createWritableFile();
   }
 
   @Test
@@ -239,5 +219,11 @@ class StorageTest {
 
     verify(writableFile).close();
     verify(readableFile).close();
+  }
+
+  private static WritableFile createWritableFile() throws IOException {
+    WritableFile mock = mock();
+    doReturn(WritableResult.SUCCEEDED).when(mock).append(any());
+    return mock;
   }
 }

@@ -19,9 +19,7 @@ import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.LogRecordDataSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.NoContentAvailableException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ReadingTimeoutException;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.exceptions.ResourceClosedException;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -131,13 +129,13 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenProcessingSucceeds_returnTrue() throws IOException {
-    assertTrue(readableFile.readAndProcess(bytes -> true));
+  public void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
+    assertEquals(ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> true));
   }
 
   @Test
-  public void whenProcessingFails_returnFalse() throws IOException {
-    assertFalse(readableFile.readAndProcess(bytes -> false));
+  public void whenProcessingFails_returnProcessFailedStatus() throws IOException {
+    assertEquals(ReadableResult.PROCESSING_FAILED, readableFile.readAndProcess(bytes -> false));
   }
 
   @Test
@@ -177,7 +175,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_throwException()
+  public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
       throws IOException {
     File emptyFile = new File(dir, "emptyFile");
     if (!emptyFile.createNewFile()) {
@@ -187,57 +185,47 @@ class ReadableFileTest {
     ReadableFile emptyReadableFile =
         new ReadableFile(
             emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
-    try {
-      emptyReadableFile.readAndProcess(bytes -> true);
-      fail();
-    } catch (NoContentAvailableException ignored) {
-      assertTrue(emptyReadableFile.isClosed());
-      assertFalse(emptyFile.exists());
-    }
+
+    assertEquals(
+        ReadableResult.NO_CONTENT_AVAILABLE, emptyReadableFile.readAndProcess(bytes -> true));
+
+    assertTrue(emptyReadableFile.isClosed());
+    assertFalse(emptyFile.exists());
   }
 
   @Test
   public void
-      whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_throwException()
+      whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
 
-    try {
-      readableFile.readAndProcess(bytes -> true);
-      fail();
-    } catch (ReadingTimeoutException ignored) {
-      assertTrue(readableFile.isClosed());
-    }
+    assertEquals(ReadableResult.FILE_HAS_EXPIRED, readableFile.readAndProcess(bytes -> true));
+
+    assertTrue(readableFile.isClosed());
   }
 
   @Test
-  public void whenReadingAfterClosed_throwException() throws IOException {
+  public void whenReadingAfterClosed_returnClosedStatus() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
-    try {
-      readableFile.readAndProcess(bytes -> true);
-      fail();
-    } catch (ResourceClosedException ignored) {
-    }
+    assertEquals(ReadableResult.CLOSED, readableFile.readAndProcess(bytes -> true));
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)
       throws IOException {
     List<LogRecordData> result = new ArrayList<>();
-    while (true) {
-      try {
-        readableFile.readAndProcess(
-            bytes -> {
-              result.add(deserialize(bytes));
-              return true;
-            });
-      } catch (IOException ignored) {
-        break;
-      }
+    ReadableResult readableResult = ReadableResult.SUCCEEDED;
+    while (readableResult == ReadableResult.SUCCEEDED) {
+      readableResult =
+          readableFile.readAndProcess(
+              bytes -> {
+                result.add(deserialize(bytes));
+                return true;
+              });
     }
 
     readableFile.close();
