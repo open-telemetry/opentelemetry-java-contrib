@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public final class MetricDiskExporter implements MetricExporter, StoredBatchExporter {
   private final MetricExporter wrapped;
   private final DiskExporter<MetricData> diskExporter;
+
   /**
    * Creates a new instance of {@link MetricDiskExporter}.
    *
