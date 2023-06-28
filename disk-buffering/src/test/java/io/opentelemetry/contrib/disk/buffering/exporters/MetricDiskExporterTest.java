@@ -10,16 +10,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
-import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,33 +24,22 @@ class MetricDiskExporterTest {
 
   private MetricExporter wrapped;
   private MetricDiskExporter exporter;
+  private static final StorageConfiguration STORAGE_CONFIGURATION =
+      TestData.getDefaultConfiguration();
+  private static final String STORAGE_FOLDER_NAME = "metrics";
   @TempDir File rootDir;
 
   @BeforeEach
   public void setUp() {
     wrapped = mock();
-    exporter = new MetricDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration());
+    exporter = new MetricDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test
-  public void verifyStorageFolderName() {
-    assertEquals("metrics", exporter.getStorageFolderName());
-  }
-
-  @Test
-  public void callWrappedWhenDoingExport() {
-    List<MetricData> data = Collections.emptyList();
-    CompletableResultCode result = CompletableResultCode.ofSuccess();
-    doReturn(result).when(wrapped).export(data);
-
-    assertEquals(result, exporter.doExport(data));
-
-    verify(wrapped).export(data);
-  }
-
-  @Test
-  public void verifySerializer() {
-    assertEquals(SignalSerializer.ofMetrics(), exporter.getSerializer());
+  public void verifyCacheFolderName() {
+    File[] files = rootDir.listFiles();
+    assertEquals(1, files.length);
+    assertEquals(STORAGE_FOLDER_NAME, files[0].getName());
   }
 
   @Test

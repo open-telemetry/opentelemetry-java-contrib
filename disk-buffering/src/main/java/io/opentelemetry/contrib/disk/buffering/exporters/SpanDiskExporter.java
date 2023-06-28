@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.AbstractDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -15,6 +15,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is a {@link SpanExporter} wrapper that takes care of intercepting all the signals sent out
@@ -23,8 +24,9 @@ import java.util.Collection;
  * <p>In order to use it, you need to wrap your own {@link SpanExporter} with a new instance of this
  * one, which will be the one you need to register in your {@link SpanProcessor}.
  */
-public final class SpanDiskExporter extends AbstractDiskExporter<SpanData> implements SpanExporter {
+public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter {
   private final SpanExporter wrapped;
+  private final DiskExporter<SpanData> diskExporter;
 
   /**
    * @param wrapped - Your own exporter.
@@ -33,19 +35,21 @@ public final class SpanDiskExporter extends AbstractDiskExporter<SpanData> imple
    * @param configuration - How you want to manage the storage process.
    */
   public SpanDiskExporter(SpanExporter wrapped, File rootDir, StorageConfiguration configuration) {
-    super(rootDir, configuration);
     this.wrapped = wrapped;
+    diskExporter =
+        new DiskExporter<>(
+            rootDir, configuration, "spans", SignalSerializer.ofSpans(), wrapped::export);
   }
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {
-    return onExport(spans);
+    return diskExporter.onExport(spans);
   }
 
   @Override
   public CompletableResultCode shutdown() {
     try {
-      onShutDown();
+      diskExporter.onShutDown();
     } catch (IOException e) {
       return CompletableResultCode.ofFailure();
     } finally {
@@ -55,22 +59,12 @@ public final class SpanDiskExporter extends AbstractDiskExporter<SpanData> imple
   }
 
   @Override
-  protected String getStorageFolderName() {
-    return "spans";
-  }
-
-  @Override
-  protected CompletableResultCode doExport(Collection<SpanData> data) {
-    return wrapped.export(data);
-  }
-
-  @Override
-  protected SignalSerializer<SpanData> getSerializer() {
-    return SignalSerializer.ofSpans();
-  }
-
-  @Override
   public CompletableResultCode flush() {
     return wrapped.flush();
+  }
+
+  @Override
+  public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
+    return diskExporter.exportStoredBatch(timeout, unit);
   }
 }

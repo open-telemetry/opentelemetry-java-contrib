@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,11 +37,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @SuppressWarnings("unchecked")
-class AbstractDiskExporterTest {
+class DiskExporterTest {
   private SpanExporter wrapped;
   private SignalSerializer<SpanData> serializer;
   private TimeProvider timeProvider;
-  private AbstractDiskExporter<SpanData> exporter;
+  private DiskExporter<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
   private static final String STORAGE_FOLDER_NAME = "testName";
@@ -53,7 +52,12 @@ class AbstractDiskExporterTest {
     setUpSerializer();
     wrapped = mock();
     exporter =
-        new TestDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration(), serializer);
+        new DiskExporter<>(
+            rootDir,
+            TestData.getDefaultConfiguration(),
+            STORAGE_FOLDER_NAME,
+            serializer,
+            wrapped::export);
   }
 
   @Test
@@ -70,14 +74,15 @@ class AbstractDiskExporterTest {
   @Test
   public void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
     try {
-      new TestDiskExporter(
-          wrapped,
+      new DiskExporter<>(
           rootDir,
           StorageConfiguration.builder()
               .setMaxFileAgeForWriteMillis(2)
               .setMinFileAgeForReadMillis(1)
               .build(),
-          serializer);
+          STORAGE_FOLDER_NAME,
+          serializer,
+          wrapped::export);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals(
@@ -140,7 +145,7 @@ class AbstractDiskExporterTest {
   }
 
   private File createDummyFile(long createdTimeMillis, String... lines) throws IOException {
-    File file = new File(rootDir, exporter.getStorageFolderName() + "/" + createdTimeMillis);
+    File file = new File(rootDir, STORAGE_FOLDER_NAME + "/" + createdTimeMillis);
     Files.write(file.toPath(), Arrays.asList(lines));
     return file;
   }
@@ -148,35 +153,5 @@ class AbstractDiskExporterTest {
   private void setUpSerializer() {
     serializer = mock();
     doReturn(deserializedData).when(serializer).deserialize(any());
-  }
-
-  private static class TestDiskExporter extends AbstractDiskExporter<SpanData> {
-    private final SpanExporter wrapped;
-    private final SignalSerializer<SpanData> serializer;
-
-    public TestDiskExporter(
-        SpanExporter wrapped,
-        File rootDir,
-        StorageConfiguration configuration,
-        SignalSerializer<SpanData> serializer) {
-      super(rootDir, configuration);
-      this.wrapped = wrapped;
-      this.serializer = serializer;
-    }
-
-    @Override
-    protected String getStorageFolderName() {
-      return STORAGE_FOLDER_NAME;
-    }
-
-    @Override
-    protected CompletableResultCode doExport(Collection<SpanData> spanData) {
-      return wrapped.export(spanData);
-    }
-
-    @Override
-    protected SignalSerializer<SpanData> getSerializer() {
-      return serializer;
-    }
   }
 }

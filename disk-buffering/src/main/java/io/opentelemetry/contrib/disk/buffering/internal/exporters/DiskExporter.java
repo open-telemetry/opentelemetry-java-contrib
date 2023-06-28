@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
+import io.opentelemetry.contrib.disk.buffering.exporters.StoredBatchExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
@@ -15,27 +16,30 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AbstractDiskExporter<EXPORT_DATA> {
+public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   private final Storage storage;
-  private static final Logger logger = Logger.getLogger(AbstractDiskExporter.class.getName());
+  private final SignalSerializer<EXPORT_DATA> serializer;
+  private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
+  private static final Logger logger = Logger.getLogger(DiskExporter.class.getName());
 
-  public AbstractDiskExporter(File rootDir, StorageConfiguration configuration) {
+  public DiskExporter(
+      File rootDir,
+      StorageConfiguration configuration,
+      String folderName,
+      SignalSerializer<EXPORT_DATA> serializer,
+      Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction) {
     validateConfiguration(configuration);
-    this.storage = new Storage(new FolderManager(getSignalFolder(rootDir), configuration));
+    this.storage =
+        new Storage(new FolderManager(getSignalFolder(rootDir, folderName), configuration));
+    this.serializer = serializer;
+    this.exportFunction = exportFunction;
   }
 
-  /**
-   * Reads data from the disk and attempts to export it.
-   *
-   * @param timeout The amount of time to wait for the wrapped exporter to finish.
-   * @param unit The unit of the time provided.
-   * @return TRUE if there was data available and it was successfully exported within the timeout
-   *     provided. FALSE if either of those conditions didn't meet.
-   * @throws IOException If an unexpected error happens.
-   */
+  @Override
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
     AtomicBoolean exportSucceeded = new AtomicBoolean(false);
@@ -44,36 +48,30 @@ public abstract class AbstractDiskExporter<EXPORT_DATA> {
             bytes -> {
               logger.log(Level.INFO, "About to export stored batch.");
               CompletableResultCode join =
-                  doExport(getSerializer().deserialize(bytes)).join(timeout, unit);
+                  exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
               exportSucceeded.set(join.isSuccess());
               return exportSucceeded.get();
             });
     return foundDataToExport && exportSucceeded.get();
   }
 
-  protected abstract String getStorageFolderName();
-
-  protected abstract CompletableResultCode doExport(Collection<EXPORT_DATA> data);
-
-  protected abstract SignalSerializer<EXPORT_DATA> getSerializer();
-
-  protected void onShutDown() throws IOException {
+  public void onShutDown() throws IOException {
     storage.close();
   }
 
-  protected CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
+  public CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
     logger.log(Level.FINER, "Intercepting exporter batch.");
     try {
-      storage.write(getSerializer().serialize(data));
+      storage.write(serializer.serialize(data));
       return CompletableResultCode.ofSuccess();
     } catch (IOException e) {
       logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
-      return doExport(data);
+      return exportFunction.apply(data);
     }
   }
 
-  private File getSignalFolder(File rootDir) {
-    File folder = new File(rootDir, getStorageFolderName());
+  private static File getSignalFolder(File rootDir, String folderName) {
+    File folder = new File(rootDir, folderName);
     if (!folder.exists()) {
       if (!folder.mkdirs()) {
         throw new IllegalStateException("Could not create the signal folder");

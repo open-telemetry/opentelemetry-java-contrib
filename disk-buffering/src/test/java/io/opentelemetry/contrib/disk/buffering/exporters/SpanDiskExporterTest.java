@@ -6,18 +6,13 @@
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,33 +20,22 @@ import org.junit.jupiter.api.io.TempDir;
 class SpanDiskExporterTest {
   private SpanExporter wrapped;
   private SpanDiskExporter exporter;
+  private static final StorageConfiguration STORAGE_CONFIGURATION =
+      TestData.getDefaultConfiguration();
+  private static final String STORAGE_FOLDER_NAME = "spans";
   @TempDir File rootDir;
 
   @BeforeEach
   public void setUp() {
     wrapped = mock();
-    exporter = new SpanDiskExporter(wrapped, rootDir, TestData.getDefaultConfiguration());
+    exporter = new SpanDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test
-  public void verifyStorageFolderName() {
-    assertEquals("spans", exporter.getStorageFolderName());
-  }
-
-  @Test
-  public void callWrappedWhenDoingExport() {
-    List<SpanData> data = Collections.emptyList();
-    CompletableResultCode result = CompletableResultCode.ofSuccess();
-    doReturn(result).when(wrapped).export(data);
-
-    assertEquals(result, exporter.doExport(data));
-
-    verify(wrapped).export(data);
-  }
-
-  @Test
-  public void verifySerializer() {
-    assertEquals(SignalSerializer.ofSpans(), exporter.getSerializer());
+  public void verifyCacheFolderName() {
+    File[] files = rootDir.listFiles();
+    assertEquals(1, files.length);
+    assertEquals(STORAGE_FOLDER_NAME, files[0].getName());
   }
 
   @Test
