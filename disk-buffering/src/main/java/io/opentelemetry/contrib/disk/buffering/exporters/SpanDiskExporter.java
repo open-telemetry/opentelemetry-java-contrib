@@ -60,7 +60,7 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
 
   @Override
   public CompletableResultCode flush() {
-    return wrapped.flush();
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override

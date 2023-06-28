@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -43,10 +44,8 @@ class MetricDiskExporterTest {
   }
 
   @Test
-  public void onFlush_flushWrappedExporter() {
-    exporter.flush();
-
-    verify(wrapped).flush();
+  public void onFlush_returnSuccess() {
+    assertEquals(CompletableResultCode.ofSuccess(), exporter.flush());
   }
 
   @Test

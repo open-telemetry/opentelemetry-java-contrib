@@ -49,7 +49,7 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
 
   @Override
   public CompletableResultCode flush() {
-    return wrapped.flush();
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override

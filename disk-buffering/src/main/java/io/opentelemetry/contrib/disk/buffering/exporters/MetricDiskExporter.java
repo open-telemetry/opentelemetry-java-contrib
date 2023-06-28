@@ -50,7 +50,7 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
 
   @Override
   public CompletableResultCode flush() {
-    return wrapped.flush();
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override

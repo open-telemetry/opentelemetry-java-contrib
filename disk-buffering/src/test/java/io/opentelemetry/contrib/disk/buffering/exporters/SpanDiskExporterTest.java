@@ -7,10 +7,10 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +39,7 @@ class SpanDiskExporterTest {
   }
 
   @Test
-  public void onFlush_flushWrappedExporter() {
-    exporter.flush();
-
-    verify(wrapped).flush();
+  public void onFlush_returnSuccess() {
+    assertEquals(CompletableResultCode.ofSuccess(), exporter.flush());
   }
 }
