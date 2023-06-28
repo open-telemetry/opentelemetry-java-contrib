@@ -31,17 +31,30 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
   private final MetricExporter wrapped;
   private final DiskExporter<MetricData> diskExporter;
   /**
-   * @param wrapped - Your own exporter.
+   * Creates a new instance of {@link MetricDiskExporter}.
+   *
+   * @param wrapped - The exporter where the data retrieved from the disk will be delegated to.
    * @param rootDir - The directory to create this signal's cache dir where all the data will be
    *     written into.
    * @param configuration - How you want to manage the storage process.
+   * @throws IOException If no dir can be created in rootDir.
    */
-  public MetricDiskExporter(
+  public static MetricDiskExporter create(
       MetricExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
-    this(wrapped, rootDir, configuration, TimeProvider.get());
+    return create(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
-  MetricDiskExporter(
+  // This is used for testing purposes.
+  public static MetricDiskExporter create(
+      MetricExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider)
+      throws IOException {
+    return new MetricDiskExporter(wrapped, rootDir, configuration, timeProvider);
+  }
+
+  private MetricDiskExporter(
       MetricExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,

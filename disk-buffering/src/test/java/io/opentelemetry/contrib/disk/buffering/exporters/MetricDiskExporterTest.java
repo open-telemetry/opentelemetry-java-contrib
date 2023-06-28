@@ -34,7 +34,7 @@ class MetricDiskExporterTest {
   @BeforeEach
   public void setUp() throws IOException {
     wrapped = mock();
-    exporter = new MetricDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
+    exporter = MetricDiskExporter.create(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test

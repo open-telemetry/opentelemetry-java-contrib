@@ -29,7 +29,7 @@ class LogRecordDiskExporterTest {
   @BeforeEach
   public void setUp() throws IOException {
     wrapped = mock();
-    exporter = new LogRecordDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
+    exporter = LogRecordDiskExporter.create(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test

@@ -30,18 +30,31 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
   private final DiskExporter<LogRecordData> diskExporter;
 
   /**
-   * @param wrapped - Your own exporter.
+   * Creates a new instance of {@link LogRecordDiskExporter}.
+   *
+   * @param wrapped - The exporter where the data retrieved from the disk will be delegated to.
    * @param rootDir - The directory to create this signal's cache dir where all the data will be
    *     written into.
    * @param configuration - How you want to manage the storage process.
+   * @throws IOException If no dir can be created in rootDir.
    */
-  public LogRecordDiskExporter(
+  public static LogRecordDiskExporter create(
       LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration)
       throws IOException {
-    this(wrapped, rootDir, configuration, TimeProvider.get());
+    return create(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
-  LogRecordDiskExporter(
+  // This is used for testing purposes.
+  static LogRecordDiskExporter create(
+      LogRecordExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider)
+      throws IOException {
+    return new LogRecordDiskExporter(wrapped, rootDir, configuration, timeProvider);
+  }
+
+  private LogRecordDiskExporter(
       LogRecordExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,

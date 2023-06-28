@@ -56,20 +56,21 @@ public class IntegrationTest {
     // Setting up spans
     memorySpanExporter = InMemorySpanExporter.create();
     diskSpanExporter =
-        new SpanDiskExporter(memorySpanExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
+        SpanDiskExporter.create(memorySpanExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     tracer = createTracerProvider(diskSpanExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
     memoryMetricExporter = InMemoryMetricExporter.create();
     diskMetricExporter =
-        new MetricDiskExporter(memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
+        MetricDiskExporter.create(
+            memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     meterProvider = createMeterProvider(diskMetricExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
     // Setting up logs
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
     diskLogRecordExporter =
-        new LogRecordDiskExporter(
+        LogRecordDiskExporter.create(
             memoryLogRecordExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     logger = createLoggerProvider(diskLogRecordExporter).get("LogInstrumentationScope");
   }

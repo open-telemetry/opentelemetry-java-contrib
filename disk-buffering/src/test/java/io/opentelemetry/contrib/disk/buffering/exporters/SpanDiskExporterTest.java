@@ -29,7 +29,7 @@ class SpanDiskExporterTest {
   @BeforeEach
   public void setUp() throws IOException {
     wrapped = mock();
-    exporter = new SpanDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
+    exporter = SpanDiskExporter.create(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test

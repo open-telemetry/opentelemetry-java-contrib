@@ -30,17 +30,30 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
   private final DiskExporter<SpanData> diskExporter;
 
   /**
-   * @param wrapped - Your own exporter.
+   * Creates a new instance of {@link SpanDiskExporter}.
+   *
+   * @param wrapped - The exporter where the data retrieved from the disk will be delegated to.
    * @param rootDir - The directory to create this signal's cache dir where all the data will be
    *     written into.
    * @param configuration - How you want to manage the storage process.
+   * @throws IOException If no dir can be created in rootDir.
    */
-  public SpanDiskExporter(SpanExporter wrapped, File rootDir, StorageConfiguration configuration)
-      throws IOException {
-    this(wrapped, rootDir, configuration, TimeProvider.get());
+  public static SpanDiskExporter create(
+      SpanExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
+    return create(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
-  SpanDiskExporter(
+  // This is used for testing purposes.
+  public static SpanDiskExporter create(
+      SpanExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider)
+      throws IOException {
+    return new SpanDiskExporter(wrapped, rootDir, configuration, timeProvider);
+  }
+
+  private SpanDiskExporter(
       SpanExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
