@@ -69,7 +69,7 @@ take care of always storing the data it receives.
 SpanExporter mySpanExporter = OtlpGrpcSpanExporter.getDefault();
 
 // Wrapping our exporter with its disk exporter.
-SpanDiskExporter diskExporter=SpanDiskExporter.create(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
+SpanDiskExporter diskExporter = SpanDiskExporter.create(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
 
  // Registering the disk exporter within our OpenTelemetry instance.
 SdkTracerProvider myTraceProvider = SdkTracerProvider.builder()
