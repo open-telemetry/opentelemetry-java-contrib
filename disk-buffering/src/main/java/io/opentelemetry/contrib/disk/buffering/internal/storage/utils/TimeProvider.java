@@ -6,11 +6,10 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.utils;
 
 public class TimeProvider {
-  @SuppressWarnings({"FieldCanBeFinal", "FieldMayBeFinal"}) // Needed for tests
-  private static TimeProvider instance = new TimeProvider();
+  private static final TimeProvider INSTANCE = new TimeProvider();
 
   public static TimeProvider get() {
-    return instance;
+    return INSTANCE;
   }
 
   public long getSystemCurrentTimeMillis() {

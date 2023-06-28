@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
@@ -36,10 +37,23 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
    */
   public LogRecordDiskExporter(
       LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration) {
+    this(wrapped, rootDir, configuration, TimeProvider.get());
+  }
+
+  LogRecordDiskExporter(
+      LogRecordExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider) {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
-            rootDir, configuration, "logs", SignalSerializer.ofLogs(), wrapped::export);
+            rootDir,
+            configuration,
+            "logs",
+            SignalSerializer.ofLogs(),
+            wrapped::export,
+            timeProvider);
   }
 
   @Override

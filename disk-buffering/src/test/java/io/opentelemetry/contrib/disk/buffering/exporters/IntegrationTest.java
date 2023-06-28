@@ -1,20 +1,17 @@
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.contrib.disk.buffering.exporters.LogRecordDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.exporters.MetricDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.exporters.SpanDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.testutils.FakeTimeProvider;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
@@ -53,24 +50,27 @@ public class IntegrationTest {
 
   @BeforeEach
   public void setUp() {
-    timeMachine = FakeTimeProvider.createAndSetMock(INITIAL_TIME_IN_MILLIS);
+    timeMachine = mock();
+    doReturn(INITIAL_TIME_IN_MILLIS).when(timeMachine).getSystemCurrentTimeMillis();
 
     // Setting up spans
     memorySpanExporter = InMemorySpanExporter.create();
-    diskSpanExporter = new SpanDiskExporter(memorySpanExporter, rootDir, STORAGE_CONFIGURATION);
+    diskSpanExporter =
+        new SpanDiskExporter(memorySpanExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     tracer = createTracerProvider(diskSpanExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
     memoryMetricExporter = InMemoryMetricExporter.create();
     diskMetricExporter =
-        new MetricDiskExporter(memoryMetricExporter, rootDir, STORAGE_CONFIGURATION);
+        new MetricDiskExporter(memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     meterProvider = createMeterProvider(diskMetricExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
     // Setting up logs
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
     diskLogRecordExporter =
-        new LogRecordDiskExporter(memoryLogRecordExporter, rootDir, STORAGE_CONFIGURATION);
+        new LogRecordDiskExporter(
+            memoryLogRecordExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
     logger = createLoggerProvider(diskLogRecordExporter).get("LogInstrumentationScope");
   }
 
@@ -139,6 +139,7 @@ public class IntegrationTest {
     assertEquals(1, memoryLogRecordExporter.getFinishedLogRecordItems().size());
   }
 
+  @SuppressWarnings("DirectInvocationOnMock")
   private void fastForwardTimeByMillis(long milliseconds) {
     doReturn(timeMachine.getSystemCurrentTimeMillis() + milliseconds)
         .when(timeMachine)

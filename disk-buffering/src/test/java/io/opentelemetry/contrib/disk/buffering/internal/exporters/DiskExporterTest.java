@@ -20,7 +20,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.testutils.FakeTimeProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -47,7 +46,7 @@ class DiskExporterTest {
 
   @BeforeEach
   public void setUp() {
-    timeProvider = FakeTimeProvider.createAndSetMock(1000L);
+    timeProvider = createTimeProviderMock(1000L);
     setUpSerializer();
     wrapped = mock();
     exporter =
@@ -56,7 +55,8 @@ class DiskExporterTest {
             TestData.getDefaultConfiguration(),
             STORAGE_FOLDER_NAME,
             serializer,
-            wrapped::export);
+            wrapped::export,
+            timeProvider);
   }
 
   @Test
@@ -81,7 +81,8 @@ class DiskExporterTest {
               .build(),
           STORAGE_FOLDER_NAME,
           serializer,
-          wrapped::export);
+          wrapped::export,
+          timeProvider);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals(
@@ -141,5 +142,11 @@ class DiskExporterTest {
   private void setUpSerializer() {
     serializer = mock();
     doReturn(deserializedData).when(serializer).deserialize(any());
+  }
+
+  private static TimeProvider createTimeProviderMock(long initialTimeMillis) {
+    TimeProvider mock = mock();
+    doReturn(initialTimeMillis).when(mock).getSystemCurrentTimeMillis();
+    return mock;
   }
 }

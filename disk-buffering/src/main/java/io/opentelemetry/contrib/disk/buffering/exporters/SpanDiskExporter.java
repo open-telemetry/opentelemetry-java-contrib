@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -35,10 +36,23 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
    * @param configuration - How you want to manage the storage process.
    */
   public SpanDiskExporter(SpanExporter wrapped, File rootDir, StorageConfiguration configuration) {
+    this(wrapped, rootDir, configuration, TimeProvider.get());
+  }
+
+  SpanDiskExporter(
+      SpanExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider) {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
-            rootDir, configuration, "spans", SignalSerializer.ofSpans(), wrapped::export);
+            rootDir,
+            configuration,
+            "spans",
+            SignalSerializer.ofSpans(),
+            wrapped::export,
+            timeProvider);
   }
 
   @Override

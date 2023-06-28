@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
@@ -37,10 +38,23 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
    */
   public MetricDiskExporter(
       MetricExporter wrapped, File rootDir, StorageConfiguration configuration) {
+    this(wrapped, rootDir, configuration, TimeProvider.get());
+  }
+
+  MetricDiskExporter(
+      MetricExporter wrapped,
+      File rootDir,
+      StorageConfiguration configuration,
+      TimeProvider timeProvider) {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
-            rootDir, configuration, "metrics", SignalSerializer.ofMetrics(), wrapped::export);
+            rootDir,
+            configuration,
+            "metrics",
+            SignalSerializer.ofMetrics(),
+            wrapped::export,
+            timeProvider);
   }
 
   @Override

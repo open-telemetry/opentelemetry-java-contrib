@@ -33,15 +33,6 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       StorageConfiguration configuration,
       String folderName,
       SignalSerializer<EXPORT_DATA> serializer,
-      Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction) {
-    this(rootDir, configuration, folderName, serializer, exportFunction, TimeProvider.get());
-  }
-
-  DiskExporter(
-      File rootDir,
-      StorageConfiguration configuration,
-      String folderName,
-      SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
       TimeProvider timeProvider) {
     validateConfiguration(configuration);
