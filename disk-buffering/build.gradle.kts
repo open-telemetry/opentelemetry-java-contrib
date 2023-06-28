@@ -5,7 +5,7 @@ plugins {
 }
 
 description = "Exporter implementations that store signals on disk"
-otelJava.moduleName.set("io.opentelemetry.contrib.disk.buffering")
+otelJava.moduleName.set("io.opentelemetry.contrib.exporters.disk")
 
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
