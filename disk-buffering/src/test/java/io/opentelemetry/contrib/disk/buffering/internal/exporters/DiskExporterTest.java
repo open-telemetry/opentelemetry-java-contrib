@@ -45,7 +45,7 @@ class DiskExporterTest {
   private static final String STORAGE_FOLDER_NAME = "testName";
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     timeProvider = createTimeProviderMock(1000L);
     setUpSerializer();
     wrapped = mock();
@@ -71,7 +71,7 @@ class DiskExporterTest {
   }
 
   @Test
-  public void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
+  public void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() throws IOException {
     try {
       new DiskExporter<>(
           rootDir,

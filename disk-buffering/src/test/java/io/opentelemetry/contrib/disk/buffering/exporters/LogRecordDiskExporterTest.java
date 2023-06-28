@@ -13,6 +13,7 @@ import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.io.File;
+import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,7 +27,7 @@ class LogRecordDiskExporterTest {
   @TempDir File rootDir;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     wrapped = mock();
     exporter = new LogRecordDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
   }

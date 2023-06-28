@@ -35,7 +35,8 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
    *     written into.
    * @param configuration - How you want to manage the storage process.
    */
-  public SpanDiskExporter(SpanExporter wrapped, File rootDir, StorageConfiguration configuration) {
+  public SpanDiskExporter(SpanExporter wrapped, File rootDir, StorageConfiguration configuration)
+      throws IOException {
     this(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
@@ -43,7 +44,8 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
       SpanExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider) {
+      TimeProvider timeProvider)
+      throws IOException {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(

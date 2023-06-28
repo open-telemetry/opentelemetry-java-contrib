@@ -34,7 +34,7 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       String folderName,
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      TimeProvider timeProvider) {
+      TimeProvider timeProvider) throws IOException {
     validateConfiguration(configuration);
     this.storage =
         new Storage(
@@ -81,11 +81,12 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
     }
   }
 
-  private static File getSignalFolder(File rootDir, String folderName) {
+  private static File getSignalFolder(File rootDir, String folderName) throws IOException {
     File folder = new File(rootDir, folderName);
     if (!folder.exists()) {
       if (!folder.mkdirs()) {
-        throw new IllegalStateException("Could not create the signal folder");
+        throw new IOException(
+            "Could not create the signal folder: '" + folderName + "' inside: " + rootDir);
       }
     }
     return folder;

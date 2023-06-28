@@ -17,6 +17,7 @@ import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.File;
+import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,7 +32,7 @@ class MetricDiskExporterTest {
   @TempDir File rootDir;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     wrapped = mock();
     exporter = new MetricDiskExporter(wrapped, rootDir, STORAGE_CONFIGURATION);
   }

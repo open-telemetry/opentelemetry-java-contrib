@@ -36,7 +36,8 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
    * @param configuration - How you want to manage the storage process.
    */
   public LogRecordDiskExporter(
-      LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration) {
+      LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration)
+      throws IOException {
     this(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
@@ -44,7 +45,7 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
       LogRecordExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider) {
+      TimeProvider timeProvider) throws IOException {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(

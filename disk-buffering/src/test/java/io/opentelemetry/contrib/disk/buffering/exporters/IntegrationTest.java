@@ -49,7 +49,7 @@ public class IntegrationTest {
       StorageConfiguration.getDefault();
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     timeMachine = mock();
     doReturn(INITIAL_TIME_IN_MILLIS).when(timeMachine).getSystemCurrentTimeMillis();
 

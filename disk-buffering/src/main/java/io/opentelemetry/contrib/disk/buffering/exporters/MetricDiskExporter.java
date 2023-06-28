@@ -37,7 +37,7 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
    * @param configuration - How you want to manage the storage process.
    */
   public MetricDiskExporter(
-      MetricExporter wrapped, File rootDir, StorageConfiguration configuration) {
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
     this(wrapped, rootDir, configuration, TimeProvider.get());
   }
 
@@ -45,7 +45,7 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
       MetricExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider) {
+      TimeProvider timeProvider) throws IOException {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
