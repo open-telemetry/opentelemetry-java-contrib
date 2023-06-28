@@ -11,6 +11,9 @@ stored data.
   the moment there's no automatic mechanism to do so. There's more information on it can be
   achieved, under [Reading data](#reading-data).
 
+> For a more detailed information on how the whole process works, take a look at
+the [CONTRIBUTING](CONTRIBUTING.md) file.
+
 ## Configuration
 
 The configurable parameters are provided **per exporter**, the available ones are:
