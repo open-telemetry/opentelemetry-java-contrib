@@ -87,6 +87,14 @@ try {
 }
 ```
 
+Both, the writing and reading processes can run in parallel and the way they don't overlap is
+because each is supposed to happen in different files, and the way it is ensured that they don't
+accidentally meet in the same file is by using the configurable parameters, which ensure to set time
+frames for each action to be done on a single file at a time. On top of that, there's a mechanism in
+place to avoid overlapping on edge cases where the time frames ended but the resources haven't been
+released, for that mechanism to work properly, this tool assumes that both, the reading and the
+writing actions, are executed within the same application process.
+
 ## Component owners
 
 - [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
