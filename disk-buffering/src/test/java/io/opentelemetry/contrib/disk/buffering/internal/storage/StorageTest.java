@@ -33,26 +33,37 @@ import org.junit.jupiter.api.Test;
 class StorageTest {
   private FolderManager folderManager;
   private Storage storage;
-  private Function<byte[], Boolean> consumer;
+  private Function<byte[], Boolean> processing;
   private ReadableFile readableFile;
   private WritableFile writableFile;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     folderManager = mock();
-    consumer = mock();
     readableFile = mock();
     writableFile = mock();
+    processing = mock();
+    doReturn(true).when(readableFile).readAndProcess(processing);
     storage = new Storage(folderManager);
   }
 
   @Test
-  public void whenReadingSuccessfully_returnTrue() throws IOException {
+  public void whenReadingAndProcessingSuccessfully_returnTrue() throws IOException {
     doReturn(readableFile).when(folderManager).getReadableFile();
 
-    assertTrue(storage.read(consumer));
+    assertTrue(storage.readAndProcess(processing));
 
-    verify(readableFile).readItem(consumer);
+    verify(readableFile).readAndProcess(processing);
+  }
+
+  @Test
+  public void whenReadableFileProcessingFails_returnFalse() throws IOException {
+    doReturn(readableFile).when(folderManager).getReadableFile();
+    doReturn(false).when(readableFile).readAndProcess(processing);
+
+    assertFalse(storage.readAndProcess(processing));
+
+    verify(readableFile).readAndProcess(processing);
   }
 
   @Test
@@ -60,10 +71,10 @@ class StorageTest {
     ReadableFile anotherReadable = mock();
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
 
-    assertTrue(storage.read(consumer));
-    assertTrue(storage.read(consumer));
+    assertTrue(storage.readAndProcess(processing));
+    assertTrue(storage.readAndProcess(processing));
 
-    verify(readableFile, times(2)).readItem(consumer);
+    verify(readableFile, times(2)).readAndProcess(processing);
     verify(folderManager, times(1)).getReadableFile();
     verifyNoInteractions(anotherReadable);
   }
@@ -86,7 +97,7 @@ class StorageTest {
   public void whenAttemptingToReadAfterClosed_throwException() throws IOException {
     storage.close();
     try {
-      storage.read(consumer);
+      storage.readAndProcess(processing);
       fail();
     } catch (ResourceClosedException ignored) {
     }
@@ -104,15 +115,15 @@ class StorageTest {
 
   @Test
   public void whenNoFileAvailableForReading_returnFalse() throws IOException {
-    assertFalse(storage.read(consumer));
+    assertFalse(storage.readAndProcess(processing));
   }
 
   @Test
   public void whenTimeoutExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ReadingTimeoutException.class).when(readableFile).readItem(consumer);
+    doThrow(ReadingTimeoutException.class).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.read(consumer));
+    assertFalse(storage.readAndProcess(processing));
 
     verify(folderManager, times(2)).getReadableFile();
   }
@@ -120,9 +131,9 @@ class StorageTest {
   @Test
   public void whenNoMoreLinesToReadExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(NoContentAvailableException.class).when(readableFile).readItem(consumer);
+    doThrow(NoContentAvailableException.class).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.read(consumer));
+    assertFalse(storage.readAndProcess(processing));
 
     verify(folderManager, times(2)).getReadableFile();
   }
@@ -130,9 +141,9 @@ class StorageTest {
   @Test
   public void whenResourceClosedExceptionHappens_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doThrow(ResourceClosedException.class).when(readableFile).readItem(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readAndProcess(processing);
 
-    assertFalse(storage.read(consumer));
+    assertFalse(storage.readAndProcess(processing));
 
     verify(folderManager, times(2)).getReadableFile();
   }
@@ -141,10 +152,10 @@ class StorageTest {
   public void whenEveryNewFileFoundCannotBeRead_throwExceptionAfterMaxAttempts()
       throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doThrow(ResourceClosedException.class).when(readableFile).readItem(consumer);
+    doThrow(ResourceClosedException.class).when(readableFile).readAndProcess(processing);
 
     try {
-      assertFalse(storage.read(consumer));
+      assertFalse(storage.readAndProcess(processing));
       fail();
     } catch (MaxAttemptsReachedException e) {
       verify(folderManager, times(3)).getReadableFile();
@@ -222,7 +233,7 @@ class StorageTest {
     doReturn(writableFile).when(folderManager).createWritableFile();
     doReturn(readableFile).when(folderManager).getReadableFile();
     storage.write(new byte[1]);
-    storage.read(consumer);
+    storage.readAndProcess(processing);
 
     storage.close();
 

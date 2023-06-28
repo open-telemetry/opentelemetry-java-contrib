@@ -117,7 +117,7 @@ class ReadableFileTest {
 
   @Test
   public void readSingleItemAndRemoveIt() throws IOException {
-    readableFile.readItem(
+    readableFile.readAndProcess(
         bytes -> {
           assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
           return true;
@@ -131,8 +131,18 @@ class ReadableFileTest {
   }
 
   @Test
+  public void whenProcessingSucceeds_returnTrue() throws IOException {
+    assertTrue(readableFile.readAndProcess(bytes -> true));
+  }
+
+  @Test
+  public void whenProcessingFails_returnFalse() throws IOException {
+    assertFalse(readableFile.readAndProcess(bytes -> false));
+  }
+
+  @Test
   public void deleteTemporaryFileWhenClosing() throws IOException {
-    readableFile.readItem(bytes -> true);
+    readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
     assertFalse(temporaryFile.exists());
@@ -140,8 +150,8 @@ class ReadableFileTest {
 
   @Test
   public void readMultipleLinesAndRemoveThem() throws IOException {
-    readableFile.readItem(bytes -> true);
-    readableFile.readItem(bytes -> true);
+    readableFile.readAndProcess(bytes -> true);
+    readableFile.readAndProcess(bytes -> true);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
@@ -151,7 +161,7 @@ class ReadableFileTest {
 
   @Test
   public void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
-    readableFile.readItem(bytes -> false);
+    readableFile.readAndProcess(bytes -> false);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
@@ -178,7 +188,7 @@ class ReadableFileTest {
         new ReadableFile(
             emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
     try {
-      emptyReadableFile.readItem(bytes -> true);
+      emptyReadableFile.readAndProcess(bytes -> true);
       fail();
     } catch (NoContentAvailableException ignored) {
       assertTrue(emptyReadableFile.isClosed());
@@ -190,13 +200,13 @@ class ReadableFileTest {
   public void
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_throwException()
           throws IOException {
-    readableFile.readItem(bytes -> true);
+    readableFile.readAndProcess(bytes -> true);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
 
     try {
-      readableFile.readItem(bytes -> true);
+      readableFile.readAndProcess(bytes -> true);
       fail();
     } catch (ReadingTimeoutException ignored) {
       assertTrue(readableFile.isClosed());
@@ -205,11 +215,11 @@ class ReadableFileTest {
 
   @Test
   public void whenReadingAfterClosed_throwException() throws IOException {
-    readableFile.readItem(bytes -> true);
+    readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
     try {
-      readableFile.readItem(bytes -> true);
+      readableFile.readAndProcess(bytes -> true);
       fail();
     } catch (ResourceClosedException ignored) {
     }
@@ -220,7 +230,7 @@ class ReadableFileTest {
     List<LogRecordData> result = new ArrayList<>();
     while (true) {
       try {
-        readableFile.readItem(
+        readableFile.readAndProcess(
             bytes -> {
               result.add(deserialize(bytes));
               return true;

@@ -43,16 +43,14 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
     AtomicBoolean exportSucceeded = new AtomicBoolean(false);
-    boolean foundDataToExport =
-        storage.read(
-            bytes -> {
-              logger.log(Level.INFO, "About to export stored batch.");
-              CompletableResultCode join =
-                  exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
-              exportSucceeded.set(join.isSuccess());
-              return exportSucceeded.get();
-            });
-    return foundDataToExport && exportSucceeded.get();
+    return storage.readAndProcess(
+        bytes -> {
+          logger.log(Level.INFO, "About to export stored batch.");
+          CompletableResultCode join =
+              exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
+          exportSucceeded.set(join.isSuccess());
+          return exportSucceeded.get();
+        });
   }
 
   public void onShutDown() throws IOException {

@@ -64,17 +64,19 @@ public final class Storage implements Closeable {
   /**
    * Attempts to read a line from a ready-to-read file.
    *
-   * @param consumer Is passed over to {@link ReadableFile#readItem(Function)}.
-   * @return TRUE if data was found and read, FALSE if there is no data available to read.
+   * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
+   * @return TRUE if data was found and processed, FALSE if either there was no data available or
+   *     there was but could not be processed.
    * @throws MaxAttemptsReachedException If there are too many unsuccessful retries.
    * @throws ResourceClosedException If it's closed.
    * @throws IOException If an unexpected error happens.
    */
-  public boolean read(Function<byte[], Boolean> consumer) throws IOException {
-    return read(consumer, 1);
+  public boolean readAndProcess(Function<byte[], Boolean> processing) throws IOException {
+    return readAndProcess(processing, 1);
   }
 
-  private boolean read(Function<byte[], Boolean> consumer, int attemptNumber) throws IOException {
+  private boolean readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
+      throws IOException {
     if (isClosed.get()) {
       throw new ResourceClosedException();
     }
@@ -88,12 +90,11 @@ public final class Storage implements Closeable {
       }
     }
     try {
-      readableFile.readItem(consumer);
-      return true;
+      return readableFile.readAndProcess(processing);
     } catch (ReadingTimeoutException | NoContentAvailableException | ResourceClosedException e) {
       // Retry with new file
       readableFile = null;
-      return read(consumer, ++attemptNumber);
+      return readAndProcess(processing, ++attemptNumber);
     }
   }
 

@@ -69,17 +69,19 @@ public final class ReadableFile extends StorageFile {
   }
 
   /**
-   * Reads the next line available in the file and provides it to a {@link Function consumer} which
-   * will determine whether to remove the provided line or not.
+   * Reads the next line available in the file and provides it to a {@link Function processing}
+   * which will determine whether to remove the provided line or not.
    *
-   * @param consumer - A function that receives the line that has been read and returns a boolean.
-   *     If the consumer function returns TRUE, then the provided line will be deleted from the
+   * @param processing - A function that receives the line that has been read and returns a boolean.
+   *     If the processing function returns TRUE, then the provided line will be deleted from the
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    * @throws ReadingTimeoutException If the configured reading time for the file has ended.
    * @throws NoContentAvailableException If there is no content to be read from the file.
    * @throws ResourceClosedException If it's closed.
+   * @return TRUE if the data is processed, FALSE otherwise.
    */
-  public synchronized void readItem(Function<byte[], Boolean> consumer) throws IOException {
+  public synchronized boolean readAndProcess(Function<byte[], Boolean> processing)
+      throws IOException {
     if (isClosed.get()) {
       throw new ResourceClosedException();
     }
@@ -92,7 +94,7 @@ public final class ReadableFile extends StorageFile {
       cleanUp();
       throw new NoContentAvailableException();
     }
-    if (consumer.apply(read.content)) {
+    if (processing.apply(read.content)) {
       unconsumedResult = null;
       readBytes += read.totalReadLength;
       int amountOfBytesToTransfer = originalFileSize - readBytes;
@@ -101,9 +103,11 @@ public final class ReadableFile extends StorageFile {
       } else {
         cleanUp();
       }
+      return true;
     } else {
       unconsumedResult = read;
     }
+    return false;
   }
 
   @Nullable
