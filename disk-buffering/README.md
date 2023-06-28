@@ -1,7 +1,15 @@
 # Disk buffering
 
 This module provides signal exporter wrappers that intercept and store signals in files which can be
-sent later on demand.
+sent later on demand. A high level description of how it works is that there are two separate
+processes in place, one for writing data in disk, and one for reading/exporting the previously
+stored data.
+
+* Each exporter stores the received data automatically in disk right after it's received from its
+  processor.
+* The reading of the data back from disk and exporting process has to be done manually. At
+  the moment there's no automatic mechanism to do so. There's more information on it can be
+  achieved, under [Reading data](#reading-data).
 
 ## Configuration
 
@@ -58,7 +66,7 @@ take care of always storing the data it receives.
 SpanExporter mySpanExporter = OtlpGrpcSpanExporter.getDefault();
 
 // Wrapping our exporter with its disk exporter.
-SpanDiskExporter diskExporter = new SpanDiskExporter(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
+SpanDiskExporter diskExporter=SpanDiskExporter.create(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
 
  // Registering the disk exporter within our OpenTelemetry instance.
 SdkTracerProvider myTraceProvider = SdkTracerProvider.builder()
