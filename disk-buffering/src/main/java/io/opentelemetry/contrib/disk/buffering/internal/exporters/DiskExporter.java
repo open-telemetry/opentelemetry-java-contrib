@@ -34,7 +34,8 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       String folderName,
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      TimeProvider timeProvider) throws IOException {
+      TimeProvider timeProvider)
+      throws IOException {
     validateConfiguration(configuration);
     this.storage =
         new Storage(

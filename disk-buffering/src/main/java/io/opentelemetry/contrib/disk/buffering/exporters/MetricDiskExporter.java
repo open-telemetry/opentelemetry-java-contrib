@@ -45,7 +45,8 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
       MetricExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider) throws IOException {
+      TimeProvider timeProvider)
+      throws IOException {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
