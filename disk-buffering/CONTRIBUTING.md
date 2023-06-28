@@ -20,6 +20,8 @@ to be triggered manually by the consumer of this library as explained in the [RE
   and then the serialized data is appended into a File using an instance of
   the [Storage](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/storage/Storage.java)
   class.
+* The data is written into a file directly, without the use of a buffer, to make sure no data gets
+  lost in case the application ends unexpectedly.
 * Each disk exporter stores its signals in its own folder, which is expected to contain files
   that belong to that type of signal only.
 * Each file may contain more than a batch of signals if the configuration parameters allow enough
