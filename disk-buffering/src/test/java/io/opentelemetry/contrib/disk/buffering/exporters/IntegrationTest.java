@@ -32,6 +32,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -85,21 +86,7 @@ public class IntegrationTest {
     Span span = tracer.spanBuilder("Span name").startSpan();
     span.end();
 
-    // Verify no data has been received in the original exporter until this point.
-    assertEquals(0, memorySpanExporter.getFinishedSpanItems().size());
-
-    // Go to the future when we can read the stored items.
-    fastForwardTimeByMillis(STORAGE_CONFIGURATION.getMinFileAgeForReadMillis());
-
-    // Read and send stored data.
-    assertTrue(diskSpanExporter.exportStoredBatch(1, TimeUnit.SECONDS));
-
-    // Now the data must have been delegated to the original exporter.
-    assertEquals(1, memorySpanExporter.getFinishedSpanItems().size());
-
-    // Bonus: Try to read again, no more data should be available.
-    assertFalse(diskSpanExporter.exportStoredBatch(1, TimeUnit.SECONDS));
-    assertEquals(1, memorySpanExporter.getFinishedSpanItems().size());
+    assertExporter(diskSpanExporter, () -> memorySpanExporter.getFinishedSpanItems().size());
   }
 
   @Test
@@ -107,42 +94,33 @@ public class IntegrationTest {
     meter.counterBuilder("Counter").build().add(2);
     meterProvider.forceFlush();
 
-    // Verify no data has been received in the original exporter until this point.
-    assertEquals(0, memoryMetricExporter.getFinishedMetricItems().size());
-
-    // Go to the future when we can read the stored items.
-    fastForwardTimeByMillis(STORAGE_CONFIGURATION.getMinFileAgeForReadMillis());
-
-    // Read and send stored data.
-    assertTrue(diskMetricExporter.exportStoredBatch(1, TimeUnit.SECONDS));
-
-    // Now the data must have been delegated to the original exporter.
-    assertEquals(1, memoryMetricExporter.getFinishedMetricItems().size());
-
-    // Bonus: Try to read again, no more data should be available.
-    assertFalse(diskMetricExporter.exportStoredBatch(1, TimeUnit.SECONDS));
-    assertEquals(1, memoryMetricExporter.getFinishedMetricItems().size());
+    assertExporter(diskMetricExporter, () -> memoryMetricExporter.getFinishedMetricItems().size());
   }
 
   @Test
   public void verifyLogRecordsIntegration() throws IOException {
     logger.logRecordBuilder().setBody("I'm a log!").emit();
 
+    assertExporter(diskLogRecordExporter, () -> memoryLogRecordExporter.getFinishedLogRecordItems().size());
+  }
+
+  private void assertExporter(StoredBatchExporter exporter, Supplier<Integer> finishedItems)
+      throws IOException {
     // Verify no data has been received in the original exporter until this point.
-    assertEquals(0, memoryLogRecordExporter.getFinishedLogRecordItems().size());
+    assertEquals(0, finishedItems.get());
 
     // Go to the future when we can read the stored items.
     fastForwardTimeByMillis(STORAGE_CONFIGURATION.getMinFileAgeForReadMillis());
 
     // Read and send stored data.
-    assertTrue(diskLogRecordExporter.exportStoredBatch(1, TimeUnit.SECONDS));
+    assertTrue(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
 
     // Now the data must have been delegated to the original exporter.
-    assertEquals(1, memoryLogRecordExporter.getFinishedLogRecordItems().size());
+    assertEquals(1, finishedItems.get());
 
     // Bonus: Try to read again, no more data should be available.
-    assertFalse(diskLogRecordExporter.exportStoredBatch(1, TimeUnit.SECONDS));
-    assertEquals(1, memoryLogRecordExporter.getFinishedLogRecordItems().size());
+    assertFalse(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
+    assertEquals(1, finishedItems.get());
   }
 
   @SuppressWarnings("DirectInvocationOnMock")
