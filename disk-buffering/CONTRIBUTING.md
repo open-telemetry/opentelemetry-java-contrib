@@ -52,4 +52,5 @@ to be triggered manually by the consumer of this library as explained in the [RE
   [FolderManager](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/storage/FolderManager.java)
   and [ReadableFile](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/storage/files/ReadableFile.java)
   files contain more information on the details of the file reading process.
-* Note that the reader delegates the data to the exporter exactly in the way it has received the data - it does not try to batch data (but this could be an optimization in the future). 
+* Note that the reader delegates the data to the exporter exactly in the way it has received the
+  data - it does not try to batch data (but this could be an optimization in the future).
