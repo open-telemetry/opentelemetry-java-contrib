@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.data.EventDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -25,12 +24,7 @@ import org.junit.jupiter.api.Test;
 class SpanDataMapperTest {
 
   private static final EventData EVENT_DATA =
-      EventDataImpl.builder()
-          .setAttributes(TestData.ATTRIBUTES)
-          .setEpochNanos(1L)
-          .setName("Event name")
-          .setTotalAttributeCount(10)
-          .build();
+      EventData.create(1L, "Event name", TestData.ATTRIBUTES, 10);
 
   private static final LinkData LINK_DATA =
       LinkData.create(TestData.SPAN_CONTEXT, TestData.ATTRIBUTES, 20);

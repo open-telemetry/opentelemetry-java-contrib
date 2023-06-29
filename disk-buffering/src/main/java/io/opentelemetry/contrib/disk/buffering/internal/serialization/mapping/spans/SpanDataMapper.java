@@ -15,7 +15,6 @@ import io.opentelemetry.api.trace.propagation.internal.W3CTraceContextEncoding;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.data.EventDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.proto.trace.v1.Status;
@@ -194,20 +193,12 @@ public final class SpanDataMapper {
   }
 
   private static EventData eventDataToSdk(Span.Event source) {
-    EventDataImpl.Builder eventData = EventDataImpl.builder();
-
-    eventData.setEpochNanos(source.getTimeUnixNano());
-    eventData.setName(source.getName());
-
-    addEventSdkExtras(source, eventData);
-
-    return eventData.build();
-  }
-
-  private static void addEventSdkExtras(Span.Event source, EventDataImpl.Builder target) {
     Attributes attributes = protoToAttributes(source.getAttributesList());
-    target.setAttributes(attributes);
-    target.setTotalAttributeCount(attributes.size() + source.getDroppedAttributesCount());
+    return EventData.create(
+        source.getTimeUnixNano(),
+        source.getName(),
+        attributes,
+        attributes.size() + source.getDroppedAttributesCount());
   }
 
   private static SpanKind mapSpanKindToSdk(Span.SpanKind source) {
