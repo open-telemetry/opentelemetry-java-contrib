@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -37,6 +36,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import java.util.Arrays;
@@ -65,18 +65,12 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
       ImmutableGaugeData.create(Collections.singletonList(DOUBLE_POINT_DATA));
 
   private static final SumData<LongPointData> LONG_SUM_DATA =
-      SumDataImpl.LongData.builder()
-          .setMonotonic(true)
-          .setAggregationTemporality(AggregationTemporality.DELTA)
-          .setPoints(Collections.singletonList(LONG_POINT_DATA))
-          .build();
+      ImmutableSumData.create(
+          true, AggregationTemporality.DELTA, Collections.singletonList(LONG_POINT_DATA));
 
   private static final SumData<DoublePointData> DOUBLE_SUM_DATA =
-      SumDataImpl.DoubleData.builder()
-          .setMonotonic(true)
-          .setAggregationTemporality(AggregationTemporality.DELTA)
-          .setPoints(Collections.singletonList(DOUBLE_POINT_DATA))
-          .build();
+      ImmutableSumData.create(
+          true, AggregationTemporality.DELTA, Collections.singletonList(DOUBLE_POINT_DATA));
 
   private static final ValueAtQuantile VALUE_AT_QUANTILE =
       ImmutableValueAtQuantile.create(2.0, 1.0);

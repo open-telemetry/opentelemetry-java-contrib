@@ -12,7 +12,6 @@ import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
@@ -57,6 +56,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
@@ -606,25 +606,17 @@ public final class MetricDataMapper {
   }
 
   private static SumData<LongPointData> mapLongSumToSdk(Sum sum) {
-    SumDataImpl.LongData.Builder sumData = SumDataImpl.LongData.builder();
-
-    sumData.setPoints(numberDataPointListToLongPointDataCollection(sum.getDataPointsList()));
-    sumData.setMonotonic(sum.getIsMonotonic());
-    sumData.setAggregationTemporality(
-        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()));
-
-    return sumData.build();
+    return ImmutableSumData.create(
+        sum.getIsMonotonic(),
+        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()),
+        numberDataPointListToLongPointDataCollection(sum.getDataPointsList()));
   }
 
   private static SumData<DoublePointData> mapDoubleSumToSdk(Sum sum) {
-    SumDataImpl.DoubleData.Builder sumData = SumDataImpl.DoubleData.builder();
-
-    sumData.setPoints(numberDataPointListToDoublePointDataCollection(sum.getDataPointsList()));
-    sumData.setMonotonic(sum.getIsMonotonic());
-    sumData.setAggregationTemporality(
-        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()));
-
-    return sumData.build();
+    return ImmutableSumData.create(
+        sum.getIsMonotonic(),
+        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()),
+        numberDataPointListToDoublePointDataCollection(sum.getDataPointsList()));
   }
 
   private static DoublePointData mapDoubleNumberDataPointToSdk(NumberDataPoint source) {
