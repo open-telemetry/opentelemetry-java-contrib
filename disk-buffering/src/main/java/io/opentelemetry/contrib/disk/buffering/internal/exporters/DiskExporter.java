@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,15 +46,13 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   @Override
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
-    AtomicBoolean exportSucceeded = new AtomicBoolean(false);
     ReadableResult result =
         storage.readAndProcess(
             bytes -> {
               logger.log(Level.INFO, "About to export stored batch.");
               CompletableResultCode join =
                   exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
-              exportSucceeded.set(join.isSuccess());
-              return exportSucceeded.get();
+              return join.isSuccess();
             });
     return result == ReadableResult.SUCCEEDED;
   }
