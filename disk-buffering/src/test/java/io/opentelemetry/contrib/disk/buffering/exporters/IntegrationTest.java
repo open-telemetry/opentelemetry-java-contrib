@@ -101,7 +101,8 @@ public class IntegrationTest {
   public void verifyLogRecordsIntegration() throws IOException {
     logger.logRecordBuilder().setBody("I'm a log!").emit();
 
-    assertExporter(diskLogRecordExporter, () -> memoryLogRecordExporter.getFinishedLogRecordItems().size());
+    assertExporter(
+        diskLogRecordExporter, () -> memoryLogRecordExporter.getFinishedLogRecordItems().size());
   }
 
   private void assertExporter(StoredBatchExporter exporter, Supplier<Integer> finishedItems)
