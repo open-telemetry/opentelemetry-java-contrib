@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.GaugeDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
@@ -20,6 +19,7 @@ import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricDataType;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import java.util.Arrays;
@@ -37,9 +37,8 @@ class ProtoMetricsDataMapperTest {
       ImmutableLongPointData.create(
           1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(LONG_EXEMPLAR_DATA));
   private static final GaugeData<LongPointData> LONG_GAUGE_DATA =
-      GaugeDataImpl.LongData.builder()
-          .setPoints(Collections.singletonList(LONG_POINT_DATA))
-          .build();
+      ImmutableGaugeData.create(Collections.singletonList(LONG_POINT_DATA));
+
   private static final MetricData LONG_GAUGE_METRIC =
       MetricDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)

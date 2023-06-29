@@ -12,7 +12,6 @@ import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.GaugeDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
@@ -54,6 +53,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
@@ -601,19 +601,13 @@ public final class MetricDataMapper {
   }
 
   private static GaugeData<LongPointData> mapLongGaugeToSdk(Gauge gauge) {
-    GaugeDataImpl.LongData.Builder gaugeData = GaugeDataImpl.LongData.builder();
-
-    gaugeData.setPoints(numberDataPointListToLongPointDataCollection(gauge.getDataPointsList()));
-
-    return gaugeData.build();
+    return ImmutableGaugeData.create(
+        numberDataPointListToLongPointDataCollection(gauge.getDataPointsList()));
   }
 
   private static GaugeData<DoublePointData> mapDoubleGaugeToSdk(Gauge gauge) {
-    GaugeDataImpl.DoubleData.Builder gaugeData = GaugeDataImpl.DoubleData.builder();
-
-    gaugeData.setPoints(numberDataPointListToDoublePointDataCollection(gauge.getDataPointsList()));
-
-    return gaugeData.build();
+    return ImmutableGaugeData.create(
+        numberDataPointListToDoublePointDataCollection(gauge.getDataPointsList()));
   }
 
   private static SumData<LongPointData> mapLongSumToSdk(Sum sum) {

@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.GaugeDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
@@ -34,6 +33,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
@@ -59,14 +59,10 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
           1L, 2L, TestData.ATTRIBUTES, 1.0, Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
 
   private static final GaugeData<LongPointData> LONG_GAUGE_DATA =
-      GaugeDataImpl.LongData.builder()
-          .setPoints(Collections.singletonList(LONG_POINT_DATA))
-          .build();
+      ImmutableGaugeData.create(Collections.singletonList(LONG_POINT_DATA));
 
   private static final GaugeData<DoublePointData> DOUBLE_GAUGE_DATA =
-      GaugeDataImpl.DoubleData.builder()
-          .setPoints(Collections.singletonList(DOUBLE_POINT_DATA))
-          .build();
+      ImmutableGaugeData.create(Collections.singletonList(DOUBLE_POINT_DATA));
 
   private static final SumData<LongPointData> LONG_SUM_DATA =
       SumDataImpl.LongData.builder()
