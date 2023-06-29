@@ -17,11 +17,8 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.DoublePointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.ExponentialHistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.LongPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.PointDataBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
@@ -57,8 +54,10 @@ import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
@@ -693,38 +692,21 @@ public final class MetricDataMapper {
   }
 
   private static DoublePointData mapDoubleNumberDataPointToSdk(NumberDataPoint source) {
-    DoublePointDataImpl.Builder doublePointData = DoublePointDataImpl.builder();
-
-    doublePointData.setStartEpochNanos(source.getStartTimeUnixNano());
-    doublePointData.setEpochNanos(source.getTimeUnixNano());
-    if (source.hasAsDouble()) {
-      doublePointData.setValue(source.getAsDouble());
-    }
-    doublePointData.setExemplars(exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
-
-    addAttributesFromNumberDataPoint(source, doublePointData);
-
-    return doublePointData.build();
+    return ImmutableDoublePointData.create(
+        source.getStartTimeUnixNano(),
+        source.getTimeUnixNano(),
+        protoToAttributes(source.getAttributesList()),
+        source.getAsDouble(),
+        exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
   }
 
   private static LongPointData mapLongNumberDataPointToSdk(NumberDataPoint source) {
-    LongPointDataImpl.Builder longPointData = LongPointDataImpl.builder();
-
-    longPointData.setStartEpochNanos(source.getStartTimeUnixNano());
-    longPointData.setEpochNanos(source.getTimeUnixNano());
-    if (source.hasAsInt()) {
-      longPointData.setValue(source.getAsInt());
-    }
-    longPointData.setExemplars(exemplarListToLongExemplarDataList(source.getExemplarsList()));
-
-    addAttributesFromNumberDataPoint(source, longPointData);
-
-    return longPointData.build();
-  }
-
-  private static void addAttributesFromNumberDataPoint(
-      NumberDataPoint source, PointDataBuilder<?> target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
+    return ImmutableLongPointData.create(
+        source.getStartTimeUnixNano(),
+        source.getTimeUnixNano(),
+        protoToAttributes(source.getAttributesList()),
+        source.getAsInt(),
+        exemplarListToLongExemplarDataList(source.getExemplarsList()));
   }
 
   private static SummaryDataPoint.ValueAtQuantile valueAtQuantileToValueAtQuantile(

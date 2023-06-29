@@ -11,10 +11,8 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.DoublePointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.ExponentialHistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.LongPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -36,8 +34,10 @@ import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,22 +51,12 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
   private static final DoubleExemplarData DOUBLE_EXEMPLAR_DATA =
       ImmutableDoubleExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1.0);
   private static final LongPointData LONG_POINT_DATA =
-      LongPointDataImpl.builder()
-          .setValue(1L)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setEpochNanos(2L)
-          .setStartEpochNanos(1L)
-          .setExemplars(Collections.singletonList(LONG_EXEMPLAR_DATA))
-          .build();
+      ImmutableLongPointData.create(
+          1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(LONG_EXEMPLAR_DATA));
 
   private static final DoublePointData DOUBLE_POINT_DATA =
-      DoublePointDataImpl.builder()
-          .setValue(1.0)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setEpochNanos(2L)
-          .setStartEpochNanos(1L)
-          .setExemplars(Collections.singletonList(DOUBLE_EXEMPLAR_DATA))
-          .build();
+      ImmutableDoublePointData.create(
+          1L, 2L, TestData.ATTRIBUTES, 1.0, Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
 
   private static final GaugeData<LongPointData> LONG_GAUGE_DATA =
       GaugeDataImpl.LongData.builder()
