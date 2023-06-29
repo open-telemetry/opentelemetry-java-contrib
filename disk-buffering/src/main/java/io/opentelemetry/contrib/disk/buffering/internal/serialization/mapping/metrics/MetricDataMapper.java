@@ -17,7 +17,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.ExponentialHistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
@@ -56,6 +55,7 @@ import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
@@ -516,40 +516,20 @@ public final class MetricDataMapper {
   private static ExponentialHistogramPointData
       exponentialHistogramDataPointToExponentialHistogramPointData(
           ExponentialHistogramDataPoint source) {
-    ExponentialHistogramPointDataImpl.Builder exponentialHistogramPointData =
-        ExponentialHistogramPointDataImpl.builder();
-
-    exponentialHistogramPointData.setExemplars(
+    return ImmutableExponentialHistogramPointData.create(
+        source.getScale(),
+        source.getSum(),
+        source.getZeroCount(),
+        source.hasMin(),
+        source.getMin(),
+        source.hasMax(),
+        source.getMax(),
+        mapBucketsFromProto(source.getPositive(), source.getScale()),
+        mapBucketsFromProto(source.getNegative(), source.getScale()),
+        source.getStartTimeUnixNano(),
+        source.getTimeUnixNano(),
+        protoToAttributes(source.getAttributesList()),
         exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
-    exponentialHistogramPointData.setScale(source.getScale());
-    if (source.hasSum()) {
-      exponentialHistogramPointData.setSum(source.getSum());
-    }
-    exponentialHistogramPointData.setCount(source.getCount());
-    exponentialHistogramPointData.setZeroCount(source.getZeroCount());
-    if (source.hasMin()) {
-      exponentialHistogramPointData.setMin(source.getMin());
-    }
-    if (source.hasMax()) {
-      exponentialHistogramPointData.setMax(source.getMax());
-    }
-
-    addBucketsExtrasFromProto(source, exponentialHistogramPointData);
-
-    return exponentialHistogramPointData.build();
-  }
-
-  private static void addBucketsExtrasFromProto(
-      ExponentialHistogramDataPoint source, ExponentialHistogramPointDataImpl.Builder target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
-    target.setStartEpochNanos(source.getStartTimeUnixNano());
-    target.setEpochNanos(source.getTimeUnixNano());
-    if (source.hasPositive()) {
-      target.setPositiveBuckets(mapBucketsFromProto(source.getPositive(), source.getScale()));
-    }
-    if (source.hasNegative()) {
-      target.setNegativeBuckets(mapBucketsFromProto(source.getNegative(), source.getScale()));
-    }
   }
 
   private static HistogramPointData histogramDataPointToHistogramPointData(

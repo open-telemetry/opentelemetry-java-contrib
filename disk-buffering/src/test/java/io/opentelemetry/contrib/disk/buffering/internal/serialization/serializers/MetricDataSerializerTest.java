@@ -11,7 +11,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.ExponentialHistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
@@ -36,6 +35,7 @@ import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
@@ -117,20 +117,20 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
   private static final ExponentialHistogramBuckets NEGATIVE_BUCKET =
       ImmutableExponentialHistogramBuckets.create(1, 0, Collections.emptyList());
   private static final ExponentialHistogramPointData EXPONENTIAL_HISTOGRAM_POINT_DATA =
-      ExponentialHistogramPointDataImpl.builder()
-          .setCount(1L)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setStartEpochNanos(1L)
-          .setEpochNanos(2L)
-          .setSum(10.0)
-          .setMin(2.0)
-          .setMax(4.0)
-          .setZeroCount(1L)
-          .setExemplars(Collections.singletonList(DOUBLE_EXEMPLAR_DATA))
-          .setPositiveBuckets(POSITIVE_BUCKET)
-          .setNegativeBuckets(NEGATIVE_BUCKET)
-          .setScale(1)
-          .build();
+      ImmutableExponentialHistogramPointData.create(
+          1,
+          10.0,
+          1L,
+          true,
+          2.0,
+          true,
+          4.0,
+          POSITIVE_BUCKET,
+          NEGATIVE_BUCKET,
+          1L,
+          2L,
+          TestData.ATTRIBUTES,
+          Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
   private static final HistogramData HISTOGRAM_DATA =
       HistogramDataImpl.builder()
           .setAggregationTemporality(AggregationTemporality.CUMULATIVE)
