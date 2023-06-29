@@ -20,40 +20,36 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Context;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValueCheckStrategy;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(
-    uses = AttributesMapper.class,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-public abstract class LogRecordDataMapper {
+public final class LogRecordDataMapper {
 
-  public static final LogRecordDataMapper INSTANCE = new LogRecordDataMapperImpl();
+  public static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();
 
-  @Mapping(target = "droppedAttributesCount", ignore = true)
-  @Mapping(target = "timeUnixNano", source = "timestampEpochNanos")
-  @Mapping(target = "observedTimeUnixNano", source = "observedTimestampEpochNanos")
-  @Mapping(target = "severityNumber", source = "severity")
-  @Mapping(
-      target = "flags",
-      expression = "java((int) source.getSpanContext().getTraceFlags().asByte())")
-  public abstract LogRecord mapToProto(LogRecordData source);
+  public LogRecord mapToProto(LogRecordData source) {
+    LogRecord.Builder logRecord = LogRecord.newBuilder();
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = LogRecordDataImpl.class)
-  public abstract LogRecordData mapToSdk(
-      LogRecord source, @Context Resource resource, @Context InstrumentationScopeInfo scopeInfo);
+    logRecord.setTimeUnixNano(source.getTimestampEpochNanos());
+    logRecord.setObservedTimeUnixNano(source.getObservedTimestampEpochNanos());
+    if (source.getSeverity() != null) {
+      logRecord.setSeverityNumber(severityToProto(source.getSeverity()));
+    }
+    if (source.getSeverityText() != null) {
+      logRecord.setSeverityText(source.getSeverityText());
+    }
+    if (source.getBody() != null) {
+      logRecord.setBody(bodyToAnyValue(source.getBody()));
+    }
 
-  @AfterMapping
-  protected void addExtrasToProtoBuilder(
+    logRecord.setFlags(source.getSpanContext().getTraceFlags().asByte());
+
+    addExtrasToProtoBuilder(source, logRecord);
+
+    return logRecord.build();
+  }
+
+  private static void addExtrasToProtoBuilder(
       LogRecordData source, @MappingTarget LogRecord.Builder target) {
     target.addAllAttributes(AttributesMapper.INSTANCE.attributesToProto(source.getAttributes()));
     SpanContext spanContext = source.getSpanContext();
@@ -63,8 +59,24 @@ public abstract class LogRecordDataMapper {
         source.getTotalAttributeCount() - source.getAttributes().size());
   }
 
-  @AfterMapping
-  protected void addExtrasToSdkItemBuilder(
+  public LogRecordData mapToSdk(
+      LogRecord source, Resource resource, InstrumentationScopeInfo scopeInfo) {
+    LogRecordDataImpl.Builder logRecordData = LogRecordDataImpl.builder();
+
+    logRecordData.setTimestampEpochNanos(source.getTimeUnixNano());
+    logRecordData.setObservedTimestampEpochNanos(source.getObservedTimeUnixNano());
+    logRecordData.setSeverity(severityNumberToSdk(source.getSeverityNumber()));
+    logRecordData.setSeverityText(source.getSeverityText());
+    if (source.hasBody()) {
+      logRecordData.setBody(anyValueToBody(source.getBody()));
+    }
+
+    addExtrasToSdkItemBuilder(source, logRecordData, resource, scopeInfo);
+
+    return logRecordData.build();
+  }
+
+  private static void addExtrasToSdkItemBuilder(
       LogRecord source,
       @MappingTarget LogRecordDataImpl.Builder target,
       @Context Resource resource,
@@ -82,15 +94,15 @@ public abstract class LogRecordDataMapper {
     target.setInstrumentationScopeInfo(scopeInfo);
   }
 
-  protected AnyValue bodyToAnyValue(Body body) {
+  private static AnyValue bodyToAnyValue(Body body) {
     return AnyValue.newBuilder().setStringValue(body.asString()).build();
   }
 
-  protected SeverityNumber severityToProto(Severity severity) {
+  private static SeverityNumber severityToProto(Severity severity) {
     return SeverityNumber.forNumber(severity.getSeverityNumber());
   }
 
-  protected Body anyValueToBody(AnyValue source) {
+  private static Body anyValueToBody(AnyValue source) {
     if (source.hasStringValue()) {
       return Body.string(source.getStringValue());
     } else {
@@ -98,7 +110,7 @@ public abstract class LogRecordDataMapper {
     }
   }
 
-  protected Severity severityNumberToSdk(SeverityNumber source) {
+  private static Severity severityNumberToSdk(SeverityNumber source) {
     for (Severity value : Severity.values()) {
       if (value.getSeverityNumber() == source.getNumber()) {
         return value;
