@@ -25,64 +25,43 @@ import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Context;
-import org.mapstruct.EnumMapping;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.ValueMapping;
 
-@Mapper(
-    uses = ByteStringMapper.class,
-    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class SpanDataMapper {
+public final class SpanDataMapper {
 
-  public static final SpanDataMapper INSTANCE = new SpanDataMapperImpl();
+  public static final SpanDataMapper INSTANCE = new SpanDataMapper();
+  private final ByteStringMapper byteStringMapper = ByteStringMapper.INSTANCE;
 
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "endTimeUnixNano", source = "endEpochNanos")
-  @Mapping(target = "eventsList", source = "events")
-  @Mapping(target = "linksList", source = "links")
-  public abstract Span mapToProto(SpanData source);
+  public Span mapToProto(SpanData source) {
+    Span.Builder span = Span.newBuilder();
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = SpanDataImpl.class)
-  public abstract SpanData mapToSdk(
-      Span source,
-      @Context Resource resource,
-      @Context InstrumentationScopeInfo instrumentationScopeInfo);
+    span.setStartTimeUnixNano(source.getStartEpochNanos());
+    span.setEndTimeUnixNano(source.getEndEpochNanos());
+    if (source.getEvents() != null) {
+      for (EventData event : source.getEvents()) {
+        span.addEvents(eventDataToProto(event));
+      }
+    }
+    if (source.getLinks() != null) {
+      for (LinkData link : source.getLinks()) {
+        span.addLinks(linkDataToProto(link));
+      }
+    }
+    span.setTraceId(byteStringMapper.stringToProto(source.getTraceId()));
+    span.setSpanId(byteStringMapper.stringToProto(source.getSpanId()));
+    span.setParentSpanId(byteStringMapper.stringToProto(source.getParentSpanId()));
+    span.setName(source.getName());
+    span.setKind(mapSpanKindToProto(source.getKind()));
+    span.setStatus(statusDataToProto(source.getStatus()));
 
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  protected abstract Span.Event eventDataToProto(EventData source);
+    addSpanProtoExtras(source, span);
 
-  protected Span.Link linkDataToProto(LinkData source) {
-    Span.Link.Builder builder = Span.Link.newBuilder();
-    SpanContext spanContext = source.getSpanContext();
-    builder.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
-    builder.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
-    builder.addAllAttributes(attributesToProto(source.getAttributes()));
-    builder.setDroppedAttributesCount(
-        source.getTotalAttributeCount() - source.getAttributes().size());
-    builder.setTraceState(encodeTraceState(spanContext.getTraceState()));
-
-    return builder.build();
+    return span.build();
   }
 
-  @Mapping(target = "message", source = "description")
-  @Mapping(target = "code", source = "statusCode")
-  protected abstract Status statusDataToProto(StatusData source);
-
-  @AfterMapping
-  protected void addSpanProtoExtras(SpanData source, @MappingTarget Span.Builder target) {
+  private static void addSpanProtoExtras(SpanData source, Span.Builder target) {
     target.addAllAttributes(attributesToProto(source.getAttributes()));
     target.setDroppedAttributesCount(
         source.getTotalAttributeCount() - source.getAttributes().size());
@@ -91,55 +70,30 @@ public abstract class SpanDataMapper {
     target.setTraceState(encodeTraceState(source.getSpanContext().getTraceState()));
   }
 
-  @AfterMapping
-  protected void addEventProtoExtras(EventData source, @MappingTarget Span.Event.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  public SpanData mapToSdk(
+      Span source, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
+    SpanDataImpl.Builder spanData = SpanDataImpl.builder();
+
+    spanData.setStartEpochNanos(source.getStartTimeUnixNano());
+    spanData.setEndEpochNanos(source.getEndTimeUnixNano());
+    spanData.setEvents(eventListToEventDataList(source.getEventsList()));
+    spanData.setLinks(linkListToLinkDataList(source.getLinksList()));
+    spanData.setName(source.getName());
+    spanData.setKind(mapSpanKindToSdk(source.getKind()));
+    if (source.hasStatus()) {
+      spanData.setStatus(mapStatusDataToSdk(source.getStatus()));
+    }
+
+    addSpanDataExtras(source, spanData, resource, instrumentationScopeInfo);
+
+    return spanData.build();
   }
 
-  @EnumMapping(
-      nameTransformationStrategy = MappingConstants.PREFIX_TRANSFORMATION,
-      configuration = "SPAN_KIND_")
-  protected abstract Span.SpanKind mapSpanKindToProto(SpanKind source);
-
-  @EnumMapping(
-      nameTransformationStrategy = MappingConstants.PREFIX_TRANSFORMATION,
-      configuration = "STATUS_CODE_")
-  protected abstract Status.StatusCode mapStatusCodeToProto(StatusCode source);
-
-  // FROM PROTO
-  protected StatusData mapStatusDataToSdk(Status source) {
-    return StatusData.create(getStatusCode(source.getCodeValue()), source.getMessage());
-  }
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = EventDataImpl.class)
-  protected abstract EventData eventDataToSdk(Span.Event source);
-
-  protected LinkData linkDataToSdk(Span.Link source) {
-    Attributes attributes = protoToAttributes(source.getAttributesList());
-    int totalAttrCount = source.getDroppedAttributesCount() + attributes.size();
-    SpanContext spanContext =
-        SpanContext.create(
-            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
-            TraceFlags.getSampled(),
-            decodeTraceState(source.getTraceState()));
-    return LinkData.create(spanContext, attributes, totalAttrCount);
-  }
-
-  @AfterMapping
-  protected void addEventSdkExtras(Span.Event source, @MappingTarget EventDataImpl.Builder target) {
-    Attributes attributes = protoToAttributes(source.getAttributesList());
-    target.setAttributes(attributes);
-    target.setTotalAttributeCount(attributes.size() + source.getDroppedAttributesCount());
-  }
-
-  @AfterMapping
-  protected void addSpanDataExtras(
+  private static void addSpanDataExtras(
       Span source,
-      @MappingTarget SpanDataImpl.Builder target,
-      @Context Resource resource,
-      @Context InstrumentationScopeInfo instrumentationScopeInfo) {
+      SpanDataImpl.Builder target,
+      Resource resource,
+      InstrumentationScopeInfo instrumentationScopeInfo) {
     Attributes attributes = protoToAttributes(source.getAttributesList());
     target.setAttributes(attributes);
     target.setResource(resource);
@@ -164,11 +118,153 @@ public abstract class SpanDataMapper {
         calculateRecordedItems(source.getDroppedLinksCount(), source.getLinksCount()));
   }
 
-  @EnumMapping(
-      nameTransformationStrategy = MappingConstants.STRIP_PREFIX_TRANSFORMATION,
-      configuration = "SPAN_KIND_")
-  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.THROW_EXCEPTION)
-  protected abstract SpanKind mapSpanKindToSdk(Span.SpanKind source);
+  private static StatusData mapStatusDataToSdk(Status source) {
+    return StatusData.create(getStatusCode(source.getCodeValue()), source.getMessage());
+  }
+
+  private static Span.Event eventDataToProto(EventData source) {
+    Span.Event.Builder event = Span.Event.newBuilder();
+
+    event.setTimeUnixNano(source.getEpochNanos());
+    event.setName(source.getName());
+    event.setDroppedAttributesCount(source.getDroppedAttributesCount());
+
+    addEventProtoExtras(source, event);
+
+    return event.build();
+  }
+
+  private static void addEventProtoExtras(EventData source, Span.Event.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  private static Status statusDataToProto(StatusData source) {
+    Status.Builder status = Status.newBuilder();
+
+    status.setMessage(source.getDescription());
+    status.setCode(mapStatusCodeToProto(source.getStatusCode()));
+
+    return status.build();
+  }
+
+  private static Span.SpanKind mapSpanKindToProto(SpanKind source) {
+    Span.SpanKind spanKind;
+
+    switch (source) {
+      case INTERNAL:
+        spanKind = Span.SpanKind.SPAN_KIND_INTERNAL;
+        break;
+      case SERVER:
+        spanKind = Span.SpanKind.SPAN_KIND_SERVER;
+        break;
+      case CLIENT:
+        spanKind = Span.SpanKind.SPAN_KIND_CLIENT;
+        break;
+      case PRODUCER:
+        spanKind = Span.SpanKind.SPAN_KIND_PRODUCER;
+        break;
+      case CONSUMER:
+        spanKind = Span.SpanKind.SPAN_KIND_CONSUMER;
+        break;
+      default:
+        throw new IllegalArgumentException("Unexpected enum constant: " + source);
+    }
+
+    return spanKind;
+  }
+
+  private static Status.StatusCode mapStatusCodeToProto(StatusCode source) {
+    Status.StatusCode statusCode;
+
+    switch (source) {
+      case UNSET:
+        statusCode = Status.StatusCode.STATUS_CODE_UNSET;
+        break;
+      case OK:
+        statusCode = Status.StatusCode.STATUS_CODE_OK;
+        break;
+      case ERROR:
+        statusCode = Status.StatusCode.STATUS_CODE_ERROR;
+        break;
+      default:
+        throw new IllegalArgumentException("Unexpected enum constant: " + source);
+    }
+
+    return statusCode;
+  }
+
+  private static EventData eventDataToSdk(Span.Event source) {
+    EventDataImpl.Builder eventData = EventDataImpl.builder();
+
+    eventData.setEpochNanos(source.getTimeUnixNano());
+    eventData.setName(source.getName());
+
+    addEventSdkExtras(source, eventData);
+
+    return eventData.build();
+  }
+
+  private static void addEventSdkExtras(Span.Event source, EventDataImpl.Builder target) {
+    Attributes attributes = protoToAttributes(source.getAttributesList());
+    target.setAttributes(attributes);
+    target.setTotalAttributeCount(attributes.size() + source.getDroppedAttributesCount());
+  }
+
+  private static SpanKind mapSpanKindToSdk(Span.SpanKind source) {
+    SpanKind spanKind;
+
+    switch (source) {
+      case SPAN_KIND_INTERNAL:
+        spanKind = SpanKind.INTERNAL;
+        break;
+      case SPAN_KIND_SERVER:
+        spanKind = SpanKind.SERVER;
+        break;
+      case SPAN_KIND_CLIENT:
+        spanKind = SpanKind.CLIENT;
+        break;
+      case SPAN_KIND_PRODUCER:
+        spanKind = SpanKind.PRODUCER;
+        break;
+      case SPAN_KIND_CONSUMER:
+        spanKind = SpanKind.CONSUMER;
+        break;
+      default:
+        throw new IllegalArgumentException("Unexpected enum constant: " + source);
+    }
+
+    return spanKind;
+  }
+
+  private static List<EventData> eventListToEventDataList(List<Span.Event> list) {
+    List<EventData> result = new ArrayList<>(list.size());
+    for (Span.Event event : list) {
+      result.add(eventDataToSdk(event));
+    }
+
+    return result;
+  }
+
+  private static List<LinkData> linkListToLinkDataList(List<Span.Link> list) {
+    List<LinkData> result = new ArrayList<>(list.size());
+    for (Span.Link link : list) {
+      result.add(linkDataToSdk(link));
+    }
+
+    return result;
+  }
+
+  private static LinkData linkDataToSdk(Span.Link source) {
+    Attributes attributes = protoToAttributes(source.getAttributesList());
+    int totalAttrCount = source.getDroppedAttributesCount() + attributes.size();
+    SpanContext spanContext =
+        SpanContext.create(
+            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
+            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
+            TraceFlags.getSampled(),
+            decodeTraceState(source.getTraceState()));
+    return LinkData.create(spanContext, attributes, totalAttrCount);
+  }
 
   private static int calculateRecordedItems(int droppedCount, int itemsCount) {
     return droppedCount + itemsCount;
@@ -209,5 +305,18 @@ public abstract class SpanDataMapper {
     return (source == null || source.isEmpty())
         ? TraceState.getDefault()
         : W3CTraceContextEncoding.decodeTraceState(source);
+  }
+
+  private static Span.Link linkDataToProto(LinkData source) {
+    Span.Link.Builder builder = Span.Link.newBuilder();
+    SpanContext spanContext = source.getSpanContext();
+    builder.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
+    builder.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
+    builder.addAllAttributes(attributesToProto(source.getAttributes()));
+    builder.setDroppedAttributesCount(
+        source.getTotalAttributeCount() - source.getAttributes().size());
+    builder.setTraceState(encodeTraceState(spanContext.getTraceState()));
+
+    return builder.build();
   }
 }
