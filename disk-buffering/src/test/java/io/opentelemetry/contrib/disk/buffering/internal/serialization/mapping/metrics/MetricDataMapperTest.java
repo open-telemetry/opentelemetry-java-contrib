@@ -13,7 +13,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -41,6 +40,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramP
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
@@ -89,14 +89,8 @@ class MetricDataMapperTest {
   private static final ValueAtQuantile VALUE_AT_QUANTILE =
       ImmutableValueAtQuantile.create(2.0, 1.0);
   private static final SummaryPointData SUMMARY_POINT_DATA =
-      SummaryPointDataImpl.builder()
-          .setCount(1L)
-          .setSum(2.0)
-          .setStartEpochNanos(1L)
-          .setEpochNanos(2L)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setValues(Collections.singletonList(VALUE_AT_QUANTILE))
-          .build();
+      ImmutableSummaryPointData.create(
+          1L, 2L, TestData.ATTRIBUTES, 1L, 2.0, Collections.singletonList(VALUE_AT_QUANTILE));
 
   private static final SummaryData SUMMARY_DATA =
       SummaryDataImpl.builder().setPoints(Collections.singletonList(SUMMARY_POINT_DATA)).build();

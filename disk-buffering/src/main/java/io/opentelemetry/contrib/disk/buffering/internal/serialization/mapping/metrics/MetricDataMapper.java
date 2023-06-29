@@ -17,7 +17,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
 import io.opentelemetry.proto.metrics.v1.Exemplar;
@@ -58,6 +57,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramP
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
@@ -573,23 +573,13 @@ public final class MetricDataMapper {
   }
 
   private static SummaryPointData summaryDataPointToSummaryPointData(SummaryDataPoint source) {
-    SummaryPointDataImpl.Builder summaryPointData = SummaryPointDataImpl.builder();
-
-    summaryPointData.setStartEpochNanos(source.getStartTimeUnixNano());
-    summaryPointData.setEpochNanos(source.getTimeUnixNano());
-    summaryPointData.setValues(
+    return ImmutableSummaryPointData.create(
+        source.getStartTimeUnixNano(),
+        source.getTimeUnixNano(),
+        protoToAttributes(source.getAttributesList()),
+        source.getCount(),
+        source.getSum(),
         valueAtQuantileListToValueAtQuantileList(source.getQuantileValuesList()));
-    summaryPointData.setCount(source.getCount());
-    summaryPointData.setSum(source.getSum());
-
-    addAttributesFromSummaryDataPoint(source, summaryPointData);
-
-    return summaryPointData.build();
-  }
-
-  private static void addAttributesFromSummaryDataPoint(
-      SummaryDataPoint source, SummaryPointDataImpl.Builder target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
   }
 
   private static ValueAtQuantile mapFromSummaryValueAtQuantileProto(
