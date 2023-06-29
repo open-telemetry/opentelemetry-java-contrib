@@ -18,10 +18,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.LongPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.DoubleExemplarDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ExponentialHistogramBucketsImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.LongExemplarDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ValueAtQuantileImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -41,6 +37,11 @@ import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
+import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,20 +50,10 @@ import org.junit.jupiter.api.Test;
 class MetricDataMapperTest {
 
   private static final LongExemplarData LONG_EXEMPLAR_DATA =
-      LongExemplarDataImpl.builder()
-          .setValue(1L)
-          .setEpochNanos(100L)
-          .setFilteredAttributes(TestData.ATTRIBUTES)
-          .setSpanContext(TestData.SPAN_CONTEXT)
-          .build();
+      ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1L);
 
   private static final DoubleExemplarData DOUBLE_EXEMPLAR_DATA =
-      DoubleExemplarDataImpl.builder()
-          .setValue(1.0)
-          .setEpochNanos(100L)
-          .setFilteredAttributes(TestData.ATTRIBUTES)
-          .setSpanContext(TestData.SPAN_CONTEXT)
-          .build();
+      ImmutableDoubleExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1.0);
   private static final LongPointData LONG_POINT_DATA =
       LongPointDataImpl.builder()
           .setValue(1L)
@@ -105,8 +96,8 @@ class MetricDataMapperTest {
           .setPoints(Collections.singletonList(DOUBLE_POINT_DATA))
           .build();
 
-  private static final ValueAtQuantileImpl VALUE_AT_QUANTILE =
-      ValueAtQuantileImpl.builder().setValue(1.0).setQuantile(2.0).build();
+  private static final ValueAtQuantile VALUE_AT_QUANTILE =
+      ImmutableValueAtQuantile.create(2.0, 1.0);
   private static final SummaryPointData SUMMARY_POINT_DATA =
       SummaryPointDataImpl.builder()
           .setCount(1L)
@@ -135,20 +126,10 @@ class MetricDataMapperTest {
           .build();
 
   private static final ExponentialHistogramBuckets POSITIVE_BUCKET =
-      ExponentialHistogramBucketsImpl.builder()
-          .setBucketCounts(Arrays.asList(1L, 10L))
-          .setTotalCount(11L)
-          .setOffset(10)
-          .setScale(1)
-          .build();
+      ImmutableExponentialHistogramBuckets.create(1, 10, Arrays.asList(1L, 10L));
 
   private static final ExponentialHistogramBuckets NEGATIVE_BUCKET =
-      ExponentialHistogramBucketsImpl.builder()
-          .setBucketCounts(Collections.emptyList())
-          .setTotalCount(0L)
-          .setOffset(0)
-          .setScale(1)
-          .build();
+      ImmutableExponentialHistogramBuckets.create(1, 0, Collections.emptyList());
 
   private static final ExponentialHistogramPointData EXPONENTIAL_HISTOGRAM_POINT_DATA =
       ExponentialHistogramPointDataImpl.builder()

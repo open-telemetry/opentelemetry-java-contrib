@@ -23,11 +23,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.LongPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.PointDataBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.DoubleExemplarDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ExemplarDataBuilder;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ExponentialHistogramBucketsImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.LongExemplarDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.ValueAtQuantileImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
 import io.opentelemetry.proto.metrics.v1.Exemplar;
@@ -61,6 +56,10 @@ import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -588,39 +587,27 @@ public final class MetricDataMapper {
   }
 
   private static DoubleExemplarData exemplarToDoubleExemplarData(Exemplar source) {
-    DoubleExemplarDataImpl.Builder doubleExemplarData = DoubleExemplarDataImpl.builder();
-
-    doubleExemplarData.setEpochNanos(source.getTimeUnixNano());
-    if (source.hasAsDouble()) {
-      doubleExemplarData.setValue(source.getAsDouble());
-    }
-
-    addExtrasFromExemplar(source, doubleExemplarData);
-
-    return doubleExemplarData.build();
-  }
-
-  private static void addExtrasFromExemplar(Exemplar source, ExemplarDataBuilder<?> target) {
-    target.setFilteredAttributes(protoToAttributes(source.getFilteredAttributesList()));
-    target.setSpanContext(
-        SpanContext.create(
-            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
-            TraceFlags.getSampled(),
-            TraceState.getDefault()));
+    return ImmutableDoubleExemplarData.create(
+        protoToAttributes(source.getFilteredAttributesList()),
+        source.getTimeUnixNano(),
+        createForExemplar(source),
+        source.getAsDouble());
   }
 
   private static LongExemplarData exemplarToLongExemplarData(Exemplar source) {
-    LongExemplarDataImpl.Builder longExemplarData = LongExemplarDataImpl.builder();
+    return ImmutableLongExemplarData.create(
+        protoToAttributes(source.getFilteredAttributesList()),
+        source.getTimeUnixNano(),
+        createForExemplar(source),
+        source.getAsInt());
+  }
 
-    longExemplarData.setEpochNanos(source.getTimeUnixNano());
-    if (source.hasAsInt()) {
-      longExemplarData.setValue(source.getAsInt());
-    }
-
-    addExtrasFromExemplar(source, longExemplarData);
-
-    return longExemplarData.build();
+  private static SpanContext createForExemplar(Exemplar value) {
+    return SpanContext.create(
+        ByteStringMapper.INSTANCE.protoToString(value.getTraceId()),
+        ByteStringMapper.INSTANCE.protoToString(value.getSpanId()),
+        TraceFlags.getSampled(),
+        TraceState.getDefault());
   }
 
   private static SummaryPointData summaryDataPointToSummaryPointData(SummaryDataPoint source) {
@@ -645,12 +632,7 @@ public final class MetricDataMapper {
 
   private static ValueAtQuantile mapFromSummaryValueAtQuantileProto(
       SummaryDataPoint.ValueAtQuantile source) {
-    ValueAtQuantileImpl.Builder valueAtQuantile = ValueAtQuantileImpl.builder();
-
-    valueAtQuantile.setQuantile(source.getQuantile());
-    valueAtQuantile.setValue(source.getValue());
-
-    return valueAtQuantile.build();
+    return ImmutableValueAtQuantile.create(source.getQuantile(), source.getValue());
   }
 
   private static io.opentelemetry.sdk.metrics.data.AggregationTemporality
@@ -839,19 +821,9 @@ public final class MetricDataMapper {
   }
 
   private static ExponentialHistogramBuckets mapBucketsFromProto(
-      ExponentialHistogramDataPoint.Buckets source, Integer scale) {
-    List<Long> bucketCounts = new ArrayList<>();
-    long totalCount = 0;
-    for (Long bucketCount : source.getBucketCountsList()) {
-      bucketCounts.add(bucketCount);
-      totalCount += bucketCount;
-    }
-    return ExponentialHistogramBucketsImpl.builder()
-        .setOffset(source.getOffset())
-        .setBucketCounts(bucketCounts)
-        .setTotalCount(totalCount)
-        .setScale(scale)
-        .build();
+      ExponentialHistogramDataPoint.Buckets source, int scale) {
+    return ImmutableExponentialHistogramBuckets.create(
+        scale, source.getOffset(), source.getBucketCountsList());
   }
 
   private static List<KeyValue> attributesToProto(Attributes source) {

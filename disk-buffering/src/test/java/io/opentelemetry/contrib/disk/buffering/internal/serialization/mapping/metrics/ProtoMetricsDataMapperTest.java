@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.GaugeDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.LongPointDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.data.LongExemplarDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
@@ -22,6 +21,7 @@ import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricDataType;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,12 +31,7 @@ import org.junit.jupiter.api.Test;
 class ProtoMetricsDataMapperTest {
 
   private static final LongExemplarData LONG_EXEMPLAR_DATA =
-      LongExemplarDataImpl.builder()
-          .setValue(1L)
-          .setEpochNanos(100L)
-          .setFilteredAttributes(TestData.ATTRIBUTES)
-          .setSpanContext(TestData.SPAN_CONTEXT)
-          .build();
+      ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1L);
 
   private static final LongPointData LONG_POINT_DATA =
       LongPointDataImpl.builder()
