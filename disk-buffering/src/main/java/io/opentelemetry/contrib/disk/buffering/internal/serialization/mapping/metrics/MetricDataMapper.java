@@ -12,7 +12,6 @@ import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
@@ -54,6 +53,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramB
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
@@ -489,14 +489,9 @@ public final class MetricDataMapper {
   }
 
   private static HistogramData mapHistogramToSdk(Histogram histogram) {
-    HistogramDataImpl.Builder histogramData = HistogramDataImpl.builder();
-
-    histogramData.setPoints(
+    return ImmutableHistogramData.create(
+        mapAggregationTemporalityToSdk(histogram.getAggregationTemporality()),
         histogramDataPointListToHistogramPointDataCollection(histogram.getDataPointsList()));
-    histogramData.setAggregationTemporality(
-        mapAggregationTemporalityToSdk(histogram.getAggregationTemporality()));
-
-    return histogramData.build();
   }
 
   private static ExponentialHistogramData mapExponentialHistogramToSdk(

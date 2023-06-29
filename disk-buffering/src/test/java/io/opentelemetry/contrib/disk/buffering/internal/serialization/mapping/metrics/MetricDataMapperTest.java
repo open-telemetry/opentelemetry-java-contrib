@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.m
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -37,6 +36,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramB
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
@@ -126,10 +126,8 @@ class MetricDataMapperTest {
           TestData.ATTRIBUTES,
           Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
   private static final HistogramData HISTOGRAM_DATA =
-      HistogramDataImpl.builder()
-          .setAggregationTemporality(AggregationTemporality.CUMULATIVE)
-          .setPoints(Collections.singletonList(HISTOGRAM_POINT_DATA))
-          .build();
+      ImmutableHistogramData.create(
+          AggregationTemporality.CUMULATIVE, Collections.singletonList(HISTOGRAM_POINT_DATA));
 
   private static final ExponentialHistogramData EXPONENTIAL_HISTOGRAM_DATA =
       ImmutableExponentialHistogramData.create(
