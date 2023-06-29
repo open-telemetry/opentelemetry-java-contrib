@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -37,6 +36,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import java.util.Arrays;
@@ -79,7 +79,7 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
           1L, 2L, TestData.ATTRIBUTES, 1L, 2.0, Collections.singletonList(VALUE_AT_QUANTILE));
 
   private static final SummaryData SUMMARY_DATA =
-      SummaryDataImpl.builder().setPoints(Collections.singletonList(SUMMARY_POINT_DATA)).build();
+      ImmutableSummaryData.create(Collections.singletonList(SUMMARY_POINT_DATA));
 
   private static final HistogramPointData HISTOGRAM_POINT_DATA =
       ImmutableHistogramPointData.create(

@@ -12,7 +12,6 @@ import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
 import io.opentelemetry.proto.metrics.v1.Exemplar;
@@ -57,6 +56,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
@@ -480,12 +480,8 @@ public final class MetricDataMapper {
   }
 
   private static SummaryData mapSummaryToSdk(Summary summary) {
-    SummaryDataImpl.Builder summaryData = SummaryDataImpl.builder();
-
-    summaryData.setPoints(
+    return ImmutableSummaryData.create(
         summaryDataPointListToSummaryPointDataCollection(summary.getDataPointsList()));
-
-    return summaryData.build();
   }
 
   private static HistogramData mapHistogramToSdk(Histogram histogram) {
