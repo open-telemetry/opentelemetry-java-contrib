@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.ExponentialHistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.GaugeDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
@@ -33,6 +32,7 @@ import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
@@ -131,11 +131,9 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
           .build();
 
   private static final ExponentialHistogramData EXPONENTIAL_HISTOGRAM_DATA =
-      ExponentialHistogramDataImpl.builder()
-          .setAggregationTemporality(AggregationTemporality.CUMULATIVE)
-          .setPoints(Collections.singletonList(EXPONENTIAL_HISTOGRAM_POINT_DATA))
-          .build();
-
+      ImmutableExponentialHistogramData.create(
+          AggregationTemporality.CUMULATIVE,
+          Collections.singletonList(EXPONENTIAL_HISTOGRAM_POINT_DATA));
   private static final MetricData LONG_GAUGE_METRIC =
       MetricDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)
