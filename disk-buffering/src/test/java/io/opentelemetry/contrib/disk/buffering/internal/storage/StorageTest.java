@@ -89,9 +89,9 @@ class StorageTest {
   }
 
   @Test
-  public void whenAttemptingToReadAfterClosed_returnClosed() throws IOException {
+  public void whenAttemptingToReadAfterClosed_returnFailed() throws IOException {
     storage.close();
-    assertEquals(ReadableResult.CLOSED, storage.readAndProcess(processing));
+    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
   }
 
   @Test
@@ -101,14 +101,14 @@ class StorageTest {
   }
 
   @Test
-  public void whenNoFileAvailableForReading_returnNoContentAvailable() throws IOException {
-    assertEquals(ReadableResult.NO_CONTENT_AVAILABLE, storage.readAndProcess(processing));
+  public void whenNoFileAvailableForReading_returnFailed() throws IOException {
+    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
   }
 
   @Test
   public void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.FILE_HAS_EXPIRED).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
     storage.readAndProcess(processing);
 
@@ -118,7 +118,7 @@ class StorageTest {
   @Test
   public void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.NO_CONTENT_AVAILABLE).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
     storage.readAndProcess(processing);
 
@@ -128,7 +128,7 @@ class StorageTest {
   @Test
   public void whenResourceClosed_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.CLOSED).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
     storage.readAndProcess(processing);
 
@@ -138,9 +138,9 @@ class StorageTest {
   @Test
   public void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doReturn(ReadableResult.CLOSED).when(readableFile).readAndProcess(processing);
+    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
-    assertEquals(ReadableResult.NO_CONTENT_AVAILABLE, storage.readAndProcess(processing));
+    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
 
     verify(folderManager, times(3)).getReadableFile();
   }

@@ -186,8 +186,7 @@ class ReadableFileTest {
         new ReadableFile(
             emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
 
-    assertEquals(
-        ReadableResult.NO_CONTENT_AVAILABLE, emptyReadableFile.readAndProcess(bytes -> true));
+    assertEquals(ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> true));
 
     assertTrue(emptyReadableFile.isClosed());
     assertFalse(emptyFile.exists());
@@ -202,17 +201,17 @@ class ReadableFileTest {
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
 
-    assertEquals(ReadableResult.FILE_HAS_EXPIRED, readableFile.readAndProcess(bytes -> true));
+    assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 
     assertTrue(readableFile.isClosed());
   }
 
   @Test
-  public void whenReadingAfterClosed_returnClosedStatus() throws IOException {
+  public void whenReadingAfterClosed_returnFailedStatus() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
-    assertEquals(ReadableResult.CLOSED, readableFile.readAndProcess(bytes -> true));
+    assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)

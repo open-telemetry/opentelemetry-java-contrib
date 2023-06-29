@@ -68,15 +68,15 @@ public final class Storage implements Closeable {
   private ReadableResult readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
-      return ReadableResult.CLOSED;
+      return ReadableResult.FAILED;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
-      return ReadableResult.NO_CONTENT_AVAILABLE;
+      return ReadableResult.FAILED;
     }
     if (readableFile == null) {
       readableFile = folderManager.getReadableFile();
       if (readableFile == null) {
-        return ReadableResult.NO_CONTENT_AVAILABLE;
+        return ReadableResult.FAILED;
       }
     }
     ReadableResult result = readableFile.readAndProcess(processing);

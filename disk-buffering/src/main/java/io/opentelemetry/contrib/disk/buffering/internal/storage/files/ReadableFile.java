@@ -77,16 +77,16 @@ public final class ReadableFile extends StorageFile {
   public synchronized ReadableResult readAndProcess(Function<byte[], Boolean> processing)
       throws IOException {
     if (isClosed.get()) {
-      return ReadableResult.CLOSED;
+      return ReadableResult.FAILED;
     }
     if (hasExpired()) {
       close();
-      return ReadableResult.FILE_HAS_EXPIRED;
+      return ReadableResult.FAILED;
     }
     ReadResult read = readNextItem();
     if (read == null) {
       cleanUp();
-      return ReadableResult.NO_CONTENT_AVAILABLE;
+      return ReadableResult.FAILED;
     }
     if (processing.apply(read.content)) {
       unconsumedResult = null;
