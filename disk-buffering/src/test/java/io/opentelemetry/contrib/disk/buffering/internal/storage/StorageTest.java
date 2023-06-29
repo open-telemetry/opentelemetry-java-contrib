@@ -162,7 +162,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.FILE_EXPIRED).when(writableFile).append(data);
+    doReturn(WritableResult.FAILED).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -176,7 +176,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.FILE_IS_FULL).when(writableFile).append(data);
+    doReturn(WritableResult.FAILED).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -190,7 +190,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.CLOSED).when(writableFile).append(data);
+    doReturn(WritableResult.FAILED).when(writableFile).append(data);
 
     storage.write(data);
 
@@ -201,7 +201,7 @@ class StorageTest {
   public void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
     byte[] data = new byte[1];
     when(folderManager.createWritableFile()).thenReturn(writableFile);
-    doReturn(WritableResult.CLOSED).when(writableFile).append(data);
+    doReturn(WritableResult.FAILED).when(writableFile).append(data);
 
     assertFalse(storage.write(data));
 

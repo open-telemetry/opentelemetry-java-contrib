@@ -37,24 +37,24 @@ public final class WritableFile extends StorageFile {
   }
 
   /**
-   * Adds a new line to the file. If {@link WritableResult#FILE_EXPIRED} or {@link
-   * WritableResult#FILE_IS_FULL} are returned, the file stream is closed with the contents
-   * available in the buffer before attempting to append the new data.
+   * Adds a new line to the file. If it fails due to expired write time or because the file has
+   * reached the configured max size, the file stream is closed with the contents available in the
+   * buffer before attempting to append the new data.
    *
    * @param data - The new data line to add.
    */
   public synchronized WritableResult append(byte[] data) throws IOException {
     if (isClosed.get()) {
-      return WritableResult.CLOSED;
+      return WritableResult.FAILED;
     }
     if (hasExpired()) {
       close();
-      return WritableResult.FILE_EXPIRED;
+      return WritableResult.FAILED;
     }
     int futureSize = size + data.length;
     if (futureSize > configuration.getMaxFileSize()) {
       close();
-      return WritableResult.FILE_IS_FULL;
+      return WritableResult.FAILED;
     }
     out.write(data);
     size = futureSize;

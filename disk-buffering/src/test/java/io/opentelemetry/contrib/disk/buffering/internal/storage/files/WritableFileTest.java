@@ -76,11 +76,11 @@ class WritableFileTest {
   }
 
   @Test
-  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnNoSpaceAvailable()
+  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnFailed()
       throws IOException {
     assertEquals(WritableResult.SUCCEEDED, writableFile.append(new byte[MAX_FILE_SIZE]));
 
-    assertEquals(WritableResult.FILE_IS_FULL, writableFile.append(new byte[1]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 
     assertEquals(1, getWrittenLines().size());
     assertEquals(MAX_FILE_SIZE, writableFile.getSize());
@@ -93,17 +93,17 @@ class WritableFileTest {
         .when(timeProvider)
         .getSystemCurrentTimeMillis();
 
-    assertEquals(WritableResult.FILE_EXPIRED, writableFile.append(new byte[1]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 
     assertEquals(1, getWrittenLines().size());
   }
 
   @Test
-  public void whenAppendingData_andIsAlreadyClosed_returnClosedStatus() throws IOException {
+  public void whenAppendingData_andIsAlreadyClosed_returnFailedStatus() throws IOException {
     writableFile.append(new byte[1]);
     writableFile.close();
 
-    assertEquals(WritableResult.CLOSED, writableFile.append(new byte[2]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new byte[2]));
   }
 
   private static byte[] getByteArrayLine(String line) {
