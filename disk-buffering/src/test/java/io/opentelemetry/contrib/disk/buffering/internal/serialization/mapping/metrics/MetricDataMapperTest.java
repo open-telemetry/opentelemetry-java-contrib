@@ -13,7 +13,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
@@ -39,6 +38,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
@@ -102,19 +102,18 @@ class MetricDataMapperTest {
       SummaryDataImpl.builder().setPoints(Collections.singletonList(SUMMARY_POINT_DATA)).build();
 
   private static final HistogramPointData HISTOGRAM_POINT_DATA =
-      HistogramPointDataImpl.builder()
-          .setCount(3L)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setStartEpochNanos(1L)
-          .setEpochNanos(2L)
-          .setSum(15.0)
-          .setMin(4.0)
-          .setMax(7.0)
-          .setBoundaries(Collections.singletonList(10.0))
-          .setCounts(Arrays.asList(1L, 2L))
-          .setExemplars(Collections.singletonList(DOUBLE_EXEMPLAR_DATA))
-          .build();
-
+      ImmutableHistogramPointData.create(
+          1L,
+          2L,
+          TestData.ATTRIBUTES,
+          15.0,
+          true,
+          4.0,
+          true,
+          7.0,
+          Collections.singletonList(10.0),
+          Arrays.asList(1L, 2L),
+          Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
   private static final ExponentialHistogramBuckets POSITIVE_BUCKET =
       ImmutableExponentialHistogramBuckets.create(1, 10, Arrays.asList(1L, 10L));
 

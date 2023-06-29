@@ -17,7 +17,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.me
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.HistogramDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SumDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.data.SummaryDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.HistogramPointDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.datapoints.SummaryPointDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
@@ -56,6 +55,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
@@ -534,35 +534,18 @@ public final class MetricDataMapper {
 
   private static HistogramPointData histogramDataPointToHistogramPointData(
       HistogramDataPoint source) {
-    HistogramPointDataImpl.Builder histogramPointData = HistogramPointDataImpl.builder();
-
-    histogramPointData.setStartEpochNanos(source.getStartTimeUnixNano());
-    histogramPointData.setEpochNanos(source.getTimeUnixNano());
-    List<Long> bucketCounts = source.getBucketCountsList();
-    histogramPointData.setCounts(new ArrayList<>(bucketCounts));
-    List<Double> explicitBounds = source.getExplicitBoundsList();
-    histogramPointData.setBoundaries(new ArrayList<>(explicitBounds));
-    histogramPointData.setExemplars(
+    return ImmutableHistogramPointData.create(
+        source.getStartTimeUnixNano(),
+        source.getTimeUnixNano(),
+        protoToAttributes(source.getAttributesList()),
+        source.getSum(),
+        source.hasMin(),
+        source.getMin(),
+        source.hasMax(),
+        source.getMax(),
+        source.getExplicitBoundsList(),
+        source.getBucketCountsList(),
         exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
-    if (source.hasSum()) {
-      histogramPointData.setSum(source.getSum());
-    }
-    histogramPointData.setCount(source.getCount());
-    if (source.hasMin()) {
-      histogramPointData.setMin(source.getMin());
-    }
-    if (source.hasMax()) {
-      histogramPointData.setMax(source.getMax());
-    }
-
-    addAttributesFromHistogramDataPoint(source, histogramPointData);
-
-    return histogramPointData.build();
-  }
-
-  private static void addAttributesFromHistogramDataPoint(
-      HistogramDataPoint source, HistogramPointDataImpl.Builder target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
   }
 
   private static DoubleExemplarData exemplarToDoubleExemplarData(Exemplar source) {
