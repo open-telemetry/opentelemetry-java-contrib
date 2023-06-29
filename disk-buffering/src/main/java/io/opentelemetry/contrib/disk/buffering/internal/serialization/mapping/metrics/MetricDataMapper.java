@@ -64,35 +64,37 @@ import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Context;
-import org.mapstruct.EnumMapping;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.ValueMapping;
 
-@Mapper(
-    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class MetricDataMapper {
+public final class MetricDataMapper {
 
-  public static final MetricDataMapper INSTANCE = new MetricDataMapperImpl();
+  public static final MetricDataMapper INSTANCE = new MetricDataMapper();
 
-  public abstract Metric mapToProto(MetricData source);
+  public Metric mapToProto(MetricData source) {
+    Metric.Builder metric = Metric.newBuilder();
 
-  @BeanMapping(resultType = MetricDataImpl.class)
-  public abstract MetricData mapToSdk(
-      Metric source, @Context Resource resource, @Context InstrumentationScopeInfo scope);
+    metric.setName(source.getName());
+    metric.setDescription(source.getDescription());
+    metric.setUnit(source.getUnit());
+
+    addDataToProto(source, metric);
+
+    return metric.build();
+  }
+
+  public MetricData mapToSdk(Metric source, Resource resource, InstrumentationScopeInfo scope) {
+    MetricDataImpl.Builder metricData = MetricDataImpl.builder();
+
+    metricData.setName(source.getName());
+    metricData.setDescription(source.getDescription());
+    metricData.setUnit(source.getUnit());
+
+    addDataToSdk(source, metricData, resource, scope);
+
+    return metricData.build();
+  }
 
   @SuppressWarnings("unchecked")
-  @AfterMapping
-  protected void addDataToProto(MetricData source, @MappingTarget Metric.Builder target) {
+  private static void addDataToProto(MetricData source, Metric.Builder target) {
     switch (source.getType()) {
       case LONG_GAUGE:
         target.setGauge(mapLongGaugeToProto((GaugeData<LongPointData>) source.getData()));
@@ -119,12 +121,11 @@ public abstract class MetricDataMapper {
     }
   }
 
-  @AfterMapping
-  protected void addDataToSdk(
+  private static void addDataToSdk(
       Metric source,
-      @MappingTarget MetricDataImpl.Builder target,
-      @Context Resource resource,
-      @Context InstrumentationScopeInfo scope) {
+      MetricDataImpl.Builder target,
+      Resource resource,
+      InstrumentationScopeInfo scope) {
     target.setResource(resource);
     target.setInstrumentationScopeInfo(scope);
     switch (source.getDataCase()) {
@@ -155,119 +156,7 @@ public abstract class MetricDataMapper {
     }
   }
 
-  @Mapping(target = "dataPointsList", source = "points")
-  protected abstract Gauge mapLongGaugeToProto(GaugeData<LongPointData> data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  protected abstract Gauge mapDoubleGaugeToProto(GaugeData<DoublePointData> data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  @Mapping(target = "isMonotonic", source = "monotonic")
-  protected abstract Sum mapLongSumToProto(SumData<LongPointData> data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  @Mapping(target = "isMonotonic", source = "monotonic")
-  protected abstract Sum mapDoubleSumToProto(SumData<DoublePointData> data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  protected abstract Summary mapSummaryToProto(SummaryData data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  protected abstract Histogram mapHistogramToProto(HistogramData data);
-
-  @Mapping(target = "dataPointsList", source = "points")
-  protected abstract ExponentialHistogram mapExponentialHistogramToProto(
-      ExponentialHistogramData data);
-
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "asInt", source = "value")
-  @Mapping(target = "exemplarsList", source = "exemplars")
-  protected abstract NumberDataPoint longPointDataToNumberDataPoint(LongPointData source);
-
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "asDouble", source = "value")
-  @Mapping(target = "exemplarsList", source = "exemplars")
-  protected abstract NumberDataPoint doublePointDataToNumberDataPoint(DoublePointData source);
-
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "quantileValuesList", source = "values")
-  protected abstract SummaryDataPoint summaryPointDataToSummaryDataPoint(
-      SummaryPointData summaryPointData);
-
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "bucketCountsList", source = "counts")
-  @Mapping(target = "explicitBoundsList", source = "boundaries")
-  @Mapping(target = "exemplarsList", source = "exemplars")
-  protected abstract HistogramDataPoint histogramPointDataToHistogramDataPoint(
-      HistogramPointData histogramPointData);
-
-  @Mapping(target = "startTimeUnixNano", source = "startEpochNanos")
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "positive", source = "positiveBuckets")
-  @Mapping(target = "negative", source = "negativeBuckets")
-  @Mapping(target = "exemplarsList", source = "exemplars")
-  protected abstract ExponentialHistogramDataPoint
-      exponentialHistogramPointDataToExponentialHistogramDataPoint(
-          ExponentialHistogramPointData exponentialHistogramPointData);
-
-  @Mapping(target = "bucketCountsList", source = "bucketCounts")
-  @Mapping(target = "offset")
-  protected abstract ExponentialHistogramDataPoint.Buckets exponentialHistogramBucketsToBuckets(
-      ExponentialHistogramBuckets source);
-
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "asDouble", source = "value")
-  protected abstract Exemplar doubleExemplarDataToExemplar(DoubleExemplarData doubleExemplarData);
-
-  @Mapping(target = "timeUnixNano", source = "epochNanos")
-  @Mapping(target = "asInt", source = "value")
-  protected abstract Exemplar longExemplarDataToExemplar(LongExemplarData doubleExemplarData);
-
-  @AfterMapping
-  protected void addAttributesToNumberDataPoint(
-      PointData source, @MappingTarget NumberDataPoint.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
-  }
-
-  @AfterMapping
-  protected void addAttributesToSummaryDataPoint(
-      PointData source, @MappingTarget SummaryDataPoint.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
-  }
-
-  @AfterMapping
-  protected void addExtrasToExemplar(ExemplarData source, @MappingTarget Exemplar.Builder target) {
-    target.addAllFilteredAttributes(attributesToProto(source.getFilteredAttributes()));
-    SpanContext spanContext = source.getSpanContext();
-    target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
-    target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
-  }
-
-  @AfterMapping
-  protected void addAttributesToExponentialHistogramDataPoint(
-      ExponentialHistogramPointData source,
-      @MappingTarget ExponentialHistogramDataPoint.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
-  }
-
-  @AfterMapping
-  protected void addAttributesToHistogramDataPoint(
-      HistogramPointData source, @MappingTarget HistogramDataPoint.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
-  }
-
-  @EnumMapping(
-      nameTransformationStrategy = MappingConstants.PREFIX_TRANSFORMATION,
-      configuration = "AGGREGATION_TEMPORALITY_")
-  protected abstract AggregationTemporality mapAggregationTemporalityToProto(
-      io.opentelemetry.sdk.metrics.data.AggregationTemporality source);
-
-  // FROM PROTO
-  private DataWithType mapGaugeToSdk(Gauge gauge) {
+  private static DataWithType mapGaugeToSdk(Gauge gauge) {
     if (gauge.getDataPointsCount() > 0) {
       NumberDataPoint dataPoint = gauge.getDataPoints(0);
       if (dataPoint.hasAsInt()) {
@@ -279,7 +168,7 @@ public abstract class MetricDataMapper {
     return new DataWithType(mapDoubleGaugeToSdk(gauge), MetricDataType.DOUBLE_GAUGE);
   }
 
-  private DataWithType mapSumToSdk(Sum sum) {
+  private static DataWithType mapSumToSdk(Sum sum) {
     if (sum.getDataPointsCount() > 0) {
       NumberDataPoint dataPoint = sum.getDataPoints(0);
       if (dataPoint.hasAsInt()) {
@@ -291,111 +180,369 @@ public abstract class MetricDataMapper {
     return new DataWithType(mapDoubleSumToSdk(sum), MetricDataType.DOUBLE_SUM);
   }
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = SummaryDataImpl.class)
-  protected abstract SummaryData mapSummaryToSdk(Summary summary);
+  private static Gauge mapLongGaugeToProto(GaugeData<LongPointData> data) {
+    Gauge.Builder gauge = Gauge.newBuilder();
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = HistogramDataImpl.class)
-  protected abstract HistogramData mapHistogramToSdk(Histogram histogram);
+    if (data.getPoints() != null) {
+      for (LongPointData point : data.getPoints()) {
+        gauge.addDataPoints(longPointDataToNumberDataPoint(point));
+      }
+    }
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = ExponentialHistogramDataImpl.class)
-  protected abstract ExponentialHistogramData mapExponentialHistogramToSdk(
-      ExponentialHistogram source);
+    return gauge.build();
+  }
 
-  @Mapping(target = "exemplars", source = "exemplarsList")
-  @BeanMapping(resultType = ExponentialHistogramPointDataImpl.class)
-  protected abstract ExponentialHistogramPointData
+  private static Gauge mapDoubleGaugeToProto(GaugeData<DoublePointData> data) {
+    Gauge.Builder gauge = Gauge.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (DoublePointData point : data.getPoints()) {
+        gauge.addDataPoints(doublePointDataToNumberDataPoint(point));
+      }
+    }
+
+    return gauge.build();
+  }
+
+  private static Sum mapLongSumToProto(SumData<LongPointData> data) {
+    Sum.Builder sum = Sum.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (LongPointData point : data.getPoints()) {
+        sum.addDataPoints(longPointDataToNumberDataPoint(point));
+      }
+    }
+    sum.setIsMonotonic(data.isMonotonic());
+    sum.setAggregationTemporality(
+        mapAggregationTemporalityToProto(data.getAggregationTemporality()));
+
+    return sum.build();
+  }
+
+  private static Sum mapDoubleSumToProto(SumData<DoublePointData> data) {
+    Sum.Builder sum = Sum.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (DoublePointData point : data.getPoints()) {
+        sum.addDataPoints(doublePointDataToNumberDataPoint(point));
+      }
+    }
+    sum.setIsMonotonic(data.isMonotonic());
+    sum.setAggregationTemporality(
+        mapAggregationTemporalityToProto(data.getAggregationTemporality()));
+
+    return sum.build();
+  }
+
+  private static Summary mapSummaryToProto(SummaryData data) {
+    Summary.Builder summary = Summary.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (SummaryPointData point : data.getPoints()) {
+        summary.addDataPoints(summaryPointDataToSummaryDataPoint(point));
+      }
+    }
+
+    return summary.build();
+  }
+
+  private static Histogram mapHistogramToProto(HistogramData data) {
+    Histogram.Builder histogram = Histogram.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (HistogramPointData point : data.getPoints()) {
+        histogram.addDataPoints(histogramPointDataToHistogramDataPoint(point));
+      }
+    }
+    histogram.setAggregationTemporality(
+        mapAggregationTemporalityToProto(data.getAggregationTemporality()));
+
+    return histogram.build();
+  }
+
+  private static ExponentialHistogram mapExponentialHistogramToProto(
+      ExponentialHistogramData data) {
+    ExponentialHistogram.Builder exponentialHistogram = ExponentialHistogram.newBuilder();
+
+    if (data.getPoints() != null) {
+      for (ExponentialHistogramPointData point : data.getPoints()) {
+        exponentialHistogram.addDataPoints(
+            exponentialHistogramPointDataToExponentialHistogramDataPoint(point));
+      }
+    }
+    exponentialHistogram.setAggregationTemporality(
+        mapAggregationTemporalityToProto(data.getAggregationTemporality()));
+
+    return exponentialHistogram.build();
+  }
+
+  private static NumberDataPoint longPointDataToNumberDataPoint(LongPointData source) {
+    NumberDataPoint.Builder numberDataPoint = NumberDataPoint.newBuilder();
+
+    numberDataPoint.setStartTimeUnixNano(source.getStartEpochNanos());
+    numberDataPoint.setTimeUnixNano(source.getEpochNanos());
+    numberDataPoint.setAsInt(source.getValue());
+    if (source.getExemplars() != null) {
+      for (LongExemplarData exemplar : source.getExemplars()) {
+        numberDataPoint.addExemplars(longExemplarDataToExemplar(exemplar));
+      }
+    }
+
+    addAttributesToNumberDataPoint(source, numberDataPoint);
+
+    return numberDataPoint.build();
+  }
+
+  private static void addAttributesToNumberDataPoint(
+      PointData source, NumberDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  private static NumberDataPoint doublePointDataToNumberDataPoint(DoublePointData source) {
+    NumberDataPoint.Builder numberDataPoint = NumberDataPoint.newBuilder();
+
+    numberDataPoint.setStartTimeUnixNano(source.getStartEpochNanos());
+    numberDataPoint.setTimeUnixNano(source.getEpochNanos());
+    numberDataPoint.setAsDouble(source.getValue());
+    if (source.getExemplars() != null) {
+      for (DoubleExemplarData exemplar : source.getExemplars()) {
+        numberDataPoint.addExemplars(doubleExemplarDataToExemplar(exemplar));
+      }
+    }
+
+    addAttributesToNumberDataPoint(source, numberDataPoint);
+
+    return numberDataPoint.build();
+  }
+
+  private static SummaryDataPoint summaryPointDataToSummaryDataPoint(
+      SummaryPointData summaryPointData) {
+    SummaryDataPoint.Builder summaryDataPoint = SummaryDataPoint.newBuilder();
+
+    summaryDataPoint.setStartTimeUnixNano(summaryPointData.getStartEpochNanos());
+    summaryDataPoint.setTimeUnixNano(summaryPointData.getEpochNanos());
+    if (summaryPointData.getValues() != null) {
+      for (ValueAtQuantile value : summaryPointData.getValues()) {
+        summaryDataPoint.addQuantileValues(valueAtQuantileToValueAtQuantile(value));
+      }
+    }
+    summaryDataPoint.setCount(summaryPointData.getCount());
+    summaryDataPoint.setSum(summaryPointData.getSum());
+
+    addAttributesToSummaryDataPoint(summaryPointData, summaryDataPoint);
+
+    return summaryDataPoint.build();
+  }
+
+  private static void addAttributesToSummaryDataPoint(
+      PointData source, SummaryDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  private static HistogramDataPoint histogramPointDataToHistogramDataPoint(
+      HistogramPointData histogramPointData) {
+    HistogramDataPoint.Builder histogramDataPoint = HistogramDataPoint.newBuilder();
+
+    histogramDataPoint.setStartTimeUnixNano(histogramPointData.getStartEpochNanos());
+    histogramDataPoint.setTimeUnixNano(histogramPointData.getEpochNanos());
+    if (histogramPointData.getCounts() != null) {
+      for (Long count : histogramPointData.getCounts()) {
+        histogramDataPoint.addBucketCounts(count);
+      }
+    }
+    if (histogramPointData.getBoundaries() != null) {
+      for (Double boundary : histogramPointData.getBoundaries()) {
+        histogramDataPoint.addExplicitBounds(boundary);
+      }
+    }
+    if (histogramPointData.getExemplars() != null) {
+      for (DoubleExemplarData exemplar : histogramPointData.getExemplars()) {
+        histogramDataPoint.addExemplars(doubleExemplarDataToExemplar(exemplar));
+      }
+    }
+    histogramDataPoint.setCount(histogramPointData.getCount());
+    histogramDataPoint.setSum(histogramPointData.getSum());
+    if (histogramPointData.hasMin()) {
+      histogramDataPoint.setMin(histogramPointData.getMin());
+    }
+    if (histogramPointData.hasMax()) {
+      histogramDataPoint.setMax(histogramPointData.getMax());
+    }
+
+    addAttributesToHistogramDataPoint(histogramPointData, histogramDataPoint);
+
+    return histogramDataPoint.build();
+  }
+
+  private static void addAttributesToHistogramDataPoint(
+      HistogramPointData source, HistogramDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  private static ExponentialHistogramDataPoint
+      exponentialHistogramPointDataToExponentialHistogramDataPoint(
+          ExponentialHistogramPointData exponentialHistogramPointData) {
+    ExponentialHistogramDataPoint.Builder exponentialHistogramDataPoint =
+        ExponentialHistogramDataPoint.newBuilder();
+
+    exponentialHistogramDataPoint.setStartTimeUnixNano(
+        exponentialHistogramPointData.getStartEpochNanos());
+    exponentialHistogramDataPoint.setTimeUnixNano(exponentialHistogramPointData.getEpochNanos());
+    exponentialHistogramDataPoint.setPositive(
+        exponentialHistogramBucketsToBuckets(exponentialHistogramPointData.getPositiveBuckets()));
+    exponentialHistogramDataPoint.setNegative(
+        exponentialHistogramBucketsToBuckets(exponentialHistogramPointData.getNegativeBuckets()));
+    if (exponentialHistogramPointData.getExemplars() != null) {
+      for (DoubleExemplarData exemplar : exponentialHistogramPointData.getExemplars()) {
+        exponentialHistogramDataPoint.addExemplars(doubleExemplarDataToExemplar(exemplar));
+      }
+    }
+    exponentialHistogramDataPoint.setCount(exponentialHistogramPointData.getCount());
+    exponentialHistogramDataPoint.setSum(exponentialHistogramPointData.getSum());
+    exponentialHistogramDataPoint.setScale(exponentialHistogramPointData.getScale());
+    exponentialHistogramDataPoint.setZeroCount(exponentialHistogramPointData.getZeroCount());
+    if (exponentialHistogramPointData.hasMin()) {
+      exponentialHistogramDataPoint.setMin(exponentialHistogramPointData.getMin());
+    }
+    if (exponentialHistogramPointData.hasMax()) {
+      exponentialHistogramDataPoint.setMax(exponentialHistogramPointData.getMax());
+    }
+
+    addAttributesToExponentialHistogramDataPoint(
+        exponentialHistogramPointData, exponentialHistogramDataPoint);
+
+    return exponentialHistogramDataPoint.build();
+  }
+
+  private static void addAttributesToExponentialHistogramDataPoint(
+      ExponentialHistogramPointData source, ExponentialHistogramDataPoint.Builder target) {
+    target.addAllAttributes(attributesToProto(source.getAttributes()));
+  }
+
+  private static ExponentialHistogramDataPoint.Buckets exponentialHistogramBucketsToBuckets(
+      ExponentialHistogramBuckets source) {
+    ExponentialHistogramDataPoint.Buckets.Builder buckets =
+        ExponentialHistogramDataPoint.Buckets.newBuilder();
+
+    if (source.getBucketCounts() != null) {
+      for (Long bucketCount : source.getBucketCounts()) {
+        buckets.addBucketCounts(bucketCount);
+      }
+    }
+    buckets.setOffset(source.getOffset());
+
+    return buckets.build();
+  }
+
+  private static Exemplar doubleExemplarDataToExemplar(DoubleExemplarData doubleExemplarData) {
+    Exemplar.Builder exemplar = Exemplar.newBuilder();
+
+    exemplar.setTimeUnixNano(doubleExemplarData.getEpochNanos());
+    exemplar.setAsDouble(doubleExemplarData.getValue());
+
+    addExtrasToExemplar(doubleExemplarData, exemplar);
+
+    return exemplar.build();
+  }
+
+  private static Exemplar longExemplarDataToExemplar(LongExemplarData doubleExemplarData) {
+    Exemplar.Builder exemplar = Exemplar.newBuilder();
+
+    exemplar.setTimeUnixNano(doubleExemplarData.getEpochNanos());
+    exemplar.setAsInt(doubleExemplarData.getValue());
+
+    addExtrasToExemplar(doubleExemplarData, exemplar);
+
+    return exemplar.build();
+  }
+
+  private static void addExtrasToExemplar(ExemplarData source, Exemplar.Builder target) {
+    target.addAllFilteredAttributes(attributesToProto(source.getFilteredAttributes()));
+    SpanContext spanContext = source.getSpanContext();
+    target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
+    target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
+  }
+
+  private static AggregationTemporality mapAggregationTemporalityToProto(
+      io.opentelemetry.sdk.metrics.data.AggregationTemporality source) {
+    AggregationTemporality aggregationTemporality;
+
+    switch (source) {
+      case DELTA:
+        aggregationTemporality = AggregationTemporality.AGGREGATION_TEMPORALITY_DELTA;
+        break;
+      case CUMULATIVE:
+        aggregationTemporality = AggregationTemporality.AGGREGATION_TEMPORALITY_CUMULATIVE;
+        break;
+      default:
+        aggregationTemporality = AggregationTemporality.UNRECOGNIZED;
+    }
+
+    return aggregationTemporality;
+  }
+
+  private static SummaryData mapSummaryToSdk(Summary summary) {
+    SummaryDataImpl.Builder summaryData = SummaryDataImpl.builder();
+
+    summaryData.setPoints(
+        summaryDataPointListToSummaryPointDataCollection(summary.getDataPointsList()));
+
+    return summaryData.build();
+  }
+
+  private static HistogramData mapHistogramToSdk(Histogram histogram) {
+    HistogramDataImpl.Builder histogramData = HistogramDataImpl.builder();
+
+    histogramData.setPoints(
+        histogramDataPointListToHistogramPointDataCollection(histogram.getDataPointsList()));
+    histogramData.setAggregationTemporality(
+        mapAggregationTemporalityToSdk(histogram.getAggregationTemporality()));
+
+    return histogramData.build();
+  }
+
+  private static ExponentialHistogramData mapExponentialHistogramToSdk(
+      ExponentialHistogram source) {
+    ExponentialHistogramDataImpl.Builder exponentialHistogramData =
+        ExponentialHistogramDataImpl.builder();
+
+    exponentialHistogramData.setPoints(
+        exponentialHistogramDataPointListToExponentialHistogramPointDataCollection(
+            source.getDataPointsList()));
+    exponentialHistogramData.setAggregationTemporality(
+        mapAggregationTemporalityToSdk(source.getAggregationTemporality()));
+
+    return exponentialHistogramData.build();
+  }
+
+  private static ExponentialHistogramPointData
       exponentialHistogramDataPointToExponentialHistogramPointData(
-          ExponentialHistogramDataPoint source);
+          ExponentialHistogramDataPoint source) {
+    ExponentialHistogramPointDataImpl.Builder exponentialHistogramPointData =
+        ExponentialHistogramPointDataImpl.builder();
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = HistogramPointDataImpl.class)
-  protected abstract HistogramPointData histogramDataPointToHistogramPointData(
-      HistogramDataPoint source);
+    exponentialHistogramPointData.setExemplars(
+        exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
+    exponentialHistogramPointData.setScale(source.getScale());
+    if (source.hasSum()) {
+      exponentialHistogramPointData.setSum(source.getSum());
+    }
+    exponentialHistogramPointData.setCount(source.getCount());
+    exponentialHistogramPointData.setZeroCount(source.getZeroCount());
+    if (source.hasMin()) {
+      exponentialHistogramPointData.setMin(source.getMin());
+    }
+    if (source.hasMax()) {
+      exponentialHistogramPointData.setMax(source.getMax());
+    }
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = DoubleExemplarDataImpl.class)
-  protected abstract DoubleExemplarData exemplarToDoubleExemplarData(Exemplar source);
+    addBucketsExtrasFromProto(source, exponentialHistogramPointData);
 
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = LongExemplarDataImpl.class)
-  protected abstract LongExemplarData exemplarToLongExemplarData(Exemplar source);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = SummaryPointDataImpl.class)
-  protected abstract SummaryPointData summaryDataPointToSummaryPointData(SummaryDataPoint source);
-
-  @BeanMapping(resultType = ValueAtQuantileImpl.class)
-  protected abstract ValueAtQuantile mapFromSummaryValueAtQuantileProto(
-      SummaryDataPoint.ValueAtQuantile source);
-
-  @EnumMapping(
-      nameTransformationStrategy = MappingConstants.STRIP_PREFIX_TRANSFORMATION,
-      configuration = "AGGREGATION_TEMPORALITY_")
-  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.THROW_EXCEPTION)
-  protected abstract io.opentelemetry.sdk.metrics.data.AggregationTemporality
-      mapAggregationTemporalityToSdk(AggregationTemporality source);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = GaugeDataImpl.LongData.class)
-  protected abstract GaugeData<LongPointData> mapLongGaugeToSdk(Gauge gauge);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = GaugeDataImpl.DoubleData.class)
-  protected abstract GaugeData<DoublePointData> mapDoubleGaugeToSdk(Gauge gauge);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = SumDataImpl.LongData.class)
-  protected abstract SumData<LongPointData> mapLongSumToSdk(Sum sum);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = SumDataImpl.DoubleData.class)
-  protected abstract SumData<DoublePointData> mapDoubleSumToSdk(Sum sum);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = DoublePointDataImpl.class)
-  protected abstract DoublePointData mapDoubleNumberDataPointToSdk(NumberDataPoint source);
-
-  @InheritInverseConfiguration
-  @BeanMapping(resultType = LongPointDataImpl.class)
-  protected abstract LongPointData mapLongNumberDataPointToSdk(NumberDataPoint source);
-
-  @AfterMapping
-  protected void addAttributesFromNumberDataPoint(
-      NumberDataPoint source, @MappingTarget PointDataBuilder<?> target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
+    return exponentialHistogramPointData.build();
   }
 
-  @AfterMapping
-  protected void addAttributesFromSummaryDataPoint(
-      SummaryDataPoint source, @MappingTarget SummaryPointDataImpl.Builder target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
-  }
-
-  @AfterMapping
-  protected void addAttributesFromHistogramDataPoint(
-      HistogramDataPoint source, @MappingTarget HistogramPointDataImpl.Builder target) {
-    target.setAttributes(protoToAttributes(source.getAttributesList()));
-  }
-
-  @AfterMapping
-  protected void addExtrasFromExemplar(
-      Exemplar source, @MappingTarget ExemplarDataBuilder<?> target) {
-    target.setFilteredAttributes(protoToAttributes(source.getFilteredAttributesList()));
-    target.setSpanContext(
-        SpanContext.create(
-            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
-            TraceFlags.getSampled(),
-            TraceState.getDefault()));
-  }
-
-  @AfterMapping
-  protected void addBucketsExtrasFromProto(
-      ExponentialHistogramDataPoint source,
-      @MappingTarget ExponentialHistogramPointDataImpl.Builder target) {
+  private static void addBucketsExtrasFromProto(
+      ExponentialHistogramDataPoint source, ExponentialHistogramPointDataImpl.Builder target) {
     target.setAttributes(protoToAttributes(source.getAttributesList()));
     target.setStartEpochNanos(source.getStartTimeUnixNano());
     target.setEpochNanos(source.getTimeUnixNano());
@@ -407,7 +554,291 @@ public abstract class MetricDataMapper {
     }
   }
 
-  protected ExponentialHistogramBuckets mapBucketsFromProto(
+  private static HistogramPointData histogramDataPointToHistogramPointData(
+      HistogramDataPoint source) {
+    HistogramPointDataImpl.Builder histogramPointData = HistogramPointDataImpl.builder();
+
+    histogramPointData.setStartEpochNanos(source.getStartTimeUnixNano());
+    histogramPointData.setEpochNanos(source.getTimeUnixNano());
+    List<Long> bucketCounts = source.getBucketCountsList();
+    histogramPointData.setCounts(new ArrayList<>(bucketCounts));
+    List<Double> explicitBounds = source.getExplicitBoundsList();
+    histogramPointData.setBoundaries(new ArrayList<>(explicitBounds));
+    histogramPointData.setExemplars(
+        exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
+    if (source.hasSum()) {
+      histogramPointData.setSum(source.getSum());
+    }
+    histogramPointData.setCount(source.getCount());
+    if (source.hasMin()) {
+      histogramPointData.setMin(source.getMin());
+    }
+    if (source.hasMax()) {
+      histogramPointData.setMax(source.getMax());
+    }
+
+    addAttributesFromHistogramDataPoint(source, histogramPointData);
+
+    return histogramPointData.build();
+  }
+
+  private static void addAttributesFromHistogramDataPoint(
+      HistogramDataPoint source, HistogramPointDataImpl.Builder target) {
+    target.setAttributes(protoToAttributes(source.getAttributesList()));
+  }
+
+  private static DoubleExemplarData exemplarToDoubleExemplarData(Exemplar source) {
+    DoubleExemplarDataImpl.Builder doubleExemplarData = DoubleExemplarDataImpl.builder();
+
+    doubleExemplarData.setEpochNanos(source.getTimeUnixNano());
+    if (source.hasAsDouble()) {
+      doubleExemplarData.setValue(source.getAsDouble());
+    }
+
+    addExtrasFromExemplar(source, doubleExemplarData);
+
+    return doubleExemplarData.build();
+  }
+
+  private static void addExtrasFromExemplar(Exemplar source, ExemplarDataBuilder<?> target) {
+    target.setFilteredAttributes(protoToAttributes(source.getFilteredAttributesList()));
+    target.setSpanContext(
+        SpanContext.create(
+            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
+            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
+            TraceFlags.getSampled(),
+            TraceState.getDefault()));
+  }
+
+  private static LongExemplarData exemplarToLongExemplarData(Exemplar source) {
+    LongExemplarDataImpl.Builder longExemplarData = LongExemplarDataImpl.builder();
+
+    longExemplarData.setEpochNanos(source.getTimeUnixNano());
+    if (source.hasAsInt()) {
+      longExemplarData.setValue(source.getAsInt());
+    }
+
+    addExtrasFromExemplar(source, longExemplarData);
+
+    return longExemplarData.build();
+  }
+
+  private static SummaryPointData summaryDataPointToSummaryPointData(SummaryDataPoint source) {
+    SummaryPointDataImpl.Builder summaryPointData = SummaryPointDataImpl.builder();
+
+    summaryPointData.setStartEpochNanos(source.getStartTimeUnixNano());
+    summaryPointData.setEpochNanos(source.getTimeUnixNano());
+    summaryPointData.setValues(
+        valueAtQuantileListToValueAtQuantileList(source.getQuantileValuesList()));
+    summaryPointData.setCount(source.getCount());
+    summaryPointData.setSum(source.getSum());
+
+    addAttributesFromSummaryDataPoint(source, summaryPointData);
+
+    return summaryPointData.build();
+  }
+
+  private static void addAttributesFromSummaryDataPoint(
+      SummaryDataPoint source, SummaryPointDataImpl.Builder target) {
+    target.setAttributes(protoToAttributes(source.getAttributesList()));
+  }
+
+  private static ValueAtQuantile mapFromSummaryValueAtQuantileProto(
+      SummaryDataPoint.ValueAtQuantile source) {
+    ValueAtQuantileImpl.Builder valueAtQuantile = ValueAtQuantileImpl.builder();
+
+    valueAtQuantile.setQuantile(source.getQuantile());
+    valueAtQuantile.setValue(source.getValue());
+
+    return valueAtQuantile.build();
+  }
+
+  private static io.opentelemetry.sdk.metrics.data.AggregationTemporality
+      mapAggregationTemporalityToSdk(AggregationTemporality source) {
+    io.opentelemetry.sdk.metrics.data.AggregationTemporality aggregationTemporality;
+
+    switch (source) {
+      case AGGREGATION_TEMPORALITY_DELTA:
+        aggregationTemporality = io.opentelemetry.sdk.metrics.data.AggregationTemporality.DELTA;
+        break;
+      case AGGREGATION_TEMPORALITY_CUMULATIVE:
+        aggregationTemporality =
+            io.opentelemetry.sdk.metrics.data.AggregationTemporality.CUMULATIVE;
+        break;
+      default:
+        throw new IllegalArgumentException("Unexpected enum constant: " + source);
+    }
+
+    return aggregationTemporality;
+  }
+
+  private static GaugeData<LongPointData> mapLongGaugeToSdk(Gauge gauge) {
+    GaugeDataImpl.LongData.Builder gaugeData = GaugeDataImpl.LongData.builder();
+
+    gaugeData.setPoints(numberDataPointListToLongPointDataCollection(gauge.getDataPointsList()));
+
+    return gaugeData.build();
+  }
+
+  private static GaugeData<DoublePointData> mapDoubleGaugeToSdk(Gauge gauge) {
+    GaugeDataImpl.DoubleData.Builder gaugeData = GaugeDataImpl.DoubleData.builder();
+
+    gaugeData.setPoints(numberDataPointListToDoublePointDataCollection(gauge.getDataPointsList()));
+
+    return gaugeData.build();
+  }
+
+  private static SumData<LongPointData> mapLongSumToSdk(Sum sum) {
+    SumDataImpl.LongData.Builder sumData = SumDataImpl.LongData.builder();
+
+    sumData.setPoints(numberDataPointListToLongPointDataCollection(sum.getDataPointsList()));
+    sumData.setMonotonic(sum.getIsMonotonic());
+    sumData.setAggregationTemporality(
+        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()));
+
+    return sumData.build();
+  }
+
+  private static SumData<DoublePointData> mapDoubleSumToSdk(Sum sum) {
+    SumDataImpl.DoubleData.Builder sumData = SumDataImpl.DoubleData.builder();
+
+    sumData.setPoints(numberDataPointListToDoublePointDataCollection(sum.getDataPointsList()));
+    sumData.setMonotonic(sum.getIsMonotonic());
+    sumData.setAggregationTemporality(
+        mapAggregationTemporalityToSdk(sum.getAggregationTemporality()));
+
+    return sumData.build();
+  }
+
+  private static DoublePointData mapDoubleNumberDataPointToSdk(NumberDataPoint source) {
+    DoublePointDataImpl.Builder doublePointData = DoublePointDataImpl.builder();
+
+    doublePointData.setStartEpochNanos(source.getStartTimeUnixNano());
+    doublePointData.setEpochNanos(source.getTimeUnixNano());
+    if (source.hasAsDouble()) {
+      doublePointData.setValue(source.getAsDouble());
+    }
+    doublePointData.setExemplars(exemplarListToDoubleExemplarDataList(source.getExemplarsList()));
+
+    addAttributesFromNumberDataPoint(source, doublePointData);
+
+    return doublePointData.build();
+  }
+
+  private static LongPointData mapLongNumberDataPointToSdk(NumberDataPoint source) {
+    LongPointDataImpl.Builder longPointData = LongPointDataImpl.builder();
+
+    longPointData.setStartEpochNanos(source.getStartTimeUnixNano());
+    longPointData.setEpochNanos(source.getTimeUnixNano());
+    if (source.hasAsInt()) {
+      longPointData.setValue(source.getAsInt());
+    }
+    longPointData.setExemplars(exemplarListToLongExemplarDataList(source.getExemplarsList()));
+
+    addAttributesFromNumberDataPoint(source, longPointData);
+
+    return longPointData.build();
+  }
+
+  private static void addAttributesFromNumberDataPoint(
+      NumberDataPoint source, PointDataBuilder<?> target) {
+    target.setAttributes(protoToAttributes(source.getAttributesList()));
+  }
+
+  private static SummaryDataPoint.ValueAtQuantile valueAtQuantileToValueAtQuantile(
+      ValueAtQuantile valueAtQuantile) {
+    SummaryDataPoint.ValueAtQuantile.Builder builder =
+        SummaryDataPoint.ValueAtQuantile.newBuilder();
+
+    builder.setQuantile(valueAtQuantile.getQuantile());
+    builder.setValue(valueAtQuantile.getValue());
+
+    return builder.build();
+  }
+
+  private static List<SummaryPointData> summaryDataPointListToSummaryPointDataCollection(
+      List<SummaryDataPoint> list) {
+    List<SummaryPointData> collection = new ArrayList<>(list.size());
+    for (SummaryDataPoint summaryDataPoint : list) {
+      collection.add(summaryDataPointToSummaryPointData(summaryDataPoint));
+    }
+
+    return collection;
+  }
+
+  private static List<HistogramPointData> histogramDataPointListToHistogramPointDataCollection(
+      List<HistogramDataPoint> list) {
+    List<HistogramPointData> collection = new ArrayList<>(list.size());
+    for (HistogramDataPoint histogramDataPoint : list) {
+      collection.add(histogramDataPointToHistogramPointData(histogramDataPoint));
+    }
+
+    return collection;
+  }
+
+  private static List<ExponentialHistogramPointData>
+      exponentialHistogramDataPointListToExponentialHistogramPointDataCollection(
+          List<ExponentialHistogramDataPoint> list) {
+    List<ExponentialHistogramPointData> collection = new ArrayList<>(list.size());
+    for (ExponentialHistogramDataPoint exponentialHistogramDataPoint : list) {
+      collection.add(
+          exponentialHistogramDataPointToExponentialHistogramPointData(
+              exponentialHistogramDataPoint));
+    }
+
+    return collection;
+  }
+
+  private static List<DoubleExemplarData> exemplarListToDoubleExemplarDataList(
+      List<Exemplar> list) {
+    List<DoubleExemplarData> result = new ArrayList<>(list.size());
+    for (Exemplar exemplar : list) {
+      result.add(exemplarToDoubleExemplarData(exemplar));
+    }
+
+    return result;
+  }
+
+  private static List<ValueAtQuantile> valueAtQuantileListToValueAtQuantileList(
+      List<SummaryDataPoint.ValueAtQuantile> list) {
+    List<ValueAtQuantile> result = new ArrayList<>(list.size());
+    for (SummaryDataPoint.ValueAtQuantile valueAtQuantile : list) {
+      result.add(mapFromSummaryValueAtQuantileProto(valueAtQuantile));
+    }
+
+    return result;
+  }
+
+  private static List<LongPointData> numberDataPointListToLongPointDataCollection(
+      List<NumberDataPoint> list) {
+    List<LongPointData> collection = new ArrayList<>(list.size());
+    for (NumberDataPoint numberDataPoint : list) {
+      collection.add(mapLongNumberDataPointToSdk(numberDataPoint));
+    }
+
+    return collection;
+  }
+
+  private static List<DoublePointData> numberDataPointListToDoublePointDataCollection(
+      List<NumberDataPoint> list) {
+    List<DoublePointData> collection = new ArrayList<>(list.size());
+    for (NumberDataPoint numberDataPoint : list) {
+      collection.add(mapDoubleNumberDataPointToSdk(numberDataPoint));
+    }
+
+    return collection;
+  }
+
+  private static List<LongExemplarData> exemplarListToLongExemplarDataList(List<Exemplar> list) {
+    List<LongExemplarData> result = new ArrayList<>(list.size());
+    for (Exemplar exemplar : list) {
+      result.add(exemplarToLongExemplarData(exemplar));
+    }
+
+    return result;
+  }
+
+  private static ExponentialHistogramBuckets mapBucketsFromProto(
       ExponentialHistogramDataPoint.Buckets source, Integer scale) {
     List<Long> bucketCounts = new ArrayList<>();
     long totalCount = 0;
