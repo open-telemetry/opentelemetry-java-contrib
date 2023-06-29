@@ -14,14 +14,10 @@ import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import java.util.ArrayList;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class AttributesMapper {
+public final class AttributesMapper {
 
-  public static final AttributesMapper INSTANCE = new AttributesMapperImpl();
+  public static final AttributesMapper INSTANCE = new AttributesMapper();
 
   public List<KeyValue> attributesToProto(Attributes attributes) {
     List<KeyValue> keyValues = new ArrayList<>();
@@ -29,7 +25,15 @@ public abstract class AttributesMapper {
     return keyValues;
   }
 
-  protected KeyValue attributeEntryToProto(AttributeKey<?> key, Object value) {
+  public Attributes protoToAttributes(List<KeyValue> values) {
+    AttributesBuilder builder = Attributes.builder();
+    for (KeyValue keyValue : values) {
+      addValue(builder, keyValue.getKey(), keyValue.getValue());
+    }
+    return builder.build();
+  }
+
+  private static KeyValue attributeEntryToProto(AttributeKey<?> key, Object value) {
     KeyValue.Builder builder = KeyValue.newBuilder();
     builder.setKey(key.getKey());
     builder.setValue(attributeValueToProto(key.getType(), value));
@@ -37,7 +41,7 @@ public abstract class AttributesMapper {
   }
 
   @SuppressWarnings("unchecked")
-  private AnyValue attributeValueToProto(AttributeType type, Object value) {
+  private static AnyValue attributeValueToProto(AttributeType type, Object value) {
     switch (type) {
       case STRING:
         return stringToAnyValue((String) value);
@@ -59,43 +63,13 @@ public abstract class AttributesMapper {
     throw new UnsupportedOperationException();
   }
 
-  @Mapping(target = "stringValue", source = ".")
-  protected abstract AnyValue stringToAnyValue(String value);
-
-  @Mapping(target = "boolValue", source = ".")
-  protected abstract AnyValue booleanToAnyValue(Boolean value);
-
-  @Mapping(target = "intValue", source = ".")
-  protected abstract AnyValue longToAnyValue(Long value);
-
-  @Mapping(target = "doubleValue", source = ".")
-  protected abstract AnyValue doubleToAnyValue(Double value);
-
-  protected abstract List<AnyValue> stringListToAnyValue(List<String> value);
-
-  protected abstract List<AnyValue> booleanListToAnyValue(List<Boolean> value);
-
-  protected abstract List<AnyValue> longListToAnyValue(List<Long> value);
-
-  protected abstract List<AnyValue> doubleListToAnyValue(List<Double> value);
-
   private static AnyValue arrayToAnyValue(List<AnyValue> value) {
     return AnyValue.newBuilder()
         .setArrayValue(ArrayValue.newBuilder().addAllValues(value).build())
         .build();
   }
 
-  // FROM PROTO
-
-  public Attributes protoToAttributes(List<KeyValue> values) {
-    AttributesBuilder builder = Attributes.builder();
-    for (KeyValue keyValue : values) {
-      addValue(builder, keyValue.getKey(), keyValue.getValue());
-    }
-    return builder.build();
-  }
-
-  private void addValue(AttributesBuilder builder, String key, AnyValue value) {
+  private static void addValue(AttributesBuilder builder, String key, AnyValue value) {
     if (value.hasStringValue()) {
       builder.put(AttributeKey.stringKey(key), value.getStringValue());
     } else if (value.hasBoolValue()) {
@@ -111,7 +85,7 @@ public abstract class AttributesMapper {
     }
   }
 
-  private void addArray(AttributesBuilder builder, String key, ArrayValue arrayValue) {
+  private static void addArray(AttributesBuilder builder, String key, ArrayValue arrayValue) {
     List<AnyValue> values = arrayValue.getValuesList();
     AnyValue anyValue = values.get(0);
     if (anyValue.hasStringValue()) {
@@ -127,27 +101,129 @@ public abstract class AttributesMapper {
     }
   }
 
-  protected abstract List<String> anyValuesToStrings(List<AnyValue> values);
+  private static AnyValue stringToAnyValue(String value) {
+    AnyValue.Builder anyValue = AnyValue.newBuilder();
 
-  protected abstract List<Boolean> anyValuesToBooleans(List<AnyValue> values);
+    anyValue.setStringValue(value);
 
-  protected abstract List<Long> anyValuesToLongs(List<AnyValue> values);
+    return anyValue.build();
+  }
 
-  protected abstract List<Double> anyValuesToDoubles(List<AnyValue> values);
+  private static AnyValue booleanToAnyValue(Boolean value) {
+    AnyValue.Builder anyValue = AnyValue.newBuilder();
 
-  protected String anyValueToString(AnyValue value) {
+    if (value != null) {
+      anyValue.setBoolValue(value);
+    }
+
+    return anyValue.build();
+  }
+
+  private static AnyValue longToAnyValue(Long value) {
+    AnyValue.Builder anyValue = AnyValue.newBuilder();
+
+    if (value != null) {
+      anyValue.setIntValue(value);
+    }
+
+    return anyValue.build();
+  }
+
+  private static AnyValue doubleToAnyValue(Double value) {
+    AnyValue.Builder anyValue = AnyValue.newBuilder();
+
+    if (value != null) {
+      anyValue.setDoubleValue(value);
+    }
+
+    return anyValue.build();
+  }
+
+  private static List<AnyValue> stringListToAnyValue(List<String> value) {
+    List<AnyValue> list = new ArrayList<>(value.size());
+    for (String string : value) {
+      list.add(stringToAnyValue(string));
+    }
+
+    return list;
+  }
+
+  private static List<AnyValue> booleanListToAnyValue(List<Boolean> value) {
+    List<AnyValue> list = new ArrayList<>(value.size());
+    for (Boolean boolean1 : value) {
+      list.add(booleanToAnyValue(boolean1));
+    }
+
+    return list;
+  }
+
+  private static List<AnyValue> longListToAnyValue(List<Long> value) {
+    List<AnyValue> list = new ArrayList<>(value.size());
+    for (Long long1 : value) {
+      list.add(longToAnyValue(long1));
+    }
+
+    return list;
+  }
+
+  private static List<AnyValue> doubleListToAnyValue(List<Double> value) {
+    List<AnyValue> list = new ArrayList<>(value.size());
+    for (Double double1 : value) {
+      list.add(doubleToAnyValue(double1));
+    }
+
+    return list;
+  }
+
+  private static List<String> anyValuesToStrings(List<AnyValue> values) {
+    List<String> list = new ArrayList<>(values.size());
+    for (AnyValue anyValue : values) {
+      list.add(anyValueToString(anyValue));
+    }
+
+    return list;
+  }
+
+  private static List<Boolean> anyValuesToBooleans(List<AnyValue> values) {
+    List<Boolean> list = new ArrayList<>(values.size());
+    for (AnyValue anyValue : values) {
+      list.add(anyValueToBoolean(anyValue));
+    }
+
+    return list;
+  }
+
+  private static List<Long> anyValuesToLongs(List<AnyValue> values) {
+    List<Long> list = new ArrayList<>(values.size());
+    for (AnyValue anyValue : values) {
+      list.add(anyValueToLong(anyValue));
+    }
+
+    return list;
+  }
+
+  private static List<Double> anyValuesToDoubles(List<AnyValue> values) {
+    List<Double> list = new ArrayList<>(values.size());
+    for (AnyValue anyValue : values) {
+      list.add(anyValueToDouble(anyValue));
+    }
+
+    return list;
+  }
+
+  private static String anyValueToString(AnyValue value) {
     return value.getStringValue();
   }
 
-  protected Boolean anyValueToBoolean(AnyValue value) {
+  private static Boolean anyValueToBoolean(AnyValue value) {
     return value.getBoolValue();
   }
 
-  protected Long anyValueToLong(AnyValue value) {
+  private static Long anyValueToLong(AnyValue value) {
     return value.getIntValue();
   }
 
-  protected Double anyValueToDouble(AnyValue value) {
+  private static Double anyValueToDouble(AnyValue value) {
     return value.getDoubleValue();
   }
 }
