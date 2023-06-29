@@ -20,8 +20,6 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
-import org.mapstruct.Context;
-import org.mapstruct.MappingTarget;
 
 public final class LogRecordDataMapper {
 
@@ -49,8 +47,7 @@ public final class LogRecordDataMapper {
     return logRecord.build();
   }
 
-  private static void addExtrasToProtoBuilder(
-      LogRecordData source, @MappingTarget LogRecord.Builder target) {
+  private static void addExtrasToProtoBuilder(LogRecordData source, LogRecord.Builder target) {
     target.addAllAttributes(AttributesMapper.INSTANCE.attributesToProto(source.getAttributes()));
     SpanContext spanContext = source.getSpanContext();
     target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
@@ -78,9 +75,9 @@ public final class LogRecordDataMapper {
 
   private static void addExtrasToSdkItemBuilder(
       LogRecord source,
-      @MappingTarget LogRecordDataImpl.Builder target,
-      @Context Resource resource,
-      @Context InstrumentationScopeInfo scopeInfo) {
+      LogRecordDataImpl.Builder target,
+      Resource resource,
+      InstrumentationScopeInfo scopeInfo) {
     Attributes attributes = AttributesMapper.INSTANCE.protoToAttributes(source.getAttributesList());
     target.setAttributes(attributes);
     target.setSpanContext(
