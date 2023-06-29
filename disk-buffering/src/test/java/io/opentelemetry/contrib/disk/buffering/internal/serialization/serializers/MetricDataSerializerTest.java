@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -20,7 +19,6 @@ import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.metrics.data.SummaryData;
 import io.opentelemetry.sdk.metrics.data.SummaryPointData;
@@ -35,6 +33,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
@@ -122,81 +121,63 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
           AggregationTemporality.CUMULATIVE,
           Collections.singletonList(EXPONENTIAL_HISTOGRAM_POINT_DATA));
   private static final MetricData LONG_GAUGE_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Long gauge name")
-          .setDescription("Long gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_GAUGE)
-          .setData(LONG_GAUGE_DATA)
-          .build();
+      ImmutableMetricData.createLongGauge(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Long gauge name",
+          "Long gauge description",
+          "ms",
+          LONG_GAUGE_DATA);
 
   private static final MetricData DOUBLE_GAUGE_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Double gauge name")
-          .setDescription("Double gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.DOUBLE_GAUGE)
-          .setData(DOUBLE_GAUGE_DATA)
-          .build();
-
+      ImmutableMetricData.createDoubleGauge(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Double gauge name",
+          "Double gauge description",
+          "ms",
+          DOUBLE_GAUGE_DATA);
   private static final MetricData LONG_SUM_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Long sum name")
-          .setDescription("Long sum description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_SUM)
-          .setData(LONG_SUM_DATA)
-          .build();
-
+      ImmutableMetricData.createLongSum(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Long sum name",
+          "Long sum description",
+          "ms",
+          LONG_SUM_DATA);
   private static final MetricData DOUBLE_SUM_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Double sum name")
-          .setDescription("Double sum description")
-          .setUnit("ms")
-          .setType(MetricDataType.DOUBLE_SUM)
-          .setData(DOUBLE_SUM_DATA)
-          .build();
-
+      ImmutableMetricData.createDoubleSum(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Double sum name",
+          "Double sum description",
+          "ms",
+          DOUBLE_SUM_DATA);
   private static final MetricData SUMMARY_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Summary name")
-          .setDescription("Summary description")
-          .setUnit("ms")
-          .setType(MetricDataType.SUMMARY)
-          .setData(SUMMARY_DATA)
-          .build();
+      ImmutableMetricData.createDoubleSummary(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Summary name",
+          "Summary description",
+          "ms",
+          SUMMARY_DATA);
 
   private static final MetricData HISTOGRAM_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Histogram name")
-          .setDescription("Histogram description")
-          .setUnit("ms")
-          .setType(MetricDataType.HISTOGRAM)
-          .setData(HISTOGRAM_DATA)
-          .build();
-
+      ImmutableMetricData.createDoubleHistogram(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Histogram name",
+          "Histogram description",
+          "ms",
+          HISTOGRAM_DATA);
   private static final MetricData EXPONENTIAL_HISTOGRAM_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Exponential histogram name")
-          .setDescription("Exponential histogram description")
-          .setUnit("ms")
-          .setType(MetricDataType.EXPONENTIAL_HISTOGRAM)
-          .setData(EXPONENTIAL_HISTOGRAM_DATA)
-          .build();
+      ImmutableMetricData.createExponentialHistogram(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Exponential histogram name",
+          "Exponential histogram description",
+          "ms",
+          EXPONENTIAL_HISTOGRAM_DATA);
 
   @Test
   public void verifySerialization() {

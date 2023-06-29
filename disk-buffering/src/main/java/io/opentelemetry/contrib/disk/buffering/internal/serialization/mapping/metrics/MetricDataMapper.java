@@ -11,7 +11,6 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
 import io.opentelemetry.proto.metrics.v1.Exemplar;
@@ -55,6 +54,7 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryPointData;
@@ -79,16 +79,74 @@ public final class MetricDataMapper {
     return metric.build();
   }
 
+  @SuppressWarnings("unchecked")
   public MetricData mapToSdk(Metric source, Resource resource, InstrumentationScopeInfo scope) {
-    MetricDataImpl.Builder metricData = MetricDataImpl.builder();
-
-    metricData.setName(source.getName());
-    metricData.setDescription(source.getDescription());
-    metricData.setUnit(source.getUnit());
-
-    addDataToSdk(source, metricData, resource, scope);
-
-    return metricData.build();
+    switch (source.getDataCase()) {
+      case GAUGE:
+        DataWithType gaugeDataWithType = mapGaugeToSdk(source.getGauge());
+        if (gaugeDataWithType.type == MetricDataType.DOUBLE_GAUGE) {
+          return ImmutableMetricData.createDoubleGauge(
+              resource,
+              scope,
+              source.getName(),
+              source.getDescription(),
+              source.getUnit(),
+              (GaugeData<DoublePointData>) gaugeDataWithType.data);
+        } else {
+          return ImmutableMetricData.createLongGauge(
+              resource,
+              scope,
+              source.getName(),
+              source.getDescription(),
+              source.getUnit(),
+              (GaugeData<LongPointData>) gaugeDataWithType.data);
+        }
+      case SUM:
+        DataWithType sumDataWithType = mapSumToSdk(source.getSum());
+        if (sumDataWithType.type == MetricDataType.DOUBLE_SUM) {
+          return ImmutableMetricData.createDoubleSum(
+              resource,
+              scope,
+              source.getName(),
+              source.getDescription(),
+              source.getUnit(),
+              (SumData<DoublePointData>) sumDataWithType.data);
+        } else {
+          return ImmutableMetricData.createLongSum(
+              resource,
+              scope,
+              source.getName(),
+              source.getDescription(),
+              source.getUnit(),
+              (SumData<LongPointData>) sumDataWithType.data);
+        }
+      case SUMMARY:
+        return ImmutableMetricData.createDoubleSummary(
+            resource,
+            scope,
+            source.getName(),
+            source.getDescription(),
+            source.getUnit(),
+            mapSummaryToSdk(source.getSummary()));
+      case HISTOGRAM:
+        return ImmutableMetricData.createDoubleHistogram(
+            resource,
+            scope,
+            source.getName(),
+            source.getDescription(),
+            source.getUnit(),
+            mapHistogramToSdk(source.getHistogram()));
+      case EXPONENTIAL_HISTOGRAM:
+        return ImmutableMetricData.createExponentialHistogram(
+            resource,
+            scope,
+            source.getName(),
+            source.getDescription(),
+            source.getUnit(),
+            mapExponentialHistogramToSdk(source.getExponentialHistogram()));
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -116,41 +174,6 @@ public final class MetricDataMapper {
         target.setExponentialHistogram(
             mapExponentialHistogramToProto((ExponentialHistogramData) source.getData()));
         break;
-    }
-  }
-
-  private static void addDataToSdk(
-      Metric source,
-      MetricDataImpl.Builder target,
-      Resource resource,
-      InstrumentationScopeInfo scope) {
-    target.setResource(resource);
-    target.setInstrumentationScopeInfo(scope);
-    switch (source.getDataCase()) {
-      case GAUGE:
-        DataWithType gaugeDataWithType = mapGaugeToSdk(source.getGauge());
-        target.setData(gaugeDataWithType.data);
-        target.setType(gaugeDataWithType.type);
-        break;
-      case SUM:
-        DataWithType sumDataWithType = mapSumToSdk(source.getSum());
-        target.setData(sumDataWithType.data);
-        target.setType(sumDataWithType.type);
-        break;
-      case SUMMARY:
-        target.setData(mapSummaryToSdk(source.getSummary()));
-        target.setType(MetricDataType.SUMMARY);
-        break;
-      case HISTOGRAM:
-        target.setData(mapHistogramToSdk(source.getHistogram()));
-        target.setType(MetricDataType.HISTOGRAM);
-        break;
-      case EXPONENTIAL_HISTOGRAM:
-        target.setData(mapExponentialHistogramToSdk(source.getExponentialHistogram()));
-        target.setType(MetricDataType.EXPONENTIAL_HISTOGRAM);
-        break;
-      default:
-        throw new UnsupportedOperationException();
     }
   }
 

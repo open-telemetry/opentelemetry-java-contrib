@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.m
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.models.MetricDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
@@ -18,10 +17,10 @@ import io.opentelemetry.sdk.metrics.data.GaugeData;
 import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,48 +39,40 @@ class ProtoMetricsDataMapperTest {
       ImmutableGaugeData.create(Collections.singletonList(LONG_POINT_DATA));
 
   private static final MetricData LONG_GAUGE_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Long gauge name")
-          .setDescription("Long gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_GAUGE)
-          .setData(LONG_GAUGE_DATA)
-          .build();
+      ImmutableMetricData.createLongGauge(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Long gauge name",
+          "Long gauge description",
+          "ms",
+          LONG_GAUGE_DATA);
 
   private static final MetricData OTHER_LONG_GAUGE_METRIC =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Long gauge name")
-          .setDescription("Long gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_GAUGE)
-          .setData(LONG_GAUGE_DATA)
-          .build();
+      ImmutableMetricData.createLongGauge(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+          "Long gauge name",
+          "Long gauge description",
+          "ms",
+          LONG_GAUGE_DATA);
 
   private static final MetricData LONG_GAUGE_METRIC_WITH_DIFFERENT_SCOPE_SAME_RESOURCE =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION)
-          .setName("Long gauge name")
-          .setDescription("Long gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_GAUGE)
-          .setData(LONG_GAUGE_DATA)
-          .build();
+      ImmutableMetricData.createLongGauge(
+          TestData.RESOURCE_FULL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION,
+          "Long gauge name",
+          "Long gauge description",
+          "ms",
+          LONG_GAUGE_DATA);
 
   private static final MetricData LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE =
-      MetricDataImpl.builder()
-          .setResource(TestData.RESOURCE_WITHOUT_SCHEMA_URL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION)
-          .setName("Long gauge name")
-          .setDescription("Long gauge description")
-          .setUnit("ms")
-          .setType(MetricDataType.LONG_GAUGE)
-          .setData(LONG_GAUGE_DATA)
-          .build();
+      ImmutableMetricData.createLongGauge(
+          TestData.RESOURCE_WITHOUT_SCHEMA_URL,
+          TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION,
+          "Long gauge name",
+          "Long gauge description",
+          "ms",
+          LONG_GAUGE_DATA);
 
   @Test
   public void verifyConversionDataStructure() {
