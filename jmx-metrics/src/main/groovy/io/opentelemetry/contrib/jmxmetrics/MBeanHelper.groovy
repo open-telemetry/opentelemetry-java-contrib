@@ -35,6 +35,7 @@ class MBeanHelper {
     private final JmxClient jmxClient
     private final boolean isSingle
     private final List<String> objectNames
+    private final Map<String, Closure> attributeTransformation
 
     private List<GroovyMBean> mbeans
 
@@ -42,12 +43,28 @@ class MBeanHelper {
         this.jmxClient = jmxClient
         this.objectNames = Collections.unmodifiableList([objectName])
         this.isSingle = isSingle
+        this.attributeTransformation = [:] as Map<String,Closure<?>>
     }
 
     MBeanHelper(JmxClient jmxClient, List<String> objectNames) {
         this.jmxClient = jmxClient
         this.objectNames = Collections.unmodifiableList(objectNames)
         this.isSingle = false
+        this.attributeTransformation = [:] as Map<String,Closure<?>>
+    }
+
+    MBeanHelper(JmxClient jmxClient, String objectName, boolean isSingle, Map<String,Closure<?>> attributeTransformation ) {
+      this.jmxClient = jmxClient
+      this.objectNames = Collections.unmodifiableList([objectName])
+      this.isSingle = isSingle
+      this.attributeTransformation = attributeTransformation
+    }
+
+    MBeanHelper(JmxClient jmxClient, List<String> objectNames, Map<String,Closure<?>> attributeTransformation) {
+      this.jmxClient = jmxClient
+      this.objectNames = Collections.unmodifiableList(objectNames)
+      this.isSingle = false
+      this.attributeTransformation = attributeTransformation
     }
 
     @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
@@ -87,9 +104,11 @@ class MBeanHelper {
         }
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
+
         return ofInterest.collect {
             try {
-                it.getProperty(attribute)
+                def extractedAttribute = it.getProperty(attribute)
+                attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](extractedAttribute) : extractedAttribute
             } catch (AttributeNotFoundException e) {
                 logger.warning("Expected attribute ${attribute} not found in mbean ${it.name()}")
                 null
@@ -106,7 +125,9 @@ class MBeanHelper {
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
             try {
-                new Tuple3(bean, attribute, bean.getProperty(attribute))
+                def extractedAttribute = bean.getProperty(attribute)
+                extractedAttribute = attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](extractedAttribute) : extractedAttribute
+                new Tuple3(bean, attribute, extractedAttribute)
             } catch (AttributeNotFoundException e) {
                 logger.info("Expected attribute ${attribute} not found in mbean ${bean.name()}")
                 new Tuple3(bean, attribute, null)
