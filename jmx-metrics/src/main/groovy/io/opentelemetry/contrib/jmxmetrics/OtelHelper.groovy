@@ -253,15 +253,15 @@ class OtelHelper {
         doubleValueCallback(name, '', updater)
     }
 
-    void longValueCallback(String name, String description, String unit, Consumer<ObservableLongMeasurement> updater) {
-        groovyMetricEnvironment.registerLongValueCallback(name, description, unit, updater)
+    ObservableLongMeasurement longValueCallback(String name, String description, String unit, Consumer<ObservableLongMeasurement> updater) {
+      return groovyMetricEnvironment.registerLongValueCallback(name, description, unit, updater)
     }
 
-    void longValueCallback(String name, String description, Consumer<ObservableLongMeasurement> updater) {
-        longValueCallback(name, description, SCALAR, updater)
+    ObservableLongMeasurement longValueCallback(String name, String description, Consumer<ObservableLongMeasurement> updater) {
+        return longValueCallback(name, description, SCALAR, updater)
     }
 
-    void longValueCallback(String name, Consumer<ObservableLongMeasurement> updater) {
-        longValueCallback(name, '', updater)
+    ObservableLongMeasurement longValueCallback(String name, Consumer<ObservableLongMeasurement> updater) {
+      return longValueCallback(name, '', updater)
     }
 }

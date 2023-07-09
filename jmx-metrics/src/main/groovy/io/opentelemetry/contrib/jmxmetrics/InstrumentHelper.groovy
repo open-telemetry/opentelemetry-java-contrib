@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.jmxmetrics
 
 import groovy.jmx.GroovyMBean
 import groovy.transform.PackageScope
+
+import javax.management.AttributeNotFoundException
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
 
@@ -69,70 +71,13 @@ class InstrumentHelper {
     }
 
     void update() {
-        // Tuples of the form (mbean, attribute, value)
-        def values = mBeanHelper.getAttributes(mBeanAttributes.keySet())
-
-        // If there are no tuples with non-null value, return early
-        if (values.find {it.getV3() != null } == null) {
-            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
-            return
-        }
-
-        // Observer instruments need to have a single updater set at build time, so pool all
-        // update operations in a list of closures per instrument to be executed after all values
-        // are established, potentially as a single updater.  This is done because a single MBeanHelper
-        // can represent multiple MBeans (each with different values for an attribute) and the labelFuncs
-        // will create multiple datapoints from the same instrument identifiers.
-        def tupleToUpdates = [:] // tuple is of form (instrument, instrumentName, description, unit)
-
-        values.each { collectedValue ->
-            def mbean = collectedValue.getV1()
-            def attribute = collectedValue.getV2()
-            def value = collectedValue.getV3()
-            if (value instanceof CompositeData) {
-                value.getCompositeType().keySet().each { key ->
-                    def val = value.get(key)
-                    def updatedInstrumentName = "${instrumentName}.${key}"
-                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                    def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
-                    logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
-                    if (!tupleToUpdates.containsKey(tuple)) {
-                        tupleToUpdates[tuple] = []
-                    }
-                    tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
-                }
-            } else if (value != null) {
-                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                def tuple = new Tuple(instrument, instrumentName, description, unit)
-                logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
-                if (!tupleToUpdates.containsKey(tuple)) {
-                    tupleToUpdates[tuple] = []
-                }
-                tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, value, labels))
-            }
-        }
-
-        tupleToUpdates.each {tuple, updateClosures ->
-            def instrument = tuple.getAt(0)
-            def instrumentName = tuple.getAt(1)
-            def description = tuple.getAt(2)
-            def unit = tuple.getAt(3)
-
-            if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
-                // Though the instrument updater is only set at build time,
-                // our GroovyMetricEnvironment helpers ensure the updater
-                // uses the Closure specified here.
-                instrument(instrumentName, description, unit, { result ->
-                    updateClosures.each { update ->
-                        update(result)
-                    }
-                })
-            } else {
-                def inst = instrument(instrumentName, description, unit)
-                updateClosures.each {
-                    it(inst)
-                }
-            }
+        def updateClosure = prepareUpdateClosure(instrument, mBeanHelper.getMBeans(), mBeanAttributes.keySet())
+        if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
+          instrument(instrumentName, description, unit, { result ->
+            updateClosure(result)
+          })
+        } else {
+          updateClosure(instrument(instrumentName, description, unit))
         }
     }
 
@@ -147,22 +92,43 @@ class InstrumentHelper {
         return labels
     }
 
-    private static Closure prepareUpdateClosure(inst, value, labels) {
-        def labelMap = GroovyMetricEnvironment.mapToAttributes(labels)
-        if (instrumentIsLongObserver(inst)) {
-            return { result ->
-                result.record((long) value, labelMap)
+  private Closure prepareUpdateClosure(inst, List<GroovyMBean> mbeans, attributes) {
+    return { result ->
+      [mbeans, attributes].combinations().each { pair ->
+        def (mbean, attribute) = pair
+        try {
+          def value = mbean.getProperty(attribute)
+          if (value instanceof CompositeData) {
+            value.getCompositeType().keySet().each { key ->
+              def val = value.get(key)
+              def updatedInstrumentName = "${instrumentName}.${key}"
+              def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+              logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
+              recordDataPoint(inst, result, val, GroovyMetricEnvironment.mapToAttributes(labels))
             }
-        } else if (instrumentIsDoubleObserver(inst)) {
-            return { result ->
-                result.record((double) value, labelMap)
-            }
-        } else if (instrumentIsCounter(inst)) {
-            return { i -> i.add(value, labelMap) }
-        } else {
-            return { i -> i.record(value, labelMap) }
+          } else if (value != null) {
+            def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+            logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+            recordDataPoint(inst, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
+          }
+        } catch (AttributeNotFoundException e ) {
+          logger.info("Expected attribute ${attribute} not found in mbean ${mbean.name()}")
         }
+      }
     }
+  }
+
+  private static void recordDataPoint(inst, result, value, labelMap) {
+    if (instrumentIsLongObserver(inst)) {
+        result.record((long) value, labelMap)
+    } else if (instrumentIsDoubleObserver(inst)) {
+        result.record((double) value, labelMap)
+    } else if (instrumentIsCounter(inst)) {
+        result.add(value, labelMap)
+    } else {
+        result.record(value, labelMap)
+    }
+  }
 
     @PackageScope static boolean instrumentIsDoubleObserver(inst) {
         return [

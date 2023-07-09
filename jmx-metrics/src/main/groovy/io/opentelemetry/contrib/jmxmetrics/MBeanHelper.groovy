@@ -78,7 +78,7 @@ class MBeanHelper {
             logger.warning("No active MBeans.  Be sure to fetch() before updating any applicable instruments.")
             return []
         }
-        return mbeans
+        return isSingle ? [mbeans[0]]: mbeans
     }
 
     @PackageScope List<Object> getAttribute(String attribute) {
