@@ -164,27 +164,6 @@ public abstract class AbstractIntegrationTest {
     waitAndAssertMetrics(Arrays.asList(assertions));
   }
 
-  protected final void waitAndAssertNoMetrics() {
-    await()
-        .atMost(Duration.ofSeconds(30))
-        .untilAsserted(
-            () -> {
-              List<Metric> metrics =
-                  otlpServer.getMetrics().stream()
-                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                      .flatMap(Collection::stream)
-                      .filter(
-                          sm ->
-                              sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
-                                  && sm.getScope().getVersion().equals(expectedMeterVersion()))
-                      .flatMap(sm -> sm.getMetricsList().stream())
-                      .collect(Collectors.toList());
-
-              assertThat(metrics).isEmpty();
-            });
-  }
-
   protected void assertGauge(Metric metric, String name, String description, String unit) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
