@@ -68,5 +68,9 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
             assertTypedGauge(
                 metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
         metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1"));
+
+    cassandra.stop();
+
+    waitAndAssertNoMetrics();
   }
 }

@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import groovy.lang.Closure;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleCounter;
@@ -16,6 +17,7 @@ import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.api.metrics.ObservableMeasurement;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
@@ -44,7 +46,10 @@ public class GroovyMetricEnvironment {
       longUpdaterRegistry = new ConcurrentHashMap<>();
   private final Map<Integer, AtomicReference<Consumer<ObservableDoubleMeasurement>>>
       doubleUpdaterRegistry = new ConcurrentHashMap<>();
-  private final Map<Integer, Boolean> instrumentOnceRegistry = new ConcurrentHashMap<>();
+  private final Map<Integer, AtomicReference<Closure<?>>> batchUpdaterRegistry =
+      new ConcurrentHashMap<>();
+  private final Map<Integer, ObservableMeasurement> instrumentOnceRegistry =
+      new ConcurrentHashMap<>();
 
   /**
    * A central context for creating and exporting metrics, to be used by groovy scripts via {@link
@@ -222,8 +227,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableDoubleMeasurement for the gauge
    */
-  public void registerDoubleValueCallback(
+  public ObservableDoubleMeasurement registerDoubleValueCallback(
       final String name,
       final String description,
       final String unit,
@@ -238,20 +244,25 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .gaugeBuilder(name)
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedDoubleObserver(descriptorHash, updater));
-    } else {
+      ObservableDoubleMeasurement obs =
+          meter.gaugeBuilder(name).setDescription(description).setUnit(unit).buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableDoubleMeasurement>> existingUpdater =
           doubleUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
     }
+
+    return (ObservableDoubleMeasurement) existingValue;
   }
 
   /**
@@ -261,8 +272,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableLongMeasurement for the gauge
    */
-  public void registerLongValueCallback(
+  public ObservableLongMeasurement registerLongValueCallback(
       final String name,
       final String description,
       final String unit,
@@ -273,21 +285,30 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .gaugeBuilder(name)
-          .ofLongs()
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedLongObserver(descriptorHash, updater));
-    } else {
+      ObservableLongMeasurement obs =
+          meter
+              .gaugeBuilder(name)
+              .ofLongs()
+              .setDescription(description)
+              .setUnit(unit)
+              .buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableLongMeasurement>> existingUpdater =
           longUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
     }
+
+    return (ObservableLongMeasurement) existingValue;
   }
 
   /**
@@ -297,8 +318,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableDoubleMeasurement for the counter
    */
-  public void registerDoubleCounterCallback(
+  public ObservableDoubleMeasurement registerDoubleCounterCallback(
       final String name,
       final String description,
       final String unit,
@@ -313,21 +335,30 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .counterBuilder(name)
-          .ofDoubles()
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedDoubleObserver(descriptorHash, updater));
-    } else {
+      ObservableDoubleMeasurement obs =
+          meter
+              .counterBuilder(name)
+              .setDescription(description)
+              .setUnit(unit)
+              .ofDoubles()
+              .buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableDoubleMeasurement>> existingUpdater =
           doubleUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
     }
+
+    return (ObservableDoubleMeasurement) existingValue;
   }
 
   /**
@@ -337,8 +368,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableLongMeasurement for the counter
    */
-  public void registerLongCounterCallback(
+  public ObservableLongMeasurement registerLongCounterCallback(
       final String name,
       final String description,
       final String unit,
@@ -353,20 +385,25 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .counterBuilder(name)
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedLongObserver(descriptorHash, updater));
-    } else {
+      ObservableLongMeasurement obs =
+          meter.counterBuilder(name).setDescription(description).setUnit(unit).buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableLongMeasurement>> existingUpdater =
           longUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
     }
+
+    return (ObservableLongMeasurement) existingValue;
   }
 
   /**
@@ -376,8 +413,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableDoubleMeasurement for the counter
    */
-  public void registerDoubleUpDownCounterCallback(
+  public ObservableDoubleMeasurement registerDoubleUpDownCounterCallback(
       final String name,
       final String description,
       final String unit,
@@ -392,21 +430,30 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .upDownCounterBuilder(name)
-          .ofDoubles()
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedDoubleObserver(descriptorHash, updater));
-    } else {
+      ObservableDoubleMeasurement obs =
+          meter
+              .upDownCounterBuilder(name)
+              .setDescription(description)
+              .setUnit(unit)
+              .ofDoubles()
+              .buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableDoubleMeasurement>> existingUpdater =
           doubleUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
     }
+
+    return (ObservableDoubleMeasurement) existingValue;
   }
 
   /**
@@ -416,8 +463,9 @@ public class GroovyMetricEnvironment {
    * @param description metric description
    * @param unit - metric unit
    * @param updater - the value updater
+   * @return the ObservableLongMeasurement for the counter
    */
-  public void registerLongUpDownCounterCallback(
+  public ObservableLongMeasurement registerLongUpDownCounterCallback(
       final String name,
       final String description,
       final String unit,
@@ -432,19 +480,44 @@ public class GroovyMetricEnvironment {
             .hashCode();
 
     // Only build the instrument if it isn't already in the registry
-    Boolean existingValue = instrumentOnceRegistry.putIfAbsent(descriptorHash, true);
+    ObservableMeasurement existingValue = instrumentOnceRegistry.get(descriptorHash);
     if (existingValue == null) {
-      meter
-          .upDownCounterBuilder(name)
-          .setDescription(description)
-          .setUnit(unit)
-          .buildWithCallback(proxiedLongObserver(descriptorHash, updater));
-    } else {
+      ObservableLongMeasurement obs =
+          meter
+              .upDownCounterBuilder(name)
+              .setDescription(description)
+              .setUnit(unit)
+              .buildObserver();
+      instrumentOnceRegistry.put(descriptorHash, obs);
+      if (updater != null) {
+        Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
+        meter.batchCallback(() -> cb.accept(obs), obs);
+      }
+      return obs;
+    } else if (updater != null) {
       // If the instrument has already been built with the appropriate proxied observer,
       // update the registry so that the callback has the appropriate updater function
       AtomicReference<Consumer<ObservableLongMeasurement>> existingUpdater =
           longUpdaterRegistry.get(descriptorHash);
       existingUpdater.set(updater);
+    }
+
+    return (ObservableLongMeasurement) existingValue;
+  }
+
+  public void registerBatchCallback(
+      Object identifier,
+      Closure<?> callback,
+      ObservableMeasurement measurement,
+      ObservableMeasurement... additional) {
+    int hash = identifier.hashCode();
+    AtomicReference<Closure<?>> existing =
+        batchUpdaterRegistry.putIfAbsent(hash, new AtomicReference<>());
+    batchUpdaterRegistry.get(hash).set(callback);
+
+    if (existing == null) {
+      meter.batchCallback(
+          () -> batchUpdaterRegistry.get(hash).get().call(), measurement, additional);
     }
   }
 

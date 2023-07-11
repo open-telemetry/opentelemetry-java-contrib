@@ -17,11 +17,13 @@
 import io.opentelemetry.api.common.Attributes
 
 def loadMatches = otel.queryJmx("org.apache.cassandra.metrics:type=Storage,name=Load")
-def load = loadMatches.first()
+if (!loadMatches.isEmpty()) {
+  def load = loadMatches.first()
 
-def lvr = otel.longHistogram(
-        "cassandra.storage.load",
-        "Size, in bytes, of the on disk data size this node manages",
-        "By"
-        )
-lvr.record(load.Count, Attributes.builder().put("myKey", "myVal").build())
+  def lvr = otel.longHistogram(
+    "cassandra.storage.load",
+    "Size, in bytes, of the on disk data size this node manages",
+    "By"
+  )
+  lvr.record(load.Count, Attributes.builder().put("myKey", "myVal").build())
+}

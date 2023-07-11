@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jmxmetrics
 
 import groovy.jmx.GroovyMBean
 import groovy.transform.PackageScope
+import io.opentelemetry.api.metrics.ObservableMeasurement
 
 import javax.management.AttributeNotFoundException
 import java.util.logging.Logger
@@ -34,7 +35,7 @@ import javax.management.openmbean.CompositeData
  * updated for each respective value.
  */
 class InstrumentHelper {
-    private static final Logger logger = Logger.getLogger(InstrumentHelper.class.getName());
+    private static final Logger logger = Logger.getLogger(InstrumentHelper.class.getName())
 
     private final MBeanHelper mBeanHelper
     private final String instrumentName
@@ -43,6 +44,7 @@ class InstrumentHelper {
     private final Map<String, Map<String, Closure>> mBeanAttributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
+    private final GroovyMetricEnvironment metricEnvironment
 
     /**
      * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.api.metrics.Instrument}
@@ -60,7 +62,7 @@ class InstrumentHelper {
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
@@ -68,16 +70,42 @@ class InstrumentHelper {
         this.labelFuncs = labelFuncs
         this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
+        this.metricEnvironment = metricEnvironment
     }
 
     void update() {
-        def updateClosure = prepareUpdateClosure(instrument, mBeanHelper.getMBeans(), mBeanAttributes.keySet())
-        if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
-          instrument(instrumentName, description, unit, { result ->
-            updateClosure(result)
-          })
-        } else {
-          updateClosure(instrument(instrumentName, description, unit))
+        def mbeans = mBeanHelper.getMBeans()
+        def compositeAttributes = []
+        def simpleAttributes = []
+        if (mbeans.size() > 0) {
+          def bean = mbeans.first()
+          mBeanAttributes.keySet().each { attribute ->
+            try {
+              def value = bean.getProperty(attribute)
+              if (value instanceof CompositeData) {
+                compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, value.getCompositeType().keySet()))
+              } else {
+                simpleAttributes.add(attribute)
+              }
+            } catch (AttributeNotFoundException|NullPointerException e ) {
+              simpleAttributes.add(attribute)
+            }
+          }
+        }
+
+        if (simpleAttributes.size() > 0) {
+          def simpleUpdateClosure = prepareUpdateClosure(mbeans, simpleAttributes)
+          if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
+            instrument(instrumentName, description, unit, { result ->
+              simpleUpdateClosure(result)
+            })
+          } else {
+            simpleUpdateClosure(instrument(instrumentName, description, unit))
+          }
+        }
+
+        if (compositeAttributes.size() > 0) {
+          registerCompositeUpdateClosures(mbeans, compositeAttributes)
         }
     }
 
@@ -92,29 +120,46 @@ class InstrumentHelper {
         return labels
     }
 
-  private Closure prepareUpdateClosure(inst, List<GroovyMBean> mbeans, attributes) {
+  private Closure prepareUpdateClosure(List<GroovyMBean> mbeans, attributes) {
     return { result ->
       [mbeans, attributes].combinations().each { pair ->
         def (mbean, attribute) = pair
         try {
           def value = mbean.getProperty(attribute)
-          if (value instanceof CompositeData) {
-            value.getCompositeType().keySet().each { key ->
-              def val = value.get(key)
-              def updatedInstrumentName = "${instrumentName}.${key}"
-              def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-              logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
-              recordDataPoint(inst, result, val, GroovyMetricEnvironment.mapToAttributes(labels))
-            }
-          } else if (value != null) {
+          if (value != null) {
             def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
             logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
-            recordDataPoint(inst, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
+            recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
           }
         } catch (AttributeNotFoundException e ) {
           logger.info("Expected attribute ${attribute} not found in mbean ${mbean.name()}")
         }
       }
+    }
+  }
+
+  private void registerCompositeUpdateClosures(List<GroovyMBean> mbeans, attributes) {
+    attributes.each { pair ->
+      def (attribute, keys) = pair
+      def instruments = keys.collect { new Tuple2<String, ObservableMeasurement>(it, instrument("${instrumentName}.${it}", description, unit, null)) }
+
+      metricEnvironment.registerBatchCallback("${instrumentName}.${attribute}", () -> {
+        mbeans.each { mbean ->
+          try {
+            def value = mbean.getProperty(attribute)
+            if (value != null && value instanceof CompositeData) {
+              instruments.each { inst ->
+                def val = value.get(inst.v1)
+                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+                logger.fine("Recording ${"${instrumentName}.${inst.v1}"} - ${instrument.method} w/ ${val} - ${labels}")
+                recordDataPoint(instrument, inst.v2, val, GroovyMetricEnvironment.mapToAttributes(labels))
+              }
+            }
+          } catch (AttributeNotFoundException e ) {
+            logger.info("Expected attribute ${attribute} not found in mbean ${mbean.name()}")
+          }
+        }
+      }, instruments.first().v2, *instruments.tail().collect {it.v2 })
     }
   }
 
