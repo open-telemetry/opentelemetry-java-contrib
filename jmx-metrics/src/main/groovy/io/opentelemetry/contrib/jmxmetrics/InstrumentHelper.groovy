@@ -77,19 +77,23 @@ class InstrumentHelper {
         def mbeans = mBeanHelper.getMBeans()
         def compositeAttributes = []
         def simpleAttributes = []
-        if (mbeans.size() > 0) {
-          def bean = mbeans.first()
-          mBeanAttributes.keySet().each { attribute ->
-            try {
-              def value = bean.getProperty(attribute)
-              if (value instanceof CompositeData) {
-                compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, value.getCompositeType().keySet()))
-              } else {
-                simpleAttributes.add(attribute)
-              }
-            } catch (AttributeNotFoundException|NullPointerException e ) {
+        if (mbeans.size() == 0) {
+          return
+        }
+        // Look at the first mbean collected to evaluate if the attributes requested are
+        // composite data types or simple. Composite types require different parsing to
+        // end up with multiple recorders in the same callback.
+        def bean = mbeans.first()
+        mBeanAttributes.keySet().each { attribute ->
+          try {
+            def value = bean.getProperty(attribute)
+            if (value instanceof CompositeData) {
+              compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, value.getCompositeType().keySet()))
+            } else {
               simpleAttributes.add(attribute)
             }
+          } catch (AttributeNotFoundException | NullPointerException e) {
+            simpleAttributes.add(attribute)
           }
         }
 
@@ -120,6 +124,8 @@ class InstrumentHelper {
         return labels
     }
 
+  // Create a closure for simple attributes that will retrieve mbean information on
+  // callback to ensure that metrics are collected on request
   private Closure prepareUpdateClosure(List<GroovyMBean> mbeans, attributes) {
     return { result ->
       [mbeans, attributes].combinations().each { pair ->
@@ -138,6 +144,9 @@ class InstrumentHelper {
     }
   }
 
+  // Create a closure for composite data attributes that will retrieve mbean information
+  // on callback to ensure that metrics are collected on request. This will create a single
+  // batch callback for all of the metrics collected on a single attribute.
   private void registerCompositeUpdateClosures(List<GroovyMBean> mbeans, attributes) {
     attributes.each { pair ->
       def (attribute, keys) = pair
@@ -163,6 +172,7 @@ class InstrumentHelper {
     }
   }
 
+  // Based on the type of instrument, record the data point in the way expected by the observable
   private static void recordDataPoint(inst, result, value, labelMap) {
     if (instrumentIsLongObserver(inst)) {
         result.record((long) value, labelMap)
