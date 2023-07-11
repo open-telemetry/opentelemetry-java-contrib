@@ -74,7 +74,7 @@ class MBeanHelper {
     }
 
     @PackageScope List<GroovyMBean> getMBeans() {
-        if (mbeans == null) {
+        if (mbeans == null || mbeans.size() == 0) {
             logger.warning("No active MBeans.  Be sure to fetch() before updating any applicable instruments.")
             return []
         }
