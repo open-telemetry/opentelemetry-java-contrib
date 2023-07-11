@@ -252,7 +252,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
-        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement)obs;
+        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
@@ -288,7 +288,8 @@ public class GroovyMetricEnvironment {
     // Only build the instrument if it isn't already in the registry
     ObservableMeasurement obs = instrumentOnceRegistry.get(descriptorHash);
     if (obs == null) {
-      obs = meter
+      obs =
+          meter
               .gaugeBuilder(name)
               .ofLongs()
               .setDescription(description)
@@ -299,7 +300,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
-        ObservableLongMeasurement finalObs = (ObservableLongMeasurement)obs;
+        ObservableLongMeasurement finalObs = (ObservableLongMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
@@ -339,7 +340,8 @@ public class GroovyMetricEnvironment {
     // Only build the instrument if it isn't already in the registry
     ObservableMeasurement obs = instrumentOnceRegistry.get(descriptorHash);
     if (obs == null) {
-      obs = meter
+      obs =
+          meter
               .counterBuilder(name)
               .setDescription(description)
               .setUnit(unit)
@@ -350,7 +352,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
-        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement)obs;
+        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
@@ -396,7 +398,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
-        ObservableLongMeasurement finalObs = (ObservableLongMeasurement)obs;
+        ObservableLongMeasurement finalObs = (ObservableLongMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
@@ -436,7 +438,8 @@ public class GroovyMetricEnvironment {
     // Only build the instrument if it isn't already in the registry
     ObservableMeasurement obs = instrumentOnceRegistry.get(descriptorHash);
     if (obs == null) {
-      obs = meter
+      obs =
+          meter
               .upDownCounterBuilder(name)
               .setDescription(description)
               .setUnit(unit)
@@ -447,7 +450,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableDoubleMeasurement> cb = proxiedDoubleObserver(descriptorHash, updater);
-        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement)obs;
+        ObservableDoubleMeasurement finalObs = (ObservableDoubleMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
@@ -487,7 +490,8 @@ public class GroovyMetricEnvironment {
     // Only build the instrument if it isn't already in the registry
     ObservableMeasurement obs = instrumentOnceRegistry.get(descriptorHash);
     if (obs == null) {
-      obs = meter
+      obs =
+          meter
               .upDownCounterBuilder(name)
               .setDescription(description)
               .setUnit(unit)
@@ -497,7 +501,7 @@ public class GroovyMetricEnvironment {
       // to a group batchcallback using the registerBatchCallback function
       if (updater != null) {
         Consumer<ObservableLongMeasurement> cb = proxiedLongObserver(descriptorHash, updater);
-        ObservableLongMeasurement finalObs = (ObservableLongMeasurement)obs;
+        ObservableLongMeasurement finalObs = (ObservableLongMeasurement) obs;
         meter.batchCallback(() -> cb.accept(finalObs), obs);
       }
     } else if (updater != null) {
