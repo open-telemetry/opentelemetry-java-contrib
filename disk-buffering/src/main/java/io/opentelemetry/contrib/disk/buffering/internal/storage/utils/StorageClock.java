@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.utils;
 
 import io.opentelemetry.sdk.common.Clock;
-import java.util.concurrent.TimeUnit;
 
+/** Internal utility that allows changing the time for testing purposes. */
 public class StorageClock implements Clock {
   private static final StorageClock INSTANCE = new StorageClock();
 
@@ -15,13 +15,14 @@ public class StorageClock implements Clock {
     return INSTANCE;
   }
 
+  /** Returns the current time in milliseconds. */
   @Override
   public long now() {
-    return TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
+    return System.currentTimeMillis();
   }
 
   @Override
   public long nanoTime() {
-    return System.nanoTime();
+    throw new UnsupportedOperationException();
   }
 }
