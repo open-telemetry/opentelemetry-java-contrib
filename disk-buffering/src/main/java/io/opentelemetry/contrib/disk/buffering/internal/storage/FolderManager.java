@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +16,15 @@ import javax.annotation.Nullable;
 
 public final class FolderManager {
   private final File folder;
-  private final TimeProvider timeProvider;
+  private final StorageClock clock;
   private final StorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
-  public FolderManager(File folder, StorageConfiguration configuration, TimeProvider timeProvider) {
+  public FolderManager(File folder, StorageConfiguration configuration, StorageClock clock) {
     this.folder = folder;
     this.configuration = configuration;
-    this.timeProvider = timeProvider;
+    this.clock = clock;
   }
 
   @Nullable
@@ -34,14 +34,14 @@ public final class FolderManager {
     if (readableFile != null) {
       currentReadableFile =
           new ReadableFile(
-              readableFile, Long.parseLong(readableFile.getName()), timeProvider, configuration);
+              readableFile, Long.parseLong(readableFile.getName()), clock, configuration);
       return currentReadableFile;
     }
     return null;
   }
 
   public synchronized WritableFile createWritableFile() throws IOException {
-    long systemCurrentTimeMillis = timeProvider.getSystemCurrentTimeMillis();
+    long systemCurrentTimeMillis = clock.now();
     File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
@@ -50,13 +50,13 @@ public final class FolderManager {
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
     currentWritableFile =
-        new WritableFile(file, systemCurrentTimeMillis, configuration, timeProvider);
+        new WritableFile(file, systemCurrentTimeMillis, configuration, clock);
     return currentWritableFile;
   }
 
   @Nullable
   private File findReadableFile() throws IOException {
-    long currentTime = timeProvider.getSystemCurrentTimeMillis();
+    long currentTime = clock.now();
     File[] existingFiles = folder.listFiles();
     File oldestFileAvailable = null;
     long oldestFileCreationTimeMillis = 0;

@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
@@ -41,7 +41,7 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
   public static LogRecordDiskExporter create(
       LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration)
       throws IOException {
-    return create(wrapped, rootDir, configuration, TimeProvider.get());
+    return create(wrapped, rootDir, configuration, StorageClock.getInstance());
   }
 
   // This is used for testing purposes.
@@ -49,16 +49,16 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
       LogRecordExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
-    return new LogRecordDiskExporter(wrapped, rootDir, configuration, timeProvider);
+    return new LogRecordDiskExporter(wrapped, rootDir, configuration, clock);
   }
 
   private LogRecordDiskExporter(
       LogRecordExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
     this.wrapped = wrapped;
     diskExporter =
@@ -68,7 +68,7 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
             "logs",
             SignalSerializer.ofLogs(),
             wrapped::export,
-            timeProvider);
+            clock);
   }
 
   @Override

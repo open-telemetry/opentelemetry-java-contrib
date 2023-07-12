@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,31 +30,31 @@ import org.junit.jupiter.api.io.TempDir;
 class WritableFileTest {
 
   @TempDir File rootDir;
-  private TimeProvider timeProvider;
+  private StorageClock clock;
   private WritableFile writableFile;
   private static final long CREATED_TIME_MILLIS = 1000L;
 
   @BeforeEach
   public void setUp() throws IOException {
-    timeProvider = mock();
+    clock = mock();
     writableFile =
         new WritableFile(
             new File(rootDir, String.valueOf(CREATED_TIME_MILLIS)),
             CREATED_TIME_MILLIS,
             TestData.getDefaultConfiguration(),
-            timeProvider);
+            clock);
   }
 
   @Test
   public void hasNotExpired_whenWriteAgeHasNotExpired() {
-    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1500L).when(clock).now();
 
     assertFalse(writableFile.hasExpired());
   }
 
   @Test
   public void hasExpired_whenWriteAgeHasExpired() {
-    doReturn(2000L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(2000L).when(clock).now();
 
     assertTrue(writableFile.hasExpired());
   }
@@ -90,8 +90,8 @@ class WritableFileTest {
   public void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS)
-        .when(timeProvider)
-        .getSystemCurrentTimeMillis();
+        .when(clock)
+        .now();
 
     assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 

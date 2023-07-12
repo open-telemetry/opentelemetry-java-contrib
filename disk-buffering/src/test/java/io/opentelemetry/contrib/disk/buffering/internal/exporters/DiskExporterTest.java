@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.io.TempDir;
 class DiskExporterTest {
   private SpanExporter wrapped;
   private SignalSerializer<SpanData> serializer;
-  private TimeProvider timeProvider;
+  private StorageClock clock;
   private DiskExporter<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
@@ -46,7 +46,7 @@ class DiskExporterTest {
 
   @BeforeEach
   public void setUp() throws IOException {
-    timeProvider = createTimeProviderMock(1000L);
+    clock = createClockMock(1000L);
     setUpSerializer();
     wrapped = mock();
     exporter =
@@ -56,7 +56,7 @@ class DiskExporterTest {
             STORAGE_FOLDER_NAME,
             serializer,
             wrapped::export,
-            timeProvider);
+            clock);
   }
 
   @Test
@@ -65,7 +65,7 @@ class DiskExporterTest {
     doReturn(CompletableResultCode.ofSuccess()).when(wrapped).export(deserializedData);
 
     createDummyFile(1000L, "First line");
-    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     assertTrue(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
   }
@@ -82,7 +82,7 @@ class DiskExporterTest {
           STORAGE_FOLDER_NAME,
           serializer,
           wrapped::export,
-          timeProvider);
+          clock);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals(
@@ -97,7 +97,7 @@ class DiskExporterTest {
     doReturn(CompletableResultCode.ofFailure()).when(wrapped).export(deserializedData);
 
     createDummyFile(1000L, "First line");
-    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     assertFalse(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
   }
@@ -144,9 +144,9 @@ class DiskExporterTest {
     doReturn(deserializedData).when(serializer).deserialize(any());
   }
 
-  private static TimeProvider createTimeProviderMock(long initialTimeMillis) {
-    TimeProvider mock = mock();
-    doReturn(initialTimeMillis).when(mock).getSystemCurrentTimeMillis();
+  private static StorageClock createClockMock(long initialTimeMillis) {
+    StorageClock mock = mock();
+    doReturn(initialTimeMillis).when(mock).now();
     return mock;
   }
 }

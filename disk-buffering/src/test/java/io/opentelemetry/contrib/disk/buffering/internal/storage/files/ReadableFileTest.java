@@ -20,7 +20,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.lo
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.LogRecordDataSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.files.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.logs.data.Body;
@@ -41,7 +41,7 @@ class ReadableFileTest {
   private File source;
   private File temporaryFile;
   private ReadableFile readableFile;
-  private TimeProvider timeProvider;
+  private StorageClock clock;
   private TemporaryFileProvider temporaryFileProvider;
   private static final long CREATED_TIME_MILLIS = 1000L;
   private static final LogRecordDataSerializer SERIALIZER = SignalSerializer.ofLogs();
@@ -94,10 +94,10 @@ class ReadableFileTest {
     addFileContents(source);
     temporaryFileProvider = mock();
     doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile(anyString());
-    timeProvider = mock();
+    clock = mock();
     readableFile =
         new ReadableFile(
-            source, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
+            source, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider));
   }
 
   private static void addFileContents(File source) throws IOException {
@@ -184,7 +184,7 @@ class ReadableFileTest {
 
     ReadableFile emptyReadableFile =
         new ReadableFile(
-            emptyFile, CREATED_TIME_MILLIS, timeProvider, getConfiguration(temporaryFileProvider));
+            emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider));
 
     assertEquals(ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> true));
 
@@ -198,8 +198,8 @@ class ReadableFileTest {
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
-        .when(timeProvider)
-        .getSystemCurrentTimeMillis();
+        .when(clock)
+        .now();
 
     assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 

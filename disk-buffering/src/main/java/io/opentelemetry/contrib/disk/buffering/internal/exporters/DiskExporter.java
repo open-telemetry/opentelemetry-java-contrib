@@ -10,7 +10,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.File;
@@ -33,12 +33,12 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       String folderName,
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
     validateConfiguration(configuration);
     this.storage =
         new Storage(
-            new FolderManager(getSignalFolder(rootDir, folderName), configuration, timeProvider));
+            new FolderManager(getSignalFolder(rootDir, folderName), configuration, clock));
     this.serializer = serializer;
     this.exportFunction = exportFunction;
   }

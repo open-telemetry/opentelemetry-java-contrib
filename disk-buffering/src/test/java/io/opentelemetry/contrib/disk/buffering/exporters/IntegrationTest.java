@@ -15,7 +15,7 @@ import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -48,7 +48,7 @@ public class IntegrationTest {
   private InMemoryLogRecordExporter memoryLogRecordExporter;
   private LogRecordDiskExporter diskLogRecordExporter;
   private Logger logger;
-  private TimeProvider timeMachine;
+  private StorageClock clock;
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final StorageConfiguration STORAGE_CONFIGURATION =
@@ -56,20 +56,20 @@ public class IntegrationTest {
 
   @BeforeEach
   public void setUp() throws IOException {
-    timeMachine = mock();
-    doReturn(INITIAL_TIME_IN_MILLIS).when(timeMachine).getSystemCurrentTimeMillis();
+    clock = mock();
+    doReturn(INITIAL_TIME_IN_MILLIS).when(clock).now();
 
     // Setting up spans
     memorySpanExporter = InMemorySpanExporter.create();
     diskSpanExporter =
-        SpanDiskExporter.create(memorySpanExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
+        SpanDiskExporter.create(memorySpanExporter, rootDir, STORAGE_CONFIGURATION, clock);
     tracer = createTracerProvider(diskSpanExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
     memoryMetricExporter = InMemoryMetricExporter.create();
     diskMetricExporter =
         MetricDiskExporter.create(
-            memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
+            memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, clock);
     meterProvider = createMeterProvider(diskMetricExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
@@ -77,7 +77,7 @@ public class IntegrationTest {
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
     diskLogRecordExporter =
         LogRecordDiskExporter.create(
-            memoryLogRecordExporter, rootDir, STORAGE_CONFIGURATION, timeMachine);
+            memoryLogRecordExporter, rootDir, STORAGE_CONFIGURATION, clock);
     logger = createLoggerProvider(diskLogRecordExporter).get("LogInstrumentationScope");
   }
 
@@ -126,9 +126,9 @@ public class IntegrationTest {
 
   @SuppressWarnings("DirectInvocationOnMock")
   private void fastForwardTimeByMillis(long milliseconds) {
-    doReturn(timeMachine.getSystemCurrentTimeMillis() + milliseconds)
-        .when(timeMachine)
-        .getSystemCurrentTimeMillis();
+    doReturn(clock.now() + milliseconds)
+        .when(clock)
+        .now();
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

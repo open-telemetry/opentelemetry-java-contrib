@@ -10,7 +10,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.Rea
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -28,7 +28,7 @@ public final class ReadableFile extends StorageFile {
   private final StreamReader reader;
   private final FileTransferUtil fileTransferUtil;
   private final File temporaryFile;
-  private final TimeProvider timeProvider;
+  private final StorageClock clock;
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int readBytes = 0;
@@ -37,13 +37,13 @@ public final class ReadableFile extends StorageFile {
   public ReadableFile(
       File file,
       long createdTimeMillis,
-      TimeProvider timeProvider,
+      StorageClock clock,
       StorageConfiguration configuration)
       throws IOException {
     this(
         file,
         createdTimeMillis,
-        timeProvider,
+        clock,
         configuration,
         DelimitedProtoStreamReader.Factory.INSTANCE);
   }
@@ -51,12 +51,12 @@ public final class ReadableFile extends StorageFile {
   public ReadableFile(
       File file,
       long createdTimeMillis,
-      TimeProvider timeProvider,
+      StorageClock clock,
       StorageConfiguration configuration,
       StreamReader.Factory readerFactory)
       throws IOException {
     super(file);
-    this.timeProvider = timeProvider;
+    this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
     originalFileSize = (int) file.length();
     temporaryFile = configuration.getTemporaryFileProvider().createTemporaryFile(file.getName());
@@ -124,7 +124,7 @@ public final class ReadableFile extends StorageFile {
 
   @Override
   public synchronized boolean hasExpired() {
-    return timeProvider.getSystemCurrentTimeMillis() >= expireTimeMillis;
+    return clock.now() >= expireTimeMillis;
   }
 
   @Override

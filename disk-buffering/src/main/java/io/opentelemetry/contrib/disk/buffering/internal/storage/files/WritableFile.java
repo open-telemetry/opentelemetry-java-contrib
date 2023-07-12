@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WritableFile extends StorageFile {
   private final StorageConfiguration configuration;
-  private final TimeProvider timeProvider;
+  private final StorageClock clock;
   private final long expireTimeMillis;
   private final OutputStream out;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -26,11 +26,11 @@ public final class WritableFile extends StorageFile {
       File file,
       long createdTimeMillis,
       StorageConfiguration configuration,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
     super(file);
     this.configuration = configuration;
-    this.timeProvider = timeProvider;
+    this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
     size = (int) file.length();
     out = new FileOutputStream(file);
@@ -68,7 +68,7 @@ public final class WritableFile extends StorageFile {
 
   @Override
   public synchronized boolean hasExpired() {
-    return timeProvider.getSystemCurrentTimeMillis() >= expireTimeMillis;
+    return clock.now() >= expireTimeMillis;
   }
 
   @Override

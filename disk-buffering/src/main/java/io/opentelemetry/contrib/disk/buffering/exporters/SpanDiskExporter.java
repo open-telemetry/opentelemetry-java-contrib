@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -40,7 +40,7 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
    */
   public static SpanDiskExporter create(
       SpanExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
-    return create(wrapped, rootDir, configuration, TimeProvider.get());
+    return create(wrapped, rootDir, configuration, StorageClock.getInstance());
   }
 
   // This is used for testing purposes.
@@ -48,16 +48,16 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
       SpanExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
-    return new SpanDiskExporter(wrapped, rootDir, configuration, timeProvider);
+    return new SpanDiskExporter(wrapped, rootDir, configuration, clock);
   }
 
   private SpanDiskExporter(
       SpanExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
-      TimeProvider timeProvider)
+      StorageClock clock)
       throws IOException {
     this.wrapped = wrapped;
     diskExporter =
@@ -67,7 +67,7 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
             "spans",
             SignalSerializer.ofSpans(),
             wrapped::export,
-            timeProvider);
+            clock);
   }
 
   @Override

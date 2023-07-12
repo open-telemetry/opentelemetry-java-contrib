@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.StorageFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.TimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,17 +32,17 @@ class FolderManagerTest {
 
   @TempDir File rootDir;
   private FolderManager folderManager;
-  private TimeProvider timeProvider;
+  private StorageClock clock;
 
   @BeforeEach
   public void setUp() {
-    timeProvider = mock();
-    folderManager = new FolderManager(rootDir, TestData.getDefaultConfiguration(), timeProvider);
+    clock = mock();
+    folderManager = new FolderManager(rootDir, TestData.getDefaultConfiguration(), clock);
   }
 
   @Test
   public void createWritableFile_withTimeMillisAsName() throws IOException {
-    doReturn(1000L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1000L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
 
@@ -59,7 +59,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile1, MAX_FILE_SIZE);
     fillWithBytes(existingFile2, MAX_FILE_SIZE);
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
-    doReturn(1500L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1500L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
 
@@ -75,14 +75,14 @@ class FolderManagerTest {
   public void closeCurrentlyWritableFile_whenItIsReadyToBeRead_anNoOtherReadableFilesAreAvailable()
       throws IOException {
     long createdFileTime = 1000L;
-    doReturn(createdFileTime).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(createdFileTime).when(clock).now();
 
     WritableFile writableFile = folderManager.createWritableFile();
     writableFile.append(new byte[3]);
 
     doReturn(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS)
-        .when(timeProvider)
-        .getSystemCurrentTimeMillis();
+        .when(clock)
+        .now();
 
     ReadableFile readableFile = folderManager.getReadableFile();
 
@@ -101,7 +101,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile1, MAX_FILE_SIZE);
     fillWithBytes(existingFile2, MAX_FILE_SIZE);
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
-    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     ReadableFile readableFile = folderManager.getReadableFile();
     assertEquals(existingFile1, readableFile.file);
@@ -124,7 +124,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile1, MAX_FILE_SIZE);
     fillWithBytes(existingFile2, MAX_FILE_SIZE);
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
-    doReturn(11_000L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(11_000L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
 
@@ -143,7 +143,7 @@ class FolderManagerTest {
     // Files that cannot be written, but can still be read, aren't ready to be deleted.
     File expiredWritableFile = new File(rootDir, "10000");
     createFiles(expiredReadableFile, expiredWritableFile);
-    doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(11_500L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
 
@@ -160,11 +160,11 @@ class FolderManagerTest {
     File expiredWritableFile = new File(rootDir, "10000");
     createFiles(expiredReadableFile, expiredWritableFile, expiredReadableFileBeingRead);
 
-    doReturn(900 + MIN_FILE_AGE_FOR_READ_MILLIS).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(900 + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
     ReadableFile readableFile = folderManager.getReadableFile();
     assertEquals(expiredReadableFileBeingRead, readableFile.file);
 
-    doReturn(11_500L).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(11_500L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
 
@@ -179,7 +179,7 @@ class FolderManagerTest {
   public void provideFileForRead_afterItsMinFileAgeForReadTimePassed() throws IOException {
     long readableFileCreationTime = 1000;
     long currentTime = readableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
-    doReturn(currentTime).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(currentTime).when(clock).now();
     File writableFile = new File(rootDir, String.valueOf(currentTime));
     File readableFile = new File(rootDir, String.valueOf(readableFileCreationTime));
     createFiles(writableFile, readableFile);
@@ -194,7 +194,7 @@ class FolderManagerTest {
     long newerReadableFileCreationTime = 1000;
     long olderReadableFileCreationTime = 900;
     long currentTime = newerReadableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
-    doReturn(currentTime).when(timeProvider).getSystemCurrentTimeMillis();
+    doReturn(currentTime).when(clock).now();
     File writableFile = new File(rootDir, String.valueOf(currentTime));
     File readableFileOlder = new File(rootDir, String.valueOf(olderReadableFileCreationTime));
     File readableFileNewer = new File(rootDir, String.valueOf(newerReadableFileCreationTime));
@@ -226,8 +226,8 @@ class FolderManagerTest {
     File expiredReadableFile2 = new File(rootDir, String.valueOf(creationReferenceTime - 10));
     createFiles(expiredReadableFile1, expiredReadableFile2);
     doReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS)
-        .when(timeProvider)
-        .getSystemCurrentTimeMillis();
+        .when(clock)
+        .now();
 
     assertNull(folderManager.getReadableFile());
   }
