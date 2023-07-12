@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
@@ -45,29 +45,18 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
 
   // This is used for testing purposes.
   public static SpanDiskExporter create(
-      SpanExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      SpanExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
     return new SpanDiskExporter(wrapped, rootDir, configuration, clock);
   }
 
   private SpanDiskExporter(
-      SpanExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      SpanExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
     this.wrapped = wrapped;
     diskExporter =
         new DiskExporter<>(
-            rootDir,
-            configuration,
-            "spans",
-            SignalSerializer.ofSpans(),
-            wrapped::export,
-            clock);
+            rootDir, configuration, "spans", SignalSerializer.ofSpans(), wrapped::export, clock);
   }
 
   @Override

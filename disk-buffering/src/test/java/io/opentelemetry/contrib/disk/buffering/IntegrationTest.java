@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -68,8 +68,7 @@ public class IntegrationTest {
     // Setting up metrics
     memoryMetricExporter = InMemoryMetricExporter.create();
     diskMetricExporter =
-        MetricDiskExporter.create(
-            memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, clock);
+        MetricDiskExporter.create(memoryMetricExporter, rootDir, STORAGE_CONFIGURATION, clock);
     meterProvider = createMeterProvider(diskMetricExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
@@ -126,9 +125,7 @@ public class IntegrationTest {
 
   @SuppressWarnings("DirectInvocationOnMock")
   private void fastForwardTimeByMillis(long milliseconds) {
-    doReturn(clock.now() + milliseconds)
-        .when(clock)
-        .now();
+    doReturn(clock.now() + milliseconds).when(clock).now();
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

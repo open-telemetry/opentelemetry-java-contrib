@@ -3,34 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.logs.LogRecordProcessor;
-import io.opentelemetry.sdk.logs.data.LogRecordData;
-import io.opentelemetry.sdk.logs.export.LogRecordExporter;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is a {@link LogRecordExporter} wrapper that takes care of intercepting all the signals sent
- * out to be exported, tries to store them in the disk in order to export them later.
+ * This is a {@link MetricExporter} wrapper that takes care of intercepting all the signals sent out
+ * to be exported, tries to store them in the disk in order to export them later.
  *
- * <p>In order to use it, you need to wrap your own {@link LogRecordExporter} with a new instance of
- * this one, which will be the one you need to register in your {@link LogRecordProcessor}.
+ * <p>In order to use it, you need to wrap your own {@link MetricExporter} with a new instance of
+ * this one, which will be the one you need to register in your {@link MetricReader}.
  */
-public final class LogRecordDiskExporter implements LogRecordExporter, StoredBatchExporter {
-  private final LogRecordExporter wrapped;
-  private final DiskExporter<LogRecordData> diskExporter;
+public final class MetricDiskExporter implements MetricExporter, StoredBatchExporter {
+  private final MetricExporter wrapped;
+  private final DiskExporter<MetricData> diskExporter;
 
   /**
-   * Creates a new instance of {@link LogRecordDiskExporter}.
+   * Creates a new instance of {@link MetricDiskExporter}.
    *
    * @param wrapped - The exporter where the data retrieved from the disk will be delegated to.
    * @param rootDir - The directory to create this signal's cache dir where all the data will be
@@ -38,24 +40,23 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
    * @param configuration - How you want to manage the storage process.
    * @throws IOException If no dir can be created in rootDir.
    */
-  public static LogRecordDiskExporter create(
-      LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration)
-      throws IOException {
+  public static MetricDiskExporter create(
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
     return create(wrapped, rootDir, configuration, StorageClock.getInstance());
   }
 
   // This is used for testing purposes.
-  static LogRecordDiskExporter create(
-      LogRecordExporter wrapped,
+  public static MetricDiskExporter create(
+      MetricExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
       StorageClock clock)
       throws IOException {
-    return new LogRecordDiskExporter(wrapped, rootDir, configuration, clock);
+    return new MetricDiskExporter(wrapped, rootDir, configuration, clock);
   }
 
-  private LogRecordDiskExporter(
-      LogRecordExporter wrapped,
+  private MetricDiskExporter(
+      MetricExporter wrapped,
       File rootDir,
       StorageConfiguration configuration,
       StorageClock clock)
@@ -65,15 +66,15 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
         new DiskExporter<>(
             rootDir,
             configuration,
-            "logs",
-            SignalSerializer.ofLogs(),
+            "metrics",
+            SignalSerializer.ofMetrics(),
             wrapped::export,
             clock);
   }
 
   @Override
-  public CompletableResultCode export(Collection<LogRecordData> logs) {
-    return diskExporter.onExport(logs);
+  public CompletableResultCode export(Collection<MetricData> metrics) {
+    return diskExporter.onExport(metrics);
   }
 
   @Override
@@ -91,6 +92,11 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
       wrapped.shutdown();
     }
     return CompletableResultCode.ofSuccess();
+  }
+
+  @Override
+  public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
+    return wrapped.getAggregationTemporality(instrumentType);
   }
 
   @Override
