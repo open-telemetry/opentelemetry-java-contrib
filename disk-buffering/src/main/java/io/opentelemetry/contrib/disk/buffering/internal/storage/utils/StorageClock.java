@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.utils;
 import io.opentelemetry.sdk.common.Clock;
 
 /** Internal utility that allows changing the time for testing purposes. */
-public class StorageClock implements Clock {
+public final class StorageClock implements Clock {
   private static final StorageClock INSTANCE = new StorageClock();
 
   public static StorageClock getInstance() {
