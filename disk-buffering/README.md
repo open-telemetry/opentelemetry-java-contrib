@@ -12,7 +12,7 @@ stored data.
   achieved, under [Reading data](#reading-data).
 
 > For a more detailed information on how the whole process works, take a look at
-the [CONTRIBUTING](CONTRIBUTING.md) file.
+> the [CONTRIBUTING](CONTRIBUTING.md) file.
 
 ## Configuration
 
@@ -29,7 +29,7 @@ The configurable parameters are provided **per exporter**, the available ones ar
   considered stale and will be removed when new files are created. No more data will be read from a
   file past this time.
 * An instance
-  of [TemporaryFileProvider](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/files/TemporaryFileProvider.java),
+  of [TemporaryFileProvider](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/files/TemporaryFileProvider.java),
   defaults to calling `File.createTempFile`. This provider will be used when reading from the disk
   in order create a temporary file from which each line (batch of signals) will be read and
   sequentially get removed from the original cache file right after the data has been successfully
@@ -43,11 +43,11 @@ In order to use it, you need to wrap your own exporter with a new instance of
 the ones provided in here:
 
 * For a LogRecordExporter, it must be wrapped within
-  a [LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/LogRecordDiskExporter.java).
+  a [LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordDiskExporter.java).
 * For a MetricExporter, it must be wrapped within
-  a [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/MetricDiskExporter.java).
+  a [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricDiskExporter.java).
 * For a SpanExporter, it must be wrapped within
-  a [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/exporters/SpanDiskExporter.java).
+  a [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanDiskExporter.java).
 
 Each wrapper will need the following when instantiating them:
 
@@ -55,7 +55,7 @@ Each wrapper will need the following when instantiating them:
 * A File instance of the root directory where all the data is going to be written. The same root dir
   can be used for all the wrappers, since each will create their own folder inside it.
 * An instance
-  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/StorageConfiguration.java)
+  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/StorageConfiguration.java)
   with the desired parameters. You can create one with default values by
   calling `StorageConfiguration.getDefault()`.
 
