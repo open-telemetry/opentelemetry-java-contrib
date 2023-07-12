@@ -9,7 +9,11 @@ import java.io.File;
 import java.io.IOException;
 
 public class DefaultTemporaryFileProvider implements TemporaryFileProvider {
-  public static final TemporaryFileProvider INSTANCE = new DefaultTemporaryFileProvider();
+  private static final TemporaryFileProvider INSTANCE = new DefaultTemporaryFileProvider();
+
+  public static TemporaryFileProvider getInstance() {
+    return INSTANCE;
+  }
 
   private DefaultTemporaryFileProvider() {}
 

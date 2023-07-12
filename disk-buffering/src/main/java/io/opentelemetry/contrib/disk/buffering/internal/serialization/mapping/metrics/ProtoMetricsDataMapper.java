@@ -21,17 +21,21 @@ public class ProtoMetricsDataMapper
     extends BaseProtoSignalsDataMapper<
         MetricData, Metric, MetricsData, ResourceMetrics, ScopeMetrics> {
 
-  public static final ProtoMetricsDataMapper INSTANCE = new ProtoMetricsDataMapper();
+  private static final ProtoMetricsDataMapper INSTANCE = new ProtoMetricsDataMapper();
+
+  public static ProtoMetricsDataMapper getInstance() {
+    return INSTANCE;
+  }
 
   @Override
   protected Metric signalItemToProto(MetricData sourceData) {
-    return MetricDataMapper.INSTANCE.mapToProto(sourceData);
+    return MetricDataMapper.getInstance().mapToProto(sourceData);
   }
 
   @Override
   protected MetricData protoToSignalItem(
       Metric protoSignalItem, Resource resource, InstrumentationScopeInfo scopeInfo) {
-    return MetricDataMapper.INSTANCE.mapToSdk(protoSignalItem, resource, scopeInfo);
+    return MetricDataMapper.getInstance().mapToSdk(protoSignalItem, resource, scopeInfo);
   }
 
   @Override

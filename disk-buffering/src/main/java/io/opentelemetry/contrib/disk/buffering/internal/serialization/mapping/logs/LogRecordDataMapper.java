@@ -23,7 +23,11 @@ import io.opentelemetry.sdk.resources.Resource;
 
 public final class LogRecordDataMapper {
 
-  public static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();
+  private static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();
+
+  public static LogRecordDataMapper getInstance() {
+    return INSTANCE;
+  }
 
   public LogRecord mapToProto(LogRecordData source) {
     LogRecord.Builder logRecord = LogRecord.newBuilder();
@@ -48,10 +52,11 @@ public final class LogRecordDataMapper {
   }
 
   private static void addExtrasToProtoBuilder(LogRecordData source, LogRecord.Builder target) {
-    target.addAllAttributes(AttributesMapper.INSTANCE.attributesToProto(source.getAttributes()));
+    target.addAllAttributes(
+        AttributesMapper.getInstance().attributesToProto(source.getAttributes()));
     SpanContext spanContext = source.getSpanContext();
-    target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
-    target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
+    target.setSpanId(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
+    target.setTraceId(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
     target.setDroppedAttributesCount(
         source.getTotalAttributeCount() - source.getAttributes().size());
   }
@@ -78,12 +83,13 @@ public final class LogRecordDataMapper {
       LogRecordDataImpl.Builder target,
       Resource resource,
       InstrumentationScopeInfo scopeInfo) {
-    Attributes attributes = AttributesMapper.INSTANCE.protoToAttributes(source.getAttributesList());
+    Attributes attributes =
+        AttributesMapper.getInstance().protoToAttributes(source.getAttributesList());
     target.setAttributes(attributes);
     target.setSpanContext(
         SpanContext.create(
-            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.getTraceId()),
+            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
             TraceFlags.getSampled(),
             TraceState.getDefault()));
     target.setTotalAttributeCount(source.getDroppedAttributesCount() + attributes.size());

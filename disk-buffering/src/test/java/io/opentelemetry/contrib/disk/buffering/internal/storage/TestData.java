@@ -18,7 +18,7 @@ public final class TestData {
   public static final int MAX_FOLDER_SIZE = 300;
 
   public static StorageConfiguration getDefaultConfiguration() {
-    return getConfiguration(DefaultTemporaryFileProvider.INSTANCE);
+    return getConfiguration(DefaultTemporaryFileProvider.getInstance());
   }
 
   public static StorageConfiguration getConfiguration(TemporaryFileProvider fileProvider) {

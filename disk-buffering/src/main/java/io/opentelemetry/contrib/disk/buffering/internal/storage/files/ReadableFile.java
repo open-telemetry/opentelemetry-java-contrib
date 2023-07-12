@@ -45,7 +45,7 @@ public final class ReadableFile extends StorageFile {
         createdTimeMillis,
         clock,
         configuration,
-        DelimitedProtoStreamReader.Factory.INSTANCE);
+        DelimitedProtoStreamReader.Factory.getInstance());
   }
 
   public ReadableFile(

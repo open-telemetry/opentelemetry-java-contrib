@@ -11,11 +11,16 @@ import javax.annotation.Nullable;
 
 public final class ResourceMapper {
 
-  public static final ResourceMapper INSTANCE = new ResourceMapper();
+  private static final ResourceMapper INSTANCE = new ResourceMapper();
+
+  public static ResourceMapper getInstance() {
+    return INSTANCE;
+  }
 
   public Resource mapToProto(io.opentelemetry.sdk.resources.Resource sdkResource) {
     return Resource.newBuilder()
-        .addAllAttributes(AttributesMapper.INSTANCE.attributesToProto(sdkResource.getAttributes()))
+        .addAllAttributes(
+            AttributesMapper.getInstance().attributesToProto(sdkResource.getAttributes()))
         .build();
   }
 
@@ -26,7 +31,8 @@ public final class ResourceMapper {
     if (schemaUrl != null) {
       resource.setSchemaUrl(schemaUrl);
     }
-    resource.putAll(AttributesMapper.INSTANCE.protoToAttributes(protoResource.getAttributesList()));
+    resource.putAll(
+        AttributesMapper.getInstance().protoToAttributes(protoResource.getAttributesList()));
     return resource.build();
   }
 }

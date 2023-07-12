@@ -9,7 +9,11 @@ import com.google.protobuf.ByteString;
 
 public final class ByteStringMapper {
 
-  public static final ByteStringMapper INSTANCE = new ByteStringMapper();
+  private static final ByteStringMapper INSTANCE = new ByteStringMapper();
+
+  public static ByteStringMapper getInstance() {
+    return INSTANCE;
+  }
 
   public ByteString stringToProto(String source) {
     return ByteString.copyFromUtf8(source);

@@ -49,10 +49,10 @@ class AttributesMapperTest {
   }
 
   private static List<KeyValue> mapToProto(Attributes attributes) {
-    return AttributesMapper.INSTANCE.attributesToProto(attributes);
+    return AttributesMapper.getInstance().attributesToProto(attributes);
   }
 
   private static Attributes mapFromProto(List<KeyValue> keyValues) {
-    return AttributesMapper.INSTANCE.protoToAttributes(keyValues);
+    return AttributesMapper.getInstance().protoToAttributes(keyValues);
   }
 }

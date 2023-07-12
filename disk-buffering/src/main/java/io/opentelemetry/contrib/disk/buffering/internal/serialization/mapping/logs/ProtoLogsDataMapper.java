@@ -21,17 +21,21 @@ public class ProtoLogsDataMapper
     extends BaseProtoSignalsDataMapper<
         LogRecordData, LogRecord, LogsData, ResourceLogs, ScopeLogs> {
 
-  public static final ProtoLogsDataMapper INSTANCE = new ProtoLogsDataMapper();
+  private static final ProtoLogsDataMapper INSTANCE = new ProtoLogsDataMapper();
+
+  public static ProtoLogsDataMapper getInstance() {
+    return INSTANCE;
+  }
 
   @Override
   protected LogRecord signalItemToProto(LogRecordData sourceData) {
-    return LogRecordDataMapper.INSTANCE.mapToProto(sourceData);
+    return LogRecordDataMapper.getInstance().mapToProto(sourceData);
   }
 
   @Override
   protected LogRecordData protoToSignalItem(
       LogRecord logRecord, Resource resource, InstrumentationScopeInfo scopeInfo) {
-    return LogRecordDataMapper.INSTANCE.mapToSdk(logRecord, resource, scopeInfo);
+    return LogRecordDataMapper.getInstance().mapToSdk(logRecord, resource, scopeInfo);
   }
 
   @Override

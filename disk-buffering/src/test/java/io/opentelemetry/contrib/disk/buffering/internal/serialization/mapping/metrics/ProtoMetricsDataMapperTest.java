@@ -151,10 +151,10 @@ class ProtoMetricsDataMapperTest {
   }
 
   private static MetricsData mapToProto(Collection<MetricData> signals) {
-    return ProtoMetricsDataMapper.INSTANCE.toProto(signals);
+    return ProtoMetricsDataMapper.getInstance().toProto(signals);
   }
 
   private static List<MetricData> mapFromProto(MetricsData protoData) {
-    return ProtoMetricsDataMapper.INSTANCE.fromProto(protoData);
+    return ProtoMetricsDataMapper.getInstance().fromProto(protoData);
   }
 }

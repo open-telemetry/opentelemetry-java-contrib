@@ -29,7 +29,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
 
   @Override
   public byte[] serialize(Collection<SpanData> spanData) {
-    TracesData proto = ProtoSpansDataMapper.INSTANCE.toProto(spanData);
+    TracesData proto = ProtoSpansDataMapper.getInstance().toProto(spanData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       proto.writeDelimitedTo(out);
       return out.toByteArray();
@@ -41,7 +41,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   @Override
   public List<SpanData> deserialize(byte[] source) {
     try {
-      return ProtoSpansDataMapper.INSTANCE.fromProto(TracesData.parseFrom(source));
+      return ProtoSpansDataMapper.getInstance().fromProto(TracesData.parseFrom(source));
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
     }

@@ -65,7 +65,11 @@ import java.util.List;
 
 public final class MetricDataMapper {
 
-  public static final MetricDataMapper INSTANCE = new MetricDataMapper();
+  private static final MetricDataMapper INSTANCE = new MetricDataMapper();
+
+  public static MetricDataMapper getInstance() {
+    return INSTANCE;
+  }
 
   public Metric mapToProto(MetricData source) {
     Metric.Builder metric = Metric.newBuilder();
@@ -480,8 +484,8 @@ public final class MetricDataMapper {
   private static void addExtrasToExemplar(ExemplarData source, Exemplar.Builder target) {
     target.addAllFilteredAttributes(attributesToProto(source.getFilteredAttributes()));
     SpanContext spanContext = source.getSpanContext();
-    target.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
-    target.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
+    target.setSpanId(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
+    target.setTraceId(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
   }
 
   private static AggregationTemporality mapAggregationTemporalityToProto(
@@ -574,8 +578,8 @@ public final class MetricDataMapper {
 
   private static SpanContext createForExemplar(Exemplar value) {
     return SpanContext.create(
-        ByteStringMapper.INSTANCE.protoToString(value.getTraceId()),
-        ByteStringMapper.INSTANCE.protoToString(value.getSpanId()),
+        ByteStringMapper.getInstance().protoToString(value.getTraceId()),
+        ByteStringMapper.getInstance().protoToString(value.getSpanId()),
         TraceFlags.getSampled(),
         TraceState.getDefault());
   }
@@ -756,11 +760,11 @@ public final class MetricDataMapper {
   }
 
   private static List<KeyValue> attributesToProto(Attributes source) {
-    return AttributesMapper.INSTANCE.attributesToProto(source);
+    return AttributesMapper.getInstance().attributesToProto(source);
   }
 
   private static Attributes protoToAttributes(List<KeyValue> source) {
-    return AttributesMapper.INSTANCE.protoToAttributes(source);
+    return AttributesMapper.getInstance().protoToAttributes(source);
   }
 
   private static final class DataWithType {

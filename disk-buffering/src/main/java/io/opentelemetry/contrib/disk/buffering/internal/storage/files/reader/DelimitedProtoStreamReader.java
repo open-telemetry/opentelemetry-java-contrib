@@ -48,7 +48,11 @@ public final class DelimitedProtoStreamReader extends StreamReader {
 
   public static class Factory implements StreamReader.Factory {
 
-    public static final Factory INSTANCE = new DelimitedProtoStreamReader.Factory();
+    private static final Factory INSTANCE = new DelimitedProtoStreamReader.Factory();
+
+    public static Factory getInstance() {
+      return INSTANCE;
+    }
 
     private Factory() {}
 

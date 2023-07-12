@@ -65,12 +65,12 @@ public abstract class BaseProtoSignalsDataMapper<
   }
 
   protected io.opentelemetry.proto.resource.v1.Resource resourceToProto(Resource resource) {
-    return ResourceMapper.INSTANCE.mapToProto(resource);
+    return ResourceMapper.getInstance().mapToProto(resource);
   }
 
   protected Resource protoToResource(
       io.opentelemetry.proto.resource.v1.Resource protoResource, String schemaUrl) {
-    return ResourceMapper.INSTANCE.mapToSdk(protoResource, schemaUrl.isEmpty() ? null : schemaUrl);
+    return ResourceMapper.getInstance().mapToSdk(protoResource, schemaUrl.isEmpty() ? null : schemaUrl);
   }
 
   protected InstrumentationScopeInfo protoToInstrumentationScopeInfo(
@@ -120,10 +120,10 @@ public abstract class BaseProtoSignalsDataMapper<
   protected abstract InstrumentationScopeInfo getInstrumentationScopeInfo(SIGNAL_ITEM source);
 
   private static List<KeyValue> attributesToProto(Attributes source) {
-    return AttributesMapper.INSTANCE.attributesToProto(source);
+    return AttributesMapper.getInstance().attributesToProto(source);
   }
 
   private static Attributes protoToAttributes(List<KeyValue> source) {
-    return AttributesMapper.INSTANCE.protoToAttributes(source);
+    return AttributesMapper.getInstance().protoToAttributes(source);
   }
 }

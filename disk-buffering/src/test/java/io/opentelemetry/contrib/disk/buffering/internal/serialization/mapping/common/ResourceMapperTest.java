@@ -21,11 +21,11 @@ class ResourceMapperTest {
   }
 
   private static Resource mapToProto(io.opentelemetry.sdk.resources.Resource sdkResource) {
-    return ResourceMapper.INSTANCE.mapToProto(sdkResource);
+    return ResourceMapper.getInstance().mapToProto(sdkResource);
   }
 
   private static io.opentelemetry.sdk.resources.Resource mapToSdk(
       Resource protoResource, String schemaUrl) {
-    return ResourceMapper.INSTANCE.mapToSdk(protoResource, schemaUrl);
+    return ResourceMapper.getInstance().mapToSdk(protoResource, schemaUrl);
   }
 }

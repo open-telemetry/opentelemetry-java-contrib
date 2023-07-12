@@ -29,7 +29,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
 
   @Override
   public byte[] serialize(Collection<LogRecordData> logRecordData) {
-    LogsData proto = ProtoLogsDataMapper.INSTANCE.toProto(logRecordData);
+    LogsData proto = ProtoLogsDataMapper.getInstance().toProto(logRecordData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       proto.writeDelimitedTo(out);
       return out.toByteArray();
@@ -41,7 +41,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   @Override
   public List<LogRecordData> deserialize(byte[] source) {
     try {
-      return ProtoLogsDataMapper.INSTANCE.fromProto(LogsData.parseFrom(source));
+      return ProtoLogsDataMapper.getInstance().fromProto(LogsData.parseFrom(source));
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
     }

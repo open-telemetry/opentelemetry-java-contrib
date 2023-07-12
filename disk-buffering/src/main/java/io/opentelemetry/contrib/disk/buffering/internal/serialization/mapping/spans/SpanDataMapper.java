@@ -30,8 +30,13 @@ import javax.annotation.Nullable;
 
 public final class SpanDataMapper {
 
-  public static final SpanDataMapper INSTANCE = new SpanDataMapper();
-  private final ByteStringMapper byteStringMapper = ByteStringMapper.INSTANCE;
+  private static final SpanDataMapper INSTANCE = new SpanDataMapper();
+
+  public static SpanDataMapper getInstance() {
+    return INSTANCE;
+  }
+
+  private final ByteStringMapper byteStringMapper = ByteStringMapper.getInstance();
 
   public Span mapToProto(SpanData source) {
     Span.Builder span = Span.newBuilder();
@@ -97,17 +102,17 @@ public final class SpanDataMapper {
     target.setAttributes(attributes);
     target.setResource(resource);
     target.setInstrumentationScopeInfo(instrumentationScopeInfo);
-    String traceId = ByteStringMapper.INSTANCE.protoToString(source.getTraceId());
+    String traceId = ByteStringMapper.getInstance().protoToString(source.getTraceId());
     target.setSpanContext(
         SpanContext.create(
             traceId,
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
             TraceFlags.getSampled(),
             decodeTraceState(source.getTraceState())));
     target.setParentSpanContext(
         SpanContext.create(
             traceId,
-            ByteStringMapper.INSTANCE.protoToString(source.getParentSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.getParentSpanId()),
             TraceFlags.getSampled(),
             TraceState.getDefault()));
     target.setTotalAttributeCount(source.getDroppedAttributesCount() + attributes.size());
@@ -250,8 +255,8 @@ public final class SpanDataMapper {
     int totalAttrCount = source.getDroppedAttributesCount() + attributes.size();
     SpanContext spanContext =
         SpanContext.create(
-            ByteStringMapper.INSTANCE.protoToString(source.getTraceId()),
-            ByteStringMapper.INSTANCE.protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.getTraceId()),
+            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
             TraceFlags.getSampled(),
             decodeTraceState(source.getTraceState()));
     return LinkData.create(spanContext, attributes, totalAttrCount);
@@ -271,11 +276,11 @@ public final class SpanDataMapper {
   }
 
   private static List<KeyValue> attributesToProto(Attributes source) {
-    return AttributesMapper.INSTANCE.attributesToProto(source);
+    return AttributesMapper.getInstance().attributesToProto(source);
   }
 
   private static Attributes protoToAttributes(List<KeyValue> source) {
-    return AttributesMapper.INSTANCE.protoToAttributes(source);
+    return AttributesMapper.getInstance().protoToAttributes(source);
   }
 
   private static int getListSize(List<?> list) {
@@ -301,8 +306,8 @@ public final class SpanDataMapper {
   private static Span.Link linkDataToProto(LinkData source) {
     Span.Link.Builder builder = Span.Link.newBuilder();
     SpanContext spanContext = source.getSpanContext();
-    builder.setTraceId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getTraceId()));
-    builder.setSpanId(ByteStringMapper.INSTANCE.stringToProto(spanContext.getSpanId()));
+    builder.setTraceId(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
+    builder.setSpanId(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
     builder.addAllAttributes(attributesToProto(source.getAttributes()));
     builder.setDroppedAttributesCount(
         source.getTotalAttributeCount() - source.getAttributes().size());

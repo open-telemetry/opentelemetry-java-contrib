@@ -265,11 +265,11 @@ class MetricDataMapperTest {
   }
 
   private static Metric mapToProto(MetricData source) {
-    return MetricDataMapper.INSTANCE.mapToProto(source);
+    return MetricDataMapper.getInstance().mapToProto(source);
   }
 
   private static MetricData mapToSdk(
       Metric source, Resource resource, InstrumentationScopeInfo scope) {
-    return MetricDataMapper.INSTANCE.mapToSdk(source, resource, scope);
+    return MetricDataMapper.getInstance().mapToSdk(source, resource, scope);
   }
 }

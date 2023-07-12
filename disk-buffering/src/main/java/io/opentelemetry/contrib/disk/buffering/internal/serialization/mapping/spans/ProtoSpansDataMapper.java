@@ -20,11 +20,15 @@ import java.util.Map;
 public class ProtoSpansDataMapper
     extends BaseProtoSignalsDataMapper<SpanData, Span, TracesData, ResourceSpans, ScopeSpans> {
 
-  public static final ProtoSpansDataMapper INSTANCE = new ProtoSpansDataMapper();
+  private static final ProtoSpansDataMapper INSTANCE = new ProtoSpansDataMapper();
+
+  public static ProtoSpansDataMapper getInstance() {
+    return INSTANCE;
+  }
 
   @Override
   protected Span signalItemToProto(SpanData sourceData) {
-    return SpanDataMapper.INSTANCE.mapToProto(sourceData);
+    return SpanDataMapper.getInstance().mapToProto(sourceData);
   }
 
   @Override
@@ -35,7 +39,7 @@ public class ProtoSpansDataMapper
   @Override
   protected SpanData protoToSignalItem(
       Span protoSignalItem, Resource resource, InstrumentationScopeInfo scopeInfo) {
-    return SpanDataMapper.INSTANCE.mapToSdk(protoSignalItem, resource, scopeInfo);
+    return SpanDataMapper.getInstance().mapToSdk(protoSignalItem, resource, scopeInfo);
   }
 
   @Override

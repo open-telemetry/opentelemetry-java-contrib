@@ -187,10 +187,10 @@ class ProtoSpansDataMapperTest {
   }
 
   private static TracesData mapToProto(Collection<SpanData> signals) {
-    return ProtoSpansDataMapper.INSTANCE.toProto(signals);
+    return ProtoSpansDataMapper.getInstance().toProto(signals);
   }
 
   private static List<SpanData> mapFromProto(TracesData protoData) {
-    return ProtoSpansDataMapper.INSTANCE.fromProto(protoData);
+    return ProtoSpansDataMapper.getInstance().fromProto(protoData);
   }
 }

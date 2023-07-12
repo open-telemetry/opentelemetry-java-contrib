@@ -92,11 +92,11 @@ class SpanDataMapperTest {
   }
 
   private static Span mapToProto(SpanData source) {
-    return SpanDataMapper.INSTANCE.mapToProto(source);
+    return SpanDataMapper.getInstance().mapToProto(source);
   }
 
   private static SpanData mapToSdk(
       Span source, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
-    return SpanDataMapper.INSTANCE.mapToSdk(source, resource, instrumentationScopeInfo);
+    return SpanDataMapper.getInstance().mapToSdk(source, resource, instrumentationScopeInfo);
   }
 }

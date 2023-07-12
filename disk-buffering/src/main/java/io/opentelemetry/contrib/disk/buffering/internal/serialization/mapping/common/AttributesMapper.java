@@ -17,7 +17,11 @@ import java.util.List;
 
 public final class AttributesMapper {
 
-  public static final AttributesMapper INSTANCE = new AttributesMapper();
+  private static final AttributesMapper INSTANCE = new AttributesMapper();
+
+  public static AttributesMapper getInstance() {
+    return INSTANCE;
+  }
 
   public List<KeyValue> attributesToProto(Attributes attributes) {
     List<KeyValue> keyValues = new ArrayList<>();

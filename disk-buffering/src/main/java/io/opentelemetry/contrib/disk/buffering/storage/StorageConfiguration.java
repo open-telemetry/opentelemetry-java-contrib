@@ -56,7 +56,7 @@ public abstract class StorageConfiguration {
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
         .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18))
-        .setTemporaryFileProvider(DefaultTemporaryFileProvider.INSTANCE);
+        .setTemporaryFileProvider(DefaultTemporaryFileProvider.getInstance());
   }
 
   @AutoValue.Builder

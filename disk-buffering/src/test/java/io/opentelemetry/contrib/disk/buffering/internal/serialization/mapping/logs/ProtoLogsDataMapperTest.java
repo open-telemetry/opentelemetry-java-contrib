@@ -161,10 +161,10 @@ class ProtoLogsDataMapperTest {
   }
 
   private static LogsData mapToProto(Collection<LogRecordData> signals) {
-    return ProtoLogsDataMapper.INSTANCE.toProto(signals);
+    return ProtoLogsDataMapper.getInstance().toProto(signals);
   }
 
   private static List<LogRecordData> mapFromProto(LogsData protoData) {
-    return ProtoLogsDataMapper.INSTANCE.fromProto(protoData);
+    return ProtoLogsDataMapper.getInstance().fromProto(protoData);
   }
 }

@@ -43,11 +43,11 @@ class LogRecordDataMapperTest {
   }
 
   private static LogRecord mapToProto(LogRecordData data) {
-    return LogRecordDataMapper.INSTANCE.mapToProto(data);
+    return LogRecordDataMapper.getInstance().mapToProto(data);
   }
 
   private static LogRecordData mapToSdk(
       LogRecord data, Resource resource, InstrumentationScopeInfo scopeInfo) {
-    return LogRecordDataMapper.INSTANCE.mapToSdk(data, resource, scopeInfo);
+    return LogRecordDataMapper.getInstance().mapToSdk(data, resource, scopeInfo);
   }
 }

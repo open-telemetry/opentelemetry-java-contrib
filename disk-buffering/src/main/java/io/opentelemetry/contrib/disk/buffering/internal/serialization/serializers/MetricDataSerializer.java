@@ -29,7 +29,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
 
   @Override
   public byte[] serialize(Collection<MetricData> metricData) {
-    MetricsData proto = ProtoMetricsDataMapper.INSTANCE.toProto(metricData);
+    MetricsData proto = ProtoMetricsDataMapper.getInstance().toProto(metricData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       proto.writeDelimitedTo(out);
       return out.toByteArray();
@@ -41,7 +41,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public List<MetricData> deserialize(byte[] source) {
     try {
-      return ProtoMetricsDataMapper.INSTANCE.fromProto(MetricsData.parseFrom(source));
+      return ProtoMetricsDataMapper.getInstance().fromProto(MetricsData.parseFrom(source));
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
     }
