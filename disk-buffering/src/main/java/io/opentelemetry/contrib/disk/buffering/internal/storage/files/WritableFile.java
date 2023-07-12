@@ -23,10 +23,7 @@ public final class WritableFile extends StorageFile {
   private int size;
 
   public WritableFile(
-      File file,
-      long createdTimeMillis,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      File file, long createdTimeMillis, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
     super(file);
     this.configuration = configuration;

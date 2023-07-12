@@ -80,9 +80,7 @@ class FolderManagerTest {
     WritableFile writableFile = folderManager.createWritableFile();
     writableFile.append(new byte[3]);
 
-    doReturn(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS)
-        .when(clock)
-        .now();
+    doReturn(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     ReadableFile readableFile = folderManager.getReadableFile();
 
@@ -225,9 +223,7 @@ class FolderManagerTest {
     File expiredReadableFile1 = new File(rootDir, String.valueOf(creationReferenceTime - 1));
     File expiredReadableFile2 = new File(rootDir, String.valueOf(creationReferenceTime - 10));
     createFiles(expiredReadableFile1, expiredReadableFile2);
-    doReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS)
-        .when(clock)
-        .now();
+    doReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     assertNull(folderManager.getReadableFile());
   }

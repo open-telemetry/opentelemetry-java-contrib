@@ -47,19 +47,13 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
 
   // This is used for testing purposes.
   public static MetricDiskExporter create(
-      MetricExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
     return new MetricDiskExporter(wrapped, rootDir, configuration, clock);
   }
 
   private MetricDiskExporter(
-      MetricExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
     this.wrapped = wrapped;
     diskExporter =

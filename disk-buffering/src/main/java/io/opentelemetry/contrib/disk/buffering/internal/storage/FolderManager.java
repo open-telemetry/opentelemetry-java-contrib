@@ -49,8 +49,7 @@ public final class FolderManager {
       }
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
-    currentWritableFile =
-        new WritableFile(file, systemCurrentTimeMillis, configuration, clock);
+    currentWritableFile = new WritableFile(file, systemCurrentTimeMillis, configuration, clock);
     return currentWritableFile;
   }
 

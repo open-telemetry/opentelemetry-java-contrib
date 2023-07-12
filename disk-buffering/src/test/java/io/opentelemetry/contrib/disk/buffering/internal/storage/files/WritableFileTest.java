@@ -89,9 +89,7 @@ class WritableFileTest {
   @Test
   public void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
-    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS)
-        .when(clock)
-        .now();
+    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS).when(clock).now();
 
     assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 

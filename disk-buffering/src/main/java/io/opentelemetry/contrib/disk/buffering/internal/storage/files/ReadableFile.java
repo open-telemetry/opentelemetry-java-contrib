@@ -35,10 +35,7 @@ public final class ReadableFile extends StorageFile {
   @Nullable private ReadResult unconsumedResult;
 
   public ReadableFile(
-      File file,
-      long createdTimeMillis,
-      StorageClock clock,
-      StorageConfiguration configuration)
+      File file, long createdTimeMillis, StorageClock clock, StorageConfiguration configuration)
       throws IOException {
     this(
         file,

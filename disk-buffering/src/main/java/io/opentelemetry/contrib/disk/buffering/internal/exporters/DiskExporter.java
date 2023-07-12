@@ -37,8 +37,7 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
       throws IOException {
     validateConfiguration(configuration);
     this.storage =
-        new Storage(
-            new FolderManager(getSignalFolder(rootDir, folderName), configuration, clock));
+        new Storage(new FolderManager(getSignalFolder(rootDir, folderName), configuration, clock));
     this.serializer = serializer;
     this.exportFunction = exportFunction;
   }

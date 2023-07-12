@@ -197,9 +197,7 @@ class ReadableFileTest {
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
-    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS)
-        .when(clock)
-        .now();
+    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
 
     assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 
