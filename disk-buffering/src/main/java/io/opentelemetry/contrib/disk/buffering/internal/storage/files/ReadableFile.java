@@ -5,13 +5,13 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
-import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
-import io.opentelemetry.contrib.disk.buffering.storage.StorageConfiguration;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

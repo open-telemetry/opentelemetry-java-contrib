@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.storage.files;
+package io.opentelemetry.contrib.disk.buffering.internal.files;
 
 import java.io.File;
 import java.io.IOException;
