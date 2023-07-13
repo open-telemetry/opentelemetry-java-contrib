@@ -502,6 +502,6 @@ public class GroovyMetricEnvironment {
       final Consumer<T> updater) {
     registry.putIfAbsent(descriptorHash, new AtomicReference<>());
     registry.get(descriptorHash).set(updater);
-    return longResult -> registry.get(descriptorHash).get().accept(longResult);
+    return result -> registry.get(descriptorHash).get().accept(result);
   }
 }
