@@ -7,8 +7,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES;
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.Constants.NEW_LINE_BYTES_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,6 +31,9 @@ class WritableFileTest {
   private StorageClock clock;
   private WritableFile writableFile;
   private static final long CREATED_TIME_MILLIS = 1000L;
+  private static final byte[] NEW_LINE_BYTES =
+      System.lineSeparator().getBytes(StandardCharsets.UTF_8);
+  private static final int NEW_LINE_BYTES_SIZE = NEW_LINE_BYTES.length;
 
   @BeforeEach
   public void setUp() throws IOException {
