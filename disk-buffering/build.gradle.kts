@@ -1,7 +1,10 @@
+import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
+
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("me.champeau.jmh") version "0.7.1"
+  id("ru.vyarus.animalsniffer") version "1.7.1"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -19,8 +22,23 @@ dependencies {
   implementation("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
   compileOnly("com.google.auto.value:auto-value-annotations:$autovalueVersion")
   annotationProcessor("com.google.auto.value:auto-value:$autovalueVersion")
+  signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
   testImplementation("org.mockito:mockito-inline:4.11.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+}
+
+animalsniffer {
+  sourceSets = listOf(java.sourceSets.main.get())
+}
+
+// Always having declared output makes this task properly participate in tasks up-to-date checks
+tasks.withType<AnimalSniffer> {
+  reports.text.required.set(true)
+}
+
+// Attaching animalsniffer check to the compilation process.
+tasks.named("classes").configure {
+  finalizedBy("animalsnifferMain")
 }
 
 jmh {
