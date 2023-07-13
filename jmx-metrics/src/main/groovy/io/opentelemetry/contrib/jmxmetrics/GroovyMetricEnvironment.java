@@ -6,8 +6,10 @@
 package io.opentelemetry.contrib.jmxmetrics;
 
 import groovy.lang.Closure;
+import groovy.lang.Tuple2;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
@@ -22,13 +24,17 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class GroovyMetricEnvironment {
@@ -46,6 +52,8 @@ public class GroovyMetricEnvironment {
       doubleUpdaterRegistry = new ConcurrentHashMap<>();
   private final Map<Integer, AtomicReference<Closure<?>>> batchUpdaterRegistry =
       new ConcurrentHashMap<>();
+  private final Map<Integer, Tuple2<BatchCallback, Set<ObservableMeasurement>>>
+      batchCallbackRegistry = new ConcurrentHashMap<>();
   private final Map<Integer, ObservableMeasurement> instrumentOnceRegistry =
       new ConcurrentHashMap<>();
 
@@ -460,15 +468,31 @@ public class GroovyMetricEnvironment {
     int hash = identifier.hashCode();
     // Store the callback in the registry so the proxied callback always runs the latest
     // metric collection closure
-    AtomicReference<Closure<?>> existing =
-        batchUpdaterRegistry.putIfAbsent(hash, new AtomicReference<>());
+    batchUpdaterRegistry.putIfAbsent(hash, new AtomicReference<>());
     batchUpdaterRegistry.get(hash).set(callback);
 
-    // If the callback had previously been stored, we assume the back callback is already
-    // registered with the Meter
-    if (existing == null) {
-      meter.batchCallback(
-          () -> batchUpdaterRegistry.get(hash).get().call(), measurement, additional);
+    // collect the set of instruments into a set so we can compare to what's previously been
+    // registered
+    Set<ObservableMeasurement> instrumentSet =
+        Arrays.stream(additional).collect(Collectors.toCollection(HashSet::new));
+    instrumentSet.add(measurement);
+
+    Tuple2<BatchCallback, Set<ObservableMeasurement>> existingCallback =
+        batchCallbackRegistry.get(hash);
+    // If this is our first attempt to register this callback or the list of relevant instruments
+    // has changed, we need register the callback.
+    if (existingCallback == null || !existingCallback.getV2().equals(instrumentSet)) {
+      // If the callback has already been created, and we're here to update the set of instruments
+      // make sure we close the previous callback
+      if (existingCallback != null) {
+        existingCallback.getV1().close();
+      }
+      batchCallbackRegistry.put(
+          hash,
+          new Tuple2<>(
+              meter.batchCallback(
+                  () -> batchUpdaterRegistry.get(hash).get().call(), measurement, additional),
+              instrumentSet));
     }
   }
 

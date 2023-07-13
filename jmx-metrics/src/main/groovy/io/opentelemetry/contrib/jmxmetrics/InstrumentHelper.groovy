@@ -88,9 +88,9 @@ class InstrumentHelper {
                 // Look at the collected mbeans to evaluate if the attributes requested are
                 // composite data types or simple. Composite types require different parsing to
                 // end up with multiple recorders in the same callback.
-                if (isAttributeComposite(attribute, mbeans)) {
-                    def value = (CompositeData) mbeans.first().getProperty(attribute)
-                    compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, value.getCompositeType().keySet()))
+                def keySet = getCompositeKeys(attribute, mbeans)
+                if (keySet.size() > 0) {
+                    compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, keySet))
                 } else {
                     simpleAttributes.add(attribute)
                 }
@@ -119,31 +119,45 @@ class InstrumentHelper {
         }
     }
 
-    // This function checks all the provided MBeans to see if they are consistently CompositeData or
-    // a simple value for the given attribute. If they are inconsistent, it will throw an exception.
-    private static boolean isAttributeComposite(String attribute, List<GroovyMBean> beans) throws AttributeNotFoundException, InvalidAttributeValueException {
-        def allComposite = beans.collect { bean ->
+    // This function retrieves the set of CompositeData keys for the given attribute for the currently
+    // collected mbeans. If the attribute is all simple values it will return an empty list.
+    // If the attribute is inconsistent across mbeans, it will throw an exception.
+    private static Set<String> getCompositeKeys(String attribute, List<GroovyMBean> beans) throws AttributeNotFoundException, InvalidAttributeValueException {
+        def isComposite = false
+        def isFound = false
+        def keySet = beans.collect { bean ->
             try {
                 def value = bean.getProperty(attribute)
+                def keys = []
                 if (value instanceof CompositeData) {
-                    true
+                    // If we've found a simple attribute, throw an exception as this attribute
+                    // was mixed between simple & composite
+                    if (!isComposite && isFound) {
+                        throw new InvalidAttributeValueException()
+                    }
+                    isComposite = true
+                    keys = value.getCompositeType().keySet()
                 } else {
-                    false
+                    // If we've found a composite attribute, throw an exception as this attribute
+                    // was mixed between simple & composite
+                    if (isComposite) {
+                        throw new InvalidAttributeValueException()
+                    }
+                    keys = []
                 }
+                isFound = true
+                return keys
             } catch (AttributeNotFoundException | NullPointerException ignored) {
-                null
+                []
             }
-        }.findAll { it != null }
+        }.flatten()
           .toSet()
 
-        switch (allComposite.size()) {
-            case 0:
-                throw new AttributeNotFoundException()
-            case 1:
-                return allComposite.contains(true)
-            default:
-                throw new InvalidAttributeValueException()
+        if (!isFound) {
+            throw new AttributeNotFoundException()
         }
+
+        return keySet
     }
 
     private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
