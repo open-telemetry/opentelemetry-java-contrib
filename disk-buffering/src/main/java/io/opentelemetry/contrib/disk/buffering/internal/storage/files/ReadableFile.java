@@ -22,6 +22,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
+/**
+ * Reads from a file and updates it in parallel in order to avoid re-reading the same items later.
+ * The way it does so is by creating a temporary file where all the contents are added during the
+ * instantiation of this class. Then, the contents are read from the temporary file, after an item
+ * has been read from the temporary file, the original file gets updated to remove the recently read
+ * data.
+ *
+ * <p>More information on the overall storage process in the CONTRIBUTING.md file.
+ */
 public final class ReadableFile extends StorageFile {
   private final int originalFileSize;
   private final StreamReader reader;
