@@ -27,16 +27,16 @@ public final class Storage implements Closeable {
   }
 
   /**
-   * Attempts to write a line into a writable file.
+   * Attempts to write an item into a writable file.
    *
-   * @param line - The data that would be appended to the file.
+   * @param item - The data that would be appended to the file.
    * @throws IOException If an unexpected error happens.
    */
-  public boolean write(byte[] line) throws IOException {
-    return write(line, 1);
+  public boolean write(byte[] item) throws IOException {
+    return write(item, 1);
   }
 
-  private boolean write(byte[] line, int attemptNumber) throws IOException {
+  private boolean write(byte[] item, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       return false;
     }
@@ -46,17 +46,17 @@ public final class Storage implements Closeable {
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
     }
-    WritableResult result = writableFile.append(line);
+    WritableResult result = writableFile.append(item);
     if (result != WritableResult.SUCCEEDED) {
       // Retry with new file
       writableFile = null;
-      return write(line, ++attemptNumber);
+      return write(item, ++attemptNumber);
     }
     return true;
   }
 
   /**
-   * Attempts to read a line from a ready-to-read file.
+   * Attempts to read an item from a ready-to-read file.
    *
    * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
    * @throws IOException If an unexpected error happens.
