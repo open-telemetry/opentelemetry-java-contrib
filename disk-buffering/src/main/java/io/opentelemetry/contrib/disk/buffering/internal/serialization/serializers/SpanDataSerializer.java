@@ -30,7 +30,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
       proto.writeDelimitedTo(out);
       return out.toByteArray();
     } catch (IOException e) {
-      throw new IllegalArgumentException(e);
+      throw new IllegalStateException(e);
     }
   }
 

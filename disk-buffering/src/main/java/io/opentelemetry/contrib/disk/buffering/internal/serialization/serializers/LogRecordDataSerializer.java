@@ -30,7 +30,7 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
       proto.writeDelimitedTo(out);
       return out.toByteArray();
     } catch (IOException e) {
-      throw new IllegalArgumentException(e);
+      throw new IllegalStateException(e);
     }
   }
 
