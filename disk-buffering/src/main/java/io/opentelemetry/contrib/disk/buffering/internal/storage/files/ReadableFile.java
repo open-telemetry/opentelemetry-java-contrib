@@ -147,6 +147,10 @@ public final class ReadableFile extends StorageFile {
     }
   }
 
+  /**
+   * This is needed instead of using Files.copy in order to keep it compatible with Android api <
+   * 26.
+   */
   private static void copyFile(File from, File to) throws IOException {
     try (InputStream in = new FileInputStream(from);
         OutputStream out = new FileOutputStream(to)) {
