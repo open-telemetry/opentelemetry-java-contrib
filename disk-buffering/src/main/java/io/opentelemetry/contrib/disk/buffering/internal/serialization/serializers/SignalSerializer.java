@@ -11,7 +11,7 @@ import java.util.List;
 public interface SignalSerializer<SDK_ITEM> {
 
   static SpanDataSerializer ofSpans() {
-    return SpanDataSerializer.get();
+    return SpanDataSerializer.getInstance();
   }
 
   static MetricDataSerializer ofMetrics() {

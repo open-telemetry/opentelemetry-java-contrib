@@ -19,7 +19,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
 
   private SpanDataSerializer() {}
 
-  static SpanDataSerializer get() {
+  static SpanDataSerializer getInstance() {
     return INSTANCE;
   }
 
