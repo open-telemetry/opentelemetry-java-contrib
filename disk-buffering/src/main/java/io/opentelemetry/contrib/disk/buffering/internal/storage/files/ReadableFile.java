@@ -12,7 +12,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.Str
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -140,7 +139,7 @@ public final class ReadableFile extends StorageFile {
   }
 
   private static void copyFile(File from, File to) throws IOException {
-    try (InputStream in = new BufferedInputStream(new FileInputStream(from));
+    try (InputStream in = new FileInputStream(from);
         OutputStream out = new FileOutputStream(to, false)) {
 
       byte[] buffer = new byte[1024];
