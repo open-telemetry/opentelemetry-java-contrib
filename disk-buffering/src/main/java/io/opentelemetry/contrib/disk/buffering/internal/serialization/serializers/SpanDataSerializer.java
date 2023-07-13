@@ -13,18 +13,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
 
 public final class SpanDataSerializer implements SignalSerializer<SpanData> {
-  @Nullable private static SpanDataSerializer instance;
+  private static final SpanDataSerializer INSTANCE = new SpanDataSerializer();
 
   private SpanDataSerializer() {}
 
   static SpanDataSerializer get() {
-    if (instance == null) {
-      instance = new SpanDataSerializer();
-    }
-    return instance;
+    return INSTANCE;
   }
 
   @Override

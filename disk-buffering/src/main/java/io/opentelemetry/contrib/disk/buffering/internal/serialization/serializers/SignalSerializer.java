@@ -15,11 +15,11 @@ public interface SignalSerializer<SDK_ITEM> {
   }
 
   static MetricDataSerializer ofMetrics() {
-    return MetricDataSerializer.get();
+    return MetricDataSerializer.getInstance();
   }
 
   static LogRecordDataSerializer ofLogs() {
-    return LogRecordDataSerializer.get();
+    return LogRecordDataSerializer.getInstance();
   }
 
   byte[] serialize(Collection<SDK_ITEM> items);

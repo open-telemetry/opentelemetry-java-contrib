@@ -13,18 +13,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
 
 public final class MetricDataSerializer implements SignalSerializer<MetricData> {
-  @Nullable private static MetricDataSerializer instance;
+  private static final MetricDataSerializer INSTANCE = new MetricDataSerializer();
 
   private MetricDataSerializer() {}
 
-  static MetricDataSerializer get() {
-    if (instance == null) {
-      instance = new MetricDataSerializer();
-    }
-    return instance;
+  static MetricDataSerializer getInstance() {
+    return INSTANCE;
   }
 
   @Override

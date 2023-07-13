@@ -13,18 +13,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
 
 public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
-  @Nullable private static LogRecordDataSerializer instance;
+  private static final LogRecordDataSerializer INSTANCE = new LogRecordDataSerializer();
 
   private LogRecordDataSerializer() {}
 
-  static LogRecordDataSerializer get() {
-    if (instance == null) {
-      instance = new LogRecordDataSerializer();
-    }
-    return instance;
+  static LogRecordDataSerializer getInstance() {
+    return INSTANCE;
   }
 
   @Override
