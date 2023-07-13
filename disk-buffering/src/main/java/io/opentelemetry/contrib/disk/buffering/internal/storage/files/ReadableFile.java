@@ -140,7 +140,7 @@ public final class ReadableFile extends StorageFile {
 
   private static void copyFile(File from, File to) throws IOException {
     try (InputStream in = new FileInputStream(from);
-        OutputStream out = new FileOutputStream(to, false)) {
+        OutputStream out = new FileOutputStream(to)) {
 
       byte[] buffer = new byte[1024];
       int lengthRead;
