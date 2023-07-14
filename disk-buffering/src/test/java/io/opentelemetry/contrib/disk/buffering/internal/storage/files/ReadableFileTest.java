@@ -87,7 +87,7 @@ class ReadableFileTest {
           .build();
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     source = new File(dir, "sourceFile");
     temporaryFile = new File(dir, "temporaryFile");
     addFileContents(source);
@@ -113,7 +113,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void readSingleItemAndRemoveIt() throws IOException {
+  void readSingleItemAndRemoveIt() throws IOException {
     readableFile.readAndProcess(
         bytes -> {
           assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
@@ -128,17 +128,17 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
+  void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
     assertEquals(ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> true));
   }
 
   @Test
-  public void whenProcessingFails_returnProcessFailedStatus() throws IOException {
+  void whenProcessingFails_returnProcessFailedStatus() throws IOException {
     assertEquals(ReadableResult.PROCESSING_FAILED, readableFile.readAndProcess(bytes -> false));
   }
 
   @Test
-  public void deleteTemporaryFileWhenClosing() throws IOException {
+  void deleteTemporaryFileWhenClosing() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
@@ -146,7 +146,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void readMultipleLinesAndRemoveThem() throws IOException {
+  void readMultipleLinesAndRemoveThem() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.readAndProcess(bytes -> true);
 
@@ -157,7 +157,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
+  void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
     readableFile.readAndProcess(bytes -> false);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
@@ -166,7 +166,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
+  void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 
     assertFalse(source.exists());
@@ -174,7 +174,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
+  void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
       throws IOException {
     File emptyFile = new File(dir, "emptyFile");
     if (!emptyFile.createNewFile()) {
@@ -192,7 +192,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void
+  void
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
@@ -204,7 +204,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenReadingAfterClosed_returnFailedStatus() throws IOException {
+  void whenReadingAfterClosed_returnFailedStatus() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 

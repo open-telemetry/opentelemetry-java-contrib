@@ -35,13 +35,13 @@ class FolderManagerTest {
   private StorageClock clock;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     clock = mock();
     folderManager = new FolderManager(rootDir, TestData.getDefaultConfiguration(), clock);
   }
 
   @Test
-  public void createWritableFile_withTimeMillisAsName() throws IOException {
+  void createWritableFile_withTimeMillisAsName() throws IOException {
     doReturn(1000L).when(clock).now();
 
     StorageFile file = folderManager.createWritableFile();
@@ -50,7 +50,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void createWritableFile_andRemoveOldestOne_whenTheAvailableFolderSpaceIsNotEnough()
+  void createWritableFile_andRemoveOldestOne_whenTheAvailableFolderSpaceIsNotEnough()
       throws IOException {
     File existingFile1 = new File(rootDir, "1000");
     File existingFile2 = new File(rootDir, "1400");
@@ -72,7 +72,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void closeCurrentlyWritableFile_whenItIsReadyToBeRead_anNoOtherReadableFilesAreAvailable()
+  void closeCurrentlyWritableFile_whenItIsReadyToBeRead_anNoOtherReadableFilesAreAvailable()
       throws IOException {
     long createdFileTime = 1000L;
     doReturn(createdFileTime).when(clock).now();
@@ -89,7 +89,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void
+  void
       closeCurrentlyReadableFileIfAny_whenItIsTheOldestOne_andRemoveIt_whenTheAvailableFolderSpaceIsNotEnough()
           throws IOException {
     File existingFile1 = new File(rootDir, "1000");
@@ -113,7 +113,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void createWritableFile_andDoNotRemoveOldestOne_ifAtLeastOneExpiredFileIsPurged()
+  void createWritableFile_andDoNotRemoveOldestOne_ifAtLeastOneExpiredFileIsPurged()
       throws IOException {
     File existingFile1 = new File(rootDir, "1100");
     File existingFile2 = new File(rootDir, "1400");
@@ -135,7 +135,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void purgeExpiredForReadFiles_whenCreatingNewOne() throws IOException {
+  void purgeExpiredForReadFiles_whenCreatingNewOne() throws IOException {
     // Files that cannot be read from are considered fully expired.
     File expiredReadableFile = new File(rootDir, "1000");
     // Files that cannot be written, but can still be read, aren't ready to be deleted.
@@ -151,7 +151,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void closeExpiredReadableFileInUseIfAny_whenPurgingExpiredForReadFiles_whenCreatingNewOne()
+  void closeExpiredReadableFileInUseIfAny_whenPurgingExpiredForReadFiles_whenCreatingNewOne()
       throws IOException {
     File expiredReadableFileBeingRead = new File(rootDir, "900");
     File expiredReadableFile = new File(rootDir, "1000");
@@ -174,7 +174,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void provideFileForRead_afterItsMinFileAgeForReadTimePassed() throws IOException {
+  void provideFileForRead_afterItsMinFileAgeForReadTimePassed() throws IOException {
     long readableFileCreationTime = 1000;
     long currentTime = readableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
     doReturn(currentTime).when(clock).now();
@@ -188,7 +188,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void provideOldestFileForRead_whenMultipleReadableFilesAreAvailable() throws IOException {
+  void provideOldestFileForRead_whenMultipleReadableFilesAreAvailable() throws IOException {
     long newerReadableFileCreationTime = 1000;
     long olderReadableFileCreationTime = 900;
     long currentTime = newerReadableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS;
@@ -204,12 +204,12 @@ class FolderManagerTest {
   }
 
   @Test
-  public void provideNullFileForRead_whenNoFilesAreAvailable() throws IOException {
+  void provideNullFileForRead_whenNoFilesAreAvailable() throws IOException {
     assertNull(folderManager.getReadableFile());
   }
 
   @Test
-  public void provideNullFileForRead_whenOnlyReadableFilesAreAvailable() throws IOException {
+  void provideNullFileForRead_whenOnlyReadableFilesAreAvailable() throws IOException {
     long currentTime = 1000;
     File writableFile = new File(rootDir, String.valueOf(currentTime));
     createFiles(writableFile);
@@ -218,7 +218,7 @@ class FolderManagerTest {
   }
 
   @Test
-  public void provideNullFileForRead_whenReadableFilesAreExpired() throws IOException {
+  void provideNullFileForRead_whenReadableFilesAreExpired() throws IOException {
     long creationReferenceTime = 1000;
     File expiredReadableFile1 = new File(rootDir, String.valueOf(creationReferenceTime - 1));
     File expiredReadableFile2 = new File(rootDir, String.valueOf(creationReferenceTime - 10));

@@ -55,7 +55,7 @@ public class IntegrationTest {
       StorageConfiguration.getDefault();
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     clock = mock();
     doReturn(INITIAL_TIME_IN_MILLIS).when(clock).now();
 
@@ -81,7 +81,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifySpansIntegration() throws IOException {
+  void verifySpansIntegration() throws IOException {
     Span span = tracer.spanBuilder("Span name").startSpan();
     span.end();
 
@@ -89,7 +89,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifyMetricsIntegration() throws IOException {
+  void verifyMetricsIntegration() throws IOException {
     meter.counterBuilder("Counter").build().add(2);
     meterProvider.forceFlush();
 
@@ -97,7 +97,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifyLogRecordsIntegration() throws IOException {
+  void verifyLogRecordsIntegration() throws IOException {
     logger.logRecordBuilder().setBody("I'm a log!").emit();
 
     assertExporter(

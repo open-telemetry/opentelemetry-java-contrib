@@ -36,7 +36,7 @@ class WritableFileTest {
   private static final int NEW_LINE_BYTES_SIZE = NEW_LINE_BYTES.length;
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     clock = mock();
     writableFile =
         new WritableFile(
@@ -47,21 +47,21 @@ class WritableFileTest {
   }
 
   @Test
-  public void hasNotExpired_whenWriteAgeHasNotExpired() {
+  void hasNotExpired_whenWriteAgeHasNotExpired() {
     doReturn(1500L).when(clock).now();
 
     assertFalse(writableFile.hasExpired());
   }
 
   @Test
-  public void hasExpired_whenWriteAgeHasExpired() {
+  void hasExpired_whenWriteAgeHasExpired() {
     doReturn(2000L).when(clock).now();
 
     assertTrue(writableFile.hasExpired());
   }
 
   @Test
-  public void appendDataInNewLines_andIncreaseSize() throws IOException {
+  void appendDataInNewLines_andIncreaseSize() throws IOException {
     byte[] line1 = getByteArrayLine("First line");
     byte[] line2 = getByteArrayLine("Second line");
     writableFile.append(line1);
@@ -77,8 +77,7 @@ class WritableFileTest {
   }
 
   @Test
-  public void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnFailed()
-      throws IOException {
+  void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnFailed() throws IOException {
     assertEquals(WritableResult.SUCCEEDED, writableFile.append(new byte[MAX_FILE_SIZE]));
 
     assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
@@ -88,7 +87,7 @@ class WritableFileTest {
   }
 
   @Test
-  public void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
+  void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
     doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS).when(clock).now();
 
@@ -98,7 +97,7 @@ class WritableFileTest {
   }
 
   @Test
-  public void whenAppendingData_andIsAlreadyClosed_returnFailedStatus() throws IOException {
+  void whenAppendingData_andIsAlreadyClosed_returnFailedStatus() throws IOException {
     writableFile.append(new byte[1]);
     writableFile.close();
 
