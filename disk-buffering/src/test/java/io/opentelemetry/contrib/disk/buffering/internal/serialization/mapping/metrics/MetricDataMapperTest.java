@@ -187,7 +187,7 @@ class MetricDataMapperTest {
           EXPONENTIAL_HISTOGRAM_DATA);
 
   @Test
-  public void verifyLongGaugeMapping() {
+  void verifyLongGaugeMapping() {
     Metric proto = mapToProto(LONG_GAUGE_METRIC);
 
     assertEquals(
@@ -199,7 +199,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifyDoubleGaugeMapping() {
+  void verifyDoubleGaugeMapping() {
     Metric proto = mapToProto(DOUBLE_GAUGE_METRIC);
 
     assertEquals(
@@ -211,7 +211,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifyLongSumMapping() {
+  void verifyLongSumMapping() {
     Metric proto = mapToProto(LONG_SUM_METRIC);
 
     assertEquals(
@@ -221,7 +221,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifyDoubleSumMapping() {
+  void verifyDoubleSumMapping() {
     Metric proto = mapToProto(DOUBLE_SUM_METRIC);
 
     assertEquals(
@@ -233,7 +233,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifySummaryMapping() {
+  void verifySummaryMapping() {
     Metric proto = mapToProto(SUMMARY_METRIC);
 
     assertEquals(
@@ -243,7 +243,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifyHistogramMapping() {
+  void verifyHistogramMapping() {
     Metric proto = mapToProto(HISTOGRAM_METRIC);
 
     assertEquals(
@@ -253,7 +253,7 @@ class MetricDataMapperTest {
   }
 
   @Test
-  public void verifyExponentialHistogramMapping() {
+  void verifyExponentialHistogramMapping() {
     Metric proto = mapToProto(EXPONENTIAL_HISTOGRAM_METRIC);
 
     assertEquals(

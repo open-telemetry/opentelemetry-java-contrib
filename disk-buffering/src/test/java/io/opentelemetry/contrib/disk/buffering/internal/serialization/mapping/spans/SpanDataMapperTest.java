@@ -71,7 +71,7 @@ class SpanDataMapperTest {
           .build();
 
   @Test
-  public void verifyMapping() {
+  void verifyMapping() {
     Span proto = mapToProto(SPAN_DATA);
 
     assertEquals(
@@ -80,7 +80,7 @@ class SpanDataMapperTest {
   }
 
   @Test
-  public void verifyMappingWithTraceState() {
+  void verifyMappingWithTraceState() {
     Span proto = mapToProto(SPAN_DATA_WITH_TRACE_STATE);
 
     assertEquals(

@@ -44,7 +44,7 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .build();
 
   @Test
-  public void verifySerialization() {
+  void verifySerialization() {
     assertSerialization(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_TEXT);
   }
 

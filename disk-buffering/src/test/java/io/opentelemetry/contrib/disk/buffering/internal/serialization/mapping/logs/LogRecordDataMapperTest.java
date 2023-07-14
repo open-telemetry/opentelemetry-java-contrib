@@ -34,7 +34,7 @@ class LogRecordDataMapperTest {
           .build();
 
   @Test
-  public void verifyMapping() {
+  void verifyMapping() {
     LogRecord proto = mapToProto(LOG_RECORD);
 
     assertEquals(
