@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.28.0 (2023-07-14)
+
 ### AWS X-Ray SDK support
 
 - generate error/fault metrics by aws sdk status code
