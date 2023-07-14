@@ -30,7 +30,6 @@ class AwsXrayRemoteSamplerProviderTest {
     try (SdkTracerProvider tracerProvider =
         AutoConfiguredOpenTelemetrySdk.builder()
             .addPropertiesSupplier(() -> props)
-            .setResultAsGlobal(false)
             .build()
             .getOpenTelemetrySdk()
             .getSdkTracerProvider()) {
@@ -62,7 +61,6 @@ class AwsXrayRemoteSamplerProviderTest {
     try (SdkTracerProvider tracerProvider =
         AutoConfiguredOpenTelemetrySdk.builder()
             .addPropertiesSupplier(() -> props)
-            .setResultAsGlobal(false)
             .build()
             .getOpenTelemetrySdk()
             .getSdkTracerProvider()) {
