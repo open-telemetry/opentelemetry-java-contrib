@@ -16,26 +16,29 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class Tracing {
+public final class Tracing {
 
   private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
       new TextMapGetter<Map<String, String>>() {
         @Override
-        public Iterable<String> keys(Map<String, String> carrier) {
+        public Set<String> keys(Map<String, String> carrier) {
           return carrier.keySet();
         }
 
         @Override
-        public String get(Map<String, String> carrier, String key) {
+        @Nullable
+        public String get(@Nullable Map<String, String> carrier, String key) {
           //noinspection ConstantConditions
-          return carrier.get(key);
+          return carrier == null ? null : carrier.get(key);
         }
       };
 
@@ -67,6 +70,7 @@ public class Tracing {
     return call(span, callable, Tracing::setSpanError);
   }
 
+  @SuppressWarnings("NullAway")
   public static <T> T call(
       Span span, Callable<T> callable, BiConsumer<Span, Exception> handleException) {
     //noinspection unused
@@ -82,42 +86,22 @@ public class Tracing {
   }
 
   /**
-   * @return the tracer to be used in an service
+   * Return the tracer to be used in a service
+   *
+   * @return the tracer to be used in a service
    */
   public static ExtendedTracer serviceTracer() {
     return ExtendedTracer.create(GlobalOpenTelemetry.getTracer("service"));
   }
 
+  /**
+   * Creates a new span builder with the given span name.
+   *
+   * @param spanName the span name
+   * @return the span builder
+   */
   public static ExtendedSpanBuilder withSpan(String spanName) {
-    return serviceTracer().spanBuilder(spanName);
-  }
-
-  /**
-   * Marks the current span as error.
-   *
-   * @param description what went wrong
-   */
-  public static void setSpanError(String description) {
-    setSpanError(Span.current(), description);
-  }
-
-  /**
-   * Marks the current span as error.
-   *
-   * @param exception the exception that caused the error
-   */
-  public static void setSpanError(Throwable exception) {
-    setSpanError(Span.current(), exception);
-  }
-
-  /**
-   * Marks the current span as error.
-   *
-   * @param description what went wrong
-   * @param exception the exception that caused the error
-   */
-  public static void setSpanError(String description, Throwable exception) {
-    setSpanError(Span.current(), description, exception);
+    return Tracing.serviceTracer().spanBuilder(spanName);
   }
 
   /**
@@ -163,7 +147,13 @@ public class Tracing {
     GlobalOpenTelemetry.get()
         .getPropagators()
         .getTextMapPropagator()
-        .inject(Context.current(), transport, Map::put);
+        .inject(Context.current(), transport,
+            (map, key, value) -> {
+              if (map != null) {
+                map.put(key, value);
+              }
+            });
+
     return transport;
   }
 
@@ -191,6 +181,7 @@ public class Tracing {
   }
 
   /** Sets baggage items which are active in given block. */
+  @SuppressWarnings("NullAway")
   public static <T> T setBaggage(Map<String, String> baggage, Callable<T> callable) {
     BaggageBuilder builder = Baggage.current().toBuilder();
     baggage.forEach(builder::put);
