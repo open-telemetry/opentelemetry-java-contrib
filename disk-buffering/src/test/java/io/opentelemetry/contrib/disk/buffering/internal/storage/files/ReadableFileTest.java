@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.LogRecordDataSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
@@ -44,7 +43,7 @@ class ReadableFileTest {
   private StorageClock clock;
   private TemporaryFileProvider temporaryFileProvider;
   private static final long CREATED_TIME_MILLIS = 1000L;
-  private static final LogRecordDataSerializer SERIALIZER = SignalSerializer.ofLogs();
+  private static final SignalSerializer<LogRecordData> SERIALIZER = SignalSerializer.ofLogs();
   private static final LogRecordData FIRST_LOG_RECORD =
       LogRecordDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)

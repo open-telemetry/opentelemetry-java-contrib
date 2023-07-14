@@ -50,13 +50,14 @@ class DiskExporterTest {
     setUpSerializer();
     wrapped = mock();
     exporter =
-        new DiskExporter<>(
-            rootDir,
-            TestData.getDefaultConfiguration(),
-            STORAGE_FOLDER_NAME,
-            serializer,
-            wrapped::export,
-            clock);
+        DiskExporter.<SpanData>builder()
+            .setRootDir(rootDir)
+            .setFolderName(STORAGE_FOLDER_NAME)
+            .setStorageConfiguration(TestData.getDefaultConfiguration())
+            .setSerializer(serializer)
+            .setExportFunction(wrapped::export)
+            .setStorageClock(clock)
+            .build();
   }
 
   @Test
@@ -73,16 +74,20 @@ class DiskExporterTest {
   @Test
   public void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() throws IOException {
     try {
-      new DiskExporter<>(
-          rootDir,
+      StorageConfiguration invalidConfig =
           StorageConfiguration.builder()
               .setMaxFileAgeForWriteMillis(2)
               .setMinFileAgeForReadMillis(1)
-              .build(),
-          STORAGE_FOLDER_NAME,
-          serializer,
-          wrapped::export,
-          clock);
+              .build();
+
+      DiskExporter.<SpanData>builder()
+          .setRootDir(rootDir)
+          .setFolderName(STORAGE_FOLDER_NAME)
+          .setStorageConfiguration(invalidConfig)
+          .setSerializer(serializer)
+          .setExportFunction(wrapped::export)
+          .setStorageClock(clock)
+          .build();
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals(

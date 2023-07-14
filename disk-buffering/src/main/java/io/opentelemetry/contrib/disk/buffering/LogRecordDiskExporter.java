@@ -44,7 +44,7 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
     return create(wrapped, rootDir, configuration, StorageClock.getInstance());
   }
 
-  // This is used for testing purposes.
+  // This is exposed for testing purposes.
   static LogRecordDiskExporter create(
       LogRecordExporter wrapped,
       File rootDir,
@@ -52,8 +52,14 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
       StorageClock clock)
       throws IOException {
     DiskExporter<LogRecordData> diskExporter =
-        new DiskExporter<>(
-            rootDir, configuration, "logs", SignalSerializer.ofLogs(), wrapped::export, clock);
+        DiskExporter.<LogRecordData>builder()
+            .setSerializer(SignalSerializer.ofLogs())
+            .setRootDir(rootDir)
+            .setFolderName("logs")
+            .setStorageConfiguration(configuration)
+            .setStorageClock(clock)
+            .setExportFunction(wrapped::export)
+            .build();
     return new LogRecordDiskExporter(wrapped, diskExporter);
   }
 
