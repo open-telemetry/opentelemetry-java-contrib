@@ -12,6 +12,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -96,17 +97,12 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
             .build();
 
     if (logger.isDebugEnabled()) {
-      logger.debug(
-          "OpenTelemetry: OpenTelemetry SDK initialized with  "
-              + OtelUtils.prettyPrintSdkConfiguration(autoConfiguredOpenTelemetrySdk));
+      logger.debug("OpenTelemetry: OpenTelemetry SDK initialized");
     }
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
     this.openTelemetry = this.openTelemetrySdk;
 
-    Boolean mojoSpansEnabled =
-        autoConfiguredOpenTelemetrySdk
-            .getConfig()
-            .getBoolean("otel.instrumentation.maven.mojo.enabled");
+    Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null ? true : mojoSpansEnabled;
 
     this.tracer = openTelemetry.getTracer("io.opentelemetry.contrib.maven", VERSION);
@@ -127,5 +123,18 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
 
   public boolean isMojosInstrumentationEnabled() {
     return mojosInstrumentationEnabled;
+  }
+
+  @Nullable
+  private static Boolean getBooleanConfig(String name) {
+    String value = System.getProperty(name);
+    if (value != null) {
+      return Boolean.parseBoolean(value);
+    }
+    value = System.getenv(name.toUpperCase(Locale.ROOT).replace('.', '_'));
+    if (value != null) {
+      return Boolean.parseBoolean(value);
+    }
+    return null;
   }
 }
