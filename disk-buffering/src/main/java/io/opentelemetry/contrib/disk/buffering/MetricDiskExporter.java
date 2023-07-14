@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -42,12 +42,12 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
    */
   public static MetricDiskExporter create(
       MetricExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
-    return create(wrapped, rootDir, configuration, StorageClock.getInstance());
+    return create(wrapped, rootDir, configuration, Clock.getDefault());
   }
 
   // This is exposed for testing purposes.
   public static MetricDiskExporter create(
-      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, Clock clock)
       throws IOException {
     DiskExporter<MetricData> diskExporter =
         DiskExporter.<MetricData>builder()

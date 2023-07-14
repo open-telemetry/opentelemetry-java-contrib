@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,8 +21,8 @@ import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvi
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
@@ -40,7 +41,7 @@ class ReadableFileTest {
   private File source;
   private File temporaryFile;
   private ReadableFile readableFile;
-  private StorageClock clock;
+  private Clock clock;
   private TemporaryFileProvider temporaryFileProvider;
   private static final long CREATED_TIME_MILLIS = 1000L;
   private static final SignalSerializer<LogRecordData> SERIALIZER = SignalSerializer.ofLogs();
@@ -196,7 +197,9 @@ class ReadableFileTest {
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
-    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS))
+        .when(clock)
+        .now();
 
     assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 

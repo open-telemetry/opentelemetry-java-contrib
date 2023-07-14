@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +19,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -36,7 +37,7 @@ import org.junit.jupiter.api.io.TempDir;
 class DiskExporterTest {
   private SpanExporter wrapped;
   private SignalSerializer<SpanData> serializer;
-  private StorageClock clock;
+  private Clock clock;
   private DiskExporter<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
@@ -64,7 +65,7 @@ class DiskExporterTest {
     doReturn(CompletableResultCode.ofSuccess()).when(wrapped).export(deserializedData);
 
     createDummyFile();
-    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(1000L + MIN_FILE_AGE_FOR_READ_MILLIS)).when(clock).now();
 
     assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isTrue();
   }
@@ -146,9 +147,9 @@ class DiskExporterTest {
     doReturn(deserializedData).when(serializer).deserialize(any());
   }
 
-  private static StorageClock createClockMock() {
-    StorageClock mock = mock();
-    doReturn(1000L).when(mock).now();
+  private static Clock createClockMock() {
+    Clock mock = mock();
+    doReturn(MILLISECONDS.toNanos(1000L)).when(mock).now();
     return mock;
   }
 }

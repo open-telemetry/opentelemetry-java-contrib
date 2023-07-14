@@ -9,7 +9,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public final class DiskExporterBuilder<T> {
   private File rootDir;
   private String folderName;
   private StorageConfiguration configuration;
-  private StorageClock clock = StorageClock.getInstance();
+  private Clock clock = Clock.getDefault();
   private Function<Collection<T>, CompletableResultCode> exportFunction;
 
   DiskExporterBuilder() {}
@@ -42,7 +42,7 @@ public final class DiskExporterBuilder<T> {
     return this;
   }
 
-  public DiskExporterBuilder<T> setStorageClock(StorageClock clock) {
+  public DiskExporterBuilder<T> setStorageClock(Clock clock) {
     this.clock = clock;
     return this;
   }

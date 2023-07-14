@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +16,7 @@ import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.io.TempDir;
 class WritableFileTest {
 
   @TempDir File rootDir;
-  private StorageClock clock;
+  private Clock clock;
   private WritableFile writableFile;
   private static final long CREATED_TIME_MILLIS = 1000L;
   private static final byte[] NEW_LINE_BYTES =
@@ -48,14 +49,14 @@ class WritableFileTest {
 
   @Test
   void hasNotExpired_whenWriteAgeHasNotExpired() {
-    doReturn(1500L).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(1500L)).when(clock).now();
 
     assertFalse(writableFile.hasExpired());
   }
 
   @Test
   void hasExpired_whenWriteAgeHasExpired() {
-    doReturn(2000L).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(2000L)).when(clock).now();
 
     assertTrue(writableFile.hasExpired());
   }
@@ -89,7 +90,9 @@ class WritableFileTest {
   @Test
   void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
-    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS))
+        .when(clock)
+        .now();
 
     assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 
