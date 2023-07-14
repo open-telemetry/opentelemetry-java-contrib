@@ -64,7 +64,6 @@ public class GroovyMetricEnvironment {
         // based on system properties.
         meterProvider =
             AutoConfiguredOpenTelemetrySdk.builder()
-                .setResultAsGlobal(false)
                 .addPropertiesSupplier(
                     () -> {
                       Map<String, String> properties = new HashMap<>();
