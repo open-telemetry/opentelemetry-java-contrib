@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class DiskExporterBuilder<T> {
+public final class DiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer;
   private File rootDir;
