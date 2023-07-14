@@ -47,16 +47,16 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
   public static SpanDiskExporter create(
       SpanExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
-    return new SpanDiskExporter(wrapped, rootDir, configuration, clock);
-  }
-
-  private SpanDiskExporter(
-      SpanExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
-      throws IOException {
-    this.wrapped = wrapped;
-    diskExporter =
+    DiskExporter<SpanData> diskExporter =
         new DiskExporter<>(
             rootDir, configuration, "spans", SignalSerializer.ofSpans(), wrapped::export, clock);
+    return new SpanDiskExporter(wrapped, diskExporter);
+  }
+
+  private SpanDiskExporter(SpanExporter wrapped, DiskExporter<SpanData> diskExporter)
+      throws IOException {
+    this.wrapped = wrapped;
+    this.diskExporter = diskExporter;
   }
 
   @Override

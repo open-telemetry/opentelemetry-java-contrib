@@ -49,14 +49,7 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
   public static MetricDiskExporter create(
       MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
       throws IOException {
-    return new MetricDiskExporter(wrapped, rootDir, configuration, clock);
-  }
-
-  private MetricDiskExporter(
-      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
-      throws IOException {
-    this.wrapped = wrapped;
-    diskExporter =
+    DiskExporter<MetricData> diskExporter =
         new DiskExporter<>(
             rootDir,
             configuration,
@@ -64,6 +57,12 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
             SignalSerializer.ofMetrics(),
             wrapped::export,
             clock);
+    return new MetricDiskExporter(wrapped, diskExporter);
+  }
+
+  private MetricDiskExporter(MetricExporter wrapped, DiskExporter<MetricData> diskExporter) {
+    this.wrapped = wrapped;
+    this.diskExporter = diskExporter;
   }
 
   @Override
