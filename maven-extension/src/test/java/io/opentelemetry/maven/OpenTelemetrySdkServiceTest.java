@@ -30,16 +30,17 @@ public class OpenTelemetrySdkServiceTest {
   }
 
   void testConfiguration(String expectedServiceName) {
-//    OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService();
-//    openTelemetrySdkService.initialize();
-//    try {
-//      Resource resource = openTelemetrySdkService.autoConfiguredOpenTelemetrySdk.getResource();
-//      assertThat(resource.getAttribute(ResourceAttributes.SERVICE_NAME))
-//          .isEqualTo(expectedServiceName);
-//    } finally {
-//      openTelemetrySdkService.dispose();
-//      GlobalOpenTelemetry.resetForTest();
-//      GlobalEventEmitterProvider.resetForTest();
-//    }
+    //    OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService();
+    //    openTelemetrySdkService.initialize();
+    //    try {
+    //      Resource resource =
+    // openTelemetrySdkService.autoConfiguredOpenTelemetrySdk.getResource();
+    //      assertThat(resource.getAttribute(ResourceAttributes.SERVICE_NAME))
+    //          .isEqualTo(expectedServiceName);
+    //    } finally {
+    //      openTelemetrySdkService.dispose();
+    //      GlobalOpenTelemetry.resetForTest();
+    //      GlobalEventEmitterProvider.resetForTest();
+    //    }
   }
 }
