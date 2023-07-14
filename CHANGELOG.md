@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- generate error/fault metrics by aws sdk status code
+  ([#924](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/924))
+
+### Disk buffering - New 🌟
+
+This module provides signal exporter wrappers that intercept and store telemetry signals in files
+which can be sent later on demand.
+
 ## Version 1.27.0 (2023-06-16)
 
 ### AWS X-Ray SDK support
