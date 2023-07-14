@@ -51,19 +51,16 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
       StorageConfiguration configuration,
       StorageClock clock)
       throws IOException {
-    return new LogRecordDiskExporter(wrapped, rootDir, configuration, clock);
+    DiskExporter<LogRecordData> diskExporter =
+        new DiskExporter<>(
+            rootDir, configuration, "logs", SignalSerializer.ofLogs(), wrapped::export, clock);
+    return new LogRecordDiskExporter(wrapped, diskExporter);
   }
 
   private LogRecordDiskExporter(
-      LogRecordExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
-      throws IOException {
+      LogRecordExporter wrapped, DiskExporter<LogRecordData> diskExporter) {
     this.wrapped = wrapped;
-    diskExporter =
-        new DiskExporter<>(
-            rootDir, configuration, "logs", SignalSerializer.ofLogs(), wrapped::export, clock);
+    this.diskExporter = diskExporter;
   }
 
   @Override
