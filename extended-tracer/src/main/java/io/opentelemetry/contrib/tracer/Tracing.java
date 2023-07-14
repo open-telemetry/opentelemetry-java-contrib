@@ -1,7 +1,12 @@
-package io.opentelemetry.contrib.tracer;/*
+/*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+package io.opentelemetry.contrib.tracer; /*
+                                          * Copyright The OpenTelemetry Authors
+                                          * SPDX-License-Identifier: Apache-2.0
+                                          */
 
 import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
 import static io.opentelemetry.api.trace.SpanKind.SERVER;
@@ -16,7 +21,6 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public final class Tracing {
 
@@ -147,7 +152,9 @@ public final class Tracing {
     GlobalOpenTelemetry.get()
         .getPropagators()
         .getTextMapPropagator()
-        .inject(Context.current(), transport,
+        .inject(
+            Context.current(),
+            transport,
             (map, key, value) -> {
               if (map != null) {
                 map.put(key, value);

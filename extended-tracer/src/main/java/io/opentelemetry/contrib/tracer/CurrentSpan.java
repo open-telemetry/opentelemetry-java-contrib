@@ -1,13 +1,15 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.tracer;
 
 import io.opentelemetry.api.trace.Span;
 
-/**
- * Utility class for the current span.
- */
+/** Utility class for the current span. */
 public final class CurrentSpan {
-  private CurrentSpan() {
-  }
+  private CurrentSpan() {}
 
   /**
    * Marks the current span as error.
@@ -36,5 +38,4 @@ public final class CurrentSpan {
   public static void setSpanError(Throwable exception) {
     Tracing.setSpanError(Span.current(), exception);
   }
-
 }
