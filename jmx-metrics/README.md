@@ -162,7 +162,7 @@ In cases where you'd like to create metrics based on non-numeric MBean attribute
 - `otel.mbean(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
 
 - `otel.mbeans(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
-  
+
 - `otel.mbeans(List<String> objectNameStrs, Map<String,Closure<?>> attributeTransformation)`
 
 These methods provide the ability to easily convert the attributes you will be extracting from the mbeans, at the time of creation for the MBeanHelper.
