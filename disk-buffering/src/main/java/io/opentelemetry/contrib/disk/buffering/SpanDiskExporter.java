@@ -59,8 +59,7 @@ public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter
     return new SpanDiskExporter(wrapped, diskExporter);
   }
 
-  private SpanDiskExporter(SpanExporter wrapped, DiskExporter<SpanData> diskExporter)
-      throws IOException {
+  private SpanDiskExporter(SpanExporter wrapped, DiskExporter<SpanData> diskExporter) {
     this.wrapped = wrapped;
     this.diskExporter = diskExporter;
   }
