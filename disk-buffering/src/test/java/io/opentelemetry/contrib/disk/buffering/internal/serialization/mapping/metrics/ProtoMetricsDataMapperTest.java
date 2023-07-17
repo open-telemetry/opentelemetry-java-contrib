@@ -75,7 +75,7 @@ class ProtoMetricsDataMapperTest {
           LONG_GAUGE_DATA);
 
   @Test
-  public void verifyConversionDataStructure() {
+  void verifyConversionDataStructure() {
     List<MetricData> signals = Collections.singletonList(LONG_GAUGE_METRIC);
 
     MetricsData proto = mapToProto(signals);
@@ -89,7 +89,7 @@ class ProtoMetricsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleMetricsWithSameResourceAndScope() {
+  void verifyMultipleMetricsWithSameResourceAndScope() {
     List<MetricData> signals = Arrays.asList(LONG_GAUGE_METRIC, OTHER_LONG_GAUGE_METRIC);
 
     MetricsData proto = mapToProto(signals);
@@ -105,7 +105,7 @@ class ProtoMetricsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleMetricsWithSameResourceDifferentScope() {
+  void verifyMultipleMetricsWithSameResourceDifferentScope() {
     List<MetricData> signals =
         Arrays.asList(LONG_GAUGE_METRIC, LONG_GAUGE_METRIC_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
 
@@ -126,7 +126,7 @@ class ProtoMetricsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleMetricsWithDifferentResource() {
+  void verifyMultipleMetricsWithDifferentResource() {
     List<MetricData> signals =
         Arrays.asList(LONG_GAUGE_METRIC, LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
 

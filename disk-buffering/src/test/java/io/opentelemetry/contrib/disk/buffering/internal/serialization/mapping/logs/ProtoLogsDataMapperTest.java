@@ -82,7 +82,7 @@ class ProtoLogsDataMapperTest {
           .build();
 
   @Test
-  public void verifyConversionDataStructure() {
+  void verifyConversionDataStructure() {
     List<LogRecordData> signals = Collections.singletonList(LOG_RECORD);
 
     LogsData result = mapToProto(signals);
@@ -96,7 +96,7 @@ class ProtoLogsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleLogsWithSameResourceAndScope() {
+  void verifyMultipleLogsWithSameResourceAndScope() {
     List<LogRecordData> signals = Arrays.asList(LOG_RECORD, OTHER_LOG_RECORD);
 
     LogsData proto = mapToProto(signals);
@@ -116,7 +116,7 @@ class ProtoLogsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleLogsWithSameResourceDifferentScope() {
+  void verifyMultipleLogsWithSameResourceDifferentScope() {
     List<LogRecordData> signals =
         Arrays.asList(LOG_RECORD, LOG_RECORD_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
 
@@ -137,7 +137,7 @@ class ProtoLogsDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleLogsWithDifferentResource() {
+  void verifyMultipleLogsWithDifferentResource() {
     List<LogRecordData> signals = Arrays.asList(LOG_RECORD, LOG_RECORD_WITH_DIFFERENT_RESOURCE);
 
     LogsData proto = mapToProto(signals);

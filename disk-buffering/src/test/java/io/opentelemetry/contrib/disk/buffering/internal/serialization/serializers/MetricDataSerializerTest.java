@@ -180,7 +180,7 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
           EXPONENTIAL_HISTOGRAM_DATA);
 
   @Test
-  public void verifySerialization() {
+  void verifySerialization() {
     assertSerialization(
         LONG_GAUGE_METRIC,
         DOUBLE_GAUGE_METRIC,

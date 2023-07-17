@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProtoSpansDataMapper
+public final class ProtoSpansDataMapper
     extends BaseProtoSignalsDataMapper<SpanData, Span, TracesData, ResourceSpans, ScopeSpans> {
 
   private static final ProtoSpansDataMapper INSTANCE = new ProtoSpansDataMapper();

@@ -113,7 +113,7 @@ class ProtoSpansDataMapperTest {
           .build();
 
   @Test
-  public void verifyConversionDataStructure() {
+  void verifyConversionDataStructure() {
     List<SpanData> signals = Collections.singletonList(SPAN_DATA);
 
     TracesData proto = mapToProto(signals);
@@ -127,7 +127,7 @@ class ProtoSpansDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleSpansWithSameResourceAndScope() {
+  void verifyMultipleSpansWithSameResourceAndScope() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, OTHER_SPAN_DATA);
 
     TracesData proto = mapToProto(signals);
@@ -143,7 +143,7 @@ class ProtoSpansDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleSpansWithSameResourceDifferentScope() {
+  void verifyMultipleSpansWithSameResourceDifferentScope() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, SPAN_DATA_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
 
     TracesData proto = mapToProto(signals);
@@ -163,7 +163,7 @@ class ProtoSpansDataMapperTest {
   }
 
   @Test
-  public void verifyMultipleSpansWithDifferentResource() {
+  void verifyMultipleSpansWithDifferentResource() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, SPAN_DATA_WITH_DIFFERENT_RESOURCE);
 
     TracesData proto = mapToProto(signals);

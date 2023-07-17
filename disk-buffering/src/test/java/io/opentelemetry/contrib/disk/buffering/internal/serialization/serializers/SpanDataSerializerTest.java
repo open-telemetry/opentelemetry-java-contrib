@@ -67,7 +67,7 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
           .build();
 
   @Test
-  public void verifySerialization() {
+  void verifySerialization() {
     assertSerialization(SPAN_DATA, SPAN_DATA_WITH_TRACE_STATE);
   }
 

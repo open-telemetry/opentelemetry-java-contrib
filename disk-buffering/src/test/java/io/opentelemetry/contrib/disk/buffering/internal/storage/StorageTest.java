@@ -33,7 +33,7 @@ class StorageTest {
   private WritableFile writableFile;
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     folderManager = mock();
     readableFile = mock();
     writableFile = createWritableFile();
@@ -43,7 +43,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
+  void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
     doReturn(readableFile).when(folderManager).getReadableFile();
 
     assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
@@ -52,7 +52,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenReadableFileProcessingFails_returnFailed() throws IOException {
+  void whenReadableFileProcessingFails_returnFailed() throws IOException {
     doReturn(readableFile).when(folderManager).getReadableFile();
     doReturn(ReadableResult.PROCESSING_FAILED).when(readableFile).readAndProcess(processing);
 
@@ -62,7 +62,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenReadingMultipleTimes_reuseReader() throws IOException {
+  void whenReadingMultipleTimes_reuseReader() throws IOException {
     ReadableFile anotherReadable = mock();
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
 
@@ -75,7 +75,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenWritingMultipleTimes_reuseWriter() throws IOException {
+  void whenWritingMultipleTimes_reuseWriter() throws IOException {
     byte[] data = new byte[1];
     WritableFile anotherWriter = createWritableFile();
     when(folderManager.createWritableFile()).thenReturn(writableFile).thenReturn(anotherWriter);
@@ -89,24 +89,24 @@ class StorageTest {
   }
 
   @Test
-  public void whenAttemptingToReadAfterClosed_returnFailed() throws IOException {
+  void whenAttemptingToReadAfterClosed_returnFailed() throws IOException {
     storage.close();
     assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
   }
 
   @Test
-  public void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
+  void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
     storage.close();
     assertFalse(storage.write(new byte[1]));
   }
 
   @Test
-  public void whenNoFileAvailableForReading_returnFailed() throws IOException {
+  void whenNoFileAvailableForReading_returnFailed() throws IOException {
     assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
   }
 
   @Test
-  public void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
+  void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
     doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
@@ -116,7 +116,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
+  void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
     doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
@@ -126,7 +126,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenResourceClosed_lookForNewFileToRead() throws IOException {
+  void whenResourceClosed_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
     doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
@@ -136,7 +136,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
+  void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
     doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
 
@@ -146,7 +146,7 @@ class StorageTest {
   }
 
   @Test
-  public void appendDataToFile() throws IOException {
+  void appendDataToFile() throws IOException {
     doReturn(writableFile).when(folderManager).createWritableFile();
     byte[] data = new byte[1];
 
@@ -156,7 +156,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenWritingTimeoutHappens_retryWithNewFile() throws IOException {
+  void whenWritingTimeoutHappens_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
@@ -170,7 +170,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenThereIsNoSpaceAvailableForWriting_retryWithNewFile() throws IOException {
+  void whenThereIsNoSpaceAvailableForWriting_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
@@ -184,7 +184,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenWritingResourceIsClosed_retryWithNewFile() throws IOException {
+  void whenWritingResourceIsClosed_retryWithNewFile() throws IOException {
     byte[] data = new byte[1];
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
@@ -198,7 +198,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
+  void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
     byte[] data = new byte[1];
     when(folderManager.createWritableFile()).thenReturn(writableFile);
     doReturn(WritableResult.FAILED).when(writableFile).append(data);
@@ -209,7 +209,7 @@ class StorageTest {
   }
 
   @Test
-  public void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
+  void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
     doReturn(writableFile).when(folderManager).createWritableFile();
     doReturn(readableFile).when(folderManager).getReadableFile();
     storage.write(new byte[1]);

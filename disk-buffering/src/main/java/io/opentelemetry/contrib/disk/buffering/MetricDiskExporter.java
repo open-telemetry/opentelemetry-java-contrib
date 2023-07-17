@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -42,28 +42,28 @@ public final class MetricDiskExporter implements MetricExporter, StoredBatchExpo
    */
   public static MetricDiskExporter create(
       MetricExporter wrapped, File rootDir, StorageConfiguration configuration) throws IOException {
-    return create(wrapped, rootDir, configuration, StorageClock.getInstance());
+    return create(wrapped, rootDir, configuration, Clock.getDefault());
   }
 
-  // This is used for testing purposes.
+  // This is exposed for testing purposes.
   public static MetricDiskExporter create(
-      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
+      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, Clock clock)
       throws IOException {
-    return new MetricDiskExporter(wrapped, rootDir, configuration, clock);
+    DiskExporter<MetricData> diskExporter =
+        DiskExporter.<MetricData>builder()
+            .setRootDir(rootDir)
+            .setFolderName("metrics")
+            .setStorageConfiguration(configuration)
+            .setSerializer(SignalSerializer.ofMetrics())
+            .setExportFunction(wrapped::export)
+            .setStorageClock(clock)
+            .build();
+    return new MetricDiskExporter(wrapped, diskExporter);
   }
 
-  private MetricDiskExporter(
-      MetricExporter wrapped, File rootDir, StorageConfiguration configuration, StorageClock clock)
-      throws IOException {
+  private MetricDiskExporter(MetricExporter wrapped, DiskExporter<MetricData> diskExporter) {
     this.wrapped = wrapped;
-    diskExporter =
-        new DiskExporter<>(
-            rootDir,
-            configuration,
-            "metrics",
-            SignalSerializer.ofMetrics(),
-            wrapped::export,
-            clock);
+    this.diskExporter = diskExporter;
   }
 
   @Override

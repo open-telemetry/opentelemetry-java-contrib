@@ -5,10 +5,12 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
+
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -16,12 +18,12 @@ import javax.annotation.Nullable;
 
 public final class FolderManager {
   private final File folder;
-  private final StorageClock clock;
+  private final Clock clock;
   private final StorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
-  public FolderManager(File folder, StorageConfiguration configuration, StorageClock clock) {
+  public FolderManager(File folder, StorageConfiguration configuration, Clock clock) {
     this.folder = folder;
     this.configuration = configuration;
     this.clock = clock;
@@ -41,7 +43,7 @@ public final class FolderManager {
   }
 
   public synchronized WritableFile createWritableFile() throws IOException {
-    long systemCurrentTimeMillis = clock.now();
+    long systemCurrentTimeMillis = nowMillis(clock);
     File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
@@ -55,7 +57,7 @@ public final class FolderManager {
 
   @Nullable
   private File findReadableFile() throws IOException {
-    long currentTime = clock.now();
+    long currentTime = nowMillis(clock);
     File[] existingFiles = folder.listFiles();
     File oldestFileAvailable = null;
     long oldestFileCreationTimeMillis = 0;

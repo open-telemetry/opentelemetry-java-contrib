@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class ResourceMapperTest {
 
   @Test
-  public void verifyMapping() {
+  void verifyMapping() {
     Resource proto = mapToProto(TestData.RESOURCE_FULL);
 
     assertEquals(TestData.RESOURCE_FULL, mapToSdk(proto, TestData.RESOURCE_FULL.getSchemaUrl()));

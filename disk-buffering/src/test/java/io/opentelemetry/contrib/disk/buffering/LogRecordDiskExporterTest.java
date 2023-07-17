@@ -27,20 +27,20 @@ class LogRecordDiskExporterTest {
   @TempDir File rootDir;
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     wrapped = mock();
     exporter = LogRecordDiskExporter.create(wrapped, rootDir, STORAGE_CONFIGURATION);
   }
 
   @Test
-  public void verifyCacheFolderName() {
+  void verifyCacheFolderName() {
     File[] files = rootDir.listFiles();
     assertEquals(1, files.length);
     assertEquals(STORAGE_FOLDER_NAME, files[0].getName());
   }
 
   @Test
-  public void onFlush_returnSuccess() {
+  void onFlush_returnSuccess() {
     assertEquals(CompletableResultCode.ofSuccess(), exporter.flush());
   }
 }

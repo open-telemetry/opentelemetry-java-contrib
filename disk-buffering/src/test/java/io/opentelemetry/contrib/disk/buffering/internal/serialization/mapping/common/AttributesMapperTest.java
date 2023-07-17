@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 class AttributesMapperTest {
 
   @Test
-  public void verifyMapping() {
+  void verifyMapping() {
     Attributes attributes =
         Attributes.builder()
             .put(AttributeKey.stringKey("someString"), "someValue")
@@ -32,7 +32,7 @@ class AttributesMapperTest {
   }
 
   @Test
-  public void verifyArrayMapping() {
+  void verifyArrayMapping() {
     Attributes attributes =
         Attributes.builder()
             .put(

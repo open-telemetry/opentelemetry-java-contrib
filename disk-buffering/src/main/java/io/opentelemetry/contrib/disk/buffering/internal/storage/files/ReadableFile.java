@@ -5,13 +5,15 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
+
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,14 +38,14 @@ public final class ReadableFile extends StorageFile {
   private final StreamReader reader;
   private final FileTransferUtil fileTransferUtil;
   private final File temporaryFile;
-  private final StorageClock clock;
+  private final Clock clock;
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int readBytes = 0;
   @Nullable private ReadResult unconsumedResult;
 
   public ReadableFile(
-      File file, long createdTimeMillis, StorageClock clock, StorageConfiguration configuration)
+      File file, long createdTimeMillis, Clock clock, StorageConfiguration configuration)
       throws IOException {
     this(
         file,
@@ -56,7 +58,7 @@ public final class ReadableFile extends StorageFile {
   public ReadableFile(
       File file,
       long createdTimeMillis,
-      StorageClock clock,
+      Clock clock,
       StorageConfiguration configuration,
       StreamReader.Factory readerFactory)
       throws IOException {
@@ -129,7 +131,7 @@ public final class ReadableFile extends StorageFile {
 
   @Override
   public synchronized boolean hasExpired() {
-    return clock.now() >= expireTimeMillis;
+    return nowMillis(clock) >= expireTimeMillis;
   }
 
   @Override

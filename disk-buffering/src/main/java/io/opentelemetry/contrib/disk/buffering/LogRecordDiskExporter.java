@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -41,29 +41,29 @@ public final class LogRecordDiskExporter implements LogRecordExporter, StoredBat
   public static LogRecordDiskExporter create(
       LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration)
       throws IOException {
-    return create(wrapped, rootDir, configuration, StorageClock.getInstance());
+    return create(wrapped, rootDir, configuration, Clock.getDefault());
   }
 
-  // This is used for testing purposes.
+  // This is exposed for testing purposes.
   static LogRecordDiskExporter create(
-      LogRecordExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
+      LogRecordExporter wrapped, File rootDir, StorageConfiguration configuration, Clock clock)
       throws IOException {
-    return new LogRecordDiskExporter(wrapped, rootDir, configuration, clock);
+    DiskExporter<LogRecordData> diskExporter =
+        DiskExporter.<LogRecordData>builder()
+            .setSerializer(SignalSerializer.ofLogs())
+            .setRootDir(rootDir)
+            .setFolderName("logs")
+            .setStorageConfiguration(configuration)
+            .setStorageClock(clock)
+            .setExportFunction(wrapped::export)
+            .build();
+    return new LogRecordDiskExporter(wrapped, diskExporter);
   }
 
   private LogRecordDiskExporter(
-      LogRecordExporter wrapped,
-      File rootDir,
-      StorageConfiguration configuration,
-      StorageClock clock)
-      throws IOException {
+      LogRecordExporter wrapped, DiskExporter<LogRecordData> diskExporter) {
     this.wrapped = wrapped;
-    diskExporter =
-        new DiskExporter<>(
-            rootDir, configuration, "logs", SignalSerializer.ofLogs(), wrapped::export, clock);
+    this.diskExporter = diskExporter;
   }
 
   @Override

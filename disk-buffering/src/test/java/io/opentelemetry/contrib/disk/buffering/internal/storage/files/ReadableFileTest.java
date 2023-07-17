@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,11 +19,10 @@ import static org.mockito.Mockito.mock;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.LogRecordDataSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
@@ -41,10 +41,10 @@ class ReadableFileTest {
   private File source;
   private File temporaryFile;
   private ReadableFile readableFile;
-  private StorageClock clock;
+  private Clock clock;
   private TemporaryFileProvider temporaryFileProvider;
   private static final long CREATED_TIME_MILLIS = 1000L;
-  private static final LogRecordDataSerializer SERIALIZER = SignalSerializer.ofLogs();
+  private static final SignalSerializer<LogRecordData> SERIALIZER = SignalSerializer.ofLogs();
   private static final LogRecordData FIRST_LOG_RECORD =
       LogRecordDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)
@@ -88,7 +88,7 @@ class ReadableFileTest {
           .build();
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     source = new File(dir, "sourceFile");
     temporaryFile = new File(dir, "temporaryFile");
     addFileContents(source);
@@ -114,7 +114,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void readSingleItemAndRemoveIt() throws IOException {
+  void readSingleItemAndRemoveIt() throws IOException {
     readableFile.readAndProcess(
         bytes -> {
           assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
@@ -129,17 +129,17 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
+  void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
     assertEquals(ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> true));
   }
 
   @Test
-  public void whenProcessingFails_returnProcessFailedStatus() throws IOException {
+  void whenProcessingFails_returnProcessFailedStatus() throws IOException {
     assertEquals(ReadableResult.PROCESSING_FAILED, readableFile.readAndProcess(bytes -> false));
   }
 
   @Test
-  public void deleteTemporaryFileWhenClosing() throws IOException {
+  void deleteTemporaryFileWhenClosing() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 
@@ -147,7 +147,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void readMultipleLinesAndRemoveThem() throws IOException {
+  void readMultipleLinesAndRemoveThem() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.readAndProcess(bytes -> true);
 
@@ -158,7 +158,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
+  void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
     readableFile.readAndProcess(bytes -> false);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
@@ -167,7 +167,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
+  void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 
     assertFalse(source.exists());
@@ -175,7 +175,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
+  void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
       throws IOException {
     File emptyFile = new File(dir, "emptyFile");
     if (!emptyFile.createNewFile()) {
@@ -193,11 +193,13 @@ class ReadableFileTest {
   }
 
   @Test
-  public void
+  void
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
-    doReturn(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS))
+        .when(clock)
+        .now();
 
     assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 
@@ -205,7 +207,7 @@ class ReadableFileTest {
   }
 
   @Test
-  public void whenReadingAfterClosed_returnFailedStatus() throws IOException {
+  void whenReadingAfterClosed_returnFailedStatus() throws IOException {
     readableFile.readAndProcess(bytes -> true);
     readableFile.close();
 

@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +17,7 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
@@ -48,16 +49,16 @@ public class IntegrationTest {
   private InMemoryLogRecordExporter memoryLogRecordExporter;
   private LogRecordDiskExporter diskLogRecordExporter;
   private Logger logger;
-  private StorageClock clock;
+  private Clock clock;
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final StorageConfiguration STORAGE_CONFIGURATION =
       StorageConfiguration.getDefault();
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     clock = mock();
-    doReturn(INITIAL_TIME_IN_MILLIS).when(clock).now();
+    doReturn(MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS)).when(clock).now();
 
     // Setting up spans
     memorySpanExporter = InMemorySpanExporter.create();
@@ -81,7 +82,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifySpansIntegration() throws IOException {
+  void verifySpansIntegration() throws IOException {
     Span span = tracer.spanBuilder("Span name").startSpan();
     span.end();
 
@@ -89,7 +90,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifyMetricsIntegration() throws IOException {
+  void verifyMetricsIntegration() throws IOException {
     meter.counterBuilder("Counter").build().add(2);
     meterProvider.forceFlush();
 
@@ -97,7 +98,7 @@ public class IntegrationTest {
   }
 
   @Test
-  public void verifyLogRecordsIntegration() throws IOException {
+  void verifyLogRecordsIntegration() throws IOException {
     logger.logRecordBuilder().setBody("I'm a log!").emit();
 
     assertExporter(
@@ -125,7 +126,7 @@ public class IntegrationTest {
 
   @SuppressWarnings("DirectInvocationOnMock")
   private void fastForwardTimeByMillis(long milliseconds) {
-    doReturn(clock.now() + milliseconds).when(clock).now();
+    doReturn(clock.now() + MILLISECONDS.toNanos(milliseconds)).when(clock).now();
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

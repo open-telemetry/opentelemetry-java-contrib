@@ -6,14 +6,10 @@
 package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.StoredBatchExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.utils.StorageClock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -27,19 +23,17 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
   private static final Logger logger = Logger.getLogger(DiskExporter.class.getName());
 
-  public DiskExporter(
-      File rootDir,
-      StorageConfiguration configuration,
-      String folderName,
+  DiskExporter(
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      StorageClock clock)
-      throws IOException {
-    validateConfiguration(configuration);
-    this.storage =
-        new Storage(new FolderManager(getSignalFolder(rootDir, folderName), configuration, clock));
+      Storage storage) {
     this.serializer = serializer;
     this.exportFunction = exportFunction;
+    this.storage = storage;
+  }
+
+  public static <T> DiskExporterBuilder<T> builder() {
+    return new DiskExporterBuilder<T>();
   }
 
   @Override
@@ -75,24 +69,6 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
           "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
           e);
       return exportFunction.apply(data);
-    }
-  }
-
-  private static File getSignalFolder(File rootDir, String folderName) throws IOException {
-    File folder = new File(rootDir, folderName);
-    if (!folder.exists()) {
-      if (!folder.mkdirs()) {
-        throw new IOException(
-            "Could not create the signal folder: '" + folderName + "' inside: " + rootDir);
-      }
-    }
-    return folder;
-  }
-
-  private static void validateConfiguration(StorageConfiguration configuration) {
-    if (configuration.getMinFileAgeForReadMillis() <= configuration.getMaxFileAgeForWriteMillis()) {
-      throw new IllegalArgumentException(
-          "The configured max file age for writing must be lower than the configured min file age for reading");
     }
   }
 }
