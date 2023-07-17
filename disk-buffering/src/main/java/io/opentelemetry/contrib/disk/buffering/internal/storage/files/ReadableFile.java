@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
@@ -131,7 +131,7 @@ public final class ReadableFile extends StorageFile {
 
   @Override
   public synchronized boolean hasExpired() {
-    return NANOSECONDS.toMillis(clock.now()) >= expireTimeMillis;
+    return nowMillis(clock) >= expireTimeMillis;
   }
 
   @Override

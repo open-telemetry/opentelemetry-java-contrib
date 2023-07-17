@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
@@ -43,7 +43,7 @@ public final class FolderManager {
   }
 
   public synchronized WritableFile createWritableFile() throws IOException {
-    long systemCurrentTimeMillis = NANOSECONDS.toMillis(clock.now());
+    long systemCurrentTimeMillis = nowMillis(clock);
     File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
@@ -57,7 +57,7 @@ public final class FolderManager {
 
   @Nullable
   private File findReadableFile() throws IOException {
-    long currentTime = NANOSECONDS.toMillis(clock.now());
+    long currentTime = nowMillis(clock);
     File[] existingFiles = folder.listFiles();
     File oldestFileAvailable = null;
     long oldestFileCreationTimeMillis = 0;
