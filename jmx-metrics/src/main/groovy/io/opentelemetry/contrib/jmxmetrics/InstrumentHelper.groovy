@@ -127,26 +127,28 @@ class InstrumentHelper {
         def isFound = false
         def keySet = beans.collect { bean ->
             try {
-                def value = bean.getProperty(attribute)
-                def keys = []
-                if (value instanceof CompositeData) {
+                def value = MBeanHelper.getBeanAttribute(bean, attribute)
+                if (value == null) {
+                    // Null represents an attribute not found exception in MBeanHelper
+                    []
+                } else if (value instanceof CompositeData) {
                     // If we've found a simple attribute, throw an exception as this attribute
                     // was mixed between simple & composite
                     if (!isComposite && isFound) {
                         throw new InvalidAttributeValueException()
                     }
                     isComposite = true
-                    keys = value.getCompositeType().keySet()
+                    isFound = true
+                    value.getCompositeType().keySet()
                 } else {
-                    // If we've found a composite attribute, throw an exception as this attribute
+                    // If we've previously found a composite attribute, throw an exception as this attribute
                     // was mixed between simple & composite
                     if (isComposite) {
                         throw new InvalidAttributeValueException()
                     }
-                    keys = []
+                    isFound = true
+                    []
                 }
-                isFound = true
-                return keys
             } catch (AttributeNotFoundException | NullPointerException ignored) {
                 []
             }
@@ -177,15 +179,11 @@ class InstrumentHelper {
         return { result ->
             [mbeans, attributes].combinations().each { pair ->
                 def (mbean, attribute) = pair
-                try {
-                    def value = mbean.getProperty(attribute)
-                    if (value != null) {
-                        def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                        logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
-                        recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
-                    }
-                } catch (AttributeNotFoundException ignored) {
-                    logger.info("Expected attribute ${attribute} not found in mbean ${mbean.name()}")
+                def value = MBeanHelper.getBeanAttribute(mbean, attribute)
+                if (value != null) {
+                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+                    logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+                    recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
                 }
             }
         }
@@ -201,18 +199,14 @@ class InstrumentHelper {
 
             metricEnvironment.registerBatchCallback("${instrumentName}.${attribute}", () -> {
                 mbeans.each { mbean ->
-                    try {
-                        def value = mbean.getProperty(attribute)
-                        if (value != null && value instanceof CompositeData) {
-                            instruments.each { inst ->
-                                def val = value.get(inst.v1)
-                                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                                logger.fine("Recording ${"${instrumentName}.${inst.v1}"} - ${instrument.method} w/ ${val} - ${labels}")
-                                recordDataPoint(instrument, inst.v2, val, GroovyMetricEnvironment.mapToAttributes(labels))
-                            }
+                    def value = MBeanHelper.getBeanAttribute(mbean, attribute)
+                    if (value != null && value instanceof CompositeData) {
+                        instruments.each { inst ->
+                            def val = value.get(inst.v1)
+                            def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+                            logger.fine("Recording ${"${instrumentName}.${inst.v1}"} - ${instrument.method} w/ ${val} - ${labels}")
+                            recordDataPoint(instrument, inst.v2, val, GroovyMetricEnvironment.mapToAttributes(labels))
                         }
-                    } catch (AttributeNotFoundException ignored) {
-                        logger.info("Expected attribute ${attribute} not found in mbean ${mbean.name()}")
                     }
                 }
             }, instruments.first().v2, *instruments.tail().collect { it.v2 })

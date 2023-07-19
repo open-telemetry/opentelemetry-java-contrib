@@ -88,12 +88,7 @@ class MBeanHelper {
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return ofInterest.collect {
-            try {
-                it.getProperty(attribute)
-            } catch (AttributeNotFoundException e) {
-                logger.warning("Expected attribute ${attribute} not found in mbean ${it.name()}")
-                null
-            }
+          getBeanAttribute(it, attribute)
         }
     }
 
@@ -105,12 +100,16 @@ class MBeanHelper {
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
-            try {
-                new Tuple3(bean, attribute, bean.getProperty(attribute))
-            } catch (AttributeNotFoundException e) {
-                logger.info("Expected attribute ${attribute} not found in mbean ${bean.name()}")
-                new Tuple3(bean, attribute, null)
-            }
+            new Tuple3(bean, attribute, getBeanAttribute(bean, attribute))
+        }
+    }
+
+    static Object getBeanAttribute(GroovyMBean bean, String attribute) {
+        try {
+            bean.getProperty(attribute)
+        } catch (AttributeNotFoundException e) {
+            logger.warning("Expected attribute ${attribute} not found in mbean ${bean.name()}")
+            null
         }
     }
 }
