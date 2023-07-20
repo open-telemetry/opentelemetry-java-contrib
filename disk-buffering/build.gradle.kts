@@ -15,7 +15,7 @@ java {
   targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val autovalueVersion = "1.10.1"
+val autovalueVersion = "1.10.2"
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
