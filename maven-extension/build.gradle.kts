@@ -27,11 +27,11 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update this version
+  compileOnly("org.apache.maven:maven-core:3.9.3") // do not auto-update this version
   compileOnly("org.slf4j:slf4j-api")
   compileOnly("org.sonatype.aether:aether-api:1.13.1")
 
-  testImplementation("org.apache.maven:maven-core:3.5.0")
+  testImplementation("org.apache.maven:maven-core:3.9.3")
   testImplementation("org.slf4j:slf4j-simple")
 }
 
