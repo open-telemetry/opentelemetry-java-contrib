@@ -130,7 +130,8 @@ class MBeanHelperTest {
                 new Object[][] {
                   {
                     "SomeAttribute",
-                    Eval.me("{mbean -> mbean.getProperty(\"SomeAttribute\") == 'someValue' ? 'otherValue' : 'someValue'}")
+                    Eval.me(
+                        "{mbean -> mbean.getProperty(\"SomeAttribute\") == 'someValue' ? 'otherValue' : 'someValue'}")
                   },
                 })
             .collect(Collectors.toMap(data -> (String) data[0], data -> (Closure<?>) data[1]));
@@ -152,7 +153,8 @@ class MBeanHelperTest {
                 new Object[][] {
                   {
                     "SomeAttribute",
-                    Eval.me("{mbean -> mbean.getProperty(\"SomeAttribute\") == 'someValue' ? 'newValue' : 'someValue'}")
+                    Eval.me(
+                        "{mbean -> mbean.getProperty(\"SomeAttribute\") == 'someValue' ? 'newValue' : 'someValue'}")
                   },
                   {
                     "AnotherAttribute",
