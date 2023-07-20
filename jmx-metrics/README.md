@@ -128,6 +128,11 @@ mutually exclusive with `otel.jmx.groovy.script`. The currently supported target
     [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances,
     each key of their `CompositeType` `keySet` will be `.`-appended to the specified `instrumentName`, whose resulting
     instrument will be updated for each respective value.
+  - If the underlying MBean(s) held by the provided MBeanHelper are a mixed set of
+    [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances
+    and simple values, the InstrumentHelper will not attempt to collect the metric as it would generate
+    metrics identified with the `instrumentName` and also the `instrumentName` with the `keySet` `.`-appended,
+    which breaks OpenTelemetry metric conventions.
 
 `otel.instrument()` provides additional signatures to obtain and update the returned `InstrumentHelper`:
 
