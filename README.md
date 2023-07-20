@@ -17,6 +17,7 @@ feature or via instrumentation, this project is hopefully for you.
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
 * [Runtime Attach](./runtime-attach/README.md)
 * [Samplers](./samplers/README.md)
+* [Kafka Support](./kafka-exporter/README.md)
 
 ## Getting Started
 
