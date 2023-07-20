@@ -170,7 +170,7 @@ These methods provide the ability to easily convert the attributes you will be e
   ```groovy
      // In this example a String based health attribute is converted to a numeric binary value
     def someBean = otel.mbean(
-        "SomeMBean", ["CustomAttrFromString": { attribute -> (attribute == "running") ? 1 : 0 }]
+        "SomeMBean", ["CustomAttrFromString": { mbean -> mbean.getProperty("Attribute") == "running" ? 1 : 0 }]
     )
     otel.instrument(someBean, "my-metric", "CustomAttrFromString", otel.&longUpDownCounterCallback)
   ```
