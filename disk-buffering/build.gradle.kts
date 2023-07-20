@@ -23,7 +23,7 @@ dependencies {
   compileOnly("com.google.auto.value:auto-value-annotations:$autovalueVersion")
   annotationProcessor("com.google.auto.value:auto-value:$autovalueVersion")
   signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
-  testImplementation("org.mockito:mockito-inline:4.11.0")
+  testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
 

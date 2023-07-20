@@ -25,7 +25,7 @@ val autoServiceVersion = "1.1.1"
 val autoValueVersion = "1.10.2"
 val errorProneVersion = "2.19.1"
 val prometheusVersion = "0.16.0"
-val mockitoVersion = "4.11.0"
+val mockitoVersion = "5.4.0"
 val slf4jVersion = "2.0.7"
 
 val CORE_DEPENDENCIES = listOf(
