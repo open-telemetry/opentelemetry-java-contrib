@@ -15,7 +15,7 @@ otelJava {
 }
 
 dependencies {
-  implementation("org.apache.maven:maven-plugin-api:3.5.0") // do not auto-update this version
+  implementation("org.apache.maven:maven-plugin-api:3.9.3") // do not auto-update this version
   implementation("org.apache.maven:maven-project:2.2.1")
   compileOnly("org.apache.maven.plugin-tools:maven-plugin-annotations:3.9.0")
   compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update this version
