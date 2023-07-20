@@ -107,8 +107,7 @@ class MBeanHelper {
 
         return ofInterest.collect {
             try {
-                def extractedAttribute = it.getProperty(attribute)
-                attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](extractedAttribute) : extractedAttribute
+                attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](it) : it.getProperty(attribute)
             } catch (AttributeNotFoundException e) {
                 logger.warning("Expected attribute ${attribute} not found in mbean ${it.name()}")
                 null
@@ -125,8 +124,7 @@ class MBeanHelper {
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
             try {
-                def extractedAttribute = bean.getProperty(attribute)
-                extractedAttribute = attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](extractedAttribute) : extractedAttribute
+                def extractedAttribute = attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](bean) : bean.getProperty(attribute)
                 new Tuple3(bean, attribute, extractedAttribute)
             } catch (AttributeNotFoundException e) {
                 logger.info("Expected attribute ${attribute} not found in mbean ${bean.name()}")
