@@ -173,6 +173,24 @@ class MBeanHelperTest {
             Stream.of(new String[] {"anotherNewValue"}).collect(Collectors.toList()));
   }
 
+  @Test
+  void customAttribute() throws Exception {
+    String thingName = "io.opentelemetry.contrib.jmxmetrics:type=custom";
+    Thing thing = new Thing("");
+    mbeanServer.registerMBean(thing, new ObjectName(thingName));
+    Map<String, Closure<?>> map =
+        Stream.of(
+                new Object[][] {
+                  {"CustomAttribute", Eval.me("{mbean -> 'customValue'}")},
+                })
+            .collect(Collectors.toMap(data -> (String) data[0], data -> (Closure<?>) data[1]));
+    MBeanHelper mBeanHelper = new MBeanHelper(jmxClient, thingName, true, map);
+    mBeanHelper.fetch();
+
+    assertThat(mBeanHelper.getAttribute("CustomAttribute"))
+        .hasSameElementsAs(Stream.of(new String[] {"customValue"}).collect(Collectors.toList()));
+  }
+
   private static void registerThings(String thingName) throws Exception {
     for (int i = 0; i < 100; i++) {
       Thing thing = new Thing(Integer.toString(i));
