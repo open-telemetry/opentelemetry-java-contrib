@@ -7,6 +7,10 @@ package io.opentelemetry.contrib.jmxmetrics
 
 import groovy.jmx.GroovyMBean
 import groovy.transform.PackageScope
+import io.opentelemetry.api.metrics.ObservableMeasurement
+
+import javax.management.AttributeNotFoundException
+import javax.management.InvalidAttributeValueException
 import java.util.logging.Logger
 import javax.management.openmbean.CompositeData
 
@@ -17,14 +21,13 @@ import javax.management.openmbean.CompositeData
  *
  * Intended to be used via the script-bound `otel` {@link OtelHelper} instance methods:
  *
- * def threadCount = otel.instrument(myThreadingMBeanHelper,
+ * otel.instrument(myThreadingMBeanHelper,
  *       "jvm.threads.count", "number of threads",
  *       "1", [
  *         "myLabel": { mbean -> mbean.name().getKeyProperty("myObjectNameProperty") },
  *         "myOtherLabel": { "myLabelValue" }
  *       ], "ThreadCount", otel.&longUpDownCounter)
  *
- * threadCount.update()
  *
  * If the underlying MBean(s) held by the MBeanHelper are
  * {@link CompositeData} instances, each key of their CompositeType's
@@ -32,7 +35,7 @@ import javax.management.openmbean.CompositeData
  * updated for each respective value.
  */
 class InstrumentHelper {
-    private static final Logger logger = Logger.getLogger(InstrumentHelper.class.getName());
+    private static final Logger logger = Logger.getLogger(InstrumentHelper.class.getName())
 
     private final MBeanHelper mBeanHelper
     private final String instrumentName
@@ -41,6 +44,7 @@ class InstrumentHelper {
     private final Map<String, Map<String, Closure>> mBeanAttributes
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
+    private final GroovyMetricEnvironment metricEnvironment
 
     /**
      * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.api.metrics.Instrument}
@@ -52,13 +56,15 @@ class InstrumentHelper {
      * @param description - the resulting instruments' description to register.
      * @param unit - the resulting instruments' unit to register.
      * @param labelFuncs - A {@link Map<String, Closure>} of label names and values to be determined by custom
-     *        {@link GroovyMBean}-provided Closures: (e.g. [ "myLabelName" : { mbean -> "myLabelValue"} ]). The
+     * {@link GroovyMBean}-provided Closures: (e.g. [ "myLabelName" : { mbean -> "myLabelValue"} ]). The
      *        resulting Label instances will be used for each individual update.
      * @param attribute - The {@link GroovyMBean} attribute for which to use as the instrument value.
      * @param instrument - The {@link io.opentelemetry.api.metrics.Instrument}-producing {@link OtelHelper} method pointer:
      *        (e.g. new OtelHelper().&doubleValueRecorder)
+     * @param metricenvironment - The {@link GroovyMetricEnvironment} used to register callbacks onto the SDK meter for
+     *        batch callbacks used to handle {@link CompositeData}
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
@@ -66,126 +72,185 @@ class InstrumentHelper {
         this.labelFuncs = labelFuncs
         this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
+        this.metricEnvironment = metricEnvironment
     }
 
     void update() {
-        // Tuples of the form (mbean, attribute, value)
-        def values = mBeanHelper.getAttributes(mBeanAttributes.keySet())
-
-        // If there are no tuples with non-null value, return early
-        if (values.find {it.getV3() != null } == null) {
-            logger.warning("No valid value(s) for ${instrumentName} - ${mBeanHelper}.${mBeanAttributes.keySet().join(",")}")
+        def mbeans = mBeanHelper.getMBeans()
+        def compositeAttributes = []
+        def simpleAttributes = []
+        if (mbeans.size() == 0) {
             return
         }
 
-        // Observer instruments need to have a single updater set at build time, so pool all
-        // update operations in a list of closures per instrument to be executed after all values
-        // are established, potentially as a single updater.  This is done because a single MBeanHelper
-        // can represent multiple MBeans (each with different values for an attribute) and the labelFuncs
-        // will create multiple datapoints from the same instrument identifiers.
-        def tupleToUpdates = [:] // tuple is of form (instrument, instrumentName, description, unit)
-
-        values.each { collectedValue ->
-            def mbean = collectedValue.getV1()
-            def attribute = collectedValue.getV2()
-            def value = collectedValue.getV3()
-            if (value instanceof CompositeData) {
-                value.getCompositeType().keySet().each { key ->
-                    def val = value.get(key)
-                    def updatedInstrumentName = "${instrumentName}.${key}"
-                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                    def tuple = new Tuple(instrument, updatedInstrumentName, description, unit)
-                    logger.fine("Recording ${updatedInstrumentName} - ${instrument.method} w/ ${val} - ${labels}")
-                    if (!tupleToUpdates.containsKey(tuple)) {
-                        tupleToUpdates[tuple] = []
-                    }
-                    tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, val, labels))
+        mBeanAttributes.keySet().each { attribute ->
+            try {
+                // Look at the collected mbeans to evaluate if the attributes requested are
+                // composite data types or simple. Composite types require different parsing to
+                // end up with multiple recorders in the same callback.
+                def keySet = getCompositeKeys(attribute, mbeans)
+                if (keySet.size() > 0) {
+                    compositeAttributes.add(new Tuple2<String, Set<String>>(attribute, keySet))
+                } else {
+                    simpleAttributes.add(attribute)
                 }
-            } else if (value != null) {
-                def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                def tuple = new Tuple(instrument, instrumentName, description, unit)
-                logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
-                if (!tupleToUpdates.containsKey(tuple)) {
-                    tupleToUpdates[tuple] = []
-                }
-                tupleToUpdates[tuple].add(prepareUpdateClosure(instrument, value, labels))
+            } catch (AttributeNotFoundException ignored) {
+                logger.fine("Attribute ${attribute} not found on any of the collected mbeans")
+            } catch (InvalidAttributeValueException ignored) {
+                logger.info("Attribute ${attribute} was not consistently CompositeData for " +
+                  "collected mbeans. The metrics gatherer cannot collect measurements for an instrument " +
+                  "when the mbeans attribute values are not all CompositeData or all simple values.")
             }
         }
 
-        tupleToUpdates.each {tuple, updateClosures ->
-            def instrument = tuple.getAt(0)
-            def instrumentName = tuple.getAt(1)
-            def description = tuple.getAt(2)
-            def unit = tuple.getAt(3)
-
+        if (simpleAttributes.size() > 0) {
+            def simpleUpdateClosure = prepareUpdateClosure(mbeans, simpleAttributes)
             if (instrumentIsDoubleObserver(instrument) || instrumentIsLongObserver(instrument)) {
-                // Though the instrument updater is only set at build time,
-                // our GroovyMetricEnvironment helpers ensure the updater
-                // uses the Closure specified here.
                 instrument(instrumentName, description, unit, { result ->
-                    updateClosures.each { update ->
-                        update(result)
-                    }
+                    simpleUpdateClosure(result)
                 })
             } else {
-                def inst = instrument(instrumentName, description, unit)
-                updateClosures.each {
-                    it(inst)
-                }
+                simpleUpdateClosure(instrument(instrumentName, description, unit))
             }
         }
+
+        if (compositeAttributes.size() > 0) {
+            registerCompositeUpdateClosures(mbeans, compositeAttributes)
+        }
+    }
+
+    // This function retrieves the set of CompositeData keys for the given attribute for the currently
+    // collected mbeans. If the attribute is all simple values it will return an empty list.
+    // If the attribute is inconsistent across mbeans, it will throw an exception.
+    private static Set<String> getCompositeKeys(String attribute, List<GroovyMBean> beans) throws AttributeNotFoundException, InvalidAttributeValueException {
+        def isComposite = false
+        def isFound = false
+        def keySet = beans.collect { bean ->
+            try {
+                def value = MBeanHelper.getBeanAttribute(bean, attribute)
+                if (value == null) {
+                    // Null represents an attribute not found exception in MBeanHelper
+                    []
+                } else if (value instanceof CompositeData) {
+                    // If we've found a simple attribute, throw an exception as this attribute
+                    // was mixed between simple & composite
+                    if (!isComposite && isFound) {
+                        throw new InvalidAttributeValueException()
+                    }
+                    isComposite = true
+                    isFound = true
+                    value.getCompositeType().keySet()
+                } else {
+                    // If we've previously found a composite attribute, throw an exception as this attribute
+                    // was mixed between simple & composite
+                    if (isComposite) {
+                        throw new InvalidAttributeValueException()
+                    }
+                    isFound = true
+                    []
+                }
+            } catch (AttributeNotFoundException | NullPointerException ignored) {
+                []
+            }
+        }.flatten()
+          .toSet()
+
+        if (!isFound) {
+            throw new AttributeNotFoundException()
+        }
+
+        return keySet
     }
 
     private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
         def labels = [:]
         labelFuncs.each { label, labelFunc ->
-          labels[label] = labelFunc(mbean) as String
+            labels[label] = labelFunc(mbean) as String
         }
-        additionalLabels.each {label, labelFunc ->
+        additionalLabels.each { label, labelFunc ->
             labels[label] = labelFunc(mbean) as String
         }
         return labels
     }
 
-    private static Closure prepareUpdateClosure(inst, value, labels) {
-        def labelMap = GroovyMetricEnvironment.mapToAttributes(labels)
-        if (instrumentIsLongObserver(inst)) {
-            return { result ->
-                result.record((long) value, labelMap)
+    // Create a closure for simple attributes that will retrieve mbean information on
+    // callback to ensure that metrics are collected on request
+    private Closure prepareUpdateClosure(List<GroovyMBean> mbeans, attributes) {
+        return { result ->
+            [mbeans, attributes].combinations().each { pair ->
+                def (mbean, attribute) = pair
+                def value = MBeanHelper.getBeanAttribute(mbean, attribute)
+                if (value != null) {
+                    def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+                    logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+                    recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
+                }
             }
-        } else if (instrumentIsDoubleObserver(inst)) {
-            return { result ->
-                result.record((double) value, labelMap)
-            }
-        } else if (instrumentIsCounter(inst)) {
-            return { i -> i.add(value, labelMap) }
-        } else {
-            return { i -> i.record(value, labelMap) }
         }
     }
 
-    @PackageScope static boolean instrumentIsDoubleObserver(inst) {
+    // Create a closure for composite data attributes that will retrieve mbean information
+    // on callback to ensure that metrics are collected on request. This will create a single
+    // batch callback for all of the metrics collected on a single attribute.
+    private void registerCompositeUpdateClosures(List<GroovyMBean> mbeans, attributes) {
+        attributes.each { pair ->
+            def (attribute, keys) = pair
+            def instruments = keys.collect { new Tuple2<String, ObservableMeasurement>(it, instrument("${instrumentName}.${it}", description, unit, null)) }
+
+            metricEnvironment.registerBatchCallback("${instrumentName}.${attribute}", () -> {
+                mbeans.each { mbean ->
+                    def value = MBeanHelper.getBeanAttribute(mbean, attribute)
+                    if (value != null && value instanceof CompositeData) {
+                        instruments.each { inst ->
+                            def val = value.get(inst.v1)
+                            def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
+                            logger.fine("Recording ${"${instrumentName}.${inst.v1}"} - ${instrument.method} w/ ${val} - ${labels}")
+                            recordDataPoint(instrument, inst.v2, val, GroovyMetricEnvironment.mapToAttributes(labels))
+                        }
+                    }
+                }
+            }, instruments.first().v2, *instruments.tail().collect { it.v2 })
+        }
+    }
+
+    // Based on the type of instrument, record the data point in the way expected by the observable
+    private static void recordDataPoint(inst, result, value, labelMap) {
+        if (instrumentIsLongObserver(inst)) {
+            result.record((long) value, labelMap)
+        } else if (instrumentIsDoubleObserver(inst)) {
+            result.record((double) value, labelMap)
+        } else if (instrumentIsCounter(inst)) {
+            result.add(value, labelMap)
+        } else {
+            result.record(value, labelMap)
+        }
+    }
+
+    @PackageScope
+    static boolean instrumentIsDoubleObserver(inst) {
         return [
-            "doubleCounterCallback",
-            "doubleUpDownCounterCallback",
-            "doubleValueCallback",
+          "doubleCounterCallback",
+          "doubleUpDownCounterCallback",
+          "doubleValueCallback",
         ].contains(inst.method)
     }
 
-    @PackageScope static boolean instrumentIsLongObserver(inst) {
+    @PackageScope
+    static boolean instrumentIsLongObserver(inst) {
         return [
-            "longCounterCallback",
-            "longUpDownCounterCallback",
-            "longValueCallback",
+          "longCounterCallback",
+          "longUpDownCounterCallback",
+          "longValueCallback",
         ].contains(inst.method)
     }
 
-    @PackageScope static boolean instrumentIsCounter(inst) {
+    @PackageScope
+    static boolean instrumentIsCounter(inst) {
         return [
-            "doubleCounter",
-            "doubleUpDownCounter",
-            "longCounter",
-            "longUpDownCounter"
+          "doubleCounter",
+          "doubleUpDownCounter",
+          "longCounter",
+          "longUpDownCounter"
         ].contains(inst.method)
     }
 }
