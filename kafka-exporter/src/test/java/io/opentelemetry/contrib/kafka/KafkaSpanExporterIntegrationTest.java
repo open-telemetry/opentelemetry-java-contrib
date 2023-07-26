@@ -69,12 +69,16 @@ class KafkaSpanExporterIntegrationTest {
             UUID.randomUUID().toString());
 
     testSubject =
-        new KafkaSpanExporter(
-            TOPIC,
-            producerConfig,
-            newFixedThreadPool(2),
-            new StringSerializer(),
-            spanDataSerializer);
+        KafkaSpanExporter.newBuilder()
+            .setTopicName(TOPIC)
+            .setExecutorService(newFixedThreadPool(2))
+            .setProducer(
+                KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                    .setConfig(producerConfig)
+                    .setKeySerializer(new StringSerializer())
+                    .setValueSerializer(spanDataSerializer)
+                    .build())
+            .build();
   }
 
   @AfterAll
@@ -122,15 +126,19 @@ class KafkaSpanExporterIntegrationTest {
 
   @Test
   void exportWhenProducerInError() {
-    KafkaSpanExporter testSubject =
-        new KafkaSpanExporter(
-            TOPIC,
-            producerConfig,
-            newFixedThreadPool(2),
-            new StringSerializer(),
-            (topic, data) -> {
-              throw new ApiException("Producer error");
-            });
+    testSubject =
+        KafkaSpanExporter.newBuilder()
+            .setTopicName(TOPIC)
+            .setProducer(
+                KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                    .setConfig(producerConfig)
+                    .setKeySerializer(new StringSerializer())
+                    .setValueSerializer(
+                        (topic, data) -> {
+                          throw new ApiException("Producer error");
+                        })
+                    .build())
+            .build();
 
     ImmutableList<SpanData> spans =
         ImmutableList.of(makeBasicSpan("span-1"), makeBasicSpan("span-2"));

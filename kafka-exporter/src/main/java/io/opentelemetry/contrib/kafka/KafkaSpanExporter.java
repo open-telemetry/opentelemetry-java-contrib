@@ -12,20 +12,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +28,17 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("FutureReturnValueIgnored")
 public class KafkaSpanExporter implements SpanExporter {
   private static final Logger logger = LoggerFactory.getLogger(KafkaSpanExporter.class);
-  private static final long DEFAULT_TIMEOUT_IN_SECONDS = 5L;
   private final String topicName;
   private final Producer<String, Collection<SpanData>> producer;
   private final ExecutorService executorService;
   private final long timeoutInSeconds;
   private final AtomicBoolean isShutdown = new AtomicBoolean();
 
-  public KafkaSpanExporter(
+  public static KafkaSpanExporterBuilder newBuilder() {
+    return new KafkaSpanExporterBuilder();
+  }
+
+  KafkaSpanExporter(
       String topicName,
       Producer<String, Collection<SpanData>> producer,
       ExecutorService executorService,
@@ -49,53 +47,6 @@ public class KafkaSpanExporter implements SpanExporter {
     this.producer = producer;
     this.executorService = executorService;
     this.timeoutInSeconds = timeoutInSeconds;
-  }
-
-  public KafkaSpanExporter(
-      String topicName,
-      Producer<String, Collection<SpanData>> producer,
-      ExecutorService executorService) {
-    this(topicName, producer, executorService, DEFAULT_TIMEOUT_IN_SECONDS);
-  }
-
-  public KafkaSpanExporter(String topicName, Producer<String, Collection<SpanData>> producer) {
-    this(topicName, producer, Executors.newCachedThreadPool(), DEFAULT_TIMEOUT_IN_SECONDS);
-  }
-
-  public KafkaSpanExporter(
-      String topicName, Map<String, Object> configs, ExecutorService executorService) {
-    this(topicName, new KafkaProducer<>(configs), executorService, DEFAULT_TIMEOUT_IN_SECONDS);
-  }
-
-  public KafkaSpanExporter(
-      String topicName,
-      Map<String, Object> configs,
-      ExecutorService executorService,
-      Serializer<String> keySerializer,
-      Serializer<Collection<SpanData>> valueSerializer) {
-    this(
-        topicName,
-        new KafkaProducer<>(configs, keySerializer, valueSerializer),
-        executorService,
-        DEFAULT_TIMEOUT_IN_SECONDS);
-  }
-
-  public KafkaSpanExporter(
-      String topicName, Properties properties, ExecutorService executorService) {
-    this(topicName, new KafkaProducer<>(properties), executorService, DEFAULT_TIMEOUT_IN_SECONDS);
-  }
-
-  public KafkaSpanExporter(
-      String topicName,
-      Properties properties,
-      ExecutorService executorService,
-      Serializer<String> keySerializer,
-      Serializer<Collection<SpanData>> valueSerializer) {
-    this(
-        topicName,
-        new KafkaProducer<>(properties, keySerializer, valueSerializer),
-        executorService,
-        DEFAULT_TIMEOUT_IN_SECONDS);
   }
 
   @Override
