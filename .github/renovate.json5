@@ -5,6 +5,14 @@
   ],
   "packageRules": [
     {
+      "matchPackagePrefixes": ["ch.qos.logback:"],
+      "groupName": "logback packages"
+    },
+    {
+      "matchPackagePrefixes": ["com.gradle.enterprise"],
+      "groupName": "gradle enterprise packages"
+    },
+    {
       // junit-pioneer 2+ requires Java 11+
       "matchPackageNames": ["org.junit-pioneer:junit-pioneer"],
       "matchUpdateTypes": ["major"],
