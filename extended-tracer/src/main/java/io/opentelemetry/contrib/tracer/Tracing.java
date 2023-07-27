@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.tracer; /*
-                                          * Copyright The OpenTelemetry Authors
-                                          * SPDX-License-Identifier: Apache-2.0
-                                          */
+package io.opentelemetry.contrib.tracer;
 
 import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
 import static io.opentelemetry.api.trace.SpanKind.SERVER;
@@ -18,6 +15,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
@@ -50,7 +48,7 @@ public final class Tracing {
   private Tracing() {}
 
   public static void run(String spanName, Runnable runnable) {
-    serviceTracer().run(spanName, runnable);
+    run(serviceTracer().spanBuilder(spanName).startSpan(), runnable);
   }
 
   public static void run(Span span, Runnable runnable) {
@@ -68,7 +66,7 @@ public final class Tracing {
    * @param spanName name of the new span
    */
   public static <T> T call(String spanName, Callable<T> callable) {
-    return serviceTracer().call(spanName, callable);
+    return call(serviceTracer().spanBuilder(spanName).startSpan(), callable);
   }
 
   public static <T> T call(Span span, Callable<T> callable) {
@@ -95,8 +93,8 @@ public final class Tracing {
    *
    * @return the tracer to be used in a service
    */
-  public static ExtendedTracer serviceTracer() {
-    return ExtendedTracer.create(GlobalOpenTelemetry.getTracer("service"));
+  public static Tracer serviceTracer() {
+    return GlobalOpenTelemetry.getTracer("service");
   }
 
   /**
@@ -105,7 +103,7 @@ public final class Tracing {
    * @param spanName the span name
    * @return the span builder
    */
-  public static ExtendedSpanBuilder withSpan(String spanName) {
+  public static SpanBuilder withSpan(String spanName) {
     return Tracing.serviceTracer().spanBuilder(spanName);
   }
 
@@ -146,7 +144,7 @@ public final class Tracing {
    * Injects the current context into a string map, which can then be added to HTTP headers or the
    * metadata of an event.
    */
-  public static Map<String, String> injectContext() {
+  public static Map<String, String> getPropagationHeaders() {
     Map<String, String> transport = new HashMap<>();
     //noinspection ConstantConditions
     GlobalOpenTelemetry.get()
@@ -189,7 +187,7 @@ public final class Tracing {
 
   /** Sets baggage items which are active in given block. */
   @SuppressWarnings("NullAway")
-  public static <T> T setBaggage(Map<String, String> baggage, Callable<T> callable) {
+  public static <T> T callWithBaggage(Map<String, String> baggage, Callable<T> callable) {
     BaggageBuilder builder = Baggage.current().toBuilder();
     baggage.forEach(builder::put);
     Context context = builder.build().storeInContext(Context.current());
