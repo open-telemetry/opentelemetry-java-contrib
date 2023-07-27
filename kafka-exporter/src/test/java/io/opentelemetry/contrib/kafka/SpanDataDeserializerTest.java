@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.kafka;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.resource.v1.Resource;
@@ -42,7 +43,7 @@ class SpanDataDeserializerTest {
 
   @Test
   void deserializeNullData() {
-    assertNotNull(testSubject.deserialize("test-topic", null));
+    assertNull(testSubject.deserialize("test-topic", null));
   }
 
   @Test
