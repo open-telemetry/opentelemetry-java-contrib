@@ -116,6 +116,6 @@ class WritableFileTest {
   }
 
   private List<String> getWrittenLines() throws IOException {
-    return Files.readAllLines(writableFile.file.toPath());
+    return Files.readAllLines(writableFile.getFile().toPath());
   }
 }

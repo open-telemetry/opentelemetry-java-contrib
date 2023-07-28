@@ -77,7 +77,7 @@ public final class FolderManager {
     // Checking if the oldest available file is currently the writable file.
     if (oldestFileAvailable != null
         && currentWritableFile != null
-        && oldestFileAvailable.equals(currentWritableFile.file)) {
+        && oldestFileAvailable.equals(currentWritableFile.getFile())) {
       currentWritableFile.close();
     }
     return oldestFileAvailable;
@@ -88,7 +88,7 @@ public final class FolderManager {
     int filesDeleted = 0;
     for (File existingFile : existingFiles) {
       if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
-        if (currentReadableFile != null && existingFile.equals(currentReadableFile.file)) {
+        if (currentReadableFile != null && existingFile.equals(currentReadableFile.getFile())) {
           currentReadableFile.close();
         }
         if (existingFile.delete()) {
@@ -103,7 +103,7 @@ public final class FolderManager {
     if (existingFiles.length > 0) {
       if (isNeededToClearSpaceForNewFile(existingFiles)) {
         File oldest = getOldest(existingFiles);
-        if (currentReadableFile != null && oldest.equals(currentReadableFile.file)) {
+        if (currentReadableFile != null && oldest.equals(currentReadableFile.getFile())) {
           currentReadableFile.close();
         }
         if (!oldest.delete()) {

@@ -33,7 +33,8 @@ import javax.annotation.Nullable;
  *
  * <p>More information on the overall storage process in the CONTRIBUTING.md file.
  */
-public final class ReadableFile extends StorageFile {
+public final class ReadableFile implements FileOperations {
+  private final File file;
   private final int originalFileSize;
   private final StreamReader reader;
   private final FileTransferUtil fileTransferUtil;
@@ -62,7 +63,7 @@ public final class ReadableFile extends StorageFile {
       StorageConfiguration configuration,
       StreamReader.Factory readerFactory)
       throws IOException {
-    super(file);
+    this.file = file;
     this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
     originalFileSize = (int) file.length();
@@ -137,6 +138,11 @@ public final class ReadableFile extends StorageFile {
   @Override
   public synchronized boolean isClosed() {
     return isClosed.get();
+  }
+
+  @Override
+  public File getFile() {
+    return file;
   }
 
   @Override
