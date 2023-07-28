@@ -67,7 +67,7 @@ class MBeanHelper {
       this.attributeTransformation = attributeTransformation
     }
 
-    @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
+  @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
         return queryJmx(jmxClient, new ObjectName(objNameStr))
     }
 
@@ -91,11 +91,11 @@ class MBeanHelper {
     }
 
     @PackageScope List<GroovyMBean> getMBeans() {
-        if (mbeans == null) {
+        if (mbeans == null || mbeans.size() == 0) {
             logger.warning("No active MBeans.  Be sure to fetch() before updating any applicable instruments.")
             return []
         }
-        return mbeans
+        return isSingle ? [mbeans[0]]: mbeans
     }
 
     @PackageScope List<Object> getAttribute(String attribute) {
@@ -104,14 +104,8 @@ class MBeanHelper {
         }
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
-
         return ofInterest.collect {
-            try {
-                attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](it) : it.getProperty(attribute)
-            } catch (AttributeNotFoundException e) {
-                logger.warning("Expected attribute ${attribute} not found in mbean ${it.name()}")
-                null
-            }
+          getBeanAttributeTransform(it, attribute)
         }
     }
 
@@ -123,13 +117,21 @@ class MBeanHelper {
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
-            try {
-                def extractedAttribute = attributeTransformation.containsKey(attribute) ? attributeTransformation[attribute](bean) : bean.getProperty(attribute)
-                new Tuple3(bean, attribute, extractedAttribute)
-            } catch (AttributeNotFoundException e) {
-                logger.info("Expected attribute ${attribute} not found in mbean ${bean.name()}")
-                new Tuple3(bean, attribute, null)
-            }
+            new Tuple3(bean, attribute, getBeanAttributeTransform(bean, attribute))
+        }
+    }
+
+    Object getBeanAttributeTransform(GroovyMBean bean, String attribute){
+      def transformationClosure = attributeTransformation.get(attribute);
+      return transformationClosure != null ? transformationClosure(bean) : getBeanAttribute(bean, attribute)
+    }
+
+    static Object getBeanAttribute(GroovyMBean bean, String attribute) {
+        try {
+          bean.getProperty(attribute)
+        } catch (AttributeNotFoundException e) {
+            logger.warning("Expected attribute ${attribute} not found in mbean ${bean.name()}")
+            null
         }
     }
 }

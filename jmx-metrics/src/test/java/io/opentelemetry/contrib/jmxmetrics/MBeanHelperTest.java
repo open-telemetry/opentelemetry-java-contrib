@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Timeout;
 @Timeout(value = 10, unit = SECONDS)
 class MBeanHelperTest {
 
-  // private static final Logger logger = Logger.getLogger(MBeanHelperTest.class.getName());
   private static final MBeanServer mbeanServer = getPlatformMBeanServer();
 
   private static final Set<ObjectInstance> registeredBeans = new HashSet<>();
