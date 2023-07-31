@@ -105,7 +105,7 @@ class MBeanHelper {
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return ofInterest.collect {
-          getBeanAttributeTransform(it, attribute)
+          getBeanAttributeWithTransform(it, attribute)
         }
     }
 
@@ -117,11 +117,11 @@ class MBeanHelper {
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
-            new Tuple3(bean, attribute, getBeanAttributeTransform(bean, attribute))
+            new Tuple3(bean, attribute, getBeanAttributeWithTransform(bean, attribute))
         }
     }
 
-    Object getBeanAttributeTransform(GroovyMBean bean, String attribute){
+    Object getBeanAttributeWithTransform(GroovyMBean bean, String attribute){
       def transformationClosure = attributeTransformation.get(attribute);
       return transformationClosure != null ? transformationClosure(bean) : getBeanAttribute(bean, attribute)
     }
