@@ -58,6 +58,7 @@ class InstrumenterHelperTest {
   // Will eventually be replaced with Jupiter extension in sdk-testing
   private SdkMeterProvider meterProvider;
   private InMemoryMetricReader metricReader;
+  private GroovyMetricEnvironment metricEnvironment;
 
   private OtelHelper otel;
 
@@ -91,8 +92,8 @@ class InstrumenterHelperTest {
   void setupOtel() {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
-
-    otel = new OtelHelper(jmxClient, new GroovyMetricEnvironment(meterProvider, "otel.test"));
+    metricEnvironment = new GroovyMetricEnvironment(meterProvider, "otel.test");
+    otel = new OtelHelper(jmxClient, metricEnvironment);
   }
 
   @AfterEach
@@ -688,7 +689,8 @@ class InstrumenterHelperTest {
             "1",
             labelFuncs,
             Collections.singletonMap(attribute, null),
-            instrument);
+            instrument,
+            metricEnvironment);
     instrumentHelper.update();
   }
 
@@ -702,7 +704,14 @@ class InstrumenterHelperTest {
     Map<String, Closure<?>> labelFuncs = new HashMap<>();
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
-            mBeanHelper, instrumentName, description, "1", labelFuncs, attributes, instrument);
+            mBeanHelper,
+            instrumentName,
+            description,
+            "1",
+            labelFuncs,
+            attributes,
+            instrument,
+            metricEnvironment);
     instrumentHelper.update();
   }
 

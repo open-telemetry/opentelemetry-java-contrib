@@ -22,6 +22,9 @@ components:
   consistent-sampling:
     - oertl
     - PeterF778
+  disk-buffering:
+    - LikeTheSalad
+    - zeitlinger
   samplers:
     - iNikem
     - trask

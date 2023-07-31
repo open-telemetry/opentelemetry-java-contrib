@@ -14,10 +14,10 @@ rootProject.extra["versions"] = dependencyVersions
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.15.2",
   "com.google.guava:guava-bom:32.1.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.24.2",
-  "org.junit:junit-bom:5.9.3",
+  "com.linecorp.armeria:armeria-bom:1.24.3",
+  "org.junit:junit-bom:5.10.0",
   "io.grpc:grpc-bom:1.56.1",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.27.0-alpha",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.28.0-alpha",
   "org.testcontainers:testcontainers-bom:1.18.3"
 )
 
@@ -49,7 +49,7 @@ val CORE_DEPENDENCIES = listOf(
 )
 
 val DEPENDENCIES = listOf(
-  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.27.0",
+  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.28.0",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.11.0",

@@ -2,7 +2,7 @@ pluginManagement {
   plugins {
     id("com.github.ben-manes.versions") version "0.47.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.enterprise") version "3.13.4"
+    id("com.gradle.enterprise") version "3.14.1"
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
   }
 }
@@ -69,6 +69,7 @@ include(":aws-xray")
 include(":aws-xray-propagator")
 include(":consistent-sampling")
 include(":dependencyManagement")
+include(":disk-buffering")
 include(":example")
 include(":jfr-events")
 include(":jfr-connection")
