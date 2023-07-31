@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class WritableFile extends StorageFile {
+public final class WritableFile implements FileOperations {
+
+  private final File file;
+
   private final StorageConfiguration configuration;
   private final Clock clock;
   private final long expireTimeMillis;
@@ -27,7 +30,7 @@ public final class WritableFile extends StorageFile {
   public WritableFile(
       File file, long createdTimeMillis, StorageConfiguration configuration, Clock clock)
       throws IOException {
-    super(file);
+    this.file = file;
     this.configuration = configuration;
     this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
@@ -73,6 +76,11 @@ public final class WritableFile extends StorageFile {
   @Override
   public synchronized boolean isClosed() {
     return isClosed.get();
+  }
+
+  @Override
+  public File getFile() {
+    return file;
   }
 
   @Override
