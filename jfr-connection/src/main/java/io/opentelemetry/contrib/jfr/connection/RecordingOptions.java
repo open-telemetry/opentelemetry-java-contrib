@@ -43,17 +43,15 @@ import javax.annotation.Nonnull;
  */
 public class RecordingOptions {
 
-  /* Default values of some options. */
-  private static final String EMPTY_STRING = "";
   private static final String NO_LIMIT = "0";
 
   /* Options hash table keys. */
   private enum Option {
-    NAME("name", EMPTY_STRING),
+    NAME("name", ""),
     MAX_AGE("maxAge", NO_LIMIT),
     MAX_SIZE("maxSize", NO_LIMIT),
     DUMP_ON_EXIT("dumpOnExit", "false"),
-    DESTINATION("destination", EMPTY_STRING),
+    DESTINATION("destination", ""),
     DISK("disk", "false"),
     DURATION("duration", NO_LIMIT);
 

@@ -65,6 +65,7 @@ class ClassArchive {
     return ze.getMessage() != null && ze.getMessage().contains("duplicate");
   }
 
+  @SuppressWarnings("BanClassLoader")
   private InputStream getInputStreamForEntry(JarEntry inEntry, ZipEntry outEntry)
       throws IOException {
 
