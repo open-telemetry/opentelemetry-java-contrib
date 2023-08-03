@@ -48,7 +48,7 @@ for component in */ ; do
   component_name=${component_names[$component]:=$component}
   commits=$(git log --reverse \
           --perl-regexp \
-          --author='^(?!dependabot\[bot\] )' \
+          --author='^(?!renovate\[bot\] )' \
           --pretty=format:"- %s" \
           "$range" \
           "$component")
