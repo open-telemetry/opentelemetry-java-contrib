@@ -2,10 +2,7 @@
   "retryOn429": true,
   "ignorePatterns": [
     {
-      "pattern": "^https://github\\.com/open-telemetry/opentelemetry-java-contrib/network/updates$"
-    },
-    {
-      "pattern": "^https://github.com/open-telemetry/opentelemetry-java-contrib/pulls/app%2Fdependabot$"
+      "pattern": "^https://developer\\.mend\\.io/github/open-telemetry/opentelemetry-java-contrib$"
     }
   ]
 }
