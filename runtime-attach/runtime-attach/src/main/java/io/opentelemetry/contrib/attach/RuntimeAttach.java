@@ -14,6 +14,7 @@ public final class RuntimeAttach {
    * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
    * beginning of the main method.
    */
+  @SuppressWarnings("MemberName")
   public static void attachJavaagentToCurrentJVM() {
 
     CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/otel-agent.jar");
