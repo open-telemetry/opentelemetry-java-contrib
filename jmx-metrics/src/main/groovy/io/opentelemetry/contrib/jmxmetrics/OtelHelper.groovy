@@ -83,6 +83,17 @@ class OtelHelper {
         return mbeanHelper
     }
 
+    MBeanHelper mbean(String objNameStr, Map<String,Closure<?>> attributeTransformation) {
+      def mbeanHelper = new MBeanHelper(jmxClient, objNameStr, true, attributeTransformation)
+      mbeanHelper.fetch()
+      return mbeanHelper
+    }
+
+    MBeanHelper mbeans(List<String> objNameStrs, Map<String,Closure<?>> attributeTransformation) {
+      def mbeanHelper = new MBeanHelper(jmxClient, objNameStrs, attributeTransformation)
+      mbeanHelper.fetch()
+      return mbeanHelper
+    }
     /**
      * Returns an updated @{link InstrumentHelper} associated with the provided {@link MBeanHelper} and its specified
      * attribute value(s).  The parameters map to the InstrumentHelper constructor.

@@ -160,6 +160,26 @@ In cases where you'd like to share instrument names while creating datapoints fo
 - `otel.instrument(MBeanHelper mBeanHelper, String name, String description, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
 - `otel.instrument(MBeanHelper mBeanHelper, String name, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map
 
+### MBeans with non-numeric attributes
+
+In cases where you'd like to create metrics based on non-numeric MBean attributes, the mbean helper methods provide the ability to pass a map of closures, to transform the original extracted attribute into one that can be consumed by the instrument callbacks.
+
+- `otel.mbean(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
+
+- `otel.mbeans(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
+
+- `otel.mbeans(List<String> objectNameStrs, Map<String,Closure<?>> attributeTransformation)`
+
+These methods provide the ability to easily convert the attributes you will be extracting from the mbeans, at the time of creation for the MBeanHelper.
+
+  ```groovy
+     // In this example a String based health attribute is converted to a numeric binary value
+    def someBean = otel.mbean(
+        "SomeMBean", ["CustomAttrFromString": { mbean -> mbean.getProperty("Attribute") == "running" ? 1 : 0 }]
+    )
+    otel.instrument(someBean, "my-metric", "CustomAttrFromString", otel.&longUpDownCounterCallback)
+  ```
+
 ## OpenTelemetry Synchronous Instrument Helpers
 
 - `otel.doubleCounter(String name, String description, String unit)`

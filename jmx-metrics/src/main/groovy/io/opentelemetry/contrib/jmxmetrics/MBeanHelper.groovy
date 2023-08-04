@@ -35,6 +35,7 @@ class MBeanHelper {
     private final JmxClient jmxClient
     private final boolean isSingle
     private final List<String> objectNames
+    private final Map<String, Closure> attributeTransformation
 
     private List<GroovyMBean> mbeans
 
@@ -42,15 +43,31 @@ class MBeanHelper {
         this.jmxClient = jmxClient
         this.objectNames = Collections.unmodifiableList([objectName])
         this.isSingle = isSingle
+        this.attributeTransformation = [:] as Map<String,Closure<?>>
     }
 
     MBeanHelper(JmxClient jmxClient, List<String> objectNames) {
         this.jmxClient = jmxClient
         this.objectNames = Collections.unmodifiableList(objectNames)
         this.isSingle = false
+        this.attributeTransformation = [:] as Map<String,Closure<?>>
     }
 
-    @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
+    MBeanHelper(JmxClient jmxClient, String objectName, boolean isSingle, Map<String,Closure<?>> attributeTransformation ) {
+      this.jmxClient = jmxClient
+      this.objectNames = Collections.unmodifiableList([objectName])
+      this.isSingle = isSingle
+      this.attributeTransformation = attributeTransformation
+    }
+
+    MBeanHelper(JmxClient jmxClient, List<String> objectNames, Map<String,Closure<?>> attributeTransformation) {
+      this.jmxClient = jmxClient
+      this.objectNames = Collections.unmodifiableList(objectNames)
+      this.isSingle = false
+      this.attributeTransformation = attributeTransformation
+    }
+
+  @PackageScope static List<GroovyMBean> queryJmx(JmxClient jmxClient, String objNameStr) {
         return queryJmx(jmxClient, new ObjectName(objNameStr))
     }
 
@@ -88,7 +105,7 @@ class MBeanHelper {
 
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return ofInterest.collect {
-          getBeanAttribute(it, attribute)
+          getBeanAttributeWithTransform(it, attribute)
         }
     }
 
@@ -100,13 +117,18 @@ class MBeanHelper {
         def ofInterest = isSingle ? [mbeans[0]]: mbeans
         return [ofInterest, attributes].combinations().collect { pair ->
             def (bean, attribute) = pair
-            new Tuple3(bean, attribute, getBeanAttribute(bean, attribute))
+            new Tuple3(bean, attribute, getBeanAttributeWithTransform(bean, attribute))
         }
+    }
+
+    Object getBeanAttributeWithTransform(GroovyMBean bean, String attribute){
+      def transformationClosure = attributeTransformation.get(attribute);
+      return transformationClosure != null ? transformationClosure(bean) : getBeanAttribute(bean, attribute)
     }
 
     static Object getBeanAttribute(GroovyMBean bean, String attribute) {
         try {
-            bean.getProperty(attribute)
+          bean.getProperty(attribute)
         } catch (AttributeNotFoundException e) {
             logger.warning("Expected attribute ${attribute} not found in mbean ${bean.name()}")
             null
