@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.tracer;
 import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
 import static io.opentelemetry.api.trace.SpanKind.SERVER;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
 import io.opentelemetry.api.trace.Span;
@@ -47,8 +47,8 @@ public final class Tracing {
 
   private Tracing() {}
 
-  public static void run(String spanName, Runnable runnable) {
-    runAndEndSpan(serviceTracer().spanBuilder(spanName).startSpan(), runnable);
+  public static void run(Tracer tracer, String spanName, Runnable runnable) {
+    runAndEndSpan(tracer.spanBuilder(spanName).startSpan(), runnable);
   }
 
   public static void runAndEndSpan(Span span, Runnable runnable) {
@@ -65,8 +65,8 @@ public final class Tracing {
    *
    * @param spanName name of the new span
    */
-  public static <T> T call(String spanName, Callable<T> callable) {
-    return callAndEndSpan(serviceTracer().spanBuilder(spanName).startSpan(), callable);
+  public static <T> T call(Tracer tracer, String spanName, Callable<T> callable) {
+    return callAndEndSpan(tracer.spanBuilder(spanName).startSpan(), callable);
   }
 
   public static <T> T callAndEndSpan(Span span, Callable<T> callable) {
@@ -86,25 +86,6 @@ public final class Tracing {
     } finally {
       span.end();
     }
-  }
-
-  /**
-   * Return the tracer to be used in a service
-   *
-   * @return the tracer to be used in a service
-   */
-  public static Tracer serviceTracer() {
-    return GlobalOpenTelemetry.getTracer("service");
-  }
-
-  /**
-   * Creates a new span builder with the given span name.
-   *
-   * @param spanName the span name
-   * @return the span builder
-   */
-  public static SpanBuilder withSpan(String spanName) {
-    return Tracing.serviceTracer().spanBuilder(spanName);
   }
 
   /**
@@ -144,10 +125,10 @@ public final class Tracing {
    * Injects the current context into a string map, which can then be added to HTTP headers or the
    * metadata of an event.
    */
-  public static Map<String, String> getPropagationHeaders() {
+  public static Map<String, String> getPropagationHeaders(OpenTelemetry openTelemetry) {
     Map<String, String> transport = new HashMap<>();
     //noinspection ConstantConditions
-    GlobalOpenTelemetry.get()
+    openTelemetry
         .getPropagators()
         .getTextMapPropagator()
         .inject(
@@ -166,7 +147,7 @@ public final class Tracing {
    * Extract the context from a string map, which you get from HTTP headers of the metadata of an
    * event you're processing.
    */
-  public static Context extractContext(Map<String, String> transport) {
+  public static Context extractContext(OpenTelemetry openTelemetry, Map<String, String> transport) {
     Context current = Context.current();
     //noinspection ConstantConditions
     if (transport == null) {
@@ -179,7 +160,7 @@ public final class Tracing {
             .collect(
                 Collectors.toMap(
                     entry -> entry.getKey().toLowerCase(Locale.ROOT), Map.Entry::getValue));
-    return GlobalOpenTelemetry.get()
+    return openTelemetry
         .getPropagators()
         .getTextMapPropagator()
         .extract(current, normalizedTransport, TEXT_MAP_GETTER);
@@ -206,8 +187,12 @@ public final class Tracing {
    * from HTTP headers of the metadata of an event you're processing.
    */
   public static <T> T traceServerSpan(
-      Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
-    return extractAndRun(SERVER, transport, spanBuilder, callable, Tracing::setSpanError);
+      OpenTelemetry openTelemetry,
+      Map<String, String> transport,
+      SpanBuilder spanBuilder,
+      Callable<T> callable) {
+    return extractAndRun(
+        openTelemetry, SERVER, transport, spanBuilder, callable, Tracing::setSpanError);
   }
 
   /**
@@ -217,11 +202,12 @@ public final class Tracing {
    * from HTTP headers of the metadata of an event you're processing.
    */
   public static <T> T traceServerSpan(
+      OpenTelemetry openTelemetry,
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return extractAndRun(SERVER, transport, spanBuilder, callable, handleException);
+    return extractAndRun(openTelemetry, SERVER, transport, spanBuilder, callable, handleException);
   }
 
   /**
@@ -231,8 +217,12 @@ public final class Tracing {
    * from HTTP headers of the metadata of an event you're processing.
    */
   public static <T> T traceConsumerSpan(
-      Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
-    return extractAndRun(CONSUMER, transport, spanBuilder, callable, Tracing::setSpanError);
+      OpenTelemetry openTelemetry,
+      Map<String, String> transport,
+      SpanBuilder spanBuilder,
+      Callable<T> callable) {
+    return extractAndRun(
+        openTelemetry, CONSUMER, transport, spanBuilder, callable, Tracing::setSpanError);
   }
 
   /**
@@ -242,21 +232,25 @@ public final class Tracing {
    * from HTTP headers of the metadata of an event you're processing.
    */
   public static <T> T traceConsumerSpan(
+      OpenTelemetry openTelemetry,
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return extractAndRun(CONSUMER, transport, spanBuilder, callable, handleException);
+    return extractAndRun(
+        openTelemetry, CONSUMER, transport, spanBuilder, callable, handleException);
   }
 
   private static <T> T extractAndRun(
+      OpenTelemetry openTelemetry,
       SpanKind spanKind,
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    try (Scope ignore = extractContext(transport).makeCurrent()) {
-      return callAndEndSpan(spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
+    try (Scope ignore = extractContext(openTelemetry, transport).makeCurrent()) {
+      return callAndEndSpan(
+          spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
     }
   }
 
