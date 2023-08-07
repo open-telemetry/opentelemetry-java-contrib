@@ -48,11 +48,11 @@ public final class Tracing {
   private Tracing() {}
 
   public static void run(String spanName, Runnable runnable) {
-    run(serviceTracer().spanBuilder(spanName).startSpan(), runnable);
+    runAndEndSpan(serviceTracer().spanBuilder(spanName).startSpan(), runnable);
   }
 
-  public static void run(Span span, Runnable runnable) {
-    call(
+  public static void runAndEndSpan(Span span, Runnable runnable) {
+    callAndEndSpan(
         span,
         () -> {
           runnable.run();
@@ -66,15 +66,15 @@ public final class Tracing {
    * @param spanName name of the new span
    */
   public static <T> T call(String spanName, Callable<T> callable) {
-    return call(serviceTracer().spanBuilder(spanName).startSpan(), callable);
+    return callAndEndSpan(serviceTracer().spanBuilder(spanName).startSpan(), callable);
   }
 
-  public static <T> T call(Span span, Callable<T> callable) {
-    return call(span, callable, Tracing::setSpanError);
+  public static <T> T callAndEndSpan(Span span, Callable<T> callable) {
+    return callAndEndSpan(span, callable, Tracing::setSpanError);
   }
 
   @SuppressWarnings("NullAway")
-  public static <T> T call(
+  public static <T> T callAndEndSpan(
       Span span, Callable<T> callable, BiConsumer<Span, Exception> handleException) {
     //noinspection unused
     try (Scope scope = span.makeCurrent()) {
@@ -256,7 +256,7 @@ public final class Tracing {
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
     try (Scope ignore = extractContext(transport).makeCurrent()) {
-      return call(spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
+      return callAndEndSpan(spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
     }
   }
 
