@@ -44,14 +44,17 @@ public final class Tracing {
           return carrier == null ? null : carrier.get(key);
         }
       };
+  private final OpenTelemetry openTelemetry;
 
-  private Tracing() {}
+  public Tracing(OpenTelemetry openTelemetry) {
+    this.openTelemetry = openTelemetry;
+  }
 
-  public static void run(Tracer tracer, String spanName, Runnable runnable) {
+  public void run(Tracer tracer, String spanName, Runnable runnable) {
     runAndEndSpan(tracer.spanBuilder(spanName).startSpan(), runnable);
   }
 
-  public static void runAndEndSpan(Span span, Runnable runnable) {
+  public void runAndEndSpan(Span span, Runnable runnable) {
     callAndEndSpan(
         span,
         () -> {
@@ -65,16 +68,16 @@ public final class Tracing {
    *
    * @param spanName name of the new span
    */
-  public static <T> T call(Tracer tracer, String spanName, Callable<T> callable) {
+  public <T> T call(Tracer tracer, String spanName, Callable<T> callable) {
     return callAndEndSpan(tracer.spanBuilder(spanName).startSpan(), callable);
   }
 
-  public static <T> T callAndEndSpan(Span span, Callable<T> callable) {
-    return callAndEndSpan(span, callable, Tracing::setSpanError);
+  public <T> T callAndEndSpan(Span span, Callable<T> callable) {
+    return callAndEndSpan(span, callable, this::setSpanError);
   }
 
   @SuppressWarnings("NullAway")
-  public static <T> T callAndEndSpan(
+  public <T> T callAndEndSpan(
       Span span, Callable<T> callable, BiConsumer<Span, Exception> handleException) {
     //noinspection unused
     try (Scope scope = span.makeCurrent()) {
@@ -94,7 +97,7 @@ public final class Tracing {
    * @param span the span
    * @param description what went wrong
    */
-  public static void setSpanError(Span span, String description) {
+  public void setSpanError(Span span, String description) {
     span.setStatus(StatusCode.ERROR, description);
   }
 
@@ -104,7 +107,7 @@ public final class Tracing {
    * @param span the span
    * @param exception the exception that caused the error
    */
-  public static void setSpanError(Span span, Throwable exception) {
+  public void setSpanError(Span span, Throwable exception) {
     span.setStatus(StatusCode.ERROR);
     span.recordException(exception);
   }
@@ -116,7 +119,7 @@ public final class Tracing {
    * @param description what went wrong
    * @param exception the exception that caused the error
    */
-  public static void setSpanError(Span span, String description, Throwable exception) {
+  public void setSpanError(Span span, String description, Throwable exception) {
     span.setStatus(StatusCode.ERROR, description);
     span.recordException(exception);
   }
@@ -125,7 +128,7 @@ public final class Tracing {
    * Injects the current context into a string map, which can then be added to HTTP headers or the
    * metadata of an event.
    */
-  public static Map<String, String> getPropagationHeaders(OpenTelemetry openTelemetry) {
+  public Map<String, String> getPropagationHeaders() {
     Map<String, String> transport = new HashMap<>();
     //noinspection ConstantConditions
     openTelemetry
@@ -147,7 +150,7 @@ public final class Tracing {
    * Extract the context from a string map, which you get from HTTP headers of the metadata of an
    * event you're processing.
    */
-  public static Context extractContext(OpenTelemetry openTelemetry, Map<String, String> transport) {
+  public Context extractContext(Map<String, String> transport) {
     Context current = Context.current();
     //noinspection ConstantConditions
     if (transport == null) {
@@ -168,7 +171,7 @@ public final class Tracing {
 
   /** Sets baggage items which are active in given block. */
   @SuppressWarnings("NullAway")
-  public static <T> T callWithBaggage(Map<String, String> baggage, Callable<T> callable) {
+  public <T> T callWithBaggage(Map<String, String> baggage, Callable<T> callable) {
     BaggageBuilder builder = Baggage.current().toBuilder();
     baggage.forEach(builder::put);
     Context context = builder.build().storeInContext(Context.current());
@@ -186,13 +189,9 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    */
-  public static <T> T traceServerSpan(
-      OpenTelemetry openTelemetry,
-      Map<String, String> transport,
-      SpanBuilder spanBuilder,
-      Callable<T> callable) {
-    return extractAndRun(
-        openTelemetry, SERVER, transport, spanBuilder, callable, Tracing::setSpanError);
+  public <T> T traceServerSpan(
+      Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
+    return extractAndRun(SERVER, transport, spanBuilder, callable, this::setSpanError);
   }
 
   /**
@@ -201,13 +200,12 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    */
-  public static <T> T traceServerSpan(
-      OpenTelemetry openTelemetry,
+  public <T> T traceServerSpan(
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return extractAndRun(openTelemetry, SERVER, transport, spanBuilder, callable, handleException);
+    return extractAndRun(SERVER, transport, spanBuilder, callable, handleException);
   }
 
   /**
@@ -216,13 +214,9 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    */
-  public static <T> T traceConsumerSpan(
-      OpenTelemetry openTelemetry,
-      Map<String, String> transport,
-      SpanBuilder spanBuilder,
-      Callable<T> callable) {
-    return extractAndRun(
-        openTelemetry, CONSUMER, transport, spanBuilder, callable, Tracing::setSpanError);
+  public <T> T traceConsumerSpan(
+      Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
+    return extractAndRun(CONSUMER, transport, spanBuilder, callable, this::setSpanError);
   }
 
   /**
@@ -231,24 +225,21 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    */
-  public static <T> T traceConsumerSpan(
-      OpenTelemetry openTelemetry,
+  public <T> T traceConsumerSpan(
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return extractAndRun(
-        openTelemetry, CONSUMER, transport, spanBuilder, callable, handleException);
+    return extractAndRun(CONSUMER, transport, spanBuilder, callable, handleException);
   }
 
-  private static <T> T extractAndRun(
-      OpenTelemetry openTelemetry,
+  private <T> T extractAndRun(
       SpanKind spanKind,
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    try (Scope ignore = extractContext(openTelemetry, transport).makeCurrent()) {
+    try (Scope ignore = extractContext(transport).makeCurrent()) {
       return callAndEndSpan(
           spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
     }

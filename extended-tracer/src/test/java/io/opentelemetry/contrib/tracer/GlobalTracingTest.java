@@ -37,6 +37,8 @@ public class GlobalTracingTest {
   @RegisterExtension
   static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
+  private final Tracing tracing = new Tracing(otelTesting.getOpenTelemetry());
+
   @Test
   void propagation() {
     GlobalTracing.run(
@@ -70,7 +72,7 @@ public class GlobalTracingTest {
         GlobalTracing.call(
             "parent",
             () ->
-                Tracing.callWithBaggage(
+                tracing.callWithBaggage(
                     Collections.singletonMap("key", "value"),
                     () -> Baggage.current().getEntryValue("key")));
 
@@ -176,22 +178,23 @@ public class GlobalTracingTest {
 
   @Keep
   private static Stream<Arguments> setSpanError() {
+    Tracing tracing = new Tracing(otelTesting.getOpenTelemetry());
     RuntimeException exception = new RuntimeException("ex");
     return Stream.of(
         Arguments.of(
             named(
                 "with description",
-                new SetSpanErrorParameter(s -> Tracing.setSpanError(s, "error"), "error", null))),
+                new SetSpanErrorParameter(s -> tracing.setSpanError(s, "error"), "error", null))),
         Arguments.of(
             named(
                 "with exception",
                 new SetSpanErrorParameter(
-                    s -> Tracing.setSpanError(s, exception), null, exception))),
+                    s -> tracing.setSpanError(s, exception), null, exception))),
         Arguments.of(
             named(
                 "with exception and description",
                 new SetSpanErrorParameter(
-                    s -> Tracing.setSpanError(s, "error", exception), "error", exception))));
+                    s -> tracing.setSpanError(s, "error", exception), "error", exception))));
   }
 
   @ParameterizedTest

@@ -14,6 +14,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
+/**
+ * Tracing utility methods that rely on the {@link io.opentelemetry.api.GlobalOpenTelemetry}
+ * instance.
+ *
+ * <p>If the application is not running in javaagent, the first call to any of the methods in this
+ * class may trigger the initialization of the {@link io.opentelemetry.api.GlobalOpenTelemetry} *
+ * instance.
+ */
 public class GlobalTracing {
   private GlobalTracing() {}
 
@@ -26,8 +34,12 @@ public class GlobalTracing {
     return GlobalOpenTelemetry.getTracer("service");
   }
 
+  private static Tracing tracing() {
+    return new Tracing(GlobalOpenTelemetry.get());
+  }
+
   public static void run(String spanName, Runnable runnable) {
-    Tracing.run(serviceTracer(), spanName, runnable);
+    tracing().run(serviceTracer(), spanName, runnable);
   }
 
   /**
@@ -36,7 +48,7 @@ public class GlobalTracing {
    * @param spanName name of the new span
    */
   public static <T> T call(String spanName, Callable<T> callable) {
-    return Tracing.call(serviceTracer(), spanName, callable);
+    return tracing().call(serviceTracer(), spanName, callable);
   }
 
   /**
@@ -54,7 +66,7 @@ public class GlobalTracing {
    * metadata of an event.
    */
   public static Map<String, String> getPropagationHeaders() {
-    return Tracing.getPropagationHeaders(GlobalOpenTelemetry.get());
+    return tracing().getPropagationHeaders();
   }
 
   /**
@@ -62,7 +74,7 @@ public class GlobalTracing {
    * event you're processing.
    */
   public static Context extractContext(Map<String, String> transport) {
-    return Tracing.extractContext(GlobalOpenTelemetry.get(), transport);
+    return tracing().extractContext(transport);
   }
 
   /**
@@ -73,7 +85,7 @@ public class GlobalTracing {
    */
   public static <T> T traceServerSpan(
       Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
-    return Tracing.traceServerSpan(GlobalOpenTelemetry.get(), transport, spanBuilder, callable);
+    return tracing().traceServerSpan(transport, spanBuilder, callable);
   }
 
   /**
@@ -87,8 +99,7 @@ public class GlobalTracing {
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return Tracing.traceServerSpan(
-        GlobalOpenTelemetry.get(), transport, spanBuilder, callable, handleException);
+    return tracing().traceServerSpan(transport, spanBuilder, callable, handleException);
   }
 
   /**
@@ -99,7 +110,7 @@ public class GlobalTracing {
    */
   public static <T> T traceConsumerSpan(
       Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
-    return Tracing.traceConsumerSpan(GlobalOpenTelemetry.get(), transport, spanBuilder, callable);
+    return tracing().traceConsumerSpan(transport, spanBuilder, callable);
   }
 
   /**
@@ -113,7 +124,6 @@ public class GlobalTracing {
       SpanBuilder spanBuilder,
       Callable<T> callable,
       BiConsumer<Span, Exception> handleException) {
-    return Tracing.traceConsumerSpan(
-        GlobalOpenTelemetry.get(), transport, spanBuilder, callable, handleException);
+    return tracing().traceConsumerSpan(transport, spanBuilder, callable, handleException);
   }
 }
