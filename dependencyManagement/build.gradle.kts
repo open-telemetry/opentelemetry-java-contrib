@@ -40,6 +40,7 @@ val CORE_DEPENDENCIES = listOf(
   "io.prometheus:simpleclient_common:${prometheusVersion}",
   "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
   "org.mockito:mockito-core:${mockitoVersion}",
+  "org.mockito:mockito-inline:${mockitoVersion}",
   "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
   "org.slf4j:slf4j-api:${slf4jVersion}",
   "org.slf4j:slf4j-simple:${slf4jVersion}",

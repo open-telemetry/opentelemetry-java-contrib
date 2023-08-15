@@ -15,15 +15,14 @@ java {
   targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val autovalueVersion = "1.10.3"
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   implementation("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
-  compileOnly("com.google.auto.value:auto-value-annotations:$autovalueVersion")
-  annotationProcessor("com.google.auto.value:auto-value:$autovalueVersion")
+  compileOnly("com.google.auto.value:auto-value-annotations")
+  annotationProcessor("com.google.auto.value:auto-value")
   signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
-  testImplementation("org.mockito:mockito-inline:4.11.0")
+  testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
 
