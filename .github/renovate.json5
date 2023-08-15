@@ -9,6 +9,10 @@
       "groupName": "logback packages"
     },
     {
+      "matchPackagePrefixes": ["io.micrometer:"],
+      "groupName": "micrometer packages"
+    },
+    {
       "matchPackagePrefixes": ["com.gradle.enterprise"],
       "groupName": "gradle enterprise packages"
     },
