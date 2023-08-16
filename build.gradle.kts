@@ -5,7 +5,6 @@ plugins {
 
   id("idea")
 
-  id("com.github.ben-manes.versions")
   id("io.github.gradle-nexus.publish-plugin")
 }
 
