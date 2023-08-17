@@ -46,7 +46,7 @@ val CORE_DEPENDENCIES = listOf(
 )
 
 val DEPENDENCIES = listOf(
-  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.28.0",
+  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.29.0",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.11.0",
