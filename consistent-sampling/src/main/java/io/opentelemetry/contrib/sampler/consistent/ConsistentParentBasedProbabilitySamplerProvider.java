@@ -20,6 +20,6 @@ public final class ConsistentParentBasedProbabilitySamplerProvider
 
   @Override
   public String getName() {
-    return "consistent_parent_based_probability";
+    return "parentbased_consistent_probability";
   }
 }
