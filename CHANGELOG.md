@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Removing protobuf dependency ([#?]())
+
 ## Version 1.28.0 (2023-07-14)
 
 ### AWS X-Ray SDK support
