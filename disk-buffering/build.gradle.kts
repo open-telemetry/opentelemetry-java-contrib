@@ -18,7 +18,6 @@ java {
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
-  implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
   signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
