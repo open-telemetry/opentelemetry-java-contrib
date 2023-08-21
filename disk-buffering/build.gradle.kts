@@ -5,6 +5,7 @@ plugins {
   id("otel.publish-conventions")
   id("me.champeau.jmh") version "0.7.1"
   id("ru.vyarus.animalsniffer") version "1.7.1"
+  id("com.squareup.wire") version "4.8.1"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -18,7 +19,6 @@ java {
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
-  implementation("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
   signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
@@ -46,4 +46,12 @@ jmh {
   iterations.set(5)
   timeOnIteration.set("5s")
   timeUnit.set("ms")
+}
+
+wire {
+  java {}
+
+  sourcePath {
+    srcJar("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
+  }
 }

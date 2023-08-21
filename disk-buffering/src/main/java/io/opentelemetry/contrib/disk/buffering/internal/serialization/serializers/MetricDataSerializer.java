@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.squareup.wire.ProtoAdapter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ProtoMetricsDataMapper;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -27,7 +27,9 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   public byte[] serialize(Collection<MetricData> metricData) {
     MetricsData proto = ProtoMetricsDataMapper.getInstance().toProto(metricData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      proto.writeDelimitedTo(out);
+      int size = MetricsData.ADAPTER.encodedSize(proto);
+      ProtoAdapter.UINT32.encode(out, size);
+      proto.encode(out);
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
@@ -37,8 +39,8 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
   @Override
   public List<MetricData> deserialize(byte[] source) {
     try {
-      return ProtoMetricsDataMapper.getInstance().fromProto(MetricsData.parseFrom(source));
-    } catch (InvalidProtocolBufferException e) {
+      return ProtoMetricsDataMapper.getInstance().fromProto(MetricsData.ADAPTER.decode(source));
+    } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
   }

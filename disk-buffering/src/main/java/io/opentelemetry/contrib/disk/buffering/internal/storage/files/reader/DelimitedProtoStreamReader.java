@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-import com.google.protobuf.CodedInputStream;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.CountingInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,10 +39,40 @@ public final class DelimitedProtoStreamReader extends StreamReader {
       if (firstByte == -1) {
         return 0;
       }
-      return CodedInputStream.readRawVarint32(firstByte, inputStream);
+      return readRawVarint32(firstByte);
     } catch (IOException e) {
       return 0;
     }
+  }
+
+  private int readRawVarint32(final int firstByte) throws IOException {
+    if ((firstByte & 0x80) == 0) {
+      return firstByte;
+    }
+
+    int result = firstByte & 0x7f;
+    int offset = 7;
+    for (; offset < 32; offset += 7) {
+      final int b = inputStream.read();
+      if (b == -1) {
+        throw new IllegalStateException();
+      }
+      result |= (b & 0x7f) << offset;
+      if ((b & 0x80) == 0) {
+        return result;
+      }
+    }
+    // Keep reading up to 64 bits.
+    for (; offset < 64; offset += 7) {
+      final int b = inputStream.read();
+      if (b == -1) {
+        throw new IllegalStateException();
+      }
+      if ((b & 0x80) == 0) {
+        return result;
+      }
+    }
+    throw new IllegalStateException();
   }
 
   public static class Factory implements StreamReader.Factory {

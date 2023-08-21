@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.squareup.wire.ProtoAdapter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.ProtoSpansDataMapper;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -27,7 +27,9 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   public byte[] serialize(Collection<SpanData> spanData) {
     TracesData proto = ProtoSpansDataMapper.getInstance().toProto(spanData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      proto.writeDelimitedTo(out);
+      int size = TracesData.ADAPTER.encodedSize(proto);
+      ProtoAdapter.UINT32.encode(out, size);
+      proto.encode(out);
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
@@ -37,8 +39,8 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   @Override
   public List<SpanData> deserialize(byte[] source) {
     try {
-      return ProtoSpansDataMapper.getInstance().fromProto(TracesData.parseFrom(source));
-    } catch (InvalidProtocolBufferException e) {
+      return ProtoSpansDataMapper.getInstance().fromProto(TracesData.ADAPTER.decode(source));
+    } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
   }
