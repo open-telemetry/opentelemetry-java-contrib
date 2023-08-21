@@ -30,21 +30,21 @@ public final class LogRecordDataMapper {
   }
 
   public LogRecord mapToProto(LogRecordData source) {
-    LogRecord.Builder logRecord = LogRecord.newBuilder();
+    LogRecord.Builder logRecord = new LogRecord.Builder();
 
-    logRecord.setTimeUnixNano(source.getTimestampEpochNanos());
-    logRecord.setObservedTimeUnixNano(source.getObservedTimestampEpochNanos());
+    logRecord.time_unix_nano(source.getTimestampEpochNanos());
+    logRecord.observed_time_unix_nano(source.getObservedTimestampEpochNanos());
     if (source.getSeverity() != null) {
-      logRecord.setSeverityNumber(severityToProto(source.getSeverity()));
+      logRecord.severity_number(severityToProto(source.getSeverity()));
     }
     if (source.getSeverityText() != null) {
-      logRecord.setSeverityText(source.getSeverityText());
+      logRecord.severity_text(source.getSeverityText());
     }
     if (source.getBody() != null) {
-      logRecord.setBody(bodyToAnyValue(source.getBody()));
+      logRecord.body(bodyToAnyValue(source.getBody()));
     }
 
-    logRecord.setFlags(source.getSpanContext().getTraceFlags().asByte());
+    logRecord.flags(source.getSpanContext().getTraceFlags().asByte());
 
     addExtrasToProtoBuilder(source, logRecord);
 
@@ -52,12 +52,12 @@ public final class LogRecordDataMapper {
   }
 
   private static void addExtrasToProtoBuilder(LogRecordData source, LogRecord.Builder target) {
-    target.addAllAttributes(
+    target.attributes.addAll(
         AttributesMapper.getInstance().attributesToProto(source.getAttributes()));
     SpanContext spanContext = source.getSpanContext();
-    target.setSpanId(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
-    target.setTraceId(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
-    target.setDroppedAttributesCount(
+    target.span_id(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
+    target.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
+    target.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
   }
 
@@ -65,12 +65,12 @@ public final class LogRecordDataMapper {
       LogRecord source, Resource resource, InstrumentationScopeInfo scopeInfo) {
     LogRecordDataImpl.Builder logRecordData = LogRecordDataImpl.builder();
 
-    logRecordData.setTimestampEpochNanos(source.getTimeUnixNano());
-    logRecordData.setObservedTimestampEpochNanos(source.getObservedTimeUnixNano());
-    logRecordData.setSeverity(severityNumberToSdk(source.getSeverityNumber()));
-    logRecordData.setSeverityText(source.getSeverityText());
-    if (source.hasBody()) {
-      logRecordData.setBody(anyValueToBody(source.getBody()));
+    logRecordData.setTimestampEpochNanos(source.time_unix_nano);
+    logRecordData.setObservedTimestampEpochNanos(source.observed_time_unix_nano);
+    logRecordData.setSeverity(severityNumberToSdk(source.severity_number));
+    logRecordData.setSeverityText(source.severity_text);
+    if (source.body != null) {
+      logRecordData.setBody(anyValueToBody(source.body));
     }
 
     addExtrasToSdkItemBuilder(source, logRecordData, resource, scopeInfo);
@@ -83,31 +83,30 @@ public final class LogRecordDataMapper {
       LogRecordDataImpl.Builder target,
       Resource resource,
       InstrumentationScopeInfo scopeInfo) {
-    Attributes attributes =
-        AttributesMapper.getInstance().protoToAttributes(source.getAttributesList());
+    Attributes attributes = AttributesMapper.getInstance().protoToAttributes(source.attributes);
     target.setAttributes(attributes);
     target.setSpanContext(
         SpanContext.create(
-            ByteStringMapper.getInstance().protoToString(source.getTraceId()),
-            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.trace_id),
+            ByteStringMapper.getInstance().protoToString(source.span_id),
             TraceFlags.getSampled(),
             TraceState.getDefault()));
-    target.setTotalAttributeCount(source.getDroppedAttributesCount() + attributes.size());
+    target.setTotalAttributeCount(source.dropped_attributes_count + attributes.size());
     target.setResource(resource);
     target.setInstrumentationScopeInfo(scopeInfo);
   }
 
   private static AnyValue bodyToAnyValue(Body body) {
-    return AnyValue.newBuilder().setStringValue(body.asString()).build();
+    return new AnyValue.Builder().string_value(body.asString()).build();
   }
 
   private static SeverityNumber severityToProto(Severity severity) {
-    return SeverityNumber.forNumber(severity.getSeverityNumber());
+    return SeverityNumber.fromValue(severity.getSeverityNumber());
   }
 
   private static Body anyValueToBody(AnyValue source) {
-    if (source.hasStringValue()) {
-      return Body.string(source.getStringValue());
+    if (source.string_value != null) {
+      return Body.string(source.string_value);
     } else {
       return Body.empty();
     }
@@ -115,7 +114,7 @@ public final class LogRecordDataMapper {
 
   private static Severity severityNumberToSdk(SeverityNumber source) {
     for (Severity value : Severity.values()) {
-      if (value.getSeverityNumber() == source.getNumber()) {
+      if (value.getSeverityNumber() == source.getValue()) {
         return value;
       }
     }
