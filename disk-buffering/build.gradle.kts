@@ -55,9 +55,9 @@ wire {
   }
 
   root(
-      "opentelemetry.proto.trace.v1.TracesData",
-      "opentelemetry.proto.metrics.v1.MetricsData",
-      "opentelemetry.proto.logs.v1.LogsData",
+    "opentelemetry.proto.trace.v1.TracesData",
+    "opentelemetry.proto.metrics.v1.MetricsData",
+    "opentelemetry.proto.logs.v1.LogsData",
   )
 }
 
