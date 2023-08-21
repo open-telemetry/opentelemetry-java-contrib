@@ -54,4 +54,10 @@ wire {
   sourcePath {
     srcJar("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
   }
+
+  root(
+      "opentelemetry.proto.trace.v1.TracesData",
+      "opentelemetry.proto.metrics.v1.MetricsData",
+      "opentelemetry.proto.logs.v1.LogsData",
+  )
 }
