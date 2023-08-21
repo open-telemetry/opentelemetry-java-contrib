@@ -45,7 +45,7 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     }
   }
 
-  private int readRawVarint32(final int firstByte) throws IOException {
+  private int readRawVarint32(int firstByte) throws IOException {
     if ((firstByte & 0x80) == 0) {
       return firstByte;
     }
@@ -53,7 +53,7 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     int result = firstByte & 0x7f;
     int offset = 7;
     for (; offset < 32; offset += 7) {
-      final int b = inputStream.read();
+      int b = inputStream.read();
       if (b == -1) {
         throw new IllegalStateException();
       }
@@ -64,7 +64,7 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     }
     // Keep reading up to 64 bits.
     for (; offset < 64; offset += 7) {
-      final int b = inputStream.read();
+      int b = inputStream.read();
       if (b == -1) {
         throw new IllegalStateException();
       }
