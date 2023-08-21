@@ -33,7 +33,7 @@ public final class ProtoSpansDataMapper
 
   @Override
   protected List<ResourceSpans> getProtoResources(TracesData protoData) {
-    return protoData.getResourceSpansList();
+    return protoData.resource_spans;
   }
 
   @Override
@@ -52,32 +52,32 @@ public final class ProtoSpansDataMapper
           for (Map.Entry<InstrumentationScopeInfo, List<Span>> spansByScope :
               instrumentationScopeInfoScopedSpansMap.entrySet()) {
             ScopeSpans.Builder scopeBuilder = createProtoScopeBuilder(spansByScope.getKey());
-            scopeBuilder.addAllSpans(spansByScope.getValue());
-            resourceSpansBuilder.addScopeSpans(scopeBuilder.build());
+            scopeBuilder.spans.addAll(spansByScope.getValue());
+            resourceSpansBuilder.scope_spans.add(scopeBuilder.build());
           }
           items.add(resourceSpansBuilder.build());
         });
-    return TracesData.newBuilder().addAllResourceSpans(items).build();
+    return new TracesData.Builder().resource_spans(items).build();
   }
 
   @Override
   protected List<Span> getSignalsFromProto(ScopeSpans scopeSignals) {
-    return scopeSignals.getSpansList();
+    return scopeSignals.spans;
   }
 
   @Override
   protected InstrumentationScopeInfo getInstrumentationScopeFromProto(ScopeSpans scopeSignals) {
-    return protoToInstrumentationScopeInfo(scopeSignals.getScope(), scopeSignals.getSchemaUrl());
+    return protoToInstrumentationScopeInfo(scopeSignals.scope, scopeSignals.schema_url);
   }
 
   @Override
   protected List<ScopeSpans> getScopes(ResourceSpans resourceSignal) {
-    return resourceSignal.getScopeSpansList();
+    return resourceSignal.scope_spans;
   }
 
   @Override
   protected Resource getResourceFromProto(ResourceSpans resourceSignal) {
-    return protoToResource(resourceSignal.getResource(), resourceSignal.getSchemaUrl());
+    return protoToResource(resourceSignal.resource, resourceSignal.schema_url);
   }
 
   @Override
@@ -91,10 +91,9 @@ public final class ProtoSpansDataMapper
   }
 
   private ResourceSpans.Builder createProtoResourceBuilder(Resource resource) {
-    ResourceSpans.Builder builder =
-        ResourceSpans.newBuilder().setResource(resourceToProto(resource));
+    ResourceSpans.Builder builder = new ResourceSpans.Builder().resource(resourceToProto(resource));
     if (resource.getSchemaUrl() != null) {
-      builder.setSchemaUrl(resource.getSchemaUrl());
+      builder.schema_url(resource.getSchemaUrl());
     }
     return builder;
   }
@@ -102,9 +101,9 @@ public final class ProtoSpansDataMapper
   private ScopeSpans.Builder createProtoScopeBuilder(
       InstrumentationScopeInfo instrumentationScopeInfo) {
     ScopeSpans.Builder builder =
-        ScopeSpans.newBuilder().setScope(instrumentationScopeToProto(instrumentationScopeInfo));
+        new ScopeSpans.Builder().scope(instrumentationScopeToProto(instrumentationScopeInfo));
     if (instrumentationScopeInfo.getSchemaUrl() != null) {
-      builder.setSchemaUrl(instrumentationScopeInfo.getSchemaUrl());
+      builder.schema_url(instrumentationScopeInfo.getSchemaUrl());
     }
     return builder;
   }

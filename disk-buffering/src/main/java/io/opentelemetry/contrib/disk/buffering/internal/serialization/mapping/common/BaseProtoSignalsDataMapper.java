@@ -76,10 +76,10 @@ public abstract class BaseProtoSignalsDataMapper<
 
   protected InstrumentationScopeInfo protoToInstrumentationScopeInfo(
       InstrumentationScope scope, @Nullable String schemaUrl) {
-    InstrumentationScopeInfoBuilder builder = InstrumentationScopeInfo.builder(scope.getName());
-    builder.setAttributes(protoToAttributes(scope.getAttributesList()));
-    if (!scope.getVersion().isEmpty()) {
-      builder.setVersion(scope.getVersion());
+    InstrumentationScopeInfoBuilder builder = InstrumentationScopeInfo.builder(scope.name);
+    builder.setAttributes(protoToAttributes(scope.attributes));
+    if (!scope.version.isEmpty()) {
+      builder.setVersion(scope.version);
     }
     if (schemaUrl != null) {
       builder.setSchemaUrl(schemaUrl);
@@ -89,11 +89,11 @@ public abstract class BaseProtoSignalsDataMapper<
 
   protected InstrumentationScope instrumentationScopeToProto(InstrumentationScopeInfo source) {
     InstrumentationScope.Builder builder =
-        InstrumentationScope.newBuilder().setName(source.getName());
+        new InstrumentationScope.Builder().name(source.getName());
     if (source.getVersion() != null) {
-      builder.setVersion(source.getVersion());
+      builder.version(source.getVersion());
     }
-    builder.addAllAttributes(attributesToProto(source.getAttributes()));
+    builder.attributes.addAll(attributesToProto(source.getAttributes()));
     return builder.build();
   }
 
