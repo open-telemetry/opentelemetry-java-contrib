@@ -13,6 +13,7 @@ public final class ProtobufTools {
     ProtoAdapter.INT32.encode(out, value);
   }
 
+  /** This code has been taken from Google's protobuf CodedInputStream. */
   public static int readRawVarint32(int firstByte, InputStream input) throws IOException {
     if ((firstByte & 0x80) == 0) {
       return firstByte;
