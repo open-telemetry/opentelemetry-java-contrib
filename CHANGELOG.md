@@ -4,7 +4,8 @@
 
 ### Disk buffering
 
-- Removing protobuf dependency ([#?]())
+- Removing protobuf
+  dependency ([#1008](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1008))
 
 ## Version 1.28.0 (2023-07-14)
 
