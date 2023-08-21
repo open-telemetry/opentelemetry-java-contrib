@@ -87,10 +87,10 @@ class ProtoLogsDataMapperTest {
 
     LogsData result = mapToProto(signals);
 
-    List<ResourceLogs> resourceLogsList = result.getResourceLogsList();
+    List<ResourceLogs> resourceLogsList = result.resource_logs;
     assertEquals(1, resourceLogsList.size());
-    assertEquals(1, resourceLogsList.get(0).getScopeLogsList().size());
-    assertEquals(1, resourceLogsList.get(0).getScopeLogsList().get(0).getLogRecordsList().size());
+    assertEquals(1, resourceLogsList.get(0).scope_logs.size());
+    assertEquals(1, resourceLogsList.get(0).scope_logs.get(0).log_records.size());
 
     assertThat(mapFromProto(result)).containsExactlyInAnyOrderElementsOf(signals);
   }
@@ -101,14 +101,14 @@ class ProtoLogsDataMapperTest {
 
     LogsData proto = mapToProto(signals);
 
-    List<ResourceLogs> resourceLogsList = proto.getResourceLogsList();
+    List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(1, resourceLogsList.size());
-    List<ScopeLogs> scopeLogsList = resourceLogsList.get(0).getScopeLogsList();
+    List<ScopeLogs> scopeLogsList = resourceLogsList.get(0).scope_logs;
     assertEquals(1, scopeLogsList.size());
-    List<LogRecord> logRecords = scopeLogsList.get(0).getLogRecordsList();
+    List<LogRecord> logRecords = scopeLogsList.get(0).log_records;
     assertEquals(2, logRecords.size());
-    assertEquals("Log body", logRecords.get(0).getBody().getStringValue());
-    assertEquals("Other log body", logRecords.get(1).getBody().getStringValue());
+    assertEquals("Log body", logRecords.get(0).body.string_value);
+    assertEquals("Other log body", logRecords.get(1).body.string_value);
 
     assertEquals(2, mapFromProto(proto).size());
 
@@ -122,14 +122,14 @@ class ProtoLogsDataMapperTest {
 
     LogsData proto = mapToProto(signals);
 
-    List<ResourceLogs> resourceLogsList = proto.getResourceLogsList();
+    List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(1, resourceLogsList.size());
-    List<ScopeLogs> scopeLogsList = resourceLogsList.get(0).getScopeLogsList();
+    List<ScopeLogs> scopeLogsList = resourceLogsList.get(0).scope_logs;
     assertEquals(2, scopeLogsList.size());
     ScopeLogs firstScope = scopeLogsList.get(0);
     ScopeLogs secondScope = scopeLogsList.get(1);
-    List<LogRecord> firstScopeLogs = firstScope.getLogRecordsList();
-    List<LogRecord> secondScopeLogs = secondScope.getLogRecordsList();
+    List<LogRecord> firstScopeLogs = firstScope.log_records;
+    List<LogRecord> secondScopeLogs = secondScope.log_records;
     assertEquals(1, firstScopeLogs.size());
     assertEquals(1, secondScopeLogs.size());
 
@@ -142,18 +142,18 @@ class ProtoLogsDataMapperTest {
 
     LogsData proto = mapToProto(signals);
 
-    List<ResourceLogs> resourceLogsList = proto.getResourceLogsList();
+    List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(2, resourceLogsList.size());
     ResourceLogs firstResourceLogs = resourceLogsList.get(0);
     ResourceLogs secondResourceLogs = resourceLogsList.get(1);
-    List<ScopeLogs> firstScopeLogsList = firstResourceLogs.getScopeLogsList();
-    List<ScopeLogs> secondScopeLogsList = secondResourceLogs.getScopeLogsList();
+    List<ScopeLogs> firstScopeLogsList = firstResourceLogs.scope_logs;
+    List<ScopeLogs> secondScopeLogsList = secondResourceLogs.scope_logs;
     assertEquals(1, firstScopeLogsList.size());
     assertEquals(1, secondScopeLogsList.size());
     ScopeLogs firstScope = firstScopeLogsList.get(0);
     ScopeLogs secondScope = secondScopeLogsList.get(0);
-    List<LogRecord> firstScopeLogs = firstScope.getLogRecordsList();
-    List<LogRecord> secondScopeLogs = secondScope.getLogRecordsList();
+    List<LogRecord> firstScopeLogs = firstScope.log_records;
+    List<LogRecord> secondScopeLogs = secondScope.log_records;
     assertEquals(1, firstScopeLogs.size());
     assertEquals(1, secondScopeLogs.size());
 
