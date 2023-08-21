@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import com.squareup.wire.ProtoAdapter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.ProtoSpansDataMapper;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +28,7 @@ public final class SpanDataSerializer implements SignalSerializer<SpanData> {
     TracesData proto = ProtoSpansDataMapper.getInstance().toProto(spanData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       int size = TracesData.ADAPTER.encodedSize(proto);
-      ProtoAdapter.UINT32.encode(out, size);
+      ProtobufTools.writeRawVarint32(size, out);
       proto.encode(out);
       return out.toByteArray();
     } catch (IOException e) {

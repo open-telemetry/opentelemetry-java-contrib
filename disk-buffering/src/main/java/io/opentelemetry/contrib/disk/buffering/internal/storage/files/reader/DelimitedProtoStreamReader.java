@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.CountingInputStream;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
@@ -39,40 +40,10 @@ public final class DelimitedProtoStreamReader extends StreamReader {
       if (firstByte == -1) {
         return 0;
       }
-      return readRawVarint32(firstByte);
+      return ProtobufTools.readRawVarint32(firstByte, inputStream);
     } catch (IOException e) {
       return 0;
     }
-  }
-
-  private int readRawVarint32(int firstByte) throws IOException {
-    if ((firstByte & 0x80) == 0) {
-      return firstByte;
-    }
-
-    int result = firstByte & 0x7f;
-    int offset = 7;
-    for (; offset < 32; offset += 7) {
-      int b = inputStream.read();
-      if (b == -1) {
-        throw new IllegalStateException();
-      }
-      result |= (b & 0x7f) << offset;
-      if ((b & 0x80) == 0) {
-        return result;
-      }
-    }
-    // Keep reading up to 64 bits.
-    for (; offset < 64; offset += 7) {
-      int b = inputStream.read();
-      if (b == -1) {
-        throw new IllegalStateException();
-      }
-      if ((b & 0x80) == 0) {
-        return result;
-      }
-    }
-    throw new IllegalStateException();
   }
 
   public static class Factory implements StreamReader.Factory {

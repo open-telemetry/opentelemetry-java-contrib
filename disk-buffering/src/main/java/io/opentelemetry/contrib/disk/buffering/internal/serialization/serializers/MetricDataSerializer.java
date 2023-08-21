@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import com.squareup.wire.ProtoAdapter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ProtoMetricsDataMapper;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +28,7 @@ public final class MetricDataSerializer implements SignalSerializer<MetricData> 
     MetricsData proto = ProtoMetricsDataMapper.getInstance().toProto(metricData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       int size = MetricsData.ADAPTER.encodedSize(proto);
-      ProtoAdapter.UINT32.encode(out, size);
+      ProtobufTools.writeRawVarint32(size, out);
       proto.encode(out);
       return out.toByteArray();
     } catch (IOException e) {
