@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.29.0 (2023-08-23)
 
 ### Consistent sampling
 
