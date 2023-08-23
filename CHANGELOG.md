@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- Add a provider for consistent parent based probability sampler
+  ([#1005](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1005))
+
+### Disk buffering
+
+- Migrate StorageFile to FileOperations
+  ([#986](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/986))
+
+### JMX metrics
+
+- [jmx-metrics] Collect in callback
+  ([#949](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/949))
+- Added transformation closure to MBeanHelper
+  ([#960](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/960))
+
 ## Version 1.28.0 (2023-07-14)
 
 ### AWS X-Ray SDK support
