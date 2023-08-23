@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.29.0 (2023-08-23)
+
 ### Consistent sampling
 
 - Add a provider for consistent parent based probability sampler
