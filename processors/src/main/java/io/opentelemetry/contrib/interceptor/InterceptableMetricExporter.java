@@ -8,15 +8,12 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Collection;
 
+/** Intercepts metrics before delegating them to the real exporter. */
 public class InterceptableMetricExporter extends Interceptable<MetricData>
     implements MetricExporter {
   private final MetricExporter delegate;
 
-  public static InterceptableMetricExporter create(MetricExporter delegate) {
-    return new InterceptableMetricExporter(delegate);
-  }
-
-  private InterceptableMetricExporter(MetricExporter delegate) {
+  public InterceptableMetricExporter(MetricExporter delegate) {
     this.delegate = delegate;
   }
 

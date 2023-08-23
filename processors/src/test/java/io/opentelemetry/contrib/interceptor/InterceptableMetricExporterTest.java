@@ -26,7 +26,7 @@ class InterceptableMetricExporterTest {
   @BeforeEach
   public void setUp() {
     memoryMetricExporter = InMemoryMetricExporter.create();
-    interceptable = InterceptableMetricExporter.create(memoryMetricExporter);
+    interceptable = new InterceptableMetricExporter(memoryMetricExporter);
     meterProvider =
         SdkMeterProvider.builder()
             .registerMetricReader(PeriodicMetricReader.create(interceptable))

@@ -10,11 +10,7 @@ import java.util.Collection;
 public class InterceptableSpanExporter extends Interceptable<SpanData> implements SpanExporter {
   private final SpanExporter delegate;
 
-  public static InterceptableSpanExporter create(SpanExporter delegate) {
-    return new InterceptableSpanExporter(delegate);
-  }
-
-  private InterceptableSpanExporter(SpanExporter delegate) {
+  public InterceptableSpanExporter(SpanExporter delegate) {
     this.delegate = delegate;
   }
 

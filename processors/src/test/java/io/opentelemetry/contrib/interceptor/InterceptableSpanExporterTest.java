@@ -23,7 +23,7 @@ class InterceptableSpanExporterTest {
   @BeforeEach
   public void setUp() {
     memorySpanExporter = InMemorySpanExporter.create();
-    interceptable = InterceptableSpanExporter.create(memorySpanExporter);
+    interceptable = new InterceptableSpanExporter(memorySpanExporter);
     tracer =
         SdkTracerProvider.builder()
             .addSpanProcessor(SimpleSpanProcessor.create(interceptable))
