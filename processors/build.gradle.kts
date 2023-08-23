@@ -13,4 +13,5 @@ java {
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
