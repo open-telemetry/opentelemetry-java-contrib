@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.interceptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,7 +81,8 @@ class InterceptableLogRecordExporterTest {
     logger.logRecordBuilder().setBody("This log will be deleted").emit();
     logger.logRecordBuilder().setBody("Another log").emit();
 
-    List<LogRecordData> finishedLogRecordItems = memoryLogRecordExporter.getFinishedLogRecordItems();
+    List<LogRecordData> finishedLogRecordItems =
+        memoryLogRecordExporter.getFinishedLogRecordItems();
     assertEquals(2, finishedLogRecordItems.size());
     assertEquals("One log", finishedLogRecordItems.get(0).getBody().asString());
     assertEquals("Another log", finishedLogRecordItems.get(1).getBody().asString());
