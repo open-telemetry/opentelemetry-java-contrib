@@ -10,4 +10,5 @@ otelJava.moduleName.set("io.opentelemetry.contrib.awsxray.propagator")
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.2")
 }
