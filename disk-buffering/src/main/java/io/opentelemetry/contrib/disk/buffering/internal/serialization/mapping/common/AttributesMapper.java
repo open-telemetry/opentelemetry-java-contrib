@@ -32,15 +32,15 @@ public final class AttributesMapper {
   public Attributes protoToAttributes(List<KeyValue> values) {
     AttributesBuilder builder = Attributes.builder();
     for (KeyValue keyValue : values) {
-      addValue(builder, keyValue.getKey(), keyValue.getValue());
+      addValue(builder, keyValue.key, keyValue.value);
     }
     return builder.build();
   }
 
   private static KeyValue attributeEntryToProto(AttributeKey<?> key, Object value) {
-    KeyValue.Builder builder = KeyValue.newBuilder();
-    builder.setKey(key.getKey());
-    builder.setValue(attributeValueToProto(key.getType(), value));
+    KeyValue.Builder builder = new KeyValue.Builder();
+    builder.key(key.getKey());
+    builder.value(attributeValueToProto(key.getType(), value));
     return builder.build();
   }
 
@@ -68,37 +68,37 @@ public final class AttributesMapper {
   }
 
   private static AnyValue arrayToAnyValue(List<AnyValue> value) {
-    return AnyValue.newBuilder()
-        .setArrayValue(ArrayValue.newBuilder().addAllValues(value).build())
+    return new AnyValue.Builder()
+        .array_value(new ArrayValue.Builder().values(value).build())
         .build();
   }
 
   private static void addValue(AttributesBuilder builder, String key, AnyValue value) {
-    if (value.hasStringValue()) {
-      builder.put(AttributeKey.stringKey(key), value.getStringValue());
-    } else if (value.hasBoolValue()) {
-      builder.put(AttributeKey.booleanKey(key), value.getBoolValue());
-    } else if (value.hasIntValue()) {
-      builder.put(AttributeKey.longKey(key), value.getIntValue());
-    } else if (value.hasDoubleValue()) {
-      builder.put(AttributeKey.doubleKey(key), value.getDoubleValue());
-    } else if (value.hasArrayValue()) {
-      addArray(builder, key, value.getArrayValue());
+    if (value.string_value != null) {
+      builder.put(AttributeKey.stringKey(key), value.string_value);
+    } else if (value.bool_value != null) {
+      builder.put(AttributeKey.booleanKey(key), value.bool_value);
+    } else if (value.int_value != null) {
+      builder.put(AttributeKey.longKey(key), value.int_value);
+    } else if (value.double_value != null) {
+      builder.put(AttributeKey.doubleKey(key), value.double_value);
+    } else if (value.array_value != null) {
+      addArray(builder, key, value.array_value);
     } else {
       throw new UnsupportedOperationException();
     }
   }
 
   private static void addArray(AttributesBuilder builder, String key, ArrayValue arrayValue) {
-    List<AnyValue> values = arrayValue.getValuesList();
+    List<AnyValue> values = arrayValue.values;
     AnyValue anyValue = values.get(0);
-    if (anyValue.hasStringValue()) {
+    if (anyValue.string_value != null) {
       builder.put(AttributeKey.stringArrayKey(key), anyValuesToStrings(values));
-    } else if (anyValue.hasBoolValue()) {
+    } else if (anyValue.bool_value != null) {
       builder.put(AttributeKey.booleanArrayKey(key), anyValuesToBooleans(values));
-    } else if (anyValue.hasIntValue()) {
+    } else if (anyValue.int_value != null) {
       builder.put(AttributeKey.longArrayKey(key), anyValuesToLongs(values));
-    } else if (anyValue.hasDoubleValue()) {
+    } else if (anyValue.double_value != null) {
       builder.put(AttributeKey.doubleArrayKey(key), anyValuesToDoubles(values));
     } else {
       throw new UnsupportedOperationException();
@@ -106,38 +106,38 @@ public final class AttributesMapper {
   }
 
   private static AnyValue stringToAnyValue(String value) {
-    AnyValue.Builder anyValue = AnyValue.newBuilder();
+    AnyValue.Builder anyValue = new AnyValue.Builder();
 
-    anyValue.setStringValue(value);
+    anyValue.string_value(value);
 
     return anyValue.build();
   }
 
   private static AnyValue booleanToAnyValue(Boolean value) {
-    AnyValue.Builder anyValue = AnyValue.newBuilder();
+    AnyValue.Builder anyValue = new AnyValue.Builder();
 
     if (value != null) {
-      anyValue.setBoolValue(value);
+      anyValue.bool_value(value);
     }
 
     return anyValue.build();
   }
 
   private static AnyValue longToAnyValue(Long value) {
-    AnyValue.Builder anyValue = AnyValue.newBuilder();
+    AnyValue.Builder anyValue = new AnyValue.Builder();
 
     if (value != null) {
-      anyValue.setIntValue(value);
+      anyValue.int_value(value);
     }
 
     return anyValue.build();
   }
 
   private static AnyValue doubleToAnyValue(Double value) {
-    AnyValue.Builder anyValue = AnyValue.newBuilder();
+    AnyValue.Builder anyValue = new AnyValue.Builder();
 
     if (value != null) {
-      anyValue.setDoubleValue(value);
+      anyValue.double_value(value);
     }
 
     return anyValue.build();
@@ -216,18 +216,18 @@ public final class AttributesMapper {
   }
 
   private static String anyValueToString(AnyValue value) {
-    return value.getStringValue();
+    return value.string_value;
   }
 
   private static Boolean anyValueToBoolean(AnyValue value) {
-    return value.getBoolValue();
+    return value.bool_value;
   }
 
   private static Long anyValueToLong(AnyValue value) {
-    return value.getIntValue();
+    return value.int_value;
   }
 
   private static Double anyValueToDouble(AnyValue value) {
-    return value.getDoubleValue();
+    return value.double_value;
   }
 }

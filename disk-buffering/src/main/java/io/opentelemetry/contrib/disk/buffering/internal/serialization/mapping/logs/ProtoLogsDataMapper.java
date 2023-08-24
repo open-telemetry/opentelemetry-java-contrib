@@ -40,7 +40,7 @@ public final class ProtoLogsDataMapper
 
   @Override
   protected List<ResourceLogs> getProtoResources(LogsData logsData) {
-    return logsData.getResourceLogsList();
+    return logsData.resource_logs;
   }
 
   @Override
@@ -53,49 +53,49 @@ public final class ProtoLogsDataMapper
           for (Map.Entry<InstrumentationScopeInfo, List<LogRecord>> logsByScope :
               instrumentationScopeInfoScopedLogsMap.entrySet()) {
             ScopeLogs.Builder scopeBuilder = createProtoScopeBuilder(logsByScope.getKey());
-            scopeBuilder.addAllLogRecords(logsByScope.getValue());
-            resourceLogsBuilder.addScopeLogs(scopeBuilder.build());
+            scopeBuilder.log_records.addAll(logsByScope.getValue());
+            resourceLogsBuilder.scope_logs.add(scopeBuilder.build());
           }
           items.add(resourceLogsBuilder.build());
         });
-    return LogsData.newBuilder().addAllResourceLogs(items).build();
+    return new LogsData.Builder().resource_logs(items).build();
   }
 
   private ScopeLogs.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {
     ScopeLogs.Builder builder =
-        ScopeLogs.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+        new ScopeLogs.Builder().scope(instrumentationScopeToProto(scopeInfo));
     if (scopeInfo.getSchemaUrl() != null) {
-      builder.setSchemaUrl(scopeInfo.getSchemaUrl());
+      builder.schema_url(scopeInfo.getSchemaUrl());
     }
     return builder;
   }
 
   private ResourceLogs.Builder createProtoResourceBuilder(Resource resource) {
-    ResourceLogs.Builder builder = ResourceLogs.newBuilder().setResource(resourceToProto(resource));
+    ResourceLogs.Builder builder = new ResourceLogs.Builder().resource(resourceToProto(resource));
     if (resource.getSchemaUrl() != null) {
-      builder.setSchemaUrl(resource.getSchemaUrl());
+      builder.schema_url(resource.getSchemaUrl());
     }
     return builder;
   }
 
   @Override
   protected List<LogRecord> getSignalsFromProto(ScopeLogs scopeSignals) {
-    return scopeSignals.getLogRecordsList();
+    return scopeSignals.log_records;
   }
 
   @Override
   protected InstrumentationScopeInfo getInstrumentationScopeFromProto(ScopeLogs scopeSignals) {
-    return protoToInstrumentationScopeInfo(scopeSignals.getScope(), scopeSignals.getSchemaUrl());
+    return protoToInstrumentationScopeInfo(scopeSignals.scope, scopeSignals.schema_url);
   }
 
   @Override
   protected List<ScopeLogs> getScopes(ResourceLogs resourceSignal) {
-    return resourceSignal.getScopeLogsList();
+    return resourceSignal.scope_logs;
   }
 
   @Override
   protected Resource getResourceFromProto(ResourceLogs resourceSignal) {
-    return protoToResource(resourceSignal.getResource(), resourceSignal.getSchemaUrl());
+    return protoToResource(resourceSignal.resource, resourceSignal.schema_url);
   }
 
   @Override

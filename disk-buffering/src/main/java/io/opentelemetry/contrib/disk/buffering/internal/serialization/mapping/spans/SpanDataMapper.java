@@ -39,26 +39,26 @@ public final class SpanDataMapper {
   private final ByteStringMapper byteStringMapper = ByteStringMapper.getInstance();
 
   public Span mapToProto(SpanData source) {
-    Span.Builder span = Span.newBuilder();
+    Span.Builder span = new Span.Builder();
 
-    span.setStartTimeUnixNano(source.getStartEpochNanos());
-    span.setEndTimeUnixNano(source.getEndEpochNanos());
+    span.start_time_unix_nano(source.getStartEpochNanos());
+    span.end_time_unix_nano(source.getEndEpochNanos());
     if (source.getEvents() != null) {
       for (EventData event : source.getEvents()) {
-        span.addEvents(eventDataToProto(event));
+        span.events.add(eventDataToProto(event));
       }
     }
     if (source.getLinks() != null) {
       for (LinkData link : source.getLinks()) {
-        span.addLinks(linkDataToProto(link));
+        span.links.add(linkDataToProto(link));
       }
     }
-    span.setTraceId(byteStringMapper.stringToProto(source.getTraceId()));
-    span.setSpanId(byteStringMapper.stringToProto(source.getSpanId()));
-    span.setParentSpanId(byteStringMapper.stringToProto(source.getParentSpanId()));
-    span.setName(source.getName());
-    span.setKind(mapSpanKindToProto(source.getKind()));
-    span.setStatus(statusDataToProto(source.getStatus()));
+    span.trace_id(byteStringMapper.stringToProto(source.getTraceId()));
+    span.span_id(byteStringMapper.stringToProto(source.getSpanId()));
+    span.parent_span_id(byteStringMapper.stringToProto(source.getParentSpanId()));
+    span.name(source.getName());
+    span.kind(mapSpanKindToProto(source.getKind()));
+    span.status(statusDataToProto(source.getStatus()));
 
     addSpanProtoExtras(source, span);
 
@@ -66,26 +66,26 @@ public final class SpanDataMapper {
   }
 
   private static void addSpanProtoExtras(SpanData source, Span.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
-    target.setDroppedAttributesCount(
+    target.attributes.addAll(attributesToProto(source.getAttributes()));
+    target.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
-    target.setDroppedEventsCount(source.getTotalRecordedEvents() - getListSize(source.getEvents()));
-    target.setDroppedLinksCount(source.getTotalRecordedLinks() - getListSize(source.getLinks()));
-    target.setTraceState(encodeTraceState(source.getSpanContext().getTraceState()));
+    target.dropped_events_count(source.getTotalRecordedEvents() - getListSize(source.getEvents()));
+    target.dropped_links_count(source.getTotalRecordedLinks() - getListSize(source.getLinks()));
+    target.trace_state(encodeTraceState(source.getSpanContext().getTraceState()));
   }
 
   public SpanData mapToSdk(
       Span source, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
     SpanDataImpl.Builder spanData = SpanDataImpl.builder();
 
-    spanData.setStartEpochNanos(source.getStartTimeUnixNano());
-    spanData.setEndEpochNanos(source.getEndTimeUnixNano());
-    spanData.setEvents(eventListToEventDataList(source.getEventsList()));
-    spanData.setLinks(linkListToLinkDataList(source.getLinksList()));
-    spanData.setName(source.getName());
-    spanData.setKind(mapSpanKindToSdk(source.getKind()));
-    if (source.hasStatus()) {
-      spanData.setStatus(mapStatusDataToSdk(source.getStatus()));
+    spanData.setStartEpochNanos(source.start_time_unix_nano);
+    spanData.setEndEpochNanos(source.end_time_unix_nano);
+    spanData.setEvents(eventListToEventDataList(source.events));
+    spanData.setLinks(linkListToLinkDataList(source.links));
+    spanData.setName(source.name);
+    spanData.setKind(mapSpanKindToSdk(source.kind));
+    if (source.status != null) {
+      spanData.setStatus(mapStatusDataToSdk(source.status));
     }
 
     addSpanDataExtras(source, spanData, resource, instrumentationScopeInfo);
@@ -98,40 +98,40 @@ public final class SpanDataMapper {
       SpanDataImpl.Builder target,
       Resource resource,
       InstrumentationScopeInfo instrumentationScopeInfo) {
-    Attributes attributes = protoToAttributes(source.getAttributesList());
+    Attributes attributes = protoToAttributes(source.attributes);
     target.setAttributes(attributes);
     target.setResource(resource);
     target.setInstrumentationScopeInfo(instrumentationScopeInfo);
-    String traceId = ByteStringMapper.getInstance().protoToString(source.getTraceId());
+    String traceId = ByteStringMapper.getInstance().protoToString(source.trace_id);
     target.setSpanContext(
         SpanContext.create(
             traceId,
-            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.span_id),
             TraceFlags.getSampled(),
-            decodeTraceState(source.getTraceState())));
+            decodeTraceState(source.trace_state)));
     target.setParentSpanContext(
         SpanContext.create(
             traceId,
-            ByteStringMapper.getInstance().protoToString(source.getParentSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.parent_span_id),
             TraceFlags.getSampled(),
             TraceState.getDefault()));
-    target.setTotalAttributeCount(source.getDroppedAttributesCount() + attributes.size());
+    target.setTotalAttributeCount(source.dropped_attributes_count + attributes.size());
     target.setTotalRecordedEvents(
-        calculateRecordedItems(source.getDroppedEventsCount(), source.getEventsCount()));
+        calculateRecordedItems(source.dropped_events_count, source.events.size()));
     target.setTotalRecordedLinks(
-        calculateRecordedItems(source.getDroppedLinksCount(), source.getLinksCount()));
+        calculateRecordedItems(source.dropped_links_count, source.links.size()));
   }
 
   private static StatusData mapStatusDataToSdk(Status source) {
-    return StatusData.create(getStatusCode(source.getCodeValue()), source.getMessage());
+    return StatusData.create(getStatusCode(source.code.getValue()), source.message);
   }
 
   private static Span.Event eventDataToProto(EventData source) {
-    Span.Event.Builder event = Span.Event.newBuilder();
+    Span.Event.Builder event = new Span.Event.Builder();
 
-    event.setTimeUnixNano(source.getEpochNanos());
-    event.setName(source.getName());
-    event.setDroppedAttributesCount(source.getDroppedAttributesCount());
+    event.time_unix_nano(source.getEpochNanos());
+    event.name(source.getName());
+    event.dropped_attributes_count(source.getDroppedAttributesCount());
 
     addEventProtoExtras(source, event);
 
@@ -139,14 +139,14 @@ public final class SpanDataMapper {
   }
 
   private static void addEventProtoExtras(EventData source, Span.Event.Builder target) {
-    target.addAllAttributes(attributesToProto(source.getAttributes()));
+    target.attributes.addAll(attributesToProto(source.getAttributes()));
   }
 
   private static Status statusDataToProto(StatusData source) {
-    Status.Builder status = Status.newBuilder();
+    Status.Builder status = new Status.Builder();
 
-    status.setMessage(source.getDescription());
-    status.setCode(mapStatusCodeToProto(source.getStatusCode()));
+    status.message(source.getDescription());
+    status.code(mapStatusCodeToProto(source.getStatusCode()));
 
     return status.build();
   }
@@ -198,12 +198,12 @@ public final class SpanDataMapper {
   }
 
   private static EventData eventDataToSdk(Span.Event source) {
-    Attributes attributes = protoToAttributes(source.getAttributesList());
+    Attributes attributes = protoToAttributes(source.attributes);
     return EventData.create(
-        source.getTimeUnixNano(),
-        source.getName(),
+        source.time_unix_nano,
+        source.name,
         attributes,
-        attributes.size() + source.getDroppedAttributesCount());
+        attributes.size() + source.dropped_attributes_count);
   }
 
   private static SpanKind mapSpanKindToSdk(Span.SpanKind source) {
@@ -251,14 +251,14 @@ public final class SpanDataMapper {
   }
 
   private static LinkData linkDataToSdk(Span.Link source) {
-    Attributes attributes = protoToAttributes(source.getAttributesList());
-    int totalAttrCount = source.getDroppedAttributesCount() + attributes.size();
+    Attributes attributes = protoToAttributes(source.attributes);
+    int totalAttrCount = source.dropped_attributes_count + attributes.size();
     SpanContext spanContext =
         SpanContext.create(
-            ByteStringMapper.getInstance().protoToString(source.getTraceId()),
-            ByteStringMapper.getInstance().protoToString(source.getSpanId()),
+            ByteStringMapper.getInstance().protoToString(source.trace_id),
+            ByteStringMapper.getInstance().protoToString(source.span_id),
             TraceFlags.getSampled(),
-            decodeTraceState(source.getTraceState()));
+            decodeTraceState(source.trace_state));
     return LinkData.create(spanContext, attributes, totalAttrCount);
   }
 
@@ -304,14 +304,14 @@ public final class SpanDataMapper {
   }
 
   private static Span.Link linkDataToProto(LinkData source) {
-    Span.Link.Builder builder = Span.Link.newBuilder();
+    Span.Link.Builder builder = new Span.Link.Builder();
     SpanContext spanContext = source.getSpanContext();
-    builder.setTraceId(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
-    builder.setSpanId(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
-    builder.addAllAttributes(attributesToProto(source.getAttributes()));
-    builder.setDroppedAttributesCount(
+    builder.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
+    builder.span_id(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
+    builder.attributes.addAll(attributesToProto(source.getAttributes()));
+    builder.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
-    builder.setTraceState(encodeTraceState(spanContext.getTraceState()));
+    builder.trace_state(encodeTraceState(spanContext.getTraceState()));
 
     return builder.build();
   }
