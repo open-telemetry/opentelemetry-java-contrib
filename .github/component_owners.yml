@@ -49,7 +49,7 @@ components:
     - jack-berg
   processors:
     - LikeTheSalad
-    - ?
+    - breedx-splk
   prometheus-collector:
     - jkwatson
   resource-providers:
