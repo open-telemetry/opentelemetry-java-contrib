@@ -10,11 +10,11 @@ rootProject.extra["versions"] = dependencyVersions
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.15.2",
   "com.google.guava:guava-bom:32.1.2-jre",
-  "com.linecorp.armeria:armeria-bom:1.24.3",
+  "com.linecorp.armeria:armeria-bom:1.25.1",
   "org.junit:junit-bom:5.10.0",
   "io.grpc:grpc-bom:1.57.2",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.28.0-alpha",
-  "org.testcontainers:testcontainers-bom:1.18.3"
+  "org.testcontainers:testcontainers-bom:1.19.0"
 )
 
 val autoServiceVersion = "1.1.1"
