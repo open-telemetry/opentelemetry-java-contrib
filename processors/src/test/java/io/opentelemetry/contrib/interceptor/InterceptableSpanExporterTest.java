@@ -11,6 +11,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
@@ -23,22 +24,24 @@ import org.junit.jupiter.api.Test;
 class InterceptableSpanExporterTest {
   private InMemorySpanExporter memorySpanExporter;
   private Tracer tracer;
-  private InterceptableSpanExporter interceptable;
+  private ComposableInterceptor<SpanData> interceptor;
 
   @BeforeEach
   public void setUp() {
     memorySpanExporter = InMemorySpanExporter.create();
-    interceptable = new InterceptableSpanExporter(memorySpanExporter);
+    interceptor = new ComposableInterceptor<>();
     tracer =
         SdkTracerProvider.builder()
-            .addSpanProcessor(SimpleSpanProcessor.create(interceptable))
+            .addSpanProcessor(
+                SimpleSpanProcessor.create(
+                    new InterceptableSpanExporter(memorySpanExporter, interceptor)))
             .build()
             .get("TestScope");
   }
 
   @Test
   public void verifySpanModification() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           ModifiableSpanData modified = new ModifiableSpanData(item);
           modified.attributes.put("global.attr", "from interceptor");
@@ -58,7 +61,7 @@ class InterceptableSpanExporterTest {
 
   @Test
   public void verifySpanFiltering() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           if (item.getName().contains("deleted")) {
             return null;

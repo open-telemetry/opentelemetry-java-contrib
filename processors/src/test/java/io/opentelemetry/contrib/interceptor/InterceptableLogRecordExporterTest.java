@@ -13,6 +13,7 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.data.Body;
@@ -28,22 +29,24 @@ import org.junit.jupiter.api.Test;
 class InterceptableLogRecordExporterTest {
   private InMemoryLogRecordExporter memoryLogRecordExporter;
   private Logger logger;
-  private InterceptableLogRecordExporter interceptable;
+  private ComposableInterceptor<LogRecordData> interceptor;
 
   @BeforeEach
   public void setUp() {
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
-    interceptable = new InterceptableLogRecordExporter(memoryLogRecordExporter);
+    interceptor = new ComposableInterceptor<>();
     logger =
         SdkLoggerProvider.builder()
-            .addLogRecordProcessor(SimpleLogRecordProcessor.create(interceptable))
+            .addLogRecordProcessor(
+                SimpleLogRecordProcessor.create(
+                    new InterceptableLogRecordExporter(memoryLogRecordExporter, interceptor)))
             .build()
             .get("TestScope");
   }
 
   @Test
   public void verifyLogModification() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           ModifiableLogRecordData modified = new ModifiableLogRecordData(item);
           modified.attributes.put("global.attr", "from interceptor");
@@ -69,7 +72,7 @@ class InterceptableLogRecordExporterTest {
 
   @Test
   public void verifyLogFiltering() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           if (item.getBody().asString().contains("deleted")) {
             return null;

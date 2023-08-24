@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import io.opentelemetry.contrib.interceptor.common.Interceptable;
+import static io.opentelemetry.contrib.interceptor.common.Utilities.interceptAll;
+
+import io.opentelemetry.contrib.interceptor.api.Interceptor;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -14,17 +16,18 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Collection;
 
 /** Intercepts metrics before delegating them to the real exporter. */
-public class InterceptableMetricExporter extends Interceptable<MetricData>
-    implements MetricExporter {
+public class InterceptableMetricExporter implements MetricExporter {
   private final MetricExporter delegate;
+  private final Interceptor<MetricData> interceptor;
 
-  public InterceptableMetricExporter(MetricExporter delegate) {
+  public InterceptableMetricExporter(MetricExporter delegate, Interceptor<MetricData> interceptor) {
     this.delegate = delegate;
+    this.interceptor = interceptor;
   }
 
   @Override
   public CompletableResultCode export(Collection<MetricData> metrics) {
-    return delegate.export(interceptAll(metrics));
+    return delegate.export(interceptAll(metrics, interceptor));
   }
 
   @Override

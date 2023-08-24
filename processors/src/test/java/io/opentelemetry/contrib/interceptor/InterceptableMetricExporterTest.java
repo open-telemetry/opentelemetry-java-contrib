@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.Data;
@@ -26,22 +27,24 @@ class InterceptableMetricExporterTest {
   private InMemoryMetricExporter memoryMetricExporter;
   private SdkMeterProvider meterProvider;
   private Meter meter;
-  private InterceptableMetricExporter interceptable;
+  private ComposableInterceptor<MetricData> interceptor;
 
   @BeforeEach
   public void setUp() {
     memoryMetricExporter = InMemoryMetricExporter.create();
-    interceptable = new InterceptableMetricExporter(memoryMetricExporter);
+    interceptor = new ComposableInterceptor<>();
     meterProvider =
         SdkMeterProvider.builder()
-            .registerMetricReader(PeriodicMetricReader.create(interceptable))
+            .registerMetricReader(
+                PeriodicMetricReader.create(
+                    new InterceptableMetricExporter(memoryMetricExporter, interceptor)))
             .build();
     meter = meterProvider.get("TestScope");
   }
 
   @Test
   public void verifyMetricModification() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           ModifiableMetricData modified = new ModifiableMetricData(item);
           modified.name = "ModifiedName";
@@ -58,7 +61,7 @@ class InterceptableMetricExporterTest {
 
   @Test
   public void verifyMetricFiltering() {
-    interceptable.addInterceptor(
+    interceptor.add(
         item -> {
           if (item.getName().contains("Deleted")) {
             return null;
