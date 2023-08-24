@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import static io.opentelemetry.contrib.interceptor.common.Utilities.interceptAll;
-
 import io.opentelemetry.contrib.interceptor.api.Interceptor;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -26,7 +24,7 @@ public class InterceptableLogRecordExporter implements LogRecordExporter {
 
   @Override
   public CompletableResultCode export(Collection<LogRecordData> logs) {
-    return delegate.export(interceptAll(logs, interceptor));
+    return delegate.export(interceptor.interceptAll(logs));
   }
 
   @Override

@@ -5,6 +5,10 @@
 
 package io.opentelemetry.contrib.interceptor.api;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Intercepts a signal before it gets exported. The signal can get updated and/or filtered out based
  * on each interceptor implementation.
@@ -20,4 +24,18 @@ public interface Interceptor<T> {
    *     is.
    */
   T intercept(T item);
+
+  /** Intercepts a collection of signals. */
+  default Collection<T> interceptAll(Collection<T> items) {
+    List<T> result = new ArrayList<>();
+
+    for (T item : items) {
+      T intercepted = intercept(item);
+      if (intercepted != null) {
+        result.add(intercepted);
+      }
+    }
+
+    return result;
+  }
 }

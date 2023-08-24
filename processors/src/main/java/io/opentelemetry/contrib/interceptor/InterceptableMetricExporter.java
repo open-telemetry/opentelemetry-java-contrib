@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import static io.opentelemetry.contrib.interceptor.common.Utilities.interceptAll;
-
 import io.opentelemetry.contrib.interceptor.api.Interceptor;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
@@ -27,7 +25,7 @@ public class InterceptableMetricExporter implements MetricExporter {
 
   @Override
   public CompletableResultCode export(Collection<MetricData> metrics) {
-    return delegate.export(interceptAll(metrics, interceptor));
+    return delegate.export(interceptor.interceptAll(metrics));
   }
 
   @Override

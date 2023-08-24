@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import static io.opentelemetry.contrib.interceptor.common.Utilities.interceptAll;
-
 import io.opentelemetry.contrib.interceptor.api.Interceptor;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -25,7 +23,7 @@ public class InterceptableSpanExporter implements SpanExporter {
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {
-    return delegate.export(interceptAll(spans, interceptor));
+    return delegate.export(interceptor.interceptAll(spans));
   }
 
   @Override
