@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.interceptor.api;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Intercepts a signal before it gets exported. The signal can get updated and/or filtered out based
