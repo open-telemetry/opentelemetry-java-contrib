@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.util.Collection;
 
 /** Intercepts logs before delegating them to the real exporter. */
-public class InterceptableLogRecordExporter implements LogRecordExporter {
+public final class InterceptableLogRecordExporter implements LogRecordExporter {
   private final LogRecordExporter delegate;
   private final Interceptor<LogRecordData> interceptor;
 
