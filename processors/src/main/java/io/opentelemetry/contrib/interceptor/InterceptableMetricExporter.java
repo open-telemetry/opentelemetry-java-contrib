@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Collection;
 
 /** Intercepts metrics before delegating them to the real exporter. */
-public class InterceptableMetricExporter implements MetricExporter {
+public final class InterceptableMetricExporter implements MetricExporter {
   private final MetricExporter delegate;
   private final Interceptor<MetricData> interceptor;
 

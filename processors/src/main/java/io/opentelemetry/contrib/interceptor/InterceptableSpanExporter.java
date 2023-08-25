@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
 
 /** Intercepts spans before delegating them to the real exporter. */
-public class InterceptableSpanExporter implements SpanExporter {
+public final class InterceptableSpanExporter implements SpanExporter {
   private final SpanExporter delegate;
   private final Interceptor<SpanData> interceptor;
 
