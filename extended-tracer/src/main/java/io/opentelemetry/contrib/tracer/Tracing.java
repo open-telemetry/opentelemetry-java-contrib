@@ -46,11 +46,14 @@ public final class Tracing {
       };
   private final OpenTelemetry openTelemetry;
 
-  public Tracing(OpenTelemetry openTelemetry) {
+  private final Tracer tracer;
+
+  public Tracing(OpenTelemetry openTelemetry, String tracerName) {
     this.openTelemetry = openTelemetry;
+    this.tracer = openTelemetry.getTracer(tracerName);
   }
 
-  public void run(Tracer tracer, String spanName, Runnable runnable) {
+  public void run(String spanName, Runnable runnable) {
     runAndEndSpan(tracer.spanBuilder(spanName).startSpan(), runnable);
   }
 
@@ -68,7 +71,7 @@ public final class Tracing {
    *
    * @param spanName name of the new span
    */
-  public <T> T call(Tracer tracer, String spanName, Callable<T> callable) {
+  public <T> T call(String spanName, Callable<T> callable) {
     return callAndEndSpan(tracer.spanBuilder(spanName).startSpan(), callable);
   }
 

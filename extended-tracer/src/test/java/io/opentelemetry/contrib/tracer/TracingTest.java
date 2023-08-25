@@ -14,6 +14,7 @@ import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
@@ -32,29 +33,31 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class GlobalTracingTest {
+public class TracingTest {
 
   @RegisterExtension
   static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
-  private final Tracing tracing = new Tracing(otelTesting.getOpenTelemetry());
+  private final Tracing tracing = new Tracing(otelTesting.getOpenTelemetry(), "test");
+
+  private final Tracer tracer = otelTesting.getOpenTelemetry().getTracer("test");
 
   @Test
   void propagation() {
-    GlobalTracing.run(
+    tracing.run(
         "parent",
         () -> {
-          Map<String, String> propagationHeaders = GlobalTracing.getPropagationHeaders();
+          Map<String, String> propagationHeaders = tracing.getPropagationHeaders();
           assertThat(propagationHeaders).hasSize(1).containsKey("traceparent");
 
           assertThat(
-                  Span.fromContext(GlobalTracing.extractContext(propagationHeaders))
-                      .getSpanContext()
-                      .getSpanId())
+              Span.fromContext(tracing.extractContext(propagationHeaders))
+                  .getSpanContext()
+                  .getSpanId())
               .isEqualTo(Span.current().getSpanContext().getSpanId());
 
-          GlobalTracing.traceServerSpan(
-              propagationHeaders, GlobalTracing.withSpan("child"), () -> null);
+          tracing.traceServerSpan(
+              propagationHeaders, tracer.spanBuilder("child"), () -> null);
         });
 
     otelTesting
@@ -69,7 +72,7 @@ public class GlobalTracingTest {
   @Test
   void callWithBaggage() {
     String value =
-        GlobalTracing.call(
+        tracing.call(
             "parent",
             () ->
                 tracing.callWithBaggage(
@@ -80,12 +83,12 @@ public class GlobalTracingTest {
   }
 
   private static class ExtractAndRunParameter {
-    private final Consumer<Callable<Void>> extractAndRun;
+    private final BiConsumer<TracingTest, Callable<Void>> extractAndRun;
     private final SpanKind wantKind;
     private final StatusData wantStatus;
 
     private ExtractAndRunParameter(
-        Consumer<Callable<Void>> extractAndRun, SpanKind wantKind, StatusData wantStatus) {
+        BiConsumer<TracingTest, Callable<Void>> extractAndRun, SpanKind wantKind, StatusData wantStatus) {
       this.extractAndRun = extractAndRun;
       this.wantKind = wantKind;
       this.wantStatus = wantStatus;
@@ -103,19 +106,19 @@ public class GlobalTracingTest {
             named(
                 "server",
                 new ExtractAndRunParameter(
-                    c ->
-                        GlobalTracing.traceServerSpan(
-                            Collections.emptyMap(), GlobalTracing.withSpan("span"), c),
+                    (t, c) ->
+                        t.tracing.traceServerSpan(
+                            Collections.emptyMap(), t.tracer.spanBuilder("span"), c),
                     io.opentelemetry.api.trace.SpanKind.SERVER,
                     io.opentelemetry.sdk.trace.data.StatusData.error()))),
         Arguments.of(
             named(
                 "server - ignore exception",
                 new ExtractAndRunParameter(
-                    c ->
-                        GlobalTracing.traceServerSpan(
+                    (t, c) ->
+                        t.tracing.traceServerSpan(
                             Collections.emptyMap(),
-                            GlobalTracing.withSpan("span"),
+                            t.tracer.spanBuilder("span"),
                             c,
                             ignoreException),
                     io.opentelemetry.api.trace.SpanKind.SERVER,
@@ -124,19 +127,19 @@ public class GlobalTracingTest {
             named(
                 "consumer",
                 new ExtractAndRunParameter(
-                    c ->
-                        GlobalTracing.traceConsumerSpan(
-                            Collections.emptyMap(), GlobalTracing.withSpan("span"), c),
+                    (t, c) ->
+                        t.tracing.traceConsumerSpan(
+                            Collections.emptyMap(), t.tracer.spanBuilder("span"), c),
                     io.opentelemetry.api.trace.SpanKind.CONSUMER,
                     io.opentelemetry.sdk.trace.data.StatusData.error()))),
         Arguments.of(
             named(
                 "consumer - ignore exception",
                 new ExtractAndRunParameter(
-                    c ->
-                        GlobalTracing.traceConsumerSpan(
+                    (t, c) ->
+                        t.tracing.traceConsumerSpan(
                             Collections.emptyMap(),
-                            GlobalTracing.withSpan("span"),
+                            t.tracer.spanBuilder("span"),
                             c,
                             ignoreException),
                     io.opentelemetry.api.trace.SpanKind.CONSUMER,
@@ -150,6 +153,7 @@ public class GlobalTracingTest {
         .isThrownBy(
             () ->
                 parameter.extractAndRun.accept(
+                    this,
                     () -> {
                       throw new RuntimeException("ex");
                     }));
@@ -178,7 +182,7 @@ public class GlobalTracingTest {
 
   @Keep
   private static Stream<Arguments> setSpanError() {
-    Tracing tracing = new Tracing(otelTesting.getOpenTelemetry());
+    Tracing tracing = new Tracing(otelTesting.getOpenTelemetry(), "test");
     RuntimeException exception = new RuntimeException("ex");
     return Stream.of(
         Arguments.of(
@@ -200,7 +204,7 @@ public class GlobalTracingTest {
   @ParameterizedTest
   @MethodSource
   void setSpanError(SetSpanErrorParameter parameter) {
-    GlobalTracing.run("parent", () -> parameter.setError.accept(Span.current()));
+    tracing.run("parent", () -> parameter.setError.accept(Span.current()));
 
     otelTesting
         .assertTraces()
