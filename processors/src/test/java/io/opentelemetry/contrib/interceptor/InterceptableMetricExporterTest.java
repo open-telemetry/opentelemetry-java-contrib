@@ -30,7 +30,7 @@ class InterceptableMetricExporterTest {
   private ComposableInterceptor<MetricData> interceptor;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     memoryMetricExporter = InMemoryMetricExporter.create();
     interceptor = new ComposableInterceptor<>();
     meterProvider =
@@ -43,7 +43,7 @@ class InterceptableMetricExporterTest {
   }
 
   @Test
-  public void verifyMetricModification() {
+  void verifyMetricModification() {
     interceptor.add(
         item -> {
           ModifiableMetricData modified = new ModifiableMetricData(item);
@@ -60,7 +60,7 @@ class InterceptableMetricExporterTest {
   }
 
   @Test
-  public void verifyMetricFiltering() {
+  void verifyMetricFiltering() {
     interceptor.add(
         item -> {
           if (item.getName().contains("Deleted")) {

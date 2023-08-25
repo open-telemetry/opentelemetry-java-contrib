@@ -27,7 +27,7 @@ class InterceptableSpanExporterTest {
   private ComposableInterceptor<SpanData> interceptor;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     memorySpanExporter = InMemorySpanExporter.create();
     interceptor = new ComposableInterceptor<>();
     tracer =
@@ -40,7 +40,7 @@ class InterceptableSpanExporterTest {
   }
 
   @Test
-  public void verifySpanModification() {
+  void verifySpanModification() {
     interceptor.add(
         item -> {
           ModifiableSpanData modified = new ModifiableSpanData(item);
@@ -60,7 +60,7 @@ class InterceptableSpanExporterTest {
   }
 
   @Test
-  public void verifySpanFiltering() {
+  void verifySpanFiltering() {
     interceptor.add(
         item -> {
           if (item.getName().contains("deleted")) {

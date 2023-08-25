@@ -45,7 +45,7 @@ class InterceptableLogRecordExporterTest {
   }
 
   @Test
-  public void verifyLogModification() {
+  void verifyLogModification() {
     interceptor.add(
         item -> {
           ModifiableLogRecordData modified = new ModifiableLogRecordData(item);
@@ -71,7 +71,7 @@ class InterceptableLogRecordExporterTest {
   }
 
   @Test
-  public void verifyLogFiltering() {
+  void verifyLogFiltering() {
     interceptor.add(
         item -> {
           if (item.getBody().asString().contains("deleted")) {
