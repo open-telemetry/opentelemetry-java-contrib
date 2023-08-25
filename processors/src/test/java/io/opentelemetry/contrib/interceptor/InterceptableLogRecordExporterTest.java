@@ -32,7 +32,7 @@ class InterceptableLogRecordExporterTest {
   private ComposableInterceptor<LogRecordData> interceptor;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
     interceptor = new ComposableInterceptor<>();
     logger =
