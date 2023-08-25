@@ -1,7 +1,7 @@
 # extended-tracer
 
 Utility methods to make it easier to use the OpenTelemetry tracer.
-                                                                       
+
 ## Usage Examples
 
 Here are some examples how the utility methods can help reduce boilerplate code.
@@ -31,7 +31,7 @@ String transactionId = tracing.call("reset_checkout", () -> resetCheckout(cartId
 ```
 
 Note: Use `run` instead of `call` if the function returns `void`.
-                                                                 
+
 ### Trace context propagation
 
 Before:
@@ -51,8 +51,8 @@ openTelemetry
         });
 
 // add propagationHeaders to request headers and call checkout service
-```    
-   
+```
+
 ```java
 // in checkout service: get request headers into a Map<String, String> requestHeaders
 Map<String, String> requestHeaders = new HashMap<>();
@@ -106,17 +106,17 @@ Tracing tracing = new Tracing(openTelemetry, "service");
 Map<String, String> propagationHeaders = tracing.getPropagationHeaders();
 // add propagationHeaders to request headers and call checkout service
 ```
-   
+
 ```java
 // in checkout service: get request headers into a Map<String, String> requestHeaders
 Map<String, String> requestHeaders = new HashMap<>();
 String cartId = "cartId";
-    
+
 Tracing tracing = new Tracing(openTelemetry, "service");
-String transactionId = tracing.traceServerSpan(requestHeaders, 
+String transactionId = tracing.traceServerSpan(requestHeaders,
     tracer.spanBuilder("checkout_cart"), () -> processCheckout(cartId));
 ```
-        
+
 ### Setting baggage entries
 
 Before:
