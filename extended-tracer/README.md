@@ -25,6 +25,7 @@ try (Scope scope = span.makeCurrent()) {
 ```
 
 After:
+
 ```java
 Tracing tracing = new Tracing(openTelemetry, "service");
 String transactionId = tracing.call("reset_checkout", () -> resetCheckout(cartId));
@@ -131,6 +132,7 @@ try (Scope ignore = context.makeCurrent()) {
 ```
 
 After:
+
 ```java
 Tracing tracing = new Tracing(openTelemetry, "service");
 String value = tracing.callWithBaggage(
