@@ -14,9 +14,7 @@ public final class ComposableInterceptor<T> implements Interceptor<T> {
   private final List<Interceptor<T>> interceptors = new CopyOnWriteArrayList<>();
 
   public void add(Interceptor<T> interceptor) {
-    if (!interceptors.contains(interceptor)) {
-      interceptors.add(interceptor);
-    }
+    interceptors.addIfAbsent(interceptor);
   }
 
   @Override
