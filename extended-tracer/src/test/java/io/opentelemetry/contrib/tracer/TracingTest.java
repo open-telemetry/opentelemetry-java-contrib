@@ -51,13 +51,12 @@ public class TracingTest {
           assertThat(propagationHeaders).hasSize(1).containsKey("traceparent");
 
           assertThat(
-              Span.fromContext(tracing.extractContext(propagationHeaders))
-                  .getSpanContext()
-                  .getSpanId())
+                  Span.fromContext(tracing.extractContext(propagationHeaders))
+                      .getSpanContext()
+                      .getSpanId())
               .isEqualTo(Span.current().getSpanContext().getSpanId());
 
-          tracing.traceServerSpan(
-              propagationHeaders, tracer.spanBuilder("child"), () -> null);
+          tracing.traceServerSpan(propagationHeaders, tracer.spanBuilder("child"), () -> null);
         });
 
     otelTesting
@@ -88,7 +87,9 @@ public class TracingTest {
     private final StatusData wantStatus;
 
     private ExtractAndRunParameter(
-        BiConsumer<TracingTest, Callable<Void>> extractAndRun, SpanKind wantKind, StatusData wantStatus) {
+        BiConsumer<TracingTest, Callable<Void>> extractAndRun,
+        SpanKind wantKind,
+        StatusData wantStatus) {
       this.extractAndRun = extractAndRun;
       this.wantKind = wantKind;
       this.wantStatus = wantStatus;
