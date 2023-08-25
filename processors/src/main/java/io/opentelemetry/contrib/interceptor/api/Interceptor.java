@@ -23,6 +23,7 @@ public interface Interceptor<T> {
    *     If there's no operation needed to be done for a specific signal, it should be returned as
    *     is.
    */
+  @Nullable
   T intercept(T item);
 
   /** Intercepts a collection of signals. */
