@@ -11,7 +11,7 @@ import java.util.List;
 
 /** Allows to run an item through a list of interceptors in the order they were added. */
 public final class ComposableInterceptor<T> implements Interceptor<T> {
-  private final List<Interceptor<T>> interceptors = new ArrayList<>();
+  private final List<Interceptor<T>> interceptors = new CopyOnWriteArrayList<>();
 
   public void add(Interceptor<T> interceptor) {
     if (!interceptors.contains(interceptor)) {
