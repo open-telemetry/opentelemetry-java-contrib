@@ -94,6 +94,7 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
             .addPropertiesSupplier(() -> properties)
+            .disableShutdownHook()
             .build();
 
     if (logger.isDebugEnabled()) {
