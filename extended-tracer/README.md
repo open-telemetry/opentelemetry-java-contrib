@@ -15,10 +15,10 @@ Span span = tracer.spanBuilder("reset_checkout").startSpan();
 String transactionId;
 try (Scope scope = span.makeCurrent()) {
   transactionId = resetCheckout(cartId);
-} catch (Exception e) {
+} catch (Throwable e) {
   span.setStatus(StatusCode.ERROR);
   span.recordException(e);
-  throw e;
+  throw e; // or throw new RuntimeException(e) - depending on your error handling strategy
 } finally {
   span.end();
 }
@@ -31,7 +31,11 @@ Tracing tracing = new Tracing(openTelemetry, "service");
 String transactionId = tracing.call("reset_checkout", () -> resetCheckout(cartId));
 ```
 
-Note: Use `run` instead of `call` if the function returns `void`.
+Note:
+
+- Use `run` instead of `call` if the function returns `void`.
+- Exceptions are re-thrown without modification - see [Exception handling](#exception-handling)
+  for more details.
 
 ### Trace context propagation
 
@@ -90,10 +94,10 @@ try (Scope ignore = newContext.makeCurrent()) {
   Span span = spanBuilder.setSpanKind(SERVER).startSpan();
   try (Scope scope = span.makeCurrent()) {
     transactionId = processCheckout(cartId);
-  } catch (Exception e) {
+  } catch (Throwable e) {
     span.setStatus(StatusCode.ERROR);
     span.recordException(e);
-    throw e;
+    throw e; // or throw new RuntimeException(e) - depending on your error handling strategy
   } finally {
     span.end();
   }
@@ -118,6 +122,13 @@ String transactionId = tracing.traceServerSpan(requestHeaders,
     tracer.spanBuilder("checkout_cart"), () -> processCheckout(cartId));
 ```
 
+Note:
+
+- You can use `traceConsumerSpan` if you want to trace a consumer (e.g. from a message queue)
+  instead of a server.
+- Exceptions are re-thrown without modification - see [Exception handling](#exception-handling)
+  for more details.
+
 ### Setting baggage entries
 
 Before:
@@ -140,7 +151,15 @@ String value = tracing.callWithBaggage(
     () -> Baggage.current().getEntryValue("key"))
 ```
 
----
+## Exception handling
+
+`Tracing` re-throws exceptions without modification. This means you can catch exceptions around
+`Tracing` calls and handle them as you would without `Tracing`.
+
+Note that the `Tracing` methods do not declare any checked exceptions
+(the idea is taken from [@SneakyThrows](https://projectlombok.org/features/SneakyThrows)).
+Declaring a checked exception would force callers to handle it, which would create a lot of
+boilerplate code. Instead, `Tracing` re-throws checked exceptions as unchecked exceptions.
 
 ## Component owners
 

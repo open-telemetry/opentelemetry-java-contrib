@@ -81,11 +81,11 @@ public final class Tracing {
 
   @SuppressWarnings("NullAway")
   public <T> T callAndEndSpan(
-      Span span, Callable<T> callable, BiConsumer<Span, Exception> handleException) {
+      Span span, Callable<T> callable, BiConsumer<Span, Throwable> handleException) {
     //noinspection unused
     try (Scope scope = span.makeCurrent()) {
       return callable.call();
-    } catch (Exception e) {
+    } catch (Throwable e) {
       handleException.accept(span, e);
       sneakyThrow(e);
       return null;
@@ -207,7 +207,7 @@ public final class Tracing {
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
-      BiConsumer<Span, Exception> handleException) {
+      BiConsumer<Span, Throwable> handleException) {
     return extractAndRun(SERVER, transport, spanBuilder, callable, handleException);
   }
 
@@ -232,7 +232,7 @@ public final class Tracing {
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
-      BiConsumer<Span, Exception> handleException) {
+      BiConsumer<Span, Throwable> handleException) {
     return extractAndRun(CONSUMER, transport, spanBuilder, callable, handleException);
   }
 
@@ -241,7 +241,7 @@ public final class Tracing {
       Map<String, String> transport,
       SpanBuilder spanBuilder,
       Callable<T> callable,
-      BiConsumer<Span, Exception> handleException) {
+      BiConsumer<Span, Throwable> handleException) {
     try (Scope ignore = extractContext(transport).makeCurrent()) {
       return callAndEndSpan(
           spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);

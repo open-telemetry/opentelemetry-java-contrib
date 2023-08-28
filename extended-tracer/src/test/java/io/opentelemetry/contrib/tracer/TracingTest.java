@@ -98,7 +98,7 @@ public class TracingTest {
 
   @Keep
   private static Stream<Arguments> extractAndRun() {
-    BiConsumer<Span, Exception> ignoreException =
+    BiConsumer<Span, Throwable> ignoreException =
         (span, throwable) -> {
           // ignore
         };
