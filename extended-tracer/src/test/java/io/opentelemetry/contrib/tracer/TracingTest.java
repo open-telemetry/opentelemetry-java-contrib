@@ -14,7 +14,6 @@ import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
@@ -40,8 +39,6 @@ public class TracingTest {
 
   private final Tracing tracing = new Tracing(otelTesting.getOpenTelemetry(), "test");
 
-  private final Tracer tracer = otelTesting.getOpenTelemetry().getTracer("test");
-
   @Test
   void propagation() {
     tracing.run(
@@ -56,7 +53,7 @@ public class TracingTest {
                       .getSpanId())
               .isEqualTo(Span.current().getSpanContext().getSpanId());
 
-          tracing.traceServerSpan(propagationHeaders, tracer.spanBuilder("child"), () -> null);
+          tracing.traceServerSpan(propagationHeaders, tracing.spanBuilder("child"), () -> null);
         });
 
     otelTesting
@@ -82,12 +79,12 @@ public class TracingTest {
   }
 
   private static class ExtractAndRunParameter {
-    private final BiConsumer<TracingTest, Callable<Void>> extractAndRun;
+    private final BiConsumer<Tracing, Callable<Void>> extractAndRun;
     private final SpanKind wantKind;
     private final StatusData wantStatus;
 
     private ExtractAndRunParameter(
-        BiConsumer<TracingTest, Callable<Void>> extractAndRun,
+        BiConsumer<Tracing, Callable<Void>> extractAndRun,
         SpanKind wantKind,
         StatusData wantStatus) {
       this.extractAndRun = extractAndRun;
@@ -107,9 +104,7 @@ public class TracingTest {
             named(
                 "server",
                 new ExtractAndRunParameter(
-                    (t, c) ->
-                        t.tracing.traceServerSpan(
-                            Collections.emptyMap(), t.tracer.spanBuilder("span"), c),
+                    (t, c) -> t.traceServerSpan(Collections.emptyMap(), t.spanBuilder("span"), c),
                     io.opentelemetry.api.trace.SpanKind.SERVER,
                     io.opentelemetry.sdk.trace.data.StatusData.error()))),
         Arguments.of(
@@ -117,20 +112,15 @@ public class TracingTest {
                 "server - ignore exception",
                 new ExtractAndRunParameter(
                     (t, c) ->
-                        t.tracing.traceServerSpan(
-                            Collections.emptyMap(),
-                            t.tracer.spanBuilder("span"),
-                            c,
-                            ignoreException),
+                        t.traceServerSpan(
+                            Collections.emptyMap(), t.spanBuilder("span"), c, ignoreException),
                     io.opentelemetry.api.trace.SpanKind.SERVER,
                     io.opentelemetry.sdk.trace.data.StatusData.unset()))),
         Arguments.of(
             named(
                 "consumer",
                 new ExtractAndRunParameter(
-                    (t, c) ->
-                        t.tracing.traceConsumerSpan(
-                            Collections.emptyMap(), t.tracer.spanBuilder("span"), c),
+                    (t, c) -> t.traceConsumerSpan(Collections.emptyMap(), t.spanBuilder("span"), c),
                     io.opentelemetry.api.trace.SpanKind.CONSUMER,
                     io.opentelemetry.sdk.trace.data.StatusData.error()))),
         Arguments.of(
@@ -138,11 +128,8 @@ public class TracingTest {
                 "consumer - ignore exception",
                 new ExtractAndRunParameter(
                     (t, c) ->
-                        t.tracing.traceConsumerSpan(
-                            Collections.emptyMap(),
-                            t.tracer.spanBuilder("span"),
-                            c,
-                            ignoreException),
+                        t.traceConsumerSpan(
+                            Collections.emptyMap(), t.spanBuilder("span"), c, ignoreException),
                     io.opentelemetry.api.trace.SpanKind.CONSUMER,
                     io.opentelemetry.sdk.trace.data.StatusData.unset()))));
   }
@@ -154,7 +141,7 @@ public class TracingTest {
         .isThrownBy(
             () ->
                 parameter.extractAndRun.accept(
-                    this,
+                    tracing,
                     () -> {
                       throw new RuntimeException("ex");
                     }));

@@ -28,6 +28,13 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
+/**
+ * Utility class to simplify tracing.
+ *
+ * <p>The <a
+ * href="https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/extended-tracer/README.md">README</a>
+ * explains the use cases in more detail.
+ */
 public final class Tracing {
 
   private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
@@ -48,15 +55,60 @@ public final class Tracing {
 
   private final Tracer tracer;
 
+  /**
+   * Creates a new instance of {@link Tracing}.
+   *
+   * @param openTelemetry the {@link OpenTelemetry} instance
+   * @param tracerName the name of the tracer to use
+   */
   public Tracing(OpenTelemetry openTelemetry, String tracerName) {
-    this.openTelemetry = openTelemetry;
-    this.tracer = openTelemetry.getTracer(tracerName);
+    this(openTelemetry, openTelemetry.getTracer(tracerName));
   }
 
+  /**
+   * Creates a new instance of {@link Tracing}.
+   *
+   * @param openTelemetry the {@link OpenTelemetry} instance
+   * @param tracer the {@link Tracer} to use
+   */
+  public Tracing(OpenTelemetry openTelemetry, Tracer tracer) {
+    this.openTelemetry = openTelemetry;
+    this.tracer = tracer;
+  }
+
+  /**
+   * Creates a new {@link SpanBuilder} with the given span name.
+   *
+   * @param spanName the name of the span
+   * @return the {@link SpanBuilder}
+   */
+  public SpanBuilder spanBuilder(String spanName) {
+    return tracer.spanBuilder(spanName);
+  }
+
+  /**
+   * Runs the given {@link Runnable} in a new span with the given name.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param spanName the name of the span
+   * @param runnable the {@link Runnable} to run
+   */
   public void run(String spanName, Runnable runnable) {
     runAndEndSpan(tracer.spanBuilder(spanName).startSpan(), runnable);
   }
 
+  /**
+   * Runs the given {@link Runnable} inside of the given span. The span will be ended at the end of
+   * the {@link Runnable}.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param span the span to use
+   * @param runnable the {@link Runnable} to run
+   */
   public void runAndEndSpan(Span span, Runnable runnable) {
     callAndEndSpan(
         span,
@@ -67,18 +119,50 @@ public final class Tracing {
   }
 
   /**
-   * Runs a block of code with a new span - ending the span at the end and recording any exception.
+   * Runs the given {@link Callable} inside a new span with the given name.
    *
-   * @param spanName name of the new span
+   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param spanName the name of the span
+   * @param callable the {@link Callable} to call
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
    */
   public <T> T call(String spanName, Callable<T> callable) {
     return callAndEndSpan(tracer.spanBuilder(spanName).startSpan(), callable);
   }
 
+  /**
+   * Runs the given {@link Callable} inside of the given span. The span will be ended at the end of
+   * the {@link Callable}.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param span the span to use
+   * @param callable the {@link Callable} to call
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
+   */
   public <T> T callAndEndSpan(Span span, Callable<T> callable) {
     return callAndEndSpan(span, callable, this::setSpanError);
   }
 
+  /**
+   * Runs the given {@link Callable} inside of the given span. The span will be ended at the end of
+   * the {@link Callable}.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
+   *
+   * @param span the span to use
+   * @param callable the {@link Callable} to call
+   * @param handleException the consumer to call when an exception is thrown
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
+   */
   @SuppressWarnings("NullAway")
   public <T> T callAndEndSpan(
       Span span, Callable<T> callable, BiConsumer<Span, Throwable> handleException) {
@@ -172,7 +256,14 @@ public final class Tracing {
         .extract(current, normalizedTransport, TEXT_MAP_GETTER);
   }
 
-  /** Sets baggage items which are active in given block. */
+  /**
+   * Set baggage items inside the given {@link Callable}.
+   *
+   * @param baggage the baggage items to set
+   * @param callable the {@link Callable} to call
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
+   */
   @SuppressWarnings("NullAway")
   public <T> T callWithBaggage(Map<String, String> baggage, Callable<T> callable) {
     BaggageBuilder builder = Baggage.current().toBuilder();
@@ -187,10 +278,19 @@ public final class Tracing {
   }
 
   /**
-   * Trace a block of code using a server span.
+   * Run the given {@link Runnable} inside a server span.
    *
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
+   *
+   * <p>If an exception is thrown by the {@link Callable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param transport the transport where to extract the span context from
+   * @param spanBuilder the {@link SpanBuilder} to use
+   * @param callable the {@link Callable} to call
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
    */
   public <T> T traceServerSpan(
       Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
@@ -198,10 +298,21 @@ public final class Tracing {
   }
 
   /**
-   * Trace a block of code using a server span.
+   * Run the given {@link Runnable} inside a server span.
    *
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
+   *
+   * @param transport the transport where to extract the span context from
+   * @param spanBuilder the {@link SpanBuilder} to use
+   * @param callable the {@link Callable} to call
+   * @param handleException the consumer to call when an exception is thrown
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
    */
   public <T> T traceServerSpan(
       Map<String, String> transport,
@@ -212,10 +323,19 @@ public final class Tracing {
   }
 
   /**
-   * Trace a block of code using a consumer span.
+   * Run the given {@link Runnable} inside a server span.
    *
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
+   *
+   * <p>If an exception is thrown by the {@link Callable}, the span will be marked as error, and the
+   * exception will be recorded.
+   *
+   * @param transport the transport where to extract the span context from
+   * @param spanBuilder the {@link SpanBuilder} to use
+   * @param callable the {@link Callable} to call
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
    */
   public <T> T traceConsumerSpan(
       Map<String, String> transport, SpanBuilder spanBuilder, Callable<T> callable) {
@@ -223,10 +343,21 @@ public final class Tracing {
   }
 
   /**
-   * Trace a block of code using a consumer span.
+   * Run the given {@link Runnable} inside a consumer span.
    *
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
+   *
+   * <p>If an exception is thrown by the {@link Runnable}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
+   *
+   * @param transport the transport where to extract the span context from
+   * @param spanBuilder the {@link SpanBuilder} to use
+   * @param callable the {@link Callable} to call
+   * @param handleException the consumer to call when an exception is thrown
+   * @param <T> the type of the result
+   * @return the result of the {@link Callable}
    */
   public <T> T traceConsumerSpan(
       Map<String, String> transport,
