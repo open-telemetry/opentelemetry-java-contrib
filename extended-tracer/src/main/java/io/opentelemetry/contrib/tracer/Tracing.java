@@ -96,22 +96,22 @@ public final class Tracing {
    * @param runnable the {@link Runnable} to run
    */
   public void run(String spanName, Runnable runnable) {
-    runAndEndSpan(tracer.spanBuilder(spanName).startSpan(), runnable);
+    run(tracer.spanBuilder(spanName), runnable);
   }
 
   /**
-   * Runs the given {@link Runnable} inside of the given span. The span will be ended at the end of
-   * the {@link Runnable}.
+   * Runs the given {@link Runnable} inside of the span created by the given {@link SpanBuilder}.
+   * The span will be ended at the end of the {@link Runnable}.
    *
    * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
    * exception will be recorded.
    *
-   * @param span the span to use
+   * @param spanBuilder the {@link SpanBuilder} to use
    * @param runnable the {@link Runnable} to run
    */
-  public void runAndEndSpan(Span span, Runnable runnable) {
-    callAndEndSpan(
-        span,
+  public void run(SpanBuilder spanBuilder, Runnable runnable) {
+    call(
+        spanBuilder,
         () -> {
           runnable.run();
           return null;
@@ -130,44 +130,45 @@ public final class Tracing {
    * @return the result of the {@link Callable}
    */
   public <T> T call(String spanName, Callable<T> callable) {
-    return callAndEndSpan(tracer.spanBuilder(spanName).startSpan(), callable);
+    return call(tracer.spanBuilder(spanName), callable);
   }
 
   /**
-   * Runs the given {@link Callable} inside of the given span. The span will be ended at the end of
-   * the {@link Callable}.
+   * Runs the given {@link Callable} inside of the span created by the given {@link SpanBuilder}.
+   * The span will be ended at the end of the {@link Callable}.
    *
    * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
    * exception will be recorded.
    *
-   * @param span the span to use
+   * @param spanBuilder the {@link SpanBuilder} to use
    * @param callable the {@link Callable} to call
    * @param <T> the type of the result
    * @return the result of the {@link Callable}
    */
-  public <T> T callAndEndSpan(Span span, Callable<T> callable) {
-    return callAndEndSpan(span, callable, this::setSpanError);
+  public <T> T call(SpanBuilder spanBuilder, Callable<T> callable) {
+    return call(spanBuilder, callable, this::setSpanError);
   }
 
   /**
-   * Runs the given {@link Callable} inside of the given span. The span will be ended at the end of
-   * the {@link Callable}.
+   * Runs the given {@link Callable} inside of the span created by the given {@link SpanBuilder}.
+   * The span will be ended at the end of the {@link Callable}.
    *
    * <p>If an exception is thrown by the {@link Runnable}, the handleException consumer will be
    * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
    * marking the span as error.
    *
-   * @param span the span to use
+   * @param spanBuilder the {@link SpanBuilder} to use
    * @param callable the {@link Callable} to call
    * @param handleException the consumer to call when an exception is thrown
    * @param <T> the type of the result
    * @return the result of the {@link Callable}
    */
   @SuppressWarnings("NullAway")
-  public <T> T callAndEndSpan(
-      Span span, Callable<T> callable, BiConsumer<Span, Throwable> handleException) {
+  public <T> T call(
+      SpanBuilder spanBuilder, Callable<T> callable, BiConsumer<Span, Throwable> handleException) {
+    Span span = spanBuilder.startSpan();
     //noinspection unused
-    try (Scope scope = span.makeCurrent()) {
+    try (Scope unused = span.makeCurrent()) {
       return callable.call();
     } catch (Throwable e) {
       handleException.accept(span, e);
@@ -374,8 +375,7 @@ public final class Tracing {
       Callable<T> callable,
       BiConsumer<Span, Throwable> handleException) {
     try (Scope ignore = extractContext(transport).makeCurrent()) {
-      return callAndEndSpan(
-          spanBuilder.setSpanKind(spanKind).startSpan(), callable, handleException);
+      return call(spanBuilder.setSpanKind(spanKind), callable, handleException);
     }
   }
 
