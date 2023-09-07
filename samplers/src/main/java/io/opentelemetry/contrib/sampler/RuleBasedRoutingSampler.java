@@ -56,20 +56,28 @@ public final class RuleBasedRoutingSampler implements Sampler {
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
+    Attributes extraAttributes =
+        Attributes.builder()
+            .putAll(attributes)
+            .put("thread.id", Thread.currentThread().getId())
+            .put("thread.name", Thread.currentThread().getName())
+            .build();
     if (kind != spanKind) {
-      return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+      return fallback.shouldSample(
+          parentContext, traceId, name, spanKind, extraAttributes, parentLinks);
     }
     for (SamplingRule samplingRule : rules) {
-      String attributeValue = attributes.get(samplingRule.attributeKey);
+      String attributeValue = extraAttributes.get(samplingRule.attributeKey);
       if (attributeValue == null) {
         continue;
       }
       if (samplingRule.pattern.matcher(attributeValue).find()) {
         return samplingRule.delegate.shouldSample(
-            parentContext, traceId, name, spanKind, attributes, parentLinks);
+            parentContext, traceId, name, spanKind, extraAttributes, parentLinks);
       }
     }
-    return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+    return fallback.shouldSample(
+        parentContext, traceId, name, spanKind, extraAttributes, parentLinks);
   }
 
   @Override
