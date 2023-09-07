@@ -47,6 +47,9 @@ components:
     - HaloFour
   noop-api:
     - jack-berg
+  processors:
+    - LikeTheSalad
+    - breedx-splk
   prometheus-collector:
     - jkwatson
   resource-providers:
