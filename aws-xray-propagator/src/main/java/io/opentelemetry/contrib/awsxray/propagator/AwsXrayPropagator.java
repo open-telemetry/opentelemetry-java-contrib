@@ -295,6 +295,11 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     }
 
     String epochPart = xrayTraceId.substring(firstDelimiter + 1, secondDelimiter);
+
+    if (xrayTraceId.length() < secondDelimiter + 25) {
+      return TraceId.getInvalid();
+    }
+
     String uniquePart = xrayTraceId.substring(secondDelimiter + 1, secondDelimiter + 25);
 
     // X-Ray trace id format is 1-{at most 8 digit hex}-{24 digit hex}
