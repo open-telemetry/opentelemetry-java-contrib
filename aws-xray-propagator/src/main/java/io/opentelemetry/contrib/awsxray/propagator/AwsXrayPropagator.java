@@ -294,7 +294,6 @@ public final class AwsXrayPropagator implements TextMapPropagator {
       return TraceId.getInvalid();
     }
 
-
     String epochPart = xrayTraceId.substring(firstDelimiter + 1, secondDelimiter);
 
     if (xrayTraceId.length() < secondDelimiter + 25) {
