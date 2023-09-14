@@ -183,7 +183,6 @@ class RuleBasedRoutingSamplerTest {
                 .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
                 .getDecision())
         .isEqualTo(SamplingDecision.DROP);
-
     assertThat(
             testSampler
                 .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
