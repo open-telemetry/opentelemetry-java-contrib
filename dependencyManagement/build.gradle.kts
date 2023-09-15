@@ -15,6 +15,8 @@ val DEPENDENCY_BOMS = listOf(
   "com.linecorp.armeria:armeria-bom:1.25.2",
   "org.junit:junit-bom:5.10.0",
   "io.grpc:grpc-bom:1.58.0",
+  // even though the stable instrumentation bom is included by the alpha bom,
+  // it is specified here because Renovate doesn't update "-alpha" artifacts
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$otelInstrumentationVersion",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:$otelInstrumentationVersion-alpha",
   "org.testcontainers:testcontainers-bom:1.19.0"
