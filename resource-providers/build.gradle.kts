@@ -14,9 +14,9 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly("io.opentelemetry:opentelemetry-semconv")
+  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  testImplementation("io.opentelemetry:opentelemetry-semconv")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
   testImplementation("com.google.auto.service:auto-service")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling") {

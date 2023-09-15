@@ -203,7 +203,7 @@ class LinksBasedSamplerTest {
             method.invoke(
                 null,
                 "linksbased_parentbased_always_on",
-                DefaultConfigProperties.createForTest(Collections.emptyMap()),
+                DefaultConfigProperties.create(Collections.emptyMap()),
                 AutoConfiguredOpenTelemetrySdkBuilder.class.getClassLoader());
 
     assertThat(sampler.getDescription())
