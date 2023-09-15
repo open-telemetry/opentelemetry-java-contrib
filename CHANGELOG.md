@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Remove protobuf dependency
+  ([#1008](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1008))
+
+### Maven extension
+
+- Disable OTel SDK shutdown hook registration
+  ([#1022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1022))
+
+### Telemetry processors - New 🌟
+
+This module contains tools for globally processing telemetry, including modifying and filtering
+telemetry.
+
 ## Version 1.29.0 (2023-08-23)
 
 ### Consistent sampling
