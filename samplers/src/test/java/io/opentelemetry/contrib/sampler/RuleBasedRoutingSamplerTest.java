@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
-import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
 import static java.util.Collections.emptyList;
