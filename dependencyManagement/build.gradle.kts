@@ -7,18 +7,13 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-val otelInstrumentationVersion = "1.30.0"
-
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.15.2",
   "com.google.guava:guava-bom:32.1.2-jre",
   "com.linecorp.armeria:armeria-bom:1.25.2",
   "org.junit:junit-bom:5.10.0",
   "io.grpc:grpc-bom:1.58.0",
-  // even though the stable instrumentation bom is included by the alpha bom,
-  // it is specified here because Renovate doesn't update "-alpha" artifacts
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$otelInstrumentationVersion",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:$otelInstrumentationVersion-alpha",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.28.0-alpha",
   "org.testcontainers:testcontainers-bom:1.19.0"
 )
 
