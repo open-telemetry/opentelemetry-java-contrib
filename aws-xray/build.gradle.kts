@@ -45,3 +45,10 @@ testing {
     }
   }
 }
+
+configurations.all {
+  resolutionStrategy {
+    // TODO this module still needs to be updated to the latest semconv
+    force("io.opentelemetry:opentelemetry-semconv:1.28.0-alpha")
+  }
+}
