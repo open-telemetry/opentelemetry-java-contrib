@@ -198,12 +198,14 @@ class LinksBasedSamplerTest {
     config.put("otel.traces.sampler", "linksbased_parentbased_always_on");
     AutoConfiguredOpenTelemetrySdk.builder()
         .addPropertiesSupplier(() -> config)
-        .addSamplerCustomizer((sampler, configProperties) -> {
-          assertThat(sampler.getDescription())
-              .isEqualTo(
-                  LinksBasedSampler.create(Sampler.parentBased(Sampler.alwaysOn())).getDescription());
-          return sampler;
-        })
+        .addSamplerCustomizer(
+            (sampler, configProperties) -> {
+              assertThat(sampler.getDescription())
+                  .isEqualTo(
+                      LinksBasedSampler.create(Sampler.parentBased(Sampler.alwaysOn()))
+                          .getDescription());
+              return sampler;
+            })
         .build();
   }
 }
