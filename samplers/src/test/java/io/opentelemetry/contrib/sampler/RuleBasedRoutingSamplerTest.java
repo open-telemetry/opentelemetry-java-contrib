@@ -189,7 +189,7 @@ class RuleBasedRoutingSamplerTest {
   }
 
   @Test
-  void testThreadIdAndNameSampler() {
+  void testThreadNameSampler() {
     patterns.add(new SamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
     Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
     RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
