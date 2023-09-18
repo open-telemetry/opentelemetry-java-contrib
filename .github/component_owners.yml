@@ -25,11 +25,7 @@ components:
   disk-buffering:
     - LikeTheSalad
     - zeitlinger
-  samplers:
-    - iNikem
-    - trask
   jfr-connection:
-    - trask
     - breedx-splk
     - jeanbisutti
     - dsgrieve
@@ -57,7 +53,8 @@ components:
     - mateuszrzeszutek
     - laurit
   runtime-attach:
-    - iNikem
     - jeanbisutti
+  samplers:
+    - trask
   static-instrumenter:
     - anosek-an
