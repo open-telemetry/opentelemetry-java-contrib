@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_ID;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_NAME;
 import static java.util.Objects.requireNonNull;
 
@@ -63,9 +62,7 @@ public final class RuleBasedRoutingSampler implements Sampler {
     }
     for (SamplingRule samplingRule : rules) {
       String attributeValue;
-      if (samplingRule.attributeKey.getKey().equals(THREAD_ID.getKey())) {
-        attributeValue = String.valueOf(Thread.currentThread().getId());
-      } else if (samplingRule.attributeKey.getKey().equals(THREAD_NAME.getKey())) {
+      if (samplingRule.attributeKey.getKey().equals(THREAD_NAME.getKey())) {
         attributeValue = Thread.currentThread().getName();
       } else {
         attributeValue = attributes.get(samplingRule.attributeKey);

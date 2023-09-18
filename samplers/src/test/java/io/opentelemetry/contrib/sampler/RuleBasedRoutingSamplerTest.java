@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.sampler;
 
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_ID;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_NAME;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -192,10 +190,8 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   void testThreadIdAndNameSampler() {
-    patterns.add(
-        new SamplingRule(AttributeKey.stringKey(THREAD_ID.getKey()), "1", Sampler.alwaysOff()));
     patterns.add(new SamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
-    Attributes attributes = Attributes.of(THREAD_NAME, "Test worker", THREAD_ID, 1L);
+    Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
     RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
     SamplingResult samplingResult =
         sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
