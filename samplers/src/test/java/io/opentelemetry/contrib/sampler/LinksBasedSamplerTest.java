@@ -14,17 +14,16 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class LinksBasedSamplerTest {
@@ -191,23 +190,22 @@ class LinksBasedSamplerTest {
   }
 
   @Test
-  void testProvider() throws Exception {
-    Method method =
-        Class.forName("io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration")
-            .getDeclaredMethod(
-                "configureSampler", String.class, ConfigProperties.class, ClassLoader.class);
-    method.setAccessible(true);
-
-    Sampler sampler =
-        (Sampler)
-            method.invoke(
-                null,
-                "linksbased_parentbased_always_on",
-                DefaultConfigProperties.createForTest(Collections.emptyMap()),
-                AutoConfiguredOpenTelemetrySdkBuilder.class.getClassLoader());
-
-    assertThat(sampler.getDescription())
-        .isEqualTo(
-            LinksBasedSampler.create(Sampler.parentBased(Sampler.alwaysOn())).getDescription());
+  void testProvider() {
+    Map<String, String> config = new HashMap<>();
+    config.put("otel.traces.exporter", "none");
+    config.put("otel.metrics.exporter", "none");
+    config.put("otel.logs.exporter", "none");
+    config.put("otel.traces.sampler", "linksbased_parentbased_always_on");
+    AutoConfiguredOpenTelemetrySdk.builder()
+        .addPropertiesSupplier(() -> config)
+        .addSamplerCustomizer(
+            (sampler, configProperties) -> {
+              assertThat(sampler.getDescription())
+                  .isEqualTo(
+                      LinksBasedSampler.create(Sampler.parentBased(Sampler.alwaysOn()))
+                          .getDescription());
+              return sampler;
+            })
+        .build();
   }
 }

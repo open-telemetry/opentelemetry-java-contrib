@@ -1,7 +1,7 @@
 pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.enterprise") version "3.14.1"
+    id("com.gradle.enterprise") version "3.15"
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
   }
 }
@@ -13,10 +13,6 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
-    maven {
-      url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-    }
-    mavenLocal()
   }
 }
 
@@ -76,6 +72,7 @@ include(":jmx-metrics")
 include(":maven-extension")
 include(":micrometer-meter-provider")
 include(":noop-api")
+include(":processors")
 include(":prometheus-client-bridge")
 include(":resource-providers")
 include(":runtime-attach:runtime-attach")

@@ -5,9 +5,10 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
 import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_NAME;
+import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
+import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
+
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -58,8 +59,8 @@ class RuleBasedRoutingSamplerTest {
     when(delegate.shouldSample(any(), any(), any(), any(), any(), any()))
         .thenReturn(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
 
-    patterns.add(new SamplingRule(HTTP_URL, ".*/healthcheck", Sampler.alwaysOff()));
-    patterns.add(new SamplingRule(HTTP_TARGET, "/actuator", Sampler.alwaysOff()));
+    patterns.add(new SamplingRule(URL_FULL, ".*/healthcheck", Sampler.alwaysOff()));
+    patterns.add(new SamplingRule(URL_PATH, "/actuator", Sampler.alwaysOff()));
   }
 
   @Test
@@ -84,7 +85,7 @@ class RuleBasedRoutingSamplerTest {
 
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(
-            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(HTTP_URL, null));
+            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(URL_FULL, null));
 
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(
@@ -94,7 +95,7 @@ class RuleBasedRoutingSamplerTest {
         .isThrownBy(
             () ->
                 RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
-                    .recordAndSample(HTTP_URL, null));
+                    .recordAndSample(URL_FULL, null));
   }
 
   @Test
@@ -110,7 +111,7 @@ class RuleBasedRoutingSamplerTest {
     clearInvocations(delegate);
 
     // with http.url attribute
-    attributes = Attributes.of(HTTP_URL, "https://example.com");
+    attributes = Attributes.of(URL_FULL, "https://example.com");
     sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
     verify(delegate)
         .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
@@ -161,7 +162,7 @@ class RuleBasedRoutingSamplerTest {
   public void testVerifiesAllGivenAttributes() {
     RuleBasedRoutingSampler sampler =
         addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
-    Attributes attributes = Attributes.of(HTTP_TARGET, "/actuator/info");
+    Attributes attributes = Attributes.of(URL_PATH, "/actuator/info");
     assertThat(
             sampler
                 .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
@@ -171,10 +172,10 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   void customSampler() {
-    Attributes attributes = Attributes.of(HTTP_TARGET, "/test");
+    Attributes attributes = Attributes.of(URL_PATH, "/test");
     RuleBasedRoutingSampler testSampler =
         RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
-            .customize(HTTP_TARGET, ".*test", new AlternatingSampler())
+            .customize(URL_PATH, ".*test", new AlternatingSampler())
             .build();
     assertThat(
             testSampler
@@ -199,13 +200,13 @@ class RuleBasedRoutingSamplerTest {
   }
 
   private SamplingResult shouldSample(Sampler sampler, String url) {
-    Attributes attributes = Attributes.of(HTTP_URL, url);
+    Attributes attributes = Attributes.of(URL_FULL, url);
     return sampler.shouldSample(
         parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
   }
 
   private static RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
-    return builder.drop(HTTP_URL, ".*/healthcheck").drop(HTTP_TARGET, "/actuator");
+    return builder.drop(URL_FULL, ".*/healthcheck").drop(URL_PATH, "/actuator");
   }
 
   /** Silly sampler that alternates decisions for testing. */
