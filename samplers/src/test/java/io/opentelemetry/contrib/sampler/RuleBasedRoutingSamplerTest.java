@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler;
 
+import static io.opentelemetry.semconv.SemanticAttributes.THREAD_NAME;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
 import static java.util.Collections.emptyList;
@@ -185,6 +186,16 @@ class RuleBasedRoutingSamplerTest {
                 .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
                 .getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void testThreadNameSampler() {
+    patterns.add(new SamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
+    Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
+    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    SamplingResult samplingResult =
+        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
   }
 
   private SamplingResult shouldSample(Sampler sampler, String url) {
