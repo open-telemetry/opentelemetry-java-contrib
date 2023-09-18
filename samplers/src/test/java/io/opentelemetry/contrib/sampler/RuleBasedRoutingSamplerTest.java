@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.THREAD_NAME;
+import static io.opentelemetry.semconv.SemanticAttributes.THREAD_NAME;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
 
