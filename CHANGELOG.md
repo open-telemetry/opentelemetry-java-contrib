@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.30.0 (2023-09-18)
+
 ### Disk buffering
 
 - Remove protobuf dependency
