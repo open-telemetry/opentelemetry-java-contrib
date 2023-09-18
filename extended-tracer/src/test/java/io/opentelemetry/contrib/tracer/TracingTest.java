@@ -18,10 +18,9 @@ import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import io.opentelemetry.sdk.trace.data.StatusData;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -33,6 +32,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class TracingTest {
+
+  interface ThrowingBiConsumer<T, U> {
+    void accept(T t, U u) throws Throwable;
+  }
 
   @RegisterExtension
   static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
@@ -79,12 +82,12 @@ public class TracingTest {
   }
 
   private static class ExtractAndRunParameter {
-    private final BiConsumer<Tracing, Callable<Void>> extractAndRun;
+    private final ThrowingBiConsumer<Tracing, ThrowingSupplier<Void, Throwable>> extractAndRun;
     private final SpanKind wantKind;
     private final StatusData wantStatus;
 
     private ExtractAndRunParameter(
-        BiConsumer<Tracing, Callable<Void>> extractAndRun,
+        ThrowingBiConsumer<Tracing, ThrowingSupplier<Void, Throwable>> extractAndRun,
         SpanKind wantKind,
         StatusData wantStatus) {
       this.extractAndRun = extractAndRun;
