@@ -150,7 +150,7 @@ public final class Tracing {
    */
   public <T, E extends Throwable> T call(
       SpanBuilder spanBuilder, ThrowingSupplier<T, E> throwingSupplier) throws E {
-    return call(spanBuilder, throwingSupplier, this::setSpanError);
+    return call(spanBuilder, throwingSupplier, Tracing::setSpanError);
   }
 
   /**
@@ -190,32 +190,10 @@ public final class Tracing {
    * Marks a span as error.
    *
    * @param span the span
-   * @param description what went wrong
-   */
-  public void setSpanError(Span span, String description) {
-    span.setStatus(StatusCode.ERROR, description);
-  }
-
-  /**
-   * Marks a span as error.
-   *
-   * @param span the span
    * @param exception the exception that caused the error
    */
-  public void setSpanError(Span span, Throwable exception) {
+  private static void setSpanError(Span span, Throwable exception) {
     span.setStatus(StatusCode.ERROR);
-    span.recordException(exception);
-  }
-
-  /**
-   * Marks a span as error.
-   *
-   * @param span the span
-   * @param description what went wrong
-   * @param exception the exception that caused the error
-   */
-  public void setSpanError(Span span, String description, Throwable exception) {
-    span.setStatus(StatusCode.ERROR, description);
     span.recordException(exception);
   }
 
@@ -245,7 +223,7 @@ public final class Tracing {
    * Extract the context from a string map, which you get from HTTP headers of the metadata of an
    * event you're processing.
    */
-  public Context extractContext(Map<String, String> transport) {
+  private Context extractContext(Map<String, String> transport) {
     Context current = Context.current();
     //noinspection ConstantConditions
     if (transport == null) {
@@ -305,7 +283,7 @@ public final class Tracing {
       SpanBuilder spanBuilder,
       ThrowingSupplier<T, E> throwingSupplier)
       throws E {
-    return extractAndRun(SERVER, transport, spanBuilder, throwingSupplier, this::setSpanError);
+    return extractAndRun(SERVER, transport, spanBuilder, throwingSupplier, Tracing::setSpanError);
   }
 
   /**
@@ -356,7 +334,7 @@ public final class Tracing {
       SpanBuilder spanBuilder,
       ThrowingSupplier<T, E> throwingSupplier)
       throws E {
-    return extractAndRun(CONSUMER, transport, spanBuilder, throwingSupplier, this::setSpanError);
+    return extractAndRun(CONSUMER, transport, spanBuilder, throwingSupplier, Tracing::setSpanError);
   }
 
   /**

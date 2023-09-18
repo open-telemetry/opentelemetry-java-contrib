@@ -13,18 +13,13 @@ import com.google.errorprone.annotations.Keep;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import io.opentelemetry.sdk.trace.data.StatusData;
-import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
-import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,12 +44,6 @@ public class TracingTest {
         () -> {
           Map<String, String> propagationHeaders = tracing.getPropagationHeaders();
           assertThat(propagationHeaders).hasSize(1).containsKey("traceparent");
-
-          assertThat(
-                  Span.fromContext(tracing.extractContext(propagationHeaders))
-                      .getSpanContext()
-                      .getSpanId())
-              .isEqualTo(Span.current().getSpanContext().getSpanId());
 
           tracing.traceServerSpan(propagationHeaders, tracing.spanBuilder("child"), () -> null);
         });
@@ -156,75 +145,5 @@ public class TracingTest {
             trace ->
                 trace.hasSpansSatisfyingExactly(
                     span -> span.hasKind(parameter.wantKind).hasStatus(parameter.wantStatus)));
-  }
-
-  private static class SetSpanErrorParameter {
-    private final Consumer<Span> setError;
-    private final String wantDescription;
-    private final Throwable wantException;
-
-    private SetSpanErrorParameter(
-        Consumer<Span> setError, String wantDescription, Throwable wantException) {
-      this.setError = setError;
-      this.wantDescription = wantDescription;
-      this.wantException = wantException;
-    }
-  }
-
-  @Keep
-  private static Stream<Arguments> setSpanError() {
-    Tracing tracing = new Tracing(otelTesting.getOpenTelemetry(), "test");
-    RuntimeException exception = new RuntimeException("ex");
-    return Stream.of(
-        Arguments.of(
-            named(
-                "with description",
-                new SetSpanErrorParameter(s -> tracing.setSpanError(s, "error"), "error", null))),
-        Arguments.of(
-            named(
-                "with exception",
-                new SetSpanErrorParameter(
-                    s -> tracing.setSpanError(s, exception), null, exception))),
-        Arguments.of(
-            named(
-                "with exception and description",
-                new SetSpanErrorParameter(
-                    s -> tracing.setSpanError(s, "error", exception), "error", exception))));
-  }
-
-  @ParameterizedTest
-  @MethodSource
-  void setSpanError(SetSpanErrorParameter parameter) {
-    tracing.run("parent", () -> parameter.setError.accept(Span.current()));
-
-    otelTesting
-        .assertTraces()
-        .hasSize(1)
-        .hasTracesSatisfyingExactly(
-            trace ->
-                trace.hasSpansSatisfyingExactly(
-                    span -> {
-                      SpanDataAssert spanDataAssert =
-                          span.hasStatus(
-                              StatusData.create(StatusCode.ERROR, parameter.wantDescription));
-                      if (parameter.wantException != null) {
-                        spanDataAssert.hasEventsSatisfyingExactly(
-                            event ->
-                                event.hasAttributesSatisfyingExactly(
-                                    OpenTelemetryAssertions.satisfies(
-                                        SemanticAttributes.EXCEPTION_TYPE,
-                                        s ->
-                                            s.isEqualTo(
-                                                parameter.wantException.getClass().getName())),
-                                    OpenTelemetryAssertions.satisfies(
-                                        SemanticAttributes.EXCEPTION_MESSAGE,
-                                        AbstractCharSequenceAssert::isNotBlank),
-                                    OpenTelemetryAssertions.satisfies(
-                                        SemanticAttributes.EXCEPTION_STACKTRACE,
-                                        AbstractCharSequenceAssert::isNotBlank)));
-                      } else {
-                        spanDataAssert.hasTotalRecordedEvents(0);
-                      }
-                    }));
   }
 }
