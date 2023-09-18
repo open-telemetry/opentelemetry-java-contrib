@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.sampler;
 import static io.opentelemetry.semconv.SemanticAttributes.THREAD_NAME;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
 import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
-
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
