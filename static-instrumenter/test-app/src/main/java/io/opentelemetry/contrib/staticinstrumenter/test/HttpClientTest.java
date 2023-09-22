@@ -38,6 +38,5 @@ public final class HttpClientTest {
       }
     }
     System.out.println("FAILURE");
-    return;
   }
 }
