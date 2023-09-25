@@ -86,7 +86,7 @@ public final class Tracing {
   }
 
   /**
-   * Runs the given {@link Runnable} in a new span with the given name.
+   * Runs the given {@link Runnable} in a new span with the given name and with kind INTERNAL.
    *
    * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
    * exception will be recorded.
