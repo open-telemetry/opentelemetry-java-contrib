@@ -119,65 +119,65 @@ public final class Tracing {
   }
 
   /**
-   * Runs the given {@link ThrowingSupplier} inside a new span with the given name.
+   * Runs the given {@link SpanCallback} inside a new span with the given name.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the span will be marked as error,
-   * and the exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param spanName the name of the span
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
-  public <T, E extends Throwable> T call(String spanName, ThrowingSupplier<T, E> throwingSupplier)
+  public <T, E extends Throwable> T call(String spanName, SpanCallback<T, E> spanCallback)
       throws E {
-    return call(tracer.spanBuilder(spanName), throwingSupplier);
+    return call(tracer.spanBuilder(spanName), spanCallback);
   }
 
   /**
-   * Runs the given {@link ThrowingSupplier} inside of the span created by the given {@link
-   * SpanBuilder}. The span will be ended at the end of the {@link ThrowingSupplier}.
+   * Runs the given {@link SpanCallback} inside of the span created by the given {@link
+   * SpanBuilder}. The span will be ended at the end of the {@link SpanCallback}.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the span will be marked as error,
-   * and the exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
-  public <T, E extends Throwable> T call(
-      SpanBuilder spanBuilder, ThrowingSupplier<T, E> throwingSupplier) throws E {
-    return call(spanBuilder, throwingSupplier, Tracing::setSpanError);
+  public <T, E extends Throwable> T call(SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
+      throws E {
+    return call(spanBuilder, spanCallback, Tracing::setSpanError);
   }
 
   /**
-   * Runs the given {@link ThrowingSupplier} inside of the span created by the given {@link
-   * SpanBuilder}. The span will be ended at the end of the {@link ThrowingSupplier}.
+   * Runs the given {@link SpanCallback} inside of the span created by the given {@link
+   * SpanBuilder}. The span will be ended at the end of the {@link SpanCallback}.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the handleException consumer will
-   * be called, giving you the opportunity to handle the exception and span in a custom way, e.g.
-   * not marking the span as error.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
    *
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param handleException the consumer to call when an exception is thrown
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   @SuppressWarnings("NullAway")
   public <T, E extends Throwable> T call(
       SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier,
+      SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
     Span span = spanBuilder.startSpan();
     //noinspection unused
     try (Scope unused = span.makeCurrent()) {
-      return throwingSupplier.get();
+      return spanCallback.doInSpan();
     } catch (Throwable e) {
       handleException.accept(span, e);
       throw e;
@@ -243,22 +243,22 @@ public final class Tracing {
   }
 
   /**
-   * Set baggage items inside the given {@link ThrowingSupplier}.
+   * Set baggage items inside the given {@link SpanCallback}.
    *
    * @param baggage the baggage items to set
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   @SuppressWarnings("NullAway")
   public <T, E extends Throwable> T callWithBaggage(
-      Map<String, String> baggage, ThrowingSupplier<T, E> throwingSupplier) throws E {
+      Map<String, String> baggage, SpanCallback<T, E> spanCallback) throws E {
     BaggageBuilder builder = Baggage.current().toBuilder();
     baggage.forEach(builder::put);
     Context context = builder.build().storeInContext(Context.current());
     try (Scope ignore = context.makeCurrent()) {
-      return throwingSupplier.get();
+      return spanCallback.doInSpan();
     }
   }
 
@@ -268,22 +268,20 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the span will be marked as error,
-   * and the exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param transport the transport where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceServerSpan(
-      Map<String, String> transport,
-      SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier)
+      Map<String, String> transport, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
       throws E {
-    return extractAndRun(SERVER, transport, spanBuilder, throwingSupplier, Tracing::setSpanError);
+    return extractAndRun(SERVER, transport, spanBuilder, spanCallback, Tracing::setSpanError);
   }
 
   /**
@@ -292,25 +290,25 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the handleException consumer will
-   * be called, giving you the opportunity to handle the exception and span in a custom way, e.g.
-   * not marking the span as error.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
    *
    * @param transport the transport where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param handleException the consumer to call when an exception is thrown
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceServerSpan(
       Map<String, String> transport,
       SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier,
+      SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    return extractAndRun(SERVER, transport, spanBuilder, throwingSupplier, handleException);
+    return extractAndRun(SERVER, transport, spanBuilder, spanCallback, handleException);
   }
 
   /**
@@ -319,22 +317,20 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the span will be marked as error,
-   * and the exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param transport the transport where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceConsumerSpan(
-      Map<String, String> transport,
-      SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier)
+      Map<String, String> transport, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
       throws E {
-    return extractAndRun(CONSUMER, transport, spanBuilder, throwingSupplier, Tracing::setSpanError);
+    return extractAndRun(CONSUMER, transport, spanBuilder, spanCallback, Tracing::setSpanError);
   }
 
   /**
@@ -343,36 +339,36 @@ public final class Tracing {
    * <p>The span context will be extracted from the <code>transport</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
-   * <p>If an exception is thrown by the {@link ThrowingSupplier}, the handleException consumer will
-   * be called, giving you the opportunity to handle the exception and span in a custom way, e.g.
-   * not marking the span as error.
+   * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
+   * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
+   * marking the span as error.
    *
    * @param transport the transport where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param throwingSupplier the {@link ThrowingSupplier} to call
+   * @param spanCallback the {@link SpanCallback} to call
    * @param handleException the consumer to call when an exception is thrown
    * @param <T> the type of the result
    * @param <E> the type of the exception
-   * @return the result of the {@link ThrowingSupplier}
+   * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceConsumerSpan(
       Map<String, String> transport,
       SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier,
+      SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    return extractAndRun(CONSUMER, transport, spanBuilder, throwingSupplier, handleException);
+    return extractAndRun(CONSUMER, transport, spanBuilder, spanCallback, handleException);
   }
 
   private <T, E extends Throwable> T extractAndRun(
       SpanKind spanKind,
       Map<String, String> transport,
       SpanBuilder spanBuilder,
-      ThrowingSupplier<T, E> throwingSupplier,
+      SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
     try (Scope ignore = extractContext(transport).makeCurrent()) {
-      return call(spanBuilder.setSpanKind(spanKind), throwingSupplier, handleException);
+      return call(spanBuilder.setSpanKind(spanKind), spanCallback, handleException);
     }
   }
 }

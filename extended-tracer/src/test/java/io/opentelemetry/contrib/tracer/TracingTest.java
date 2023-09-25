@@ -71,12 +71,12 @@ public class TracingTest {
   }
 
   private static class ExtractAndRunParameter {
-    private final ThrowingBiConsumer<Tracing, ThrowingSupplier<Void, Throwable>> extractAndRun;
+    private final ThrowingBiConsumer<Tracing, SpanCallback<Void, Throwable>> extractAndRun;
     private final SpanKind wantKind;
     private final StatusData wantStatus;
 
     private ExtractAndRunParameter(
-        ThrowingBiConsumer<Tracing, ThrowingSupplier<Void, Throwable>> extractAndRun,
+        ThrowingBiConsumer<Tracing, SpanCallback<Void, Throwable>> extractAndRun,
         SpanKind wantKind,
         StatusData wantStatus) {
       this.extractAndRun = extractAndRun;
