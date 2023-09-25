@@ -10,9 +10,8 @@ import static java.util.Objects.requireNonNull;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A consistent sampler that makes the same sampling decision as the parent and optionally falls
- * back to an alternative consistent sampler, if the parent p-value is invalid (like for root
- * spans).
+ * A consistent sampler that makes the same sampling decision as the parent. For root spans, the
+ * sampling decision is delegated to the root sampler.
  */
 @Immutable
 final class ConsistentParentBasedSampler extends ConsistentSampler {
@@ -38,7 +37,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
   @Override
   protected int getP(int parentP, boolean isRoot) {
     if (isRoot) {
-      return rootSampler.getP(parentP, isRoot);
+      return rootSampler.getP(OtelTraceState.getInvalidP(), isRoot);
     } else {
       return parentP;
     }
