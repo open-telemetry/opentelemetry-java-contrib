@@ -13,6 +13,6 @@ import java.util.function.Supplier;
  * @param <E> Thrown exception type.
  */
 @FunctionalInterface
-public interface ThrowingSupplier<T, E extends Throwable> {
-  T get() throws E;
+public interface SpanCallback<T, E extends Throwable> {
+  T doInSpan() throws E;
 }
