@@ -5,7 +5,7 @@ plugins {
   id("otel.publish-conventions")
   id("me.champeau.jmh") version "0.7.1"
   id("ru.vyarus.animalsniffer") version "1.7.1"
-  id("com.squareup.wire") version "4.9.0"
+  id("com.squareup.wire") version "4.9.1"
 }
 
 description = "Exporter implementations that store signals on disk"
