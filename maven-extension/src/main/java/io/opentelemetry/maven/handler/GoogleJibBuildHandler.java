@@ -9,7 +9,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

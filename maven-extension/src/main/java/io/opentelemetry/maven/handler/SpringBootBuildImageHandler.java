@@ -9,9 +9,9 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-import java.net.MalformedURLException;
-import java.net.URL;
+import io.opentelemetry.semconv.SemanticAttributes;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.execution.ExecutionEvent;
@@ -106,8 +106,8 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
             // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
             // service will be instrumented and what it "service.name" would be
             spanBuilder.setAttribute(
-                SemanticAttributes.PEER_SERVICE, new URL(registryUrl).getHost());
-          } catch (MalformedURLException e) {
+                SemanticAttributes.PEER_SERVICE, new URI(registryUrl).getHost());
+          } catch (URISyntaxException e) {
             logger.debug("Ignore exception parsing container registry URL", e);
           }
         }

@@ -13,7 +13,7 @@ import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -40,8 +40,10 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.junit.jupiter.api.Test;
 
 /**
- * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. See
- * https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java
+ * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. Unfortunately
+ * the <a
+ * href="https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java">Takari
+ * testing framework</a> can't test Maven extensions.
  */
 @SuppressWarnings({"DeduplicateConstants", "deprecation"})
 public class MojoGoalExecutionHandlerTest {

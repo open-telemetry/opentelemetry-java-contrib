@@ -8,12 +8,12 @@ package io.opentelemetry.maven.handler;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.execution.ExecutionEvent;
 
-/** See https://github.com/snyk/snyk-maven-plugin */
+/** See <a href="https://github.com/snyk/snyk-maven-plugin">Snyk Maven Plugin</a> */
 final class SnykTestHandler implements MojoGoalExecutionHandler {
 
   /**
