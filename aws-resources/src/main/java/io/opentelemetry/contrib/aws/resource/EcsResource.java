@@ -64,8 +64,7 @@ public final class EcsResource {
     return Resource.empty();
   }
 
-  static void fetchMetadata(
-      JdkHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
+  static void fetchMetadata(JdkHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
     String json = httpClient.fetchString("GET", url, Collections.emptyMap(), null);
     if (json.isEmpty()) {
       return;

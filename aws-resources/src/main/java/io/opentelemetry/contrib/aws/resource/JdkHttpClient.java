@@ -5,11 +5,6 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import javax.annotation.Nullable;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +15,12 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
-/**
- * A simple HTTP client based on JDK HttpURLConnection. Not meant for high throughput.
- */
+/** A simple HTTP client based on JDK HttpURLConnection. Not meant for high throughput. */
 final class JdkHttpClient {
 
   private static final Logger logger = Logger.getLogger(JdkHttpClient.class.getName());
@@ -42,13 +39,14 @@ final class JdkHttpClient {
       // https
       if (connection instanceof HttpsURLConnection) {
         // cast
-        HttpsURLConnection httpsConnection = (HttpsURLConnection)connection;
+        HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
         // check CA cert path is available
         if (certPath != null) {
           // create trust manager
           X509TrustManager trustManager = SslSocketFactoryBuilder.createTrustManager(certPath);
           // socket factory
-          SSLSocketFactory socketFactory = SslSocketFactoryBuilder.createSocketFactory(trustManager);
+          SSLSocketFactory socketFactory =
+              SslSocketFactoryBuilder.createSocketFactory(trustManager);
           if (socketFactory != null) {
             // update connection
             httpsConnection.setSSLSocketFactory(socketFactory);
@@ -60,7 +58,7 @@ final class JdkHttpClient {
       // http
       if (connection instanceof HttpURLConnection) {
         // cast
-        HttpURLConnection httpConnection = (HttpURLConnection)connection;
+        HttpURLConnection httpConnection = (HttpURLConnection) connection;
         // process request
         return processRequest(httpConnection, httpMethod, urlStr, headers);
       }
@@ -74,7 +72,12 @@ final class JdkHttpClient {
     return "";
   }
 
-  private static String processRequest(HttpURLConnection httpConnection, String httpMethod, String urlStr, Map<String, String> headers) throws IOException {
+  private static String processRequest(
+      HttpURLConnection httpConnection,
+      String httpMethod,
+      String urlStr,
+      Map<String, String> headers)
+      throws IOException {
     // set method
     httpConnection.setRequestMethod(httpMethod);
     // set headers
@@ -89,13 +92,13 @@ final class JdkHttpClient {
       int responseCode = httpConnection.getResponseCode();
       if (responseCode != 200) {
         logger.log(
-          Level.FINE,
-          "Error response from "
-            + urlStr
-            + " code ("
-            + responseCode
-            + ") text "
-            + httpConnection.getResponseMessage());
+            Level.FINE,
+            "Error response from "
+                + urlStr
+                + " code ("
+                + responseCode
+                + ") text "
+                + httpConnection.getResponseMessage());
         return "";
       }
       // read response
