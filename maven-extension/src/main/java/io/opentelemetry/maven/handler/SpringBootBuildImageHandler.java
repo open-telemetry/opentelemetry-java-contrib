@@ -8,8 +8,8 @@ package io.opentelemetry.maven.handler;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
-import io.opentelemetry.maven.SemconvStability;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import io.opentelemetry.maven.semconv.SemconvStability;
 import io.opentelemetry.semconv.SemanticAttributes;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,7 +41,7 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
         MavenGoal.create("org.springframework.boot", "spring-boot-maven-plugin", "build-image"));
   }
 
-  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
+  @SuppressWarnings("deprecation") // until old http semconv are dropped
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
 
@@ -96,30 +96,33 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
         Xpp3Dom registryUrlNode = registryNode.getChild("url");
         String registryUrl = registryUrlNode == null ? null : registryUrlNode.getValue();
 
-        // REGISTRY URL
-        if (registryUrl != null
-            && (registryUrl.startsWith("http://") || registryUrl.startsWith("https://"))) {
-          spanBuilder.setAttribute(
-              MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL, registryUrl);
-
-          if (SemconvStability.emitStableHttpSemconv()) {
-            spanBuilder.setAttribute(SemanticAttributes.URL_FULL, registryUrl);
-            spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
-          }
-
-          if (SemconvStability.emitOldHttpSemconv()) {
-            spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, registryUrl);
-            spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
-          }
-          try {
-            // Note: setting the "peer.service" helps visualization on Jaeger but
-            // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
-            // service will be instrumented and what it "service.name" would be
+        if (registryUrl == null) {
+          return;
+        }
+        try {
+          URI registryUri = new URI(registryUrl);
+          // REGISTRY URL
+          if ("https".equals(registryUri.getScheme()) || "http".equals(registryUri.getScheme())) {
             spanBuilder.setAttribute(
-                SemanticAttributes.PEER_SERVICE, new URI(registryUrl).getHost());
-          } catch (URISyntaxException e) {
-            logger.debug("Ignore exception parsing container registry URL", e);
+                MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL,
+                registryUri.toString());
+
+            if (SemconvStability.emitStableHttpSemconv()) {
+              spanBuilder
+                  .setAttribute(SemanticAttributes.URL_PATH, registryUri.getPath())
+                  .setAttribute(SemanticAttributes.SERVER_ADDRESS, registryUri.getHost())
+                  .setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
+            }
+
+            if (SemconvStability.emitOldHttpSemconv()) {
+              spanBuilder
+                  .setAttribute(SemanticAttributes.HTTP_URL, registryUrl)
+                  .setAttribute(SemanticAttributes.NET_PEER_NAME, registryUri.getHost())
+                  .setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+            }
           }
+        } catch (URISyntaxException e) {
+          logger.debug("Ignore exception parsing container registry URL", e);
         }
       }
     }

@@ -2,13 +2,16 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.opentelemetry.maven;
+
+package io.opentelemetry.maven.semconv;
 
 import static java.util.Arrays.asList;
 
+import io.opentelemetry.maven.ConfigPropertiesUtil;
 import java.util.HashSet;
 import java.util.Set;
 
+// Copy of io.opentelemetry.instrumentation.api.internal.SemconvStability
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.

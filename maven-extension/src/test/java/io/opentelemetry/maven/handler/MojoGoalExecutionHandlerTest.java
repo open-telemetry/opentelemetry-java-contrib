@@ -83,7 +83,8 @@ public class MojoGoalExecutionHandlerTest {
               "https://maven.example.com/repository/maven-snapshots/io/opentelemetry/contrib/maven/test-jar/1.0-SNAPSHOT");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL))
           .isEqualTo("https://maven.example.com/repository/maven-snapshots/");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("maven.example.com");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME))
+          .isEqualTo("maven.example.com");
 
       assertThat(span.getKind()).isEqualTo(SpanKind.CLIENT);
     }
@@ -127,7 +128,7 @@ public class MojoGoalExecutionHandlerTest {
           .isEqualTo(Collections.singletonList("latest"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
     }
@@ -171,7 +172,7 @@ public class MojoGoalExecutionHandlerTest {
           .isEqualTo(Collections.singletonList("${project.version}"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
     }
