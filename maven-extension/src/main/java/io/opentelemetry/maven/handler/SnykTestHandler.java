@@ -8,6 +8,7 @@ package io.opentelemetry.maven.handler;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
+import io.opentelemetry.maven.SemconvStability;
 import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.Collections;
 import java.util.List;
@@ -26,9 +27,19 @@ final class SnykTestHandler implements MojoGoalExecutionHandler {
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
     spanBuilder.setAttribute(SemanticAttributes.PEER_SERVICE, "snyk.io");
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://snyk.io/api/v1/test-dep-graph");
     spanBuilder.setAttribute(SemanticAttributes.RPC_METHOD, "test");
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+
+    if (SemconvStability.emitStableHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.URL_FULL,
+          "https://snyk.io/api/v1/test-dep-graph");
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
+    }
+
+    if (SemconvStability.emitOldHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL,
+          "https://snyk.io/api/v1/test-dep-graph");
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+    }
   }
 
   @Override

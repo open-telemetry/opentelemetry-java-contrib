@@ -8,6 +8,7 @@ package io.opentelemetry.maven.handler;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
+import io.opentelemetry.maven.SemconvStability;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.ArrayList;
@@ -90,8 +91,18 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
     spanBuilder.setAttribute(
         MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL,
         "https://" + registryHostname);
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://" + registryHostname);
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+
+    if (SemconvStability.emitStableHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.URL_FULL, "https://" + registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
+    }
+
+    if (SemconvStability.emitOldHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://" + registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+    }
+
+
     // Note: setting the "peer.service" helps visualization on Jaeger but
     // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
     // service will be instrumented and what it "service.name" would be
