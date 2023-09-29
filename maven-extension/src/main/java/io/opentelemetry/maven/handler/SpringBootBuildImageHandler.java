@@ -40,6 +40,7 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
         MavenGoal.create("org.springframework.boot", "spring-boot-maven-plugin", "build-image"));
   }
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
 

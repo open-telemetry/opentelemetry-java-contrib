@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 final class MavenDeployHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(MavenDeployHandler.class);
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent execution) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);

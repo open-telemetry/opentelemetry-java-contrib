@@ -21,6 +21,7 @@ final class SnykTestHandler implements MojoGoalExecutionHandler {
    * flag `snyk -d test`. See <a href="https://snyk.io/blog/snyk-cli-cheat-sheet/">Snyk CLI Cheat
    * Sheet</a>
    */
+  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
