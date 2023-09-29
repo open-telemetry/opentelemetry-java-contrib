@@ -138,7 +138,7 @@ public final class Ec2Resource {
 
   // Generic HTTP fetch function for IMDS.
   private static String fetchString(String httpMethod, URL url, String token, boolean includeTtl) {
-    SimpleHttpClient client = new SimpleHttpClient();
+    JdkHttpClient client = new JdkHttpClient();
     Map<String, String> headers = new HashMap<>();
 
     if (includeTtl) {

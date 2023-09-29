@@ -31,7 +31,7 @@ class EcsResourceTest {
   private static final String ECS_METADATA_KEY_V4 = "ECS_CONTAINER_METADATA_URI_V4";
   private static final String ECS_METADATA_KEY_V3 = "ECS_CONTAINER_METADATA_URI";
 
-  @Mock private SimpleHttpClient mockHttpClient;
+  @Mock private JdkHttpClient mockHttpClient;
 
   @Test
   void testCreateAttributesV3() throws IOException {

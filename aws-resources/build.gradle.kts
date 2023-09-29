@@ -16,7 +16,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
   implementation("com.fasterxml.jackson.core:jackson-core")
-  implementation("com.squareup.okhttp3:okhttp")
+  compileOnly("com.squareup.okhttp3:okhttp")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
