@@ -23,6 +23,7 @@ dependencies {
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testRuntimeOnly("org.bouncycastle:bcpkix-jdk15on")
+  testRuntimeOnly("com.squareup.okhttp3:okhttp")
   testImplementation("com.google.guava:guava")
   testImplementation("org.skyscreamer:jsonassert")
 }
