@@ -19,7 +19,10 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** See <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">Jit Maven Plugin</a> */
+/**
+ * See <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">Jit Maven
+ * Plugin</a>
+ */
 final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GoogleJibBuildHandler.class);
 
