@@ -142,6 +142,5 @@ class AgentJarsProvider(
   @PathSensitive(PathSensitivity.RELATIVE)
   val noInstAgentJar: Provider<RegularFile>,
 ) : CommandLineArgumentProvider {
-  override fun asArguments(): Iterable<String> =
-    listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
+  override fun asArguments(): Iterable<String> = listOf("-Dagent=${file(agentJar).path}", "-Dno.inst.agent=${file(noInstAgentJar).path}")
 }
