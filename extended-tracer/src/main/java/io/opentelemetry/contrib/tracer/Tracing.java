@@ -58,10 +58,10 @@ public final class Tracing {
    * Creates a new instance of {@link Tracing}.
    *
    * @param openTelemetry the {@link OpenTelemetry} instance
-   * @param tracerName the name of the tracer to use
+   * @param instrumentationScopeName the name of the tracer to use
    */
   public Tracing(OpenTelemetry openTelemetry, String instrumentationScopeName) {
-    this(openTelemetry, openTelemetry.getTracer(tracerName));
+    this(openTelemetry, openTelemetry.getTracer(instrumentationScopeName));
   }
 
   /**
@@ -202,44 +202,46 @@ public final class Tracing {
    * metadata of an event.
    */
   public Map<String, String> getPropagationHeaders() {
-    Map<String, String> transport = new HashMap<>();
+    Map<String, String> carrier = new HashMap<>();
     //noinspection ConstantConditions
     openTelemetry
         .getPropagators()
         .getTextMapPropagator()
         .inject(
             Context.current(),
-            transport,
+            carrier,
             (map, key, value) -> {
               if (map != null) {
                 map.put(key, value);
               }
             });
 
-    return transport;
+    return carrier;
   }
 
   /**
    * Extract the context from a string map, which you get from HTTP headers of the metadata of an
    * event you're processing.
+   *
+   * @param carrier the string map
    */
-  private Context extractContext(Map<String, String> transport) {
+  private Context extractContext(Map<String, String> carrier) {
     Context current = Context.current();
     //noinspection ConstantConditions
-    if (transport == null) {
+    if (carrier == null) {
       return current;
     }
     // HTTP headers are case-insensitive. As we're using Map, which is case-sensitive, we need to
     // normalize all the keys
-    Map<String, String> normalizedTransport =
-        transport.entrySet().stream()
+    Map<String, String> normalizedCarrier =
+        carrier.entrySet().stream()
             .collect(
                 Collectors.toMap(
                     entry -> entry.getKey().toLowerCase(Locale.ROOT), Map.Entry::getValue));
     return openTelemetry
         .getPropagators()
         .getTextMapPropagator()
-        .extract(current, normalizedTransport, TEXT_MAP_GETTER);
+        .extract(current, normalizedCarrier, TEXT_MAP_GETTER);
   }
 
   /**
@@ -265,13 +267,13 @@ public final class Tracing {
   /**
    * Run the given {@link Runnable} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>transport</code>, which you usually get
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
    * the exception will be recorded.
    *
-   * @param transport the transport where to extract the span context from
+   * @param carrier the string map where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
    * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
@@ -279,22 +281,22 @@ public final class Tracing {
    * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceServerSpan(
-      Map<String, String> transport, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
+      Map<String, String> carrier, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
       throws E {
-    return extractAndRun(SERVER, transport, spanBuilder, spanCallback, Tracing::setSpanError);
+    return extractAndRun(SERVER, carrier, spanBuilder, spanCallback, Tracing::setSpanError);
   }
 
   /**
    * Run the given {@link Runnable} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>transport</code>, which you usually get
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
    * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
    * marking the span as error.
    *
-   * @param transport the transport where to extract the span context from
+   * @param carrier the string map where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
    * @param spanCallback the {@link SpanCallback} to call
    * @param handleException the consumer to call when an exception is thrown
@@ -303,24 +305,24 @@ public final class Tracing {
    * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceServerSpan(
-      Map<String, String> transport,
+      Map<String, String> carrier,
       SpanBuilder spanBuilder,
       SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    return extractAndRun(SERVER, transport, spanBuilder, spanCallback, handleException);
+    return extractAndRun(SERVER, carrier, spanBuilder, spanCallback, handleException);
   }
 
   /**
    * Run the given {@link Runnable} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>transport</code>, which you usually get
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
    * the exception will be recorded.
    *
-   * @param transport the transport where to extract the span context from
+   * @param carrier the string map where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
    * @param spanCallback the {@link SpanCallback} to call
    * @param <T> the type of the result
@@ -328,22 +330,22 @@ public final class Tracing {
    * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceConsumerSpan(
-      Map<String, String> transport, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
+      Map<String, String> carrier, SpanBuilder spanBuilder, SpanCallback<T, E> spanCallback)
       throws E {
-    return extractAndRun(CONSUMER, transport, spanBuilder, spanCallback, Tracing::setSpanError);
+    return extractAndRun(CONSUMER, carrier, spanBuilder, spanCallback, Tracing::setSpanError);
   }
 
   /**
    * Run the given {@link Runnable} inside a consumer span.
    *
-   * <p>The span context will be extracted from the <code>transport</code>, which you usually get
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
    * from HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
    * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
    * marking the span as error.
    *
-   * @param transport the transport where to extract the span context from
+   * @param carrier the string map where to extract the span context from
    * @param spanBuilder the {@link SpanBuilder} to use
    * @param spanCallback the {@link SpanCallback} to call
    * @param handleException the consumer to call when an exception is thrown
@@ -352,22 +354,22 @@ public final class Tracing {
    * @return the result of the {@link SpanCallback}
    */
   public <T, E extends Throwable> T traceConsumerSpan(
-      Map<String, String> transport,
+      Map<String, String> carrier,
       SpanBuilder spanBuilder,
       SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    return extractAndRun(CONSUMER, transport, spanBuilder, spanCallback, handleException);
+    return extractAndRun(CONSUMER, carrier, spanBuilder, spanCallback, handleException);
   }
 
   private <T, E extends Throwable> T extractAndRun(
       SpanKind spanKind,
-      Map<String, String> transport,
+      Map<String, String> carrier,
       SpanBuilder spanBuilder,
       SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    try (Scope ignore = extractContext(transport).makeCurrent()) {
+    try (Scope ignore = extractContext(carrier).makeCurrent()) {
       return call(spanBuilder.setSpanKind(spanKind), spanCallback, handleException);
     }
   }
