@@ -60,7 +60,7 @@ public final class Tracing {
    * @param openTelemetry the {@link OpenTelemetry} instance
    * @param tracerName the name of the tracer to use
    */
-  public Tracing(OpenTelemetry openTelemetry, String tracerName) {
+  public Tracing(OpenTelemetry openTelemetry, String instrumentationScopeName) {
     this(openTelemetry, openTelemetry.getTracer(tracerName));
   }
 
