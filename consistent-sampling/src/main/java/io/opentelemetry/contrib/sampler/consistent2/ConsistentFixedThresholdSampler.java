@@ -1,0 +1,33 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.sampler.consistent2;
+
+import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.checkThreshold;
+
+public class ConsistentFixedThresholdSampler extends ConsistentSampler {
+
+  private final long threshold;
+  private final String description;
+
+  protected ConsistentFixedThresholdSampler(
+      long threshold, RandomValueGenerator randomValueGenerator) {
+    super(randomValueGenerator);
+    checkThreshold(threshold);
+    this.threshold = threshold;
+    this.description =
+        "ConsistentFixedThresholdSampler{threshold=" + Long.toHexString(threshold) + "}";
+  }
+
+  @Override
+  public String getDescription() {
+    return description;
+  }
+
+  @Override
+  protected long getThreshold(long parentThreshold, boolean isRoot) {
+    return threshold;
+  }
+}
