@@ -86,34 +86,35 @@ public final class Tracing {
   }
 
   /**
-   * Runs the given {@link Runnable} in a new span with the given name and with kind INTERNAL.
+   * Runs the given {@link SpanRunnable} in a new span with the given name and with kind INTERNAL.
    *
-   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
-   * exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanRunnable}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param spanName the name of the span
-   * @param runnable the {@link Runnable} to run
+   * @param runnable the {@link SpanRunnable} to run
    */
-  public void run(String spanName, Runnable runnable) {
+  public <E extends Throwable> void run(String spanName, SpanRunnable<E> runnable) throws E {
     run(tracer.spanBuilder(spanName), runnable);
   }
 
   /**
-   * Runs the given {@link Runnable} inside of the span created by the given {@link SpanBuilder}.
-   * The span will be ended at the end of the {@link Runnable}.
+   * Runs the given {@link SpanRunnable} inside of the span created by the given {@link
+   * SpanBuilder}. The span will be ended at the end of the {@link SpanRunnable}.
    *
-   * <p>If an exception is thrown by the {@link Runnable}, the span will be marked as error, and the
-   * exception will be recorded.
+   * <p>If an exception is thrown by the {@link SpanRunnable}, the span will be marked as error, and
+   * the exception will be recorded.
    *
    * @param spanBuilder the {@link SpanBuilder} to use
-   * @param runnable the {@link Runnable} to run
+   * @param runnable the {@link SpanRunnable} to run
    */
   @SuppressWarnings("NullAway")
-  public void run(SpanBuilder spanBuilder, Runnable runnable) {
+  public <E extends Throwable> void run(SpanBuilder spanBuilder, SpanRunnable<E> runnable)
+      throws E {
     call(
         spanBuilder,
         () -> {
-          runnable.run();
+          runnable.doInSpan();
           return null;
         });
   }
@@ -265,10 +266,10 @@ public final class Tracing {
   }
 
   /**
-   * Run the given {@link Runnable} inside a server span.
+   * Run the given {@link SpanCallback} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
-   * from HTTP headers of the metadata of an event you're processing.
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get from
+   * HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
    * the exception will be recorded.
@@ -287,10 +288,10 @@ public final class Tracing {
   }
 
   /**
-   * Run the given {@link Runnable} inside a server span.
+   * Run the given {@link SpanCallback} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
-   * from HTTP headers of the metadata of an event you're processing.
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get from
+   * HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
    * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
@@ -314,10 +315,10 @@ public final class Tracing {
   }
 
   /**
-   * Run the given {@link Runnable} inside a server span.
+   * Run the given {@link SpanCallback} inside a server span.
    *
-   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
-   * from HTTP headers of the metadata of an event you're processing.
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get from
+   * HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the span will be marked as error, and
    * the exception will be recorded.
@@ -336,10 +337,10 @@ public final class Tracing {
   }
 
   /**
-   * Run the given {@link Runnable} inside a consumer span.
+   * Run the given {@link SpanRunnable} inside a consumer span.
    *
-   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get
-   * from HTTP headers of the metadata of an event you're processing.
+   * <p>The span context will be extracted from the <code>carrier</code>, which you usually get from
+   * HTTP headers of the metadata of an event you're processing.
    *
    * <p>If an exception is thrown by the {@link SpanCallback}, the handleException consumer will be
    * called, giving you the opportunity to handle the exception and span in a custom way, e.g. not
