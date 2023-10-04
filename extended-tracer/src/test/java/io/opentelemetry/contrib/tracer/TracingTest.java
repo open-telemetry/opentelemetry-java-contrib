@@ -42,7 +42,7 @@ public class TracingTest {
     tracing.run(
         "parent",
         () -> {
-          Map<String, String> propagationHeaders = tracing.getPropagationHeaders();
+          Map<String, String> propagationHeaders = tracing.getTextMapPropagationContext();
           assertThat(propagationHeaders).hasSize(1).containsKey("traceparent");
 
           tracing.traceServerSpan(propagationHeaders, tracing.spanBuilder("child"), () -> null);

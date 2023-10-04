@@ -202,7 +202,7 @@ public final class Tracing {
    * Injects the current context into a string map, which can then be added to HTTP headers or the
    * metadata of an event.
    */
-  public Map<String, String> getPropagationHeaders() {
+  public Map<String, String> getTextMapPropagationContext() {
     Map<String, String> carrier = new HashMap<>();
     //noinspection ConstantConditions
     openTelemetry
@@ -226,7 +226,7 @@ public final class Tracing {
    *
    * @param carrier the string map
    */
-  private Context extractContext(Map<String, String> carrier) {
+  private Context extractTextMapPropagationContext(Map<String, String> carrier) {
     Context current = Context.current();
     //noinspection ConstantConditions
     if (carrier == null) {
@@ -370,7 +370,7 @@ public final class Tracing {
       SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    try (Scope ignore = extractContext(carrier).makeCurrent()) {
+    try (Scope ignore = extractTextMapPropagationContext(carrier).makeCurrent()) {
       return call(spanBuilder.setSpanKind(spanKind), spanCallback, handleException);
     }
   }
