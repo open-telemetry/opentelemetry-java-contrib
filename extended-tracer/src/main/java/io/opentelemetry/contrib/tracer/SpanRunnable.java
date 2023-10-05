@@ -6,7 +6,8 @@
 package io.opentelemetry.contrib.tracer;
 
 /**
- * A utility interface representing a {@link Runnable} that may throw.
+ * An interface for creating a lambda that is wrapped in a span and that may throw, similar to <a
+ * href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/support/TransactionCallback.html">TransactionCallback</a>.
  *
  * @param <E> Thrown exception type.
  */

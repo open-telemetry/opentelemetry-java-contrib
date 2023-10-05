@@ -5,10 +5,10 @@
 
 package io.opentelemetry.contrib.tracer;
 
-import java.util.function.Supplier;
-
 /**
- * A utility interface representing a {@link Supplier} that may throw.
+ * An interface for creating a lambda that is wrapped in a span, returns a value, and that may
+ * throw, similar to <a
+ * href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/support/TransactionCallback.html">TransactionCallback</a>.
  *
  * @param <E> Thrown exception type.
  */
