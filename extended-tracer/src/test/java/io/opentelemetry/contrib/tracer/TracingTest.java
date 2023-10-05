@@ -7,15 +7,18 @@ package io.opentelemetry.contrib.tracer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Named.named;
 
 import com.google.errorprone.annotations.Keep;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import io.opentelemetry.sdk.trace.data.StatusData;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -36,6 +39,54 @@ public class TracingTest {
   static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   private final Tracing tracing = new Tracing(otelTesting.getOpenTelemetry(), "test");
+
+  @Test
+  void wrapInSpan() {
+    assertThatIllegalStateException()
+        .isThrownBy(
+            () ->
+                tracing.run(
+                    "test",
+                    () -> {
+                      // runs in span
+                      throw new IllegalStateException("ex");
+                    }));
+
+    String result =
+        tracing.call(
+            "another test",
+            () -> {
+              // runs in span
+              return "result";
+            });
+    assertThat(result).isEqualTo("result");
+
+    otelTesting
+        .assertTraces()
+        .hasSize(2)
+        .hasTracesSatisfyingExactly(
+            trace ->
+                trace.hasSpansSatisfyingExactly(
+                    span ->
+                        span.hasName("test")
+                            .hasStatus(StatusData.error())
+                            .hasEventsSatisfyingExactly(
+                                event ->
+                                    event
+                                        .hasName("exception")
+                                        .hasAttributesSatisfyingExactly(
+                                            OpenTelemetryAssertions.equalTo(
+                                                SemanticAttributes.EXCEPTION_TYPE,
+                                                "java.lang.IllegalStateException"),
+                                            OpenTelemetryAssertions.satisfies(
+                                                SemanticAttributes.EXCEPTION_STACKTRACE,
+                                                string ->
+                                                    string.contains(
+                                                        "java.lang.IllegalStateException: ex")),
+                                            OpenTelemetryAssertions.equalTo(
+                                                SemanticAttributes.EXCEPTION_MESSAGE, "ex")))),
+            trace -> trace.hasSpansSatisfyingExactly(a -> a.hasName("another test")));
+  }
 
   @Test
   void propagation() {
