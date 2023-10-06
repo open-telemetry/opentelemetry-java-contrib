@@ -18,14 +18,8 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.context.propagation.TextMapGetter;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /**
  * Utility class to simplify tracing.
@@ -36,20 +30,6 @@ import javax.annotation.Nullable;
  */
 public final class Tracing {
 
-  private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
-      new TextMapGetter<Map<String, String>>() {
-        @Override
-        public Set<String> keys(Map<String, String> carrier) {
-          return carrier.keySet();
-        }
-
-        @Override
-        @Nullable
-        public String get(@Nullable Map<String, String> carrier, String key) {
-          //noinspection ConstantConditions
-          return carrier == null ? null : carrier.get(key);
-        }
-      };
   private final OpenTelemetry openTelemetry;
 
   private final Tracer tracer;
@@ -203,46 +183,7 @@ public final class Tracing {
    * metadata of an event.
    */
   public Map<String, String> getTextMapPropagationContext() {
-    Map<String, String> carrier = new HashMap<>();
-    //noinspection ConstantConditions
-    openTelemetry
-        .getPropagators()
-        .getTextMapPropagator()
-        .inject(
-            Context.current(),
-            carrier,
-            (map, key, value) -> {
-              if (map != null) {
-                map.put(key, value);
-              }
-            });
-
-    return carrier;
-  }
-
-  /**
-   * Extract the context from a string map, which you get from HTTP headers of the metadata of an
-   * event you're processing.
-   *
-   * @param carrier the string map
-   */
-  private Context extractTextMapPropagationContext(Map<String, String> carrier) {
-    Context current = Context.current();
-    //noinspection ConstantConditions
-    if (carrier == null) {
-      return current;
-    }
-    // HTTP headers are case-insensitive. As we're using Map, which is case-sensitive, we need to
-    // normalize all the keys
-    Map<String, String> normalizedCarrier =
-        carrier.entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().toLowerCase(Locale.ROOT), Map.Entry::getValue));
-    return openTelemetry
-        .getPropagators()
-        .getTextMapPropagator()
-        .extract(current, normalizedCarrier, TEXT_MAP_GETTER);
+    return Propagation.getTextMapPropagationContext(openTelemetry);
   }
 
   /**
@@ -255,7 +196,7 @@ public final class Tracing {
    * @return the result of the {@link SpanCallback}
    */
   @SuppressWarnings("NullAway")
-  public <T, E extends Throwable> T callWithBaggage(
+  public static <T, E extends Throwable> T callWithBaggage(
       Map<String, String> baggage, SpanCallback<T, E> spanCallback) throws E {
     BaggageBuilder builder = Baggage.current().toBuilder();
     baggage.forEach(builder::put);
@@ -370,7 +311,8 @@ public final class Tracing {
       SpanCallback<T, E> spanCallback,
       BiConsumer<Span, Throwable> handleException)
       throws E {
-    try (Scope ignore = extractTextMapPropagationContext(carrier).makeCurrent()) {
+    try (Scope ignore =
+        Propagation.extractTextMapPropagationContext(openTelemetry, carrier).makeCurrent()) {
       return call(spanBuilder.setSpanKind(spanKind), spanCallback, handleException);
     }
   }
