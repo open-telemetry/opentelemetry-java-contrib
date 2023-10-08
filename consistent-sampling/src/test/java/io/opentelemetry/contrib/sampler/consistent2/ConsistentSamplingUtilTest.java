@@ -67,11 +67,11 @@ public class ConsistentSamplingUtilTest {
 
   @Test
   void testCalculateAdjustedCount() {
-    assertThat(calculateAdjustedCount(0L)).isEqualTo(Double.POSITIVE_INFINITY);
+    assertThat(calculateAdjustedCount(0L)).isZero();
     assertThat(calculateAdjustedCount(0x40000000000000L)).isEqualTo(4.);
     assertThat(calculateAdjustedCount(0x80000000000000L)).isEqualTo(2.);
-    assertThat(calculateAdjustedCount(0x100000000000000L)).isEqualTo(1.);
-    assertThat(calculateAdjustedCount(-1)).isEqualTo(1.);
-    assertThat(calculateAdjustedCount(0x100000000000001L)).isEqualTo(1.);
+    assertThat(calculateAdjustedCount(0x100000000000000L)).isOne();
+    assertThat(calculateAdjustedCount(-1)).isOne();
+    assertThat(calculateAdjustedCount(0x100000000000001L)).isOne();
   }
 }

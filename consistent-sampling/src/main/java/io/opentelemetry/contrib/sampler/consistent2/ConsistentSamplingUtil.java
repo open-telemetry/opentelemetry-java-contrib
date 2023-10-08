@@ -47,14 +47,19 @@ public final class ConsistentSamplingUtil {
    *
    * <p>Returns 1, if the threshold is invalid.
    *
-   * <p>Returns {@link Double#POSITIVE_INFINITY}, if the threshold is 0.
+   * <p>Returns 0, if the threshold is 0. A span with zero threshold is only sampled due to a
+   * non-probabilistic sampling decision and therefore does not contribute to the adjusted count.
    *
    * @param threshold the threshold
    * @return the adjusted count
    */
   public static double calculateAdjustedCount(long threshold) {
     if (isValidThreshold(threshold)) {
-      return 0x1p56 / threshold;
+      if (threshold > 0) {
+        return 0x1p56 / threshold;
+      } else {
+        return 0;
+      }
     } else {
       return 1.;
     }
