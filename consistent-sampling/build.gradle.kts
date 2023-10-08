@@ -10,6 +10,6 @@ otelJava.moduleName.set("io.opentelemetry.contrib.sampler.consistent56")
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  testImplementation("org.hipparchus:hipparchus-core:2.3")
-  testImplementation("org.hipparchus:hipparchus-stat:2.3")
+  testImplementation("org.hipparchus:hipparchus-core:3.0")
+  testImplementation("org.hipparchus:hipparchus-stat:3.0")
 }
