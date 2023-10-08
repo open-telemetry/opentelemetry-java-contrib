@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.sampler.consistent2;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 public final class ConsistentSamplingUtil {
 
   private static final int RANDOM_VALUE_BITS = 56;
@@ -117,5 +119,29 @@ public final class ConsistentSamplingUtil {
     if (!isValidProbability(probability)) {
       throw new IllegalArgumentException("The probability must be in the range [0,1]!");
     }
+  }
+
+  private static final char[] HEX_DIGITS = {
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+  };
+
+  @CanIgnoreReturnValue
+  static StringBuilder appendLast56BitHexEncoded(StringBuilder sb, long l) {
+    return appendLast56BitHexEncodedHelper(sb, l, 0);
+  }
+
+  @CanIgnoreReturnValue
+  static StringBuilder appendLast56BitHexEncodedWithoutTrailingZeros(StringBuilder sb, long l) {
+    int numTrailingBits = Long.numberOfTrailingZeros(l | 0x80000000000000L);
+    return appendLast56BitHexEncodedHelper(sb, l, numTrailingBits);
+  }
+
+  @CanIgnoreReturnValue
+  private static StringBuilder appendLast56BitHexEncodedHelper(
+      StringBuilder sb, long l, int numTrailingZeroBits) {
+    for (int i = 52; i >= numTrailingZeroBits - 3; i -= 4) {
+      sb.append(HEX_DIGITS[(int) ((l >>> i) & 0xf)]);
+    }
+    return sb;
   }
 }

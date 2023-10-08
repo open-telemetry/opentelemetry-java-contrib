@@ -74,4 +74,41 @@ public class ConsistentSamplingUtilTest {
     assertThat(calculateAdjustedCount(-1)).isOne();
     assertThat(calculateAdjustedCount(0x100000000000001L)).isOne();
   }
+
+  @Test
+  void testAppendLast56BitHexEncoded() {
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncoded(new StringBuilder(), 0x3a436f7842456L))
+        .hasToString("03a436f7842456");
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncoded(
+                new StringBuilder(), 0x3a436f7842456abL))
+        .hasToString("a436f7842456ab");
+    assertThat(ConsistentSamplingUtil.appendLast56BitHexEncoded(new StringBuilder(), 0L))
+        .hasToString("00000000000000");
+  }
+
+  @Test
+  void testAppendLast56BitHexEncodedWithoutTrailingZeros() {
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                new StringBuilder(), 0x3a436f7842456L))
+        .hasToString("03a436f7842456");
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                new StringBuilder(), 0x3a436f7842456abL))
+        .hasToString("a436f7842456ab");
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                new StringBuilder(), 0x80000000000000L))
+        .hasToString("8");
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                new StringBuilder(), 0x11000000000000L))
+        .hasToString("11");
+    assertThat(
+            ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                new StringBuilder(), 0L))
+        .hasToString("0");
+  }
 }

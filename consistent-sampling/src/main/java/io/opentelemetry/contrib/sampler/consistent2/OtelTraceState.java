@@ -5,13 +5,14 @@
 
 package io.opentelemetry.contrib.sampler.consistent2;
 
+import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.appendLast56BitHexEncoded;
+import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getInvalidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getInvalidThreshold;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getMaxThreshold;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.isValidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.isValidThreshold;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,14 +104,14 @@ final class OtelTraceState {
     StringBuilder sb = new StringBuilder();
     if (hasValidThreshold() && threshold < getMaxThreshold()) {
       sb.append(SUBKEY_THRESHOLD).append(':');
-      appendThreshold(sb, threshold);
+      appendLast56BitHexEncodedWithoutTrailingZeros(sb, threshold);
     }
     if (hasValidRandomValue()) {
       if (sb.length() > 0) {
         sb.append(';');
       }
       sb.append(SUBKEY_RANDOM_VALUE).append(':');
-      appendRandomValue(sb, randomValue);
+      appendLast56BitHexEncoded(sb, randomValue);
     }
     for (String pair : otherKeyValuePairs) {
       int ex = sb.length();
@@ -146,27 +147,6 @@ final class OtelTraceState {
 
   private static boolean isUpperCaseAlpha(char c) {
     return c >= 'A' && c <= 'Z';
-  }
-
-  private static final char[] HEX_DIGITS = {
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-  };
-
-  @CanIgnoreReturnValue
-  static StringBuilder appendRandomValue(StringBuilder sb, long l) {
-    for (int i = 52; i >= 0; i -= 4) {
-      sb.append(HEX_DIGITS[(int) ((l >>> i) & 0xf)]);
-    }
-    return sb;
-  }
-
-  @CanIgnoreReturnValue
-  static StringBuilder appendThreshold(StringBuilder sb, long l) {
-    int numTrailingBits = Long.numberOfTrailingZeros(l | 0x80000000000000L);
-    for (int i = 52; i >= numTrailingBits - 3; i -= 4) {
-      sb.append(HEX_DIGITS[(int) ((l >>> i) & 0xf)]);
-    }
-    return sb;
   }
 
   private static long parseRandomValue(String s, int startIncl, int endIncl) {
