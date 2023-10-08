@@ -313,7 +313,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param parentThreshold is the threshold (if known) that was used for a consistent sampling
    *     decision by the parent
    * @param isRoot is true for the root span
-   * @return this Builder
+   * @return the threshold to be used for the sampling decision
    */
   protected abstract long getThreshold(long parentThreshold, boolean isRoot);
 }
