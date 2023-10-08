@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
+package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.calculateSamplingProbability;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.checkThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateSamplingProbability;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.checkThreshold;
 
 public class ConsistentFixedThresholdSampler extends ConsistentSampler {
 

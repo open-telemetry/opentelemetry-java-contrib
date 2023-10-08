@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
+package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getMaxThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
 
 import javax.annotation.concurrent.Immutable;
 

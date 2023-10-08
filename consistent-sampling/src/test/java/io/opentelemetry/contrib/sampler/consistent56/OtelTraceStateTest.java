@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
+package io.opentelemetry.contrib.sampler.consistent56;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
+package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getInvalidThreshold;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.concurrent.Immutable;
@@ -39,7 +38,7 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
   @Override
   protected long getThreshold(long parentThreshold, boolean isRoot) {
     if (isRoot) {
-      return rootSampler.getThreshold(getInvalidThreshold(), isRoot);
+      return rootSampler.getThreshold(ConsistentSamplingUtil.getInvalidThreshold(), isRoot);
     } else {
       return parentThreshold;
     }

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
+package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getMaxThreshold;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -148,7 +147,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
             / currentState.effectiveWindowCount;
 
     if (samplingProbability >= 1.) {
-      return getMaxThreshold();
+      return ConsistentSamplingUtil.getMaxThreshold();
     } else {
       return ConsistentSamplingUtil.calculateThreshold(samplingProbability);
     }

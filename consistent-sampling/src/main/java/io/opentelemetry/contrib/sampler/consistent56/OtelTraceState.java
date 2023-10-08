@@ -3,15 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent2;
-
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.appendLast56BitHexEncoded;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getInvalidRandomValue;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getInvalidThreshold;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.getMaxThreshold;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.isValidRandomValue;
-import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.isValidThreshold;
+package io.opentelemetry.contrib.sampler.consistent56;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +30,10 @@ final class OtelTraceState {
   }
 
   private OtelTraceState() {
-    this(getInvalidRandomValue(), getInvalidThreshold(), Collections.emptyList());
+    this(
+        ConsistentSamplingUtil.getInvalidRandomValue(),
+        ConsistentSamplingUtil.getInvalidThreshold(),
+        Collections.emptyList());
   }
 
   public long getRandomValue() {
@@ -50,19 +45,19 @@ final class OtelTraceState {
   }
 
   public boolean hasValidRandomValue() {
-    return isValidRandomValue(randomValue);
+    return ConsistentSamplingUtil.isValidRandomValue(randomValue);
   }
 
   public boolean hasValidThreshold() {
-    return isValidThreshold(threshold);
+    return ConsistentSamplingUtil.isValidThreshold(threshold);
   }
 
   public void invalidateRandomValue() {
-    randomValue = getInvalidRandomValue();
+    randomValue = ConsistentSamplingUtil.getInvalidRandomValue();
   }
 
   public void invalidateThreshold() {
-    threshold = getInvalidThreshold();
+    threshold = ConsistentSamplingUtil.getInvalidThreshold();
   }
 
   /**
@@ -73,7 +68,7 @@ final class OtelTraceState {
    * @param threshold the new th-value
    */
   public void setThreshold(long threshold) {
-    if (isValidThreshold(threshold)) {
+    if (ConsistentSamplingUtil.isValidThreshold(threshold)) {
       this.threshold = threshold;
     } else {
       invalidateThreshold();
@@ -88,7 +83,7 @@ final class OtelTraceState {
    * @param randomValue the new rv-value
    */
   public void setRandomValue(long randomValue) {
-    if (isValidRandomValue(randomValue)) {
+    if (ConsistentSamplingUtil.isValidRandomValue(randomValue)) {
       this.randomValue = randomValue;
     } else {
       invalidateRandomValue();
@@ -102,16 +97,16 @@ final class OtelTraceState {
    */
   public String serialize() {
     StringBuilder sb = new StringBuilder();
-    if (hasValidThreshold() && threshold < getMaxThreshold()) {
+    if (hasValidThreshold() && threshold < ConsistentSamplingUtil.getMaxThreshold()) {
       sb.append(SUBKEY_THRESHOLD).append(':');
-      appendLast56BitHexEncodedWithoutTrailingZeros(sb, threshold);
+      ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(sb, threshold);
     }
     if (hasValidRandomValue()) {
       if (sb.length() > 0) {
         sb.append(';');
       }
       sb.append(SUBKEY_RANDOM_VALUE).append(':');
-      appendLast56BitHexEncoded(sb, randomValue);
+      ConsistentSamplingUtil.appendLast56BitHexEncoded(sb, randomValue);
     }
     for (String pair : otherKeyValuePairs) {
       int ex = sb.length();
@@ -152,17 +147,17 @@ final class OtelTraceState {
   private static long parseRandomValue(String s, int startIncl, int endIncl) {
     int len = endIncl - startIncl;
     if (len != 14) {
-      return getInvalidRandomValue();
+      return ConsistentSamplingUtil.getInvalidRandomValue();
     }
-    return parseHex(s, startIncl, len, getInvalidRandomValue());
+    return parseHex(s, startIncl, len, ConsistentSamplingUtil.getInvalidRandomValue());
   }
 
   private static long parseThreshold(String s, int startIncl, int endIncl) {
     int len = endIncl - startIncl;
     if (len > 14) {
-      return getInvalidThreshold();
+      return ConsistentSamplingUtil.getInvalidThreshold();
     }
-    return parseHex(s, startIncl, len, getInvalidThreshold());
+    return parseHex(s, startIncl, len, ConsistentSamplingUtil.getInvalidThreshold());
   }
 
   static long parseHex(String s, int startIncl, int len, long invalidReturnValue) {
@@ -193,8 +188,8 @@ final class OtelTraceState {
    */
   public static OtelTraceState parse(@Nullable String ts) {
     List<String> otherKeyValuePairs = null;
-    long threshold = getInvalidThreshold();
-    long randomValue = getInvalidRandomValue();
+    long threshold = ConsistentSamplingUtil.getInvalidThreshold();
+    long randomValue = ConsistentSamplingUtil.getInvalidRandomValue();
 
     if (ts == null || ts.isEmpty()) {
       return new OtelTraceState();
