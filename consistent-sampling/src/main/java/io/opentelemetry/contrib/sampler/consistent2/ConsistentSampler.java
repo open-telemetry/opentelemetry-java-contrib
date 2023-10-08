@@ -184,8 +184,8 @@ public abstract class ConsistentSampler implements Sampler {
   }
 
   /**
-   * Returns a {@link ConsistentSampler} that samples a span if either this or the other given
-   * consistent sampler would sample the span.
+   * Returns a {@link ConsistentSampler} that samples a span if this or the other given consistent
+   * sampler would sample the span.
    *
    * <p>If the other consistent sampler is the same as this, this consistent sampler will be
    * returned.
