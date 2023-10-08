@@ -45,7 +45,7 @@ public class ConsistentFixedThresholdSamplerTest {
     parentLinks = Collections.emptyList();
   }
 
-  private void test(SplittableRandom rng, double samplingProbability) {
+  private void testSampling(SplittableRandom rng, double samplingProbability) {
     int numSpans = 10000;
 
     Sampler sampler =
@@ -82,19 +82,33 @@ public class ConsistentFixedThresholdSamplerTest {
   }
 
   @Test
-  public void test() {
+  public void testSampling() {
 
     // fix seed to get reproducible results
     SplittableRandom random = new SplittableRandom(0);
 
-    test(random, 1.);
-    test(random, 0.5);
-    test(random, 0.25);
-    test(random, 0.125);
-    test(random, 0.0);
-    test(random, 0.45);
-    test(random, 0.2);
-    test(random, 0.13);
-    test(random, 0.05);
+    testSampling(random, 1.);
+    testSampling(random, 0.5);
+    testSampling(random, 0.25);
+    testSampling(random, 0.125);
+    testSampling(random, 0.0);
+    testSampling(random, 0.45);
+    testSampling(random, 0.2);
+    testSampling(random, 0.13);
+    testSampling(random, 0.05);
+  }
+
+  @Test
+  public void testDescription() {
+    assertThat(ConsistentSampler.probabilityBased(1.0).getDescription())
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=max, sampling probability=1.0}");
+    assertThat(ConsistentSampler.probabilityBased(0.5).getDescription())
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=8, sampling probability=0.5}");
+    assertThat(ConsistentSampler.probabilityBased(0.25).getDescription())
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=4, sampling probability=0.25}");
+    assertThat(ConsistentSampler.probabilityBased(1e-300).getDescription())
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=0.0}");
+    assertThat(ConsistentSampler.probabilityBased(0).getDescription())
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=0.0}");
   }
 }

@@ -211,4 +211,21 @@ class ConsistentRateLimitingSamplerTest {
     assertThat(numSampledSpansInLast5Seconds / 5.)
         .isCloseTo(targetSpansPerSecondLimit, Percentage.withPercentage(5));
   }
+
+  @Test
+  void testDescription() {
+
+    double targetSpansPerSecondLimit = 123.456;
+    double adaptationTimeSeconds = 7.89;
+    ConsistentSampler sampler =
+        ConsistentSampler.rateLimited(targetSpansPerSecondLimit, adaptationTimeSeconds);
+
+    assertThat(sampler.getDescription())
+        .isEqualTo(
+            "ConsistentRateLimitingSampler{targetSpansPerSecondLimit="
+                + targetSpansPerSecondLimit
+                + ", adaptationTimeSeconds="
+                + adaptationTimeSeconds
+                + "}");
+  }
 }

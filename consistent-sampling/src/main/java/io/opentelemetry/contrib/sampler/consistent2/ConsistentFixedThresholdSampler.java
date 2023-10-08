@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.consistent2;
 
+import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.calculateSamplingProbability;
 import static io.opentelemetry.contrib.sampler.consistent2.ConsistentSamplingUtil.checkThreshold;
 
 public class ConsistentFixedThresholdSampler extends ConsistentSampler {
@@ -17,8 +18,23 @@ public class ConsistentFixedThresholdSampler extends ConsistentSampler {
     super(randomValueGenerator);
     checkThreshold(threshold);
     this.threshold = threshold;
+
+    String thresholdString;
+    if (threshold == ConsistentSamplingUtil.getMaxThreshold()) {
+      thresholdString = "max";
+    } else {
+      thresholdString =
+          ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
+                  new StringBuilder(), threshold)
+              .toString();
+    }
+
     this.description =
-        "ConsistentFixedThresholdSampler{threshold=" + Long.toHexString(threshold) + "}";
+        "ConsistentFixedThresholdSampler{threshold="
+            + thresholdString
+            + ", sampling probability="
+            + calculateSamplingProbability(threshold)
+            + "}";
   }
 
   @Override

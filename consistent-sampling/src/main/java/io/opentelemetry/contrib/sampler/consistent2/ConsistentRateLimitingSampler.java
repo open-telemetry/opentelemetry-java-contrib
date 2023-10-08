@@ -68,6 +68,8 @@ import javax.annotation.concurrent.Immutable;
  */
 final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
+  private static final double NANOS_IN_SECONDS = 1e-9;
+
   @Immutable
   private static final class State {
     private final double effectiveWindowCount;
@@ -110,13 +112,15 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
       throw new IllegalArgumentException("Adaptation rate must be nonnegative!");
     }
     this.description =
-        String.format(
-            "ConsistentRateLimitingSampler{%.6f, %.6f}",
-            targetSpansPerSecondLimit, adaptationTimeSeconds);
+        "ConsistentRateLimitingSampler{targetSpansPerSecondLimit="
+            + targetSpansPerSecondLimit
+            + ", adaptationTimeSeconds="
+            + adaptationTimeSeconds
+            + "}";
     this.nanoTimeSupplier = requireNonNull(nanoTimeSupplier);
 
-    this.inverseAdaptationTimeNanos = 1e-9 / adaptationTimeSeconds;
-    this.targetSpansPerNanosecondLimit = 1e-9 * targetSpansPerSecondLimit;
+    this.inverseAdaptationTimeNanos = NANOS_IN_SECONDS / adaptationTimeSeconds;
+    this.targetSpansPerNanosecondLimit = NANOS_IN_SECONDS * targetSpansPerSecondLimit;
 
     this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
   }
