@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;

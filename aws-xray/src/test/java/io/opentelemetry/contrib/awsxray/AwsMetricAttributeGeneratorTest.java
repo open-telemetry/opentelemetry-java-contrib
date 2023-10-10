@@ -15,25 +15,25 @@ import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_TARGE
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
-import static io.opentelemetry.semconv.ResourceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.SemanticAttributes.DB_OPERATION;
-import static io.opentelemetry.semconv.SemanticAttributes.DB_SYSTEM;
-import static io.opentelemetry.semconv.SemanticAttributes.FAAS_INVOKED_NAME;
-import static io.opentelemetry.semconv.SemanticAttributes.FAAS_INVOKED_PROVIDER;
-import static io.opentelemetry.semconv.SemanticAttributes.FAAS_TRIGGER;
-import static io.opentelemetry.semconv.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
-import static io.opentelemetry.semconv.SemanticAttributes.HTTP_REQUEST_METHOD;
-import static io.opentelemetry.semconv.SemanticAttributes.MESSAGING_OPERATION;
-import static io.opentelemetry.semconv.SemanticAttributes.MESSAGING_SYSTEM;
-import static io.opentelemetry.semconv.SemanticAttributes.PEER_SERVICE;
-import static io.opentelemetry.semconv.SemanticAttributes.RPC_METHOD;
-import static io.opentelemetry.semconv.SemanticAttributes.RPC_SERVICE;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_ADDRESS;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_PORT;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_SOCKET_ADDRESS;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_SOCKET_PORT;
-import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
-import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
+import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_OPERATION;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_PROVIDER;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_TRIGGER;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_OPERATION;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_ADDR;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.PEER_SERVICE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_SERVICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -170,7 +170,7 @@ class AwsMetricAttributeGeneratorTest {
   public void testServerSpanWithSpanNameAsHttpMethod() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn("GET");
-    mockAttribute(HTTP_REQUEST_METHOD, "GET");
+    mockAttribute(HTTP_METHOD, "GET");
 
     Attributes expectedAttributes =
         Attributes.of(
@@ -178,15 +178,15 @@ class AwsMetricAttributeGeneratorTest {
             AWS_LOCAL_SERVICE, SERVICE_NAME_VALUE,
             AWS_LOCAL_OPERATION, UNKNOWN_OPERATION);
     validateAttributesProducedForSpanOfKind(expectedAttributes, SpanKind.SERVER);
-    mockAttribute(HTTP_REQUEST_METHOD, null);
+    mockAttribute(HTTP_METHOD, null);
   }
 
   @Test
   public void testServerSpanWithSpanNameWithHttpTarget() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn("POST");
-    mockAttribute(HTTP_REQUEST_METHOD, "POST");
-    mockAttribute(URL_PATH, "/payment/123");
+    mockAttribute(HTTP_METHOD, "POST");
+    mockAttribute(HTTP_TARGET, "/payment/123");
 
     Attributes expectedAttributes =
         Attributes.of(
@@ -197,8 +197,8 @@ class AwsMetricAttributeGeneratorTest {
             AWS_LOCAL_OPERATION,
             "POST /payment");
     validateAttributesProducedForSpanOfKind(expectedAttributes, SpanKind.SERVER);
-    mockAttribute(HTTP_REQUEST_METHOD, null);
-    mockAttribute(URL_PATH, null);
+    mockAttribute(HTTP_METHOD, null);
+    mockAttribute(HTTP_TARGET, null);
   }
 
   @Test
@@ -283,44 +283,44 @@ class AwsMetricAttributeGeneratorTest {
     mockAttribute(GRAPHQL_OPERATION_TYPE, null);
 
     // Validate behaviour of extracting Remote Service from net.peer.name
-    mockAttribute(SERVER_ADDRESS, "www.example.com");
+    mockAttribute(NET_PEER_NAME, "www.example.com");
     validateExpectedRemoteAttributes("www.example.com", UNKNOWN_REMOTE_OPERATION);
-    mockAttribute(SERVER_ADDRESS, null);
+    mockAttribute(NET_PEER_NAME, null);
 
     // Validate behaviour of extracting Remote Service from net.peer.name and net.peer.port
-    mockAttribute(SERVER_ADDRESS, "192.168.0.0");
-    mockAttribute(SERVER_PORT, 8081L);
+    mockAttribute(NET_PEER_NAME, "192.168.0.0");
+    mockAttribute(NET_PEER_PORT, 8081L);
     validateExpectedRemoteAttributes("192.168.0.0:8081", UNKNOWN_REMOTE_OPERATION);
-    mockAttribute(SERVER_ADDRESS, null);
-    mockAttribute(SERVER_PORT, null);
+    mockAttribute(NET_PEER_NAME, null);
+    mockAttribute(NET_PEER_PORT, null);
 
     // Validate behaviour of extracting Remote Service from net.peer.socket.addr
-    mockAttribute(SERVER_SOCKET_ADDRESS, "www.example.com");
+    mockAttribute(NET_SOCK_PEER_ADDR, "www.example.com");
     validateExpectedRemoteAttributes("www.example.com", UNKNOWN_REMOTE_OPERATION);
-    mockAttribute(SERVER_SOCKET_ADDRESS, null);
+    mockAttribute(NET_SOCK_PEER_ADDR, null);
 
     // Validate behaviour of extracting Remote Service from net.peer.socket.addr and
     // net.sock.peer.port
-    mockAttribute(SERVER_SOCKET_ADDRESS, "192.168.0.0");
-    mockAttribute(SERVER_SOCKET_PORT, 8081L);
+    mockAttribute(NET_SOCK_PEER_ADDR, "192.168.0.0");
+    mockAttribute(NET_SOCK_PEER_PORT, 8081L);
     validateExpectedRemoteAttributes("192.168.0.0:8081", UNKNOWN_REMOTE_OPERATION);
-    mockAttribute(SERVER_SOCKET_ADDRESS, null);
-    mockAttribute(SERVER_SOCKET_PORT, null);
+    mockAttribute(NET_SOCK_PEER_ADDR, null);
+    mockAttribute(NET_SOCK_PEER_PORT, null);
 
     // Validate behavior of Remote Operation from HttpTarget - with 1st api part, then remove it
-    mockAttribute(URL_FULL, "http://www.example.com/payment/123");
+    mockAttribute(HTTP_URL, "http://www.example.com/payment/123");
     validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, "/payment");
-    mockAttribute(URL_FULL, null);
+    mockAttribute(HTTP_URL, null);
 
     // Validate behavior of Remote Operation from HttpTarget - without 1st api part, then remove it
-    mockAttribute(URL_FULL, "http://www.example.com");
+    mockAttribute(HTTP_URL, "http://www.example.com");
     validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, "/");
-    mockAttribute(URL_FULL, null);
+    mockAttribute(HTTP_URL, null);
 
     // Validate behavior of Remote Operation from HttpTarget - invalid url, then remove it
-    mockAttribute(URL_FULL, "abc");
+    mockAttribute(HTTP_URL, "abc");
     validateExpectedRemoteAttributes(UNKNOWN_REMOTE_SERVICE, UNKNOWN_REMOTE_OPERATION);
-    mockAttribute(URL_FULL, null);
+    mockAttribute(HTTP_URL, null);
 
     // Validate behaviour of Peer service attribute, then remove it.
     mockAttribute(PEER_SERVICE, "Peer service");
@@ -338,8 +338,8 @@ class AwsMetricAttributeGeneratorTest {
     validatePeerServiceDoesOverride(FAAS_INVOKED_PROVIDER);
     validatePeerServiceDoesOverride(MESSAGING_SYSTEM);
     validatePeerServiceDoesOverride(GRAPHQL_OPERATION_TYPE);
-    validatePeerServiceDoesOverride(SERVER_ADDRESS);
-    validatePeerServiceDoesOverride(SERVER_SOCKET_ADDRESS);
+    validatePeerServiceDoesOverride(NET_PEER_NAME);
+    validatePeerServiceDoesOverride(NET_SOCK_PEER_ADDR);
     // Actually testing that peer service overrides "UnknownRemoteService".
     validatePeerServiceDoesOverride(AttributeKey.stringKey("unknown.service.key"));
   }
