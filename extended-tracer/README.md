@@ -146,7 +146,7 @@ After:
 
 ```java
 Tracing tracing = new Tracing(openTelemetry, "service");
-String value = tracing.callWithBaggage(
+String value = Tracing.callWithBaggage(
     Collections.singletonMap("key", "value"),
     () -> Baggage.current().getEntryValue("key"))
 ```

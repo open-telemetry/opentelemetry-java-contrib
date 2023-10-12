@@ -114,7 +114,7 @@ public class TracingTest {
         tracing.call(
             "parent",
             () ->
-                tracing.callWithBaggage(
+                Tracing.callWithBaggage(
                     Collections.singletonMap("key", "value"),
                     () -> Baggage.current().getEntryValue("key")));
 

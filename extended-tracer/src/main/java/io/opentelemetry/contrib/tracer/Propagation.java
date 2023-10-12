@@ -15,7 +15,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-public class Propagation {
+/**
+ * Utility class to simplify context propagation.
+ *
+ * <p>The <a
+ * href="https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/extended-tracer/README.md">README</a>
+ * explains the use cases in more detail.
+ */
+public final class Propagation {
+
+  private Propagation() {}
 
   private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
       new TextMapGetter<Map<String, String>>() {
