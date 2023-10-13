@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- Explicitly pass invalid p-value to root sampler
+  ([#1053](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1053))
+
+### Samplers
+
+- Support `thread.name` attributes in RuleBasedRoutingSampler
+  ([#1030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1030))
+
 ## Version 1.30.0 (2023-09-18)
 
 ### Disk buffering
