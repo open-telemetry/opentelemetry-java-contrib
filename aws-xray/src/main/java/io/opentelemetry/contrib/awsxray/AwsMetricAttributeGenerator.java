@@ -15,24 +15,24 @@ import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_TARGE
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
-import static io.opentelemetry.semconv.ResourceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.SemanticAttributes.DB_OPERATION;
-import static io.opentelemetry.semconv.SemanticAttributes.DB_SYSTEM;
-import static io.opentelemetry.semconv.SemanticAttributes.FAAS_INVOKED_NAME;
-import static io.opentelemetry.semconv.SemanticAttributes.FAAS_TRIGGER;
-import static io.opentelemetry.semconv.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
-import static io.opentelemetry.semconv.SemanticAttributes.HTTP_REQUEST_METHOD;
-import static io.opentelemetry.semconv.SemanticAttributes.MESSAGING_OPERATION;
-import static io.opentelemetry.semconv.SemanticAttributes.MESSAGING_SYSTEM;
-import static io.opentelemetry.semconv.SemanticAttributes.PEER_SERVICE;
-import static io.opentelemetry.semconv.SemanticAttributes.RPC_METHOD;
-import static io.opentelemetry.semconv.SemanticAttributes.RPC_SERVICE;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_ADDRESS;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_PORT;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_SOCKET_ADDRESS;
-import static io.opentelemetry.semconv.SemanticAttributes.SERVER_SOCKET_PORT;
-import static io.opentelemetry.semconv.SemanticAttributes.URL_FULL;
-import static io.opentelemetry.semconv.SemanticAttributes.URL_PATH;
+import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_OPERATION;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_TRIGGER;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_OPERATION;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_SYSTEM;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_NAME;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_ADDR;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_PORT;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.PEER_SERVICE;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_METHOD;
+import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_SERVICE;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -40,8 +40,8 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.semconv.ResourceAttributes;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -156,8 +156,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
     if (operation == null || operation.equals(UNKNOWN_OPERATION)) {
       return false;
     }
-    if (isKeyPresent(span, HTTP_REQUEST_METHOD)) {
-      String httpMethod = span.getAttributes().get(HTTP_REQUEST_METHOD);
+    if (isKeyPresent(span, HTTP_METHOD)) {
+      String httpMethod = span.getAttributes().get(HTTP_METHOD);
       return !operation.equals(httpMethod);
     }
     return true;
@@ -260,15 +260,15 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    */
   private static String generateIngressOperation(SpanData span) {
     String operation = UNKNOWN_OPERATION;
-    if (isKeyPresent(span, URL_PATH)) {
-      String httpTarget = span.getAttributes().get(URL_PATH);
+    if (isKeyPresent(span, HTTP_TARGET)) {
+      String httpTarget = span.getAttributes().get(HTTP_TARGET);
       // get the first part from API path string as operation value
       // the more levels/parts we get from API path the higher chance for getting high cardinality
       // data
       if (httpTarget != null) {
         operation = extractApiPathValue(httpTarget);
-        if (isKeyPresent(span, HTTP_REQUEST_METHOD)) {
-          String httpMethod = span.getAttributes().get(HTTP_REQUEST_METHOD);
+        if (isKeyPresent(span, HTTP_METHOD)) {
+          String httpMethod = span.getAttributes().get(HTTP_METHOD);
           if (httpMethod != null) {
             operation = httpMethod + " " + operation;
           }
@@ -284,8 +284,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    */
   private static String generateRemoteOperation(SpanData span) {
     String remoteOperation = UNKNOWN_REMOTE_OPERATION;
-    if (isKeyPresent(span, URL_FULL)) {
-      String httpUrl = span.getAttributes().get(URL_FULL);
+    if (isKeyPresent(span, HTTP_URL)) {
+      String httpUrl = span.getAttributes().get(HTTP_URL);
       try {
         URL url;
         if (httpUrl != null) {
@@ -296,8 +296,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
         logger.log(Level.FINEST, "invalid http.url attribute: ", httpUrl);
       }
     }
-    if (isKeyPresent(span, HTTP_REQUEST_METHOD)) {
-      String httpMethod = span.getAttributes().get(HTTP_REQUEST_METHOD);
+    if (isKeyPresent(span, HTTP_METHOD)) {
+      String httpMethod = span.getAttributes().get(HTTP_METHOD);
       remoteOperation = httpMethod + " " + remoteOperation;
     }
     if (remoteOperation.equals(UNKNOWN_REMOTE_OPERATION)) {
@@ -325,16 +325,16 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
 
   private static String generateRemoteService(SpanData span) {
     String remoteService = UNKNOWN_REMOTE_SERVICE;
-    if (isKeyPresent(span, SERVER_ADDRESS)) {
-      remoteService = getRemoteService(span, SERVER_ADDRESS);
-      if (isKeyPresent(span, SERVER_PORT)) {
-        Long port = span.getAttributes().get(SERVER_PORT);
+    if (isKeyPresent(span, NET_PEER_NAME)) {
+      remoteService = getRemoteService(span, NET_PEER_NAME);
+      if (isKeyPresent(span, NET_PEER_PORT)) {
+        Long port = span.getAttributes().get(NET_PEER_PORT);
         remoteService += ":" + port;
       }
-    } else if (isKeyPresent(span, SERVER_SOCKET_ADDRESS)) {
-      remoteService = getRemoteService(span, SERVER_SOCKET_ADDRESS);
-      if (isKeyPresent(span, SERVER_SOCKET_PORT)) {
-        Long port = span.getAttributes().get(SERVER_SOCKET_PORT);
+    } else if (isKeyPresent(span, NET_SOCK_PEER_ADDR)) {
+      remoteService = getRemoteService(span, NET_SOCK_PEER_ADDR);
+      if (isKeyPresent(span, NET_SOCK_PEER_PORT)) {
+        Long port = span.getAttributes().get(NET_SOCK_PEER_PORT);
         remoteService += ":" + port;
       }
     } else {

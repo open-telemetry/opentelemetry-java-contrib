@@ -17,8 +17,8 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.ResourceAttributes;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -162,25 +162,13 @@ final class SamplingRuleApplier {
     String host = null;
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(SemanticAttributes.URL_PATH)) {
+      if (entry.getKey().equals(SemanticAttributes.HTTP_TARGET)) {
         httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.HTTP_TARGET)) {
-        // TODO remove support for deprecated http.target attribute
-        httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.URL_FULL)) {
-        httpUrl = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_URL)) {
-        // TODO remove support for deprecated http.url attribute
         httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.HTTP_REQUEST_METHOD)) {
-        httpMethod = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_METHOD)) {
-        // TODO remove support for deprecated http.method attribute
         httpMethod = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.SERVER_ADDRESS)) {
-        host = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.NET_HOST_NAME)) {
-        // TODO remove support for deprecated net.host.name attribute
         host = (String) entry.getValue();
       } else if (entry.getKey().equals(SemanticAttributes.HTTP_HOST)) {
         // TODO (trask) remove support for deprecated http.host attribute
