@@ -35,7 +35,7 @@ public final class CoreRuntimeAttach {
    * beginning of the main method.
    */
   @SuppressWarnings("MemberName")
-  public void attachJavaagentToCurrentJVM() {
+  public void attachJavaagentToCurrentJvm() {
     if (!shouldAttach()) {
       return;
     }
