@@ -48,7 +48,7 @@ val CORE_DEPENDENCIES = listOf(
 val DEPENDENCIES = listOf(
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
-  "com.squareup.okhttp3:okhttp:4.11.0",
+  "com.squareup.okhttp3:okhttp:4.12.0",
   "com.uber.nullaway:nullaway:0.10.14",
   "org.assertj:assertj-core:3.24.2",
   "org.awaitility:awaitility:4.2.0",
