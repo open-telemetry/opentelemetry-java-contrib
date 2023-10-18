@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.31.0 (2023-10-18)
+
 ### Consistent sampling
 
 - Explicitly pass invalid p-value to root sampler
