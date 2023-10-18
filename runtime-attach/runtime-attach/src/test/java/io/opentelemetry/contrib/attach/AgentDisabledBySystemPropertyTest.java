@@ -14,7 +14,7 @@ public class AgentDisabledBySystemPropertyTest extends AbstractAttachmentTest {
 
   @Test
   void shouldNotAttachWhenAgentDisabledWithProperty() {
-    RuntimeAttach.attachJavaagentToCurrentJVM();
+    RuntimeAttach.attachJavaagentToCurrentJvm();
     verifyNoAttachment();
   }
 

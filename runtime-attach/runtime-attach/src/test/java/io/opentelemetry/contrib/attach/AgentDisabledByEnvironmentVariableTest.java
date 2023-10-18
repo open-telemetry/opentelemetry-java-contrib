@@ -14,7 +14,7 @@ public class AgentDisabledByEnvironmentVariableTest extends AbstractAttachmentTe
 
   @Test
   void shouldNotAttachWhenAgentDisabledWithEnvVariable() {
-    RuntimeAttach.attachJavaagentToCurrentJVM();
+    RuntimeAttach.attachJavaagentToCurrentJvm();
     verifyNoAttachment();
   }
 

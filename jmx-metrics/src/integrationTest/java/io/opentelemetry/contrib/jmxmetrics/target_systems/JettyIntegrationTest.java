@@ -29,7 +29,7 @@ class JettyIntegrationTest extends AbstractIntegrationTest {
                   .withDockerfileFromBuilder(
                       builder ->
                           builder
-                              .from("jetty")
+                              .from("jetty:11")
                               .run(
                                   "java",
                                   "-jar",

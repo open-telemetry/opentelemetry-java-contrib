@@ -39,7 +39,7 @@ We give below an example for Spring Boot applications:
 public class SpringBootApp {
 
     public static void main(String[] args) {
-        RuntimeAttach.attachJavaagentToCurrentJVM();
+        RuntimeAttach.attachJavaagentToCurrentJvm();
         SpringApplication.run(SpringBootApp.class, args);
     }
 
