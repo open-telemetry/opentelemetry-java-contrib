@@ -15,11 +15,11 @@ public final class RuntimeAttach {
    * beginning of the main method.
    */
   @SuppressWarnings("MemberName")
-  public static void attachJavaagentToCurrentJVM() {
+  public static void attachJavaagentToCurrentJvm() {
 
     CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/otel-agent.jar");
 
-    distroRuntimeAttach.attachJavaagentToCurrentJVM();
+    distroRuntimeAttach.attachJavaagentToCurrentJvm();
   }
 
   private RuntimeAttach() {}
