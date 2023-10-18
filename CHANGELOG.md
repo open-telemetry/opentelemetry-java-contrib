@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- Explicitly pass invalid p-value to root sampler
+  ([#1053](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1053))
+- Consistent sampler prototypes using 56 bits of randomness
+  ([#1063](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1063))
+
+### Runtime attach
+
+- Rename runtime attach method from `attachJavaagentToCurrentJVM`
+  to `attachJavaagentToCurrentJvm`
+  ([#1077](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1077))
+
+### Samplers
+
+- Support `thread.name` attributes in RuleBasedRoutingSampler
+  ([#1030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1030))
+
 ## Version 1.30.0 (2023-09-18)
 
 ### Disk buffering
