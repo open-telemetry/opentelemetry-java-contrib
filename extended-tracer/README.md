@@ -108,7 +108,7 @@ After:
 
 ```java
 Tracing tracing = new Tracing(openTelemetry, "service");
-Map<String, String> propagationHeaders = tracing.getPropagationHeaders();
+Map<String, String> propagationHeaders = tracing.getTextMapPropagationContext();
 // add propagationHeaders to request headers and call checkout service
 ```
 
