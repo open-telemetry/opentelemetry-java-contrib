@@ -3,7 +3,7 @@ import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("me.champeau.jmh") version "0.7.1"
+  id("me.champeau.jmh") version "0.7.2"
   id("ru.vyarus.animalsniffer") version "1.7.1"
   id("com.squareup.wire") version "4.9.1"
 }
