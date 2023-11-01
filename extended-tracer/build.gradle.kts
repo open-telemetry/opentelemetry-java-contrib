@@ -3,7 +3,7 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "Tracing Utilities"
+description = "Extended Tracer"
 otelJava.moduleName.set("io.opentelemetry.contrib.extended-tracer")
 
 dependencies {
