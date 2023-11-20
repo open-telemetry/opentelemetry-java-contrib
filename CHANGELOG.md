@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Using Android 21 as minimum supported for disk-buffering
+  ([#1096](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1096))
+
 ## Version 1.31.0 (2023-10-18)
 
 ### Consistent sampling
