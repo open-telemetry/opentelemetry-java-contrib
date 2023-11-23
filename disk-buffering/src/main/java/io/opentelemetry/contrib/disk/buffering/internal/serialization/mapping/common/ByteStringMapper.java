@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common;
 
-import com.google.protobuf.ByteString;
+import okio.ByteString;
 
 public final class ByteStringMapper {
 
@@ -16,10 +16,10 @@ public final class ByteStringMapper {
   }
 
   public ByteString stringToProto(String source) {
-    return ByteString.copyFromUtf8(source);
+    return ByteString.encodeUtf8(source);
   }
 
   public String protoToString(ByteString source) {
-    return source.toStringUtf8();
+    return source.utf8();
   }
 }

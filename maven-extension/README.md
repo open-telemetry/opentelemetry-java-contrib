@@ -192,9 +192,8 @@ Otherwise, the instrumentation of the Maven plugin is noop.
 
 It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
 to improve the visualization and analysis in Observability products.
-The [HTTP](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/http/)
-and [database client calls](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/database/)
-conventions are particularly useful when  invoking external systems.
+The HTTP and database client [semantic conventions](https://github.com/open-telemetry/semantic-conventions)
+are particularly useful when invoking external systems.
 
 Steps to instrument a Maven Mojo:
 

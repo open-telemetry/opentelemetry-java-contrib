@@ -13,14 +13,17 @@ body:
         - aws-xray
         - aws-xray-propagator
         - consistent-sampling
+        - disk-buffering
         - jfr-connection
         - jfr-events
         - jmx-metrics
         - maven-extension
         - micrometer-meter-provider
         - noop-api
+        - processors
         - prometheus-client-bridge
         - resource-providers
+        - runtime-attach
         - samplers
         - static-instrumenter
   - type: textarea

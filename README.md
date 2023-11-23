@@ -12,11 +12,16 @@ feature or via instrumentation, this project is hopefully for you.
 * [AWS Resources](./aws-resources/README.md)
 * [AWS X-Ray SDK Support](./aws-xray/README.md)
 * [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
-* [Consistent sampling](./consistent-sampling/README.md)
+* [Consistent Sampling](./consistent-sampling/README.md)
+* [Disk Buffering](./disk-buffering/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
+* [No-Op API](./noop-api/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)
+* [Prometheus Client Bridge](./prometheus-client-bridge/README.md)
+* [Resource Providers](./resource-providers/README.md)
 * [Runtime Attach](./runtime-attach/README.md)
 * [Samplers](./samplers/README.md)
+* [Static Instrumenter](./static-instrumenter/README.md)
 * [Kafka Support](./kafka-exporter/README.md)
 
 ## Getting Started

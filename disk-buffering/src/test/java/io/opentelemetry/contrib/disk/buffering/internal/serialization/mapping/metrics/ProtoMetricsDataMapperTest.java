@@ -80,10 +80,10 @@ class ProtoMetricsDataMapperTest {
 
     MetricsData proto = mapToProto(signals);
 
-    List<ResourceMetrics> resourceMetrics = proto.getResourceMetricsList();
+    List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
-    assertEquals(1, resourceMetrics.get(0).getScopeMetricsList().size());
-    assertEquals(1, resourceMetrics.get(0).getScopeMetricsList().get(0).getMetricsList().size());
+    assertEquals(1, resourceMetrics.get(0).scope_metrics.size());
+    assertEquals(1, resourceMetrics.get(0).scope_metrics.get(0).metrics.size());
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
   }
@@ -94,11 +94,11 @@ class ProtoMetricsDataMapperTest {
 
     MetricsData proto = mapToProto(signals);
 
-    List<ResourceMetrics> resourceMetrics = proto.getResourceMetricsList();
+    List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
-    List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).getScopeMetricsList();
+    List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).scope_metrics;
     assertEquals(1, scopeMetrics.size());
-    List<Metric> metrics = scopeMetrics.get(0).getMetricsList();
+    List<Metric> metrics = scopeMetrics.get(0).metrics;
     assertEquals(2, metrics.size());
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
@@ -111,14 +111,14 @@ class ProtoMetricsDataMapperTest {
 
     MetricsData proto = mapToProto(signals);
 
-    List<ResourceMetrics> resourceMetrics = proto.getResourceMetricsList();
+    List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
-    List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).getScopeMetricsList();
+    List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).scope_metrics;
     assertEquals(2, scopeMetrics.size());
     ScopeMetrics firstScope = scopeMetrics.get(0);
     ScopeMetrics secondScope = scopeMetrics.get(1);
-    List<Metric> firstScopeMetrics = firstScope.getMetricsList();
-    List<Metric> secondScopeMetrics = secondScope.getMetricsList();
+    List<Metric> firstScopeMetrics = firstScope.metrics;
+    List<Metric> secondScopeMetrics = secondScope.metrics;
     assertEquals(1, firstScopeMetrics.size());
     assertEquals(1, secondScopeMetrics.size());
 
@@ -132,18 +132,18 @@ class ProtoMetricsDataMapperTest {
 
     MetricsData proto = mapToProto(signals);
 
-    List<ResourceMetrics> resourceMetrics = proto.getResourceMetricsList();
+    List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(2, resourceMetrics.size());
     ResourceMetrics firstResourceMetrics = resourceMetrics.get(0);
     ResourceMetrics secondResourceMetrics = resourceMetrics.get(1);
-    List<ScopeMetrics> firstScopeMetrics = firstResourceMetrics.getScopeMetricsList();
-    List<ScopeMetrics> secondScopeMetrics = secondResourceMetrics.getScopeMetricsList();
+    List<ScopeMetrics> firstScopeMetrics = firstResourceMetrics.scope_metrics;
+    List<ScopeMetrics> secondScopeMetrics = secondResourceMetrics.scope_metrics;
     assertEquals(1, firstScopeMetrics.size());
     assertEquals(1, secondScopeMetrics.size());
     ScopeMetrics firstScope = firstScopeMetrics.get(0);
     ScopeMetrics secondScope = secondScopeMetrics.get(0);
-    List<Metric> firstMetrics = firstScope.getMetricsList();
-    List<Metric> secondMetrics = secondScope.getMetricsList();
+    List<Metric> firstMetrics = firstScope.metrics;
+    List<Metric> secondMetrics = secondScope.metrics;
     assertEquals(1, firstMetrics.size());
     assertEquals(1, secondMetrics.size());
 

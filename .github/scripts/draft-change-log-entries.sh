@@ -35,6 +35,8 @@ component_names["jmx-metrics/"]="JMX metrics"
 component_names["maven-extension/"]="Maven extension"
 component_names["micrometer-meter-provider/"]="Micrometer MeterProvider"
 component_names["noop-api/"]="No-op API"
+component_names["processors/"]="Telemetry processors"
+component_names["extended-tracer/"]="Extended Tracer"
 component_names["prometheus-client-bridge/"]="Prometheus client bridge"
 component_names["runtime-attach/"]="Runtime attach"
 component_names["resource-providers/"]="Resource providers"
@@ -48,7 +50,7 @@ for component in */ ; do
   component_name=${component_names[$component]:=$component}
   commits=$(git log --reverse \
           --perl-regexp \
-          --author='^(?!dependabot\[bot\] )' \
+          --author='^(?!renovate\[bot\] )' \
           --pretty=format:"- %s" \
           "$range" \
           "$component")

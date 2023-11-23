@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-import com.google.protobuf.CodedInputStream;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.CountingInputStream;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ public final class DelimitedProtoStreamReader extends StreamReader {
       if (firstByte == -1) {
         return 0;
       }
-      return CodedInputStream.readRawVarint32(firstByte, inputStream);
+      return ProtobufTools.readRawVarint32(firstByte, inputStream);
     } catch (IOException e) {
       return 0;
     }

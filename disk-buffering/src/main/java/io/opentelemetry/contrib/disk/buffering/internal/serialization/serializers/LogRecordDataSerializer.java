@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.ProtoLogsDataMapper;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.ByteArrayOutputStream;
@@ -27,7 +27,9 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   public byte[] serialize(Collection<LogRecordData> logRecordData) {
     LogsData proto = ProtoLogsDataMapper.getInstance().toProto(logRecordData);
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      proto.writeDelimitedTo(out);
+      int size = LogsData.ADAPTER.encodedSize(proto);
+      ProtobufTools.writeRawVarint32(size, out);
+      proto.encode(out);
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
@@ -37,8 +39,8 @@ public final class LogRecordDataSerializer implements SignalSerializer<LogRecord
   @Override
   public List<LogRecordData> deserialize(byte[] source) {
     try {
-      return ProtoLogsDataMapper.getInstance().fromProto(LogsData.parseFrom(source));
-    } catch (InvalidProtocolBufferException e) {
+      return ProtoLogsDataMapper.getInstance().fromProto(LogsData.ADAPTER.decode(source));
+    } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
   }

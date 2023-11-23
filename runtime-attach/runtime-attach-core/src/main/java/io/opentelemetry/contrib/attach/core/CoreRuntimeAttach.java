@@ -34,7 +34,8 @@ public final class CoreRuntimeAttach {
    * Attach the OpenTelemetry Java agent to the current JVM. The attachment must be requested at the
    * beginning of the main method.
    */
-  public void attachJavaagentToCurrentJVM() {
+  @SuppressWarnings("MemberName")
+  public void attachJavaagentToCurrentJvm() {
     if (!shouldAttach()) {
       return;
     }

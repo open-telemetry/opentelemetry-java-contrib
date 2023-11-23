@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## Version 1.31.0 (2023-10-18)
+
+### Consistent sampling
+
+- Explicitly pass invalid p-value to root sampler
+  ([#1053](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1053))
+- Consistent sampler prototypes using 56 bits of randomness
+  ([#1063](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1063))
+
+### Runtime attach
+
+- Rename runtime attach method from `attachJavaagentToCurrentJVM`
+  to `attachJavaagentToCurrentJvm`
+  ([#1077](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1077))
+
+### Samplers
+
+- Support `thread.name` attributes in RuleBasedRoutingSampler
+  ([#1030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1030))
+
+## Version 1.30.0 (2023-09-18)
+
+### Disk buffering
+
+- Remove protobuf dependency
+  ([#1008](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1008))
+
+### Maven extension
+
+- Disable OTel SDK shutdown hook registration
+  ([#1022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1022))
+
+### Telemetry processors - New 🌟
+
+This module contains tools for globally processing telemetry, including modifying and filtering
+telemetry.
+
+## Version 1.29.0 (2023-08-23)
+
+### Consistent sampling
+
+- Add a provider for consistent parent based probability sampler
+  ([#1005](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1005))
+
+### Disk buffering
+
+- Migrate StorageFile to FileOperations
+  ([#986](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/986))
+
+### JMX metrics
+
+- [jmx-metrics] Collect in callback
+  ([#949](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/949))
+- Added transformation closure to MBeanHelper
+  ([#960](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/960))
+
 ## Version 1.28.0 (2023-07-14)
 
 ### AWS X-Ray SDK support

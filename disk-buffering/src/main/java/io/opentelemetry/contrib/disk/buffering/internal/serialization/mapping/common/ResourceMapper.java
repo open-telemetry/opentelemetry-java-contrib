@@ -18,9 +18,8 @@ public final class ResourceMapper {
   }
 
   public Resource mapToProto(io.opentelemetry.sdk.resources.Resource sdkResource) {
-    return Resource.newBuilder()
-        .addAllAttributes(
-            AttributesMapper.getInstance().attributesToProto(sdkResource.getAttributes()))
+    return new Resource.Builder()
+        .attributes(AttributesMapper.getInstance().attributesToProto(sdkResource.getAttributes()))
         .build();
   }
 
@@ -31,8 +30,7 @@ public final class ResourceMapper {
     if (schemaUrl != null) {
       resource.setSchemaUrl(schemaUrl);
     }
-    resource.putAll(
-        AttributesMapper.getInstance().protoToAttributes(protoResource.getAttributesList()));
+    resource.putAll(AttributesMapper.getInstance().protoToAttributes(protoResource.attributes));
     return resource.build();
   }
 }

@@ -1,9 +1,5 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-
 plugins {
   `java-platform`
-
-  id("com.github.ben-manes.versions")
 }
 
 data class DependencySet(val group: String, val version: String, val modules: List<String>)
@@ -12,21 +8,21 @@ val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.15.2",
-  "com.google.guava:guava-bom:32.1.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.24.2",
-  "org.junit:junit-bom:5.9.3",
-  "io.grpc:grpc-bom:1.56.1",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.28.0-alpha",
-  "org.testcontainers:testcontainers-bom:1.18.3"
+  "com.fasterxml.jackson:jackson-bom:2.16.0",
+  "com.google.guava:guava-bom:32.1.3-jre",
+  "com.linecorp.armeria:armeria-bom:1.26.3",
+  "org.junit:junit-bom:5.10.1",
+  "io.grpc:grpc-bom:1.59.0",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.32.0-alpha",
+  "org.testcontainers:testcontainers-bom:1.19.2"
 )
 
 val autoServiceVersion = "1.1.1"
-val autoValueVersion = "1.10.2"
-val errorProneVersion = "2.19.1"
+val autoValueVersion = "1.10.4"
+val errorProneVersion = "2.22.0"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.11.0"
-val slf4jVersion = "2.0.7"
+val slf4jVersion = "2.0.9"
 
 val CORE_DEPENDENCIES = listOf(
   "com.google.auto.service:auto-service:${autoServiceVersion}",
@@ -40,6 +36,7 @@ val CORE_DEPENDENCIES = listOf(
   "io.prometheus:simpleclient_common:${prometheusVersion}",
   "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
   "org.mockito:mockito-core:${mockitoVersion}",
+  "org.mockito:mockito-inline:${mockitoVersion}",
   "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
   "org.slf4j:slf4j-api:${slf4jVersion}",
   "org.slf4j:slf4j-simple:${slf4jVersion}",
@@ -49,11 +46,10 @@ val CORE_DEPENDENCIES = listOf(
 )
 
 val DEPENDENCIES = listOf(
-  "io.opentelemetry.javaagent:opentelemetry-javaagent:1.28.0",
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
-  "com.squareup.okhttp3:okhttp:4.11.0",
-  "com.uber.nullaway:nullaway:0.10.11",
+  "com.squareup.okhttp3:okhttp:4.12.0",
+  "com.uber.nullaway:nullaway:0.10.17",
   "org.assertj:assertj-core:3.24.2",
   "org.awaitility:awaitility:4.2.0",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
@@ -83,25 +79,6 @@ dependencies {
       api(dependency)
       val split = dependency.split(':')
       dependencyVersions[split[0]] = split[2]
-    }
-  }
-}
-
-fun isNonStable(version: String): Boolean {
-  val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
-  val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-  val isGuava = version.endsWith("-jre")
-  val isStable = stableKeyword || regex.matches(version) || isGuava
-  return isStable.not()
-}
-
-tasks {
-  named<DependencyUpdatesTask>("dependencyUpdates") {
-    revision = "release"
-    checkConstraints = true
-
-    rejectVersionIf {
-      isNonStable(candidate.version)
     }
   }
 }

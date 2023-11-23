@@ -118,10 +118,10 @@ class ProtoSpansDataMapperTest {
 
     TracesData proto = mapToProto(signals);
 
-    List<ResourceSpans> resourceSpans = proto.getResourceSpansList();
+    List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
-    assertEquals(1, resourceSpans.get(0).getScopeSpansList().size());
-    assertEquals(1, resourceSpans.get(0).getScopeSpansList().get(0).getSpansList().size());
+    assertEquals(1, resourceSpans.get(0).scope_spans.size());
+    assertEquals(1, resourceSpans.get(0).scope_spans.get(0).spans.size());
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
   }
@@ -132,11 +132,11 @@ class ProtoSpansDataMapperTest {
 
     TracesData proto = mapToProto(signals);
 
-    List<ResourceSpans> resourceSpans = proto.getResourceSpansList();
+    List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
-    List<ScopeSpans> scopeSpans = resourceSpans.get(0).getScopeSpansList();
+    List<ScopeSpans> scopeSpans = resourceSpans.get(0).scope_spans;
     assertEquals(1, scopeSpans.size());
-    List<Span> spans = scopeSpans.get(0).getSpansList();
+    List<Span> spans = scopeSpans.get(0).spans;
     assertEquals(2, spans.size());
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
@@ -148,14 +148,14 @@ class ProtoSpansDataMapperTest {
 
     TracesData proto = mapToProto(signals);
 
-    List<ResourceSpans> resourceSpans = proto.getResourceSpansList();
+    List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
-    List<ScopeSpans> scopeSpans = resourceSpans.get(0).getScopeSpansList();
+    List<ScopeSpans> scopeSpans = resourceSpans.get(0).scope_spans;
     assertEquals(2, scopeSpans.size());
     ScopeSpans firstScope = scopeSpans.get(0);
     ScopeSpans secondScope = scopeSpans.get(1);
-    List<Span> firstScopeSpans = firstScope.getSpansList();
-    List<Span> secondScopeSpans = secondScope.getSpansList();
+    List<Span> firstScopeSpans = firstScope.spans;
+    List<Span> secondScopeSpans = secondScope.spans;
     assertEquals(1, firstScopeSpans.size());
     assertEquals(1, secondScopeSpans.size());
 
@@ -168,18 +168,18 @@ class ProtoSpansDataMapperTest {
 
     TracesData proto = mapToProto(signals);
 
-    List<ResourceSpans> resourceSpans = proto.getResourceSpansList();
+    List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(2, resourceSpans.size());
     ResourceSpans firstResourceSpans = resourceSpans.get(0);
     ResourceSpans secondResourceSpans = resourceSpans.get(1);
-    List<ScopeSpans> firstScopeSpans = firstResourceSpans.getScopeSpansList();
-    List<ScopeSpans> secondScopeSpans = secondResourceSpans.getScopeSpansList();
+    List<ScopeSpans> firstScopeSpans = firstResourceSpans.scope_spans;
+    List<ScopeSpans> secondScopeSpans = secondResourceSpans.scope_spans;
     assertEquals(1, firstScopeSpans.size());
     assertEquals(1, secondScopeSpans.size());
     ScopeSpans firstScope = firstScopeSpans.get(0);
     ScopeSpans secondScope = secondScopeSpans.get(0);
-    List<Span> firstSpans = firstScope.getSpansList();
-    List<Span> secondSpans = secondScope.getSpansList();
+    List<Span> firstSpans = firstScope.spans;
+    List<Span> secondSpans = secondScope.spans;
     assertEquals(1, firstSpans.size());
     assertEquals(1, secondSpans.size());
 

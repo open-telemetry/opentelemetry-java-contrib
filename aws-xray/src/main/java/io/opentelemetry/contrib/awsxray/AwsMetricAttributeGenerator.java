@@ -266,7 +266,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
       // the more levels/parts we get from API path the higher chance for getting high cardinality
       // data
       if (httpTarget != null) {
-        operation = extractAPIPathValue(httpTarget);
+        operation = extractApiPathValue(httpTarget);
         if (isKeyPresent(span, HTTP_METHOD)) {
           String httpMethod = span.getAttributes().get(HTTP_METHOD);
           if (httpMethod != null) {
@@ -290,7 +290,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
         URL url;
         if (httpUrl != null) {
           url = new URL(httpUrl);
-          remoteOperation = extractAPIPathValue(url.getPath());
+          remoteOperation = extractApiPathValue(url.getPath());
         }
       } catch (MalformedURLException e) {
         logger.log(Level.FINEST, "invalid http.url attribute: ", httpUrl);
@@ -312,7 +312,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    * @param httpTarget http request target string value. Eg, /payment/1234
    * @return the first part from the http target. Eg, /payment
    */
-  private static String extractAPIPathValue(String httpTarget) {
+  private static String extractApiPathValue(String httpTarget) {
     if (httpTarget == null || httpTarget.isEmpty()) {
       return "/";
     }

@@ -37,7 +37,7 @@ class JfrStream extends InputStream {
   // Initialize buffer to empty array to subvert null checks.
   private byte[] buffer = new byte[0];
   private int index = 0;
-  private boolean reachedEOF = false;
+  private boolean reachedEndOfFile = false;
   // There is a recording id and an id you get from the recording for the stream.
   // streamId is the id for the stream.
   private final long streamid;
@@ -53,7 +53,7 @@ class JfrStream extends InputStream {
   @Override
   public int read() throws IOException {
 
-    if (!reachedEOF && index == 0) {
+    if (!reachedEndOfFile && index == 0) {
       Object[] params = new Object[] {streamid};
       String[] signature = new String[] {long.class.getName()};
       try {
@@ -63,7 +63,7 @@ class JfrStream extends InputStream {
       }
     }
 
-    if (reachedEOF || (reachedEOF = (buffer == null))) {
+    if (reachedEndOfFile || (reachedEndOfFile = (buffer == null))) {
       return -1;
     }
 

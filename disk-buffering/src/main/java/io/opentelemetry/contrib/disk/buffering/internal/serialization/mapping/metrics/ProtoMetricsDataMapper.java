@@ -40,7 +40,7 @@ public final class ProtoMetricsDataMapper
 
   @Override
   protected List<ResourceMetrics> getProtoResources(MetricsData protoData) {
-    return protoData.getResourceMetricsList();
+    return protoData.resource_metrics;
   }
 
   @Override
@@ -53,50 +53,50 @@ public final class ProtoMetricsDataMapper
           for (Map.Entry<InstrumentationScopeInfo, List<Metric>> metricsByScope :
               instrumentationScopeInfoScopedMetricsMap.entrySet()) {
             ScopeMetrics.Builder scopeBuilder = createProtoScopeBuilder(metricsByScope.getKey());
-            scopeBuilder.addAllMetrics(metricsByScope.getValue());
-            resourceMetricsBuilder.addScopeMetrics(scopeBuilder.build());
+            scopeBuilder.metrics.addAll(metricsByScope.getValue());
+            resourceMetricsBuilder.scope_metrics.add(scopeBuilder.build());
           }
           items.add(resourceMetricsBuilder.build());
         });
-    return MetricsData.newBuilder().addAllResourceMetrics(items).build();
+    return new MetricsData.Builder().resource_metrics(items).build();
   }
 
   private ScopeMetrics.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {
     ScopeMetrics.Builder builder =
-        ScopeMetrics.newBuilder().setScope(instrumentationScopeToProto(scopeInfo));
+        new ScopeMetrics.Builder().scope(instrumentationScopeToProto(scopeInfo));
     if (scopeInfo.getSchemaUrl() != null) {
-      builder.setSchemaUrl(scopeInfo.getSchemaUrl());
+      builder.schema_url(scopeInfo.getSchemaUrl());
     }
     return builder;
   }
 
   private ResourceMetrics.Builder createProtoResourceBuilder(Resource resource) {
     ResourceMetrics.Builder builder =
-        ResourceMetrics.newBuilder().setResource(resourceToProto(resource));
+        new ResourceMetrics.Builder().resource(resourceToProto(resource));
     if (resource.getSchemaUrl() != null) {
-      builder.setSchemaUrl(resource.getSchemaUrl());
+      builder.schema_url(resource.getSchemaUrl());
     }
     return builder;
   }
 
   @Override
   protected List<Metric> getSignalsFromProto(ScopeMetrics scopeSignals) {
-    return scopeSignals.getMetricsList();
+    return scopeSignals.metrics;
   }
 
   @Override
   protected InstrumentationScopeInfo getInstrumentationScopeFromProto(ScopeMetrics scopeSignals) {
-    return protoToInstrumentationScopeInfo(scopeSignals.getScope(), scopeSignals.getSchemaUrl());
+    return protoToInstrumentationScopeInfo(scopeSignals.scope, scopeSignals.schema_url);
   }
 
   @Override
   protected List<ScopeMetrics> getScopes(ResourceMetrics resourceSignal) {
-    return resourceSignal.getScopeMetricsList();
+    return resourceSignal.scope_metrics;
   }
 
   @Override
   protected Resource getResourceFromProto(ResourceMetrics resourceSignal) {
-    return protoToResource(resourceSignal.getResource(), resourceSignal.getSchemaUrl());
+    return protoToResource(resourceSignal.resource, resourceSignal.schema_url);
   }
 
   @Override
