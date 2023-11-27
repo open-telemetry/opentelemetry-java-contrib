@@ -54,6 +54,7 @@ Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-t
 
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
+- [Jason Plumb](https://github.com/breedx-splk), Splunk
 - [John Watson](https://github.com/jkwatson), Verta.ai
 - [Lauri Tulmin](https://github.com/laurit), Splunk
 
