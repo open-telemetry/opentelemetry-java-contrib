@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.32.0 (2023-11-27)
+
 ### Disk buffering
 
 - Using Android 21 as minimum supported for disk-buffering
