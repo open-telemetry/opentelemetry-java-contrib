@@ -63,12 +63,8 @@ public class ConsistentFixedThresholdSamplerTest {
                 .get(OtelTraceState.TRACE_STATE_KEY);
         OtelTraceState traceState = OtelTraceState.parse(traceStateString);
         assertThat(traceState.hasValidRandomValue()).isTrue();
-        if (samplingProbability == 1.) {
-          assertThat(traceState.hasValidThreshold()).isFalse();
-        } else {
-          assertThat(traceState.hasValidThreshold()).isTrue();
-          assertThat(traceState.getThreshold()).isEqualTo(calculateThreshold(samplingProbability));
-        }
+        assertThat(traceState.hasValidThreshold()).isTrue();
+        assertThat(traceState.getThreshold()).isEqualTo(calculateThreshold(samplingProbability));
 
         numSampled += 1;
       }
@@ -101,14 +97,14 @@ public class ConsistentFixedThresholdSamplerTest {
   @Test
   public void testDescription() {
     assertThat(ConsistentSampler.probabilityBased(1.0).getDescription())
-        .isEqualTo("ConsistentFixedThresholdSampler{threshold=max, sampling probability=1.0}");
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=1.0}");
     assertThat(ConsistentSampler.probabilityBased(0.5).getDescription())
         .isEqualTo("ConsistentFixedThresholdSampler{threshold=8, sampling probability=0.5}");
     assertThat(ConsistentSampler.probabilityBased(0.25).getDescription())
-        .isEqualTo("ConsistentFixedThresholdSampler{threshold=4, sampling probability=0.25}");
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=c, sampling probability=0.25}");
     assertThat(ConsistentSampler.probabilityBased(1e-300).getDescription())
-        .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=0.0}");
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=max, sampling probability=0.0}");
     assertThat(ConsistentSampler.probabilityBased(0).getDescription())
-        .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=0.0}");
+        .isEqualTo("ConsistentFixedThresholdSampler{threshold=max, sampling probability=0.0}");
   }
 }

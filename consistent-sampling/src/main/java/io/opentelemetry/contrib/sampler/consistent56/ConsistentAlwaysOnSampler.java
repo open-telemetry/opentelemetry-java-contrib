@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -18,7 +18,7 @@ final class ConsistentAlwaysOnSampler extends ConsistentSampler {
 
   @Override
   protected long getThreshold(long parentThreshold, boolean isRoot) {
-    return getMaxThreshold();
+    return getMinThreshold();
   }
 
   @Override

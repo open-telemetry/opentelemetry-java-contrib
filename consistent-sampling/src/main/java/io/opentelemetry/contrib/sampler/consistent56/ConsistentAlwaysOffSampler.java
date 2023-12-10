@@ -16,7 +16,7 @@ final class ConsistentAlwaysOffSampler extends ConsistentSampler {
 
   @Override
   protected long getThreshold(long parentThreshold, boolean isRoot) {
-    return 0;
+    return ConsistentSamplingUtil.getMaxThreshold();
   }
 
   @Override

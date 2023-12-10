@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
 import static java.util.Objects.requireNonNull;
 
@@ -247,15 +246,13 @@ public abstract class ConsistentSampler implements Sampler {
     long parentThreshold;
     if (otelTraceState.hasValidThreshold()) {
       long threshold = otelTraceState.getThreshold();
-      if (((randomValue < threshold) == isParentSampled) || threshold == 0) {
+      if ((randomValue >= threshold) == isParentSampled) { // test invariant
         parentThreshold = threshold;
       } else {
         parentThreshold = getInvalidThreshold();
       }
-    } else if (isParentSampled) {
-      parentThreshold = getMaxThreshold();
     } else {
-      parentThreshold = 0;
+      parentThreshold = getInvalidThreshold();
     }
 
     // determine new threshold that is used for the sampling decision
@@ -264,12 +261,8 @@ public abstract class ConsistentSampler implements Sampler {
     // determine sampling decision
     boolean isSampled;
     if (isValidThreshold(threshold)) {
-      isSampled = (randomValue < threshold);
-      if (0 < threshold && threshold < getMaxThreshold()) {
-        otelTraceState.setThreshold(threshold);
-      } else {
-        otelTraceState.invalidateThreshold();
-      }
+      isSampled = (randomValue >= threshold);
+      otelTraceState.setThreshold(threshold);
     } else {
       isSampled = isParentSampled;
       otelTraceState.invalidateThreshold();

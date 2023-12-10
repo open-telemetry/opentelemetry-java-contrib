@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -147,9 +149,9 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
             / currentState.effectiveWindowCount;
 
     if (samplingProbability >= 1.) {
-      return ConsistentSamplingUtil.getMaxThreshold();
+      return getMinThreshold();
     } else {
-      return ConsistentSamplingUtil.calculateThreshold(samplingProbability);
+      return calculateThreshold(samplingProbability);
     }
   }
 

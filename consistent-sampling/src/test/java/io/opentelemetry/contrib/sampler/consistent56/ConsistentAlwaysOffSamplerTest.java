@@ -21,11 +21,15 @@ public class ConsistentAlwaysOffSamplerTest {
 
   @Test
   void testThreshold() {
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(getInvalidThreshold(), false)).isZero();
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(getInvalidThreshold(), true)).isZero();
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(getMaxThreshold(), false)).isZero();
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(getMaxThreshold(), true)).isZero();
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(0, false)).isZero();
-    assertThat(ConsistentSampler.alwaysOff().getThreshold(0, true)).isZero();
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(getInvalidThreshold(), false))
+        .isEqualTo(getMaxThreshold());
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(getInvalidThreshold(), true))
+        .isEqualTo(getMaxThreshold());
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(getMaxThreshold(), false))
+        .isEqualTo(getMaxThreshold());
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(getMaxThreshold(), true))
+        .isEqualTo(getMaxThreshold());
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(0, false)).isEqualTo(getMaxThreshold());
+    assertThat(ConsistentSampler.alwaysOff().getThreshold(0, true)).isEqualTo(getMaxThreshold());
   }
 }
