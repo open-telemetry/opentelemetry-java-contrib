@@ -79,9 +79,12 @@ public class ConsistentSamplingUtilTest {
     assertThat(calculateAdjustedCount(getMinThreshold())).isOne();
     assertThat(calculateAdjustedCount(0xc0000000000000L)).isEqualTo(4.);
     assertThat(calculateAdjustedCount(0x80000000000000L)).isEqualTo(2.);
+    assertThat(calculateAdjustedCount(getMaxThreshold() - 1)).isEqualTo(0x1p56);
     assertThat(calculateAdjustedCount(getMaxThreshold())).isInfinite();
-    assertThat(calculateAdjustedCount(-1)).isZero();
-    assertThat(calculateAdjustedCount(0x100000000000001L)).isZero();
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> calculateAdjustedCount(getMinThreshold() - 1));
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> calculateAdjustedCount(getMaxThreshold() + 1));
   }
 
   @Test

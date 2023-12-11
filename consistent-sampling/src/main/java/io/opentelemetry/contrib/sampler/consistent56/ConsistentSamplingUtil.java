@@ -49,19 +49,12 @@ public final class ConsistentSamplingUtil {
   /**
    * Calculates the adjusted count from a given threshold.
    *
-   * <p>Returns 1, if the threshold is invalid.
-   *
-   * <p>Returns 0, if there is no valid threshold.
-   *
    * @param threshold the threshold
    * @return the adjusted count
    */
   public static double calculateAdjustedCount(long threshold) {
-    if (isValidThreshold(threshold)) {
-      return 0x1p56 / (MAX_THRESHOLD - threshold);
-    } else {
-      return 0;
-    }
+    checkThreshold(threshold);
+    return 0x1p56 / (MAX_THRESHOLD - threshold);
   }
 
   /**
