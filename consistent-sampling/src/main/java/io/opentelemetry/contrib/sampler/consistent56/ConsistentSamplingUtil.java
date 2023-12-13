@@ -10,7 +10,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 public final class ConsistentSamplingUtil {
 
   private static final int RANDOM_VALUE_BITS = 56;
-  private static final long MAX_THRESHOLD = 1L << RANDOM_VALUE_BITS;
+  private static final long MAX_THRESHOLD =
+      1L << RANDOM_VALUE_BITS; // corresponds to 0% sampling probability
+  private static final long MIN_THRESHOLD = 0; // corresponds to 100% sampling probability
   private static final long MAX_RANDOM_VALUE = MAX_THRESHOLD - 1;
   private static final long INVALID_THRESHOLD = -1;
   private static final long INVALID_RANDOM_VALUE = -1;
@@ -29,7 +31,7 @@ public final class ConsistentSamplingUtil {
    */
   public static double calculateSamplingProbability(long threshold) {
     checkThreshold(threshold);
-    return threshold * 0x1p-56;
+    return (MAX_THRESHOLD - threshold) * 0x1p-56;
   }
 
   /**
@@ -41,30 +43,18 @@ public final class ConsistentSamplingUtil {
    */
   public static long calculateThreshold(double samplingProbability) {
     checkProbability(samplingProbability);
-    return Math.round(samplingProbability * 0x1p56);
+    return MAX_THRESHOLD - Math.round(samplingProbability * 0x1p56);
   }
 
   /**
    * Calculates the adjusted count from a given threshold.
    *
-   * <p>Returns 1, if the threshold is invalid.
-   *
-   * <p>Returns 0, if the threshold is 0. A span with zero threshold is only sampled due to a
-   * non-probabilistic sampling decision and therefore does not contribute to the adjusted count.
-   *
    * @param threshold the threshold
    * @return the adjusted count
    */
   public static double calculateAdjustedCount(long threshold) {
-    if (isValidThreshold(threshold)) {
-      if (threshold > 0) {
-        return 0x1p56 / threshold;
-      } else {
-        return 0;
-      }
-    } else {
-      return 1.;
-    }
+    checkThreshold(threshold);
+    return 0x1p56 / (MAX_THRESHOLD - threshold);
   }
 
   /**
@@ -93,6 +83,10 @@ public final class ConsistentSamplingUtil {
     return MAX_RANDOM_VALUE;
   }
 
+  public static long getMinThreshold() {
+    return MIN_THRESHOLD;
+  }
+
   public static long getMaxThreshold() {
     return MAX_THRESHOLD;
   }
@@ -102,7 +96,7 @@ public final class ConsistentSamplingUtil {
   }
 
   public static boolean isValidThreshold(long threshold) {
-    return 0 <= threshold && threshold <= getMaxThreshold();
+    return getMinThreshold() <= threshold && threshold <= getMaxThreshold();
   }
 
   public static boolean isValidProbability(double probability) {

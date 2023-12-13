@@ -10,6 +10,8 @@ import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUt
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,21 +23,23 @@ public class ConsistentSamplingUtilTest {
 
   @Test
   void testCalculateSamplingProbability() {
-    assertThat(calculateSamplingProbability(0L)).isEqualTo(0.);
-    assertThat(calculateSamplingProbability(0x40000000000000L)).isEqualTo(0.25);
+    assertThat(calculateSamplingProbability(getMinThreshold())).isOne();
+    assertThat(calculateSamplingProbability(0xc0000000000000L)).isEqualTo(0.25);
     assertThat(calculateSamplingProbability(0x80000000000000L)).isEqualTo(0.5);
-    assertThat(calculateSamplingProbability(0x100000000000000L)).isEqualTo(1.);
+    assertThat(calculateSamplingProbability(getMaxThreshold())).isZero();
     assertThatIllegalArgumentException().isThrownBy(() -> calculateSamplingProbability(-1));
     assertThatIllegalArgumentException()
-        .isThrownBy(() -> calculateSamplingProbability(0x100000000000001L));
+        .isThrownBy(() -> calculateSamplingProbability(getMaxThreshold() + 1));
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> calculateSamplingProbability(getMinThreshold() - 1));
   }
 
   @Test
   void testCalculateThreshold() {
-    assertThat(calculateThreshold(0.)).isEqualTo(0L);
-    assertThat(calculateThreshold(0.25)).isEqualTo(0x40000000000000L);
+    assertThat(calculateThreshold(0.)).isEqualTo(getMaxThreshold());
+    assertThat(calculateThreshold(0.25)).isEqualTo(0xc0000000000000L);
     assertThat(calculateThreshold(0.5)).isEqualTo(0x80000000000000L);
-    assertThat(calculateThreshold(1.)).isEqualTo(0x100000000000000L);
+    assertThat(calculateThreshold(1.)).isEqualTo(getMinThreshold());
     assertThatIllegalArgumentException().isThrownBy(() -> calculateThreshold(Math.nextDown(0.)));
     assertThatIllegalArgumentException().isThrownBy(() -> calculateThreshold(Math.nextUp(1.)));
     assertThatIllegalArgumentException()
@@ -56,8 +60,13 @@ public class ConsistentSamplingUtilTest {
   }
 
   @Test
+  void testGetMinThreshold() {
+    assertThat(getMinThreshold()).isZero();
+  }
+
+  @Test
   void testGetMaxThreshold() {
-    assertThat(ConsistentSamplingUtil.getMaxThreshold()).isEqualTo(0x100000000000000L);
+    assertThat(getMaxThreshold()).isEqualTo(0x100000000000000L);
   }
 
   @Test
@@ -67,12 +76,15 @@ public class ConsistentSamplingUtilTest {
 
   @Test
   void testCalculateAdjustedCount() {
-    assertThat(calculateAdjustedCount(0L)).isZero();
-    assertThat(calculateAdjustedCount(0x40000000000000L)).isEqualTo(4.);
+    assertThat(calculateAdjustedCount(getMinThreshold())).isOne();
+    assertThat(calculateAdjustedCount(0xc0000000000000L)).isEqualTo(4.);
     assertThat(calculateAdjustedCount(0x80000000000000L)).isEqualTo(2.);
-    assertThat(calculateAdjustedCount(0x100000000000000L)).isOne();
-    assertThat(calculateAdjustedCount(-1)).isOne();
-    assertThat(calculateAdjustedCount(0x100000000000001L)).isOne();
+    assertThat(calculateAdjustedCount(getMaxThreshold() - 1)).isEqualTo(0x1p56);
+    assertThat(calculateAdjustedCount(getMaxThreshold())).isInfinite();
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> calculateAdjustedCount(getMinThreshold() - 1));
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> calculateAdjustedCount(getMaxThreshold() + 1));
   }
 
   @Test

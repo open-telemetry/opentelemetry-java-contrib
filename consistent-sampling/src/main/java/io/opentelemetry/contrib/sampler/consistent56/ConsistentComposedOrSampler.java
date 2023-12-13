@@ -43,7 +43,7 @@ final class ConsistentComposedOrSampler extends ConsistentSampler {
     long threshold2 = sampler2.getThreshold(parentThreshold, isRoot);
     if (ConsistentSamplingUtil.isValidThreshold(threshold1)) {
       if (ConsistentSamplingUtil.isValidThreshold(threshold2)) {
-        return Math.max(threshold1, threshold2);
+        return Math.min(threshold1, threshold2);
       }
       return threshold1;
     } else {
