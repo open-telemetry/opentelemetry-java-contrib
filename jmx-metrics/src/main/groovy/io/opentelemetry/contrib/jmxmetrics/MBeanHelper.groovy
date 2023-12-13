@@ -122,8 +122,16 @@ class MBeanHelper {
     }
 
     Object getBeanAttributeWithTransform(GroovyMBean bean, String attribute){
-      def transformationClosure = attributeTransformation.get(attribute);
-      return transformationClosure != null ? transformationClosure(bean) : getBeanAttribute(bean, attribute)
+        def transformationClosure = attributeTransformation.get(attribute);
+        if (transformationClosure == null) {
+            return getBeanAttribute(bean, attribute)
+        }
+        try {
+            return transformationClosure(bean)
+        } catch(AttributeNotFoundException e) {
+            logger.warning("Transformed attribute not found in ${bean.name()}")
+            return null
+        }
     }
 
     static Object getBeanAttribute(GroovyMBean bean, String attribute) {
