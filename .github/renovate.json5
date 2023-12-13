@@ -55,6 +55,10 @@
       "matchPackagePrefixes": ["org.apache.maven:"],
       "matchCurrentVersion": "3.5.0",
       "enabled": false
+    },
+    {
+      "matchPackagePrefixes": ["com.diffplug.spotless"],
+      "groupName": "spotless packages"
     }
   ]
 }
