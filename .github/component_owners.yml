@@ -58,3 +58,6 @@ components:
     - trask
   static-instrumenter:
     - anosek-an
+  kafka-exporter:
+    - spockz
+    - vincentfree
