@@ -16,11 +16,11 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
-import io.opentelemetry.sdk.metrics.internal.export.MetricProducer;
 import io.opentelemetry.sdk.resources.Resource;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
@@ -36,14 +36,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class PrometheusCollectorTest {
-  @Mock MetricProducer metricProducer;
+  @Mock CollectionRegistration collectionRegistration;
   PrometheusCollector prometheusCollector;
 
   @BeforeEach
   void setUp() {
     // Apply the SDK metric producer registers with prometheus.
     prometheusCollector = new PrometheusCollector();
-    prometheusCollector.register(metricProducer);
+    prometheusCollector.register(collectionRegistration);
   }
 
   @Test
@@ -60,7 +60,7 @@ class PrometheusCollectorTest {
 
   @Test
   void registerToDefault() throws IOException {
-    when(metricProducer.collectAllMetrics()).thenReturn(generateTestData());
+    when(collectionRegistration.collectAllMetrics()).thenReturn(generateTestData());
     StringWriter stringWriter = new StringWriter();
     TextFormat.write004(stringWriter, CollectorRegistry.defaultRegistry.metricFamilySamples());
     assertThat(stringWriter.toString())

@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## Version 1.32.0 (2023-11-27)
+
+### Disk buffering
+
+- Using Android 21 as minimum supported for disk-buffering
+  ([#1096](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1096))
+
+## Version 1.31.0 (2023-10-18)
+
+### Consistent sampling
+
+- Explicitly pass invalid p-value to root sampler
+  ([#1053](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1053))
+- Consistent sampler prototypes using 56 bits of randomness
+  ([#1063](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1063))
+
+### Runtime attach
+
+- Rename runtime attach method from `attachJavaagentToCurrentJVM`
+  to `attachJavaagentToCurrentJvm`
+  ([#1077](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1077))
+
+### Samplers
+
+- Support `thread.name` attributes in RuleBasedRoutingSampler
+  ([#1030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1030))
+
 ## Version 1.30.0 (2023-09-18)
 
 ### Disk buffering

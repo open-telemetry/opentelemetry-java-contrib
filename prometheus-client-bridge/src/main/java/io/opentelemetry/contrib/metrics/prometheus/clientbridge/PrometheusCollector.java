@@ -11,7 +11,6 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
-import io.opentelemetry.sdk.metrics.internal.export.MetricProducer;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import java.util.ArrayList;
@@ -28,10 +27,10 @@ import java.util.function.Supplier;
 public final class PrometheusCollector implements MetricReader {
 
   private final Collector collector;
-  private volatile MetricProducer metricProducer = MetricProducer.noop();
+  private volatile CollectionRegistration collectionRegistration = CollectionRegistration.noop();
 
   PrometheusCollector() {
-    this.collector = new CollectorImpl(() -> getMetricProducer().collectAllMetrics());
+    this.collector = new CollectorImpl(() -> collectionRegistration.collectAllMetrics());
     this.collector.register();
   }
 
@@ -43,13 +42,9 @@ public final class PrometheusCollector implements MetricReader {
     return new PrometheusCollector();
   }
 
-  private MetricProducer getMetricProducer() {
-    return metricProducer;
-  }
-
   @Override
   public void register(CollectionRegistration registration) {
-    this.metricProducer = MetricProducer.asMetricProducer(registration);
+    this.collectionRegistration = registration;
   }
 
   @Override

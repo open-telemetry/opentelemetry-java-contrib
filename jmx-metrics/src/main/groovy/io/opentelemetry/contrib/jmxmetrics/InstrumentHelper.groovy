@@ -165,10 +165,18 @@ class InstrumentHelper {
     private static Map<String, String> getLabels(GroovyMBean mbean, Map<String, Closure> labelFuncs, Map<String, Closure> additionalLabels) {
         def labels = [:]
         labelFuncs.each { label, labelFunc ->
-            labels[label] = labelFunc(mbean) as String
+            try {
+                labels[label] = labelFunc(mbean) as String
+            } catch(AttributeNotFoundException e) {
+                logger.warning("Attribute missing for label:${label}, label was not applied")
+            }
         }
         additionalLabels.each { label, labelFunc ->
-            labels[label] = labelFunc(mbean) as String
+            try {
+                labels[label] = labelFunc(mbean) as String
+            } catch(AttributeNotFoundException e) {
+                logger.warning("Attribute missing for label:${label}, label was not applied")
+            }
         }
         return labels
     }

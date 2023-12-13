@@ -24,6 +24,14 @@ final class ZipEntryCreator {
       FileSystem targetFs, String targetPath, JarEntry sourceEntry, JarFile sourceJar)
       throws IOException {
 
+    if (targetPath.equals(
+        "META-INF/services/io.opentelemetry.javaagent.tooling.BeforeAgentListener")) {
+      // TEMPORARY hack to make things pass after a BeforeAgentListener was added in the agent
+      // in https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/9301
+      // which then causes conflict with the BeforeAgentListener in this module
+      return;
+    }
+
     Path entry = targetFs.getPath("/", targetPath);
     Files.createDirectories(entry.getParent());
     try (InputStream sourceInput = sourceJar.getInputStream(sourceEntry)) {

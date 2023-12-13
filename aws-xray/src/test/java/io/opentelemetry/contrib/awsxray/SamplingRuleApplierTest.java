@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.awsxray;
 
-import static io.opentelemetry.semconv.ResourceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -22,8 +22,8 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.ResourceAttributes;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
@@ -61,9 +61,9 @@ class SamplingRuleApplierTest {
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_REQUEST_METHOD, "GET")
-            .put(SemanticAttributes.SERVER_ADDRESS, "opentelemetry.io")
-            .put(SemanticAttributes.URL_PATH, "/instrument-me")
+            .put(SemanticAttributes.HTTP_METHOD, "GET")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
+            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -109,8 +109,8 @@ class SamplingRuleApplierTest {
       assertThat(
               applier.matches(
                   attributes.toBuilder()
-                      .remove(SemanticAttributes.URL_PATH)
-                      .put(SemanticAttributes.URL_FULL, "scheme://host:port/instrument-me")
+                      .remove(SemanticAttributes.HTTP_TARGET)
+                      .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-me")
                       .build(),
                   resource))
           .isTrue();
@@ -133,7 +133,7 @@ class SamplingRuleApplierTest {
     @Test
     void methodNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_REQUEST_METHOD, "POST").build();
+          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "POST").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -143,7 +143,7 @@ class SamplingRuleApplierTest {
       // wildcard.
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentelemetryfio")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -151,18 +151,20 @@ class SamplingRuleApplierTest {
     @Test
     void pathNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.URL_PATH, "/instrument-you").build();
-      assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes =
           this.attributes.toBuilder()
-              .remove(SemanticAttributes.URL_PATH)
-              .put(SemanticAttributes.URL_FULL, "scheme://host:port/instrument-you")
+              .put(SemanticAttributes.HTTP_TARGET, "/instrument-you")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .remove(SemanticAttributes.URL_PATH)
-              .put(SemanticAttributes.URL_FULL, "scheme://host:port")
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.attributes.toBuilder()
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "scheme://host:port")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
 
@@ -170,8 +172,8 @@ class SamplingRuleApplierTest {
       // present.
       attributes =
           this.attributes.toBuilder()
-              .remove(SemanticAttributes.URL_PATH)
-              .put(SemanticAttributes.URL_FULL, "host:port/instrument-me")
+              .remove(SemanticAttributes.HTTP_TARGET)
+              .put(SemanticAttributes.HTTP_URL, "host:port/instrument-me")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -234,9 +236,9 @@ class SamplingRuleApplierTest {
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_REQUEST_METHOD, "GET")
-            .put(SemanticAttributes.SERVER_ADDRESS, "opentelemetry.io")
-            .put(SemanticAttributes.URL_PATH, "/instrument-me?foo=bar&cat=meow")
+            .put(SemanticAttributes.HTTP_METHOD, "GET")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
+            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -308,24 +310,22 @@ class SamplingRuleApplierTest {
     @Test
     void methodMatches() {
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_REQUEST_METHOD, "BADGETGOOD")
-              .build();
+          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "BADGETGOOD").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_REQUEST_METHOD, "BADGET").build();
+          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "BADGET").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_REQUEST_METHOD, "GETGET").build();
+          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "GETGET").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void methodNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_REQUEST_METHOD, "POST").build();
+          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "POST").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_REQUEST_METHOD);
+      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_METHOD);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -333,27 +333,27 @@ class SamplingRuleApplierTest {
     void hostMatches() {
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "alpha.opentelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "alpha.opentelemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opfdnqtelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opfdnqtelemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentglemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentglemry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentglemrz.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentglemrz.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
@@ -362,20 +362,20 @@ class SamplingRuleApplierTest {
     void hostNotMatch() {
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentelemetryfio")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "opentgalemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "opentgalemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.SERVER_ADDRESS, "alpha.oentelemetry.io")
+              .put(SemanticAttributes.NET_HOST_NAME, "alpha.oentelemetry.io")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.SERVER_ADDRESS);
+      attributes = removeAttribute(this.attributes, SemanticAttributes.NET_HOST_NAME);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -383,13 +383,13 @@ class SamplingRuleApplierTest {
     void pathMatches() {
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.URL_PATH, "/instrument-me?foo=bar&cat=")
+              .put(SemanticAttributes.HTTP_TARGET, "/instrument-me?foo=bar&cat=")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       // Deceptive question mark, it's actually a wildcard :-)
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.URL_PATH, "/instrument-meafoo=bar&cat=")
+              .put(SemanticAttributes.HTTP_TARGET, "/instrument-meafoo=bar&cat=")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
@@ -398,15 +398,15 @@ class SamplingRuleApplierTest {
     void pathNotMatch() {
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.URL_PATH, "/instrument-mea?foo=bar&cat=")
+              .put(SemanticAttributes.HTTP_TARGET, "/instrument-mea?foo=bar&cat=")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.URL_PATH, "foo/instrument-meafoo=bar&cat=")
+              .put(SemanticAttributes.HTTP_TARGET, "foo/instrument-meafoo=bar&cat=")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.URL_PATH);
+      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_TARGET);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -507,9 +507,9 @@ class SamplingRuleApplierTest {
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_REQUEST_METHOD, "GET")
-            .put(SemanticAttributes.SERVER_ADDRESS, "opentelemetry.io")
-            .put(SemanticAttributes.URL_PATH, "/instrument-me")
+            .put(SemanticAttributes.HTTP_METHOD, "GET")
+            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
+            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();

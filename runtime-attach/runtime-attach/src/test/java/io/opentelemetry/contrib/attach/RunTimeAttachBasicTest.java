@@ -14,7 +14,7 @@ public class RunTimeAttachBasicTest extends AbstractAttachmentTest {
 
   @Test
   void shouldAttach() {
-    RuntimeAttach.attachJavaagentToCurrentJVM();
+    RuntimeAttach.attachJavaagentToCurrentJvm();
     verifyAttachment();
   }
 

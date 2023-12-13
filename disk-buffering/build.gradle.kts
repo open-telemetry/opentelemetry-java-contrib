@@ -3,9 +3,9 @@ import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("me.champeau.jmh") version "0.7.1"
+  id("me.champeau.jmh") version "0.7.2"
   id("ru.vyarus.animalsniffer") version "1.7.1"
-  id("com.squareup.wire") version "4.9.1"
+  id("com.squareup.wire") version "4.9.3"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -20,7 +20,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
-  signature("com.toasttab.android:gummy-bears-api-24:0.5.1@signature")
+  signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
