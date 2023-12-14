@@ -19,7 +19,7 @@ jobs:
         with:
           arguments: build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Save unit test results
         if: always()
         with:
@@ -42,7 +42,7 @@ jobs:
         with:
           arguments: integrationTest
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Save integration test results
         if: always()
         with:
