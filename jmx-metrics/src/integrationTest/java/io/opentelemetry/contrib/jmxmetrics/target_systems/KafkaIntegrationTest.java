@@ -127,6 +127,15 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 attrs -> attrs.containsOnly(entry("type", "fetchfollower")),
                 attrs -> attrs.containsOnly(entry("type", "fetchconsumer"))),
         metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "kafka.request.time.avg",
+                "The average time the broker has taken to service requests",
+                "ms",
+                attrs -> attrs.containsOnly(entry("type", "produce")),
+                attrs -> attrs.containsOnly(entry("type", "fetchfollower")),
+                attrs -> attrs.containsOnly(entry("type", "fetchconsumer"))),
+        metric ->
             assertGauge(
                 metric,
                 "kafka.partition.count",

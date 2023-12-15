@@ -86,8 +86,14 @@ otel.instrument(requestTime,
     "type" : { mbean -> mbean.name().getKeyProperty("request").toLowerCase() },
   ],
   "99thPercentile", otel.&doubleValueCallback)
-
-
+otel.instrument(requestTime,
+  "kafka.request.time.avg",
+  "The average time the broker has taken to service requests",
+  "ms",
+  [
+    "type" : { mbean -> mbean.name().getKeyProperty("request").toLowerCase() },
+  ],
+  "Mean", otel.&doubleValueCallback)
 
 def network = otel.mbeans(["kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec",
                           "kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec"])
