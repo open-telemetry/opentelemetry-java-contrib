@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public final class ResourceHolder implements AutoConfigurationCustomizerProvider {
 
+  @SuppressWarnings("NonFinalStaticField")
   @Nullable static volatile Resource resource;
 
   @Override
