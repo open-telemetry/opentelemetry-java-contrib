@@ -63,7 +63,7 @@ wire {
   )
 }
 
-tasks.named("shadowJar", ShadowJar::class.java) {
+tasks.named<ShadowJar>("shadowJar") {
   archiveClassifier.set("")
   configurations = emptyList() // To avoid embedding any dependencies as we only need to rename some local packages.
   relocate("io.opentelemetry.proto", "io.opentelemetry.diskbuffering.proto")
