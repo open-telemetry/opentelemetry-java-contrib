@@ -42,6 +42,12 @@ These metrics are sourced from Kafka's exposed Yammer metrics for each instance:
 * Attributes: `type`
 * Instrument Type: DoubleValueObserver
 
+* Name: `kafka.request.time.avg`
+* Description: The average time the broker has taken to service requests
+* Unit: `ms`
+* Attributes: `type`
+* Instrument Type: DoubleValueObserver
+
 * Name: `kafka.network.io`
 * Description: The bytes received or sent by the broker
 * Unit: `by`
