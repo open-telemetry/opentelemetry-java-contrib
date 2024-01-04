@@ -43,7 +43,7 @@ class Ec2ResourceTest {
           + "    \"region\" : \"us-west-2\"\n"
           + "}";
 
-  @RegisterExtension public static MockWebServerExtension server = new MockWebServerExtension();
+  @RegisterExtension public static final MockWebServerExtension server = new MockWebServerExtension();
 
   @Test
   void imdsv2() {

@@ -52,7 +52,9 @@ class InstrumenterHelperTest {
 
   private static final Set<ObjectInstance> registeredBeans = new HashSet<>();
 
+  @SuppressWarnings("NonFinalStaticField") // https://github.com/google/error-prone/issues/4239
   private static JMXConnectorServer jmxServer;
+  @SuppressWarnings("NonFinalStaticField") // https://github.com/google/error-prone/issues/4239
   private static JmxClient jmxClient;
 
   // Will eventually be replaced with Jupiter extension in sdk-testing
