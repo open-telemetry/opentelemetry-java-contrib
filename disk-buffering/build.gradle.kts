@@ -1,8 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
 
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
+  id("com.github.johnrengelman.shadow")
   id("me.champeau.jmh") version "0.7.2"
   id("ru.vyarus.animalsniffer") version "1.7.1"
   id("com.squareup.wire") version "4.9.3"
@@ -59,6 +61,13 @@ wire {
     "opentelemetry.proto.metrics.v1.MetricsData",
     "opentelemetry.proto.logs.v1.LogsData",
   )
+}
+
+tasks.named("shadowJar", ShadowJar::class.java) {
+  archiveClassifier.set("")
+  configurations = emptyList() // To avoid embedding any dependencies as we only need to rename some local packages.
+  relocate("io.opentelemetry.proto", "io.opentelemetry.diskbuffering.proto")
+  mustRunAfter("jar")
 }
 
 // The javadoc from wire's generated classes has errors that make the task that generates the "javadoc" artifact to fail. This
