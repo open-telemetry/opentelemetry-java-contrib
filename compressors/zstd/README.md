@@ -14,7 +14,7 @@ Add dependency, replacing `{{version}}` with the latest release version.
 <dependency>
   <groupId>io.opentelemetry.contrib</groupId>
   <artifactId>opentelemetry-compressor-zstd</artifactId>
-  <version>{{version}}/version>
+  <version>{{version}}</version>
 </dependency>
 ```
 
