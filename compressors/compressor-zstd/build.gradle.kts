@@ -7,7 +7,7 @@ description = "zstd compressor implementation for use with OTLP exporters"
 otelJava.moduleName.set("io.opentelemetry.contrib.compressor.zstd")
 
 dependencies {
-  // Use version from :depedencyManagement when opentelemetry-instrumentation-bom-alpha depends on opentelemetry-java 1.34.0
+  // TODO(jack-berg): Use version from :depedencyManagement when opentelemetry-instrumentation-bom-alpha depends on opentelemetry-java 1.34.0
   var openTelemetryVersion = "1.34.0"
   api("io.opentelemetry:opentelemetry-exporter-common:$openTelemetryVersion")
 

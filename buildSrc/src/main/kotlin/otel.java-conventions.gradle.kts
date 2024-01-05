@@ -10,17 +10,11 @@ plugins {
   id("otel.spotless-conventions")
 }
 
+val otelJava = extensions.create<OtelJavaExtension>("otelJava")
 
 group = "io.opentelemetry.contrib"
 
-base {
-  // May be set already by a parent project, only set if not.
-  if (!archivesName.get().startsWith("opentelemetry-")) {
-    archivesName.set("opentelemetry-$name")
-  }
-}
-
-val otelJava = extensions.create<OtelJavaExtension>("otelJava")
+base.archivesName.set("opentelemetry-${project.name}")
 
 // Version to use to compile code and run tests.
 val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
@@ -28,7 +22,7 @@ val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
 java {
   toolchain {
     languageVersion.set(
-      otelJava.minJavaVersionSupported.map { JavaLanguageVersion.of(Math.max(it.majorVersion.toInt(), DEFAULT_JAVA_VERSION.majorVersion.toInt())) }
+        otelJava.minJavaVersionSupported.map { JavaLanguageVersion.of(Math.max(it.majorVersion.toInt(), DEFAULT_JAVA_VERSION.majorVersion.toInt())) }
     )
   }
 
