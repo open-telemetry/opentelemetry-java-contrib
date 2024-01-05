@@ -42,6 +42,7 @@ class MBeanHelperTest {
 
   @SuppressWarnings("NonFinalStaticField") // https://github.com/google/error-prone/issues/4239
   private static JMXConnectorServer jmxServer;
+
   @SuppressWarnings("NonFinalStaticField") // https://github.com/google/error-prone/issues/4239
   private static JmxClient jmxClient;
 

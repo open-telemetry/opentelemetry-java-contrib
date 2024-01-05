@@ -25,7 +25,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class SimpleHttpClientTest {
 
-  @RegisterExtension public static final MockWebServerExtension server = new MockWebServerExtension();
+  @RegisterExtension
+  public static final MockWebServerExtension server = new MockWebServerExtension();
 
   @Test
   void testFetchString() {
@@ -58,7 +59,8 @@ class SimpleHttpClientTest {
   static class HttpsServerTest {
     @RegisterExtension
     @Order(1)
-    public static final SelfSignedCertificateExtension certificate = new SelfSignedCertificateExtension();
+    public static final SelfSignedCertificateExtension certificate =
+        new SelfSignedCertificateExtension();
 
     @RegisterExtension
     @Order(2)

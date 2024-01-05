@@ -30,7 +30,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 class XraySamplerClientTest {
 
-  @RegisterExtension public static final MockWebServerExtension server = new MockWebServerExtension();
+  @RegisterExtension
+  public static final MockWebServerExtension server = new MockWebServerExtension();
 
   private XraySamplerClient client;
 
