@@ -11,7 +11,7 @@ dependencies {
   var openTelemetryVersion = "1.34.0"
   api("io.opentelemetry:opentelemetry-exporter-common:$openTelemetryVersion")
 
-  implementation("com.github.luben:zstd-jni:1.5.5-10")
+  implementation("com.github.luben:zstd-jni:1.5.5-11")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:$openTelemetryVersion")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetryVersion")
