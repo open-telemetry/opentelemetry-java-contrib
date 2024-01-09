@@ -12,7 +12,7 @@ feature or via instrumentation, this project is hopefully for you.
 * [AWS Resources](./aws-resources/README.md)
 * [AWS X-Ray SDK Support](./aws-xray/README.md)
 * [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
-* [zstd Compressor](./compressors/zstd/README.md)
+* [zstd Compressor](./compressors/compressor-zstd/README.md)
 * [Consistent Sampling](./consistent-sampling/README.md)
 * [Disk Buffering](./disk-buffering/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
