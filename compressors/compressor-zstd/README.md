@@ -46,4 +46,4 @@ export OTEL_EXPORTER_OTLP_COMPRESSION=zstd
 
 - [Jack Berg](https://github.com/jack-berg), New Relic
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+Learn more about component owners in [component_owners.yml](../../.github/component_owners.yml).
