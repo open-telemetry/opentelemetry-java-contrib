@@ -23,6 +23,7 @@ feature or via instrumentation, this project is hopefully for you.
 * [Runtime Attach](./runtime-attach/README.md)
 * [Samplers](./samplers/README.md)
 * [Static Instrumenter](./static-instrumenter/README.md)
+* [Kafka Support](./kafka-exporter/README.md)
 
 ## Getting Started
 
