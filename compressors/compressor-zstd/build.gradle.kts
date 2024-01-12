@@ -8,7 +8,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.compressor.zstd")
 
 dependencies {
   // TODO(jack-berg): Use version from :depedencyManagement when opentelemetry-instrumentation-bom-alpha depends on opentelemetry-java 1.34.0
-  var openTelemetryVersion = "1.34.0"
+  var openTelemetryVersion = "1.34.1"
   api("io.opentelemetry:opentelemetry-exporter-common:$openTelemetryVersion")
 
   implementation("com.github.luben:zstd-jni:1.5.5-11")
