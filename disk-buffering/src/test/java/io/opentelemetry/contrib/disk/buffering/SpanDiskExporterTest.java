@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.exporters.SpanDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.export.SpanExporter;

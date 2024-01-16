@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.exporters.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;

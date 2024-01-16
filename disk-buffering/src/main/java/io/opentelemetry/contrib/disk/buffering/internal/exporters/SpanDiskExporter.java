@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.DiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
