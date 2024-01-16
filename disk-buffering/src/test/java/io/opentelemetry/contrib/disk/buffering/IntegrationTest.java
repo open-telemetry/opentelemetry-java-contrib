@@ -20,7 +20,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.LogRecordDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SpanDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.StoredBatchExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.exporters.FromDiskExporter;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -109,7 +109,7 @@ public class IntegrationTest {
         diskLogRecordExporter, () -> memoryLogRecordExporter.getFinishedLogRecordItems().size());
   }
 
-  private void assertExporter(StoredBatchExporter exporter, Supplier<Integer> finishedItems)
+  private void assertExporter(FromDiskExporter exporter, Supplier<Integer> finishedItems)
       throws IOException {
     // Verify no data has been received in the original exporter until this point.
     assertEquals(0, finishedItems.get());

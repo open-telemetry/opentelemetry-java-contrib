@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * <p>In order to use it, you need to wrap your own {@link LogRecordExporter} with a new instance of
  * this one, which will be the one you need to register in your {@link LogRecordProcessor}.
  */
-public final class LogRecordDiskExporter implements LogRecordExporter, StoredBatchExporter {
+public final class LogRecordDiskExporter implements LogRecordExporter, FromDiskExporter {
   private final LogRecordExporter wrapped;
   private final DiskExporter<LogRecordData> diskExporter;
 

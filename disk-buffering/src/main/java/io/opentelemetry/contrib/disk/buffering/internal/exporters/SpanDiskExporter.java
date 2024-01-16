@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * <p>In order to use it, you need to wrap your own {@link SpanExporter} with a new instance of this
  * one, which will be the one you need to register in your {@link SpanProcessor}.
  */
-public final class SpanDiskExporter implements SpanExporter, StoredBatchExporter {
+public final class SpanDiskExporter implements SpanExporter, FromDiskExporter {
   private final SpanExporter wrapped;
   private final DiskExporter<SpanData> diskExporter;
 

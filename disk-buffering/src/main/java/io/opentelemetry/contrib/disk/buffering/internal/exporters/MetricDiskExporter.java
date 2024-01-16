@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * <p>In order to use it, you need to wrap your own {@link MetricExporter} with a new instance of
  * this one, which will be the one you need to register in your {@link MetricReader}.
  */
-public final class MetricDiskExporter implements MetricExporter, StoredBatchExporter {
+public final class MetricDiskExporter implements MetricExporter, FromDiskExporter {
   private final MetricExporter wrapped;
   private final DiskExporter<MetricData> diskExporter;
 

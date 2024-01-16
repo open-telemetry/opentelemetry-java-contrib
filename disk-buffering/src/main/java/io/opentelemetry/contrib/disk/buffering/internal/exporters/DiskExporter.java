@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
+public final class DiskExporter<EXPORT_DATA> implements FromDiskExporter {
   private final Storage storage;
   private final SignalSerializer<EXPORT_DATA> serializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
