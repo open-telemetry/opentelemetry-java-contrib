@@ -17,12 +17,7 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.FromDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.FromDiskExporterBuilder;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.LogRecordToDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.MetricToDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.SpanToDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.exporters.ToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -66,12 +61,13 @@ public class IntegrationTest {
   private Clock clock;
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
-  private static final StorageConfiguration STORAGE_CONFIGURATION =
-      StorageConfiguration.getDefault();
+  private StorageConfiguration storageConfig;
 
   @BeforeEach
   void setUp() throws IOException {
+    storageConfig = StorageConfiguration.getDefault(rootDir);
     clock = mock();
+
     doReturn(MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS)).when(clock).now();
 
     // Setting up spans
@@ -104,9 +100,8 @@ public class IntegrationTest {
       SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter)
       throws IOException {
     return ToDiskExporter.<T>builder()
-        .setRootDir(rootDir)
         .setFolderName("spans")
-        .setStorageConfiguration(STORAGE_CONFIGURATION)
+        .setStorageConfiguration(storageConfig)
         .setSerializer(serializer)
         .setExportFunction(exporter)
         .setStorageClock(clock)
@@ -121,9 +116,8 @@ public class IntegrationTest {
       throws IOException {
     return builder
         .setExportFunction(exportFunction)
-        .setRootDir(rootDir)
         .setFolderName("spans")
-        .setStorageConfiguration(STORAGE_CONFIGURATION)
+        .setStorageConfiguration(storageConfig)
         .setDeserializer(serializer)
         .setStorageClock(clock)
         .build();
@@ -167,7 +161,7 @@ public class IntegrationTest {
     assertEquals(0, finishedItems.get());
 
     // Go to the future when we can read the stored items.
-    fastForwardTimeByMillis(STORAGE_CONFIGURATION.getMinFileAgeForReadMillis());
+    fastForwardTimeByMillis(storageConfig.getMinFileAgeForReadMillis());
 
     // Read and send stored data.
     assertTrue(exporter.exportStoredBatch(1, TimeUnit.SECONDS));

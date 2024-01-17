@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
@@ -12,7 +12,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,12 +46,6 @@ public class FromDiskExporterBuilder<T> {
   @CanIgnoreReturnValue
   public FromDiskExporterBuilder<T> setFolderName(String folderName) {
     storageBuilder.setFolderName(folderName);
-    return this;
-  }
-
-  @CanIgnoreReturnValue
-  public FromDiskExporterBuilder<T> setRootDir(File rootDir) {
-    storageBuilder.setRootDir(rootDir);
     return this;
   }
 

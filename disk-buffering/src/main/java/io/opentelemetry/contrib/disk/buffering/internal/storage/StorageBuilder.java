@@ -13,9 +13,8 @@ import java.io.IOException;
 
 public class StorageBuilder {
 
-  private File rootDir = new File(".");
   private String folderName = "data";
-  private StorageConfiguration configuration = StorageConfiguration.getDefault();
+  private StorageConfiguration configuration = StorageConfiguration.getDefault(new File("."));
   private Clock clock = Clock.getDefault();
 
   StorageBuilder() {}
@@ -23,12 +22,6 @@ public class StorageBuilder {
   @CanIgnoreReturnValue
   public StorageBuilder setFolderName(String folderName) {
     this.folderName = folderName;
-    return this;
-  }
-
-  @CanIgnoreReturnValue
-  public StorageBuilder setRootDir(File rootDir) {
-    this.rootDir = rootDir;
     return this;
   }
 
@@ -45,7 +38,7 @@ public class StorageBuilder {
   }
 
   public Storage build() throws IOException {
-    File folder = ensureSubdir(rootDir, folderName);
+    File folder = ensureSubdir(configuration.getRootDir(), folderName);
     FolderManager folderManager = new FolderManager(folder, configuration, clock);
     return new Storage(folderManager);
   }

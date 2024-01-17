@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static java.util.Collections.singletonList;
@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.contrib.disk.buffering.FromDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -42,13 +43,13 @@ class FromDiskExporterTest {
   @BeforeEach
   void setUp() throws IOException {
     clock = createClockMock();
+
     setUpSerializer();
     wrapped = mock();
     exporter =
         FromDiskExporter.<SpanData>builder()
-            .setRootDir(rootDir)
             .setFolderName(STORAGE_FOLDER_NAME)
-            .setStorageConfiguration(TestData.getDefaultConfiguration())
+            .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
             .setDeserializer(serializer)
             .setExportFunction(wrapped::export)
             .setStorageClock(clock)

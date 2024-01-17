@@ -97,7 +97,7 @@ class ReadableFileTest {
     clock = mock();
     readableFile =
         new ReadableFile(
-            source, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider));
+            source, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider, dir));
   }
 
   private static void addFileContents(File source) throws IOException {
@@ -184,7 +184,7 @@ class ReadableFileTest {
 
     ReadableFile emptyReadableFile =
         new ReadableFile(
-            emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider));
+            emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider, dir));
 
     assertEquals(ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> true));
 

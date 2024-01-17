@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import org.junit.jupiter.api.Test;
+import java.io.File;
 
 class ToDiskExporterBuilderTest {
 
@@ -19,6 +20,7 @@ class ToDiskExporterBuilderTest {
         StorageConfiguration.builder()
             .setMaxFileAgeForWriteMillis(2)
             .setMinFileAgeForReadMillis(1)
+            .setRootDir(new File("."))
             .build();
 
     assertThatThrownBy(

@@ -3,18 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
-import static io.opentelemetry.sdk.metrics.data.AggregationTemporality.CUMULATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.metrics.InstrumentType;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
-import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -24,28 +22,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MetricToDiskExporterTest {
+class LogRecordToDiskExporterTest {
 
-  @Mock private ToDiskExporter<MetricData> delegate;
+  @Mock private ToDiskExporter<LogRecordData> delegate;
 
   @Test
   void delegateShutdown_success() throws IOException {
-    MetricToDiskExporter testClass =
-        new MetricToDiskExporter(delegate, MetricToDiskExporterTest::temporalityFn);
+    LogRecordToDiskExporter testClass = new LogRecordToDiskExporter(delegate);
     CompletableResultCode result = testClass.shutdown();
     assertThat(result.isSuccess()).isTrue();
     verify(delegate).shutdown();
   }
 
-  private static AggregationTemporality temporalityFn(InstrumentType instrumentType) {
-    return CUMULATIVE;
-  }
-
   @Test
   void delegateShutdown_fail() throws IOException {
     doThrow(new IOException("boom")).when(delegate).shutdown();
-    MetricToDiskExporter testClass =
-        new MetricToDiskExporter(delegate, MetricToDiskExporterTest::temporalityFn);
+    LogRecordToDiskExporter testClass = new LogRecordToDiskExporter(delegate);
     CompletableResultCode result = testClass.shutdown();
     assertThat(result.isSuccess()).isFalse();
     verify(delegate).shutdown();
@@ -53,23 +45,19 @@ class MetricToDiskExporterTest {
 
   @Test
   void delegateExport() {
-    MetricData metric1 = mock();
-    MetricData metric2 = mock();
-    List<MetricData> metrics = Arrays.asList(metric1, metric2);
+    LogRecordData log1 = mock();
+    LogRecordData log2 = mock();
+    List<LogRecordData> logRecords = Arrays.asList(log1, log2);
 
-    MetricToDiskExporter testClass =
-        new MetricToDiskExporter(delegate, MetricToDiskExporterTest::temporalityFn);
+    LogRecordToDiskExporter testClass = new LogRecordToDiskExporter(delegate);
+    testClass.export(logRecords);
 
-    testClass.export(metrics);
-
-    verify(delegate).export(metrics);
+    verify(delegate).export(logRecords);
   }
 
   @Test
   void flushReturnsSuccess() {
-    MetricToDiskExporter testClass =
-        new MetricToDiskExporter(delegate, MetricToDiskExporterTest::temporalityFn);
-
+    LogRecordToDiskExporter testClass = new LogRecordToDiskExporter(delegate);
     CompletableResultCode result = testClass.flush();
     assertThat(result.isSuccess()).isTrue();
   }
