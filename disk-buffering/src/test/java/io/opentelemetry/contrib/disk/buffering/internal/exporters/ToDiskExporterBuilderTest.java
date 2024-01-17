@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,8 +22,7 @@ class ToDiskExporterBuilderTest {
             .build();
 
     assertThatThrownBy(
-        () -> ToDiskExporter.<SpanData>builder()
-            .setStorageConfiguration(invalidConfig))
+            () -> ToDiskExporter.<SpanData>builder().setStorageConfiguration(invalidConfig))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(
             "The configured max file age for writing must be lower than the configured min file age for reading");

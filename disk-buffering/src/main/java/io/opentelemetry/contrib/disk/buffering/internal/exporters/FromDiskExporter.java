@@ -64,23 +64,4 @@ public final class FromDiskExporter<EXPORT_DATA> {
   public void onShutDown() throws IOException {
     storage.close();
   }
-
-  //  public CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
-  //    logger.log(Level.FINER, "Intercepting exporter batch.");
-  //    try {
-  //      if (storage.write(serializer.serialize(data))) {
-  //        return CompletableResultCode.ofSuccess();
-  //      } else {
-  //        logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
-  //        return exportFunction.apply(data);
-  //      }
-  //    } catch (IOException e) {
-  //      logger.log(
-  //          Level.WARNING,
-  //          "An unexpected error happened while attempting to write the data in disk. Exporting it
-  // right away.",
-  //          e);
-  //      return exportFunction.apply(data);
-  //    }
-  //  }
 }

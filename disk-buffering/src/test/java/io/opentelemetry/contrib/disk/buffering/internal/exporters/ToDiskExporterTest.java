@@ -90,5 +90,4 @@ class ToDiskExporterTest {
     toDiskExporter.shutdown();
     verify(storage).close();
   }
-
 }
