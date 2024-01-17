@@ -17,8 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This interface is for classes that are able to read telemetry previously buffered on disk and
- * send it to another delegated exporter.
+ * Signal-type generic class that can read telemetry previously buffered on disk and send it to
+ * another delegated exporter.
  */
 public final class FromDiskExporter<EXPORT_DATA> {
   private final Storage storage;
