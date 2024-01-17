@@ -16,11 +16,11 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 public final class Storage implements Closeable {
+  private static final int MAX_ATTEMPTS = 3;
   private final FolderManager folderManager;
+  private final AtomicBoolean isClosed = new AtomicBoolean(false);
   @Nullable private WritableFile writableFile;
   @Nullable private ReadableFile readableFile;
-  private static final int MAX_ATTEMPTS = 3;
-  private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
   public Storage(FolderManager folderManager) {
     this.folderManager = folderManager;
