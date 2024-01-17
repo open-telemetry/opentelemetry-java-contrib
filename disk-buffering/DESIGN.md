@@ -1,9 +1,9 @@
-# Contributor Guide
+# Design Overview
 
 Each one of the three exporters provided by this
 tool ([LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordDiskExporter.java), [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricDiskExporter.java)
 and [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanDiskExporter.java))
-is responsible of performing 2 actions, `write` and `read/delegate`, the `write` one happens
+is responsible for performing 2 actions, `write` and `read/delegate`, the `write` one happens
 automatically as a set of signals are provided from the processor, while the `read/delegate` one has
 to be triggered manually by the consumer of this library as explained in the [README](README.md).
 

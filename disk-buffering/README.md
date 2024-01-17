@@ -12,7 +12,7 @@ stored data.
   achieved, under [Reading data](#reading-data).
 
 > For a more detailed information on how the whole process works, take a look at
-> the [CONTRIBUTING](CONTRIBUTING.md) file.
+> the [DESIGN.md](DESIGN.md) file.
 
 ## Configuration
 
