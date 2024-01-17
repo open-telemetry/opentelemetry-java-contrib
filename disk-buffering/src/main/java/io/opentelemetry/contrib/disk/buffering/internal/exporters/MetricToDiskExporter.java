@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * This class implements a {@link MetricExporter} that delegates to an instance of {@code
+ * ToDiskExporter<MetricData>}.
+ */
 public class MetricToDiskExporter implements MetricExporter {
 
   private final ToDiskExporter<MetricData> delegate;
