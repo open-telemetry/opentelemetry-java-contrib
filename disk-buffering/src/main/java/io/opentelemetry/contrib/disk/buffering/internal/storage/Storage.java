@@ -26,6 +26,10 @@ public final class Storage implements Closeable {
     this.folderManager = folderManager;
   }
 
+  public static StorageBuilder builder() {
+    return new StorageBuilder();
+  }
+
   /**
    * Attempts to write an item into a writable file.
    *

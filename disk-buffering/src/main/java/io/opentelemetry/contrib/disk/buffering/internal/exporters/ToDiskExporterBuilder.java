@@ -8,8 +8,8 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.File;
@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public final class DiskExporterBuilder<T> {
+public final class ToDiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer =
       new SignalSerializer<T>() {
@@ -34,71 +34,55 @@ public final class DiskExporterBuilder<T> {
           return Collections.emptyList();
         }
       };
-  private File rootDir = new File(".");
-  private String folderName = "data";
-  private StorageConfiguration configuration = StorageConfiguration.getDefault();
-  private Clock clock = Clock.getDefault();
+
+  private final StorageBuilder storageBuilder = Storage.builder();
 
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
 
-  DiskExporterBuilder() {}
+  ToDiskExporterBuilder() {}
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setRootDir(File rootDir) {
-    this.rootDir = rootDir;
+  public ToDiskExporterBuilder<T> setRootDir(File rootDir) {
+    storageBuilder.setRootDir(rootDir);
     return this;
   }
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setFolderName(String folderName) {
-    this.folderName = folderName;
+  public ToDiskExporterBuilder<T> setFolderName(String folderName) {
+    storageBuilder.setFolderName(folderName);
     return this;
   }
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setStorageConfiguration(StorageConfiguration configuration) {
-    this.configuration = configuration;
+  public ToDiskExporterBuilder<T> setStorageConfiguration(StorageConfiguration configuration) {
+    validateConfiguration(configuration);
+    storageBuilder.setStorageConfiguration(configuration);
     return this;
   }
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setStorageClock(Clock clock) {
-    this.clock = clock;
+  public ToDiskExporterBuilder<T> setStorageClock(Clock clock) {
+    storageBuilder.setStorageClock(clock);
     return this;
   }
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setSerializer(SignalSerializer<T> serializer) {
+  public ToDiskExporterBuilder<T> setSerializer(SignalSerializer<T> serializer) {
     this.serializer = serializer;
     return this;
   }
 
   @CanIgnoreReturnValue
-  public DiskExporterBuilder<T> setExportFunction(
+  public ToDiskExporterBuilder<T> setExportFunction(
       Function<Collection<T>, CompletableResultCode> exportFunction) {
     this.exportFunction = exportFunction;
     return this;
   }
 
-  private static File getSignalFolder(File rootDir, String folderName) throws IOException {
-    File folder = new File(rootDir, folderName);
-    if (!folder.exists()) {
-      if (!folder.mkdirs()) {
-        throw new IOException(
-            "Could not create the signal folder: '" + folderName + "' inside: " + rootDir);
-      }
-    }
-    return folder;
-  }
-
-  public DiskExporter<T> build() throws IOException {
-    validateConfiguration(configuration);
-
-    File folder = getSignalFolder(rootDir, folderName);
-    Storage storage = new Storage(new FolderManager(folder, configuration, clock));
-
-    return new DiskExporter<>(serializer, exportFunction, storage);
+  public ToDiskExporter<T> build() throws IOException {
+    Storage storage = storageBuilder.build();
+    return new ToDiskExporter<>(serializer, exportFunction, storage);
   }
 
   private static void validateConfiguration(StorageConfiguration configuration) {
