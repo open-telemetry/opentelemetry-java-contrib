@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
+import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -19,7 +21,26 @@ import java.util.Collection;
 public class LogRecordToDiskExporter implements LogRecordExporter {
   private final ToDiskExporter<LogRecordData> delegate;
 
-  public LogRecordToDiskExporter(ToDiskExporter<LogRecordData> delegate) {
+  /**
+   * Creates a new LogRecordToDiskExporter that will buffer LogRecordData telemetry on
+   * disk storage.
+   * @param delegate - The LogRecordExporter to delegate to if disk writing fails.
+   * @param config - The StorageConfiguration that specifies how storage is managed.
+   * @return A new LogRecordToDiskExporter instance.
+   * @throws IOException if the delegate ToDiskExporter could not be created.
+   */
+  public static LogRecordToDiskExporter create(LogRecordExporter delegate, StorageConfiguration config) throws IOException {
+    ToDiskExporter<LogRecordData> toDisk = ToDiskExporter.<LogRecordData>builder()
+        .setFolderName("logs")
+        .setStorageConfiguration(config)
+        .setSerializer(SignalSerializer.ofLogs())
+        .setExportFunction(delegate::export)
+        .build();
+    return new LogRecordToDiskExporter(toDisk);
+  }
+
+  // Visible for testing
+  LogRecordToDiskExporter(ToDiskExporter<LogRecordData> delegate) {
     this.delegate = delegate;
   }
 

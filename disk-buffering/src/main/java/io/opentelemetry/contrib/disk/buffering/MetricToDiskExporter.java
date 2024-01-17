@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
+import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -24,7 +26,28 @@ public class MetricToDiskExporter implements MetricExporter {
   private final ToDiskExporter<MetricData> delegate;
   private final Function<InstrumentType, AggregationTemporality> typeToTemporality;
 
-  public MetricToDiskExporter(
+  /**
+   * Creates a new MetricToDiskExporter that will buffer Metric telemetry on
+   * disk storage.
+   * @param delegate - The MetricExporter to delegate to if disk writing fails.
+   * @param config - The StorageConfiguration that specifies how storage is managed.
+   * @param typeToTemporality - The function that maps an InstrumentType into an AggregationTemporality.
+   * @return A new MetricToDiskExporter instance.
+   * @throws IOException if the delegate ToDiskExporter could not be created.
+   */
+  public static MetricToDiskExporter create(MetricExporter delegate, StorageConfiguration config,
+  Function<InstrumentType, AggregationTemporality> typeToTemporality) throws IOException {
+    ToDiskExporter<MetricData> toDisk = ToDiskExporter.<MetricData>builder()
+        .setFolderName("metrics")
+        .setStorageConfiguration(config)
+        .setSerializer(SignalSerializer.ofMetrics())
+        .setExportFunction(delegate::export)
+        .build();
+    return new MetricToDiskExporter(toDisk, typeToTemporality);
+  }
+
+  // VisibleForTesting
+  MetricToDiskExporter(
       ToDiskExporter<MetricData> delegate,
       Function<InstrumentType, AggregationTemporality> typeToTemporality) {
     this.delegate = delegate;
