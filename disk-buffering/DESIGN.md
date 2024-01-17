@@ -1,11 +1,18 @@
 # Design Overview
 
-Each one of the three exporters provided by this
-tool ([LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordDiskExporter.java), [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricDiskExporter.java)
-and [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanDiskExporter.java))
-is responsible for performing 2 actions, `write` and `read/delegate`, the `write` one happens
-automatically as a set of signals are provided from the processor, while the `read/delegate` one has
-to be triggered manually by the consumer of this library as explained in the [README](README.md).
+There are three main disk-writing exporters provided by this module:
+* [LogRecordToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordToDiskExporter.java)
+* [MetricToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricToDiskExporter.java)
+* [SpanToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanToDiskExporter.java))
+
+Each is responsible for writing a specific type of telemetry to disk storage for later 
+harvest/ingest.
+
+For later reading, there is:
+* [FromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/FromDiskExporter.java)
+which can be created with `FromDiskExporter.builder()....build()`. 
+As explained in the [README](README.md), this has to be triggered manually by the consumer of 
+* this library and does not happen automaticall
 
 ## Writing overview
 
