@@ -15,9 +15,7 @@ import java.util.concurrent.TimeUnit;
 @AutoValue
 public abstract class StorageConfiguration {
 
-  /**
-   * The root storage location for buffered telemetry.
-   */
+  /** The root storage location for buffered telemetry. */
   public abstract File getRootDir();
 
   /** The max amount of time a file can receive new data. */

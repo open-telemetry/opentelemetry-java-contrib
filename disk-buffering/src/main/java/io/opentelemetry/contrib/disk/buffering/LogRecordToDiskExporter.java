@@ -22,20 +22,22 @@ public class LogRecordToDiskExporter implements LogRecordExporter {
   private final ToDiskExporter<LogRecordData> delegate;
 
   /**
-   * Creates a new LogRecordToDiskExporter that will buffer LogRecordData telemetry on
-   * disk storage.
+   * Creates a new LogRecordToDiskExporter that will buffer LogRecordData telemetry on disk storage.
+   *
    * @param delegate - The LogRecordExporter to delegate to if disk writing fails.
    * @param config - The StorageConfiguration that specifies how storage is managed.
    * @return A new LogRecordToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
-  public static LogRecordToDiskExporter create(LogRecordExporter delegate, StorageConfiguration config) throws IOException {
-    ToDiskExporter<LogRecordData> toDisk = ToDiskExporter.<LogRecordData>builder()
-        .setFolderName("logs")
-        .setStorageConfiguration(config)
-        .setSerializer(SignalSerializer.ofLogs())
-        .setExportFunction(delegate::export)
-        .build();
+  public static LogRecordToDiskExporter create(
+      LogRecordExporter delegate, StorageConfiguration config) throws IOException {
+    ToDiskExporter<LogRecordData> toDisk =
+        ToDiskExporter.<LogRecordData>builder()
+            .setFolderName("logs")
+            .setStorageConfiguration(config)
+            .setSerializer(SignalSerializer.ofLogs())
+            .setExportFunction(delegate::export)
+            .build();
     return new LogRecordToDiskExporter(toDisk);
   }
 

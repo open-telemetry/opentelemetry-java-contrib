@@ -27,22 +27,27 @@ public class MetricToDiskExporter implements MetricExporter {
   private final Function<InstrumentType, AggregationTemporality> typeToTemporality;
 
   /**
-   * Creates a new MetricToDiskExporter that will buffer Metric telemetry on
-   * disk storage.
+   * Creates a new MetricToDiskExporter that will buffer Metric telemetry on disk storage.
+   *
    * @param delegate - The MetricExporter to delegate to if disk writing fails.
    * @param config - The StorageConfiguration that specifies how storage is managed.
-   * @param typeToTemporality - The function that maps an InstrumentType into an AggregationTemporality.
+   * @param typeToTemporality - The function that maps an InstrumentType into an
+   *     AggregationTemporality.
    * @return A new MetricToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
-  public static MetricToDiskExporter create(MetricExporter delegate, StorageConfiguration config,
-  Function<InstrumentType, AggregationTemporality> typeToTemporality) throws IOException {
-    ToDiskExporter<MetricData> toDisk = ToDiskExporter.<MetricData>builder()
-        .setFolderName("metrics")
-        .setStorageConfiguration(config)
-        .setSerializer(SignalSerializer.ofMetrics())
-        .setExportFunction(delegate::export)
-        .build();
+  public static MetricToDiskExporter create(
+      MetricExporter delegate,
+      StorageConfiguration config,
+      Function<InstrumentType, AggregationTemporality> typeToTemporality)
+      throws IOException {
+    ToDiskExporter<MetricData> toDisk =
+        ToDiskExporter.<MetricData>builder()
+            .setFolderName("metrics")
+            .setStorageConfiguration(config)
+            .setSerializer(SignalSerializer.ofMetrics())
+            .setExportFunction(delegate::export)
+            .build();
     return new MetricToDiskExporter(toDisk, typeToTemporality);
   }
 

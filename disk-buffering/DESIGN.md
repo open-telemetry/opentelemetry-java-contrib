@@ -5,13 +5,13 @@ There are three main disk-writing exporters provided by this module:
 * [MetricToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricToDiskExporter.java)
 * [SpanToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanToDiskExporter.java))
 
-Each is responsible for writing a specific type of telemetry to disk storage for later 
+Each is responsible for writing a specific type of telemetry to disk storage for later
 harvest/ingest.
 
 For later reading, there is:
 * [FromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/FromDiskExporter.java)
-which can be created with `FromDiskExporter.builder()....build()`. 
-As explained in the [README](README.md), this has to be triggered manually by the consumer of 
+which can be created with `FromDiskExporter.builder()....build()`.
+As explained in the [README](README.md), this has to be triggered manually by the consumer of
 * this library and does not happen automaticall
 
 ## Writing overview

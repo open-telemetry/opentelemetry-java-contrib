@@ -23,8 +23,8 @@ public final class TestData {
     return getConfiguration(fileProvider, rootDir);
   }
 
-  public static StorageConfiguration getConfiguration(TemporaryFileProvider fileProvider,
-      File rootDir) {
+  public static StorageConfiguration getConfiguration(
+      TemporaryFileProvider fileProvider, File rootDir) {
     return StorageConfiguration.builder()
         .setRootDir(rootDir)
         .setMaxFileAgeForWriteMillis(MAX_FILE_AGE_FOR_WRITE_MILLIS)

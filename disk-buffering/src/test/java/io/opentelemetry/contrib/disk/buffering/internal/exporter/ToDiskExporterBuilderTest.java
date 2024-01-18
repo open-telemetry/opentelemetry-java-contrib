@@ -9,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import org.junit.jupiter.api.Test;
 import java.io.File;
+import org.junit.jupiter.api.Test;
 
 class ToDiskExporterBuilderTest {
 

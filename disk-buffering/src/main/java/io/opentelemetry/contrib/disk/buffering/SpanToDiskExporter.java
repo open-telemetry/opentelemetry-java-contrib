@@ -23,20 +23,22 @@ public class SpanToDiskExporter implements SpanExporter {
   private final ToDiskExporter<SpanData> delegate;
 
   /**
-   * Creates a new SpanToDiskExporter that will buffer Span telemetry on
-   * disk storage.
+   * Creates a new SpanToDiskExporter that will buffer Span telemetry on disk storage.
+   *
    * @param delegate - The SpanExporter to delegate to if disk writing fails.
    * @param config - The StorageConfiguration that specifies how storage is managed.
    * @return A new SpanToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
-  public static SpanToDiskExporter create(SpanExporter delegate, StorageConfiguration config) throws IOException {
-    ToDiskExporter<SpanData> toDisk = ToDiskExporter.<SpanData>builder()
-        .setFolderName("spans")
-        .setStorageConfiguration(config)
-        .setSerializer(SignalSerializer.ofSpans())
-        .setExportFunction(delegate::export)
-        .build();
+  public static SpanToDiskExporter create(SpanExporter delegate, StorageConfiguration config)
+      throws IOException {
+    ToDiskExporter<SpanData> toDisk =
+        ToDiskExporter.<SpanData>builder()
+            .setFolderName("spans")
+            .setStorageConfiguration(config)
+            .setSerializer(SignalSerializer.ofSpans())
+            .setExportFunction(delegate::export)
+            .build();
     return new SpanToDiskExporter(toDisk);
   }
 
