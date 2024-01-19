@@ -22,7 +22,6 @@ The following OpenTelemetry semantic conventions will be detected:
 | faas.version | | | auto | auto | auto |
 | faas.instance | | | auto | auto | auto |
 
-
 ## Downward API
 
 For GKE applications, some values most be passed via the environment variable using k8s
