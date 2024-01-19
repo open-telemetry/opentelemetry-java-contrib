@@ -18,9 +18,9 @@ The following OpenTelemetry semantic conventions will be detected:
 | k8s.namespace.name | | downward API | | | |
 | k8s.container.name | | hardcoded | | | |
 | k8s.cluster.name | | auto | | | |
-| faas.name | | | auto | auto | auto |
-| faas.version | | | auto | auto | auto |
-| faas.instance | | | auto | auto | auto |
+| faas.name | | | environment var | environment var | environment var |
+| faas.version | | | environment var | environment var | environment var |
+| faas.instance | | | auto | auto | environment var |
 
 ## Downward API
 
