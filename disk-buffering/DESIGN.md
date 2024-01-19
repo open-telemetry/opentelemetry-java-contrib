@@ -14,7 +14,7 @@ For later reading, there is:
 * [FromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/FromDiskExporter.java)
 which can be created with `FromDiskExporter.builder()....build()`.
 As explained in the [README](README.md), this has to be triggered manually by the consumer of
-* this library and does not happen automaticall
+* this library and does not happen automatically.
 
 ## Writing overview
 
