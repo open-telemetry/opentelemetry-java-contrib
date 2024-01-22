@@ -27,4 +27,5 @@ dependencies {
   testImplementation("com.google.guava:guava")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
