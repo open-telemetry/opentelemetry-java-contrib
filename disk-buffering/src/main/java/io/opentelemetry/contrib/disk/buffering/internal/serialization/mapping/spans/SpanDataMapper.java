@@ -55,6 +55,7 @@ public final class SpanDataMapper {
     }
     span.trace_id(byteStringMapper.stringToProto(source.getTraceId()));
     span.span_id(byteStringMapper.stringToProto(source.getSpanId()));
+    span.flags(source.getSpanContext().getTraceFlags().asByte());
     span.parent_span_id(byteStringMapper.stringToProto(source.getParentSpanId()));
     span.name(source.getName());
     span.kind(mapSpanKindToProto(source.getKind()));
@@ -107,7 +108,7 @@ public final class SpanDataMapper {
         SpanContext.create(
             traceId,
             ByteStringMapper.getInstance().protoToString(source.span_id),
-            TraceFlags.getSampled(),
+            flagsFromInt(source.flags),
             decodeTraceState(source.trace_state)));
     target.setParentSpanContext(
         SpanContext.create(
@@ -257,7 +258,7 @@ public final class SpanDataMapper {
         SpanContext.create(
             ByteStringMapper.getInstance().protoToString(source.trace_id),
             ByteStringMapper.getInstance().protoToString(source.span_id),
-            TraceFlags.getSampled(),
+            flagsFromInt(source.flags),
             decodeTraceState(source.trace_state));
     return LinkData.create(spanContext, attributes, totalAttrCount);
   }
@@ -308,11 +309,16 @@ public final class SpanDataMapper {
     SpanContext spanContext = source.getSpanContext();
     builder.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
     builder.span_id(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
+    builder.flags = spanContext.getTraceFlags().asByte();
     builder.attributes.addAll(attributesToProto(source.getAttributes()));
     builder.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
     builder.trace_state(encodeTraceState(spanContext.getTraceState()));
 
     return builder.build();
+  }
+
+  public static TraceFlags flagsFromInt(int b) {
+    return TraceFlags.fromByte((byte) (b & 0x000000FF));
   }
 }

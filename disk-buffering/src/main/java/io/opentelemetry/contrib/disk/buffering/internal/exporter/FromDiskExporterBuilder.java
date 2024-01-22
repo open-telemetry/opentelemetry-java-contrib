@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
@@ -74,8 +74,8 @@ public class FromDiskExporterBuilder<T> {
     return this;
   }
 
-  public FromDiskExporter<T> build() throws IOException {
+  public FromDiskExporterImpl<T> build() throws IOException {
     Storage storage = storageBuilder.build();
-    return new FromDiskExporter<>(serializer, exportFunction, storage);
+    return new FromDiskExporterImpl<>(serializer, exportFunction, storage);
   }
 }

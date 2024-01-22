@@ -17,6 +17,8 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterBuilder;
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.Clock;
@@ -109,7 +111,7 @@ public class IntegrationTest {
   }
 
   @NotNull
-  private <T> FromDiskExporter<T> buildFromDiskExporter(
+  private <T> FromDiskExporterImpl<T> buildFromDiskExporter(
       FromDiskExporterBuilder<T> builder,
       Function<Collection<T>, CompletableResultCode> exportFunction,
       SignalSerializer<T> serializer)
@@ -127,9 +129,9 @@ public class IntegrationTest {
   void verifySpansIntegration() throws IOException {
     Span span = tracer.spanBuilder("Span name").startSpan();
     span.end();
-    FromDiskExporter<SpanData> fromDiskExporter =
+    FromDiskExporterImpl<SpanData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporter.builder(), memorySpanExporter::export, SignalSerializer.ofSpans());
+            FromDiskExporterImpl.builder(), memorySpanExporter::export, SignalSerializer.ofSpans());
     assertExporter(fromDiskExporter, () -> memorySpanExporter.getFinishedSpanItems().size());
   }
 
@@ -138,9 +140,11 @@ public class IntegrationTest {
     meter.counterBuilder("Counter").build().add(2);
     meterProvider.forceFlush();
 
-    FromDiskExporter<MetricData> fromDiskExporter =
+    FromDiskExporterImpl<MetricData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporter.builder(), memoryMetricExporter::export, SignalSerializer.ofMetrics());
+            FromDiskExporterImpl.builder(),
+            memoryMetricExporter::export,
+            SignalSerializer.ofMetrics());
     assertExporter(fromDiskExporter, () -> memoryMetricExporter.getFinishedMetricItems().size());
   }
 
@@ -148,14 +152,16 @@ public class IntegrationTest {
   void verifyLogRecordsIntegration() throws IOException {
     logger.logRecordBuilder().setBody("I'm a log!").emit();
 
-    FromDiskExporter<LogRecordData> fromDiskExporter =
+    FromDiskExporterImpl<LogRecordData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporter.builder(), memoryLogRecordExporter::export, SignalSerializer.ofLogs());
+            FromDiskExporterImpl.builder(),
+            memoryLogRecordExporter::export,
+            SignalSerializer.ofLogs());
     assertExporter(
         fromDiskExporter, () -> memoryLogRecordExporter.getFinishedLogRecordItems().size());
   }
 
-  private <T> void assertExporter(FromDiskExporter<T> exporter, Supplier<Integer> finishedItems)
+  private <T> void assertExporter(FromDiskExporterImpl<T> exporter, Supplier<Integer> finishedItems)
       throws IOException {
     // Verify no data has been received in the original exporter until this point.
     assertEquals(0, finishedItems.get());

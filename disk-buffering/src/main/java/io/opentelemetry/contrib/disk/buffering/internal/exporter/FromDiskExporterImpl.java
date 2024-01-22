@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
@@ -20,13 +20,13 @@ import java.util.logging.Logger;
  * Signal-type generic class that can read telemetry previously buffered on disk and send it to
  * another delegated exporter.
  */
-public final class FromDiskExporter<EXPORT_DATA> {
+public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter {
   private final Storage storage;
   private final SignalSerializer<EXPORT_DATA> deserializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
-  private static final Logger logger = Logger.getLogger(FromDiskExporter.class.getName());
+  private static final Logger logger = Logger.getLogger(FromDiskExporterImpl.class.getName());
 
-  FromDiskExporter(
+  FromDiskExporterImpl(
       SignalSerializer<EXPORT_DATA> deserializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
       Storage storage) {
@@ -48,6 +48,7 @@ public final class FromDiskExporter<EXPORT_DATA> {
    *     provided. false otherwise.
    * @throws IOException If an unexpected error happens.
    */
+  @Override
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
     ReadableResult result =
@@ -61,7 +62,8 @@ public final class FromDiskExporter<EXPORT_DATA> {
     return result == ReadableResult.SUCCEEDED;
   }
 
-  public void onShutDown() throws IOException {
+  @Override
+  public void shutdown() throws IOException {
     storage.close();
   }
 }

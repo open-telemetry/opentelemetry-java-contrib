@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -30,11 +31,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @SuppressWarnings("unchecked")
-class FromDiskExporterTest {
+class FromDiskExporterImplTest {
   private SpanExporter wrapped;
   private SignalSerializer<SpanData> serializer;
   private Clock clock;
-  private FromDiskExporter<SpanData> exporter;
+  private FromDiskExporterImpl<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
   private static final String STORAGE_FOLDER_NAME = "testName";
@@ -46,7 +47,7 @@ class FromDiskExporterTest {
     setUpSerializer();
     wrapped = mock();
     exporter =
-        FromDiskExporter.<SpanData>builder()
+        FromDiskExporterImpl.<SpanData>builder()
             .setFolderName(STORAGE_FOLDER_NAME)
             .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
             .setDeserializer(serializer)

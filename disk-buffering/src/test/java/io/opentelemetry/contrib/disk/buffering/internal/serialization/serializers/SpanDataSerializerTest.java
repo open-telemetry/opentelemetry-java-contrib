@@ -28,47 +28,50 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
   private static final LinkData LINK_DATA_WITH_TRACE_STATE =
       LinkData.create(TestData.SPAN_CONTEXT_WITH_TRACE_STATE, TestData.ATTRIBUTES, 20);
 
-  private static final SpanData SPAN_DATA =
-      SpanDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Span name")
-          .setSpanContext(TestData.SPAN_CONTEXT)
-          .setParentSpanContext(TestData.PARENT_SPAN_CONTEXT)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setStartEpochNanos(1L)
-          .setEndEpochNanos(2L)
-          .setKind(SpanKind.CLIENT)
-          .setStatus(StatusData.error())
-          .setEvents(Collections.singletonList(EVENT_DATA))
-          .setLinks(Arrays.asList(LINK_DATA, LINK_DATA_WITH_TRACE_STATE))
-          .setTotalAttributeCount(10)
-          .setTotalRecordedEvents(2)
-          .setTotalRecordedLinks(2)
-          .build();
-
-  private static final SpanData SPAN_DATA_WITH_TRACE_STATE =
-      SpanDataImpl.builder()
-          .setResource(TestData.RESOURCE_FULL)
-          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
-          .setName("Span name2")
-          .setSpanContext(TestData.SPAN_CONTEXT_WITH_TRACE_STATE)
-          .setParentSpanContext(TestData.PARENT_SPAN_CONTEXT)
-          .setAttributes(TestData.ATTRIBUTES)
-          .setStartEpochNanos(1L)
-          .setEndEpochNanos(2L)
-          .setKind(SpanKind.CLIENT)
-          .setStatus(StatusData.error())
-          .setEvents(Collections.singletonList(EVENT_DATA))
-          .setLinks(Collections.singletonList(LINK_DATA))
-          .setTotalAttributeCount(10)
-          .setTotalRecordedEvents(2)
-          .setTotalRecordedLinks(2)
-          .build();
+  @Test
+  void verifySerialization_noFlagsNoState() {
+    SpanData span =
+        SpanDataImpl.builder()
+            .setResource(TestData.RESOURCE_FULL)
+            .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+            .setName("Span name")
+            .setSpanContext(TestData.SPAN_CONTEXT)
+            .setParentSpanContext(TestData.PARENT_SPAN_CONTEXT)
+            .setAttributes(TestData.ATTRIBUTES)
+            .setStartEpochNanos(1L)
+            .setEndEpochNanos(2L)
+            .setKind(SpanKind.CLIENT)
+            .setStatus(StatusData.error())
+            .setEvents(Collections.singletonList(EVENT_DATA))
+            .setLinks(Arrays.asList(LINK_DATA, LINK_DATA_WITH_TRACE_STATE))
+            .setTotalAttributeCount(10)
+            .setTotalRecordedEvents(2)
+            .setTotalRecordedLinks(2)
+            .build();
+    assertSerialization(span);
+  }
 
   @Test
-  void verifySerialization() {
-    assertSerialization(SPAN_DATA, SPAN_DATA_WITH_TRACE_STATE);
+  void verifySerialization_withTraceState() {
+    SpanData span =
+        SpanDataImpl.builder()
+            .setResource(TestData.RESOURCE_FULL)
+            .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+            .setName("Span name2")
+            .setSpanContext(TestData.SPAN_CONTEXT_WITH_TRACE_STATE)
+            .setParentSpanContext(TestData.PARENT_SPAN_CONTEXT)
+            .setAttributes(TestData.ATTRIBUTES)
+            .setStartEpochNanos(1L)
+            .setEndEpochNanos(2L)
+            .setKind(SpanKind.CLIENT)
+            .setStatus(StatusData.error())
+            .setEvents(Collections.singletonList(EVENT_DATA))
+            .setLinks(Collections.singletonList(LINK_DATA))
+            .setTotalAttributeCount(10)
+            .setTotalRecordedEvents(2)
+            .setTotalRecordedLinks(2)
+            .build();
+    assertSerialization(span);
   }
 
   @Override

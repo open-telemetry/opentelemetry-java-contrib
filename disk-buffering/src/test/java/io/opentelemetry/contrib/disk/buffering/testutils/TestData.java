@@ -38,7 +38,7 @@ public final class TestData {
       Resource.create(Attributes.builder().put("resourceAttr", "resourceAttrValue").build());
 
   public static final SpanContext SPAN_CONTEXT =
-      SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
+      SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault());
   public static final SpanContext SPAN_CONTEXT_WITH_TRACE_STATE =
       SpanContext.create(
           TRACE_ID,
