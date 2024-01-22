@@ -5,8 +5,12 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -44,224 +48,266 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableValueAtQuantile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 class MetricDataMapperTest {
 
-  private static final LongExemplarData LONG_EXEMPLAR_DATA =
-      ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1L);
-
-  private static final DoubleExemplarData DOUBLE_EXEMPLAR_DATA =
-      ImmutableDoubleExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1.0);
-  private static final LongPointData LONG_POINT_DATA =
-      ImmutableLongPointData.create(
-          1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(LONG_EXEMPLAR_DATA));
-
-  private static final DoublePointData DOUBLE_POINT_DATA =
-      ImmutableDoublePointData.create(
-          1L, 2L, TestData.ATTRIBUTES, 1.0, Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
-
-  private static final GaugeData<LongPointData> LONG_GAUGE_DATA =
-      ImmutableGaugeData.create(Collections.singletonList(LONG_POINT_DATA));
-
-  private static final GaugeData<DoublePointData> DOUBLE_GAUGE_DATA =
-      ImmutableGaugeData.create(Collections.singletonList(DOUBLE_POINT_DATA));
-
-  private static final SumData<LongPointData> LONG_SUM_DATA =
-      ImmutableSumData.create(
-          true, AggregationTemporality.DELTA, Collections.singletonList(LONG_POINT_DATA));
-
-  private static final SumData<DoublePointData> DOUBLE_SUM_DATA =
-      ImmutableSumData.create(
-          true, AggregationTemporality.DELTA, Collections.singletonList(DOUBLE_POINT_DATA));
-
-  private static final ValueAtQuantile VALUE_AT_QUANTILE =
-      ImmutableValueAtQuantile.create(2.0, 1.0);
-  private static final SummaryPointData SUMMARY_POINT_DATA =
-      ImmutableSummaryPointData.create(
-          1L, 2L, TestData.ATTRIBUTES, 1L, 2.0, Collections.singletonList(VALUE_AT_QUANTILE));
-
-  private static final SummaryData SUMMARY_DATA =
-      ImmutableSummaryData.create(Collections.singletonList(SUMMARY_POINT_DATA));
-
-  private static final HistogramPointData HISTOGRAM_POINT_DATA =
-      ImmutableHistogramPointData.create(
-          1L,
-          2L,
-          TestData.ATTRIBUTES,
-          15.0,
-          true,
-          4.0,
-          true,
-          7.0,
-          Collections.singletonList(10.0),
-          Arrays.asList(1L, 2L),
-          Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
-  private static final ExponentialHistogramBuckets POSITIVE_BUCKET =
-      ImmutableExponentialHistogramBuckets.create(1, 10, Arrays.asList(1L, 10L));
-
-  private static final ExponentialHistogramBuckets NEGATIVE_BUCKET =
-      ImmutableExponentialHistogramBuckets.create(1, 0, Collections.emptyList());
-
-  private static final ExponentialHistogramPointData EXPONENTIAL_HISTOGRAM_POINT_DATA =
-      ImmutableExponentialHistogramPointData.create(
-          1,
-          10.0,
-          1L,
-          true,
-          2.0,
-          true,
-          4.0,
-          POSITIVE_BUCKET,
-          NEGATIVE_BUCKET,
-          1L,
-          2L,
-          TestData.ATTRIBUTES,
-          Collections.singletonList(DOUBLE_EXEMPLAR_DATA));
-  private static final HistogramData HISTOGRAM_DATA =
-      ImmutableHistogramData.create(
-          AggregationTemporality.CUMULATIVE, Collections.singletonList(HISTOGRAM_POINT_DATA));
-
-  private static final ExponentialHistogramData EXPONENTIAL_HISTOGRAM_DATA =
-      ImmutableExponentialHistogramData.create(
-          AggregationTemporality.CUMULATIVE,
-          Collections.singletonList(EXPONENTIAL_HISTOGRAM_POINT_DATA));
-
-  private static final MetricData LONG_GAUGE_METRIC =
-      ImmutableMetricData.createLongGauge(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Long gauge name",
-          "Long gauge description",
-          "ms",
-          LONG_GAUGE_DATA);
-
-  private static final MetricData DOUBLE_GAUGE_METRIC =
-      ImmutableMetricData.createDoubleGauge(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Double gauge name",
-          "Double gauge description",
-          "ms",
-          DOUBLE_GAUGE_DATA);
-  private static final MetricData LONG_SUM_METRIC =
-      ImmutableMetricData.createLongSum(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Long sum name",
-          "Long sum description",
-          "ms",
-          LONG_SUM_DATA);
-  private static final MetricData DOUBLE_SUM_METRIC =
-      ImmutableMetricData.createDoubleSum(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Double sum name",
-          "Double sum description",
-          "ms",
-          DOUBLE_SUM_DATA);
-  private static final MetricData SUMMARY_METRIC =
-      ImmutableMetricData.createDoubleSummary(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Summary name",
-          "Summary description",
-          "ms",
-          SUMMARY_DATA);
-
-  private static final MetricData HISTOGRAM_METRIC =
-      ImmutableMetricData.createDoubleHistogram(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Histogram name",
-          "Histogram description",
-          "ms",
-          HISTOGRAM_DATA);
-  private static final MetricData EXPONENTIAL_HISTOGRAM_METRIC =
-      ImmutableMetricData.createExponentialHistogram(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Exponential histogram name",
-          "Exponential histogram description",
-          "ms",
-          EXPONENTIAL_HISTOGRAM_DATA);
-
   @Test
   void verifyLongGaugeMapping() {
-    Metric proto = mapToProto(LONG_GAUGE_METRIC);
+    MetricData longGauge = makeLongGauge(TraceFlags.getDefault());
+    MetricData expected = makeLongGauge(TraceFlags.getSampled());
 
-    assertEquals(
-        LONG_GAUGE_METRIC,
-        mapToSdk(
-            proto,
-            LONG_GAUGE_METRIC.getResource(),
-            LONG_GAUGE_METRIC.getInstrumentationScopeInfo()));
+    Metric proto = mapToProto(longGauge);
+
+    MetricData result =
+        mapToSdk(proto, longGauge.getResource(), longGauge.getInstrumentationScopeInfo());
+
+    assertThat(result).isEqualTo(expected);
   }
 
   @Test
   void verifyDoubleGaugeMapping() {
-    Metric proto = mapToProto(DOUBLE_GAUGE_METRIC);
+    MetricData doubleGauge = makeDoubleGauge(TraceFlags.getDefault());
+    MetricData expected = makeDoubleGauge(TraceFlags.getSampled());
 
-    assertEquals(
-        DOUBLE_GAUGE_METRIC,
-        mapToSdk(
-            proto,
-            DOUBLE_GAUGE_METRIC.getResource(),
-            DOUBLE_GAUGE_METRIC.getInstrumentationScopeInfo()));
+    Metric proto = mapToProto(doubleGauge);
+    MetricData result =
+        mapToSdk(proto, doubleGauge.getResource(), doubleGauge.getInstrumentationScopeInfo());
+
+    assertThat(result).isEqualTo(expected);
   }
 
   @Test
   void verifyLongSumMapping() {
-    Metric proto = mapToProto(LONG_SUM_METRIC);
+    MetricData longSum = makeLongSum(TraceFlags.getDefault());
+    MetricData expected = makeLongSum(TraceFlags.getSampled());
 
-    assertEquals(
-        LONG_SUM_METRIC,
-        mapToSdk(
-            proto, LONG_SUM_METRIC.getResource(), LONG_SUM_METRIC.getInstrumentationScopeInfo()));
+    Metric proto = mapToProto(longSum);
+    MetricData result =
+        mapToSdk(proto, TestData.RESOURCE_FULL, longSum.getInstrumentationScopeInfo());
+    assertThat(expected).isEqualTo(result);
   }
 
   @Test
   void verifyDoubleSumMapping() {
-    Metric proto = mapToProto(DOUBLE_SUM_METRIC);
+    MetricData doubleSum = makeDoubleSum(TraceFlags.getDefault());
+    MetricData expected = makeDoubleSum(TraceFlags.getSampled());
 
-    assertEquals(
-        DOUBLE_SUM_METRIC,
-        mapToSdk(
-            proto,
-            DOUBLE_SUM_METRIC.getResource(),
-            DOUBLE_SUM_METRIC.getInstrumentationScopeInfo()));
+    Metric proto = mapToProto(doubleSum);
+
+    MetricData result =
+        mapToSdk(proto, doubleSum.getResource(), doubleSum.getInstrumentationScopeInfo());
+
+    assertThat(result).isEqualTo(expected);
   }
 
   @Test
   void verifySummaryMapping() {
-    Metric proto = mapToProto(SUMMARY_METRIC);
+    ValueAtQuantile value = ImmutableValueAtQuantile.create(2.0, 1.0);
+    SummaryPointData pointData =
+        ImmutableSummaryPointData.create(
+            1L, 2L, TestData.ATTRIBUTES, 1L, 2.0, Collections.singletonList(value));
+
+    SummaryData data = ImmutableSummaryData.create(Collections.singletonList(pointData));
+
+    MetricData summaryMetric =
+        ImmutableMetricData.createDoubleSummary(
+            TestData.RESOURCE_FULL,
+            TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+            "Summary name",
+            "Summary description",
+            "ms",
+            data);
+
+    Metric proto = mapToProto(summaryMetric);
 
     assertEquals(
-        SUMMARY_METRIC,
-        mapToSdk(
-            proto, SUMMARY_METRIC.getResource(), SUMMARY_METRIC.getInstrumentationScopeInfo()));
+        summaryMetric,
+        mapToSdk(proto, summaryMetric.getResource(), summaryMetric.getInstrumentationScopeInfo()));
   }
 
   @Test
   void verifyHistogramMapping() {
-    Metric proto = mapToProto(HISTOGRAM_METRIC);
 
-    assertEquals(
-        HISTOGRAM_METRIC,
+    MetricData histogramMetric = makeHistogram(TraceFlags.getDefault());
+    MetricData expected = makeHistogram(TraceFlags.getSampled());
+
+    Metric proto = mapToProto(histogramMetric);
+
+    MetricData result =
         mapToSdk(
-            proto, HISTOGRAM_METRIC.getResource(), HISTOGRAM_METRIC.getInstrumentationScopeInfo()));
+            proto, histogramMetric.getResource(), histogramMetric.getInstrumentationScopeInfo());
+
+    assertThat(result).isEqualTo(expected);
   }
 
   @Test
   void verifyExponentialHistogramMapping() {
-    Metric proto = mapToProto(EXPONENTIAL_HISTOGRAM_METRIC);
+    MetricData histogram = makeExponentialHistogram(TraceFlags.getDefault());
+    MetricData expected = makeExponentialHistogram(TraceFlags.getSampled());
 
-    assertEquals(
-        EXPONENTIAL_HISTOGRAM_METRIC,
-        mapToSdk(
-            proto,
-            EXPONENTIAL_HISTOGRAM_METRIC.getResource(),
-            EXPONENTIAL_HISTOGRAM_METRIC.getInstrumentationScopeInfo()));
+    Metric proto = mapToProto(histogram);
+
+    MetricData result =
+        mapToSdk(proto, histogram.getResource(), histogram.getInstrumentationScopeInfo());
+
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @NotNull
+  private static MetricData makeDoubleGauge(TraceFlags flags) {
+    DoublePointData point = makeDoublePointData(flags);
+    return ImmutableMetricData.createDoubleGauge(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Double gauge name",
+        "Double gauge description",
+        "ms",
+        ImmutableGaugeData.create(Collections.singletonList(point)));
+  }
+
+  @NotNull
+  private static List<DoubleExemplarData> makeDoubleExemplars(TraceFlags flags) {
+    SpanContext context = makeContext(flags);
+    DoubleExemplarData doubleExemplarData =
+        ImmutableDoubleExemplarData.create(TestData.ATTRIBUTES, 100L, context, 1.0);
+    return Collections.singletonList(doubleExemplarData);
+  }
+
+  @NotNull
+  private static MetricData makeLongGauge(TraceFlags flags) {
+    LongPointData point = makeLongPointData(flags);
+    GaugeData<LongPointData> gaugeData =
+        ImmutableGaugeData.create(Collections.singletonList(point));
+    return ImmutableMetricData.createLongGauge(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Long gauge name",
+        "Long gauge description",
+        "ms",
+        gaugeData);
+  }
+
+  @NotNull
+  private static LongExemplarData makeLongExemplarData(TraceFlags flags) {
+    SpanContext context = makeContext(flags);
+    return ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, context, 1L);
+  }
+
+  @NotNull
+  private static MetricData makeLongSum(TraceFlags flags) {
+    LongPointData pointData = makeLongPointData(flags);
+    SumData<LongPointData> sumData =
+        ImmutableSumData.create(
+            true, AggregationTemporality.DELTA, Collections.singletonList(pointData));
+    return ImmutableMetricData.createLongSum(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Long sum name",
+        "Long sum description",
+        "ms",
+        sumData);
+  }
+
+  @NotNull
+  private static MetricData makeDoubleSum(TraceFlags flags) {
+    DoublePointData doublePointData = makeDoublePointData(flags);
+    SumData<DoublePointData> sumData =
+        ImmutableSumData.create(
+            true, AggregationTemporality.DELTA, Collections.singletonList(doublePointData));
+
+    return ImmutableMetricData.createDoubleSum(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Double sum name",
+        "Double sum description",
+        "ms",
+        sumData);
+  }
+
+  @NotNull
+  private static DoublePointData makeDoublePointData(TraceFlags flags) {
+    return ImmutableDoublePointData.create(
+        1L, 2L, TestData.ATTRIBUTES, 1.0, makeDoubleExemplars(flags));
+  }
+
+  @NotNull
+  private static MetricData makeExponentialHistogram(TraceFlags flags) {
+    ExponentialHistogramBuckets positiveBucket =
+        ImmutableExponentialHistogramBuckets.create(1, 10, Arrays.asList(1L, 10L));
+    ExponentialHistogramBuckets negativeBucket =
+        ImmutableExponentialHistogramBuckets.create(1, 0, Collections.emptyList());
+
+    ExponentialHistogramPointData pointData =
+        ImmutableExponentialHistogramPointData.create(
+            1,
+            10.0,
+            1L,
+            true,
+            2.0,
+            true,
+            4.0,
+            positiveBucket,
+            negativeBucket,
+            1L,
+            2L,
+            TestData.ATTRIBUTES,
+            makeDoubleExemplars(flags));
+
+    ExponentialHistogramData histogramData =
+        ImmutableExponentialHistogramData.create(
+            AggregationTemporality.CUMULATIVE, Collections.singletonList(pointData));
+
+    return ImmutableMetricData.createExponentialHistogram(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Exponential histogram name",
+        "Exponential histogram description",
+        "ms",
+        histogramData);
+  }
+
+  @NotNull
+  private static MetricData makeHistogram(TraceFlags flags) {
+    HistogramPointData dataPoint =
+        ImmutableHistogramPointData.create(
+            1L,
+            2L,
+            TestData.ATTRIBUTES,
+            15.0,
+            true,
+            4.0,
+            true,
+            7.0,
+            Collections.singletonList(10.0),
+            Arrays.asList(1L, 2L),
+            makeDoubleExemplars(flags));
+
+    HistogramData data =
+        ImmutableHistogramData.create(
+            AggregationTemporality.CUMULATIVE, Collections.singletonList(dataPoint));
+
+    return ImmutableMetricData.createDoubleHistogram(
+        TestData.RESOURCE_FULL,
+        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
+        "Histogram name",
+        "Histogram description",
+        "ms",
+        data);
+  }
+
+  @NotNull
+  private static LongPointData makeLongPointData(TraceFlags flags) {
+    LongExemplarData longExemplarData = makeLongExemplarData(flags);
+    return ImmutableLongPointData.create(
+        1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(longExemplarData));
+  }
+
+  @NotNull
+  private static SpanContext makeContext(TraceFlags flags) {
+    return SpanContext.create(TestData.TRACE_ID, TestData.SPAN_ID, flags, TraceState.getDefault());
   }
 
   private static Metric mapToProto(MetricData source) {
