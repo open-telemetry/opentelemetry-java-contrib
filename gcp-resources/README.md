@@ -16,15 +16,15 @@ The following OpenTelemetry semantic conventions will be detected:
 | host.type | auto | auto | | | |
 | k8s.pod.name | | downward API or auto | | | |
 | k8s.namespace.name | | downward API | | | |
-| k8s.container.name | | hardcoded | | | |
+| k8s.container.name | | hardcoded (manual) | | | |
 | k8s.cluster.name | | auto | | | |
-| faas.name | | | environment var | environment var | environment var |
-| faas.version | | | environment var | environment var | environment var |
-| faas.instance | | | auto | auto | environment var |
+| faas.name | | | auto | auto | auto |
+| faas.version | | | auto | auto | auto |
+| faas.instance | | | auto | auto | auto |
 
 ## Downward API
 
-For GKE applications, some values most be passed via the environment variable using k8s
+For GKE applications, some values must be passed via the environment variable using k8s
 "downward API".  For example, the following spec will ensure `k8s.namespace.name` and
 `k8s.pod.name` are correctly discovered:
 
