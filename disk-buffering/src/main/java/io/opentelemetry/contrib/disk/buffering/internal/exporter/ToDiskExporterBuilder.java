@@ -41,12 +41,6 @@ public final class ToDiskExporterBuilder<T> {
 
   ToDiskExporterBuilder() {}
 
-  //  @CanIgnoreReturnValue
-  //  public ToDiskExporterBuilder<T> setRootDir(File rootDir) {
-  //    storageBuilder.setRootDir(rootDir);
-  //    return this;
-  //  }
-
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> setFolderName(String folderName) {
     storageBuilder.setFolderName(folderName);
