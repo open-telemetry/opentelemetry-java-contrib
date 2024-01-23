@@ -5,12 +5,14 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics;
 
+import static io.opentelemetry.contrib.disk.buffering.testutils.TestData.makeContext;
+import static io.opentelemetry.contrib.disk.buffering.testutils.TestData.makeLongGauge;
+import static io.opentelemetry.contrib.disk.buffering.testutils.TestData.makeLongPointData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -20,10 +22,8 @@ import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramBuckets;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramData;
 import io.opentelemetry.sdk.metrics.data.ExponentialHistogramPointData;
-import io.opentelemetry.sdk.metrics.data.GaugeData;
 import io.opentelemetry.sdk.metrics.data.HistogramData;
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
-import io.opentelemetry.sdk.metrics.data.LongExemplarData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.SumData;
@@ -38,8 +38,6 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableExponentialHistogramP
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableHistogramPointData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSumData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableSummaryData;
@@ -177,26 +175,6 @@ class MetricDataMapperTest {
   }
 
   @NotNull
-  private static MetricData makeLongGauge(TraceFlags flags) {
-    LongPointData point = makeLongPointData(flags);
-    GaugeData<LongPointData> gaugeData =
-        ImmutableGaugeData.create(Collections.singletonList(point));
-    return ImmutableMetricData.createLongGauge(
-        TestData.RESOURCE_FULL,
-        TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-        "Long gauge name",
-        "Long gauge description",
-        "ms",
-        gaugeData);
-  }
-
-  @NotNull
-  private static LongExemplarData makeLongExemplarData(TraceFlags flags) {
-    SpanContext context = makeContext(flags);
-    return ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, context, 1L);
-  }
-
-  @NotNull
   private static MetricData makeLongSum(TraceFlags flags) {
     LongPointData pointData = makeLongPointData(flags);
     SumData<LongPointData> sumData =
@@ -296,18 +274,6 @@ class MetricDataMapperTest {
         "Histogram description",
         "ms",
         data);
-  }
-
-  @NotNull
-  private static LongPointData makeLongPointData(TraceFlags flags) {
-    LongExemplarData longExemplarData = makeLongExemplarData(flags);
-    return ImmutableLongPointData.create(
-        1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(longExemplarData));
-  }
-
-  @NotNull
-  private static SpanContext makeContext(TraceFlags flags) {
-    return SpanContext.create(TestData.TRACE_ID, TestData.SPAN_ID, flags, TraceState.getDefault());
   }
 
   private static Metric mapToProto(MetricData source) {
