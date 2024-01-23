@@ -19,8 +19,8 @@ import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.resources.Resource;
-import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unchecked")
 public final class TestData {
@@ -83,7 +83,8 @@ public final class TestData {
   }
 
   @NotNull
-  public static MetricData makeLongGauge(TraceFlags flags, InstrumentationScopeInfo instrumentationScopeInfo) {
+  public static MetricData makeLongGauge(
+      TraceFlags flags, InstrumentationScopeInfo instrumentationScopeInfo) {
     return makeLongGauge(flags, RESOURCE_FULL, instrumentationScopeInfo);
   }
 
@@ -93,7 +94,8 @@ public final class TestData {
   }
 
   @NotNull
-  public static MetricData makeLongGauge(TraceFlags flags, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
+  public static MetricData makeLongGauge(
+      TraceFlags flags, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
     LongPointData point = makeLongPointData(flags);
     GaugeData<LongPointData> gaugeData =
         ImmutableGaugeData.create(Collections.singletonList(point));
@@ -106,8 +108,8 @@ public final class TestData {
         gaugeData);
   }
 
-    @NotNull
-  public  static LongPointData makeLongPointData(TraceFlags flags) {
+  @NotNull
+  public static LongPointData makeLongPointData(TraceFlags flags) {
     LongExemplarData longExemplarData = makeLongExemplarData(flags);
     return ImmutableLongPointData.create(
         1L, 2L, ATTRIBUTES, 1L, Collections.singletonList(longExemplarData));
@@ -115,7 +117,12 @@ public final class TestData {
 
   @NotNull
   public static SpanContext makeContext(TraceFlags flags) {
-    return SpanContext.create(TRACE_ID, SPAN_ID, flags, TraceState.getDefault());
+    return makeContext(flags, SPAN_ID);
+  }
+
+  @NotNull
+  public static SpanContext makeContext(TraceFlags flags, String spanId) {
+    return SpanContext.create(TRACE_ID, spanId, flags, TraceState.getDefault());
   }
 
   @NotNull
@@ -125,5 +132,4 @@ public final class TestData {
   }
 
   private TestData() {}
-
 }

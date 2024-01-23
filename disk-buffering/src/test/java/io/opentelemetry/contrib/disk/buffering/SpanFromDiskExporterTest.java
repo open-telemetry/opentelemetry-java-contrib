@@ -21,16 +21,19 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.testing.trace.TestSpanData;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -63,39 +66,22 @@ class SpanFromDiskExporterTest {
     boolean result = testClass.exportStoredBatch(30, TimeUnit.SECONDS);
     assertThat(result).isTrue();
     List<SpanData> exportedSpans = (List<SpanData>) capture.getValue();
-    assertThat(exportedSpans.get(1)).isEqualTo(spans.get(1));
-    assertThat(exportedSpans.get(0)).isEqualTo(spans.get(0));
-    verify(exporter).export(eq(spans));
+
+    long now = spans.get(0).getStartEpochNanos();
+    SpanData expected1 = makeSpan1(TraceFlags.getSampled(), now);
+    SpanData expected2 = makeSpan2(TraceFlags.getSampled(), now);
+
+    assertThat(exportedSpans.get(0)).isEqualTo(expected1);
+    assertThat(exportedSpans.get(1)).isEqualTo(expected2);
+    assertThat(exportedSpans).containsExactly(expected1, expected2);
+
+    verify(exporter).export(eq(Arrays.asList(expected1, expected2)));
   }
 
   private static List<SpanData> writeSomeSpans(StorageConfiguration config) throws Exception {
     long now = System.currentTimeMillis() * 1_000_000;
-    TestSpanData span1 =
-        TestSpanData.builder()
-            .setName("span1")
-            .setSpanContext(
-                SpanContext.create(
-                    "abc123", "fff1", TraceFlags.getDefault(), TraceState.getDefault()))
-            .setStatus(StatusData.create(StatusCode.OK, "whatever"))
-            .setHasEnded(true)
-            .setAttributes(Attributes.of(AttributeKey.stringKey("foo"), "bar"))
-            .setKind(SpanKind.SERVER)
-            .setStartEpochNanos(now)
-            .setEndEpochNanos(now + 50_000_000)
-            .build();
-    TestSpanData span2 =
-        TestSpanData.builder()
-            .setName("span2")
-            .setSpanContext(
-                SpanContext.create(
-                    "abc123", "fff2", TraceFlags.getSampled(), TraceState.getDefault()))
-            .setStatus(StatusData.create(StatusCode.OK, "excellent"))
-            .setHasEnded(true)
-            .setAttributes(Attributes.of(AttributeKey.stringKey("bar"), "baz"))
-            .setKind(SpanKind.CLIENT)
-            .setStartEpochNanos(now + 12)
-            .setEndEpochNanos(now + 12 + 40_000_000)
-            .build();
+    SpanData span1 = makeSpan1(TraceFlags.getDefault(), now);
+    SpanData span2 = makeSpan2(TraceFlags.getSampled(), now);
     List<SpanData> spans = Arrays.asList(span1, span2);
 
     SignalSerializer<SpanData> serializer = SignalSerializer.ofSpans();
@@ -107,5 +93,57 @@ class SpanFromDiskExporterTest {
     storage.write(serializer.serialize(spans));
     storage.close();
     return spans;
+  }
+
+  private static SpanData makeSpan1(TraceFlags parentSpanContextFlags, long now) {
+    Attributes attributes = Attributes.of(AttributeKey.stringKey("foo"), "bar");
+    SpanContext parentContext = TestData.makeContext(parentSpanContextFlags, TestData.SPAN_ID);
+    return SpanDataImpl.builder()
+        .setName("span1")
+        .setSpanContext(
+            SpanContext.create(
+                TestData.TRACE_ID,
+                TestData.SPAN_ID,
+                TraceFlags.getDefault(),
+                TraceState.getDefault()))
+        .setParentSpanContext(parentContext)
+        .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+        .setStatus(StatusData.create(StatusCode.OK, "whatever"))
+        .setAttributes(attributes)
+        .setKind(SpanKind.SERVER)
+        .setStartEpochNanos(now)
+        .setEndEpochNanos(now + 50_000_000)
+        .setTotalRecordedEvents(0)
+        .setTotalRecordedLinks(0)
+        .setTotalAttributeCount(attributes.size())
+        .setLinks(Collections.emptyList())
+        .setEvents(Collections.emptyList())
+        .setResource(Resource.getDefault())
+        .build();
+  }
+
+  private static SpanData makeSpan2(TraceFlags parentSpanContextFlags, long now) {
+    Attributes attributes = Attributes.of(AttributeKey.stringKey("bar"), "baz");
+    String spanId = "aaaaaaaaa12312312";
+    SpanContext parentContext = TestData.makeContext(parentSpanContextFlags, spanId);
+    return SpanDataImpl.builder()
+        .setName("span2")
+        .setSpanContext(
+            SpanContext.create(
+                TestData.TRACE_ID, spanId, TraceFlags.getSampled(), TraceState.getDefault()))
+        .setParentSpanContext(parentContext)
+        .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+        .setStatus(StatusData.create(StatusCode.OK, "excellent"))
+        .setAttributes(attributes)
+        .setKind(SpanKind.CLIENT)
+        .setStartEpochNanos(now + 12)
+        .setEndEpochNanos(now + 12 + 40_000_000)
+        .setTotalRecordedEvents(0)
+        .setTotalRecordedLinks(0)
+        .setTotalAttributeCount(attributes.size())
+        .setLinks(Collections.emptyList())
+        .setEvents(Collections.emptyList())
+        .setResource(Resource.getDefault())
+        .build();
   }
 }

@@ -66,12 +66,14 @@ class ProtoMetricsDataMapperTest {
   @Test
   void verifyMultipleMetricsWithSameResourceDifferentScope() {
     MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
-    MetricData gauge2 = TestData.makeLongGauge(TraceFlags.getDefault(),
-        TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    MetricData gauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getDefault(), TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
 
     MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
-    MetricData expectedGauge2 = TestData.makeLongGauge(TraceFlags.getSampled(),
-        TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    MetricData expectedGauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getSampled(), TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
 
     List<MetricData> signals = Arrays.asList(gauge1, gauge2);
     List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
@@ -95,15 +97,21 @@ class ProtoMetricsDataMapperTest {
   @Test
   void verifyMultipleMetricsWithDifferentResource() {
     MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
-    MetricData gauge2 = TestData.makeLongGauge(TraceFlags.getDefault(),
-        TestData.RESOURCE_WITHOUT_SCHEMA_URL, TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    MetricData gauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getDefault(),
+            TestData.RESOURCE_WITHOUT_SCHEMA_URL,
+            TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
     List<MetricData> signals = Arrays.asList(gauge1, gauge2);
     MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
-    MetricData expectedGauge2 = TestData.makeLongGauge(TraceFlags.getSampled(),
-        TestData.RESOURCE_WITHOUT_SCHEMA_URL, TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    MetricData expectedGauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getSampled(),
+            TestData.RESOURCE_WITHOUT_SCHEMA_URL,
+            TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
     List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
-//    , LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
-//    List<MetricData> expectedSignals = Arrays.asList(expected);
+    //    , LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
+    //    List<MetricData> expectedSignals = Arrays.asList(expected);
 
     MetricsData proto = mapToProto(signals);
 
