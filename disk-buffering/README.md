@@ -43,11 +43,11 @@ In order to use it, you need to wrap your own exporter with a new instance of
 the ones provided in here:
 
 * For a LogRecordExporter, it must be wrapped within
-  a [LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordDiskExporter.java).
+  a [LogRecordToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordToDiskExporter.java).
 * For a MetricExporter, it must be wrapped within
-  a [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricDiskExporter.java).
+  a [MetricToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricToDiskExporter.java).
 * For a SpanExporter, it must be wrapped within
-  a [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanDiskExporter.java).
+  a [SpanToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanToDiskExporter.java).
 
 Each wrapper will need the following when instantiating them:
 
