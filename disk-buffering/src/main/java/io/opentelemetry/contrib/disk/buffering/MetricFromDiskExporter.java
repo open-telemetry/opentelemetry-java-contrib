@@ -14,11 +14,11 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class MetricsFromDiskExporter implements FromDiskExporter {
+public class MetricFromDiskExporter implements FromDiskExporter {
 
   private final FromDiskExporterImpl<MetricData> delegate;
 
-  public static MetricsFromDiskExporter create(MetricExporter exporter, StorageConfiguration config)
+  public static MetricFromDiskExporter create(MetricExporter exporter, StorageConfiguration config)
       throws IOException {
     FromDiskExporterImpl<MetricData> delegate =
         FromDiskExporterImpl.<MetricData>builder()
@@ -27,10 +27,10 @@ public class MetricsFromDiskExporter implements FromDiskExporter {
             .setDeserializer(SignalSerializer.ofMetrics())
             .setExportFunction(exporter::export)
             .build();
-    return new MetricsFromDiskExporter(delegate);
+    return new MetricFromDiskExporter(delegate);
   }
 
-  private MetricsFromDiskExporter(FromDiskExporterImpl<MetricData> delegate) {
+  private MetricFromDiskExporter(FromDiskExporterImpl<MetricData> delegate) {
     this.delegate = delegate;
   }
 

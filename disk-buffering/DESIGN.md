@@ -9,10 +9,15 @@ There are three main disk-writing exporters provided by this module:
 Each is responsible for writing a specific type of telemetry to disk storage for later
 harvest/ingest.
 
-For later reading, there is:
+For later reading, there are:
 
-* [FromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/FromDiskExporter.java)
-which can be created with `FromDiskExporter.builder()....build()`.
+* [LogRecordFromToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordFromDiskExporter.java)
+* [MetricFromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricFromDiskExporter.java)
+* [SpanFromDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanFromDiskExporter.java))
+
+Each one of those has a `create()` method that takes a delegate exporter (to send data
+to ingest) and the `StorageConfiguration` that tells them where to find buffered data.
+
 As explained in the [README](README.md), this has to be triggered manually by the consumer of
 * this library and does not happen automatically.
 
@@ -23,7 +28,7 @@ As explained in the [README](README.md), this has to be triggered manually by th
 * The writing process happens automatically within its `export(Collection<SignalData> signals)`
   method, which is called by the configured signal processor.
 * When a set of signals is received, these are delegated over to
-  the [DiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/exporters/DiskExporter.java)
+  a type-specific wrapper of [ToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/exporter/ToDiskExporter.java)
   class which then serializes them using an implementation
   of [SignalSerializer](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/serialization/serializers/SignalSerializer.java)
   and then the serialized data is appended into a File using an instance of
