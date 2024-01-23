@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public final class MetricDataSerializer implements SignalSerializer<MetricData> {
+public final class MetricDataSerializer
+    implements SignalSerializer<MetricData>, SignalDeserializer<MetricData> {
   private static final MetricDataSerializer INSTANCE = new MetricDataSerializer();
 
   private MetricDataSerializer() {}

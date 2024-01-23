@@ -14,7 +14,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
 @SuppressWarnings("unchecked")
 class FromDiskExporterImplTest {
   private SpanExporter wrapped;
-  private SignalSerializer<SpanData> serializer;
+  private SignalDeserializer<SpanData> deserializer;
   private Clock clock;
   private FromDiskExporterImpl<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
@@ -50,7 +50,7 @@ class FromDiskExporterImplTest {
         FromDiskExporterImpl.<SpanData>builder()
             .setFolderName(STORAGE_FOLDER_NAME)
             .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
-            .setDeserializer(serializer)
+            .setDeserializer(deserializer)
             .setExportFunction(wrapped::export)
             .setStorageClock(clock)
             .build();
@@ -94,8 +94,8 @@ class FromDiskExporterImplTest {
   }
 
   private void setUpSerializer() {
-    serializer = mock();
-    doReturn(deserializedData).when(serializer).deserialize(any());
+    deserializer = mock();
+    doReturn(deserializedData).when(deserializer).deserialize(any());
   }
 
   private static Clock createClockMock() {

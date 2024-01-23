@@ -5,40 +5,29 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
+import static java.util.Collections.emptyList;
+
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 
 public class FromDiskExporterBuilder<T> {
 
-  private SignalSerializer<T> serializer = noopSerializer();
+  private SignalDeserializer<T> serializer = noopDeserializer();
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
 
   @NotNull
-  private static <T> SignalSerializer<T> noopSerializer() {
-    return new SignalSerializer<T>() {
-
-      @Override
-      public byte[] serialize(Collection<T> ts) {
-        return new byte[0];
-      }
-
-      @Override
-      public List<T> deserialize(byte[] source) {
-        return Collections.emptyList();
-      }
-    };
+  private static <T> SignalDeserializer<T> noopDeserializer() {
+    return x -> emptyList();
   }
 
   private final StorageBuilder storageBuilder = Storage.builder();
@@ -62,7 +51,7 @@ public class FromDiskExporterBuilder<T> {
   }
 
   @CanIgnoreReturnValue
-  public FromDiskExporterBuilder<T> setDeserializer(SignalSerializer<T> serializer) {
+  public FromDiskExporterBuilder<T> setDeserializer(SignalDeserializer<T> serializer) {
     this.serializer = serializer;
     return this;
   }

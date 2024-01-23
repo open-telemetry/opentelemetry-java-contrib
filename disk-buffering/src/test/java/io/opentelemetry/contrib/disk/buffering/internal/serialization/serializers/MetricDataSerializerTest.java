@@ -274,4 +274,9 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
   protected SignalSerializer<MetricData> getSerializer() {
     return SignalSerializer.ofMetrics();
   }
+
+  @Override
+  protected SignalDeserializer<MetricData> getDeserializer() {
+    return SignalDeserializer.ofMetrics();
+  }
 }

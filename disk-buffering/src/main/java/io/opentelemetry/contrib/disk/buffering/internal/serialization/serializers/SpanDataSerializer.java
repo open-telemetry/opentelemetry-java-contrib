@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public final class SpanDataSerializer implements SignalSerializer<SpanData> {
+public final class SpanDataSerializer
+    implements SignalSerializer<SpanData>, SignalDeserializer<SpanData> {
   private static final SpanDataSerializer INSTANCE = new SpanDataSerializer();
 
   private SpanDataSerializer() {}

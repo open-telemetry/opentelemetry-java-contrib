@@ -78,4 +78,9 @@ class SpanDataSerializerTest extends BaseSignalSerializerTest<SpanData> {
   protected SignalSerializer<SpanData> getSerializer() {
     return SignalSerializer.ofSpans();
   }
+
+  @Override
+  protected SignalDeserializer<SpanData> getDeserializer() {
+    return SignalDeserializer.ofSpans();
+  }
 }

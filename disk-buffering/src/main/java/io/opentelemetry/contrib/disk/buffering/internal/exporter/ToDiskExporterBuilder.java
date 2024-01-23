@@ -14,25 +14,11 @@ import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 
 public final class ToDiskExporterBuilder<T> {
 
-  private SignalSerializer<T> serializer =
-      new SignalSerializer<T>() {
-
-        @Override
-        public byte[] serialize(Collection<T> ts) {
-          return new byte[0];
-        }
-
-        @Override
-        public List<T> deserialize(byte[] source) {
-          return Collections.emptyList();
-        }
-      };
+  private SignalSerializer<T> serializer = ts -> new byte[0];
 
   private final StorageBuilder storageBuilder = Storage.builder();
 

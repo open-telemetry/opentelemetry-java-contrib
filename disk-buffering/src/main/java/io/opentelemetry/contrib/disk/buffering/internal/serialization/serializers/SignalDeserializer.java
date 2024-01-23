@@ -8,21 +8,21 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.serialize
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import java.util.Collection;
+import java.util.List;
 
-public interface SignalSerializer<SDK_ITEM> {
+public interface SignalDeserializer<SDK_ITEM> {
 
-  static SignalSerializer<SpanData> ofSpans() {
+  static SignalDeserializer<SpanData> ofSpans() {
     return SpanDataSerializer.getInstance();
   }
 
-  static SignalSerializer<MetricData> ofMetrics() {
+  static SignalDeserializer<MetricData> ofMetrics() {
     return MetricDataSerializer.getInstance();
   }
 
-  static SignalSerializer<LogRecordData> ofLogs() {
+  static SignalDeserializer<LogRecordData> ofLogs() {
     return LogRecordDataSerializer.getInstance();
   }
 
-  byte[] serialize(Collection<SDK_ITEM> items);
+  List<SDK_ITEM> deserialize(byte[] source);
 }

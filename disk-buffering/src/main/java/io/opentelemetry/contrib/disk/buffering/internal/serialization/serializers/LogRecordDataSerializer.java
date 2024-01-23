@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
+public final class LogRecordDataSerializer
+    implements SignalSerializer<LogRecordData>, SignalDeserializer<LogRecordData> {
   private static final LogRecordDataSerializer INSTANCE = new LogRecordDataSerializer();
 
   private LogRecordDataSerializer() {}

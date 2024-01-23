@@ -52,4 +52,9 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
   protected SignalSerializer<LogRecordData> getSerializer() {
     return SignalSerializer.ofLogs();
   }
+
+  @Override
+  protected SignalDeserializer<LogRecordData> getDeserializer() {
+    return SignalDeserializer.ofLogs();
+  }
 }
