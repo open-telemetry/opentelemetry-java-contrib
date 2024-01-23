@@ -8,19 +8,13 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.m
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
-import io.opentelemetry.sdk.metrics.data.GaugeData;
-import io.opentelemetry.sdk.metrics.data.LongExemplarData;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
-import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,54 +23,12 @@ import org.junit.jupiter.api.Test;
 
 class ProtoMetricsDataMapperTest {
 
-  private static final LongExemplarData LONG_EXEMPLAR_DATA =
-      ImmutableLongExemplarData.create(TestData.ATTRIBUTES, 100L, TestData.SPAN_CONTEXT, 1L);
-
-  private static final LongPointData LONG_POINT_DATA =
-      ImmutableLongPointData.create(
-          1L, 2L, TestData.ATTRIBUTES, 1L, Collections.singletonList(LONG_EXEMPLAR_DATA));
-  private static final GaugeData<LongPointData> LONG_GAUGE_DATA =
-      ImmutableGaugeData.create(Collections.singletonList(LONG_POINT_DATA));
-
-  private static final MetricData LONG_GAUGE_METRIC =
-      ImmutableMetricData.createLongGauge(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Long gauge name",
-          "Long gauge description",
-          "ms",
-          LONG_GAUGE_DATA);
-
-  private static final MetricData OTHER_LONG_GAUGE_METRIC =
-      ImmutableMetricData.createLongGauge(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_FULL,
-          "Long gauge name",
-          "Long gauge description",
-          "ms",
-          LONG_GAUGE_DATA);
-
-  private static final MetricData LONG_GAUGE_METRIC_WITH_DIFFERENT_SCOPE_SAME_RESOURCE =
-      ImmutableMetricData.createLongGauge(
-          TestData.RESOURCE_FULL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION,
-          "Long gauge name",
-          "Long gauge description",
-          "ms",
-          LONG_GAUGE_DATA);
-
-  private static final MetricData LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE =
-      ImmutableMetricData.createLongGauge(
-          TestData.RESOURCE_WITHOUT_SCHEMA_URL,
-          TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION,
-          "Long gauge name",
-          "Long gauge description",
-          "ms",
-          LONG_GAUGE_DATA);
-
   @Test
   void verifyConversionDataStructure() {
-    List<MetricData> signals = Collections.singletonList(LONG_GAUGE_METRIC);
+    MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
+    List<MetricData> signals = Collections.singletonList(gauge1);
+    MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
+    List<MetricData> expectedSignals = Collections.singletonList(expectedGauge1);
 
     MetricsData proto = mapToProto(signals);
 
@@ -85,12 +37,17 @@ class ProtoMetricsDataMapperTest {
     assertEquals(1, resourceMetrics.get(0).scope_metrics.size());
     assertEquals(1, resourceMetrics.get(0).scope_metrics.get(0).metrics.size());
 
-    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
+    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
 
   @Test
   void verifyMultipleMetricsWithSameResourceAndScope() {
-    List<MetricData> signals = Arrays.asList(LONG_GAUGE_METRIC, OTHER_LONG_GAUGE_METRIC);
+    MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
+    MetricData gauge2 = TestData.makeLongGauge(TraceFlags.getDefault());
+    List<MetricData> signals = Arrays.asList(gauge1, gauge2);
+    MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
+    MetricData expectedGauge2 = TestData.makeLongGauge(TraceFlags.getSampled());
+    List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
 
     MetricsData proto = mapToProto(signals);
 
@@ -101,13 +58,25 @@ class ProtoMetricsDataMapperTest {
     List<Metric> metrics = scopeMetrics.get(0).metrics;
     assertEquals(2, metrics.size());
 
-    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
+    List<MetricData> result = mapFromProto(proto);
+
+    assertThat(result).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
 
   @Test
   void verifyMultipleMetricsWithSameResourceDifferentScope() {
-    List<MetricData> signals =
-        Arrays.asList(LONG_GAUGE_METRIC, LONG_GAUGE_METRIC_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
+    MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
+    MetricData gauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getDefault(), TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+
+    MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
+    MetricData expectedGauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getSampled(), TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+
+    List<MetricData> signals = Arrays.asList(gauge1, gauge2);
+    List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
 
     MetricsData proto = mapToProto(signals);
 
@@ -122,13 +91,27 @@ class ProtoMetricsDataMapperTest {
     assertEquals(1, firstScopeMetrics.size());
     assertEquals(1, secondScopeMetrics.size());
 
-    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
+    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
 
   @Test
   void verifyMultipleMetricsWithDifferentResource() {
-    List<MetricData> signals =
-        Arrays.asList(LONG_GAUGE_METRIC, LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
+    MetricData gauge1 = TestData.makeLongGauge(TraceFlags.getDefault());
+    MetricData gauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getDefault(),
+            TestData.RESOURCE_WITHOUT_SCHEMA_URL,
+            TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    List<MetricData> signals = Arrays.asList(gauge1, gauge2);
+    MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
+    MetricData expectedGauge2 =
+        TestData.makeLongGauge(
+            TraceFlags.getSampled(),
+            TestData.RESOURCE_WITHOUT_SCHEMA_URL,
+            TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION);
+    List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
+    //    , LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
+    //    List<MetricData> expectedSignals = Arrays.asList(expected);
 
     MetricsData proto = mapToProto(signals);
 
@@ -147,7 +130,7 @@ class ProtoMetricsDataMapperTest {
     assertEquals(1, firstMetrics.size());
     assertEquals(1, secondMetrics.size());
 
-    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
+    assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
 
   private static MetricsData mapToProto(Collection<MetricData> signals) {

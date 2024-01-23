@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
+import java.io.File;
 
 public final class TestData {
 
@@ -17,12 +18,15 @@ public final class TestData {
   public static final int MAX_FILE_SIZE = 100;
   public static final int MAX_FOLDER_SIZE = 300;
 
-  public static StorageConfiguration getDefaultConfiguration() {
-    return getConfiguration(DefaultTemporaryFileProvider.getInstance());
+  public static StorageConfiguration getDefaultConfiguration(File rootDir) {
+    TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
+    return getConfiguration(fileProvider, rootDir);
   }
 
-  public static StorageConfiguration getConfiguration(TemporaryFileProvider fileProvider) {
+  public static StorageConfiguration getConfiguration(
+      TemporaryFileProvider fileProvider, File rootDir) {
     return StorageConfiguration.builder()
+        .setRootDir(rootDir)
         .setMaxFileAgeForWriteMillis(MAX_FILE_AGE_FOR_WRITE_MILLIS)
         .setMinFileAgeForReadMillis(MIN_FILE_AGE_FOR_READ_MILLIS)
         .setMaxFileAgeForReadMillis(MAX_FILE_AGE_FOR_READ_MILLIS)

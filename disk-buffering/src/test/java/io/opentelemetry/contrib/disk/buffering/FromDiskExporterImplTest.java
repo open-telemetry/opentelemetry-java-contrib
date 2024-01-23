@@ -3,20 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
-import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -34,11 +31,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @SuppressWarnings("unchecked")
-class DiskExporterTest {
+class FromDiskExporterImplTest {
   private SpanExporter wrapped;
   private SignalSerializer<SpanData> serializer;
   private Clock clock;
-  private DiskExporter<SpanData> exporter;
+  private FromDiskExporterImpl<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
   private static final String STORAGE_FOLDER_NAME = "testName";
@@ -46,14 +43,14 @@ class DiskExporterTest {
   @BeforeEach
   void setUp() throws IOException {
     clock = createClockMock();
+
     setUpSerializer();
     wrapped = mock();
     exporter =
-        DiskExporter.<SpanData>builder()
-            .setRootDir(rootDir)
+        FromDiskExporterImpl.<SpanData>builder()
             .setFolderName(STORAGE_FOLDER_NAME)
-            .setStorageConfiguration(TestData.getDefaultConfiguration())
-            .setSerializer(serializer)
+            .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
+            .setDeserializer(serializer)
             .setExportFunction(wrapped::export)
             .setStorageClock(clock)
             .build();
@@ -68,30 +65,6 @@ class DiskExporterTest {
     doReturn(MILLISECONDS.toNanos(1000L + MIN_FILE_AGE_FOR_READ_MILLIS)).when(clock).now();
 
     assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isTrue();
-  }
-
-  @Test
-  void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
-    assertThatThrownBy(
-            () -> {
-              StorageConfiguration invalidConfig =
-                  StorageConfiguration.builder()
-                      .setMaxFileAgeForWriteMillis(2)
-                      .setMinFileAgeForReadMillis(1)
-                      .build();
-
-              DiskExporter.<SpanData>builder()
-                  .setRootDir(rootDir)
-                  .setFolderName(STORAGE_FOLDER_NAME)
-                  .setStorageConfiguration(invalidConfig)
-                  .setSerializer(serializer)
-                  .setExportFunction(wrapped::export)
-                  .setStorageClock(clock)
-                  .build();
-            })
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(
-            "The configured max file age for writing must be lower than the configured min file age for reading");
   }
 
   @Test
@@ -115,31 +88,9 @@ class DiskExporterTest {
     assertThat(new File(rootDir, STORAGE_FOLDER_NAME).exists()).isTrue();
   }
 
-  @Test
-  void whenWritingSucceedsOnExport_returnSuccessfulResultCode() {
-    doReturn(new byte[2]).when(serializer).serialize(deserializedData);
-
-    CompletableResultCode completableResultCode = exporter.onExport(deserializedData);
-
-    assertThat(completableResultCode.isSuccess()).isTrue();
-    verifyNoInteractions(wrapped);
-  }
-
-  @Test
-  void whenWritingFailsOnExport_doExportRightAway() throws IOException {
-    doReturn(CompletableResultCode.ofSuccess()).when(wrapped).export(deserializedData);
-    exporter.onShutDown();
-
-    CompletableResultCode completableResultCode = exporter.onExport(deserializedData);
-
-    assertThat(completableResultCode.isSuccess()).isTrue();
-    verify(wrapped).export(deserializedData);
-  }
-
-  private File createDummyFile() throws IOException {
+  private void createDummyFile() throws IOException {
     File file = new File(rootDir, STORAGE_FOLDER_NAME + "/" + 1000L);
     Files.write(file.toPath(), singletonList("First line"));
-    return file;
   }
 
   private void setUpSerializer() {

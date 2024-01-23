@@ -8,11 +8,16 @@ package io.opentelemetry.contrib.disk.buffering.internal;
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /** Defines how the storage should be managed. */
 @AutoValue
 public abstract class StorageConfiguration {
+
+  /** The root storage location for buffered telemetry. */
+  public abstract File getRootDir();
+
   /** The max amount of time a file can receive new data. */
   public abstract long getMaxFileAgeForWriteMillis();
 
@@ -45,18 +50,19 @@ public abstract class StorageConfiguration {
   /** A creator of temporary files needed to do the disk reading process. */
   public abstract TemporaryFileProvider getTemporaryFileProvider();
 
-  public static StorageConfiguration getDefault() {
-    return builder().build();
+  public static StorageConfiguration getDefault(File rootDir) {
+    return builder().setRootDir(rootDir).build();
   }
 
   public static Builder builder() {
+    TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
     return new AutoValue_StorageConfiguration.Builder()
         .setMaxFileSize(1024 * 1024) // 1MB
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
         .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18))
-        .setTemporaryFileProvider(DefaultTemporaryFileProvider.getInstance());
+        .setTemporaryFileProvider(fileProvider);
   }
 
   @AutoValue.Builder
@@ -72,6 +78,8 @@ public abstract class StorageConfiguration {
     public abstract Builder setMaxFolderSize(int value);
 
     public abstract Builder setTemporaryFileProvider(TemporaryFileProvider value);
+
+    public abstract Builder setRootDir(File rootDir);
 
     public abstract StorageConfiguration build();
   }

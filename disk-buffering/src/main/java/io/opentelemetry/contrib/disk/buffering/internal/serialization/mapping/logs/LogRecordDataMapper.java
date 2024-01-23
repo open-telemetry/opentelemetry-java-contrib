@@ -5,10 +5,11 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.SpanDataMapper.flagsFromInt;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.AttributesMapper;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.ByteStringMapper;
@@ -89,7 +90,7 @@ public final class LogRecordDataMapper {
         SpanContext.create(
             ByteStringMapper.getInstance().protoToString(source.trace_id),
             ByteStringMapper.getInstance().protoToString(source.span_id),
-            TraceFlags.getSampled(),
+            flagsFromInt(source.flags),
             TraceState.getDefault()));
     target.setTotalAttributeCount(source.dropped_attributes_count + attributes.size());
     target.setResource(resource);

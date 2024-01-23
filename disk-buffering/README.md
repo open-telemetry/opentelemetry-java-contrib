@@ -1,6 +1,6 @@
 # Disk buffering
 
-This module provides signal exporter wrappers that intercept and store signals in files which can be
+This module provides exporters that store telemetry data in files which can be
 sent later on demand. A high level description of how it works is that there are two separate
 processes in place, one for writing data in disk, and one for reading/exporting the previously
 stored data.
@@ -8,11 +8,11 @@ stored data.
 * Each exporter stores the received data automatically in disk right after it's received from its
   processor.
 * The reading of the data back from disk and exporting process has to be done manually. At
-  the moment there's no automatic mechanism to do so. There's more information on it can be
+  the moment there's no automatic mechanism to do so. There's more information on how it can be
   achieved, under [Reading data](#reading-data).
 
 > For a more detailed information on how the whole process works, take a look at
-> the [CONTRIBUTING](CONTRIBUTING.md) file.
+> the [DESIGN.md](DESIGN.md) file.
 
 ## Configuration
 
@@ -43,11 +43,11 @@ In order to use it, you need to wrap your own exporter with a new instance of
 the ones provided in here:
 
 * For a LogRecordExporter, it must be wrapped within
-  a [LogRecordDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordDiskExporter.java).
+  a [LogRecordToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/LogRecordToDiskExporter.java).
 * For a MetricExporter, it must be wrapped within
-  a [MetricDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricDiskExporter.java).
+  a [MetricToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/MetricToDiskExporter.java).
 * For a SpanExporter, it must be wrapped within
-  a [SpanDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanDiskExporter.java).
+  a [SpanToDiskExporter](src/main/java/io/opentelemetry/contrib/disk/buffering/SpanToDiskExporter.java).
 
 Each wrapper will need the following when instantiating them:
 

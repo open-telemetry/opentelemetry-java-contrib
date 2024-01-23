@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.internal.exporters;
+package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
-import io.opentelemetry.contrib.disk.buffering.StoredBatchExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
@@ -17,25 +16,38 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
+/**
+ * Signal-type generic class that can read telemetry previously buffered on disk and send it to
+ * another delegated exporter.
+ */
+public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter {
   private final Storage storage;
-  private final SignalSerializer<EXPORT_DATA> serializer;
+  private final SignalSerializer<EXPORT_DATA> deserializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
-  private static final Logger logger = Logger.getLogger(DiskExporter.class.getName());
+  private static final Logger logger = Logger.getLogger(FromDiskExporterImpl.class.getName());
 
-  DiskExporter(
-      SignalSerializer<EXPORT_DATA> serializer,
+  FromDiskExporterImpl(
+      SignalSerializer<EXPORT_DATA> deserializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
       Storage storage) {
-    this.serializer = serializer;
+    this.deserializer = deserializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
   }
 
-  public static <T> DiskExporterBuilder<T> builder() {
-    return new DiskExporterBuilder<T>();
+  public static <T> FromDiskExporterBuilder<T> builder() {
+    return new FromDiskExporterBuilder<>();
   }
 
+  /**
+   * Reads data from the disk and attempts to export it.
+   *
+   * @param timeout The amount of time to wait for the wrapped exporter to finish.
+   * @param unit The unit of the time provided.
+   * @return true if there was data available and it was successfully exported within the timeout
+   *     provided. false otherwise.
+   * @throws IOException If an unexpected error happens.
+   */
   @Override
   public boolean exportStoredBatch(long timeout, TimeUnit unit) throws IOException {
     logger.log(Level.INFO, "Attempting to export batch from disk.");
@@ -44,31 +56,14 @@ public final class DiskExporter<EXPORT_DATA> implements StoredBatchExporter {
             bytes -> {
               logger.log(Level.INFO, "About to export stored batch.");
               CompletableResultCode join =
-                  exportFunction.apply(serializer.deserialize(bytes)).join(timeout, unit);
+                  exportFunction.apply(deserializer.deserialize(bytes)).join(timeout, unit);
               return join.isSuccess();
             });
     return result == ReadableResult.SUCCEEDED;
   }
 
-  public void onShutDown() throws IOException {
+  @Override
+  public void shutdown() throws IOException {
     storage.close();
-  }
-
-  public CompletableResultCode onExport(Collection<EXPORT_DATA> data) {
-    logger.log(Level.FINER, "Intercepting exporter batch.");
-    try {
-      if (storage.write(serializer.serialize(data))) {
-        return CompletableResultCode.ofSuccess();
-      } else {
-        logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
-        return exportFunction.apply(data);
-      }
-    } catch (IOException e) {
-      logger.log(
-          Level.WARNING,
-          "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
-          e);
-      return exportFunction.apply(data);
-    }
   }
 }

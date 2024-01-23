@@ -10,7 +10,17 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.GaugeData;
+import io.opentelemetry.sdk.metrics.data.LongExemplarData;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongExemplarData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableLongPointData;
+import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.Collections;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unchecked")
 public final class TestData {
@@ -38,7 +48,7 @@ public final class TestData {
       Resource.create(Attributes.builder().put("resourceAttr", "resourceAttrValue").build());
 
   public static final SpanContext SPAN_CONTEXT =
-      SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault());
+      SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault());
   public static final SpanContext SPAN_CONTEXT_WITH_TRACE_STATE =
       SpanContext.create(
           TRACE_ID,
@@ -66,6 +76,60 @@ public final class TestData {
                   .put("instrumentationScopeInfoAttr", "instrumentationScopeInfoAttrValue")
                   .build())
           .build();
+
+  @NotNull
+  public static MetricData makeLongGauge(TraceFlags flags) {
+    return makeLongGauge(flags, RESOURCE_FULL, INSTRUMENTATION_SCOPE_INFO_FULL);
+  }
+
+  @NotNull
+  public static MetricData makeLongGauge(
+      TraceFlags flags, InstrumentationScopeInfo instrumentationScopeInfo) {
+    return makeLongGauge(flags, RESOURCE_FULL, instrumentationScopeInfo);
+  }
+
+  @NotNull
+  public static MetricData makeLongGauge(TraceFlags flags, Resource resource) {
+    return makeLongGauge(flags, resource, INSTRUMENTATION_SCOPE_INFO_FULL);
+  }
+
+  @NotNull
+  public static MetricData makeLongGauge(
+      TraceFlags flags, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo) {
+    LongPointData point = makeLongPointData(flags);
+    GaugeData<LongPointData> gaugeData =
+        ImmutableGaugeData.create(Collections.singletonList(point));
+    return ImmutableMetricData.createLongGauge(
+        resource,
+        instrumentationScopeInfo,
+        "Long gauge name",
+        "Long gauge description",
+        "ms",
+        gaugeData);
+  }
+
+  @NotNull
+  public static LongPointData makeLongPointData(TraceFlags flags) {
+    LongExemplarData longExemplarData = makeLongExemplarData(flags);
+    return ImmutableLongPointData.create(
+        1L, 2L, ATTRIBUTES, 1L, Collections.singletonList(longExemplarData));
+  }
+
+  @NotNull
+  public static SpanContext makeContext(TraceFlags flags) {
+    return makeContext(flags, SPAN_ID);
+  }
+
+  @NotNull
+  public static SpanContext makeContext(TraceFlags flags, String spanId) {
+    return SpanContext.create(TRACE_ID, spanId, flags, TraceState.getDefault());
+  }
+
+  @NotNull
+  private static LongExemplarData makeLongExemplarData(TraceFlags flags) {
+    SpanContext context = makeContext(flags);
+    return ImmutableLongExemplarData.create(ATTRIBUTES, 100L, context, 1L);
+  }
 
   private TestData() {}
 }
