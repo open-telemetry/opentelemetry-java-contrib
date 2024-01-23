@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;

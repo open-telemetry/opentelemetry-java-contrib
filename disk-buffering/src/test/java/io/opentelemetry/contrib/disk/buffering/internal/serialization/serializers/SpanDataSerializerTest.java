@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;

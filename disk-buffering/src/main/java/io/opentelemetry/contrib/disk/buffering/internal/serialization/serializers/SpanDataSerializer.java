@@ -12,10 +12,8 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
-public final class SpanDataSerializer
-    implements SignalSerializer<SpanData>, SignalDeserializer<SpanData> {
+public final class SpanDataSerializer implements SignalSerializer<SpanData> {
   private static final SpanDataSerializer INSTANCE = new SpanDataSerializer();
 
   private SpanDataSerializer() {}
@@ -34,15 +32,6 @@ public final class SpanDataSerializer
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
-    }
-  }
-
-  @Override
-  public List<SpanData> deserialize(byte[] source) {
-    try {
-      return ProtoSpansDataMapper.getInstance().fromProto(TracesData.ADAPTER.decode(source));
-    } catch (IOException e) {
-      throw new IllegalArgumentException(e);
     }
   }
 }

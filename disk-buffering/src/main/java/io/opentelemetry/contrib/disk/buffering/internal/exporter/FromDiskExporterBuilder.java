@@ -9,7 +9,7 @@ import static java.util.Collections.emptyList;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;

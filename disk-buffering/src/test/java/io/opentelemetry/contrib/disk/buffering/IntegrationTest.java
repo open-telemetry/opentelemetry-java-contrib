@@ -20,7 +20,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;

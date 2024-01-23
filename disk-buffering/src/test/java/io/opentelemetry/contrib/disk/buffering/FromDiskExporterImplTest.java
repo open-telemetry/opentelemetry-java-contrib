@@ -14,7 +14,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;

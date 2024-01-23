@@ -12,10 +12,8 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
-public final class LogRecordDataSerializer
-    implements SignalSerializer<LogRecordData>, SignalDeserializer<LogRecordData> {
+public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
   private static final LogRecordDataSerializer INSTANCE = new LogRecordDataSerializer();
 
   private LogRecordDataSerializer() {}
@@ -34,15 +32,6 @@ public final class LogRecordDataSerializer
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
-    }
-  }
-
-  @Override
-  public List<LogRecordData> deserialize(byte[] source) {
-    try {
-      return ProtoLogsDataMapper.getInstance().fromProto(LogsData.ADAPTER.decode(source));
-    } catch (IOException e) {
-      throw new IllegalArgumentException(e);
     }
   }
 }

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.serialize
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;

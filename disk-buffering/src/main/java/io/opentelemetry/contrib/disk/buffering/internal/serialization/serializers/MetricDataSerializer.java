@@ -12,10 +12,8 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
-public final class MetricDataSerializer
-    implements SignalSerializer<MetricData>, SignalDeserializer<MetricData> {
+public final class MetricDataSerializer implements SignalSerializer<MetricData> {
   private static final MetricDataSerializer INSTANCE = new MetricDataSerializer();
 
   private MetricDataSerializer() {}
@@ -34,15 +32,6 @@ public final class MetricDataSerializer
       return out.toByteArray();
     } catch (IOException e) {
       throw new IllegalStateException(e);
-    }
-  }
-
-  @Override
-  public List<MetricData> deserialize(byte[] source) {
-    try {
-      return ProtoMetricsDataMapper.getInstance().fromProto(MetricsData.ADAPTER.decode(source));
-    } catch (IOException e) {
-      throw new IllegalArgumentException(e);
     }
   }
 }

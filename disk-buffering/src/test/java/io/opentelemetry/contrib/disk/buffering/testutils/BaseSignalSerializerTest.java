@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.testutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
