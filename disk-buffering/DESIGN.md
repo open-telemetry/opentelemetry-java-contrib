@@ -19,7 +19,7 @@ Each one of those has a `create()` method that takes a delegate exporter (to sen
 to ingest) and the `StorageConfiguration` that tells them where to find buffered data.
 
 As explained in the [README](README.md), this has to be triggered manually by the consumer of
-* this library and does not happen automatically.
+this library and does not happen automatically.
 
 ## Writing overview
 
