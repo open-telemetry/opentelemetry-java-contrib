@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.SpanDataMapper.flagsFromInt;
+import static io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools.toUnsignedInt;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
@@ -45,7 +46,8 @@ public final class LogRecordDataMapper {
       logRecord.body(bodyToAnyValue(source.getBody()));
     }
 
-    logRecord.flags(source.getSpanContext().getTraceFlags().asByte());
+    byte flags = source.getSpanContext().getTraceFlags().asByte();
+    logRecord.flags(toUnsignedInt(flags));
 
     addExtrasToProtoBuilder(source, logRecord);
 
