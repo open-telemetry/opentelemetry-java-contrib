@@ -11,12 +11,12 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.IOException;
 import java.util.List;
 
-public final class MetricDataDeerializer implements SignalDeserializer<MetricData> {
-  private static final MetricDataDeerializer INSTANCE = new MetricDataDeerializer();
+public final class MetricDataDeserializer implements SignalDeserializer<MetricData> {
+  private static final MetricDataDeserializer INSTANCE = new MetricDataDeserializer();
 
-  private MetricDataDeerializer() {}
+  private MetricDataDeserializer() {}
 
-  static MetricDataDeerializer getInstance() {
+  static MetricDataDeserializer getInstance() {
     return INSTANCE;
   }
 

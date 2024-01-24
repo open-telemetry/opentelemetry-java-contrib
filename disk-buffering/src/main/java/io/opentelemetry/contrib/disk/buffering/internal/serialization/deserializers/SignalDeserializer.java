@@ -17,7 +17,7 @@ public interface SignalDeserializer<SDK_ITEM> {
   }
 
   static SignalDeserializer<MetricData> ofMetrics() {
-    return MetricDataDeerializer.getInstance();
+    return MetricDataDeserializer.getInstance();
   }
 
   static SignalDeserializer<LogRecordData> ofLogs() {
