@@ -165,7 +165,7 @@ public class GCPResourceProvider implements ResourceProvider {
                         attributesMap.get(GKE_CLUSTER_LOCATION));
                     break;
                   default:
-                    // TODO: Figure out how to handle unexpected conditions like this - Issue #183
+                    // TODO: Figure out how to handle unexpected conditions like this
                     LOGGER.severe(
                         String.format(
                             "Unrecognized format for cluster location: %s",
