@@ -27,6 +27,9 @@ components:
   disk-buffering:
     - LikeTheSalad
     - zeitlinger
+  gcp-resources:
+    - jsuereth
+    - psx95
   jfr-connection:
     - breedx-splk
     - jeanbisutti
