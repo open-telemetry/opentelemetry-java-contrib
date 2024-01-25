@@ -10,6 +10,7 @@ import static java.util.Collections.singletonList;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -273,5 +274,10 @@ class MetricDataSerializerTest extends BaseSignalSerializerTest<MetricData> {
   @Override
   protected SignalSerializer<MetricData> getSerializer() {
     return SignalSerializer.ofMetrics();
+  }
+
+  @Override
+  protected SignalDeserializer<MetricData> getDeserializer() {
+    return SignalDeserializer.ofMetrics();
   }
 }

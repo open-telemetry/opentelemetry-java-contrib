@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -22,12 +22,12 @@ import java.util.logging.Logger;
  */
 public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter {
   private final Storage storage;
-  private final SignalSerializer<EXPORT_DATA> deserializer;
+  private final SignalDeserializer<EXPORT_DATA> deserializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
   private static final Logger logger = Logger.getLogger(FromDiskExporterImpl.class.getName());
 
   FromDiskExporterImpl(
-      SignalSerializer<EXPORT_DATA> deserializer,
+      SignalDeserializer<EXPORT_DATA> deserializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
       Storage storage) {
     this.deserializer = deserializer;

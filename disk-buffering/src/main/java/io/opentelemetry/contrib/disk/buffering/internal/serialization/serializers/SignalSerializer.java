@@ -9,7 +9,6 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.Collection;
-import java.util.List;
 
 public interface SignalSerializer<SDK_ITEM> {
 
@@ -26,6 +25,4 @@ public interface SignalSerializer<SDK_ITEM> {
   }
 
   byte[] serialize(Collection<SDK_ITEM> items);
-
-  List<SDK_ITEM> deserialize(byte[] source);
 }

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.testutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
@@ -25,7 +26,7 @@ public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
   protected List<SIGNAL_SDK_ITEM> deserialize(byte[] source) {
     try (ByteArrayInputStream in = new ByteArrayInputStream(source)) {
       StreamReader streamReader = DelimitedProtoStreamReader.Factory.getInstance().create(in);
-      return getSerializer().deserialize(Objects.requireNonNull(streamReader.read()).content);
+      return getDeserializer().deserialize(Objects.requireNonNull(streamReader.read()).content);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -42,4 +43,6 @@ public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
   }
 
   protected abstract SignalSerializer<SIGNAL_SDK_ITEM> getSerializer();
+
+  protected abstract SignalDeserializer<SIGNAL_SDK_ITEM> getDeserializer();
 }
