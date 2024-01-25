@@ -55,7 +55,7 @@ Each wrapper will need the following when instantiating them:
 * A File instance of the root directory where all the data is going to be written. The same root dir
   can be used for all the wrappers, since each will create their own folder inside it.
 * An instance
-  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/StorageConfiguration.java)
+  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/StorageConfiguration.java)
   with the desired parameters. You can create one with default values by
   calling `StorageConfiguration.getDefault()`.
 
