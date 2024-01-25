@@ -64,16 +64,21 @@ take care of always storing the data it receives.
 
 #### Set up example for spans
 
+### Writing data
+
+The data is written in the disk by "ToDisk" exporters, these are exporters that serialize and store the data as received by their processors. If for some reason
+the "ToDisk" cannot store data in the disk, they'll delegate the data to their wrapped exporter.
+
 ```java
 // Creating the SpanExporter of our choice.
 SpanExporter mySpanExporter = OtlpGrpcSpanExporter.getDefault();
 
-// Wrapping our exporter with its disk exporter.
-SpanDiskExporter diskExporter = SpanDiskExporter.create(mySpanExporter, new File("/my/signals/cache/dir"), StorageConfiguration.getDefault());
+// Wrapping our exporter with its "ToDisk" exporter.
+SpanToDiskExporter toDiskExporter = SpanToDiskExporter.create(mySpanExporter, StorageConfiguration.getDefault(new File("/my/signals/cache/dir")));
 
  // Registering the disk exporter within our OpenTelemetry instance.
 SdkTracerProvider myTraceProvider = SdkTracerProvider.builder()
-        .addSpanProcessor(SimpleSpanProcessor.create(diskExporter))
+        .addSpanProcessor(SimpleSpanProcessor.create(toDiskExporter))
         .build();
 OpenTelemetrySdk.builder()
         .setTracerProvider(myTraceProvider)
@@ -83,12 +88,13 @@ OpenTelemetrySdk.builder()
 
 ### Reading data
 
-Each of the exporter wrappers can read from the disk and send the retrieved data over to their
-wrapped exporter by calling this method from them:
+In order to read data, we need to create "FromDisk" exporters, which read data from the disk, parse it and delegate it
+to their wrapped exporters.
 
 ```java
 try {
-    if(diskExporter.exportStoredBatch(1, TimeUnit.SECONDS)) {
+    SpanFromDiskExporter fromDiskExporter = SpanFromDiskExporter.create(memorySpanExporter, storageConfig);
+    if(fromDiskExporter.exportStoredBatch(1, TimeUnit.SECONDS)) {
         // A batch was successfully exported and removed from disk. You can call this method for as long as it keeps returning true.
     } else {
         // Either there was no data in the disk or the wrapped exporter returned CompletableResultCode.ofFailure().
