@@ -10,8 +10,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurablePropagatorProvider;
 
 /**
- * A {@link ConfigurablePropagatorProvider} which allows enabling the {@link AwsXrayLambdaPropagator}
- * with the propagator name {@code xray-lambda}.
+ * A {@link ConfigurablePropagatorProvider} which allows enabling the {@link
+ * AwsXrayLambdaPropagator} with the propagator name {@code xray-lambda}.
  */
 public final class AwsXrayLambdaConfigurablePropagator implements ConfigurablePropagatorProvider {
   @Override

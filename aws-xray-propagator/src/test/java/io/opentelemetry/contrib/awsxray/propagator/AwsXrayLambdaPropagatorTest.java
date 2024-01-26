@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.awsxray.propagator;
 
+import static io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator.TRACE_HEADER_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
@@ -15,6 +18,8 @@ import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.LinkData;
+import java.util.Collections;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +27,6 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
-
-import java.util.Collections;
-import java.util.Map;
-
-import static io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator.TRACE_HEADER_KEY;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SystemStubsExtension.class)
 class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
@@ -54,7 +53,7 @@ class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
         "Root=1-00000001-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
     assertThat(
-        getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
+            getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "00000001d188f8fa79d48a391a778fa6",
@@ -70,7 +69,7 @@ class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
         "Root=1-00000001-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
     assertThat(
-        getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
+            getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "00000001d188f8fa79d48a391a778fa6",
@@ -89,7 +88,7 @@ class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
         "Root=1-00000002-240000000000000000000002;Parent=1600000000000002;Sampled=1;Foo=Baz");
 
     assertThat(
-        getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
+            getSpanContext(propagator().extract(Context.current(), Collections.emptyMap(), GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "00000002240000000000000000000002",
@@ -112,10 +111,15 @@ class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
         "Root=1-00000003-240000000000000000000003;Parent=1600000000000003;Sampled=1;Foo=Baz");
 
     Context extract = propagator().extract(Context.current(), carrier, GETTER);
-    ReadableSpan span = (ReadableSpan) tracer.spanBuilder("test")
-        .setParent(extract)
-        .addLink(Span.fromContext(propagator().extract(extract, carrier, GETTER)).getSpanContext())
-        .startSpan();
+    ReadableSpan span =
+        (ReadableSpan)
+            tracer
+                .spanBuilder("test")
+                .setParent(extract)
+                .addLink(
+                    Span.fromContext(propagator().extract(extract, carrier, GETTER))
+                        .getSpanContext())
+                .startSpan();
     assertThat(span.getParentSpanContext())
         .isEqualTo(
             SpanContext.createFromRemoteParent(
@@ -125,12 +129,13 @@ class AwsXrayLambdaPropagatorTest extends AwsXrayPropagatorTest {
                 TraceState.getDefault()));
 
     assertThat(span.toSpanData().getLinks())
-        .isEqualTo(Collections.singletonList(LinkData.create(
-            SpanContext.createFromRemoteParent(
-                "00000001240000000000000000000001",
-                "1600000000000001",
-                TraceFlags.getSampled(),
-                TraceState.getDefault()))));
-
+        .isEqualTo(
+            Collections.singletonList(
+                LinkData.create(
+                    SpanContext.createFromRemoteParent(
+                        "00000001240000000000000000000001",
+                        "1600000000000001",
+                        TraceFlags.getSampled(),
+                        TraceState.getDefault()))));
   }
 }
