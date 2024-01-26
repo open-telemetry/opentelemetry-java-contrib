@@ -47,6 +47,24 @@ public final class EcsResource {
     return buildResource(System.getenv(), new SimpleHttpClient());
   }
 
+  @Nullable
+  private static String getAccountId(@Nullable String arn) {
+    if (arn != null) {
+      return arn.split(":")[4];
+    }
+
+    return null;
+  }
+
+  @Nullable
+  private static String getRegion(@Nullable String arn) {
+    if (arn != null) {
+      return arn.split(":")[3];
+    }
+
+    return null;
+  }
+
   // Visible for testing
   static Resource buildResource(Map<String, String> sysEnv, SimpleHttpClient httpClient) {
     // Note: If V4 is set V3 is set as well, so check V4 first.
@@ -107,9 +125,14 @@ public final class EcsResource {
       return;
     }
 
+    String accountId = null;
+    String region = null;
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
       switch (parser.getCurrentName()) {
+        case "AvailabilityZone":
+          attrBuilders.put(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, value);
+          break;
         case "DockerId":
           attrBuilders.put(ResourceAttributes.CONTAINER_ID, value);
           break;
@@ -117,6 +140,12 @@ public final class EcsResource {
           attrBuilders.put(ResourceAttributes.CONTAINER_NAME, value);
           break;
         case "ContainerARN":
+          if (accountId == null) {
+            accountId = getAccountId(value);
+          }
+          if (region == null) {
+            region = getRegion(value);
+          }
           attrBuilders.put(ResourceAttributes.AWS_ECS_CONTAINER_ARN, value);
           logArnBuilder.setContainerArn(value);
           break;
@@ -146,6 +175,12 @@ public final class EcsResource {
           logArnBuilder.setRegion(value);
           break;
         case "TaskARN":
+          if (accountId == null) {
+            accountId = getAccountId(value);
+          }
+          if (region == null) {
+            region = getRegion(value);
+          }
           attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_ARN, value);
           break;
         case "LaunchType":
@@ -161,6 +196,14 @@ public final class EcsResource {
           parser.skipChildren();
           break;
       }
+    }
+
+    if (accountId != null) {
+      attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId);
+    }
+
+    if (region != null) {
+      attrBuilders.put(ResourceAttributes.CLOUD_REGION, region);
     }
   }
 
@@ -193,9 +236,7 @@ public final class EcsResource {
     }
 
     void setContainerArn(@Nullable String containerArn) {
-      if (containerArn != null) {
-        account = containerArn.split(":")[4];
-      }
+      account = getAccountId(containerArn);
     }
 
     Optional<String> getLogGroupArn() {

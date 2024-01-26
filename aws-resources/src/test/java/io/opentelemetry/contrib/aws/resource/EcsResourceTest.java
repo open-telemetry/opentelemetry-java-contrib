@@ -51,6 +51,9 @@ class EcsResourceTest {
         .containsOnly(
             entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
             entry(ResourceAttributes.CLOUD_PLATFORM, "aws_ecs"),
+            entry(ResourceAttributes.CLOUD_ACCOUNT_ID, "012345678910"),
+            entry(ResourceAttributes.CLOUD_REGION, "us-east-2"),
+            entry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, "us-east-2b"),
             entry(ResourceAttributes.CONTAINER_NAME, "ecs-nginx-5-nginx-curl-ccccb9f49db0dfe0d901"),
             entry(
                 ResourceAttributes.CONTAINER_ID,
@@ -85,6 +88,9 @@ class EcsResourceTest {
         .containsOnly(
             entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
             entry(ResourceAttributes.CLOUD_PLATFORM, "aws_ecs"),
+            entry(ResourceAttributes.CLOUD_ACCOUNT_ID, "111122223333"),
+            entry(ResourceAttributes.CLOUD_REGION, "us-west-2"),
+            entry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, "us-west-2d"),
             entry(ResourceAttributes.CONTAINER_NAME, "ecs-curltest-26-curl-cca48e8dcadd97805600"),
             entry(
                 ResourceAttributes.CONTAINER_ID,
