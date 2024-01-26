@@ -47,24 +47,6 @@ public final class EcsResource {
     return buildResource(System.getenv(), new SimpleHttpClient());
   }
 
-  @Nullable
-  private static String getAccountId(@Nullable String arn) {
-    if (arn != null) {
-      return arn.split(":")[4];
-    }
-
-    return null;
-  }
-
-  @Nullable
-  private static String getRegion(@Nullable String arn) {
-    if (arn != null) {
-      return arn.split(":")[3];
-    }
-
-    return null;
-  }
-
   // Visible for testing
   static Resource buildResource(Map<String, String> sysEnv, SimpleHttpClient httpClient) {
     // Note: If V4 is set V3 is set as well, so check V4 first.
@@ -115,6 +97,24 @@ public final class EcsResource {
     } catch (IOException e) {
       logger.log(Level.WARNING, "Can't get ECS metadata", e);
     }
+  }
+
+  @Nullable
+  private static String getAccountId(@Nullable String arn) {
+    if (arn != null) {
+      return arn.split(":")[4];
+    }
+
+    return null;
+  }
+
+  @Nullable
+  private static String getRegion(@Nullable String arn) {
+    if (arn != null) {
+      return arn.split(":")[3];
+    }
+
+    return null;
   }
 
   static void parseResponse(
