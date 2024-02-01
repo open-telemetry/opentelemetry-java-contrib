@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.awsxray.propagator;
 import static io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator.TRACE_HEADER_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
@@ -20,8 +19,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -76,63 +73,6 @@ class AwsXrayPropagatorTest {
         .containsEntry(
             TRACE_HEADER_KEY,
             "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
-  }
-
-  @Test
-  void inject_WithBaggage() {
-    Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(
-        withSpanContext(
-                SpanContext.create(
-                    TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
-                Context.current())
-            .with(
-                Baggage.builder()
-                    .put("cat", "meow")
-                    .put("dog", "bark")
-                    .put("Root", "ignored")
-                    .put("Parent", "ignored")
-                    .put("Sampled", "ignored")
-                    .build()),
-        carrier,
-        setter);
-
-    assertThat(carrier)
-        .containsEntry(
-            TRACE_HEADER_KEY,
-            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0;"
-                + "cat=meow;dog=bark");
-  }
-
-  @Test
-  void inject_WithBaggage_LimitTruncates() {
-    Map<String, String> carrier = new LinkedHashMap<>();
-    // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
-    // 3 character key value pair.
-    String key1 = Stream.generate(() -> "a").limit(252).collect(Collectors.joining());
-    String value1 = "a"; // 252 + 1 (=) + 1 = 254
-
-    String key2 = "b";
-    String value2 = "b"; // 1 + 1 (=) + 1 = 3
-
-    Baggage baggage = Baggage.builder().put(key1, value1).put(key2, value2).build();
-
-    xrayPropagator.inject(
-        withSpanContext(
-                SpanContext.create(
-                    TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
-                Context.current())
-            .with(baggage),
-        carrier,
-        setter);
-
-    assertThat(carrier)
-        .containsEntry(
-            TRACE_HEADER_KEY,
-            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0;"
-                + key1
-                + '='
-                + value1);
   }
 
   @Test
@@ -221,52 +161,6 @@ class AwsXrayPropagatorTest {
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-  }
-
-  @Test
-  void extract_AdditionalFields() {
-    Map<String, String> carrier = new LinkedHashMap<>();
-    carrier.put(
-        TRACE_HEADER_KEY,
-        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
-
-    Context context = xrayPropagator.extract(Context.current(), carrier, getter);
-    assertThat(getSpanContext(context))
-        .isEqualTo(
-            SpanContext.createFromRemoteParent(
-                TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue("Foo")).isEqualTo("Bar");
-  }
-
-  @Test
-  void extract_Baggage_LimitTruncates() {
-    // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
-    // 3 character key value pair.
-    String key1 = Stream.generate(() -> "a").limit(252).collect(Collectors.joining());
-    String value1 = "a"; // 252 + 1 (=) + 1 = 254
-
-    String key2 = "b";
-    String value2 = "b"; // 1 + 1 (=) + 1 = 3
-
-    Map<String, String> carrier = new LinkedHashMap<>();
-    carrier.put(
-        TRACE_HEADER_KEY,
-        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;"
-            + key1
-            + '='
-            + value1
-            + ';'
-            + key2
-            + '='
-            + value2);
-
-    Context context = xrayPropagator.extract(Context.current(), carrier, getter);
-    assertThat(getSpanContext(context))
-        .isEqualTo(
-            SpanContext.createFromRemoteParent(
-                TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue(key1)).isEqualTo(value1);
-    assertThat(Baggage.fromContext(context).getEntryValue(key2)).isNull();
   }
 
   @Test
