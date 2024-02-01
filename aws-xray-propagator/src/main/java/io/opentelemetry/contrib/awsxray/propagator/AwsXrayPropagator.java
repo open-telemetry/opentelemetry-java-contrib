@@ -108,17 +108,18 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     char samplingFlag = spanContext.isSampled() ? IS_SAMPLED : NOT_SAMPLED;
     // TODO: Add OT trace state to the X-Ray trace header
 
-    String traceHeader = TRACE_ID_KEY +
-            KV_DELIMITER +
-            xrayTraceId +
-            TRACE_HEADER_DELIMITER +
-            PARENT_ID_KEY +
-            KV_DELIMITER +
-            parentId +
-            TRACE_HEADER_DELIMITER +
-            SAMPLED_FLAG_KEY +
-            KV_DELIMITER +
-            samplingFlag;
+    String traceHeader =
+        TRACE_ID_KEY
+            + KV_DELIMITER
+            + xrayTraceId
+            + TRACE_HEADER_DELIMITER
+            + PARENT_ID_KEY
+            + KV_DELIMITER
+            + parentId
+            + TRACE_HEADER_DELIMITER
+            + SAMPLED_FLAG_KEY
+            + KV_DELIMITER
+            + samplingFlag;
 
     setter.set(carrier, TRACE_HEADER_KEY, traceHeader);
   }
