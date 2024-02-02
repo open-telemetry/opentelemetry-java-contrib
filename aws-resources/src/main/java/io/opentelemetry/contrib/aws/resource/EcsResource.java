@@ -101,17 +101,24 @@ public final class EcsResource {
 
   @Nullable
   private static String getAccountId(@Nullable String arn) {
-    if (arn != null) {
-      return arn.split(":")[4];
-    }
-
-    return null;
+    return getArnPart(arn, 4);
   }
 
   @Nullable
   private static String getRegion(@Nullable String arn) {
-    if (arn != null) {
-      return arn.split(":")[3];
+    return getArnPart(arn, 3);
+  }
+
+  @Nullable
+  private static String getArnPart(@Nullable String arn, int partIndex) {
+    if (arn == null) {
+      return null;
+    }
+
+    String[] arnParts = arn.split(":");
+
+    if (partIndex < arnParts.length) {
+      return arnParts[partIndex];
     }
 
     return null;
