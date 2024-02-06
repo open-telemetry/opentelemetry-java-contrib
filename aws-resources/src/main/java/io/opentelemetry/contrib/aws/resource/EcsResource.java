@@ -108,7 +108,6 @@ public final class EcsResource {
   }
 
   private static enum ArnPart {
-
     REGION(3),
     ACCOUNT(4);
 
@@ -117,7 +116,6 @@ public final class EcsResource {
     private ArnPart(int partIndex) {
       this.partIndex = partIndex;
     }
-
   }
 
   private static Optional<String> getArnPart(@Nullable String arn, ArnPart arnPart) {
@@ -130,7 +128,7 @@ public final class EcsResource {
     if (arnPart.partIndex >= arnParts.length) {
       return Optional.empty();
     }
-    
+
     return Optional.of(arnParts[arnPart.partIndex]);
   }
 
@@ -209,7 +207,8 @@ public final class EcsResource {
     }
 
     getRegion(arn).ifPresent(region -> attrBuilders.put(ResourceAttributes.CLOUD_REGION, region));
-    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId));
+    getAccountId(arn)
+        .ifPresent(accountId -> attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId));
   }
 
   private EcsResource() {}
