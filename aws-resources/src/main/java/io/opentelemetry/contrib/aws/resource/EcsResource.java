@@ -241,7 +241,7 @@ public final class EcsResource {
     }
 
     void setContainerArn(@Nullable String containerArn) {
-      account = getAccountId(containerArn);
+      account = getAccountId(containerArn).orElse(null);
     }
 
     Optional<String> getLogGroupArn() {
