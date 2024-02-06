@@ -99,29 +99,39 @@ public final class EcsResource {
     }
   }
 
-  @Nullable
-  private static String getAccountId(@Nullable String arn) {
-    return getArnPart(arn, 4);
+  private static Optional<String> getAccountId(@Nullable String arn) {
+    return getArnPart(arn, ArnPart.ACCOUNT);
   }
 
-  @Nullable
-  private static String getRegion(@Nullable String arn) {
-    return getArnPart(arn, 3);
+  private static Optional<String> getRegion(@Nullable String arn) {
+    return getArnPart(arn, ArnPart.REGION);
   }
 
-  @Nullable
-  private static String getArnPart(@Nullable String arn, int partIndex) {
+  private static enum ArnPart {
+
+    REGION(3),
+    ACCOUNT(4);
+
+    final int partIndex;
+
+    private ArnPart(int partIndex) {
+      this.partIndex = partIndex;
+    }
+
+  }
+
+  private static Optional<String> getArnPart(@Nullable String arn, ArnPart arnPart) {
     if (arn == null) {
-      return null;
+      return Optional.empty();
     }
 
     String[] arnParts = arn.split(":");
 
-    if (partIndex < arnParts.length) {
-      return arnParts[partIndex];
+    if (arnPart.partIndex >= arnParts.length) {
+      return Optional.empty();
     }
-
-    return null;
+    
+    return Optional.of(arnParts[arnPart.partIndex]);
   }
 
   static void parseResponse(
@@ -132,8 +142,11 @@ public final class EcsResource {
       return;
     }
 
-    String accountId = null;
-    String region = null;
+    // Either the container ARN or the task ARN, they both contain the
+    // account id and region tokens we need later for the cloud.account.id
+    // and cloud.region attributes.
+    String arn = null;
+
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
       switch (parser.getCurrentName()) {
@@ -147,12 +160,7 @@ public final class EcsResource {
           attrBuilders.put(ResourceAttributes.CONTAINER_NAME, value);
           break;
         case "ContainerARN":
-          if (accountId == null) {
-            accountId = getAccountId(value);
-          }
-          if (region == null) {
-            region = getRegion(value);
-          }
+          arn = value;
           attrBuilders.put(ResourceAttributes.AWS_ECS_CONTAINER_ARN, value);
           logArnBuilder.setContainerArn(value);
           break;
@@ -182,12 +190,7 @@ public final class EcsResource {
           logArnBuilder.setRegion(value);
           break;
         case "TaskARN":
-          if (accountId == null) {
-            accountId = getAccountId(value);
-          }
-          if (region == null) {
-            region = getRegion(value);
-          }
+          arn = value;
           attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_ARN, value);
           break;
         case "LaunchType":
@@ -205,13 +208,8 @@ public final class EcsResource {
       }
     }
 
-    if (accountId != null) {
-      attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId);
-    }
-
-    if (region != null) {
-      attrBuilders.put(ResourceAttributes.CLOUD_REGION, region);
-    }
+    getRegion(arn).ifPresent(region -> attrBuilders.put(ResourceAttributes.CLOUD_REGION, region));
+    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId));
   }
 
   private EcsResource() {}
