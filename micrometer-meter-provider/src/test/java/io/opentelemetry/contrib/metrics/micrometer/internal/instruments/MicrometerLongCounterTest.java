@@ -12,14 +12,17 @@ import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongCounterBuilder;
 import io.opentelemetry.api.metrics.ObservableLongCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedLongCounterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -177,6 +180,59 @@ public class MicrometerLongCounterTest {
   }
 
   @Test
+  void addWithAttributesAndAdvice() {
+    LongCounterBuilder builder =
+        MicrometerLongCounter.builder(meterSharedState, "counter")
+            .setDescription("description")
+            .setUnit("unit");
+
+    ((ExtendedLongCounterBuilder) builder)
+        .setAttributesAdvice(
+            Arrays.asList(
+                AttributeKey.stringKey(Constants.OTEL_INSTRUMENTATION_NAME),
+                AttributeKey.stringKey(Constants.OTEL_INSTRUMENTATION_VERSION),
+                AttributeKey.stringKey("key")));
+
+    LongCounter underTest = builder.build();
+
+    assertThat(meterRegistry.getMeters()).isEmpty();
+
+    Attributes attributes =
+        Attributes.builder().put("key", "value").put("unwanted", "value").build();
+    underTest.add(10, attributes);
+
+    Counter counter = meterRegistry.find("counter").counter();
+    assertThat(counter).isNotNull();
+    Meter.Id id = counter.getId();
+    assertThat(id.getName()).isEqualTo("counter");
+    assertThat(id.getTags())
+        .isEqualTo(
+            Arrays.asList(
+                Tag.of("key", "value"),
+                Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+                Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0")));
+    assertThat(id.getDescription()).isEqualTo("description");
+    assertThat(id.getBaseUnit()).isEqualTo("unit");
+    assertThat(counter.count()).isEqualTo(10.0);
+
+    // test that counter can be increased
+    underTest.add(10, attributes);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    underTest.add(-5, attributes);
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    double expectedCount = 20.0;
+    for (long value : RandomUtils.randomLongs(10, 0L, 500L)) {
+      expectedCount += value;
+
+      underTest.add(value, attributes);
+      assertThat(counter.count()).isEqualTo(expectedCount);
+    }
+  }
+
+  @Test
   void observable() {
     AtomicLong atomicLong = new AtomicLong();
     ObservableLongCounter underTest =
@@ -235,6 +291,68 @@ public class MicrometerLongCounterTest {
             .setDescription("description")
             .setUnit("unit")
             .buildWithCallback(measurement -> measurement.record(atomicLong.get(), attributes));
+
+    assertThat(callbacks).hasSize(1);
+
+    assertThat(meterRegistry.getMeters()).isEmpty();
+
+    atomicLong.set(10L);
+    callbackRegistrar.run();
+    FunctionCounter counter = meterRegistry.find("counter").functionCounter();
+    assertThat(counter).isNotNull();
+    Meter.Id id = counter.getId();
+    assertThat(id.getName()).isEqualTo("counter");
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of("key", "value"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
+    assertThat(id.getDescription()).isEqualTo("description");
+    assertThat(id.getBaseUnit()).isEqualTo("unit");
+    assertThat(counter.count()).isEqualTo(10.0);
+
+    // test that counter can be increased
+    atomicLong.set(20L);
+    callbackRegistrar.run();
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    // test that counter cannot be decreased
+    atomicLong.set(5L);
+    callbackRegistrar.run();
+    assertThat(counter.count()).isEqualTo(20.0);
+
+    long value = 20L;
+    for (long increment : RandomUtils.randomLongs(10, 0L, 500L)) {
+      value += increment;
+      atomicLong.set(value);
+      callbackRegistrar.run();
+      assertThat(counter.count()).isEqualTo((double) value);
+    }
+
+    underTest.close();
+
+    assertThat(callbacks).isEmpty();
+  }
+
+  @Test
+  void observableWithAttributesAndAdvice() {
+    LongCounterBuilder builder =
+        MicrometerLongCounter.builder(meterSharedState, "counter")
+            .setDescription("description")
+            .setUnit("unit");
+
+    ((ExtendedLongCounterBuilder) builder)
+        .setAttributesAdvice(
+            Arrays.asList(
+                AttributeKey.stringKey(Constants.OTEL_INSTRUMENTATION_NAME),
+                AttributeKey.stringKey(Constants.OTEL_INSTRUMENTATION_VERSION),
+                AttributeKey.stringKey("key")));
+
+    AtomicLong atomicLong = new AtomicLong();
+    Attributes attributes =
+        Attributes.builder().put("key", "value").put("unwanted", "value").build();
+    ObservableLongCounter underTest =
+        builder.buildWithCallback(measurement -> measurement.record(atomicLong.get(), attributes));
 
     assertThat(callbacks).hasSize(1);
 
