@@ -160,6 +160,7 @@ public final class EcsResource {
         case "ContainerARN":
           arn = value;
           attrBuilders.put(ResourceAttributes.AWS_ECS_CONTAINER_ARN, value);
+          attrBuilders.put(ResourceAttributes.CLOUD_RESOURCE_ID, value);
           logArnBuilder.setContainerArn(value);
           break;
         case "Image":

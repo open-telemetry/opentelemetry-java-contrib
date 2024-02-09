@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Resource providers
+
+- Add support `cloud.account.id`, `cloud.availability_zone`, `cloud.region` and `cloud.resource_id`
+  ([#1171](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1171))
+
 ## Version 1.32.0 (2023-11-27)
 
 ### Disk buffering
