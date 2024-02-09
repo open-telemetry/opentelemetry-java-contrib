@@ -244,9 +244,6 @@ public class MicrometerLongHistogramTest {
     assertThat(counts)
         .hasSize(3)
         .containsExactly(
-            new CountAtBucket(10.0, 1),
-            new CountAtBucket(20.0, 2),
-            new CountAtBucket(30.0, 3)
-        );
+            new CountAtBucket(10.0, 1), new CountAtBucket(20.0, 2), new CountAtBucket(30.0, 3));
   }
 }
