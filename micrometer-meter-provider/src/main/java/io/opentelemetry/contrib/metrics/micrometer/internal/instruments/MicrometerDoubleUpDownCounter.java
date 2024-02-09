@@ -12,12 +12,11 @@ import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleUpDownCounterBuilder;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
 final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
-    implements DoubleUpDownCounter {
+    implements DoubleUpDownCounter, ObservableDoubleMeasurement {
   private MicrometerDoubleUpDownCounter(InstrumentState instrumentState) {
     super(instrumentState);
   }
@@ -37,22 +36,24 @@ final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
     add(attributes, value);
   }
 
-  static DoubleUpDownCounterBuilder builder(
-      MeterSharedState meterSharedState,
-      String name,
-      @Nullable String description,
-      @Nullable String unit) {
-    return new Builder(meterSharedState, name, description, unit);
+  @Override
+  public void record(double value) {
+    record(Attributes.empty(), value);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements DoubleUpDownCounterBuilder {
-    private Builder(
-        MeterSharedState meterSharedState,
-        String name,
-        @Nullable String description,
-        @Nullable String unit) {
-      super(meterSharedState, name, description, unit);
+  @Override
+  public void record(double value, Attributes attributes) {
+    record(attributes, value);
+  }
+
+  static DoubleUpDownCounterBuilder builder(MicrometerLongUpDownCounter.Builder parent) {
+    return new Builder(parent);
+  }
+
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements DoubleUpDownCounterBuilder, ExtendedDoubleUpDownCounterBuilder {
+    private Builder(MicrometerLongUpDownCounter.Builder parent) {
+      super(parent);
     }
 
     @Override
@@ -69,19 +70,7 @@ final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter
     public ObservableDoubleUpDownCounter buildWithCallback(
         Consumer<ObservableDoubleMeasurement> callback) {
       MicrometerDoubleUpDownCounter instrument = build();
-      return instrument.registerDoubleCallback(
-          callback,
-          new ObservableDoubleMeasurement() {
-            @Override
-            public void record(double value) {
-              instrument.record(value, Attributes.empty());
-            }
-
-            @Override
-            public void record(double value, Attributes attributes) {
-              instrument.record(value, attributes);
-            }
-          });
+      return instrument.registerDoubleCallback(callback, instrument);
     }
   }
 }

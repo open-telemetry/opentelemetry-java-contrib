@@ -22,7 +22,7 @@ abstract class AbstractUpDownCounter extends AbstractInstrument {
     counterMap.computeIfAbsent(attributesOrEmpty(attributes), this::createCounter).increment(value);
   }
 
-  protected final void record(double value, Attributes attributes) {
+  protected final void record(Attributes attributes, double value) {
     counterMap.computeIfAbsent(attributesOrEmpty(attributes), this::createCounter).set(value);
   }
 

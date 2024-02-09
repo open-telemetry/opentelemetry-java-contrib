@@ -12,51 +12,72 @@ import io.opentelemetry.api.metrics.ObservableDoubleGauge;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.DoubleGauge;
+import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleGaugeBuilder;
 import java.util.function.Consumer;
 
-public final class MicrometerDoubleGauge extends AbstractGauge {
+public final class MicrometerDoubleGauge extends AbstractGauge
+    implements DoubleGauge, ObservableDoubleMeasurement {
 
   private MicrometerDoubleGauge(InstrumentState instrumentState) {
     super(instrumentState);
   }
 
-  public static DoubleGaugeBuilder builder(MeterSharedState meterSharedState, String name) {
-    return new DoubleBuilder(meterSharedState, name);
+  @Override
+  public void set(double value) {
+    recordImpl(value, Attributes.empty());
   }
 
-  private static class DoubleBuilder extends AbstractInstrumentBuilder<DoubleBuilder>
-      implements DoubleGaugeBuilder {
+  @Override
+  public void set(double value, Attributes attributes) {
+    recordImpl(value, attributes);
+  }
 
-    private DoubleBuilder(MeterSharedState meterSharedState, String name) {
+  @Override
+  public void record(double value) {
+    recordImpl(value, Attributes.empty());
+  }
+
+  @Override
+  public void record(double value, Attributes attributes) {
+    recordImpl(value, attributes);
+  }
+
+  public static DoubleGaugeBuilder builder(MeterSharedState meterSharedState, String name) {
+    return new Builder(meterSharedState, name);
+  }
+
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements DoubleGaugeBuilder, ExtendedDoubleGaugeBuilder {
+
+    private Builder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
     }
 
     @Override
-    public DoubleBuilder self() {
+    public Builder self() {
       return this;
     }
 
     @Override
     public LongGaugeBuilder ofLongs() {
-      return MicrometerLongGauge.builder(meterSharedState, name, description, unit);
+      return MicrometerLongGauge.builder(this);
+    }
+
+    @Override
+    public DoubleGauge build() {
+      return new MicrometerDoubleGauge(createInstrumentState());
+    }
+
+    @Override
+    public ObservableDoubleMeasurement buildObserver() {
+      return new MicrometerDoubleGauge(createInstrumentState());
     }
 
     @Override
     public ObservableDoubleGauge buildWithCallback(Consumer<ObservableDoubleMeasurement> callback) {
       MicrometerDoubleGauge instrument = new MicrometerDoubleGauge(createInstrumentState());
-      return instrument.registerDoubleCallback(
-          callback,
-          new ObservableDoubleMeasurement() {
-            @Override
-            public void record(double value) {
-              record(value, Attributes.empty());
-            }
-
-            @Override
-            public void record(double value, Attributes attributes) {
-              instrument.record(value, attributes);
-            }
-          });
+      return instrument.registerDoubleCallback(callback, instrument);
     }
   }
 }

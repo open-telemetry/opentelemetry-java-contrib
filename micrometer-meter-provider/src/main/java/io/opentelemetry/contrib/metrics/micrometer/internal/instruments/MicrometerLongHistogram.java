@@ -10,8 +10,8 @@ import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.LongHistogramBuilder;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import javax.annotation.Nullable;
+import io.opentelemetry.extension.incubator.metrics.ExtendedLongHistogramBuilder;
+import java.util.List;
 
 final class MicrometerLongHistogram extends AbstractHistogram implements LongHistogram {
 
@@ -34,22 +34,19 @@ final class MicrometerLongHistogram extends AbstractHistogram implements LongHis
     distribution(attributes).record((double) value);
   }
 
-  public static LongHistogramBuilder builder(
-      MeterSharedState meterSharedState,
-      String name,
-      @Nullable String description,
-      @Nullable String unit) {
-    return new Builder(meterSharedState, name, description, unit);
+  public static LongHistogramBuilder builder(MicrometerDoubleHistogram.Builder parent) {
+    return new Builder(parent);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements LongHistogramBuilder {
-    private Builder(
-        MeterSharedState meterSharedState,
-        String name,
-        @Nullable String description,
-        @Nullable String unit) {
-      super(meterSharedState, name, description, unit);
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements LongHistogramBuilder, ExtendedLongHistogramBuilder {
+    private Builder(MicrometerDoubleHistogram.Builder parent) {
+      super(parent);
+    }
+
+    @Override
+    public LongHistogramBuilder setExplicitBucketBoundariesAdvice(List<Long> bucketBoundaries) {
+      return super.setExplicitBucketBoundaries(bucketBoundaries);
     }
 
     @Override

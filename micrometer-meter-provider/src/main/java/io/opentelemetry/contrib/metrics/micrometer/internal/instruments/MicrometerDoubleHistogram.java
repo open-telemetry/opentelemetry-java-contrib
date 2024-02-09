@@ -12,6 +12,8 @@ import io.opentelemetry.api.metrics.LongHistogramBuilder;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleHistogramBuilder;
+import java.util.List;
 
 public final class MicrometerDoubleHistogram extends AbstractHistogram implements DoubleHistogram {
 
@@ -38,10 +40,15 @@ public final class MicrometerDoubleHistogram extends AbstractHistogram implement
     return new Builder(meterSharedState, name);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements DoubleHistogramBuilder {
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements DoubleHistogramBuilder, ExtendedDoubleHistogramBuilder {
     private Builder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
+    }
+
+    @Override
+    public DoubleHistogramBuilder setExplicitBucketBoundariesAdvice(List<Double> bucketBoundaries) {
+      return super.setExplicitBucketBoundaries(bucketBoundaries);
     }
 
     @Override
@@ -51,7 +58,7 @@ public final class MicrometerDoubleHistogram extends AbstractHistogram implement
 
     @Override
     public LongHistogramBuilder ofLongs() {
-      return MicrometerLongHistogram.builder(meterSharedState, name, description, unit);
+      return MicrometerLongHistogram.builder(this);
     }
 
     @Override

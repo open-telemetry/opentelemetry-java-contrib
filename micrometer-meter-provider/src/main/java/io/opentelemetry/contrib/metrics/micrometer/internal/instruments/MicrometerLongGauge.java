@@ -10,31 +10,44 @@ import io.opentelemetry.api.metrics.LongGaugeBuilder;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedLongGaugeBuilder;
+import io.opentelemetry.extension.incubator.metrics.LongGauge;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
-public final class MicrometerLongGauge extends AbstractGauge {
+public final class MicrometerLongGauge extends AbstractGauge
+    implements LongGauge, ObservableLongMeasurement {
   public MicrometerLongGauge(InstrumentState instrumentState) {
     super(instrumentState);
   }
 
-  public static LongGaugeBuilder builder(
-      MeterSharedState meterSharedState,
-      String name,
-      @Nullable String description,
-      @Nullable String unit) {
-    return new Builder(meterSharedState, name, description, unit);
+  static LongGaugeBuilder builder(MicrometerDoubleGauge.Builder parent) {
+    return new Builder(parent);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements LongGaugeBuilder {
-    private Builder(
-        MeterSharedState meterSharedState,
-        String name,
-        @Nullable String description,
-        @Nullable String unit) {
-      super(meterSharedState, name, description, unit);
+  @Override
+  public void set(long value) {
+    recordImpl((double) value, Attributes.empty());
+  }
+
+  @Override
+  public void set(long value, Attributes attributes) {
+    recordImpl((double) value, attributes);
+  }
+
+  @Override
+  public void record(long value) {
+    recordImpl((double) value, Attributes.empty());
+  }
+
+  @Override
+  public void record(long value, Attributes attributes) {
+    recordImpl((double) value, attributes);
+  }
+
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements LongGaugeBuilder, ExtendedLongGaugeBuilder {
+    private Builder(MicrometerDoubleGauge.Builder parent) {
+      super(parent);
     }
 
     @Override
@@ -43,21 +56,19 @@ public final class MicrometerLongGauge extends AbstractGauge {
     }
 
     @Override
+    public LongGauge build() {
+      return new MicrometerLongGauge(createInstrumentState());
+    }
+
+    @Override
+    public ObservableLongMeasurement buildObserver() {
+      return new MicrometerLongGauge(createInstrumentState());
+    }
+
+    @Override
     public ObservableLongGauge buildWithCallback(Consumer<ObservableLongMeasurement> callback) {
       MicrometerLongGauge instrument = new MicrometerLongGauge(createInstrumentState());
-      return instrument.registerLongCallback(
-          callback,
-          new ObservableLongMeasurement() {
-            @Override
-            public void record(long value) {
-              record(value, Attributes.empty());
-            }
-
-            @Override
-            public void record(long value, Attributes attributes) {
-              instrument.record((double) value, attributes);
-            }
-          });
+      return instrument.registerLongCallback(callback, instrument);
     }
   }
 }

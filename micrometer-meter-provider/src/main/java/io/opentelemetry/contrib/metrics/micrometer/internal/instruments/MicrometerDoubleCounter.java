@@ -12,11 +12,11 @@ import io.opentelemetry.api.metrics.ObservableDoubleCounter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleCounterBuilder;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
-final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCounter {
+final class MicrometerDoubleCounter extends AbstractCounter
+    implements DoubleCounter, ObservableDoubleMeasurement {
 
   private MicrometerDoubleCounter(InstrumentState instrumentState) {
     super(instrumentState);
@@ -24,41 +24,37 @@ final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCou
 
   @Override
   public void add(double value) {
-    if (value >= 0.0) {
-      counter(Attributes.empty()).increment(value);
-    }
+    increment(Attributes.empty(), value);
   }
 
   @Override
   public void add(double value, Attributes attributes) {
-    if (value >= 0.0) {
-      counter(attributes).increment(value);
-    }
+    increment(attributes, value);
   }
 
   @Override
   public void add(double value, Attributes attributes, Context context) {
-    if (value >= 0.0) {
-      counter(attributes).increment(value);
-    }
+    increment(attributes, value);
   }
 
-  public static DoubleCounterBuilder builder(
-      MeterSharedState meterSharedState,
-      String name,
-      @Nullable String description,
-      @Nullable String unit) {
-    return new Builder(meterSharedState, name, description, unit);
+  @Override
+  public void record(double value) {
+    setMonotonically(Attributes.empty(), value);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements DoubleCounterBuilder {
-    private Builder(
-        MeterSharedState meterSharedState,
-        String name,
-        @Nullable String description,
-        @Nullable String unit) {
-      super(meterSharedState, name, description, unit);
+  @Override
+  public void record(double value, Attributes attributes) {
+    setMonotonically(attributes, value);
+  }
+
+  public static DoubleCounterBuilder builder(MicrometerLongCounter.Builder parent) {
+    return new Builder(parent);
+  }
+
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements DoubleCounterBuilder, ExtendedDoubleCounterBuilder {
+    private Builder(MicrometerLongCounter.Builder parent) {
+      super(parent);
     }
 
     @Override
@@ -75,19 +71,7 @@ final class MicrometerDoubleCounter extends AbstractCounter implements DoubleCou
     public ObservableDoubleCounter buildWithCallback(
         Consumer<ObservableDoubleMeasurement> callback) {
       MicrometerDoubleCounter instrument = build();
-      return instrument.registerDoubleCallback(
-          callback,
-          new ObservableDoubleMeasurement() {
-            @Override
-            public void record(double value) {
-              record(value, Attributes.empty());
-            }
-
-            @Override
-            public void record(double value, Attributes attributes) {
-              instrument.record(value, attributes);
-            }
-          });
+      return instrument.registerDoubleCallback(callback, instrument);
     }
   }
 }

@@ -27,7 +27,13 @@ abstract class AbstractCounter extends AbstractInstrument {
         .register(meterRegistry());
   }
 
-  protected final void record(double value, Attributes attributes) {
+  protected final void increment(Attributes attributes, double value) {
+    if (value >= 0.0) {
+      counter(attributes).increment(value);
+    }
+  }
+
+  protected final void setMonotonically(Attributes attributes, double value) {
     counterMap
         .computeIfAbsent(attributesOrEmpty(attributes), this::createAsyncCounter)
         .setMonotonically(value);

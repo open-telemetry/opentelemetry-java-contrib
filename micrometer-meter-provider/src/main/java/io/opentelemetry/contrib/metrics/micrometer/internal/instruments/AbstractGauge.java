@@ -18,7 +18,7 @@ abstract class AbstractGauge extends AbstractInstrument {
     super(instrumentState);
   }
 
-  protected final void record(double value, Attributes attributes) {
+  protected final void recordImpl(double value, Attributes attributes) {
     gaugeMap.computeIfAbsent(attributesOrEmpty(attributes), this::createAsyncGauge).set(value);
   }
 

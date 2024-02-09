@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
@@ -17,8 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -28,6 +31,7 @@ abstract class AbstractInstrument {
   private final Logger logger;
   private final Tag instrumentationNameTag;
   private final Tag instrumentationVersionTag;
+  private final Predicate<AttributeKey<?>> attributeKeyPredicate;
   private final Map<Attributes, Iterable<Tag>> attributesTagsCache;
 
   protected AbstractInstrument(InstrumentState instrumentState) {
@@ -35,6 +39,12 @@ abstract class AbstractInstrument {
     this.logger = Logger.getLogger(getClass().getName());
     this.instrumentationNameTag = instrumentState.instrumentationScopeNameTag();
     this.instrumentationVersionTag = instrumentState.instrumentationScopeVersionTag();
+    Set<AttributeKey<?>> attributes = instrumentState.attributes();
+    if (attributes != null) {
+      attributeKeyPredicate = attributes::contains;
+    } else {
+      attributeKeyPredicate = key -> true;
+    }
     this.attributesTagsCache = new ConcurrentHashMap<>();
   }
 
@@ -69,7 +79,11 @@ abstract class AbstractInstrument {
   private Iterable<Tag> calculateTags(Attributes attributes) {
     List<Tag> list = new ArrayList<>(attributes.size() + 2);
     attributes.forEach(
-        (attributeKey, value) -> list.add(Tag.of(attributeKey.getKey(), Objects.toString(value))));
+        (attributeKey, value) -> {
+          if (attributeKeyPredicate.test(attributeKey)) {
+            list.add(Tag.of(attributeKey.getKey(), Objects.toString(value)));
+          }
+        });
 
     list.add(instrumentationNameTag);
     list.add(instrumentationVersionTag);

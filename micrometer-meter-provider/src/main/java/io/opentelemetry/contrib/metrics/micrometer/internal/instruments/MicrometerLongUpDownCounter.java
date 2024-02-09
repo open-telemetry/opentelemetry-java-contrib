@@ -14,10 +14,11 @@ import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedLongUpDownCounterBuilder;
 import java.util.function.Consumer;
 
 public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
-    implements LongUpDownCounter {
+    implements LongUpDownCounter, ObservableLongMeasurement {
   private MicrometerLongUpDownCounter(InstrumentState instrumentState) {
     super(instrumentState);
   }
@@ -37,12 +38,22 @@ public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
     add(attributes, (double) value);
   }
 
+  @Override
+  public void record(long value) {
+    record(Attributes.empty(), (double) value);
+  }
+
+  @Override
+  public void record(long value, Attributes attributes) {
+    record(attributes, (double) value);
+  }
+
   public static LongUpDownCounterBuilder builder(MeterSharedState meterSharedState, String name) {
     return new Builder(meterSharedState, name);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements LongUpDownCounterBuilder {
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements LongUpDownCounterBuilder, ExtendedLongUpDownCounterBuilder {
     private Builder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
     }
@@ -54,7 +65,7 @@ public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
 
     @Override
     public DoubleUpDownCounterBuilder ofDoubles() {
-      return MicrometerDoubleUpDownCounter.builder(meterSharedState, name, description, unit);
+      return MicrometerDoubleUpDownCounter.builder(this);
     }
 
     @Override
@@ -66,19 +77,7 @@ public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
     public ObservableLongUpDownCounter buildWithCallback(
         Consumer<ObservableLongMeasurement> callback) {
       MicrometerLongUpDownCounter instrument = build();
-      return instrument.registerLongCallback(
-          callback,
-          new ObservableLongMeasurement() {
-            @Override
-            public void record(long value) {
-              instrument.record((double) value, Attributes.empty());
-            }
-
-            @Override
-            public void record(long value, Attributes attributes) {
-              instrument.record((double) value, attributes);
-            }
-          });
+      return instrument.registerLongCallback(callback, instrument);
     }
   }
 }
