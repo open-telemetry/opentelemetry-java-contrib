@@ -179,7 +179,7 @@ public class MicrometerDoubleCounterTest {
   }
 
   @Test
-  void addWithAttributesAndAdvice() {
+  void addWithAttributesAndAttributesAdvice() {
     DoubleCounterBuilder builder =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .ofDoubles()
@@ -339,7 +339,7 @@ public class MicrometerDoubleCounterTest {
   }
 
   @Test
-  void observableWithAttributesAndAdvice() {
+  void observableWithAttributesAndAttributesAdvice() {
     DoubleCounterBuilder builder =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .ofDoubles()

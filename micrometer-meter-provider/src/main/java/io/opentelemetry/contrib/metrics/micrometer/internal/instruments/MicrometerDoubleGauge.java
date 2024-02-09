@@ -25,22 +25,22 @@ public final class MicrometerDoubleGauge extends AbstractGauge
 
   @Override
   public void set(double value) {
-    recordImpl(value, Attributes.empty());
+    record(Attributes.empty(), value);
   }
 
   @Override
   public void set(double value, Attributes attributes) {
-    recordImpl(value, attributes);
+    record(attributes, value);
   }
 
   @Override
   public void record(double value) {
-    recordImpl(value, Attributes.empty());
+    record(Attributes.empty(), value);
   }
 
   @Override
   public void record(double value, Attributes attributes) {
-    recordImpl(value, attributes);
+    record(attributes, value);
   }
 
   public static DoubleGaugeBuilder builder(MeterSharedState meterSharedState, String name) {

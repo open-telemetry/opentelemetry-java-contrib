@@ -26,22 +26,22 @@ public final class MicrometerLongGauge extends AbstractGauge
 
   @Override
   public void set(long value) {
-    recordImpl((double) value, Attributes.empty());
+    record(Attributes.empty(), (double) value);
   }
 
   @Override
   public void set(long value, Attributes attributes) {
-    recordImpl((double) value, attributes);
+    record(attributes, (double) value);
   }
 
   @Override
   public void record(long value) {
-    recordImpl((double) value, Attributes.empty());
+    record(Attributes.empty(), (double) value);
   }
 
   @Override
   public void record(long value, Attributes attributes) {
-    recordImpl((double) value, attributes);
+    record(attributes, (double) value);
   }
 
   static final class Builder extends AbstractInstrumentBuilder<Builder>

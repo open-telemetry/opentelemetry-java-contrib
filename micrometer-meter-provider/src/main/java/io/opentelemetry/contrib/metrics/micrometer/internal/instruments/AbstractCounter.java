@@ -35,7 +35,7 @@ abstract class AbstractCounter extends AbstractInstrument {
 
   protected final void setMonotonically(Attributes attributes, double value) {
     counterMap
-        .computeIfAbsent(attributesOrEmpty(attributes), this::createAsyncCounter)
+        .computeIfAbsent(effectiveAttributes(attributes), this::createAsyncCounter)
         .setMonotonically(value);
   }
 

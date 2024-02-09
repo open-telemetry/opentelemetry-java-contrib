@@ -163,7 +163,7 @@ public class MicrometerLongHistogramTest {
   }
 
   @Test
-  void addWithAttributesAndAdvice() {
+  void addWithAttributesAndAttributesAdvice() {
     LongHistogramBuilder builder =
         MicrometerDoubleHistogram.builder(meterSharedState, "histogram")
             .ofLongs()

@@ -18,8 +18,8 @@ abstract class AbstractGauge extends AbstractInstrument {
     super(instrumentState);
   }
 
-  protected final void recordImpl(double value, Attributes attributes) {
-    gaugeMap.computeIfAbsent(attributesOrEmpty(attributes), this::createAsyncGauge).set(value);
+  protected final void record(Attributes attributes, double value) {
+    gaugeMap.computeIfAbsent(effectiveAttributes(attributes), this::createAsyncGauge).set(value);
   }
 
   private AtomicDoubleCounter createAsyncGauge(Attributes attributes) {

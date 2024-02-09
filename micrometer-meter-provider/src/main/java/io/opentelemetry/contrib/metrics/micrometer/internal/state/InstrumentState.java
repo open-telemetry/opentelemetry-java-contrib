@@ -9,9 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -25,7 +23,7 @@ public final class InstrumentState {
   private final String name;
   @Nullable private final String description;
   @Nullable private final String unit;
-  @Nullable private final Set<AttributeKey<?>> attributes;
+  @Nullable private final List<AttributeKey<?>> attributes;
   @Nullable private final List<? extends Number> explicitBucketBoundaries;
 
   public InstrumentState(
@@ -39,11 +37,7 @@ public final class InstrumentState {
     this.name = name;
     this.description = description;
     this.unit = unit;
-    if (attributes == null) {
-      this.attributes = null;
-    } else {
-      this.attributes = new HashSet<>(attributes);
-    }
+    this.attributes = attributes;
     this.explicitBucketBoundaries = explicitBucketBoundaries;
   }
 
@@ -78,12 +72,12 @@ public final class InstrumentState {
   }
 
   @Nullable
-  public Set<AttributeKey<?>> attributes() {
+  public List<AttributeKey<?>> attributesAdvice() {
     return attributes;
   }
 
   @Nullable
-  public List<? extends Number> explicitBucketBoundaries() {
+  public List<? extends Number> explicitBucketBoundariesAdvice() {
     return explicitBucketBoundaries;
   }
 }

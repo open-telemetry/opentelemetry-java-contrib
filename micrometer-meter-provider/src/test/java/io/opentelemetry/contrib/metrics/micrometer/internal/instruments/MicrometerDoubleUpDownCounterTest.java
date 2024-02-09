@@ -163,7 +163,7 @@ public class MicrometerDoubleUpDownCounterTest {
   }
 
   @Test
-  void addWithAttributesAndAdvice() {
+  void addWithAttributesAndAttributesAdvice() {
     DoubleUpDownCounterBuilder builder =
         MicrometerLongUpDownCounter.builder(meterSharedState, "upDownCounter")
             .ofDoubles()
@@ -300,7 +300,7 @@ public class MicrometerDoubleUpDownCounterTest {
   }
 
   @Test
-  void observableWithAttributesAndAdvice() {
+  void observableWithAttributesAndAttributesAdvice() {
     DoubleUpDownCounterBuilder builder =
         MicrometerLongUpDownCounter.builder(meterSharedState, "upDownCounter")
             .ofDoubles()

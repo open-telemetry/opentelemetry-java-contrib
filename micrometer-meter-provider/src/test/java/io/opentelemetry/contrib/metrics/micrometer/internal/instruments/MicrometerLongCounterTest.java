@@ -180,7 +180,7 @@ public class MicrometerLongCounterTest {
   }
 
   @Test
-  void addWithAttributesAndAdvice() {
+  void addWithAttributesAndAttributesAdvice() {
     LongCounterBuilder builder =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .setDescription("description")
@@ -335,7 +335,7 @@ public class MicrometerLongCounterTest {
   }
 
   @Test
-  void observableWithAttributesAndAdvice() {
+  void observableWithAttributesAndAttributesAdvice() {
     LongCounterBuilder builder =
         MicrometerLongCounter.builder(meterSharedState, "counter")
             .setDescription("description")

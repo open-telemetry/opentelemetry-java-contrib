@@ -124,7 +124,7 @@ public class MicrometerLongGaugeTest {
   }
 
   @Test
-  void observableWithAttributesAndAdvice() {
+  void observableWithAttributesAndAttributesAdvice() {
     LongGaugeBuilder builder =
         MicrometerDoubleGauge.builder(meterSharedState, "gauge")
             .ofLongs()

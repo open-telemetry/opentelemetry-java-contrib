@@ -160,7 +160,7 @@ public class MicrometerDoubleHistogramTest {
   }
 
   @Test
-  void addWithAttributesAndAdvice() {
+  void addWithAttributesAndAttributesAdvice() {
 
     DoubleHistogramBuilder builder =
         MicrometerDoubleHistogram.builder(meterSharedState, "histogram")

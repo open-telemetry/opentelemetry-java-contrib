@@ -123,7 +123,7 @@ public class MicrometerDoubleGaugeTest {
   }
 
   @Test
-  void observableWithAttributesAndAdvice() {
+  void observableWithAttributesAndAttributesAdvice() {
     AtomicDoubleCounter atomicDoubleCounter = new AtomicDoubleCounter();
     Attributes attributes =
         Attributes.builder().put("key", "value").put("unwanted", "value").build();

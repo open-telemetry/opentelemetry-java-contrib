@@ -16,7 +16,7 @@ abstract class AbstractHistogram extends AbstractInstrument {
 
   protected AbstractHistogram(InstrumentState instrumentState) {
     super(instrumentState);
-    this.explicitBucketBoundaries = instrumentState.explicitBucketBoundaries();
+    this.explicitBucketBoundaries = instrumentState.explicitBucketBoundariesAdvice();
   }
 
   public DistributionSummary distribution(Attributes attributes) {
@@ -25,7 +25,6 @@ abstract class AbstractHistogram extends AbstractInstrument {
         .description(description())
         .baseUnit(unit())
         .serviceLevelObjectives(serviceLevelObjectives(explicitBucketBoundaries))
-        .publishPercentileHistogram(publishPercentileHistogram(explicitBucketBoundaries))
         .register(meterRegistry());
   }
 
@@ -40,10 +39,5 @@ abstract class AbstractHistogram extends AbstractInstrument {
       slos[i] = explicitBucketBoundaries.get(i).doubleValue();
     }
     return slos;
-  }
-
-  private static boolean publishPercentileHistogram(
-      @Nullable List<? extends Number> explicitBucketBoundaries) {
-    return explicitBucketBoundaries != null;
   }
 }
