@@ -24,19 +24,26 @@ abstract class AbstractHistogram extends AbstractInstrument {
         .tags(attributesToTags(attributes))
         .description(description())
         .baseUnit(unit())
-        .sla(sla(explicitBucketBoundaries))
+        .serviceLevelObjectives(serviceLevelObjectives(explicitBucketBoundaries))
+        .publishPercentileHistogram(publishPercentileHistogram(explicitBucketBoundaries))
         .register(meterRegistry());
   }
 
   @Nullable
-  private static long[] sla(@Nullable List<? extends Number> explicitBucketBoundaries) {
+  private static double[] serviceLevelObjectives(
+      @Nullable List<? extends Number> explicitBucketBoundaries) {
     if (explicitBucketBoundaries == null) {
       return null;
     }
-    long[] sla = new long[explicitBucketBoundaries.size()];
+    double[] slos = new double[explicitBucketBoundaries.size()];
     for (int i = 0; i < explicitBucketBoundaries.size(); i++) {
-      sla[i] = explicitBucketBoundaries.get(i).longValue();
+      slos[i] = explicitBucketBoundaries.get(i).doubleValue();
     }
-    return sla;
+    return slos;
+  }
+
+  private static boolean publishPercentileHistogram(
+      @Nullable List<? extends Number> explicitBucketBoundaries) {
+    return explicitBucketBoundaries != null;
   }
 }

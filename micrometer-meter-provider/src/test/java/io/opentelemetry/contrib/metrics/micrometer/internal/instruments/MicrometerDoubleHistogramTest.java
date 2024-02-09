@@ -10,6 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.distribution.CountAtBucket;
+import io.micrometer.core.instrument.distribution.HistogramSnapshot;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -204,5 +206,43 @@ public class MicrometerDoubleHistogramTest {
       assertThat(summary.count()).isEqualTo(expectedCount);
       assertThat(summary.totalAmount()).isEqualTo(expectedTotal);
     }
+  }
+
+  @Test
+  void addWithExplicitBucketBoundaries() {
+    DoubleHistogram underTest =
+        MicrometerDoubleHistogram.builder(meterSharedState, "histogram")
+            .setDescription("description")
+            .setUnit("unit")
+            .setExplicitBucketBoundariesAdvice(Arrays.asList(10.0, 20.0, 30.0))
+            .build();
+
+    underTest.record(5.0);
+    underTest.record(15.0);
+    underTest.record(25.0);
+    underTest.record(35.0);
+
+    DistributionSummary summary = meterRegistry.find("histogram").summary();
+    assertThat(summary).isNotNull();
+    Meter.Id id = summary.getId();
+    assertThat(id.getName()).isEqualTo("histogram");
+    assertThat(id.getTags())
+        .containsExactlyInAnyOrder(
+            Tag.of(Constants.OTEL_INSTRUMENTATION_NAME, "meter"),
+            Tag.of(Constants.OTEL_INSTRUMENTATION_VERSION, "1.0"));
+    assertThat(id.getDescription()).isEqualTo("description");
+    assertThat(id.getBaseUnit()).isEqualTo("unit");
+    assertThat(summary.count()).isEqualTo(4);
+    assertThat(summary.totalAmount()).isEqualTo(80.0);
+
+    HistogramSnapshot snapshot = summary.takeSnapshot();
+    CountAtBucket[] counts = snapshot.histogramCounts();
+    assertThat(counts)
+        .hasSize(3)
+        .containsExactly(
+            new CountAtBucket(10.0, 1),
+            new CountAtBucket(20.0, 2),
+            new CountAtBucket(30.0, 3)
+        );
   }
 }
