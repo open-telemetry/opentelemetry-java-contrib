@@ -100,12 +100,10 @@ class EcsResourceTest {
             entry(
                 ResourceAttributes.AWS_ECS_CONTAINER_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
-            entry(
-                ResourceAttributes.AWS_LOG_GROUP_NAMES, singletonList("/ecs/metadata")),
+            entry(ResourceAttributes.AWS_LOG_GROUP_NAMES, singletonList("/ecs/metadata")),
             entry(
                 ResourceAttributes.AWS_LOG_GROUP_ARNS,
-                singletonList(
-                    "arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
+                singletonList("arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
             entry(
                 ResourceAttributes.AWS_LOG_STREAM_NAMES,
                 singletonList("ecs/curl/8f03e41243824aea923aca126495f665")),
