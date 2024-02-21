@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.33.0 (2024-02-21)
 
 ### compressors/
 
