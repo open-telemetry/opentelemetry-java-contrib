@@ -4,7 +4,7 @@
 
 ## Version 1.33.0 (2024-02-21)
 
-### Compressors
+### compressors/
 
 - Add zstd compressor implementation for OTLP exporters
   ([#1108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1108))
