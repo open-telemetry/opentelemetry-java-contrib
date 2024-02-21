@@ -33,6 +33,8 @@ class EcsResourceTest {
 
   @Mock private SimpleHttpClient mockHttpClient;
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV3() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();
@@ -67,6 +69,8 @@ class EcsResourceTest {
             entry(ResourceAttributes.AWS_ECS_TASK_REVISION, "5"));
   }
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV4() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();
@@ -99,10 +103,12 @@ class EcsResourceTest {
             entry(
                 ResourceAttributes.AWS_ECS_CONTAINER_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
-            entry(ResourceAttributes.AWS_LOG_GROUP_NAMES, Collections.singletonList("/ecs/metadata")),
+            entry(
+                ResourceAttributes.AWS_LOG_GROUP_NAMES, Collections.singletonList("/ecs/metadata")),
             entry(
                 ResourceAttributes.AWS_LOG_GROUP_ARNS,
-                Collections.singletonList("arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
+                Collections.singletonList(
+                    "arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
             entry(
                 ResourceAttributes.AWS_LOG_STREAM_NAMES,
                 Collections.singletonList("ecs/curl/8f03e41243824aea923aca126495f665")),

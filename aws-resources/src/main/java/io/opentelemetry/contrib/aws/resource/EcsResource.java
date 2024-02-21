@@ -99,6 +99,8 @@ public final class EcsResource {
     }
   }
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   static void parseResponse(
       JsonParser parser, AttributesBuilder attrBuilders, LogArnBuilder logArnBuilder)
       throws IOException {
@@ -124,6 +126,7 @@ public final class EcsResource {
           DockerImage parsedImage = DockerImage.parse(value);
           if (parsedImage != null) {
             attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_NAME, parsedImage.getRepository());
+            // TODO: CONTAINER_IMAGE_TAG has been replaced with CONTAINER_IMAGE_TAGS
             attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_TAG, parsedImage.getTag());
           }
           break;
