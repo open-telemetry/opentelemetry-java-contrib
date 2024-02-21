@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.33.0 (2024-02-21)
+
 ### compressors/
 
 - Add zstd compressor implementation for OTLP exporters
