@@ -56,7 +56,7 @@ class EcsResourceTest {
                 ResourceAttributes.CONTAINER_ID,
                 "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946"),
             entry(ResourceAttributes.CONTAINER_IMAGE_NAME, "nrdlngr/nginx-curl"),
-            entry(ResourceAttributes.CONTAINER_IMAGE_TAGS, "latest"),
+            entry(ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
                 "sha256:2e00ae64383cfc865ba0a2ba37f61b50a120d2d9378559dcd458dc0de47bc165"),
@@ -92,7 +92,7 @@ class EcsResourceTest {
             entry(
                 ResourceAttributes.CONTAINER_IMAGE_NAME,
                 "111122223333.dkr.ecr.us-west-2.amazonaws.com/curltest"),
-            entry(ResourceAttributes.CONTAINER_IMAGE_TAGS, "latest"),
+            entry(ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
                 "sha256:d691691e9652791a60114e67b365688d20d19940dde7c4736ea30e660d8d3553"),

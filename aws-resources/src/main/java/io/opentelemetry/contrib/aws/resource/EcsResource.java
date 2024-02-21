@@ -124,7 +124,7 @@ public final class EcsResource {
           DockerImage parsedImage = DockerImage.parse(value);
           if (parsedImage != null) {
             attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_NAME, parsedImage.getRepository());
-            attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_TAGS, parsedImage.getTag());
+            attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_TAG, parsedImage.getTag());
           }
           break;
         case "ImageID":
