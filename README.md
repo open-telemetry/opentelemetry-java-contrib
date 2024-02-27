@@ -67,7 +67,7 @@ Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/
 
 Emeritus maintainers:
 
-- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
+- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
