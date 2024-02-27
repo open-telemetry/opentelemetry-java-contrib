@@ -56,18 +56,18 @@ Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-t
 
 Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
 
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
 - [John Watson](https://github.com/jkwatson), Verta.ai
-- [Lauri Tulmin](https://github.com/laurit), Splunk
 
 Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
 
 - [Jack Berg](https://github.com/jack-berg), New Relic
-- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
+- [Jason Plumb](https://github.com/breedx-splk), Splunk
+- [Lauri Tulmin](https://github.com/laurit), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
 
 Emeritus maintainers:
 
+- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
