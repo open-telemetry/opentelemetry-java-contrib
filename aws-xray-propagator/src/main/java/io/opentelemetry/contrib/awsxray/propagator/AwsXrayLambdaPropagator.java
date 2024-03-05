@@ -60,21 +60,21 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
 
   @Override
   public <C> Context extract(Context context, @Nullable C carrier, TextMapGetter<C> getter) {
-    if (Span.fromContext(context).getSpanContext().isValid()) {
-      return xrayPropagator.extract(context, carrier, getter);
-    }
+    Context xrayContext = xrayPropagator.extract(context, carrier, getter);
 
-    context = xrayPropagator.extract(context, carrier, getter);
+    if (Span.fromContext(context).getSpanContext().isValid()) {
+      return xrayContext;
+    }
 
     String traceHeader = System.getProperty(AWS_TRACE_HEADER_PROP);
     if (isEmptyOrNull(traceHeader)) {
       traceHeader = System.getenv(AWS_TRACE_HEADER_ENV_KEY);
     }
     if (isEmptyOrNull(traceHeader)) {
-      return context;
+      return xrayContext;
     }
     return xrayPropagator.extract(
-        context,
+        xrayContext,
         Collections.singletonMap(AwsXrayPropagator.TRACE_HEADER_KEY, traceHeader),
         MapGetter.INSTANCE);
   }
