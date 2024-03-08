@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
  *     ContextPropagators.create(
  *         TextMapPropagator.composite(
  *             W3CTraceContextPropagator.getInstance(),
- *             AwsXrayEnvPropagator.getInstance())))
+ *             AwsXrayLambdaPropagator.getInstance())))
  *    .build();
  * }</pre>
  */
