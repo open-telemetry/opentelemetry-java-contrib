@@ -126,7 +126,7 @@ public final class SpanDataMapper {
   }
 
   private static StatusData mapStatusDataToSdk(Status source) {
-    return StatusData.create(getStatusCode(source.code.getValue()), source.message);
+    return StatusData.create(getStatusCode(source.code), source.message);
   }
 
   private static Span.Event eventDataToProto(EventData source) {
@@ -269,13 +269,16 @@ public final class SpanDataMapper {
     return droppedCount + itemsCount;
   }
 
-  private static StatusCode getStatusCode(int ordinal) {
-    for (StatusCode statusCode : StatusCode.values()) {
-      if (statusCode.ordinal() == ordinal) {
-        return statusCode;
-      }
+  private static StatusCode getStatusCode(Status.StatusCode source) {
+    switch (source) {
+      case STATUS_CODE_UNSET:
+        return StatusCode.UNSET;
+      case STATUS_CODE_OK:
+        return StatusCode.OK;
+      case STATUS_CODE_ERROR:
+        return StatusCode.ERROR;
     }
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("Unexpected enum constant: " + source);
   }
 
   private static List<KeyValue> attributesToProto(Attributes source) {
