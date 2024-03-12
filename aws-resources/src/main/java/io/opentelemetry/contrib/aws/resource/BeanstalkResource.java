@@ -64,7 +64,7 @@ public final class BeanstalkResource {
       while (parser.nextToken() != JsonToken.END_OBJECT) {
         parser.nextValue();
         String value = parser.getText();
-        switch (parser.getCurrentName()) {
+        switch (parser.currentName()) {
           case DEVELOPMENT_ID:
             attrBuilders.put(ResourceAttributes.SERVICE_INSTANCE_ID, value);
             break;
