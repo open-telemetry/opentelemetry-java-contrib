@@ -13,7 +13,7 @@ import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -40,8 +40,10 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.junit.jupiter.api.Test;
 
 /**
- * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. See
- * https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java
+ * TODO Find a better solution to instantiate a MavenProject and a MojoExecutionEvent. Unfortunately
+ * the <a
+ * href="https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java">Takari
+ * testing framework</a> can't test Maven extensions.
  */
 @SuppressWarnings({"DeduplicateConstants", "deprecation"})
 public class MojoGoalExecutionHandlerTest {
@@ -81,7 +83,8 @@ public class MojoGoalExecutionHandlerTest {
               "https://maven.example.com/repository/maven-snapshots/io/opentelemetry/contrib/maven/test-jar/1.0-SNAPSHOT");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_REPOSITORY_URL))
           .isEqualTo("https://maven.example.com/repository/maven-snapshots/");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("maven.example.com");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME))
+          .isEqualTo("maven.example.com");
 
       assertThat(span.getKind()).isEqualTo(SpanKind.CLIENT);
     }
@@ -125,7 +128,7 @@ public class MojoGoalExecutionHandlerTest {
           .isEqualTo(Collections.singletonList("latest"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
     }
@@ -169,7 +172,7 @@ public class MojoGoalExecutionHandlerTest {
           .isEqualTo(Collections.singletonList("${project.version}"));
 
       assertThat(span.getAttribute(SemanticAttributes.HTTP_URL)).isEqualTo("https://docker.io");
-      assertThat(span.getAttribute(SemanticAttributes.PEER_SERVICE)).isEqualTo("docker.io");
+      assertThat(span.getAttribute(SemanticAttributes.NET_PEER_NAME)).isEqualTo("docker.io");
       assertThat(span.getAttribute(MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL))
           .isEqualTo("https://docker.io");
     }

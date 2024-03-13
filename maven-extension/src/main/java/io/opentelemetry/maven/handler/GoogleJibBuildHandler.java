@@ -9,7 +9,8 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.maven.semconv.SemconvStability;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +20,10 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** See https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin */
+/**
+ * See <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">Jit Maven
+ * Plugin</a>
+ */
 final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GoogleJibBuildHandler.class);
 
@@ -29,6 +33,7 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
         MavenGoal.create("com.google.cloud.tools", "jib-maven-plugin", "build"));
   }
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
@@ -86,8 +91,19 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
     spanBuilder.setAttribute(
         MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL,
         "https://" + registryHostname);
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://" + registryHostname);
-    spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+
+    if (SemconvStability.emitStableHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.URL_FULL, "https://" + registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.SERVER_ADDRESS, registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
+    }
+
+    if (SemconvStability.emitOldHttpSemconv()) {
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, "https://" + registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.NET_PEER_NAME, registryHostname);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+    }
+
     // Note: setting the "peer.service" helps visualization on Jaeger but
     // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
     // service will be instrumented and what it "service.name" would be

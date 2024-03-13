@@ -9,14 +9,14 @@ import static io.opentelemetry.api.common.AttributeKey.stringArrayKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.List;
 
 /**
  * Semantic attributes for Maven executions.
  *
  * @see io.opentelemetry.api.common.Attributes
- * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
+ * @see io.opentelemetry.semconv.SemanticAttributes
  */
 public class MavenOtelSemanticAttributes {
 

@@ -9,9 +9,10 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-import java.net.MalformedURLException;
-import java.net.URL;
+import io.opentelemetry.maven.semconv.SemconvStability;
+import io.opentelemetry.semconv.SemanticAttributes;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 final class MavenDeployHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(MavenDeployHandler.class);
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent execution) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
@@ -48,15 +50,15 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
     if (artifactRepositoryUrl != null
         && (artifactRepositoryUrl.startsWith("https://")
             || artifactRepositoryUrl.startsWith("http://"))) {
+      String artifactoryRepositoryHost;
       try {
-        // Note: setting the "peer.service" helps visualization on Jaeger but
-        // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
-        // service will be instrumented and what it "service.name" would be
-        spanBuilder.setAttribute(
-            SemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
-      } catch (MalformedURLException e) {
+        URI artifactoryRepositoryUri = new URI(artifactRepositoryUrl);
+        artifactoryRepositoryHost = artifactoryRepositoryUri.getHost();
+      } catch (URISyntaxException e) {
         logger.debug("Ignore exception parsing artifact repository URL", e);
+        artifactoryRepositoryHost = "unknown";
       }
+
       Artifact artifact = project.getArtifact();
       String artifactRootUrl = artifactRepositoryUrl;
       if (!artifactRootUrl.endsWith("/")) {
@@ -68,8 +70,20 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
               + artifact.getArtifactId()
               + '/'
               + artifact.getVersion();
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl);
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+
+      if (SemconvStability.emitStableHttpSemconv()) {
+        spanBuilder
+            .setAttribute(SemanticAttributes.URL_FULL, artifactRootUrl)
+            .setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST")
+            .setAttribute(SemanticAttributes.SERVER_ADDRESS, artifactoryRepositoryHost);
+      }
+
+      if (SemconvStability.emitOldHttpSemconv()) {
+        spanBuilder
+            .setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl)
+            .setAttribute(SemanticAttributes.HTTP_METHOD, "POST")
+            .setAttribute(SemanticAttributes.NET_PEER_NAME, artifactoryRepositoryHost);
+      }
     }
   }
 
