@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
 /** {@link ResourceProvider} for automatically configuring {@link EcsResource}. */
-public final class EcsResourceProvider implements ResourceProvider {
+public final class EcsResourceProvider extends CloudResourceProvider {
   @Override
   public Resource createResource(ConfigProperties config) {
     return EcsResource.get();

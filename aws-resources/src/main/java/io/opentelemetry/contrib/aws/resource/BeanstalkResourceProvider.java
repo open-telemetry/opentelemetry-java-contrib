@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
 /** {@link ResourceProvider} for automatically configuring {@link BeanstalkResource}. */
-public final class BeanstalkResourceProvider implements ResourceProvider {
+public final class BeanstalkResourceProvider extends CloudResourceProvider {
   @Override
   public Resource createResource(ConfigProperties config) {
     return BeanstalkResource.get();
