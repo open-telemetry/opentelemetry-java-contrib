@@ -111,7 +111,7 @@ public final class EcsResource {
 
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
-      switch (parser.getCurrentName()) {
+      switch (parser.currentName()) {
         case "DockerId":
           attrBuilders.put(ResourceAttributes.CONTAINER_ID, value);
           break;
