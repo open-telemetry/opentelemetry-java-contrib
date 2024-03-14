@@ -29,4 +29,5 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testImplementation("org.assertj:assertj-core")
+  testImplementation("com.linecorp.armeria:armeria-junit5")
 }
