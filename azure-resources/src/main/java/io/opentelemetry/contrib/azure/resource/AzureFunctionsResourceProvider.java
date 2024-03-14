@@ -49,9 +49,9 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
       return Resource.empty();
     }
 
-    AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder();
-    builder.put(
-        ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AZURE_FUNCTIONS);
+    AttributesBuilder builder =
+        AzureVmResourceProvider.azureAttributeBuilder(
+            ResourceAttributes.CloudPlatformValues.AZURE_FUNCTIONS);
 
     String limit = env.get(FUNCTIONS_MEM_LIMIT);
     if (limit != null) {

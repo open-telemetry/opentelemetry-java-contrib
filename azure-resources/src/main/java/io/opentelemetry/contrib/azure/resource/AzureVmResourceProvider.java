@@ -69,8 +69,8 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   }
 
   private static Resource parseMetadata(String body) {
-    AttributesBuilder builder = azureAttributeBuilder();
-    builder.put(ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AZURE_VM);
+    AttributesBuilder builder =
+        azureAttributeBuilder(ResourceAttributes.CloudPlatformValues.AZURE_VM);
     try (JsonParser parser = JSON_FACTORY.createParser(body)) {
       parser.nextToken();
       parseResponse(parser, builder);
@@ -81,9 +81,10 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   }
 
   @NotNull
-  static AttributesBuilder azureAttributeBuilder() {
+  static AttributesBuilder azureAttributeBuilder(String platform) {
     AttributesBuilder builder = Attributes.builder();
     builder.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AZURE);
+    builder.put(ResourceAttributes.CLOUD_PLATFORM, platform);
     return builder;
   }
 

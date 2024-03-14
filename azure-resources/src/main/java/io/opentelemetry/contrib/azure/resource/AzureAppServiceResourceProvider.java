@@ -58,10 +58,9 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
       return Resource.empty();
     }
     String name = Objects.requireNonNull(env.get(WEBSITE_SITE_NAME));
-    AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder();
-    builder.put(
-        ResourceAttributes.CLOUD_PLATFORM,
-        ResourceAttributes.CloudPlatformValues.AZURE_APP_SERVICE);
+    AttributesBuilder builder =
+        AzureVmResourceProvider.azureAttributeBuilder(
+            ResourceAttributes.CloudPlatformValues.AZURE_APP_SERVICE);
     builder.put(ResourceAttributes.SERVICE_NAME, name);
 
     String resourceUri = resourceUri(name);
