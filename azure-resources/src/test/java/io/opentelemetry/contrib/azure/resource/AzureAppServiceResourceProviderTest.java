@@ -80,6 +80,14 @@ class AzureAppServiceResourceProviderTest {
     createResource(map).isEmpty();
   }
 
+  @Test
+  void isFunction() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.put("FUNCTIONS_EXTENSION_VERSION", "3.0");
+
+    createResource(map).isEmpty();
+  }
+
   @NotNull
   private static AttributesAssert createResource(Map<String, String> map) {
     return OpenTelemetryAssertions.assertThat(
