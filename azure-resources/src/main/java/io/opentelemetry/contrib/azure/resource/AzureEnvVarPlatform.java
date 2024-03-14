@@ -12,9 +12,14 @@ import java.util.Map;
 public enum AzureEnvVarPlatform {
   APP_SERVICE,
   FUNCTIONS,
+  CONTAINERS,
   NONE;
 
   static AzureEnvVarPlatform detect(Map<String, String> env) {
+    String appName = env.get(AzureContainersResourceProvider.CONTAINER_APP_NAME);
+    if (appName != null) {
+      return CONTAINERS;
+    }
     String name = env.get(AzureAppServiceResourceProvider.WEBSITE_SITE_NAME);
     if (name == null) {
       return NONE;
