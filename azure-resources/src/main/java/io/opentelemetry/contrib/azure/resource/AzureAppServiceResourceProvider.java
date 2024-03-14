@@ -66,8 +66,9 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
     String resourceUri = resourceUri(name);
     if (resourceUri != null) {
       builder.put(ResourceAttributes.CLOUD_RESOURCE_ID, resourceUri);
-      AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
     }
+
+    AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
 
     return Resource.create(builder.build());
   }
