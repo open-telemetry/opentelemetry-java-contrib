@@ -18,8 +18,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +32,20 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 
 public class AzureVmResourceProvider extends CloudResourceProvider {
+
+  private static final Map<String, AttributeKey<String>> COMPUTE_MAPPING = new HashMap<>();
+
+  static {
+    COMPUTE_MAPPING.put("location", ResourceAttributes.CLOUD_REGION);
+    COMPUTE_MAPPING.put("resourceId", ResourceAttributes.CLOUD_RESOURCE_ID);
+    COMPUTE_MAPPING.put("vmId", ResourceAttributes.HOST_ID);
+    COMPUTE_MAPPING.put("name", ResourceAttributes.HOST_NAME);
+    COMPUTE_MAPPING.put("vmSize", ResourceAttributes.HOST_TYPE);
+    COMPUTE_MAPPING.put("osType", ResourceAttributes.OS_TYPE);
+    COMPUTE_MAPPING.put("version", ResourceAttributes.OS_VERSION);
+    COMPUTE_MAPPING.put("vmScaleSetName", AttributeKey.stringKey("azure.vm.scaleset.name"));
+    COMPUTE_MAPPING.put("sku", AttributeKey.stringKey("azure.vm.sku"));
+  }
 
   private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
@@ -94,43 +111,43 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
       return;
     }
 
+    consumeJson(
+        parser,
+        (name, value) -> {
+          try {
+            if (name.equals("compute")) {
+              consumeCompute(parser, builder);
+            } else {
+              parser.skipChildren();
+            }
+          } catch (IOException e) {
+            throw new IllegalStateException(e);
+          }
+        });
+  }
+
+  private static void consumeCompute(JsonParser parser, AttributesBuilder builder)
+      throws IOException {
+    consumeJson(
+        parser,
+        (computeName, computeValue) -> {
+          AttributeKey<String> key = COMPUTE_MAPPING.get(computeName);
+          if (key != null) {
+            builder.put(key, computeValue);
+          } else {
+            try {
+              parser.skipChildren();
+            } catch (IOException e) {
+              throw new IllegalStateException(e);
+            }
+          }
+        });
+  }
+
+  private static void consumeJson(JsonParser parser, BiConsumer<String, String> consumer)
+      throws IOException {
     while (parser.nextToken() != JsonToken.END_OBJECT) {
-      String value = parser.nextTextValue();
-      switch (parser.currentName()) {
-        case "compute":
-          // go inside
-          break;
-        case "location":
-          builder.put(ResourceAttributes.CLOUD_REGION, value);
-          break;
-        case "resourceId":
-          builder.put(ResourceAttributes.CLOUD_RESOURCE_ID, value);
-          break;
-        case "vmId":
-          builder.put(ResourceAttributes.HOST_ID, value);
-          break;
-        case "name":
-          builder.put(ResourceAttributes.HOST_NAME, value);
-          break;
-        case "vmSize":
-          builder.put(ResourceAttributes.HOST_TYPE, value);
-          break;
-        case "osType":
-          builder.put(ResourceAttributes.OS_TYPE, value);
-          break;
-        case "version":
-          builder.put(ResourceAttributes.OS_VERSION, value);
-          break;
-        case "vmScaleSetName":
-          builder.put(AttributeKey.stringKey("azure.vm.scaleset.name"), value);
-          break;
-        case "sku":
-          builder.put(AttributeKey.stringKey("azure.vm.sku"), value);
-          break;
-        default:
-          parser.skipChildren();
-          break;
-      }
+      consumer.accept(parser.currentName(), parser.nextTextValue());
     }
   }
 
