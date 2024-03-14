@@ -1,0 +1,2 @@
+io.opentelemetry.contrib.azure.resource.AzureAppServiceResourceProvider
+io.opentelemetry.contrib.azure.resource.AzureVmResourceProvider
