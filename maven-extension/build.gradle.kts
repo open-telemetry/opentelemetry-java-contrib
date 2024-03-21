@@ -21,7 +21,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-trace")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  implementation("io.opentelemetry:opentelemetry-semconv")
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
   annotationProcessor("com.google.auto.value:auto-value")
@@ -60,10 +60,3 @@ tasks {
 }
 
 tasks.getByName("test").dependsOn("shadowJar")
-
-configurations.all {
-  resolutionStrategy {
-    // TODO this module still needs to be updated to the latest semconv
-    force("io.opentelemetry:opentelemetry-semconv:1.28.0-alpha")
-  }
-}

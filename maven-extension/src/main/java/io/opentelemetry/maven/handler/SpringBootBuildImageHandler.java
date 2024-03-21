@@ -9,7 +9,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -99,8 +99,8 @@ final class SpringBootBuildImageHandler implements MojoGoalExecutionHandler {
             && (registryUrl.startsWith("http://") || registryUrl.startsWith("https://"))) {
           spanBuilder.setAttribute(
               MavenOtelSemanticAttributes.MAVEN_BUILD_CONTAINER_REGISTRY_URL, registryUrl);
-          spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, registryUrl);
-          spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+          spanBuilder.setAttribute(SemanticAttributes.URL_FULL, registryUrl);
+          spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
           try {
             // Note: setting the "peer.service" helps visualization on Jaeger but
             // may not fully comply with the OTel "peer.service" spec as we don't know if the remote

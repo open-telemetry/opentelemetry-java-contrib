@@ -9,7 +9,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -68,8 +68,8 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
               + artifact.getArtifactId()
               + '/'
               + artifact.getVersion();
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl);
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+      spanBuilder.setAttribute(SemanticAttributes.URL_FULL, artifactRootUrl);
+      spanBuilder.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
     }
   }
 
