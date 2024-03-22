@@ -91,7 +91,7 @@ public final class Ec2Resource {
 
       while (parser.nextToken() != JsonToken.END_OBJECT) {
         String value = parser.nextTextValue();
-        switch (parser.getCurrentName()) {
+        switch (parser.currentName()) {
           case "instanceId":
             attrBuilders.put(ResourceAttributes.HOST_ID, value);
             break;

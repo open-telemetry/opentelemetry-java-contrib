@@ -25,7 +25,7 @@ jobs:
           java-version: 17
 
       - name: Build
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: build -x test
           cache-read-only: ${{ github.event_name == 'pull_request' }}
@@ -61,7 +61,7 @@ jobs:
           java-version: 17
 
       - name: Build
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: >
             test
@@ -84,7 +84,7 @@ jobs:
           java-version: 17
 
       - name: Integration test
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: integrationTest
           cache-read-only: ${{ github.event_name == 'pull_request' }}
@@ -136,7 +136,7 @@ jobs:
           java-version: 17
 
       - name: Build and publish snapshots
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         # skipping release branches because the versions in those branches are not snapshots
         # (also this skips pull requests)
         if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}

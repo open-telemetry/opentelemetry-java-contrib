@@ -1,7 +1,7 @@
 pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.enterprise") version "3.16.1"
+    id("com.gradle.enterprise") version "3.16.2"
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
   }
 }
@@ -85,3 +85,4 @@ include(":static-instrumenter:agent-extension")
 include(":static-instrumenter:bootstrap")
 include(":static-instrumenter:test-app")
 include(":kafka-exporter")
+include(":gcp-resources")

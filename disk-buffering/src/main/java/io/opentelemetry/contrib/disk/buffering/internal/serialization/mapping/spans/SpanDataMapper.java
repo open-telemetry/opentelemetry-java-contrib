@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools.toUnsignedInt;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
@@ -124,7 +126,7 @@ public final class SpanDataMapper {
   }
 
   private static StatusData mapStatusDataToSdk(Status source) {
-    return StatusData.create(getStatusCode(source.code.getValue()), source.message);
+    return StatusData.create(getStatusCode(source.code), source.message);
   }
 
   private static Span.Event eventDataToProto(EventData source) {
@@ -267,13 +269,16 @@ public final class SpanDataMapper {
     return droppedCount + itemsCount;
   }
 
-  private static StatusCode getStatusCode(int ordinal) {
-    for (StatusCode statusCode : StatusCode.values()) {
-      if (statusCode.ordinal() == ordinal) {
-        return statusCode;
-      }
+  private static StatusCode getStatusCode(Status.StatusCode source) {
+    switch (source) {
+      case STATUS_CODE_UNSET:
+        return StatusCode.UNSET;
+      case STATUS_CODE_OK:
+        return StatusCode.OK;
+      case STATUS_CODE_ERROR:
+        return StatusCode.ERROR;
     }
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("Unexpected enum constant: " + source);
   }
 
   private static List<KeyValue> attributesToProto(Attributes source) {
@@ -309,7 +314,7 @@ public final class SpanDataMapper {
     SpanContext spanContext = source.getSpanContext();
     builder.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
     builder.span_id(ByteStringMapper.getInstance().stringToProto(spanContext.getSpanId()));
-    builder.flags = spanContext.getTraceFlags().asByte();
+    builder.flags = toUnsignedInt(spanContext.getTraceFlags().asByte());
     builder.attributes.addAll(attributesToProto(source.getAttributes()));
     builder.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());

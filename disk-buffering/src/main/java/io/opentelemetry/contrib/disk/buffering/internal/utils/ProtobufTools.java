@@ -48,4 +48,12 @@ public final class ProtobufTools {
     }
     throw new IllegalStateException();
   }
+
+  /**
+   * Vendored {@link Byte#toUnsignedInt(byte)} to support Android. Also helps with accidental sign
+   * propagation.
+   */
+  public static int toUnsignedInt(byte x) {
+    return ((int) x) & 0xff;
+  }
 }

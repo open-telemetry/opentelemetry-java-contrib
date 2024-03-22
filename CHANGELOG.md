@@ -7,6 +7,48 @@
 - Add support `cloud.account.id`, `cloud.availability_zone`, `cloud.region` and `cloud.resource_id`
   ([#1171](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1171))
 
+## Version 1.33.0 (2024-02-21)
+
+### Compressors
+
+- Add zstd compressor implementation for OTLP exporters
+  ([#1108](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1108))
+
+### Consistent sampling
+
+- Switch from acceptance to rejection threshold
+  ([#1130](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1130))
+
+### Disk buffering
+
+- Shadowing generated proto java sources
+  ([#1146](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1146))
+- Single responsibility for disk exporters
+  ([#1161](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1161))
+- Split serializer
+  ([#1167](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1167))
+- Disk buffering config and README updates
+  ([#1169](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1169))
+- Ensure no sign propagation for flags byte
+  ([#1166](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1166))
+
+### GCP Resources - New 🌟
+
+This module provides GCP resource detectors for OpenTelemetry.
+
+### JMX metrics
+
+- Add Error handling for closure parameters
+  ([#1102](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1102))
+- Add `kafka.request.time.avg`
+  ([#1135](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1135))
+
+### Kafka exporter - New 🌟
+
+This module contains `KafkaSpanExporter`, which is an implementation of the `io.opentelemetry.sdk.trace.export.SpanExporter` interface.
+
+`KafkaSpanExporter` can be used for sending `SpanData` to a Kafka topic.
+
 ## Version 1.32.0 (2023-11-27)
 
 ### Disk buffering

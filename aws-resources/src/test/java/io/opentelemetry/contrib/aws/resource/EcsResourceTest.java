@@ -33,6 +33,8 @@ class EcsResourceTest {
 
   @Mock private SimpleHttpClient mockHttpClient;
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV3() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();
@@ -70,6 +72,8 @@ class EcsResourceTest {
             entry(ResourceAttributes.AWS_ECS_TASK_REVISION, "5"));
   }
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV4() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();

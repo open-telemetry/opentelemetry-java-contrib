@@ -132,6 +132,8 @@ public final class EcsResource {
     return Optional.of(arnParts[arnPart.partIndex]);
   }
 
+  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
+  @SuppressWarnings("deprecation")
   static void parseResponse(
       JsonParser parser, AttributesBuilder attrBuilders, LogArnBuilder logArnBuilder)
       throws IOException {
@@ -147,7 +149,7 @@ public final class EcsResource {
 
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
-      switch (parser.getCurrentName()) {
+      switch (parser.currentName()) {
         case "AvailabilityZone":
           attrBuilders.put(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, value);
           break;
@@ -167,6 +169,7 @@ public final class EcsResource {
           DockerImage parsedImage = DockerImage.parse(value);
           if (parsedImage != null) {
             attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_NAME, parsedImage.getRepository());
+            // TODO: CONTAINER_IMAGE_TAG has been replaced with CONTAINER_IMAGE_TAGS
             attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_TAG, parsedImage.getTag());
           }
           break;

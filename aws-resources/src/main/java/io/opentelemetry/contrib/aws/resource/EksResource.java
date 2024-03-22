@@ -120,7 +120,7 @@ public final class EksResource {
 
       while (parser.nextToken() != JsonToken.END_OBJECT) {
         parser.nextToken();
-        if (!parser.getCurrentName().equals("data")) {
+        if (!parser.currentName().equals("data")) {
           parser.skipChildren();
           continue;
         }
@@ -131,7 +131,7 @@ public final class EksResource {
 
         while (parser.nextToken() != JsonToken.END_OBJECT) {
           String value = parser.nextTextValue();
-          if (!parser.getCurrentName().equals("cluster.name")) {
+          if (!parser.currentName().equals("cluster.name")) {
             parser.skipChildren();
             continue;
           }
