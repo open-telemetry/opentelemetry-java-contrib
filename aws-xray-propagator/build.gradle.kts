@@ -13,5 +13,5 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.2")
+  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.3")
 }

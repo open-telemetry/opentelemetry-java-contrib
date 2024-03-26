@@ -39,6 +39,12 @@
       "enabled": false
     },
     {
+      // system-stubs-jupiter 2.1.+ requires Java 11+
+      "matchPackagePrefixes": ["uk.org.webcompere:system-stubs-jupiter"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       // pinned version for compatibility
       "matchPackageNames": ["io.micrometer:micrometer-core"],
       "matchCurrentVersion": "1.1.0",
