@@ -39,9 +39,9 @@
       "enabled": false
     },
     {
-      // system-stubs-jupiter 2.1.+ requires Java 11+
-      "matchPackagePrefixes": ["uk.org.webcompere:system-stubs-jupiter"],
-      "matchUpdateTypes": ["major"],
+      // system-stubs-jupiter 2.1+ requires Java 11+
+      "matchPackageNames": ["uk.org.webcompere:system-stubs-jupiter"],
+      "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
     {
