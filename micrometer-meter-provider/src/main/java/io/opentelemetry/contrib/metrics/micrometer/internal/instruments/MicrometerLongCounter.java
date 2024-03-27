@@ -14,9 +14,11 @@ import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
+import io.opentelemetry.extension.incubator.metrics.ExtendedLongCounterBuilder;
 import java.util.function.Consumer;
 
-public final class MicrometerLongCounter extends AbstractCounter implements LongCounter {
+public final class MicrometerLongCounter extends AbstractCounter
+    implements LongCounter, ObservableLongMeasurement {
 
   private MicrometerLongCounter(InstrumentState instrumentState) {
     super(instrumentState);
@@ -24,31 +26,35 @@ public final class MicrometerLongCounter extends AbstractCounter implements Long
 
   @Override
   public void add(long value) {
-    if (value > 0L) {
-      counter(Attributes.empty()).increment((double) value);
-    }
+    increment(Attributes.empty(), (double) value);
   }
 
   @Override
   public void add(long value, Attributes attributes) {
-    if (value > 0L) {
-      counter(attributes).increment((double) value);
-    }
+    increment(attributes, (double) value);
   }
 
   @Override
   public void add(long value, Attributes attributes, Context context) {
-    if (value > 0L) {
-      counter(attributes).increment((double) value);
-    }
+    increment(attributes, (double) value);
+  }
+
+  @Override
+  public void record(long value) {
+    setMonotonically(Attributes.empty(), (double) value);
+  }
+
+  @Override
+  public void record(long value, Attributes attributes) {
+    setMonotonically(attributes, (double) value);
   }
 
   public static LongCounterBuilder builder(MeterSharedState meterSharedState, String name) {
     return new Builder(meterSharedState, name);
   }
 
-  private static class Builder extends AbstractInstrumentBuilder<Builder>
-      implements LongCounterBuilder {
+  static final class Builder extends AbstractInstrumentBuilder<Builder>
+      implements LongCounterBuilder, ExtendedLongCounterBuilder {
     private Builder(MeterSharedState meterSharedState, String name) {
       super(meterSharedState, name);
     }
@@ -60,7 +66,7 @@ public final class MicrometerLongCounter extends AbstractCounter implements Long
 
     @Override
     public DoubleCounterBuilder ofDoubles() {
-      return MicrometerDoubleCounter.builder(meterSharedState, name, description, unit);
+      return MicrometerDoubleCounter.builder(this);
     }
 
     @Override
@@ -71,19 +77,7 @@ public final class MicrometerLongCounter extends AbstractCounter implements Long
     @Override
     public ObservableLongCounter buildWithCallback(Consumer<ObservableLongMeasurement> callback) {
       MicrometerLongCounter instrument = build();
-      return instrument.registerLongCallback(
-          callback,
-          new ObservableLongMeasurement() {
-            @Override
-            public void record(long value) {
-              record(value, Attributes.empty());
-            }
-
-            @Override
-            public void record(long value, Attributes attributes) {
-              instrument.record((double) value, attributes);
-            }
-          });
+      return instrument.registerLongCallback(callback, instrument);
     }
   }
 }

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
@@ -14,9 +15,11 @@ import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -28,6 +31,7 @@ abstract class AbstractInstrument {
   private final Logger logger;
   private final Tag instrumentationNameTag;
   private final Tag instrumentationVersionTag;
+  @Nullable private final Set<AttributeKey<?>> attributeKeySet;
   private final Map<Attributes, Iterable<Tag>> attributesTagsCache;
 
   protected AbstractInstrument(InstrumentState instrumentState) {
@@ -35,6 +39,12 @@ abstract class AbstractInstrument {
     this.logger = Logger.getLogger(getClass().getName());
     this.instrumentationNameTag = instrumentState.instrumentationScopeNameTag();
     this.instrumentationVersionTag = instrumentState.instrumentationScopeVersionTag();
+    List<AttributeKey<?>> attributes = instrumentState.attributesAdvice();
+    if (attributes != null) {
+      attributeKeySet = new HashSet<>(attributes);
+    } else {
+      attributeKeySet = null;
+    }
     this.attributesTagsCache = new ConcurrentHashMap<>();
   }
 
@@ -56,19 +66,27 @@ abstract class AbstractInstrument {
     return instrumentState.unit();
   }
 
-  protected final Attributes attributesOrEmpty(@Nullable Attributes attributes) {
-    return attributes != null ? attributes : Attributes.empty();
+  protected final Attributes effectiveAttributes(@Nullable Attributes attributes) {
+    if (attributes == null) {
+      return Attributes.empty();
+    }
+    if (attributeKeySet == null) {
+      return attributes;
+    }
+    return attributes.toBuilder().removeIf(key -> !attributeKeySet.contains(key)).build();
   }
 
   @SuppressWarnings("PreferredInterfaceType")
   protected final Iterable<Tag> attributesToTags(Attributes attributes) {
-    return attributesTagsCache.computeIfAbsent(attributesOrEmpty(attributes), this::calculateTags);
+    return attributesTagsCache.computeIfAbsent(
+        effectiveAttributes(attributes), this::calculateTags);
   }
 
   @SuppressWarnings("PreferredInterfaceType")
   private Iterable<Tag> calculateTags(Attributes attributes) {
-    List<Tag> list = new ArrayList<>(attributes.size() + 2);
-    attributes.forEach(
+    Attributes effectiveAttributes = effectiveAttributes(attributes);
+    List<Tag> list = new ArrayList<>(effectiveAttributes.size() + 2);
+    effectiveAttributes.forEach(
         (attributeKey, value) -> list.add(Tag.of(attributeKey.getKey(), Objects.toString(value))));
 
     list.add(instrumentationNameTag);
