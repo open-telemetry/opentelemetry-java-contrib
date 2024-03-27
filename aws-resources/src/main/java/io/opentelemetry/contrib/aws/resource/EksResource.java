@@ -51,12 +51,12 @@ public final class EksResource {
   }
 
   private static Resource buildResource() {
-    return buildResource(new SimpleHttpClient(), new DockerHelper(), K8S_TOKEN_PATH, K8S_CERT_PATH);
+    return buildResource(new JdkHttpClient(), new DockerHelper(), K8S_TOKEN_PATH, K8S_CERT_PATH);
   }
 
   // Visible for testing
   static Resource buildResource(
-      SimpleHttpClient httpClient,
+      JdkHttpClient httpClient,
       DockerHelper dockerHelper,
       String k8sTokenPath,
       String k8sKeystorePath) {
@@ -83,7 +83,7 @@ public final class EksResource {
   }
 
   private static boolean isEks(
-      String k8sTokenPath, String k8sKeystorePath, SimpleHttpClient httpClient) {
+      String k8sTokenPath, String k8sKeystorePath, JdkHttpClient httpClient) {
     if (!isK8s(k8sTokenPath, k8sKeystorePath)) {
       logger.log(Level.FINE, "Not running on k8s.");
       return false;
@@ -104,7 +104,7 @@ public final class EksResource {
     return k8sTokeyFile.exists() && k8sKeystoreFile.exists();
   }
 
-  private static String getClusterName(SimpleHttpClient httpClient) {
+  private static String getClusterName(JdkHttpClient httpClient) {
     Map<String, String> requestProperties = new HashMap<>();
     requestProperties.put("Authorization", getK8sCredHeader());
     String json =

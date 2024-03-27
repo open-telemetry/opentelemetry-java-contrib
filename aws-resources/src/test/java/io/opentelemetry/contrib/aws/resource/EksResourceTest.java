@@ -34,7 +34,7 @@ public class EksResourceTest {
 
   @Mock private DockerHelper mockDockerHelper;
 
-  @Mock private SimpleHttpClient httpClient;
+  @Mock private JdkHttpClient httpClient;
 
   @Test
   void testEks(@TempDir File tempFolder) throws IOException {
