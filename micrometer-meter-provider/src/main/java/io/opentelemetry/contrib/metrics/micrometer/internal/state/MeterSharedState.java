@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.util.StringUtils;
+import io.micrometer.common.util.StringUtils;
 import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
 import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import javax.annotation.Nullable;
