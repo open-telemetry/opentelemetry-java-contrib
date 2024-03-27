@@ -2,10 +2,26 @@
 
 ## Unreleased
 
-### Resource providers
+### AWS resources
 
-- Add support `cloud.account.id`, `cloud.availability_zone`, `cloud.region` and `cloud.resource_id`
+- Add support for `cloud.account.id`, `cloud.availability_zone`, `cloud.region`,
+  and `cloud.resource_id`
   ([#1171](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1171))
+
+### AWS X-Ray propagator
+
+- Add xray propagators that prioritizes xray environment variable
+  ([#1032](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1032))
+
+### GCP Resources
+
+- Update docs on how to use with Java agent v2.2.0 and later
+  ([#1237](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1237))
+
+### Micrometer MeterProvider
+
+- Implement Metrics incubator APIs to accept advice
+  ([#1190](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1190))
 
 ## Version 1.33.0 (2024-02-21)
 
