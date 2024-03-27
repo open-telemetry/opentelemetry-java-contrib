@@ -99,6 +99,39 @@ public final class EcsResource {
     }
   }
 
+  private static Optional<String> getAccountId(@Nullable String arn) {
+    return getArnPart(arn, ArnPart.ACCOUNT);
+  }
+
+  private static Optional<String> getRegion(@Nullable String arn) {
+    return getArnPart(arn, ArnPart.REGION);
+  }
+
+  private static enum ArnPart {
+    REGION(3),
+    ACCOUNT(4);
+
+    final int partIndex;
+
+    private ArnPart(int partIndex) {
+      this.partIndex = partIndex;
+    }
+  }
+
+  private static Optional<String> getArnPart(@Nullable String arn, ArnPart arnPart) {
+    if (arn == null) {
+      return Optional.empty();
+    }
+
+    String[] arnParts = arn.split(":");
+
+    if (arnPart.partIndex >= arnParts.length) {
+      return Optional.empty();
+    }
+
+    return Optional.of(arnParts[arnPart.partIndex]);
+  }
+
   // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
   @SuppressWarnings("deprecation")
   static void parseResponse(
@@ -109,9 +142,17 @@ public final class EcsResource {
       return;
     }
 
+    // Either the container ARN or the task ARN, they both contain the
+    // account id and region tokens we need later for the cloud.account.id
+    // and cloud.region attributes.
+    String arn = null;
+
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
       switch (parser.currentName()) {
+        case "AvailabilityZone":
+          attrBuilders.put(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, value);
+          break;
         case "DockerId":
           attrBuilders.put(ResourceAttributes.CONTAINER_ID, value);
           break;
@@ -119,7 +160,9 @@ public final class EcsResource {
           attrBuilders.put(ResourceAttributes.CONTAINER_NAME, value);
           break;
         case "ContainerARN":
+          arn = value;
           attrBuilders.put(ResourceAttributes.AWS_ECS_CONTAINER_ARN, value);
+          attrBuilders.put(ResourceAttributes.CLOUD_RESOURCE_ID, value);
           logArnBuilder.setContainerArn(value);
           break;
         case "Image":
@@ -149,6 +192,7 @@ public final class EcsResource {
           logArnBuilder.setRegion(value);
           break;
         case "TaskARN":
+          arn = value;
           attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_ARN, value);
           break;
         case "LaunchType":
@@ -165,6 +209,10 @@ public final class EcsResource {
           break;
       }
     }
+
+    getRegion(arn).ifPresent(region -> attrBuilders.put(ResourceAttributes.CLOUD_REGION, region));
+    getAccountId(arn)
+        .ifPresent(accountId -> attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId));
   }
 
   private EcsResource() {}
@@ -196,9 +244,7 @@ public final class EcsResource {
     }
 
     void setContainerArn(@Nullable String containerArn) {
-      if (containerArn != null) {
-        account = containerArn.split(":")[4];
-      }
+      account = getAccountId(containerArn).orElse(null);
     }
 
     Optional<String> getLogGroupArn() {

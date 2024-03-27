@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Resource providers
+
+- Add support `cloud.account.id`, `cloud.availability_zone`, `cloud.region` and `cloud.resource_id`
+  ([#1171](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1171))
+
 ## Version 1.33.0 (2024-02-21)
 
 ### Compressors
