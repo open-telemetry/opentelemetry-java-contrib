@@ -24,6 +24,7 @@ dependencies {
   implementation("com.google.protobuf:protobuf-java")
 
   testImplementation("io.opentelemetry:opentelemetry-api")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("com.google.guava:guava")
   testImplementation("org.testcontainers:junit-jupiter")
