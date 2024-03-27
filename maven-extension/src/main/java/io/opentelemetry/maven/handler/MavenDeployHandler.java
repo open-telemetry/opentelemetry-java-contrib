@@ -9,9 +9,9 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-import java.net.MalformedURLException;
-import java.net.URL;
+import io.opentelemetry.semconv.SemanticAttributes;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 final class MavenDeployHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(MavenDeployHandler.class);
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent execution) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
@@ -53,8 +54,8 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
         // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
         // service will be instrumented and what it "service.name" would be
         spanBuilder.setAttribute(
-            SemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
-      } catch (MalformedURLException e) {
+            SemanticAttributes.PEER_SERVICE, new URI(artifactRepositoryUrl).getHost());
+      } catch (URISyntaxException e) {
         logger.debug("Ignore exception parsing artifact repository URL", e);
       }
       Artifact artifact = project.getArtifact();

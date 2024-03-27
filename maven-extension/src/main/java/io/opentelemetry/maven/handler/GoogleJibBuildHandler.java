@@ -9,7 +9,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +19,10 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** See https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin */
+/**
+ * See <a href="https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin">Jit Maven
+ * Plugin</a>
+ */
 final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GoogleJibBuildHandler.class);
 
@@ -29,6 +32,7 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
         MavenGoal.create("com.google.cloud.tools", "jib-maven-plugin", "build"));
   }
 
+  @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
   @Override
   public void enrichSpan(SpanBuilder spanBuilder, ExecutionEvent executionEvent) {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
