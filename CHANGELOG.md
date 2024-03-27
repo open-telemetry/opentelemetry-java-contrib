@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.34.0 (2024-03-27)
+
 ### AWS resources
 
 - Add support for `cloud.account.id`, `cloud.availability_zone`, `cloud.region`,
