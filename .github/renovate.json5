@@ -47,13 +47,7 @@
     {
       // pinned version for compatibility
       "matchPackageNames": ["io.micrometer:micrometer-core"],
-      "matchCurrentVersion": "1.1.0",
-      "enabled": false
-    },
-    {
-      // pinned version for compatibility
-      "matchPackageNames": ["io.micrometer:micrometer-core"],
-      "matchCurrentVersion": "1.1.0",
+      "matchCurrentVersion": "1.5.0",
       "enabled": false
     },
     {
