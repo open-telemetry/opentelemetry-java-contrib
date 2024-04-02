@@ -49,7 +49,7 @@ spec:
 Additionally, the container name will only be discovered via the environment variable `CONTAINER_NAME`
 which much be included in the environment.
 
-## Usage with Manual-Instrumentation
+## Usage with Manual Instrumentation
 
 It is recommended to use this resource detector with the [OpenTelemetry Autoconfiguration SPI](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#resource-provider-spi). The GCP resource detector automatically provides the detected resources via the [autoconfigure-spi](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure-spi) SDK extension.
 
