@@ -2,6 +2,7 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.stacktrace;
 
 import io.opentelemetry.api.common.AttributeKey;
@@ -18,7 +19,8 @@ import java.util.logging.Logger;
 public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor {
 
   // TODO : remove this once semconv 1.24.0 is available
-  private static final AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
+  private static final AttributeKey<String> SPAN_STACKTRACE =
+      AttributeKey.stringKey("code.stacktrace");
 
   private static final Logger logger = Logger.getLogger(StackTraceSpanProcessor.class.getName());
 
@@ -31,7 +33,10 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
    * @param minSpanDurationNanos minimum span duration in ns for stacktrace capture
    * @param filterFunction extra filter function to exclude spans if needed
    */
-  public StackTraceSpanProcessor(SpanProcessor next, long minSpanDurationNanos, Function<ReadableSpan, Boolean> filterFunction) {
+  public StackTraceSpanProcessor(
+      SpanProcessor next,
+      long minSpanDurationNanos,
+      Function<ReadableSpan, Boolean> filterFunction) {
     super(next);
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterFunction = filterFunction;
