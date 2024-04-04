@@ -18,7 +18,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class MutableSpanTest {
@@ -54,8 +53,8 @@ public class MutableSpanTest {
     assertThat(mutable1.toSpanData()).hasName("updated");
     assertThat(mutable2.toSpanData()).hasName("updated again");
 
-    Assertions.assertThat(mutable1.getOriginalSpan()).isSameAs(original);
-    Assertions.assertThat(mutable2.getOriginalSpan()).isSameAs(mutable1);
+    assertThat(mutable1.getOriginalSpan()).isSameAs(original);
+    assertThat(mutable2.getOriginalSpan()).isSameAs(mutable1);
   }
 
   @Test
@@ -76,18 +75,18 @@ public class MutableSpanTest {
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
 
-    Assertions.assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
-    Assertions.assertThat(mutable.getAttribute(update)).isEqualTo("update-original");
-    Assertions.assertThat(mutable.getAttribute(remove)).isEqualTo("remove-original");
+    assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
+    assertThat(mutable.getAttribute(update)).isEqualTo("update-original");
+    assertThat(mutable.getAttribute(remove)).isEqualTo("remove-original");
 
     mutable.setAttribute(add, "added");
     mutable.removeAttribute(remove);
     mutable.setAttribute(update, "updated");
 
-    Assertions.assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
-    Assertions.assertThat(mutable.getAttribute(update)).isEqualTo("updated");
-    Assertions.assertThat(mutable.getAttribute(remove)).isNull();
-    Assertions.assertThat(mutable.getAttribute(add)).isEqualTo("added");
+    assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
+    assertThat(mutable.getAttribute(update)).isEqualTo("updated");
+    assertThat(mutable.getAttribute(remove)).isNull();
+    assertThat(mutable.getAttribute(add)).isEqualTo("added");
 
     // check again after the MutableSpan has been frozen due ot the toSpanData() call
     assertThat(mutable.toSpanData().getAttributes())
@@ -96,10 +95,10 @@ public class MutableSpanTest {
         .containsEntry(update, "updated")
         .containsEntry(add, "added");
 
-    Assertions.assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
-    Assertions.assertThat(mutable.getAttribute(update)).isEqualTo("updated");
-    Assertions.assertThat(mutable.getAttribute(remove)).isNull();
-    Assertions.assertThat(mutable.getAttribute(add)).isEqualTo("added");
+    assertThat(mutable.getAttribute(keep)).isEqualTo("keep-original");
+    assertThat(mutable.getAttribute(update)).isEqualTo("updated");
+    assertThat(mutable.getAttribute(remove)).isNull();
+    assertThat(mutable.getAttribute(add)).isEqualTo("added");
 
     // Ensure attributes are cached
     assertThat(mutable.toSpanData().getAttributes()).isSameAs(mutable.toSpanData().getAttributes());
@@ -133,10 +132,10 @@ public class MutableSpanTest {
     ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
-    Assertions.assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);
+    assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);
 
     mutable.setName("updated");
-    Assertions.assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);
+    assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);
   }
 
   private static ReadableSpan createSpan(String name, Consumer<SpanBuilder> spanCustomizer) {
