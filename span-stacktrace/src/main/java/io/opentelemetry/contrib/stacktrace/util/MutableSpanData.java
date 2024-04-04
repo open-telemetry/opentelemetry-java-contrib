@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.stacktrace.mutable;
+package io.opentelemetry.contrib.stacktrace.util;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -21,8 +21,7 @@ public class MutableSpanData extends DelegatingSpanData {
 
   @Nullable private Attributes cachedMutatedAttributes = null;
 
-  @Nullable
-  private String nameOverride = null;
+  @Nullable private String nameOverride = null;
 
   protected MutableSpanData(SpanData delegate) {
     super(delegate);
