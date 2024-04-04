@@ -66,3 +66,7 @@ components:
   kafka-exporter:
     - spockz
     - vincentfree
+  span-stacktrace:
+    - jackshirazi
+    - jonaskunz
+    - sylvainjuge
