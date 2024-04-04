@@ -14,7 +14,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.concurrent.atomic.AtomicReference;
@@ -164,10 +163,7 @@ public class MutableSpanTest {
           }
         };
 
-    try (OpenTelemetrySdk sdk =
-        OpenTelemetrySdk.builder()
-            .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(collecting).build())
-            .build()) {
+    try (OpenTelemetrySdk sdk = TestUtils.sdkWith(collecting)) {
 
       SpanBuilder builder = sdk.getTracer("my-tracer").spanBuilder(name);
       spanCustomizer.accept(builder);

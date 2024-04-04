@@ -13,7 +13,6 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,7 @@ public class AbstractSimpleChainingSpanProcessorTest {
             }
           }
         };
-    try (OpenTelemetrySdk sdk = sdkWith(processor)) {
+    try (OpenTelemetrySdk sdk = TestUtils.sdkWith(processor)) {
       Tracer tracer = sdk.getTracer("dummy-tracer");
 
       tracer.spanBuilder("dropMe1").startSpan().end();
@@ -83,7 +82,7 @@ public class AbstractSimpleChainingSpanProcessorTest {
             return span;
           }
         };
-    try (OpenTelemetrySdk sdk = sdkWith(first)) {
+    try (OpenTelemetrySdk sdk = TestUtils.sdkWith(first)) {
       Tracer tracer = sdk.getTracer("dummy-tracer");
 
       tracer
@@ -106,11 +105,5 @@ public class AbstractSimpleChainingSpanProcessorTest {
                     .containsEntry(addMeKey, "added");
               });
     }
-  }
-
-  private static OpenTelemetrySdk sdkWith(SpanProcessor processor) {
-    return OpenTelemetrySdk.builder()
-        .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(processor).build())
-        .build();
   }
 }
