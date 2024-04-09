@@ -59,9 +59,7 @@ class StackTraceSpanProcessorTest {
   }
 
   private void testSpan(
-      Predicate<ReadableSpan> filterPredicate,
-      long spanDurationNanos,
-      int expectedSpansCount) {
+      Predicate<ReadableSpan> filterPredicate, long spanDurationNanos, int expectedSpansCount) {
     testSpan(
         filterPredicate,
         spanDurationNanos,

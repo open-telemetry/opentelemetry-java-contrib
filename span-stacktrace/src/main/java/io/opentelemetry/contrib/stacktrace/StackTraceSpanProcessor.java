@@ -33,9 +33,7 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
    * @param filterPredicate extra filter function to exclude spans if needed
    */
   public StackTraceSpanProcessor(
-      SpanProcessor next,
-      long minSpanDurationNanos,
-      Predicate<ReadableSpan> filterPredicate) {
+      SpanProcessor next, long minSpanDurationNanos, Predicate<ReadableSpan> filterPredicate) {
     super(next);
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterPredicate = filterPredicate;
