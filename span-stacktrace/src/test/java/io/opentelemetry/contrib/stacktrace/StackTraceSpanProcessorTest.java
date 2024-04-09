@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,11 +59,11 @@ class StackTraceSpanProcessorTest {
   }
 
   private void testSpan(
-      Function<ReadableSpan, Boolean> includeFilter,
+      Predicate<ReadableSpan> filterPredicate,
       long spanDurationNanos,
       int expectedSpansCount) {
     testSpan(
-        includeFilter,
+        filterPredicate,
         spanDurationNanos,
         expectedSpansCount,
         Function.identity(),
@@ -73,13 +74,13 @@ class StackTraceSpanProcessorTest {
   }
 
   private void testSpan(
-      Function<ReadableSpan, Boolean> includeFilter,
+      Predicate<ReadableSpan> filterPredicate,
       long spanDurationNanos,
       int expectedSpansCount,
       Function<SpanBuilder, SpanBuilder> customizeSpanBuilder,
       Consumer<String> stackTraceCheck) {
     try (SpanProcessor processor =
-        new StackTraceSpanProcessor(exportProcessor, 10, includeFilter)) {
+        new StackTraceSpanProcessor(exportProcessor, 10, filterPredicate)) {
 
       OpenTelemetrySdk sdk = TestUtils.sdkWith(processor);
       Tracer tracer = sdk.getTracer("test");

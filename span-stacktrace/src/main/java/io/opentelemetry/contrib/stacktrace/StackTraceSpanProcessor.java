@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,20 +25,20 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
 
   private final long minSpanDurationNanos;
 
-  private final Function<ReadableSpan, Boolean> filterFunction;
+  private final Predicate<ReadableSpan> filterPredicate;
 
   /**
    * @param next next span processor to invoke
    * @param minSpanDurationNanos minimum span duration in ns for stacktrace capture
-   * @param filterFunction extra filter function to exclude spans if needed
+   * @param filterPredicate extra filter function to exclude spans if needed
    */
   public StackTraceSpanProcessor(
       SpanProcessor next,
       long minSpanDurationNanos,
-      Function<ReadableSpan, Boolean> filterFunction) {
+      Predicate<ReadableSpan> filterPredicate) {
     super(next);
     this.minSpanDurationNanos = minSpanDurationNanos;
-    this.filterFunction = filterFunction;
+    this.filterPredicate = filterPredicate;
     logger.log(
         Level.FINE,
         "Stack traces will be added to spans with a minimum duration of {0} nanos",
@@ -64,7 +64,7 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
       // Span already has a stacktrace, do not override
       return span;
     }
-    if (!filterFunction.apply(span)) {
+    if (!filterPredicate.test(span)) {
       return span;
     }
     MutableSpan mutableSpan = MutableSpan.makeMutable(span);
