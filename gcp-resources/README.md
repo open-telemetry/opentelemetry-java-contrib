@@ -53,7 +53,7 @@ which much be included in the environment.
 
 It is recommended to use this resource detector with the [OpenTelemetry Autoconfiguration SPI](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#resource-provider-spi). The GCP resource detector automatically provides the detected resources via the [autoconfigure-spi](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure-spi) SDK extension.
 
-For a reference example showcasing the detected resource attributes and usage with `autoconfigure-spi`, see the [Resource detection example](https://github.com/GoogleCloudPlatform/opentelemetry-operations-java/tree/main/examples/resource).
+For a reference example showcasing the detected resource attributes and usage with `autoconfigure-spi`, see the [Resource detection example](https://github.com/open-telemetry/opentelemetry-java-examples/tree/main/resource-detection-gcp).
 
 ## Usage with Auto-Instrumentation
 
