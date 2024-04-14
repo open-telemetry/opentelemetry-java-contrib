@@ -11,7 +11,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -41,18 +41,6 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   /** Visible for testing */
   @Nullable AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk;
 
-  /**
-   * Note: the JVM shutdown hook defined by the {@code
-   * io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration} v1.7.0 does NOT cause
-   * classloading issues even when Maven Plexus has unloaded the classes of the Otel Maven Extension
-   * before the shutdown hook is invoked.
-   *
-   * <p>TODO create a feature request on {@code
-   * io.opentelemetry.sdk.autoconfigure.TracerProviderConfiguration} to support the capability to
-   * not register a JVM shutdown hook at initialization time (see
-   * https://github.com/open-telemetry/opentelemetry-java/blob/v1.7.0/sdk-extensions/autoconfigure/src/main/java/io/opentelemetry/sdk/autoconfigure/TracerProviderConfiguration.java#L58
-   * )
-   */
   @Override
   public synchronized void dispose() {
     logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
@@ -65,10 +53,8 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
       if (sdkProviderShutdown.isSuccess()) {
         logger.debug("OpenTelemetry: SDK Trace Provider shut down");
       } else {
-        logger.warn(
-            "OpenTelemetry: Failure to shutdown SDK Trace Provider (done: "
-                + sdkProviderShutdown.isDone()
-                + ")");
+        logger.warn("OpenTelemetry: Failure to shutdown SDK Trace Provider (done: {})",
+            sdkProviderShutdown.isDone());
       }
       this.openTelemetrySdk = null;
     }
@@ -82,13 +68,16 @@ public final class OpenTelemetrySdkService implements Initializable, Disposable 
   public void initialize() {
     logger.debug("OpenTelemetry: Initialize OpenTelemetrySdkService v{}...", VERSION);
 
-    // Change default of "otel.traces.exporter" from "otlp" to "none"
+    // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
     // The impacts are
     // * If no otel exporter settings are passed, then the Maven extension will not export
     //   rather than exporting on OTLP GRPC to http://localhost:4317
-    // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_TRACES_EXPORTER is not, then don't
-    //   export
-    Map<String, String> properties = Collections.singletonMap("otel.traces.exporter", "none");
+    // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_[TRACES,METRICS,LOGS]_EXPORTER,
+    //   is not, then don't export
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.traces.exporter", "none");
+    properties.put("otel.metrics.exporter", "none");
+    properties.put("otel.logs.exporter", "none");
 
     this.autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
