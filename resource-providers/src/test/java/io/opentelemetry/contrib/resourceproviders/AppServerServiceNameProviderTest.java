@@ -55,9 +55,7 @@ class AppServerServiceNameProviderTest {
   @Test
   void shouldApply() {
     Resource existing =
-        Resource.builder()
-            .put(SERVICE_NAME.getKey(), "unknown_service:java")
-            .build();
+        Resource.builder().put(SERVICE_NAME.getKey(), "unknown_service:java").build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 
@@ -82,8 +80,7 @@ class AppServerServiceNameProviderTest {
 
   @Test
   void shouldApply_serviceNameAlreadyInResource() {
-    Resource existing =
-        Resource.builder().put(SERVICE_NAME.getKey(), "shemp").build();
+    Resource existing = Resource.builder().put(SERVICE_NAME.getKey(), "shemp").build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 

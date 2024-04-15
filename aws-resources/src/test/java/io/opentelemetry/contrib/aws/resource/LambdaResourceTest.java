@@ -18,10 +18,10 @@ import static org.assertj.core.api.Assertions.entry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
-import io.opentelemetry.semconv.SchemaUrls;
 import org.junit.jupiter.api.Test;
 
 class LambdaResourceTest {

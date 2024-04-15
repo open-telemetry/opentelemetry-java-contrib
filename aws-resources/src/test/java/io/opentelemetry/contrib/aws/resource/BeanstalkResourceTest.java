@@ -18,10 +18,10 @@ import com.google.common.io.Files;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
 import java.util.ServiceLoader;
-import io.opentelemetry.semconv.SchemaUrls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

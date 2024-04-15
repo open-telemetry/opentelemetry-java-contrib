@@ -5,13 +5,6 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.SchemaUrls;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
@@ -19,6 +12,13 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.Clou
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.SchemaUrls;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /** A factory for a {@link Resource} which provides information about the AWS Lambda function. */
 public final class LambdaResource {
@@ -47,11 +47,8 @@ public final class LambdaResource {
       return Resource.empty();
     }
 
-    AttributesBuilder builder =
-        Attributes.builder()
-            .put(CLOUD_PROVIDER, AWS);
-    builder.put(
-        CLOUD_PLATFORM, AWS_LAMBDA);
+    AttributesBuilder builder = Attributes.builder().put(CLOUD_PROVIDER, AWS);
+    builder.put(CLOUD_PLATFORM, AWS_LAMBDA);
 
     if (!region.isEmpty()) {
       builder.put(CLOUD_REGION, region);

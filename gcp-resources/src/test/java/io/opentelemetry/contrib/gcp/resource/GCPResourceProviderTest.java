@@ -176,23 +176,15 @@ class GCPResourceProviderTest {
 
     assertThat(gotResource.getAttributes())
         .hasSize(10)
-        .containsEntry(
-            CLOUD_PROVIDER, GCP)
-        .containsEntry(
-            CLOUD_PLATFORM,
-            GCP_COMPUTE_ENGINE)
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_COMPUTE_ENGINE)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
         .containsEntry(HOST_ID, detectedAttributes.get(GCE_INSTANCE_ID))
         .containsEntry(HOST_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
-        .containsEntry(
-            GCP_GCE_INSTANCE_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
-        .containsEntry(
-            GCP_GCE_INSTANCE_HOSTNAME,
-            detectedAttributes.get(GCE_INSTANCE_HOSTNAME))
+        .containsEntry(GCP_GCE_INSTANCE_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
+        .containsEntry(GCP_GCE_INSTANCE_HOSTNAME, detectedAttributes.get(GCE_INSTANCE_HOSTNAME))
         .containsEntry(HOST_TYPE, detectedAttributes.get(GCE_MACHINE_TYPE))
-        .containsEntry(
-            CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(GCE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GCE_AVAILABILITY_ZONE))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION));
   }
 
@@ -209,8 +201,7 @@ class GCPResourceProviderTest {
     assertThat(gotResource.getAttributes())
         .hasSize(6)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .containsEntry(
-            CLOUD_REGION, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
+        .containsEntry(CLOUD_REGION, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
         .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
   }
 
@@ -228,8 +219,7 @@ class GCPResourceProviderTest {
         .hasSize(6)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
         .containsEntry(
-            CLOUD_AVAILABILITY_ZONE,
-            mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
+            CLOUD_AVAILABILITY_ZONE, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
         .doesNotContainKey(CLOUD_REGION);
   }
 
@@ -277,14 +267,10 @@ class GCPResourceProviderTest {
   private static void verifyGkeMapping(Resource gotResource, DetectedPlatform detectedPlatform) {
     Map<String, String> detectedAttributes = detectedPlatform.getAttributes();
     assertThat(gotResource.getAttributes())
-        .containsEntry(
-            CLOUD_PLATFORM,
-            GCP_KUBERNETES_ENGINE)
-        .containsEntry(
-            CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_KUBERNETES_ENGINE)
+        .containsEntry(CLOUD_PROVIDER, GCP)
         .containsEntry(HOST_ID, detectedAttributes.get(GKE_HOST_ID))
-        .containsEntry(
-            K8S_CLUSTER_NAME, detectedAttributes.get(GKE_CLUSTER_NAME));
+        .containsEntry(K8S_CLUSTER_NAME, detectedAttributes.get(GKE_CLUSTER_NAME));
   }
 
   @Test
@@ -300,8 +286,7 @@ class GCPResourceProviderTest {
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            CLOUD_PLATFORM, GCP_CLOUD_RUN)
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
   }
 
@@ -319,9 +304,7 @@ class GCPResourceProviderTest {
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            CLOUD_PLATFORM,
-            GCP_CLOUD_FUNCTIONS)
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
   }
 
@@ -329,21 +312,13 @@ class GCPResourceProviderTest {
       Resource gotResource, DetectedPlatform detectedPlatform) {
     Map<String, String> detectedAttributes = detectedPlatform.getAttributes();
     assertThat(gotResource.getAttributes())
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
+        .containsEntry(FAAS_VERSION, detectedAttributes.get(SERVERLESS_COMPUTE_REVISION))
+        .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
         .containsEntry(
-            CLOUD_PROVIDER, GCP)
-        .containsEntry(
-            FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
-        .containsEntry(
-            FAAS_VERSION, detectedAttributes.get(SERVERLESS_COMPUTE_REVISION))
-        .containsEntry(
-            FAAS_INSTANCE,
-            detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
-        .containsEntry(
-            CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(SERVERLESS_COMPUTE_AVAILABILITY_ZONE))
-        .containsEntry(
-            CLOUD_REGION,
-            detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+            CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(SERVERLESS_COMPUTE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
   }
 
   @Test
@@ -358,18 +333,13 @@ class GCPResourceProviderTest {
 
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            CLOUD_PROVIDER, GCP)
-        .containsEntry(
-            CLOUD_PLATFORM,
-            GCP_APP_ENGINE)
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_APP_ENGINE)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
         .containsEntry(FAAS_NAME, detectedAttributes.get(GAE_MODULE_NAME))
         .containsEntry(FAAS_VERSION, detectedAttributes.get(GAE_APP_VERSION))
         .containsEntry(FAAS_INSTANCE, detectedAttributes.get(GAE_INSTANCE_ID))
-        .containsEntry(
-            CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(GAE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GAE_AVAILABILITY_ZONE))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(GAE_CLOUD_REGION));
   }
 

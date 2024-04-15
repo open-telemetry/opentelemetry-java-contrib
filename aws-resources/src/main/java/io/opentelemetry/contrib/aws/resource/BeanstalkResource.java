@@ -5,6 +5,14 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -16,14 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
-import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
-import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
 
 /**
  * A factory for a {@link Resource} which provides information about the current EC2 instance if
@@ -92,9 +92,7 @@ public final class BeanstalkResource {
     }
 
     attrBuilders.put(CLOUD_PROVIDER, AWS);
-    attrBuilders.put(
-        CLOUD_PLATFORM,
-        AWS_ELASTIC_BEANSTALK);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_ELASTIC_BEANSTALK);
 
     return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
   }

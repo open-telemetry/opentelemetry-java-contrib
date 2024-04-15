@@ -6,12 +6,12 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.ExtendedLongGaugeBuilder;
+import io.opentelemetry.api.incubator.metrics.LongGauge;
 import io.opentelemetry.api.metrics.LongGaugeBuilder;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.api.incubator.metrics.ExtendedLongGaugeBuilder;
-import io.opentelemetry.api.incubator.metrics.LongGauge;
 import java.util.function.Consumer;
 
 public final class MicrometerLongGauge extends AbstractGauge

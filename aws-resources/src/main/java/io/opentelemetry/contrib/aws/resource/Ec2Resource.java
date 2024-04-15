@@ -5,6 +5,17 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EC2;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_IMAGE_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -20,17 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EC2;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_IMAGE_ID;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
 
 /**
  * A factory for a {@link Resource} which provides information about the current EC2 instance if
@@ -91,8 +91,7 @@ public final class Ec2Resource {
 
     AttributesBuilder attrBuilders = Attributes.builder();
     attrBuilders.put(CLOUD_PROVIDER, CloudIncubatingAttributes.CloudProviderValues.AWS);
-    attrBuilders.put(
-        CLOUD_PLATFORM, AWS_EC2);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_EC2);
 
     try (JsonParser parser = JSON_FACTORY.createParser(identity)) {
       parser.nextToken();

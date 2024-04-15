@@ -32,13 +32,13 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
-import io.opentelemetry.semconv.SchemaUrls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -75,9 +75,7 @@ class EcsResourceTest {
             entry(CLOUD_REGION, "us-east-2"),
             entry(CLOUD_AVAILABILITY_ZONE, "us-east-2b"),
             entry(CONTAINER_NAME, "ecs-nginx-5-nginx-curl-ccccb9f49db0dfe0d901"),
-            entry(
-                CONTAINER_ID,
-                "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946"),
+            entry(CONTAINER_ID, "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946"),
             entry(CONTAINER_IMAGE_NAME, "nrdlngr/nginx-curl"),
             entry(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
             entry(
@@ -117,12 +115,8 @@ class EcsResourceTest {
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
             entry(CLOUD_AVAILABILITY_ZONE, "us-west-2d"),
             entry(CONTAINER_NAME, "ecs-curltest-26-curl-cca48e8dcadd97805600"),
-            entry(
-                CONTAINER_ID,
-                "ea32192c8553fbff06c9340478a2ff089b2bb5646fb718b4ee206641c9086d66"),
-            entry(
-                CONTAINER_IMAGE_NAME,
-                "111122223333.dkr.ecr.us-west-2.amazonaws.com/curltest"),
+            entry(CONTAINER_ID, "ea32192c8553fbff06c9340478a2ff089b2bb5646fb718b4ee206641c9086d66"),
+            entry(CONTAINER_IMAGE_NAME, "111122223333.dkr.ecr.us-west-2.amazonaws.com/curltest"),
             entry(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
@@ -130,8 +124,7 @@ class EcsResourceTest {
             entry(
                 AWS_ECS_CONTAINER_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
-            entry(
-                AWS_LOG_GROUP_NAMES, Collections.singletonList("/ecs/metadata")),
+            entry(AWS_LOG_GROUP_NAMES, Collections.singletonList("/ecs/metadata")),
             entry(
                 AWS_LOG_GROUP_ARNS,
                 Collections.singletonList(

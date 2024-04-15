@@ -5,24 +5,6 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.SchemaUrls;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.annotation.Nullable;
-
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ARN;
@@ -43,6 +25,24 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.Clou
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_NAME;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_NAME;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.SchemaUrls;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * A factory for a {@link Resource} which provides information about the current ECS container if
@@ -92,8 +92,7 @@ public final class EcsResource {
       return;
     }
     attrBuilders.put(CLOUD_PROVIDER, AWS);
-    attrBuilders.put(
-        CLOUD_PLATFORM, AWS_ECS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_ECS);
     try (JsonParser parser = JSON_FACTORY.createParser(json)) {
       parser.nextToken();
       LogArnBuilder logArnBuilder = new LogArnBuilder();
@@ -103,17 +102,14 @@ public final class EcsResource {
           .getLogGroupArn()
           .ifPresent(
               logGroupArn -> {
-                attrBuilders.put(
-                    AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
+                attrBuilders.put(AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
               });
 
       logArnBuilder
           .getLogStreamArn()
           .ifPresent(
               logStreamArn -> {
-                attrBuilders.put(
-                    AWS_LOG_STREAM_ARNS,
-                    Collections.singletonList(logStreamArn));
+                attrBuilders.put(AWS_LOG_STREAM_ARNS, Collections.singletonList(logStreamArn));
               });
     } catch (IOException e) {
       logger.log(Level.WARNING, "Can't get ECS metadata", e);
@@ -191,7 +187,9 @@ public final class EcsResource {
           if (parsedImage != null) {
             attrBuilders.put(CONTAINER_IMAGE_NAME, parsedImage.getRepository());
             // TODO: CONTAINER_IMAGE_TAG has been replaced with CONTAINER_IMAGE_TAGS
-            attrBuilders.put(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, parsedImage.getTag());
+            attrBuilders.put(
+                io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG,
+                parsedImage.getTag());
           }
           break;
         case "ImageID":
@@ -232,8 +230,7 @@ public final class EcsResource {
     }
 
     getRegion(arn).ifPresent(region -> attrBuilders.put(CLOUD_REGION, region));
-    getAccountId(arn)
-        .ifPresent(accountId -> attrBuilders.put(CLOUD_ACCOUNT_ID, accountId));
+    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(CLOUD_ACCOUNT_ID, accountId));
   }
 
   private EcsResource() {}

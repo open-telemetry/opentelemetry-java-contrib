@@ -6,13 +6,13 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleUpDownCounterBuilder;
 import io.opentelemetry.api.metrics.DoubleUpDownCounter;
 import io.opentelemetry.api.metrics.DoubleUpDownCounterBuilder;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.api.incubator.metrics.ExtendedDoubleUpDownCounterBuilder;
 import java.util.function.Consumer;
 
 final class MicrometerDoubleUpDownCounter extends AbstractUpDownCounter

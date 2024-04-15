@@ -127,9 +127,7 @@ public class GCPResourceProvider implements ResourceProvider {
    */
   private static void addGceAttributes(
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
-    attrBuilder.put(
-        CLOUD_PLATFORM,
-        GCP_COMPUTE_ENGINE);
+    attrBuilder.put(CLOUD_PLATFORM, GCP_COMPUTE_ENGINE);
 
     Optional.ofNullable(attributesMap.get(GCE_AVAILABILITY_ZONE))
         .ifPresent(zone -> attrBuilder.put(CLOUD_AVAILABILITY_ZONE, zone));
@@ -145,8 +143,7 @@ public class GCPResourceProvider implements ResourceProvider {
             });
     Optional.ofNullable(attributesMap.get(GCE_INSTANCE_HOSTNAME))
         .ifPresent(
-            instanceHostname ->
-                attrBuilder.put(GCP_GCE_INSTANCE_HOSTNAME, instanceHostname));
+            instanceHostname -> attrBuilder.put(GCP_GCE_INSTANCE_HOSTNAME, instanceHostname));
     Optional.ofNullable(attributesMap.get(GCE_MACHINE_TYPE))
         .ifPresent(machineType -> attrBuilder.put(HOST_TYPE, machineType));
   }
@@ -160,13 +157,10 @@ public class GCPResourceProvider implements ResourceProvider {
    */
   private static void addGkeAttributes(
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
-    attrBuilder.put(
-        CLOUD_PLATFORM,
-        GCP_KUBERNETES_ENGINE);
+    attrBuilder.put(CLOUD_PLATFORM, GCP_KUBERNETES_ENGINE);
 
     Optional.ofNullable(attributesMap.get(GKE_CLUSTER_NAME))
-        .ifPresent(
-            clusterName -> attrBuilder.put(K8S_CLUSTER_NAME, clusterName));
+        .ifPresent(clusterName -> attrBuilder.put(K8S_CLUSTER_NAME, clusterName));
     Optional.ofNullable(attributesMap.get(GKE_HOST_ID))
         .ifPresent(hostId -> attrBuilder.put(HOST_ID, hostId));
     Optional.ofNullable(attributesMap.get(GKE_CLUSTER_LOCATION_TYPE))
@@ -175,13 +169,11 @@ public class GCPResourceProvider implements ResourceProvider {
               if (attributesMap.get(GKE_CLUSTER_LOCATION) != null) {
                 switch (locationType) {
                   case GKE_LOCATION_TYPE_REGION:
-                    attrBuilder.put(
-                        CLOUD_REGION, attributesMap.get(GKE_CLUSTER_LOCATION));
+                    attrBuilder.put(CLOUD_REGION, attributesMap.get(GKE_CLUSTER_LOCATION));
                     break;
                   case GKE_LOCATION_TYPE_ZONE:
                     attrBuilder.put(
-                        CLOUD_AVAILABILITY_ZONE,
-                        attributesMap.get(GKE_CLUSTER_LOCATION));
+                        CLOUD_AVAILABILITY_ZONE, attributesMap.get(GKE_CLUSTER_LOCATION));
                     break;
                   default:
                     // TODO: Figure out how to handle unexpected conditions like this
@@ -203,8 +195,7 @@ public class GCPResourceProvider implements ResourceProvider {
    */
   private static void addGcrAttributes(
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
-    attrBuilder.put(
-        CLOUD_PLATFORM, GCP_CLOUD_RUN);
+    attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
     addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
   }
 
@@ -217,9 +208,7 @@ public class GCPResourceProvider implements ResourceProvider {
    */
   private static void addGcfAttributes(
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
-    attrBuilder.put(
-        CLOUD_PLATFORM,
-        GCP_CLOUD_FUNCTIONS);
+    attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS);
     addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
   }
 
@@ -232,15 +221,13 @@ public class GCPResourceProvider implements ResourceProvider {
    */
   private static void addGaeAttributes(
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
-    attrBuilder.put(
-        CLOUD_PLATFORM, GCP_APP_ENGINE);
+    attrBuilder.put(CLOUD_PLATFORM, GCP_APP_ENGINE);
     Optional.ofNullable(attributesMap.get(GAE_MODULE_NAME))
         .ifPresent(appName -> attrBuilder.put(FAAS_NAME, appName));
     Optional.ofNullable(attributesMap.get(GAE_APP_VERSION))
         .ifPresent(appVersion -> attrBuilder.put(FAAS_VERSION, appVersion));
     Optional.ofNullable(attributesMap.get(GAE_INSTANCE_ID))
-        .ifPresent(
-            appInstanceId -> attrBuilder.put(FAAS_INSTANCE, appInstanceId));
+        .ifPresent(appInstanceId -> attrBuilder.put(FAAS_INSTANCE, appInstanceId));
     Optional.ofNullable(attributesMap.get(GAE_CLOUD_REGION))
         .ifPresent(cloudRegion -> attrBuilder.put(CLOUD_REGION, cloudRegion));
     Optional.ofNullable(attributesMap.get(GAE_AVAILABILITY_ZONE))

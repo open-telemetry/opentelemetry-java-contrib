@@ -5,6 +5,13 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EKS;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -21,13 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EKS;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
-import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 
 /**
  * A factory for a {@link Resource} which provides information about the current ECS container if
@@ -73,8 +73,7 @@ public final class EksResource {
 
     AttributesBuilder attrBuilders = Attributes.builder();
     attrBuilders.put(CLOUD_PROVIDER, AWS);
-    attrBuilders.put(
-        CLOUD_PLATFORM, AWS_EKS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_EKS);
 
     String clusterName = getClusterName(httpClient);
     if (clusterName != null && !clusterName.isEmpty()) {
