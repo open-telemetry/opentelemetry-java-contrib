@@ -19,7 +19,7 @@ import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleGaugeBuilder;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleGaugeBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

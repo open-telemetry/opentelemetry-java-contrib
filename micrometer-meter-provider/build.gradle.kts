@@ -9,7 +9,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.metrics.micrometer")
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
   api("io.opentelemetry:opentelemetry-sdk-metrics")
-  api("io.opentelemetry:opentelemetry-extension-incubator")
+  api("io.opentelemetry:opentelemetry-api-incubator")
 
   compileOnly("io.micrometer:micrometer-core:1.5.0") // do not auto-update this version
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

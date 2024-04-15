@@ -6,6 +6,15 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_IMAGE_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
 import static org.assertj.core.api.Assertions.entry;
 
 import com.linecorp.armeria.common.AggregatedHttpRequest;
@@ -16,8 +25,8 @@ import com.linecorp.armeria.testing.junit5.server.mock.MockWebServerExtension;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.ServiceLoader;
+import io.opentelemetry.semconv.SchemaUrls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -53,20 +62,20 @@ class Ec2ResourceTest {
     server.enqueue(HttpResponse.of("ec2-1-2-3-4"));
 
     Resource resource = Ec2Resource.buildResource("localhost:" + server.httpPort());
-    assertThat(resource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
     Attributes attributes = resource.getAttributes();
 
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_ec2"),
-            entry(ResourceAttributes.HOST_ID, "i-1234567890abcdef0"),
-            entry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, "us-west-2b"),
-            entry(ResourceAttributes.HOST_TYPE, "t2.micro"),
-            entry(ResourceAttributes.HOST_IMAGE_ID, "ami-5fb8c835"),
-            entry(ResourceAttributes.CLOUD_ACCOUNT_ID, "123456789012"),
-            entry(ResourceAttributes.CLOUD_REGION, "us-west-2"),
-            entry(ResourceAttributes.HOST_NAME, "ec2-1-2-3-4"));
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_ec2"),
+            entry(HOST_ID, "i-1234567890abcdef0"),
+            entry(CLOUD_AVAILABILITY_ZONE, "us-west-2b"),
+            entry(HOST_TYPE, "t2.micro"),
+            entry(HOST_IMAGE_ID, "ami-5fb8c835"),
+            entry(CLOUD_ACCOUNT_ID, "123456789012"),
+            entry(CLOUD_REGION, "us-west-2"),
+            entry(HOST_NAME, "ec2-1-2-3-4"));
 
     AggregatedHttpRequest request1 = server.takeRequest().request();
     assertThat(request1.path()).isEqualTo("/latest/api/token");
@@ -88,20 +97,20 @@ class Ec2ResourceTest {
     server.enqueue(HttpResponse.of("ec2-1-2-3-4"));
 
     Resource resource = Ec2Resource.buildResource("localhost:" + server.httpPort());
-    assertThat(resource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
     Attributes attributes = resource.getAttributes();
 
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_ec2"),
-            entry(ResourceAttributes.HOST_ID, "i-1234567890abcdef0"),
-            entry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, "us-west-2b"),
-            entry(ResourceAttributes.HOST_TYPE, "t2.micro"),
-            entry(ResourceAttributes.HOST_IMAGE_ID, "ami-5fb8c835"),
-            entry(ResourceAttributes.CLOUD_ACCOUNT_ID, "123456789012"),
-            entry(ResourceAttributes.CLOUD_REGION, "us-west-2"),
-            entry(ResourceAttributes.HOST_NAME, "ec2-1-2-3-4"));
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_ec2"),
+            entry(HOST_ID, "i-1234567890abcdef0"),
+            entry(CLOUD_AVAILABILITY_ZONE, "us-west-2b"),
+            entry(HOST_TYPE, "t2.micro"),
+            entry(HOST_IMAGE_ID, "ami-5fb8c835"),
+            entry(CLOUD_ACCOUNT_ID, "123456789012"),
+            entry(CLOUD_REGION, "us-west-2"),
+            entry(HOST_NAME, "ec2-1-2-3-4"));
 
     AggregatedHttpRequest request1 = server.takeRequest().request();
     assertThat(request1.path()).isEqualTo("/latest/api/token");

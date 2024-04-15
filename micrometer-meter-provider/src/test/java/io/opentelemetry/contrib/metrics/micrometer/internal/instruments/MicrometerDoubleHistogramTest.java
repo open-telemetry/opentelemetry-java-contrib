@@ -22,7 +22,7 @@ import io.opentelemetry.contrib.metrics.micrometer.TestCallbackRegistrar;
 import io.opentelemetry.contrib.metrics.micrometer.internal.Constants;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleHistogramBuilder;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogramBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;

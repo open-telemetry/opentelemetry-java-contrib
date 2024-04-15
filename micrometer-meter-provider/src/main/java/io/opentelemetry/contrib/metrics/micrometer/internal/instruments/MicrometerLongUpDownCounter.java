@@ -14,7 +14,7 @@ import io.opentelemetry.api.metrics.ObservableLongUpDownCounter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import io.opentelemetry.extension.incubator.metrics.ExtendedLongUpDownCounterBuilder;
+import io.opentelemetry.api.incubator.metrics.ExtendedLongUpDownCounterBuilder;
 import java.util.function.Consumer;
 
 public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter

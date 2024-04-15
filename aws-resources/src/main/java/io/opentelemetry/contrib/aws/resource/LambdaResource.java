@@ -8,9 +8,17 @@ package io.opentelemetry.contrib.aws.resource;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_LAMBDA;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
 
 /** A factory for a {@link Resource} which provides information about the AWS Lambda function. */
 public final class LambdaResource {
@@ -41,21 +49,21 @@ public final class LambdaResource {
 
     AttributesBuilder builder =
         Attributes.builder()
-            .put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AWS);
+            .put(CLOUD_PROVIDER, AWS);
     builder.put(
-        ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_LAMBDA);
+        CLOUD_PLATFORM, AWS_LAMBDA);
 
     if (!region.isEmpty()) {
-      builder.put(ResourceAttributes.CLOUD_REGION, region);
+      builder.put(CLOUD_REGION, region);
     }
     if (!functionName.isEmpty()) {
-      builder.put(ResourceAttributes.FAAS_NAME, functionName);
+      builder.put(FAAS_NAME, functionName);
     }
     if (!functionVersion.isEmpty()) {
-      builder.put(ResourceAttributes.FAAS_VERSION, functionVersion);
+      builder.put(FAAS_VERSION, functionVersion);
     }
 
-    return Resource.create(builder.build(), ResourceAttributes.SCHEMA_URL);
+    return Resource.create(builder.build(), SchemaUrls.V1_25_0);
   }
 
   private static boolean isLambda(String... envVariables) {

@@ -6,6 +6,11 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.entry;
@@ -13,10 +18,10 @@ import static org.assertj.core.api.Assertions.entry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
+import io.opentelemetry.semconv.SchemaUrls;
 import org.junit.jupiter.api.Test;
 
 class LambdaResourceTest {
@@ -32,12 +37,12 @@ class LambdaResourceTest {
         LambdaResource.buildResource(singletonMap("AWS_LAMBDA_FUNCTION_NAME", "my-function"));
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_lambda"),
-            entry(ResourceAttributes.FAAS_NAME, "my-function"));
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_lambda"),
+            entry(FAAS_NAME, "my-function"));
   }
 
   @Test
@@ -50,14 +55,14 @@ class LambdaResourceTest {
     Resource resource = LambdaResource.buildResource(envVars);
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_lambda"),
-            entry(ResourceAttributes.CLOUD_REGION, "us-east-1"),
-            entry(ResourceAttributes.FAAS_NAME, "my-function"),
-            entry(ResourceAttributes.FAAS_VERSION, "1.2.3"));
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_lambda"),
+            entry(CLOUD_REGION, "us-east-1"),
+            entry(FAAS_NAME, "my-function"),
+            entry(FAAS_VERSION, "1.2.3"));
   }
 
   @Test

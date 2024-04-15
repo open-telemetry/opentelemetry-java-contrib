@@ -12,7 +12,7 @@ import io.opentelemetry.api.metrics.ObservableDoubleCounter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
-import io.opentelemetry.extension.incubator.metrics.ExtendedDoubleCounterBuilder;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleCounterBuilder;
 import java.util.function.Consumer;
 
 final class MicrometerDoubleCounter extends AbstractCounter

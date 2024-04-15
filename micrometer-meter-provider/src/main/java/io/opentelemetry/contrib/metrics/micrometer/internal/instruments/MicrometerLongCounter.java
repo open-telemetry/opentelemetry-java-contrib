@@ -14,7 +14,7 @@ import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import io.opentelemetry.extension.incubator.metrics.ExtendedLongCounterBuilder;
+import io.opentelemetry.api.incubator.metrics.ExtendedLongCounterBuilder;
 import java.util.function.Consumer;
 
 public final class MicrometerLongCounter extends AbstractCounter
