@@ -15,7 +15,6 @@ dependencies {
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:3.1.0")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.0.0")
-  implementation("com.gradle.enterprise:com.gradle.enterprise.gradle.plugin:3.17.1")
 }
 
 spotless {
