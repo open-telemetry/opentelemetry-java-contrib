@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.stacktrace;
 
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.contrib.stacktrace.util.AbstractSimpleChainingSpanProcessor;
-import io.opentelemetry.contrib.stacktrace.util.MutableSpan;
+import io.opentelemetry.contrib.stacktrace.internal.AbstractSimpleChainingSpanProcessor;
+import io.opentelemetry.contrib.stacktrace.internal.MutableSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.PrintWriter;
