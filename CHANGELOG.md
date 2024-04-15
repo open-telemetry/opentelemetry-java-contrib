@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Span stack traces - New 🌟
+
+This module provides a SpanProcessor that captures stack traces on spans that meet
+a certain criteria such as exceeding a certain duration threshold.
+
 ## Version 1.34.0 (2024-03-27)
 
 ### AWS resources
