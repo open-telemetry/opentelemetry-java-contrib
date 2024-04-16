@@ -13,9 +13,7 @@ public class ConsistentFixedThresholdSampler extends ConsistentSampler {
   private final long threshold;
   private final String description;
 
-  protected ConsistentFixedThresholdSampler(
-      long threshold, RandomValueGenerator randomValueGenerator) {
-    super(randomValueGenerator);
+  protected ConsistentFixedThresholdSampler(long threshold) {
     checkThreshold(threshold);
     this.threshold = threshold;
 
