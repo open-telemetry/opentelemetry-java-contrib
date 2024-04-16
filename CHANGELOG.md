@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### JMX metrics
+
+- Add support for newly named Tomcat MBean with Spring ([#1269])
+
 ### Span stack traces - New 🌟
 
 This module provides a SpanProcessor that captures stack traces on spans that meet
