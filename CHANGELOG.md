@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.35.0 (2024-04-16)
 
 ### JMX metrics
 
