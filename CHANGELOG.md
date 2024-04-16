@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.35.0 (2024-04-16)
+
 ### JMX metrics
 
 - Add support for newly named Tomcat MBean with Spring ([#1269])
