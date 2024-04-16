@@ -43,6 +43,7 @@ component_names["prometheus-client-bridge/"]="Prometheus client bridge"
 component_names["runtime-attach/"]="Runtime attach"
 component_names["resource-providers/"]="Resource providers"
 component_names["samplers/"]="Samplers"
+component_names["span-stacktrace/"]="Span stack traces"
 component_names["static-instrumenter/"]="Static instrumenter"
 
 echo "## Unreleased"
