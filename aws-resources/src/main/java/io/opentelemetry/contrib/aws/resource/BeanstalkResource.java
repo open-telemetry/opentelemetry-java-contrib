@@ -5,13 +5,21 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -58,7 +66,7 @@ public final class BeanstalkResource {
 
       if (!parser.isExpectedStartObjectToken()) {
         logger.log(Level.WARNING, "Invalid Beanstalk config: ", configPath);
-        return Resource.create(attrBuilders.build(), ResourceAttributes.SCHEMA_URL);
+        return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
       }
 
       while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -66,13 +74,13 @@ public final class BeanstalkResource {
         String value = parser.getText();
         switch (parser.currentName()) {
           case DEVELOPMENT_ID:
-            attrBuilders.put(ResourceAttributes.SERVICE_INSTANCE_ID, value);
+            attrBuilders.put(SERVICE_INSTANCE_ID, value);
             break;
           case VERSION_LABEL:
-            attrBuilders.put(ResourceAttributes.SERVICE_VERSION, value);
+            attrBuilders.put(SERVICE_VERSION, value);
             break;
           case ENVIRONMENT_NAME:
-            attrBuilders.put(ResourceAttributes.SERVICE_NAMESPACE, value);
+            attrBuilders.put(SERVICE_NAMESPACE, value);
             break;
           default:
             parser.skipChildren();
@@ -83,12 +91,10 @@ public final class BeanstalkResource {
       return Resource.empty();
     }
 
-    attrBuilders.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AWS);
-    attrBuilders.put(
-        ResourceAttributes.CLOUD_PLATFORM,
-        ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK);
+    attrBuilders.put(CLOUD_PROVIDER, AWS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_ELASTIC_BEANSTALK);
 
-    return Resource.create(attrBuilders.build(), ResourceAttributes.SCHEMA_URL);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
   }
 
   private BeanstalkResource() {}

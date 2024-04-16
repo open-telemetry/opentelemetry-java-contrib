@@ -5,13 +5,20 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EKS;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -65,21 +72,20 @@ public final class EksResource {
     }
 
     AttributesBuilder attrBuilders = Attributes.builder();
-    attrBuilders.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AWS);
-    attrBuilders.put(
-        ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EKS);
+    attrBuilders.put(CLOUD_PROVIDER, AWS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_EKS);
 
     String clusterName = getClusterName(httpClient);
     if (clusterName != null && !clusterName.isEmpty()) {
-      attrBuilders.put(ResourceAttributes.K8S_CLUSTER_NAME, clusterName);
+      attrBuilders.put(K8S_CLUSTER_NAME, clusterName);
     }
 
     String containerId = dockerHelper.getContainerId();
     if (containerId != null && !containerId.isEmpty()) {
-      attrBuilders.put(ResourceAttributes.CONTAINER_ID, containerId);
+      attrBuilders.put(CONTAINER_ID, containerId);
     }
 
-    return Resource.create(attrBuilders.build(), ResourceAttributes.SCHEMA_URL);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
   }
 
   private static boolean isEks(

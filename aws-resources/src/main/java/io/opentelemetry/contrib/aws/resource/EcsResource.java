@@ -5,13 +5,34 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ARN;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_FAMILY;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_REVISION;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_ARNS;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_NAMES;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_STREAM_ARNS;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_STREAM_NAMES;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_ECS;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_NAME;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_NAME;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
@@ -58,7 +79,7 @@ public final class EcsResource {
       // For TaskARN, Family, Revision.
       // May put the same attribute twice but that shouldn't matter.
       fetchMetadata(httpClient, ecsMetadataUrl + "/task", attrBuilders);
-      return Resource.create(attrBuilders.build(), ResourceAttributes.SCHEMA_URL);
+      return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
     }
     // Not running on ECS
     return Resource.empty();
@@ -70,9 +91,8 @@ public final class EcsResource {
     if (json.isEmpty()) {
       return;
     }
-    attrBuilders.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AWS);
-    attrBuilders.put(
-        ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_ECS);
+    attrBuilders.put(CLOUD_PROVIDER, AWS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_ECS);
     try (JsonParser parser = JSON_FACTORY.createParser(json)) {
       parser.nextToken();
       LogArnBuilder logArnBuilder = new LogArnBuilder();
@@ -82,17 +102,14 @@ public final class EcsResource {
           .getLogGroupArn()
           .ifPresent(
               logGroupArn -> {
-                attrBuilders.put(
-                    ResourceAttributes.AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
+                attrBuilders.put(AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
               });
 
       logArnBuilder
           .getLogStreamArn()
           .ifPresent(
               logStreamArn -> {
-                attrBuilders.put(
-                    ResourceAttributes.AWS_LOG_STREAM_ARNS,
-                    Collections.singletonList(logStreamArn));
+                attrBuilders.put(AWS_LOG_STREAM_ARNS, Collections.singletonList(logStreamArn));
               });
     } catch (IOException e) {
       logger.log(Level.WARNING, "Can't get ECS metadata", e);
@@ -151,26 +168,28 @@ public final class EcsResource {
       String value = parser.nextTextValue();
       switch (parser.currentName()) {
         case "AvailabilityZone":
-          attrBuilders.put(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, value);
+          attrBuilders.put(CLOUD_AVAILABILITY_ZONE, value);
           break;
         case "DockerId":
-          attrBuilders.put(ResourceAttributes.CONTAINER_ID, value);
+          attrBuilders.put(CONTAINER_ID, value);
           break;
         case "DockerName":
-          attrBuilders.put(ResourceAttributes.CONTAINER_NAME, value);
+          attrBuilders.put(CONTAINER_NAME, value);
           break;
         case "ContainerARN":
           arn = value;
-          attrBuilders.put(ResourceAttributes.AWS_ECS_CONTAINER_ARN, value);
-          attrBuilders.put(ResourceAttributes.CLOUD_RESOURCE_ID, value);
+          attrBuilders.put(AWS_ECS_CONTAINER_ARN, value);
+          attrBuilders.put(CLOUD_RESOURCE_ID, value);
           logArnBuilder.setContainerArn(value);
           break;
         case "Image":
           DockerImage parsedImage = DockerImage.parse(value);
           if (parsedImage != null) {
-            attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_NAME, parsedImage.getRepository());
+            attrBuilders.put(CONTAINER_IMAGE_NAME, parsedImage.getRepository());
             // TODO: CONTAINER_IMAGE_TAG has been replaced with CONTAINER_IMAGE_TAGS
-            attrBuilders.put(ResourceAttributes.CONTAINER_IMAGE_TAG, parsedImage.getTag());
+            attrBuilders.put(
+                io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG,
+                parsedImage.getTag());
           }
           break;
         case "ImageID":
@@ -181,11 +200,11 @@ public final class EcsResource {
           parseResponse(parser, attrBuilders, logArnBuilder);
           break;
         case "awslogs-group":
-          attrBuilders.put(ResourceAttributes.AWS_LOG_GROUP_NAMES, value);
+          attrBuilders.put(AWS_LOG_GROUP_NAMES, value);
           logArnBuilder.setLogGroupName(value);
           break;
         case "awslogs-stream":
-          attrBuilders.put(ResourceAttributes.AWS_LOG_STREAM_NAMES, value);
+          attrBuilders.put(AWS_LOG_STREAM_NAMES, value);
           logArnBuilder.setLogStreamName(value);
           break;
         case "awslogs-region":
@@ -193,16 +212,16 @@ public final class EcsResource {
           break;
         case "TaskARN":
           arn = value;
-          attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_ARN, value);
+          attrBuilders.put(AWS_ECS_TASK_ARN, value);
           break;
         case "LaunchType":
-          attrBuilders.put(ResourceAttributes.AWS_ECS_LAUNCHTYPE, value.toLowerCase(Locale.ROOT));
+          attrBuilders.put(AWS_ECS_LAUNCHTYPE, value.toLowerCase(Locale.ROOT));
           break;
         case "Family":
-          attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_FAMILY, value);
+          attrBuilders.put(AWS_ECS_TASK_FAMILY, value);
           break;
         case "Revision":
-          attrBuilders.put(ResourceAttributes.AWS_ECS_TASK_REVISION, value);
+          attrBuilders.put(AWS_ECS_TASK_REVISION, value);
           break;
         default:
           parser.skipChildren();
@@ -210,9 +229,8 @@ public final class EcsResource {
       }
     }
 
-    getRegion(arn).ifPresent(region -> attrBuilders.put(ResourceAttributes.CLOUD_REGION, region));
-    getAccountId(arn)
-        .ifPresent(accountId -> attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, accountId));
+    getRegion(arn).ifPresent(region -> attrBuilders.put(CLOUD_REGION, region));
+    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(CLOUD_ACCOUNT_ID, accountId));
   }
 
   private EcsResource() {}

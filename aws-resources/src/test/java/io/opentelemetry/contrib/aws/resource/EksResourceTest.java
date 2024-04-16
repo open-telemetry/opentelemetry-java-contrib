@@ -9,6 +9,10 @@ import static io.opentelemetry.contrib.aws.resource.EksResource.AUTH_CONFIGMAP_P
 import static io.opentelemetry.contrib.aws.resource.EksResource.CW_CONFIGMAP_PATH;
 import static io.opentelemetry.contrib.aws.resource.EksResource.K8S_SVC_URL;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -18,7 +22,7 @@ import com.google.common.io.Files;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
 import java.util.ServiceLoader;
@@ -59,13 +63,13 @@ public class EksResourceTest {
             mockK8sKeystoreFile.getPath());
     Attributes attributes = eksResource.getAttributes();
 
-    assertThat(eksResource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+    assertThat(eksResource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_eks"),
-            entry(ResourceAttributes.K8S_CLUSTER_NAME, "my-cluster"),
-            entry(ResourceAttributes.CONTAINER_ID, "0123456789A"));
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_eks"),
+            entry(K8S_CLUSTER_NAME, "my-cluster"),
+            entry(CONTAINER_ID, "0123456789A"));
   }
 
   @Test

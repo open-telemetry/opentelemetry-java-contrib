@@ -6,6 +6,11 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
 import static org.assertj.core.api.Assertions.entry;
 
 import com.google.common.base.Charsets;
@@ -13,7 +18,7 @@ import com.google.common.io.Files;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
 import java.util.ServiceLoader;
@@ -33,12 +38,12 @@ class BeanstalkResourceTest {
     Attributes attributes = resource.getAttributes();
     assertThat(attributes)
         .containsOnly(
-            entry(ResourceAttributes.CLOUD_PROVIDER, "aws"),
-            entry(ResourceAttributes.CLOUD_PLATFORM, "aws_elastic_beanstalk"),
-            entry(ResourceAttributes.SERVICE_INSTANCE_ID, "4"),
-            entry(ResourceAttributes.SERVICE_VERSION, "2"),
-            entry(ResourceAttributes.SERVICE_NAMESPACE, "HttpSubscriber-env"));
-    assertThat(resource.getSchemaUrl()).isEqualTo(ResourceAttributes.SCHEMA_URL);
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_elastic_beanstalk"),
+            entry(SERVICE_INSTANCE_ID, "4"),
+            entry(SERVICE_VERSION, "2"),
+            entry(SERVICE_NAMESPACE, "HttpSubscriber-env"));
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
   }
 
   @Test
