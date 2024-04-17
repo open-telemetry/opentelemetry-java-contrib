@@ -6,7 +6,8 @@
 
 ### JMX metrics
 
-- Add support for newly named Tomcat MBean with Spring ([#1269])
+- Add support for newly named Tomcat MBean with Spring
+([#1269](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1269))
 
 ### Span stack traces - New 🌟
 
