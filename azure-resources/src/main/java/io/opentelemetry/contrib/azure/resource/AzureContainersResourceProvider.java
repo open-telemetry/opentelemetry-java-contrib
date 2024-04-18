@@ -46,7 +46,7 @@ public class AzureContainersResourceProvider extends CloudResourceProvider {
     return Resource.create(getAttributes());
   }
 
-  private Attributes getAttributes() {
+  public Attributes getAttributes() {
     AzureEnvVarPlatform detect = AzureEnvVarPlatform.detect(env);
     if (detect != AzureEnvVarPlatform.CONTAINERS) {
       return Attributes.empty();

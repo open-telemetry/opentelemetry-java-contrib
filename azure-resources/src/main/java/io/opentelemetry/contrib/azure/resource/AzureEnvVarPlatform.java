@@ -15,7 +15,7 @@ public enum AzureEnvVarPlatform {
   CONTAINERS,
   NONE;
 
-  static AzureEnvVarPlatform detect(Map<String, String> env) {
+  public static AzureEnvVarPlatform detect(Map<String, String> env) {
     String appName = env.get(AzureContainersResourceProvider.CONTAINER_APP_NAME);
     if (appName != null) {
       return CONTAINERS;
