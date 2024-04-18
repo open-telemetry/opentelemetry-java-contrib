@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.azure.resource;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
@@ -44,9 +45,13 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
   @Override
   public Resource createResource(ConfigProperties config) {
+    return Resource.create(getAttributes());
+  }
+
+  public Attributes getAttributes() {
     AzureEnvVarPlatform detect = AzureEnvVarPlatform.detect(env);
     if (detect != AzureEnvVarPlatform.FUNCTIONS) {
-      return Resource.empty();
+      return Attributes.empty();
     }
 
     AttributesBuilder builder =
@@ -60,6 +65,6 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
 
-    return Resource.create(builder.build());
+    return builder.build();
   }
 }

@@ -2,10 +2,16 @@ plugins {
   id("otel.java-conventions")
 
   id("otel.publish-conventions")
+  id("maven-publish")
 }
 
 description = "OpenTelemetry GCP Resources Support"
 otelJava.moduleName.set("io.opentelemetry.contrib.gcp.resource")
+
+// enable publishing to maven local
+java {
+  withSourcesJar()
+}
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
