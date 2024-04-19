@@ -7,6 +7,6 @@ description = "OpenTelemetry JFR Connection"
 otelJava.moduleName.set("io.opentelemetry.contrib.jfr.connection")
 
 dependencies {
-  testImplementation("org.openjdk.jmc:common:8.3.1")
+  testImplementation("org.openjdk.jmc:common:9.0.0")
   testImplementation("org.openjdk.jmc:flightrecorder:8.3.1")
 }
