@@ -75,7 +75,7 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
 
   @Override
   public final boolean shouldApply(ConfigProperties config, Resource existing) {
-    return existing.getAttribute(ResourceAttributes.CLOUD_PROVIDER) == null;
+    return existing.getAttribute(CLOUD_PROVIDER) == null;
   }
 
   /**
