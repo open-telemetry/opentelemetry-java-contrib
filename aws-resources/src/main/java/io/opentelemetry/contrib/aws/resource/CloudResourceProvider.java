@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
-public abstract class CloudResourceProvider implements ConditionalResourceProvider {
+abstract class CloudResourceProvider implements ConditionalResourceProvider {
   @Override
   public final boolean shouldApply(ConfigProperties config, Resource existing) {
     return existing.getAttribute(CLOUD_PROVIDER) == null;
