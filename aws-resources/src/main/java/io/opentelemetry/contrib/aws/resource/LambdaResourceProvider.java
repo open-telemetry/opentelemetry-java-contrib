@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
 /** {@link ResourceProvider} for automatically configuring {@link LambdaResource}. */
-public final class LambdaResourceProvider implements ResourceProvider {
+public final class LambdaResourceProvider extends CloudResourceProvider {
   @Override
   public Resource createResource(ConfigProperties config) {
     return LambdaResource.get();

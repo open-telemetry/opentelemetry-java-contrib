@@ -53,13 +53,13 @@ import com.google.cloud.opentelemetry.detection.GCPPlatformDetector;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-public class GCPResourceProvider implements ResourceProvider {
+public class GCPResourceProvider implements ConditionalResourceProvider {
 
   private static final Logger LOGGER = Logger.getLogger(GCPResourceProvider.class.getSimpleName());
   private final GCPPlatformDetector detector;
@@ -71,6 +71,11 @@ public class GCPResourceProvider implements ResourceProvider {
 
   public GCPResourceProvider() {
     this.detector = GCPPlatformDetector.DEFAULT_INSTANCE;
+  }
+
+  @Override
+  public final boolean shouldApply(ConfigProperties config, Resource existing) {
+    return existing.getAttribute(CLOUD_PROVIDER) == null;
   }
 
   /**
