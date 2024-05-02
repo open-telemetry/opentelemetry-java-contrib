@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +56,7 @@ class StackTraceSpanProcessorTest {
         span -> true,
         20,
         1,
-        sb -> sb.setAttribute(StackTraceSpanProcessor.SPAN_STACKTRACE, "hello"),
+        sb -> sb.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, "hello"),
         stacktrace -> assertThat(stacktrace).isEqualTo("hello"));
   }
 
@@ -99,7 +101,7 @@ class StackTraceSpanProcessorTest {
 
       if (!finishedSpans.isEmpty()) {
         String stackTrace =
-            finishedSpans.get(0).getAttributes().get(StackTraceSpanProcessor.SPAN_STACKTRACE);
+            finishedSpans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
 
         stackTraceCheck.accept(stackTrace);
       }
