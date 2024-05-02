@@ -8,5 +8,5 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.25.0-alpha")
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 }
