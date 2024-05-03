@@ -11,8 +11,8 @@ introduce other components to make it work as expected.
 
 ## Usage
 
-This extension does not support autoconfiguration because it requires strict ordering of span
-processors to ensure it's executed between the last span processor and the span exporter.
+This extension does not support autoconfiguration because it needs to wrap the `SimpleSpanExporter`
+or `BatchingSpanProcessor` that invokes the `SpanExporter`.
 
 As a consequence you have to use [Manual SDK setup](#manual-sdk-setup)
 section below to configure it.
