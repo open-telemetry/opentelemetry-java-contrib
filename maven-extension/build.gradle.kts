@@ -13,7 +13,7 @@ description = "Maven extension to observe Maven builds with distributed traces u
 otelJava.moduleName.set("io.opentelemetry.maven")
 
 dependencies {
-  implementation("org.codehaus.plexus:plexus-component-annotations:2.1.1")
+  implementation("org.codehaus.plexus:plexus-component-annotations:2.2.0")
 
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
