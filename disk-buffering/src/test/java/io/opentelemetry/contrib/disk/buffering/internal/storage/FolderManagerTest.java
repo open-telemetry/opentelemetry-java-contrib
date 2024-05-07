@@ -71,7 +71,7 @@ class FolderManagerTest {
   }
 
   @Test
-  void closeCurrentlyWritableFile_whenItIsReadyToBeRead_anNoOtherReadableFilesAreAvailable()
+  void closeCurrentlyWritableFile_whenItIsReadyToBeRead_andNoOtherReadableFilesAreAvailable()
       throws IOException {
     long createdFileTime = 1000L;
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(createdFileTime));
@@ -79,7 +79,8 @@ class FolderManagerTest {
     WritableFile writableFile = folderManager.createWritableFile();
     writableFile.append(new byte[3]);
 
-    when(clock.now()).thenReturn(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+    when(clock.now())
+        .thenReturn(MILLISECONDS.toNanos(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS));
 
     ReadableFile readableFile = folderManager.getReadableFile();
 
