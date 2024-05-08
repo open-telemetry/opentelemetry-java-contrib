@@ -16,6 +16,7 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.ContextKey;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
@@ -68,6 +69,10 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static final char IS_SAMPLED = '1';
   private static final char NOT_SAMPLED = '0';
 
+  private static final String XRAY_HEADER_ADDITIONAL_FIELDS_KEY_NAME = "XrayHeaderAdditionalFields";
+  static final ContextKey<Baggage> XRAY_HEADER_ADDITIONAL_FIELDS_KEY =
+      ContextKey.named(XRAY_HEADER_ADDITIONAL_FIELDS_KEY_NAME);
+
   private static final List<String> FIELDS = Collections.singletonList(TRACE_HEADER_KEY);
 
   private static final AwsXrayPropagator INSTANCE = new AwsXrayPropagator();
@@ -85,6 +90,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     return FIELDS;
   }
 
+  @SuppressWarnings("null")
   @Override
   public <C> void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter) {
     if (context == null) {
@@ -126,34 +132,35 @@ public final class AwsXrayPropagator implements TextMapPropagator {
         .append(KV_DELIMITER)
         .append(samplingFlag);
 
-    Baggage baggage = Baggage.fromContext(context);
-    // Truncate baggage to 256 chars per X-Ray spec.
-    baggage.forEach(
-        new BiConsumer<String, BaggageEntry>() {
+    Baggage fields = context.get(XRAY_HEADER_ADDITIONAL_FIELDS_KEY);
+    // Truncate fields to 256 chars per X-Ray spec.
+    if (fields != null) {
+      fields.forEach(
+          new BiConsumer<String, BaggageEntry>() {
 
-          private int baggageWrittenBytes;
+            private int baggageWrittenBytes;
 
-          @Override
-          public void accept(String key, BaggageEntry entry) {
-            if (key.equals(TRACE_ID_KEY)
-                || key.equals(PARENT_ID_KEY)
-                || key.equals(SAMPLED_FLAG_KEY)) {
-              return;
+            @Override
+            public void accept(String key, BaggageEntry entry) {
+              if (key.equals(TRACE_ID_KEY)
+                  || key.equals(PARENT_ID_KEY)
+                  || key.equals(SAMPLED_FLAG_KEY)) {
+                return;
+              }
+              // Size is key/value pair, excludes delimiter.
+              int size = key.length() + entry.getValue().length() + 1;
+              if (baggageWrittenBytes + size > 256) {
+                return;
+              }
+              traceHeader
+                  .append(TRACE_HEADER_DELIMITER)
+                  .append(key)
+                  .append(KV_DELIMITER)
+                  .append(entry.getValue());
+              baggageWrittenBytes += size;
             }
-            // Size is key/value pair, excludes delimiter.
-            int size = key.length() + entry.getValue().length() + 1;
-            if (baggageWrittenBytes + size > 256) {
-              return;
-            }
-            traceHeader
-                .append(TRACE_HEADER_DELIMITER)
-                .append(key)
-                .append(KV_DELIMITER)
-                .append(entry.getValue());
-            baggageWrittenBytes += size;
-          }
-        });
-
+          });
+    }
     setter.set(carrier, TRACE_HEADER_KEY, traceHeader.toString());
   }
 
@@ -180,7 +187,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     String spanId = SpanId.getInvalid();
     Boolean isSampled = false;
 
-    BaggageBuilder baggage = null;
+    BaggageBuilder fields = null;
     int baggageReadBytes = 0;
 
     int pos = 0;
@@ -211,10 +218,10 @@ public final class AwsXrayPropagator implements TextMapPropagator {
       } else if (trimmedPart.startsWith(SAMPLED_FLAG_KEY)) {
         isSampled = parseTraceFlag(value);
       } else if (baggageReadBytes + trimmedPart.length() <= 256) {
-        if (baggage == null) {
-          baggage = Baggage.builder();
+        if (fields == null) {
+          fields = Baggage.builder();
         }
-        baggage.put(trimmedPart.substring(0, equalsIndex), value);
+        fields.put(trimmedPart.substring(0, equalsIndex), value);
         baggageReadBytes += trimmedPart.length();
       }
     }
@@ -241,8 +248,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     if (spanContext.isValid()) {
       context = context.with(Span.wrap(spanContext));
     }
-    if (baggage != null) {
-      context = context.with(baggage.build());
+    if (fields != null) {
+      context = context.with(XRAY_HEADER_ADDITIONAL_FIELDS_KEY, fields.build());
     }
     return context;
   }

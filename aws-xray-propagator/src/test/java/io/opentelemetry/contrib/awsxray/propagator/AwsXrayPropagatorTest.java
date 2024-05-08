@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.awsxray.propagator;
 
 import static io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator.TRACE_HEADER_KEY;
+import static io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator.XRAY_HEADER_ADDITIONAL_FIELDS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.baggage.Baggage;
@@ -90,7 +91,7 @@ class AwsXrayPropagatorTest {
   }
 
   @Test
-  void inject_WithBaggage() {
+  void inject_WithAdditionalFields() {
     Map<String, String> carrier = new LinkedHashMap<>();
     subject.inject(
         withSpanContext(
@@ -98,6 +99,7 @@ class AwsXrayPropagatorTest {
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
                 Context.current())
             .with(
+                XRAY_HEADER_ADDITIONAL_FIELDS_KEY,
                 Baggage.builder()
                     .put("cat", "meow")
                     .put("dog", "bark")
@@ -116,7 +118,7 @@ class AwsXrayPropagatorTest {
   }
 
   @Test
-  void inject_WithBaggage_LimitTruncates() {
+  void inject_WithAdditionalFields_LimitTruncates() {
     Map<String, String> carrier = new LinkedHashMap<>();
     // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
     // 3 character key value pair.
@@ -133,7 +135,7 @@ class AwsXrayPropagatorTest {
                 SpanContext.create(
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
                 Context.current())
-            .with(baggage),
+            .with(XRAY_HEADER_ADDITIONAL_FIELDS_KEY, baggage),
         carrier,
         SETTER);
 
@@ -244,11 +246,13 @@ class AwsXrayPropagatorTest {
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue("Foo")).isEqualTo("Bar");
+    Baggage additionalFields = context.get(XRAY_HEADER_ADDITIONAL_FIELDS_KEY);
+    assertThat(additionalFields.getEntryValue("Foo")).isEqualTo("Bar");
+    assertThat(Baggage.fromContext(context)).isEqualTo(Baggage.empty());
   }
 
   @Test
-  void extract_Baggage_LimitTruncates() {
+  void extract_AdditionalFields_LimitTruncates() {
     // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
     // 3 character key value pair.
     String key1 = Stream.generate(() -> "a").limit(252).collect(Collectors.joining());
@@ -274,8 +278,10 @@ class AwsXrayPropagatorTest {
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue(key1)).isEqualTo(value1);
-    assertThat(Baggage.fromContext(context).getEntryValue(key2)).isNull();
+    Baggage additionalFields = context.get(XRAY_HEADER_ADDITIONAL_FIELDS_KEY);
+    assertThat(additionalFields.getEntryValue(key1)).isEqualTo(value1);
+    assertThat(additionalFields.getEntryValue(key2)).isNull();
+    assertThat(Baggage.fromContext(context)).isEqualTo(Baggage.empty());
   }
 
   @Test
