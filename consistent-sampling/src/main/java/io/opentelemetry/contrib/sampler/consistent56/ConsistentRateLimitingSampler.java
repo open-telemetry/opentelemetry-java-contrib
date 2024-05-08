@@ -96,15 +96,12 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param targetSpansPerSecondLimit the desired spans per second limit
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
-   * @param randomValueGenerator the function to use for generating the r-value
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   ConsistentRateLimitingSampler(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      RandomValueGenerator randomValueGenerator,
       LongSupplier nanoTimeSupplier) {
-    super(randomValueGenerator);
 
     if (targetSpansPerSecondLimit < 0.0) {
       throw new IllegalArgumentException("Limit for sampled spans per second must be nonnegative!");

@@ -21,11 +21,7 @@ final class ConsistentComposedAndSampler extends ConsistentSampler {
   private final ConsistentSampler sampler2;
   private final String description;
 
-  ConsistentComposedAndSampler(
-      ConsistentSampler sampler1,
-      ConsistentSampler sampler2,
-      RandomValueGenerator randomValueGenerator) {
-    super(randomValueGenerator);
+  ConsistentComposedAndSampler(ConsistentSampler sampler1, ConsistentSampler sampler2) {
     this.sampler1 = requireNonNull(sampler1);
     this.sampler2 = requireNonNull(sampler2);
     this.description =

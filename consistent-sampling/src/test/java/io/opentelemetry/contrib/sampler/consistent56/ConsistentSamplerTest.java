@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +21,6 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalLong;
-import java.util.SplittableRandom;
 import org.junit.jupiter.api.Test;
 
 class ConsistentSamplerTest {
@@ -38,8 +36,6 @@ class ConsistentSamplerTest {
 
     private OptionalLong parentThreshold = OptionalLong.empty();
     private OptionalLong parentRandomValue = OptionalLong.empty();
-
-    private final SplittableRandom random = new SplittableRandom(0L);
 
     public void setParentSampled(boolean parentSampled) {
       this.parentSampled = parentSampled;
@@ -78,10 +74,6 @@ class ConsistentSamplerTest {
 
     public static List<LinkData> getParentLinks() {
       return parentLinks;
-    }
-
-    public RandomValueGenerator getRandomValueGenerator() {
-      return s -> random.nextLong() & getMaxRandomValue();
     }
   }
 
@@ -164,13 +156,13 @@ class ConsistentSamplerTest {
 
     Input input = new Input();
 
-    ConsistentSampler sampler = ConsistentSampler.alwaysOn(input.getRandomValueGenerator());
+    ConsistentSampler sampler = ConsistentSampler.alwaysOn();
 
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).hasValue(0);
-    assertThat(output.getRandomValue()).hasValue(0x20a8397b1dcdafL);
+    assertThat(output.getRandomValue()).isNotPresent();
     assertThat(output.getSampledFlag()).isTrue();
   }
 
@@ -182,7 +174,7 @@ class ConsistentSamplerTest {
     Input input = new Input();
     input.setParentRandomValue(parentRandomValue);
 
-    ConsistentSampler sampler = ConsistentSampler.alwaysOn(input.getRandomValueGenerator());
+    ConsistentSampler sampler = ConsistentSampler.alwaysOn();
 
     Output output = sample(input, sampler);
 
@@ -197,14 +189,13 @@ class ConsistentSamplerTest {
 
     Input input = new Input();
 
-    ConsistentSampler sampler =
-        new ConsistentFixedThresholdSampler(getMaxThreshold(), input.getRandomValueGenerator());
+    ConsistentSampler sampler = new ConsistentFixedThresholdSampler(getMaxThreshold());
 
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
     assertThat(output.getThreshold()).isEmpty();
-    assertThat(output.getRandomValue()).hasValue(0x20a8397b1dcdafL);
+    assertThat(output.getRandomValue()).isNotPresent();
     assertThat(output.getSampledFlag()).isFalse();
   }
 
@@ -214,13 +205,12 @@ class ConsistentSamplerTest {
     Input input = new Input();
     input.setParentRandomValue(0x7FFFFFFFFFFFFFL);
 
-    ConsistentSampler sampler =
-        new ConsistentFixedThresholdSampler(0x80000000000000L, input.getRandomValueGenerator());
+    ConsistentSampler sampler = new ConsistentFixedThresholdSampler(0x80000000000000L);
 
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
-    assertThat(output.getThreshold()).hasValue(0x80000000000000L);
+    assertThat(output.getThreshold()).isNotPresent();
     assertThat(output.getRandomValue()).hasValue(0x7FFFFFFFFFFFFFL);
     assertThat(output.getSampledFlag()).isFalse();
   }
@@ -231,8 +221,7 @@ class ConsistentSamplerTest {
     Input input = new Input();
     input.setParentRandomValue(0x80000000000000L);
 
-    ConsistentSampler sampler =
-        new ConsistentFixedThresholdSampler(0x80000000000000L, input.getRandomValueGenerator());
+    ConsistentSampler sampler = new ConsistentFixedThresholdSampler(0x80000000000000L);
 
     Output output = sample(input, sampler);
 
@@ -250,8 +239,7 @@ class ConsistentSamplerTest {
     input.setParentRandomValue(0x80000000000000L);
     input.setParentSampled(false);
 
-    ConsistentSampler sampler =
-        new ConsistentFixedThresholdSampler(0x0L, input.getRandomValueGenerator());
+    ConsistentSampler sampler = new ConsistentFixedThresholdSampler(0x0);
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
