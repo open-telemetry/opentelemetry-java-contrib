@@ -14,7 +14,7 @@ val DEPENDENCY_BOMS = listOf(
   "org.junit:junit-bom:5.10.2",
   "io.grpc:grpc-bom:1.63.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.3.0-alpha",
-  "org.testcontainers:testcontainers-bom:1.19.7"
+  "org.testcontainers:testcontainers-bom:1.19.8"
 )
 
 val autoServiceVersion = "1.1.1"
@@ -57,7 +57,7 @@ val DEPENDENCIES = listOf(
   "org.junit-pioneer:junit-pioneer:1.9.1",
   "org.skyscreamer:jsonassert:1.5.1",
   "org.apache.kafka:kafka-clients:3.7.0",
-  "org.testcontainers:kafka:1.19.7"
+  "org.testcontainers:kafka:1.19.8"
 )
 
 javaPlatform {
