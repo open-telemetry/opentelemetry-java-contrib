@@ -61,6 +61,12 @@
     {
       "matchPackagePrefixes": ["com.diffplug.spotless"],
       "groupName": "spotless packages"
+    },
+    {
+      // pinned version for compatibility with java 8 JFR parsing
+      "matchPackagePrefixes": ["org.openjdk.jmc"],
+      "matchCurrentVersion": "8.3.1",
+      "enabled": false
     }
   ]
 }
