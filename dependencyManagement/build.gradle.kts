@@ -12,7 +12,7 @@ val DEPENDENCY_BOMS = listOf(
   "com.google.guava:guava-bom:33.2.0-jre",
   "com.linecorp.armeria:armeria-bom:1.28.4",
   "org.junit:junit-bom:5.10.2",
-  "io.grpc:grpc-bom:1.63.0",
+  "io.grpc:grpc-bom:1.64.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.3.0-alpha",
   "org.testcontainers:testcontainers-bom:1.19.8"
 )
