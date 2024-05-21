@@ -9,6 +9,7 @@
         <exportedPackage>io.opentelemetry.api.internal</exportedPackage>
         <exportedPackage>io.opentelemetry.api.metrics</exportedPackage>
         <exportedPackage>io.opentelemetry.api.trace</exportedPackage>
-        <exportedPackage>io.opentelemetry.context</exportedPackage>
+      <exportedPackage>io.opentelemetry.context</exportedPackage>
+      <exportedPackage>io.opentelemetry.context.propagation</exportedPackage>
     </exportedPackages>
 </extension>

@@ -21,28 +21,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Close the OpenTelemetry SDK (see {@link OpenTelemetrySdkService#dispose()}) on the end of
- * execution of the last project ({@link #projectSucceeded(ExecutionEvent)} and {@link
- * #projectFailed(ExecutionEvent)}) rather than on the end of the Maven session {@link
- * #sessionEnded(ExecutionEvent)} because OpenTelemetry and GRPC classes are unloaded by the Maven
- * classloader before {@link #sessionEnded(ExecutionEvent)} causing {@link NoClassDefFoundError}
- * messages in the logs.
- */
-@Component(role = ExecutionListener.class, hint = "otel-execution-listener")
 public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);
@@ -56,17 +45,16 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
    */
   private static final ThreadLocal<Scope> MOJO_EXECUTION_SCOPE = new ThreadLocal<>();
 
-  @SuppressWarnings("NullAway") // Automatically initialized by DI
-  @Requirement
-  private SpanRegistry spanRegistry;
+  private final SpanRegistry spanRegistry;
 
-  @SuppressWarnings("NullAway") // Automatically initialized by DI
-  @Requirement
-  private OpenTelemetrySdkService openTelemetrySdkService;
+  private final OpenTelemetrySdkService openTelemetrySdkService;
 
   private final Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers;
 
-  public OtelExecutionListener() {
+  OtelExecutionListener(
+      SpanRegistry spanRegistry, OpenTelemetrySdkService openTelemetrySdkService) {
+    this.spanRegistry = spanRegistry;
+    this.openTelemetrySdkService = openTelemetrySdkService;
     this.mojoGoalExecutionHandlers =
         MojoGoalExecutionHandlerConfiguration.loadMojoGoalExecutionHandler(
             OtelExecutionListener.class.getClassLoader());
@@ -99,36 +87,6 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
               + Optional.of(contextStorageClass.getProtectionDomain().getCodeSource())
                   .map(source -> source.getLocation().toString())
                   .orElse("#unknown#"));
-    }
-  }
-
-  /**
-   * Register in given {@link OtelExecutionListener} to the lifecycle of the given {@link
-   * MavenSession}
-   *
-   * @see org.apache.maven.execution.MavenExecutionRequest#setExecutionListener(ExecutionListener)
-   */
-  public static void registerOtelExecutionListener(
-      MavenSession session, OtelExecutionListener otelExecutionListener) {
-
-    ExecutionListener initialExecutionListener = session.getRequest().getExecutionListener();
-    if (initialExecutionListener instanceof ChainedExecutionListener
-        || initialExecutionListener instanceof OtelExecutionListener) {
-      // already initialized
-      logger.debug(
-          "OpenTelemetry: OpenTelemetry extension already registered as execution listener, skip.");
-    } else if (initialExecutionListener == null) {
-      session.getRequest().setExecutionListener(otelExecutionListener);
-      logger.debug(
-          "OpenTelemetry: OpenTelemetry extension registered as execution listener. No execution listener initially defined");
-    } else {
-      session
-          .getRequest()
-          .setExecutionListener(
-              new ChainedExecutionListener(otelExecutionListener, initialExecutionListener));
-      logger.debug(
-          "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
-              + initialExecutionListener);
     }
   }
 
@@ -382,7 +340,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
     @Override
     @Nullable
-    public String get(@Nullable Map<String, String> environmentVariables, String key) {
+    public String get(@Nullable Map<String, String> environmentVariables, @Nonnull String key) {
       return environmentVariables == null
           ? null
           : environmentVariables.get(key.toUpperCase(Locale.ROOT));
