@@ -13,7 +13,7 @@ description = "Maven extension to observe Maven builds with distributed traces u
 otelJava.moduleName.set("io.opentelemetry.maven")
 
 dependencies {
-  implementation("javax.inject:javax.inject:1")
+  compileOnly("javax.inject:javax.inject:1")
 
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")

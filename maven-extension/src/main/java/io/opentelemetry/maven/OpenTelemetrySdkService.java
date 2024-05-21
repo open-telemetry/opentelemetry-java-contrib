@@ -8,6 +8,7 @@ package io.opentelemetry.maven;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -43,7 +44,9 @@ public final class OpenTelemetrySdkService {
   private boolean disposed;
 
   public OpenTelemetrySdkService() {
-    logger.debug("OpenTelemetry: Initialize OpenTelemetrySdkService v{}...", VERSION);
+    logger.debug(
+        "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
+        MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
     // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
     // The impacts are
