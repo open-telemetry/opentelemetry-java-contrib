@@ -26,12 +26,19 @@ import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Don't mark this class as {@link javax.inject.Named} and {@link javax.inject.Singleton} because
+ * Maven Sisu doesn't automatically load instance of {@link ExecutionListener} as Maven Extension
+ * hooks the same way Maven Plexus did so we manually hook this instance of {@link
+ * ExecutionListener} through the {@link OtelLifecycleParticipant#afterProjectsRead(MavenSession)}.
+ */
 public final class OtelExecutionListener extends AbstractExecutionListener {
 
   private static final Logger logger = LoggerFactory.getLogger(OtelExecutionListener.class);

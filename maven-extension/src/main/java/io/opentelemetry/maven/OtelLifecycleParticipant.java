@@ -23,6 +23,10 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
 
   private final OtelExecutionListener otelExecutionListener;
 
+  /**
+   * Manually instantiate {@link OtelExecutionListener} and hook it in the Maven build lifecycle
+   * because Maven Sisu doesn't load it when Maven Plexus did.
+   */
   @Inject
   OtelLifecycleParticipant(
       OpenTelemetrySdkService openTelemetrySdkService, SpanRegistry spanRegistry) {
@@ -31,7 +35,8 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
 
   /**
    * For an unknown reason, {@link #afterProjectsRead(MavenSession)} is invoked when the module is
-   * declared as an extension in pom.xml but {@link #afterSessionStart(MavenSession)} is not invoked
+   * declared as an extension in pom.xml but {@link #afterSessionStart(MavenSession)} is not
+   * invoked.
    */
   @Override
   public void afterProjectsRead(MavenSession session) {
