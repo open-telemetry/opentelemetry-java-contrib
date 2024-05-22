@@ -12,6 +12,7 @@ import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,14 +27,12 @@ import org.slf4j.LoggerFactory;
 /** Service to configure the {@link OpenTelemetry} instance. */
 @Named
 @Singleton
-public final class OpenTelemetrySdkService {
+public final class OpenTelemetrySdkService implements Closeable {
 
   static final String VERSION =
       OpenTelemetrySdkService.class.getPackage().getImplementationVersion();
 
   private static final Logger logger = LoggerFactory.getLogger(OpenTelemetrySdkService.class);
-
-  private final OpenTelemetry openTelemetry;
 
   private final OpenTelemetrySdk openTelemetrySdk;
 
@@ -66,49 +65,41 @@ public final class OpenTelemetrySdkService {
             .disableShutdownHook()
             .build();
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("OpenTelemetry: OpenTelemetry SDK initialized");
-    }
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
-    this.openTelemetry = this.openTelemetrySdk;
 
     Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null || mojoSpansEnabled;
 
-    this.tracer = openTelemetry.getTracer("io.opentelemetry.contrib.maven", VERSION);
+    this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
   }
 
   @PreDestroy
-  public synchronized void preDestroy() {
-    logger.debug("OpenTelemetry: dispose OpenTelemetrySdkService...");
-    if (!disposed) {
-      logger.debug("OpenTelemetry: Shutdown SDK Trace Provider...");
-      CompletableResultCode sdkProviderShutdown =
-          this.openTelemetrySdk.getSdkTracerProvider().shutdown();
-      sdkProviderShutdown.join(10, TimeUnit.SECONDS);
-      if (sdkProviderShutdown.isSuccess()) {
-        logger.debug("OpenTelemetry: SDK Trace Provider shut down");
+  @Override
+  public synchronized void close() {
+    if (disposed) {
+      logger.debug("OpenTelemetry: OpenTelemetry SDK already shut down, ignore");
+    } else {
+      logger.debug("OpenTelemetry: Shutdown OpenTelemetry SDK...");
+      CompletableResultCode openTelemetrySdkShutdownResult =
+          this.openTelemetrySdk.shutdown().join(10, TimeUnit.SECONDS);
+      if (openTelemetrySdkShutdownResult.isSuccess()) {
+        logger.debug("OpenTelemetry: OpenTelemetry SDK successfully shut down");
       } else {
         logger.warn(
-            "OpenTelemetry: Failure to shutdown SDK Trace Provider (done: {})",
-            sdkProviderShutdown.isDone());
+            "OpenTelemetry: Failure to shutdown OpenTelemetry SDK (done: {})",
+            openTelemetrySdkShutdownResult.isDone());
       }
       this.disposed = true;
     }
-    logger.debug("OpenTelemetry: OpenTelemetrySdkService disposed");
   }
 
   public Tracer getTracer() {
-    Tracer tracer = this.tracer;
-    if (tracer == null) {
-      throw new IllegalStateException("Not initialized");
-    }
-    return tracer;
+    return this.tracer;
   }
 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
   public ContextPropagators getPropagators() {
-    return openTelemetry.getPropagators();
+    return this.openTelemetrySdk.getPropagators();
   }
 
   public boolean isMojosInstrumentationEnabled() {

@@ -59,11 +59,5 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
           "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
               + initialExecutionListener);
     }
-    logger.debug("OpenTelemetry: afterProjectsRead");
-  }
-
-  @Override
-  public void afterSessionEnd(MavenSession session) {
-    logger.debug("OpenTelemetry: afterSessionEnd");
   }
 }

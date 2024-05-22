@@ -18,20 +18,21 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-trace")
+  implementation("io.opentelemetry:opentelemetry-sdk-metrics")
+  implementation("io.opentelemetry:opentelemetry-sdk-logs")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.25.0-alpha")
-  implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  compileOnly("org.apache.maven:maven-core:3.9.6") // do not auto-update this version
+  compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update, support older mvn versions
   compileOnly("org.slf4j:slf4j-api")
-  compileOnly("org.sonatype.aether:aether-api:1.13.1")
 
-  testImplementation("org.apache.maven:maven-core:3.9.6")
+  testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
 }
 

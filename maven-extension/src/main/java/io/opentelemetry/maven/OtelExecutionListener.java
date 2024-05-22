@@ -335,7 +335,7 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
 
   @Override
   public void sessionEnded(ExecutionEvent event) {
-    logger.debug("OpenTelemetry: Maven session ended");
+    logger.debug("OpenTelemetry: Maven session ended, end root span");
     spanRegistry.removeRootSpan().end();
   }
 
