@@ -21,7 +21,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.25.0-alpha")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
   annotationProcessor("com.google.auto.value:auto-value")

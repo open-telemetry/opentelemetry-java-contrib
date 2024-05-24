@@ -11,7 +11,6 @@ import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.semconv.HttpAttributes;
 import io.opentelemetry.semconv.UrlAttributes;
-import io.opentelemetry.semconv.incubating.PeerIncubatingAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,6 +92,6 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
     // Note: setting the "peer.service" helps visualization on Jaeger but
     // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
     // service will be instrumented and what it "service.name" would be
-    spanBuilder.setAttribute(PeerIncubatingAttributes.PEER_SERVICE, registryHostname);
+    spanBuilder.setAttribute(MavenOtelSemanticAttributes.PEER_SERVICE, registryHostname);
   }
 }
