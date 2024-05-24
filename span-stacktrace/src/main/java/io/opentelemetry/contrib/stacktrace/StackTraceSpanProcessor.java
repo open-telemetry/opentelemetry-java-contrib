@@ -18,7 +18,8 @@ import java.util.logging.Logger;
 
 public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor {
 
-  static final AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
+  // inlined incubating attribute to prevent direct dependency on incubating semconv
+  private static final AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
 
   private static final Logger logger = Logger.getLogger(StackTraceSpanProcessor.class.getName());
 
