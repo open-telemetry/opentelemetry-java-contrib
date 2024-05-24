@@ -5,11 +5,11 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.contrib.stacktrace.internal.AbstractSimpleChainingSpanProcessor;
 import io.opentelemetry.contrib.stacktrace.internal.MutableSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Predicate;
@@ -17,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor {
+
+  static final AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
 
   private static final Logger logger = Logger.getLogger(StackTraceSpanProcessor.class.getName());
 
@@ -55,7 +57,7 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
     if (span.getLatencyNanos() < minSpanDurationNanos) {
       return span;
     }
-    if (span.getAttribute(CodeIncubatingAttributes.CODE_STACKTRACE) != null) {
+    if (span.getAttribute(SPAN_STACKTRACE) != null) {
       // Span already has a stacktrace, do not override
       return span;
     }
@@ -65,7 +67,7 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
     MutableSpan mutableSpan = MutableSpan.makeMutable(span);
 
     String stacktrace = generateSpanEndStacktrace();
-    mutableSpan.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, stacktrace);
+    mutableSpan.setAttribute(SPAN_STACKTRACE, stacktrace);
     return mutableSpan;
   }
 
