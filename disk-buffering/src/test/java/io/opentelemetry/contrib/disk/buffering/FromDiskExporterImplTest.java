@@ -10,8 +10,8 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
@@ -59,10 +59,10 @@ class FromDiskExporterImplTest {
   @Test
   void whenExportingStoredBatch_withAvailableData_andSuccessfullyProcessed_returnTrue()
       throws IOException {
-    doReturn(CompletableResultCode.ofSuccess()).when(wrapped).export(deserializedData);
+    when(wrapped.export(deserializedData)).thenReturn(CompletableResultCode.ofSuccess());
 
     createDummyFile();
-    doReturn(MILLISECONDS.toNanos(1000L + MIN_FILE_AGE_FOR_READ_MILLIS)).when(clock).now();
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L + MIN_FILE_AGE_FOR_READ_MILLIS));
 
     assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isTrue();
   }
@@ -70,10 +70,10 @@ class FromDiskExporterImplTest {
   @Test
   void whenExportingStoredBatch_withAvailableData_andUnsuccessfullyProcessed_returnFalse()
       throws IOException {
-    doReturn(CompletableResultCode.ofFailure()).when(wrapped).export(deserializedData);
+    when(wrapped.export(deserializedData)).thenReturn(CompletableResultCode.ofSuccess());
 
     createDummyFile();
-    doReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS).when(clock).now();
+    when(clock.now()).thenReturn(1000L + MIN_FILE_AGE_FOR_READ_MILLIS);
 
     assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isFalse();
   }
@@ -95,12 +95,12 @@ class FromDiskExporterImplTest {
 
   private void setUpSerializer() {
     deserializer = mock();
-    doReturn(deserializedData).when(deserializer).deserialize(any());
+    when(deserializer.deserialize(any())).thenReturn(deserializedData);
   }
 
   private static Clock createClockMock() {
     Clock mock = mock();
-    doReturn(MILLISECONDS.toNanos(1000L)).when(mock).now();
+    when(mock.now()).thenReturn(MILLISECONDS.toNanos(1000L));
     return mock;
   }
 }

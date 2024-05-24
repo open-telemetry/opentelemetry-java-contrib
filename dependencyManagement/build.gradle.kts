@@ -8,18 +8,18 @@ val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.17.0",
-  "com.google.guava:guava-bom:33.1.0-jre",
+  "com.fasterxml.jackson:jackson-bom:2.17.1",
+  "com.google.guava:guava-bom:33.2.0-jre",
   "com.linecorp.armeria:armeria-bom:1.28.4",
   "org.junit:junit-bom:5.10.2",
-  "io.grpc:grpc-bom:1.63.0",
+  "io.grpc:grpc-bom:1.64.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.3.0-alpha",
-  "org.testcontainers:testcontainers-bom:1.19.7"
+  "org.testcontainers:testcontainers-bom:1.19.8"
 )
 
 val autoServiceVersion = "1.1.1"
 val autoValueVersion = "1.10.4"
-val errorProneVersion = "2.26.1"
+val errorProneVersion = "2.27.1"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.11.0"
 val slf4jVersion = "2.0.13"
@@ -52,14 +52,14 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.12.0",
-  "com.uber.nullaway:nullaway:0.10.25",
+  "com.uber.nullaway:nullaway:0.10.26",
   "org.assertj:assertj-core:3.25.3",
   "org.awaitility:awaitility:4.2.1",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.9.1",
   "org.skyscreamer:jsonassert:1.5.1",
   "org.apache.kafka:kafka-clients:3.7.0",
-  "org.testcontainers:kafka:1.19.7"
+  "org.testcontainers:kafka:1.19.8"
 )
 
 javaPlatform {

@@ -9,8 +9,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.metrics.Meter;
@@ -63,6 +63,7 @@ public class IntegrationTest {
   private Clock clock;
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
+  private static final long NOW_NANOS = MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS);
   private StorageConfiguration storageConfig;
 
   @BeforeEach
@@ -70,7 +71,7 @@ public class IntegrationTest {
     storageConfig = StorageConfiguration.getDefault(rootDir);
     clock = mock();
 
-    doReturn(MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS)).when(clock).now();
+    when(clock.now()).thenReturn(NOW_NANOS);
 
     // Setting up spans
     memorySpanExporter = InMemorySpanExporter.create();
@@ -184,7 +185,7 @@ public class IntegrationTest {
 
   @SuppressWarnings("DirectInvocationOnMock")
   private void fastForwardTimeByMillis(long milliseconds) {
-    doReturn(clock.now() + MILLISECONDS.toNanos(milliseconds)).when(clock).now();
+    when(clock.now()).thenReturn(NOW_NANOS + MILLISECONDS.toNanos(milliseconds));
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

@@ -9,22 +9,24 @@ import static io.opentelemetry.api.common.AttributeKey.stringArrayKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
 import java.util.List;
 
 /**
  * Semantic attributes for Maven executions.
  *
  * @see io.opentelemetry.api.common.Attributes
- * @see io.opentelemetry.semconv.trace.attributes.SemanticAttributes
  */
 public class MavenOtelSemanticAttributes {
 
-  /** See {@link ResourceAttributes#CONTAINER_IMAGE_NAME} */
+  /**
+   * See {@link
+   * io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes#CONTAINER_IMAGE_NAME}
+   */
   public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_IMAGE_NAME =
       stringKey("maven.build.container.image.name");
 
-  /** See {@link ResourceAttributes#CONTAINER_IMAGE_TAG} */
+  /** See {@link ContainerIncubatingAttributes#CONTAINER_IMAGE_TAGS} */
   public static final AttributeKey<List<String>> MAVEN_BUILD_CONTAINER_IMAGE_TAGS =
       stringArrayKey("maven.build.container.image.tags");
 

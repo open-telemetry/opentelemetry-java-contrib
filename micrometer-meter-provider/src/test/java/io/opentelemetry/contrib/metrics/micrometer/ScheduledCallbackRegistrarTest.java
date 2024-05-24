@@ -8,10 +8,10 @@ package io.opentelemetry.contrib.metrics.micrometer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,9 +37,8 @@ class ScheduledCallbackRegistrarTest {
 
   @Test
   void schedulesCallback() {
-    doReturn(scheduledFuture)
-        .when(scheduledExecutorService)
-        .scheduleAtFixedRate(any(), anyLong(), anyLong(), any());
+    when(scheduledExecutorService.scheduleAtFixedRate(any(), anyLong(), anyLong(), any()))
+        .thenAnswer(invocationOnMock -> scheduledFuture);
 
     try (CallbackRegistrar underTest =
         ScheduledCallbackRegistrar.builder(scheduledExecutorService).build()) {
@@ -63,9 +62,8 @@ class ScheduledCallbackRegistrarTest {
   @Test
   @SuppressWarnings("PreferJavaTimeOverload")
   void schedulesCallbackWithPeriod() {
-    doReturn(scheduledFuture)
-        .when(scheduledExecutorService)
-        .scheduleAtFixedRate(any(), anyLong(), anyLong(), any());
+    when(scheduledExecutorService.scheduleAtFixedRate(any(), anyLong(), anyLong(), any()))
+        .thenAnswer(invocationOnMock -> scheduledFuture);
 
     try (CallbackRegistrar underTest =
         ScheduledCallbackRegistrar.builder(scheduledExecutorService)
@@ -90,9 +88,8 @@ class ScheduledCallbackRegistrarTest {
 
   @Test
   void schedulesCallbackWithPeriodDuration() {
-    doReturn(scheduledFuture)
-        .when(scheduledExecutorService)
-        .scheduleAtFixedRate(any(), anyLong(), anyLong(), any());
+    when(scheduledExecutorService.scheduleAtFixedRate(any(), anyLong(), anyLong(), any()))
+        .thenAnswer(invocationOnMock -> scheduledFuture);
 
     try (CallbackRegistrar underTest =
         ScheduledCallbackRegistrar.builder(scheduledExecutorService)
@@ -128,9 +125,8 @@ class ScheduledCallbackRegistrarTest {
 
   @Test
   void closeCancelsScheduledFuture() {
-    doReturn(scheduledFuture)
-        .when(scheduledExecutorService)
-        .scheduleAtFixedRate(any(), anyLong(), anyLong(), any());
+    when(scheduledExecutorService.scheduleAtFixedRate(any(), anyLong(), anyLong(), any()))
+        .thenAnswer(invocationOnMock -> scheduledFuture);
 
     try (CallbackRegistrar underTest =
         ScheduledCallbackRegistrar.builder(scheduledExecutorService).build()) {

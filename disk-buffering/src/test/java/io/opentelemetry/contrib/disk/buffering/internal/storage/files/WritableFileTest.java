@@ -11,8 +11,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
@@ -49,14 +49,14 @@ class WritableFileTest {
 
   @Test
   void hasNotExpired_whenWriteAgeHasNotExpired() {
-    doReturn(MILLISECONDS.toNanos(1500L)).when(clock).now();
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(1500L));
 
     assertFalse(writableFile.hasExpired());
   }
 
   @Test
   void hasExpired_whenWriteAgeHasExpired() {
-    doReturn(MILLISECONDS.toNanos(2000L)).when(clock).now();
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(2000L));
 
     assertTrue(writableFile.hasExpired());
   }
@@ -90,9 +90,8 @@ class WritableFileTest {
   @Test
   void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
     writableFile.append(new byte[2]);
-    doReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS))
-        .when(clock)
-        .now();
+    when(clock.now())
+        .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS));
 
     assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
 

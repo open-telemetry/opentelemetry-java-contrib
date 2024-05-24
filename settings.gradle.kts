@@ -1,7 +1,7 @@
 pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.enterprise") version "3.17.2"
+    id("com.gradle.enterprise") version "3.17.3"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
   }
 }

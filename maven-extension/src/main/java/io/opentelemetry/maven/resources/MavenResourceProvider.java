@@ -9,7 +9,7 @@ import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.rtinfo.internal.DefaultRuntimeInformation;
 
@@ -20,8 +20,8 @@ public class MavenResourceProvider implements ResourceProvider {
     //  Maven Plexus Launcher
     RuntimeInformation runtimeInformation = new DefaultRuntimeInformation();
     return Resource.builder()
-        .put(ResourceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
-        .put(ResourceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
+        .put(ServiceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
+        .put(ServiceAttributes.SERVICE_VERSION, runtimeInformation.getMavenVersion())
         .build();
   }
 }
