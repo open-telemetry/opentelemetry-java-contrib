@@ -8,6 +8,10 @@ package io.opentelemetry.contrib.aws.resource;
 import io.opentelemetry.api.common.AttributeKey;
 import java.util.List;
 
+/**
+ * Inlines incubating attributes until they are stable, doing this prevents having a direct
+ * dependency on incubating artifact which can conflict with another incubating version.
+ */
 class IncubatingAttributes {
   private IncubatingAttributes() {}
 
