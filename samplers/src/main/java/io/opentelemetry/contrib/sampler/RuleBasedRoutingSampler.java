@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.contrib.sampler.IncubatingAttributes.THREAD_NAME;
 import static java.util.Objects.requireNonNull;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -33,6 +33,9 @@ import java.util.List;
  * <p>If none of the rules matched, the default fallback sampler will make a decision.
  */
 public final class RuleBasedRoutingSampler implements Sampler {
+
+  // inlined incubating attribute to prevent direct dependency on incubating semconv
+  private static final AttributeKey<String> THREAD_NAME = AttributeKey.stringKey("thread.name");
 
   private final List<SamplingRule> rules;
   private final SpanKind kind;
