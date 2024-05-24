@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvider;

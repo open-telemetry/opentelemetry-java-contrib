@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.sampler;
 
-import static io.opentelemetry.semconv.incubating.ThreadIncubatingAttributes.THREAD_NAME;
+import static io.opentelemetry.contrib.sampler.IncubatingAttributes.THREAD_NAME;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.api.common.Attributes;
@@ -33,6 +33,7 @@ import java.util.List;
  * <p>If none of the rules matched, the default fallback sampler will make a decision.
  */
 public final class RuleBasedRoutingSampler implements Sampler {
+
   private final List<SamplingRule> rules;
   private final SpanKind kind;
   private final Sampler fallback;
