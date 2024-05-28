@@ -34,6 +34,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
   "io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha",
+  "io.opentelemetry.semconv:opentelemetry-semconv:${contribIncubatingVersion}",
   "io.opentelemetry.semconv:opentelemetry-semconv-incubating:${contribIncubatingVersion}",
   "io.prometheus:simpleclient:${prometheusVersion}",
   "io.prometheus:simpleclient_common:${prometheusVersion}",
