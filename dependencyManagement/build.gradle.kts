@@ -12,8 +12,8 @@ val DEPENDENCY_BOMS = listOf(
   "com.google.guava:guava-bom:33.2.0-jre",
   "com.linecorp.armeria:armeria-bom:1.28.4",
   "org.junit:junit-bom:5.10.2",
-  "io.grpc:grpc-bom:1.63.0",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.3.0-alpha",
+  "io.grpc:grpc-bom:1.64.0",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.4.0-alpha",
   "org.testcontainers:testcontainers-bom:1.19.8"
 )
 
@@ -51,7 +51,7 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.12.0",
   "com.uber.nullaway:nullaway:0.10.26",
-  "org.assertj:assertj-core:3.25.3",
+  "org.assertj:assertj-core:3.26.0",
   "org.awaitility:awaitility:4.2.1",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.9.1",
