@@ -58,8 +58,10 @@ public class MavenOtelSemanticAttributes {
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   public static final AttributeKey<String> PEER_SERVICE = AttributeKey.stringKey("peer.service");
   public static final AttributeKey<String> RPC_METHOD = AttributeKey.stringKey("rpc.method");
-  public static final AttributeKey<String> TELEMETRY_DISTRO_NAME = AttributeKey.stringKey("telemetry.distro.name");
-  public static final AttributeKey<String> TELEMETRY_DISTRO_VERSION = AttributeKey.stringKey("telemetry.distro.version");
+  public static final AttributeKey<String> TELEMETRY_DISTRO_NAME =
+      AttributeKey.stringKey("telemetry.distro.name");
+  public static final AttributeKey<String> TELEMETRY_DISTRO_VERSION =
+      AttributeKey.stringKey("telemetry.distro.version");
 
   public static final String TELEMETRY_DISTRO_NAME_VALUE = "opentelemetry-maven-extension";
 
