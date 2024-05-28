@@ -19,6 +19,8 @@ components:
   aws-xray-propagator:
     - wangzlei
     - srprash
+  baggage-procesor:
+    - mikegoldsmith
   compressors:
     - jack-berg
   consistent-sampling:

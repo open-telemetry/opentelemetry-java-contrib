@@ -9,6 +9,8 @@ import static io.opentelemetry.api.common.AttributeKey.stringArrayKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.maven.OpenTelemetrySdkService;
+import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
 import java.util.List;
 
 /**
@@ -57,6 +59,11 @@ public class MavenOtelSemanticAttributes {
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   public static final AttributeKey<String> PEER_SERVICE = AttributeKey.stringKey("peer.service");
   public static final AttributeKey<String> RPC_METHOD = AttributeKey.stringKey("rpc.method");
+
+  public static final String TELEMETRY_DISTRO_NAME_VALUE = "opentelemetry-maven-extension";
+
+  public static final String TELEMETRY_DISTRO_VERSION_VALUE =
+      OpenTelemetrySdkService.class.getPackage().getImplementationVersion();
 
   private MavenOtelSemanticAttributes() {}
 }

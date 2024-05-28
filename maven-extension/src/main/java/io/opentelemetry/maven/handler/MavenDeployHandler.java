@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
@@ -35,7 +34,9 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
 
     MavenProject project = execution.getProject();
-    ArtifactRepository optRepository = project.getDistributionManagementArtifactRepository();
+    @SuppressWarnings("deprecation") // there is no alternative to o.a.m.a.r.ArtifactRepository
+    org.apache.maven.artifact.repository.ArtifactRepository optRepository =
+        project.getDistributionManagementArtifactRepository();
 
     if (optRepository == null) {
       return;

@@ -4,6 +4,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.opentelemetry.maven;
+package io.opentelemetry.maven.resources;
 
 import javax.annotation.ParametersAreNonnullByDefault;

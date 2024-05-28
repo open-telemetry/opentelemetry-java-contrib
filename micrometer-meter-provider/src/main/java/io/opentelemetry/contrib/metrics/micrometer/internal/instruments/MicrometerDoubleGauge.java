@@ -6,12 +6,13 @@
 package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.incubator.metrics.DoubleGauge;
 import io.opentelemetry.api.incubator.metrics.ExtendedDoubleGaugeBuilder;
+import io.opentelemetry.api.metrics.DoubleGauge;
 import io.opentelemetry.api.metrics.DoubleGaugeBuilder;
 import io.opentelemetry.api.metrics.LongGaugeBuilder;
 import io.opentelemetry.api.metrics.ObservableDoubleGauge;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.function.Consumer;
@@ -30,6 +31,11 @@ public final class MicrometerDoubleGauge extends AbstractGauge
 
   @Override
   public void set(double value, Attributes attributes) {
+    record(attributes, value);
+  }
+
+  @Override
+  public void set(double value, Attributes attributes, Context context) {
     record(attributes, value);
   }
 

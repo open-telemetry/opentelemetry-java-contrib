@@ -7,10 +7,11 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.instruments;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.metrics.ExtendedLongGaugeBuilder;
-import io.opentelemetry.api.incubator.metrics.LongGauge;
+import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.LongGaugeBuilder;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import java.util.function.Consumer;
 
@@ -31,6 +32,11 @@ public final class MicrometerLongGauge extends AbstractGauge
 
   @Override
   public void set(long value, Attributes attributes) {
+    record(attributes, (double) value);
+  }
+
+  @Override
+  public void set(long value, Attributes attributes, Context context) {
     record(attributes, (double) value);
   }
 
