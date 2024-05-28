@@ -57,7 +57,10 @@ val DEPENDENCIES = listOf(
   "org.junit-pioneer:junit-pioneer:1.9.1",
   "org.skyscreamer:jsonassert:1.5.1",
   "org.apache.kafka:kafka-clients:3.7.0",
-  "org.testcontainers:kafka:1.19.8"
+  "org.testcontainers:kafka:1.19.8",
+  "com.lmax:disruptor:3.4.4",
+  "org.jctools:jctools-core:4.0.3",
+  "tools.profiler:async-profiler:3.0"
 )
 
 javaPlatform {
