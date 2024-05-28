@@ -12,10 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,8 @@ import org.slf4j.LoggerFactory;
  * Daemon</a>, can't execute multiple builds concurrently, there is no need to differentiate spans
  * per {@link org.apache.maven.execution.MavenSession}.
  */
-@Component(role = SpanRegistry.class)
+@Singleton
+@Named
 public final class SpanRegistry {
 
   private static final Logger logger = LoggerFactory.getLogger(SpanRegistry.class);

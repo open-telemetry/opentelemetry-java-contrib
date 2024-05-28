@@ -9,6 +9,7 @@ import static io.opentelemetry.api.common.AttributeKey.stringArrayKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.maven.OpenTelemetrySdkService;
 import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
 import java.util.List;
 
@@ -54,6 +55,11 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.project.version");
 
   public static final String SERVICE_NAME_VALUE = "maven";
+
+  public static final String TELEMETRY_DISTRO_NAME_VALUE = "opentelemetry-maven-extension";
+
+  public static final String TELEMETRY_DISTRO_VERSION_VALUE =
+      OpenTelemetrySdkService.class.getPackage().getImplementationVersion();
 
   private MavenOtelSemanticAttributes() {}
 }
