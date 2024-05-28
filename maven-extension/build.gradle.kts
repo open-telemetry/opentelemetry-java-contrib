@@ -61,6 +61,3 @@ tasks {
 }
 
 tasks.getByName("test").dependsOn("shadowJar")
-repositories {
-  mavenCentral()
-}
