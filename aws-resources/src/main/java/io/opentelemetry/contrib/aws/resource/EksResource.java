@@ -5,12 +5,12 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_EKS;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
-import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_EKS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.K8S_CLUSTER_NAME;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;

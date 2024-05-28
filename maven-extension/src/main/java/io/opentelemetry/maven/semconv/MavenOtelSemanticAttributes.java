@@ -10,7 +10,6 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.maven.OpenTelemetrySdkService;
-import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
 import java.util.List;
 
 /**
@@ -21,13 +20,13 @@ import java.util.List;
 public class MavenOtelSemanticAttributes {
 
   /**
-   * See {@link
+   * See {@code
    * io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes#CONTAINER_IMAGE_NAME}
    */
   public static final AttributeKey<String> MAVEN_BUILD_CONTAINER_IMAGE_NAME =
       stringKey("maven.build.container.image.name");
 
-  /** See {@link ContainerIncubatingAttributes#CONTAINER_IMAGE_TAGS} */
+  /** See {@code ContainerIncubatingAttributes#CONTAINER_IMAGE_TAGS} */
   public static final AttributeKey<List<String>> MAVEN_BUILD_CONTAINER_IMAGE_TAGS =
       stringArrayKey("maven.build.container.image.tags");
 
@@ -55,6 +54,14 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.project.version");
 
   public static final String SERVICE_NAME_VALUE = "maven";
+
+  // inlined incubating attribute to prevent direct dependency on incubating semconv
+  public static final AttributeKey<String> PEER_SERVICE = AttributeKey.stringKey("peer.service");
+  public static final AttributeKey<String> RPC_METHOD = AttributeKey.stringKey("rpc.method");
+  public static final AttributeKey<String> TELEMETRY_DISTRO_NAME =
+      AttributeKey.stringKey("telemetry.distro.name");
+  public static final AttributeKey<String> TELEMETRY_DISTRO_VERSION =
+      AttributeKey.stringKey("telemetry.distro.version");
 
   public static final String TELEMETRY_DISTRO_NAME_VALUE = "opentelemetry-maven-extension";
 
