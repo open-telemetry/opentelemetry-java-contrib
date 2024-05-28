@@ -93,9 +93,9 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longCounter_units_total LongCounter test")
         .contains("# TYPE longCounter_units_total counter")
         .contains(
-            "longCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.0")
         .contains(
-            "longCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0");
   }
 
   @Test
@@ -116,7 +116,7 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longCounter_units_total LongCounter test")
         .contains("# TYPE longCounter_units_total counter")
         .contains(
-            "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+            "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 3.0")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -137,14 +137,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longCounter_units_total counter")
           .contains("# HELP longCounter_units_total LongCounter test")
           .contains(
-              "longCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+              "longCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
           .contains(
-              "longCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+              "longCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2");
     }
   }
 
@@ -165,12 +163,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longCounter_units_total counter")
           .contains("# HELP longCounter_units_total LongCounter test")
           .contains(
-              "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+              "longCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
@@ -195,9 +191,9 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleCounter_units_total DoubleCounter test")
         .contains("# TYPE doubleCounter_units_total counter")
         .contains(
-            "doubleCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
   }
 
   @Test
@@ -223,7 +219,7 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleCounter_units_total DoubleCounter test")
         .contains("# TYPE doubleCounter_units_total counter")
         .contains(
-            "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+            "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4.0")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -245,14 +241,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleCounter_units_total counter")
           .contains("# HELP doubleCounter_units_total DoubleCounter test")
           .contains(
-              "doubleCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+              "doubleCounter_units_total{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
           .contains(
-              "doubleCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+              "doubleCounter_units_total{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
     }
   }
 
@@ -277,12 +271,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleCounter_units_total counter")
           .contains("# HELP doubleCounter_units_total DoubleCounter test")
           .contains(
-              "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+              "doubleCounter_units_total{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
@@ -306,9 +298,9 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
         .contains("# TYPE longUpDownCounter_units gauge")
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.0")
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0");
 
     longUpDownCounter.add(1, FIRST_ATTRIBUTES);
     longUpDownCounter.add(2, SECOND_ATTRIBUTES);
@@ -317,9 +309,9 @@ public class PrometheusIntegrationTest {
 
     assertThat(output)
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0")
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0");
+            "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4.0");
   }
 
   @Test
@@ -345,7 +337,7 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
         .contains("# TYPE longUpDownCounter_units gauge")
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 3.0")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
 
@@ -356,7 +348,7 @@ public class PrometheusIntegrationTest {
 
     assertThat(output)
         .contains(
-            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 6.0")
+            "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 6.0")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -376,14 +368,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longUpDownCounter_units gauge")
           .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
           .contains(
-              "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+              "longUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.0")
           .contains(
-              "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.0");
+              "longUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} -2.0");
     }
   }
 
@@ -407,12 +397,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longUpDownCounter_units gauge")
           .contains("# HELP longUpDownCounter_units LongUpDownCounter test")
           .contains(
-              "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.0")
+              "longUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} -2.0")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
@@ -437,9 +425,9 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
         .contains("# TYPE doubleUpDownCounter_units gauge")
         .contains(
-            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
 
     doubleUpDownCounter.add(0.5, FIRST_ATTRIBUTES);
     doubleUpDownCounter.add(-1.5, SECOND_ATTRIBUTES);
@@ -448,9 +436,9 @@ public class PrometheusIntegrationTest {
 
     assertThat(output)
         .contains(
-            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0")
         .contains(
-            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0");
+            "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.0");
   }
 
   @Test
@@ -476,7 +464,7 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
         .contains("# TYPE doubleUpDownCounter_units gauge")
         .contains(
-            "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+            "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4.0")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -498,14 +486,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleUpDownCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleUpDownCounter_units gauge")
           .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
           .contains(
-              "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+              "doubleUpDownCounter_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
           .contains(
-              "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.5");
+              "doubleUpDownCounter_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} -2.5");
     }
   }
 
@@ -531,12 +517,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleUpDownCounter");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleUpDownCounter_units gauge")
           .contains("# HELP doubleUpDownCounter_units DoubleUpDownCounter test")
           .contains(
-              "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} -2.5")
+              "doubleUpDownCounter_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} -2.5")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
@@ -559,30 +543,30 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleHistogram_units DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units summary")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5")
         .contains("# HELP doubleHistogram_units_max DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units_max gauge")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
 
     doubleHistogram.record(2.5, FIRST_ATTRIBUTES);
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
   }
 
   @Test
@@ -606,13 +590,13 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleHistogram_units DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units summary")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "doubleHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+            "doubleHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4")
         .contains("# HELP doubleHistogram_units_max DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units_max gauge")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
+            "doubleHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -635,54 +619,54 @@ public class PrometheusIntegrationTest {
         .contains("# HELP doubleHistogram_units DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units histogram")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 0.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 0")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 1")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 1")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 1")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 0.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 0")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 0.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 0")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 1")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 1")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5")
         .contains("# HELP doubleHistogram_units_max DoubleHistogram test")
         .contains("# TYPE doubleHistogram_units_max gauge")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
 
     doubleHistogram.record(2.5, FIRST_ATTRIBUTES);
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 0.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 0")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 1.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 1")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 2.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 2")
         .contains(
-            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 2.0")
+            "doubleHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 2")
         .contains(
-            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "doubleHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 4.0")
+            "doubleHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 4")
         .contains(
-            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+            "doubleHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
   }
 
   @Test
@@ -703,30 +687,30 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longHistogram_units LongHistogram test")
         .contains("# TYPE longHistogram_units summary")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains("# HELP longHistogram_units_max LongHistogram test")
         .contains("# TYPE longHistogram_units_max gauge")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2");
 
     longHistogram.record(2, FIRST_ATTRIBUTES);
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 3")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2");
   }
 
   @Test
@@ -750,13 +734,13 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longHistogram_units LongHistogram test")
         .contains("# TYPE longHistogram_units summary")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_count{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+            "longHistogram_units_sum{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 3")
         .contains("# HELP longHistogram_units_max LongHistogram test")
         .contains("# TYPE longHistogram_units_max gauge")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_max{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .doesNotContain("key2=\"value1\"")
         .doesNotContain("key2=\"value2\"");
   }
@@ -780,54 +764,54 @@ public class PrometheusIntegrationTest {
         .contains("# HELP longHistogram_units LongHistogram test")
         .contains("# TYPE longHistogram_units histogram")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 1")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 0.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 0")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 1")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains("# HELP longHistogram_units_max LongHistogram test")
         .contains("# TYPE longHistogram_units_max gauge")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longHistogram_units_max{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2");
 
     longHistogram.record(2, FIRST_ATTRIBUTES);
 
     output = prometheusMeterRegistry.scrape();
     assertThat(output)
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\",} 1.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"1.0\"} 1")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\",} 2.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"2.0\"} 2")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\",} 2.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"3.0\"} 2")
         .contains(
-            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\",} 2.0")
+            "longHistogram_units_bucket{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",le=\"+Inf\"} 2")
         .contains(
-            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+            "longHistogram_units_count{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2")
         .contains(
-            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 3.0")
+            "longHistogram_units_sum{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 3")
         .contains(
-            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+            "longHistogram_units_max{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2");
   }
 
   @Test
@@ -845,14 +829,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleGauge");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleGauge_units gauge")
           .contains("# HELP doubleGauge_units DoubleGauge test")
           .contains(
-              "doubleGauge_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.5")
+              "doubleGauge_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.5")
           .contains(
-              "doubleGauge_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5");
+              "doubleGauge_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5");
     }
   }
 
@@ -872,12 +854,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("doubleGauge");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE doubleGauge_units gauge")
           .contains("# HELP doubleGauge_units DoubleGauge test")
           .contains(
-              "doubleGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.5")
+              "doubleGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.5")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
@@ -899,14 +879,12 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longGauge");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longGauge_units gauge")
           .contains("# HELP longGauge_units LongGauge test")
           .contains(
-              "longGauge_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 1.0")
+              "longGauge_units{key1=\"value1\",key2=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 1.0")
           .contains(
-              "longGauge_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0");
+              "longGauge_units{key1=\"value1\",key2=\"value2\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0");
     }
   }
 
@@ -926,12 +904,10 @@ public class PrometheusIntegrationTest {
 
       String output = scrapeFor("longGauge");
       assertThat(output)
-          .contains("# HELP otel_polling_meter")
-          .contains("# TYPE otel_polling_meter untyped")
           .contains("# TYPE longGauge_units gauge")
           .contains("# HELP longGauge_units LongGauge test")
           .contains(
-              "longGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\",} 2.0")
+              "longGauge_units{key1=\"value1\",otel_instrumentation_name=\"integrationTest\",otel_instrumentation_version=\"1.0\"} 2.0")
           .doesNotContain("key2=\"value1\"")
           .doesNotContain("key2=\"value2\"");
     }
