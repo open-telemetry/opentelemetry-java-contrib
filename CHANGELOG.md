@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## Version 1.36.0 (2024-05-28)
+## Version 1.36.0 (2024-05-29)
 
 ### AWS resources
 
