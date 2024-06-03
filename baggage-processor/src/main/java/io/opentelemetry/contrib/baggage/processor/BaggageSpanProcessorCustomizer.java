@@ -23,7 +23,8 @@ public class BaggageSpanProcessorCustomizer implements AutoConfigurationCustomiz
 
   private static void addSpanProcessor(
       SdkTracerProviderBuilder sdkTracerProviderBuilder, ConfigProperties config) {
-    List<String> keys = config.getList("otel.traces.baggage-to-attributes.include");
+    List<String> keys =
+        config.getList("otel.java.experimental.span-attributes.copy-from-baggage.include");
 
     if (keys.isEmpty()) {
       return;

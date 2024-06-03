@@ -34,7 +34,9 @@ class BaggageSpanProcessorCustomizerTest {
   void test_customizer() {
     assertCustomizer(Collections.emptyMap(), 0);
     assertCustomizer(
-        Collections.singletonMap("otel.traces.baggage-to-attributes.include", "key"), 1);
+        Collections.singletonMap(
+            "otel.java.experimental.span-attributes.copy-from-baggage.include", "key"),
+        1);
   }
 
   private static void assertCustomizer(

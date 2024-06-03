@@ -47,9 +47,9 @@ new BaggageSpanProcessor(baggageKey -> pattern.matcher(baggageKey).matches())
 If you are using the OpenTelemetry SDK auto-configuration, you can add the span processor this
 library to configure the span processor.
 
-| Property                                  | Description                                                                                     |
-|-------------------------------------------|-------------------------------------------------------------------------------------------------|
-| otel.traces.baggage-to-attributes.include | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
+| Property                                                         | Description                                                                                       |
+|------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| otel.java.experimental.span-attributes.copy-from-baggage.include | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
 
 ## Component owners
 
