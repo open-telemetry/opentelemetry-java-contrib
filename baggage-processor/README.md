@@ -49,7 +49,7 @@ library to configure the span processor.
 
 | Property                                  | Description                                                                                     |
 |-------------------------------------------|-------------------------------------------------------------------------------------------------|
-| otel.traces.baggage-to-attributes.include | Add baggage items to span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
+| otel.traces.baggage-to-attributes.include | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
 
 ## Component owners
 
