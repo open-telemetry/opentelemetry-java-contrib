@@ -13,5 +13,8 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.mockito:mockito-inline")
+  testImplementation("com.google.guava:guava")
+  testImplementation("org.awaitility:awaitility")
 }
