@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxRandomValue;
+import static io.opentelemetry.contrib.sampler.consistent56.TestUtil.generateRandomTraceId;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 public class ConsistentFixedThresholdSamplerTest {
 
   private Context parentContext;
-  private String traceId;
   private String name;
   private SpanKind spanKind;
   private Attributes attributes;
@@ -38,7 +37,6 @@ public class ConsistentFixedThresholdSamplerTest {
   public void init() {
 
     parentContext = Context.root();
-    traceId = "0123456789abcdef0123456789abcdef";
     name = "name";
     spanKind = SpanKind.SERVER;
     attributes = Attributes.empty();
@@ -48,21 +46,20 @@ public class ConsistentFixedThresholdSamplerTest {
   private void testSampling(SplittableRandom rng, double samplingProbability) {
     int numSpans = 10000;
 
-    Sampler sampler =
-        ConsistentSampler.probabilityBased(
-            samplingProbability, s -> rng.nextLong() & getMaxRandomValue());
+    Sampler sampler = ConsistentSampler.probabilityBased(samplingProbability);
 
     int numSampled = 0;
     for (long i = 0; i < numSpans; ++i) {
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext, generateRandomTraceId(rng), name, spanKind, attributes, parentLinks);
       if (samplingResult.getDecision() == SamplingDecision.RECORD_AND_SAMPLE) {
         String traceStateString =
             samplingResult
                 .getUpdatedTraceState(TraceState.getDefault())
                 .get(OtelTraceState.TRACE_STATE_KEY);
         OtelTraceState traceState = OtelTraceState.parse(traceStateString);
-        assertThat(traceState.hasValidRandomValue()).isTrue();
+        assertThat(traceState.hasValidRandomValue()).isFalse();
         assertThat(traceState.hasValidThreshold()).isTrue();
         assertThat(traceState.getThreshold()).isEqualTo(calculateThreshold(samplingProbability));
 

@@ -39,14 +39,14 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry:opentelemetry-exporter-prometheus")
-  implementation("org.slf4j:slf4j-api")
-  implementation("org.slf4j:slf4j-simple")
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
   runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
 
+  testImplementation("org.slf4j:slf4j-api")
+  testImplementation("org.slf4j:slf4j-simple")
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("org.awaitility:awaitility")
 }

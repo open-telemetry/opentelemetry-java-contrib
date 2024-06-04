@@ -15,6 +15,7 @@ feature or via instrumentation, this project is hopefully for you.
 * [zstd Compressor](./compressors/compressor-zstd/README.md)
 * [Consistent Sampling](./consistent-sampling/README.md)
 * [Disk Buffering](./disk-buffering/README.md)
+* [GCP Resources](./gcp-resources/README.md)
 * [JMX Metric Gatherer](./jmx-metrics/README.md)
 * [No-Op API](./noop-api/README.md)
 * [OpenTelemetry Maven Extension](./maven-extension/README.md)

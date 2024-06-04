@@ -15,6 +15,7 @@ import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -27,11 +28,11 @@ import org.junit.jupiter.api.Test;
 
 class AwsXrayPropagatorTest {
 
-  private static final String TRACE_ID = "8a3c60f7d188f8fa79d48a391a778fa6";
-  private static final String SPAN_ID = "53995c3f42cd8ad8";
+  static final String TRACE_ID = "8a3c60f7d188f8fa79d48a391a778fa6";
+  static final String SPAN_ID = "53995c3f42cd8ad8";
 
-  private static final TextMapSetter<Map<String, String>> setter = Map::put;
-  private static final TextMapGetter<Map<String, String>> getter =
+  static final TextMapSetter<Map<String, String>> SETTER = Map::put;
+  static final TextMapGetter<Map<String, String>> GETTER =
       new TextMapGetter<Map<String, String>>() {
         @Override
         public Set<String> keys(Map<String, String> carrier) {
@@ -44,17 +45,27 @@ class AwsXrayPropagatorTest {
           return carrier.get(key);
         }
       };
-  private final AwsXrayPropagator xrayPropagator = AwsXrayPropagator.getInstance();
+  protected static final AwsXrayPropagator X_RAY = AwsXrayPropagator.getInstance();
+  protected final TextMapPropagator subject = propagator();
+
+  TextMapPropagator propagator() {
+    return AwsXrayPropagator.getInstance();
+  }
+
+  @Test
+  void fields_valid() {
+    assertThat(subject.fields()).containsOnly("X-Amzn-Trace-Id");
+  }
 
   @Test
   void inject_SampledContext() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(
+    subject.inject(
         withSpanContext(
             SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()),
             Context.current()),
         carrier,
-        setter);
+        SETTER);
 
     assertThat(carrier)
         .containsEntry(
@@ -65,12 +76,12 @@ class AwsXrayPropagatorTest {
   @Test
   void inject_NotSampledContext() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(
+    subject.inject(
         withSpanContext(
             SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
             Context.current()),
         carrier,
-        setter);
+        SETTER);
 
     assertThat(carrier)
         .containsEntry(
@@ -81,7 +92,7 @@ class AwsXrayPropagatorTest {
   @Test
   void inject_WithBaggage() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(
+    subject.inject(
         withSpanContext(
                 SpanContext.create(
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
@@ -95,7 +106,7 @@ class AwsXrayPropagatorTest {
                     .put("Sampled", "ignored")
                     .build()),
         carrier,
-        setter);
+        SETTER);
 
     assertThat(carrier)
         .containsEntry(
@@ -117,14 +128,14 @@ class AwsXrayPropagatorTest {
 
     Baggage baggage = Baggage.builder().put(key1, value1).put(key2, value2).build();
 
-    xrayPropagator.inject(
+    subject.inject(
         withSpanContext(
                 SpanContext.create(
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
                 Context.current())
             .with(baggage),
         carrier,
-        setter);
+        SETTER);
 
     assertThat(carrier)
         .containsEntry(
@@ -138,7 +149,7 @@ class AwsXrayPropagatorTest {
   @Test
   void inject_WithTraceState() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(
+    subject.inject(
         withSpanContext(
             SpanContext.create(
                 TRACE_ID,
@@ -147,7 +158,7 @@ class AwsXrayPropagatorTest {
                 TraceState.builder().put("foo", "bar").build()),
             Context.current()),
         carrier,
-        setter);
+        SETTER);
 
     // TODO: assert trace state when the propagator supports it, for general key/value pairs we are
     // mapping with baggage.
@@ -160,7 +171,7 @@ class AwsXrayPropagatorTest {
   @Test
   void inject_nullContext() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    xrayPropagator.inject(null, carrier, setter);
+    subject.inject(null, carrier, SETTER);
     assertThat(carrier).isEmpty();
   }
 
@@ -171,16 +182,14 @@ class AwsXrayPropagatorTest {
         withSpanContext(
             SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
             Context.current());
-    xrayPropagator.inject(context, carrier, null);
+    subject.inject(context, carrier, null);
     assertThat(carrier).isEmpty();
   }
 
   @Test
   void extract_Nothing() {
     // Context remains untouched.
-    assertThat(
-            xrayPropagator.extract(
-                Context.current(), Collections.<String, String>emptyMap(), getter))
+    assertThat(subject.extract(Context.current(), Collections.<String, String>emptyMap(), GETTER))
         .isSameAs(Context.current());
   }
 
@@ -191,7 +200,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
@@ -204,7 +213,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()));
@@ -217,7 +226,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Parent=53995c3f42cd8ad8;Sampled=1;Root=1-8a3c60f7-d188f8fa79d48a391a778fa6");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
@@ -230,7 +239,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
-    Context context = xrayPropagator.extract(Context.current(), carrier, getter);
+    Context context = subject.extract(Context.current(), carrier, GETTER);
     assertThat(getSpanContext(context))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
@@ -260,7 +269,7 @@ class AwsXrayPropagatorTest {
             + '='
             + value2);
 
-    Context context = xrayPropagator.extract(Context.current(), carrier, getter);
+    Context context = subject.extract(Context.current(), carrier, GETTER);
     assertThat(getSpanContext(context))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
@@ -357,15 +366,14 @@ class AwsXrayPropagatorTest {
 
   private void verifyInvalidBehavior(Map<String, String> invalidHeaders) {
     Context input = Context.current();
-    Context result = xrayPropagator.extract(input, invalidHeaders, getter);
+    Context result = subject.extract(input, invalidHeaders, GETTER);
     assertThat(result).isSameAs(input);
     assertThat(getSpanContext(result)).isSameAs(SpanContext.getInvalid());
   }
 
   @Test
   void extract_nullContext() {
-    assertThat(xrayPropagator.extract(null, Collections.emptyMap(), getter))
-        .isSameAs(Context.root());
+    assertThat(subject.extract(null, Collections.emptyMap(), GETTER)).isSameAs(Context.root());
   }
 
   @Test
@@ -374,7 +382,7 @@ class AwsXrayPropagatorTest {
         withSpanContext(
             SpanContext.create(TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
             Context.current());
-    assertThat(xrayPropagator.extract(context, Collections.emptyMap(), null)).isSameAs(context);
+    assertThat(subject.extract(context, Collections.emptyMap(), null)).isSameAs(context);
   }
 
   @Test
@@ -384,7 +392,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-0-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "00000000d188f8fa79d48a391a778fa6",
@@ -400,7 +408,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-1a-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "0000001ad188f8fa79d48a391a778fa6",
@@ -416,7 +424,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-00000000-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 "00000000d188f8fa79d48a391a778fa6",
@@ -432,7 +440,7 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=1-8a3c60f711-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), invalidHeaders, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), invalidHeaders, GETTER)))
         .isSameAs(SpanContext.getInvalid());
   }
 
@@ -442,7 +450,7 @@ class AwsXrayPropagatorTest {
     invalidHeaders.put(
         TRACE_HEADER_KEY, "Root=1--d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), invalidHeaders, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), invalidHeaders, GETTER)))
         .isSameAs(SpanContext.getInvalid());
   }
 
@@ -452,7 +460,7 @@ class AwsXrayPropagatorTest {
     invalidHeaders.put(
         TRACE_HEADER_KEY, "Root=1-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), invalidHeaders, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), invalidHeaders, GETTER)))
         .isSameAs(SpanContext.getInvalid());
   }
 
@@ -463,15 +471,15 @@ class AwsXrayPropagatorTest {
         TRACE_HEADER_KEY,
         "Root=2-1a2a3a4a-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
-    assertThat(getSpanContext(xrayPropagator.extract(Context.current(), carrier, getter)))
+    assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isSameAs(SpanContext.getInvalid());
   }
 
-  private static Context withSpanContext(SpanContext spanContext, Context context) {
+  static Context withSpanContext(SpanContext spanContext, Context context) {
     return context.with(Span.wrap(spanContext));
   }
 
-  private static SpanContext getSpanContext(Context context) {
+  static SpanContext getSpanContext(Context context) {
     return Span.fromContext(context).getSpanContext();
   }
 }

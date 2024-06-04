@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.resourceproviders;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
@@ -32,7 +31,7 @@ class AppServerServiceNameDetectorTest {
 
   @Test
   void nullDeploymentDir() throws Exception {
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     AppServerServiceNameDetector detector = new AppServerServiceNameDetector(appServer);
     assertThat(detector.detect()).isNull();
   }
@@ -41,7 +40,7 @@ class AppServerServiceNameDetectorTest {
   void detectMissingDir() throws Exception {
     Path deploymentDir = Paths.get("/fake", "location");
 
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(dirTool.isDirectory(deploymentDir)).thenReturn(false);
 
@@ -56,7 +55,7 @@ class AppServerServiceNameDetectorTest {
     Path path1 = Paths.get("path1.xml");
     Path path2 = Paths.get("something/");
 
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(appServer.isValidAppName(path1)).thenReturn(false);
     when(appServer.isValidAppName(path2)).thenReturn(true);
@@ -76,7 +75,7 @@ class AppServerServiceNameDetectorTest {
     Path path1 = Paths.get("meh");
     Path path2 = Paths.get("excellent.war");
 
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(appServer.isValidAppName(path1)).thenReturn(false);
     when(appServer.isValidAppName(path2)).thenReturn(true);
@@ -96,7 +95,7 @@ class AppServerServiceNameDetectorTest {
     Path path1 = Paths.get("meh");
     Path path2 = Paths.get("excellent.ear");
 
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(appServer.isValidAppName(path1)).thenReturn(false);
     when(appServer.isValidAppName(path2)).thenReturn(true);
@@ -117,7 +116,7 @@ class AppServerServiceNameDetectorTest {
     Path deploymentDir = Paths.get("/fake", "location");
     Path path1 = Paths.get("meh");
 
-    doReturn(AppServer.class).when(appServer).getServerClass();
+    when(appServer.getServerClass()).thenAnswer(invocationOnMock -> AppServer.class);
     when(appServer.getDeploymentDir()).thenReturn(deploymentDir);
     when(appServer.isValidAppName(path1)).thenReturn(true);
     when(appServer.supportsEar()).thenReturn(true);

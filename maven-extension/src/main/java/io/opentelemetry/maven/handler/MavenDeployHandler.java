@@ -9,13 +9,13 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
@@ -34,7 +34,9 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
 
     MavenProject project = execution.getProject();
-    ArtifactRepository optRepository = project.getDistributionManagementArtifactRepository();
+    @SuppressWarnings("deprecation") // there is no alternative to o.a.m.a.r.ArtifactRepository
+    org.apache.maven.artifact.repository.ArtifactRepository optRepository =
+        project.getDistributionManagementArtifactRepository();
 
     if (optRepository == null) {
       return;
@@ -53,7 +55,7 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
         // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
         // service will be instrumented and what it "service.name" would be
         spanBuilder.setAttribute(
-            SemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
+            MavenOtelSemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
       } catch (MalformedURLException e) {
         logger.debug("Ignore exception parsing artifact repository URL", e);
       }
@@ -68,8 +70,8 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
               + artifact.getArtifactId()
               + '/'
               + artifact.getVersion();
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_URL, artifactRootUrl);
-      spanBuilder.setAttribute(SemanticAttributes.HTTP_METHOD, "POST");
+      spanBuilder.setAttribute(UrlAttributes.URL_FULL, artifactRootUrl);
+      spanBuilder.setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, "POST");
     }
   }
 

@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxRandomValue;
+import static io.opentelemetry.contrib.sampler.consistent56.TestUtil.generateRandomTraceId;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
@@ -29,27 +29,22 @@ class ConsistentRateLimitingSamplerTest {
   private long[] nanoTime;
   private LongSupplier nanoTimeSupplier;
   private Context parentContext;
-  private String traceId;
   private String name;
   private SpanKind spanKind;
   private Attributes attributes;
   private List<LinkData> parentLinks;
-
-  private static RandomValueGenerator randomValueGenerator() {
-    SplittableRandom random = new SplittableRandom(0L);
-    return s -> random.nextLong() & getMaxRandomValue();
-  }
+  private SplittableRandom random;
 
   @BeforeEach
   void init() {
     nanoTime = new long[] {0L};
     nanoTimeSupplier = () -> nanoTime[0];
     parentContext = Context.root();
-    traceId = "0123456789abcdef0123456789abcdef";
     name = "name";
     spanKind = SpanKind.SERVER;
     attributes = Attributes.empty();
     parentLinks = Collections.emptyList();
+    random = new SplittableRandom(0L);
   }
 
   private void advanceTime(long nanosIncrement) {
@@ -68,10 +63,7 @@ class ConsistentRateLimitingSamplerTest {
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            randomValueGenerator(),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
 
     long nanosBetweenSpans = TimeUnit.MICROSECONDS.toNanos(100);
     int numSpans = 1000000;
@@ -81,7 +73,13 @@ class ConsistentRateLimitingSamplerTest {
     for (int i = 0; i < numSpans; ++i) {
       advanceTime(nanosBetweenSpans);
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
       if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
         spanSampledNanos.add(getCurrentTimeNanos());
       }
@@ -104,10 +102,7 @@ class ConsistentRateLimitingSamplerTest {
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            randomValueGenerator(),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(100);
     long nanosBetweenSpans2 = TimeUnit.MICROSECONDS.toNanos(10);
@@ -119,7 +114,13 @@ class ConsistentRateLimitingSamplerTest {
     for (int i = 0; i < numSpans1; ++i) {
       advanceTime(nanosBetweenSpans1);
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
       if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
         spanSampledNanos.add(getCurrentTimeNanos());
       }
@@ -127,7 +128,13 @@ class ConsistentRateLimitingSamplerTest {
     for (int i = 0; i < numSpans2; ++i) {
       advanceTime(nanosBetweenSpans2);
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
       if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
         spanSampledNanos.add(getCurrentTimeNanos());
       }
@@ -162,10 +169,7 @@ class ConsistentRateLimitingSamplerTest {
 
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds,
-            randomValueGenerator(),
-            nanoTimeSupplier);
+            targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
 
     long nanosBetweenSpans1 = TimeUnit.MICROSECONDS.toNanos(10);
     long nanosBetweenSpans2 = TimeUnit.MICROSECONDS.toNanos(100);
@@ -177,7 +181,13 @@ class ConsistentRateLimitingSamplerTest {
     for (int i = 0; i < numSpans1; ++i) {
       advanceTime(nanosBetweenSpans1);
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
       if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
         spanSampledNanos.add(getCurrentTimeNanos());
       }
@@ -185,7 +195,13 @@ class ConsistentRateLimitingSamplerTest {
     for (int i = 0; i < numSpans2; ++i) {
       advanceTime(nanosBetweenSpans2);
       SamplingResult samplingResult =
-          sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
       if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
         spanSampledNanos.add(getCurrentTimeNanos());
       }

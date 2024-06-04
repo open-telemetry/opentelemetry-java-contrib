@@ -5,10 +5,10 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.PROCESSING_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,13 +38,13 @@ class StorageTest {
     readableFile = mock();
     writableFile = createWritableFile();
     processing = mock();
-    doReturn(ReadableResult.SUCCEEDED).when(readableFile).readAndProcess(processing);
+    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
     storage = new Storage(folderManager);
   }
 
   @Test
   void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
-    doReturn(readableFile).when(folderManager).getReadableFile();
+    when(folderManager.getReadableFile()).thenReturn(readableFile);
 
     assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
 
@@ -53,10 +53,10 @@ class StorageTest {
 
   @Test
   void whenReadableFileProcessingFails_returnFailed() throws IOException {
-    doReturn(readableFile).when(folderManager).getReadableFile();
-    doReturn(ReadableResult.PROCESSING_FAILED).when(readableFile).readAndProcess(processing);
+    when(folderManager.getReadableFile()).thenReturn(readableFile);
+    when(readableFile.readAndProcess(processing)).thenReturn(PROCESSING_FAILED);
 
-    assertEquals(ReadableResult.PROCESSING_FAILED, storage.readAndProcess(processing));
+    assertEquals(PROCESSING_FAILED, storage.readAndProcess(processing));
 
     verify(readableFile).readAndProcess(processing);
   }
@@ -108,7 +108,7 @@ class StorageTest {
   @Test
   void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
+    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
 
     storage.readAndProcess(processing);
 
@@ -118,7 +118,7 @@ class StorageTest {
   @Test
   void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
+    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
 
     storage.readAndProcess(processing);
 
@@ -128,7 +128,7 @@ class StorageTest {
   @Test
   void whenResourceClosed_lookForNewFileToRead() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
+    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
 
     storage.readAndProcess(processing);
 
@@ -138,7 +138,7 @@ class StorageTest {
   @Test
   void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    doReturn(ReadableResult.FAILED).when(readableFile).readAndProcess(processing);
+    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
 
     assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
 
@@ -147,7 +147,7 @@ class StorageTest {
 
   @Test
   void appendDataToFile() throws IOException {
-    doReturn(writableFile).when(folderManager).createWritableFile();
+    when(folderManager.createWritableFile()).thenReturn(writableFile);
     byte[] data = new byte[1];
 
     storage.write(data);
@@ -162,7 +162,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.FAILED).when(writableFile).append(data);
+    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
     storage.write(data);
 
@@ -176,7 +176,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.FAILED).when(writableFile).append(data);
+    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
     storage.write(data);
 
@@ -190,7 +190,7 @@ class StorageTest {
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
         .thenReturn(workingWritableFile);
-    doReturn(WritableResult.FAILED).when(writableFile).append(data);
+    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
     storage.write(data);
 
@@ -201,7 +201,7 @@ class StorageTest {
   void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
     byte[] data = new byte[1];
     when(folderManager.createWritableFile()).thenReturn(writableFile);
-    doReturn(WritableResult.FAILED).when(writableFile).append(data);
+    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
     assertFalse(storage.write(data));
 
@@ -210,8 +210,8 @@ class StorageTest {
 
   @Test
   void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
-    doReturn(writableFile).when(folderManager).createWritableFile();
-    doReturn(readableFile).when(folderManager).getReadableFile();
+    when(folderManager.createWritableFile()).thenReturn(writableFile);
+    when(folderManager.getReadableFile()).thenReturn(readableFile);
     storage.write(new byte[1]);
     storage.readAndProcess(processing);
 
@@ -223,7 +223,7 @@ class StorageTest {
 
   private static WritableFile createWritableFile() throws IOException {
     WritableFile mock = mock();
-    doReturn(WritableResult.SUCCEEDED).when(mock).append(any());
+    when(mock.append(any())).thenReturn(WritableResult.SUCCEEDED);
     return mock;
   }
 }

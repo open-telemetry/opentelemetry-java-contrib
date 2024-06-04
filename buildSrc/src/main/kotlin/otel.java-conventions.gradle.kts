@@ -107,20 +107,20 @@ plugins.withId("otel.publish-conventions") {
   tasks {
     register("generateVersionResource") {
       val moduleName = otelJava.moduleName
-      val propertiesDir = moduleName.map { File(buildDir, "generated/properties/${it.replace('.', '/')}") }
+      val propertiesDir = moduleName.map { layout.buildDirectory.file("generated/properties/${it.replace('.', '/')}") }
 
       inputs.property("project.version", project.version.toString())
       outputs.dir(propertiesDir)
 
       doLast {
-        File(propertiesDir.get(), "version.properties").writeText("contrib.version=${project.version}")
+        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${project.version}")
       }
     }
   }
 
   sourceSets {
     main {
-      output.dir("$buildDir/generated/properties", "builtBy" to "generateVersionResource")
+      output.dir(layout.buildDirectory.dir("generated/properties"), "builtBy" to "generateVersionResource")
     }
   }
 }

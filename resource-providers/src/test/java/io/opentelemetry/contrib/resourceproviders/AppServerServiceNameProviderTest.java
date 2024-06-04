@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.resourceproviders;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,9 +55,7 @@ class AppServerServiceNameProviderTest {
   @Test
   void shouldApply() {
     Resource existing =
-        Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME.getKey(), "unknown_service:java")
-            .build();
+        Resource.builder().put(SERVICE_NAME.getKey(), "unknown_service:java").build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 
@@ -82,8 +80,7 @@ class AppServerServiceNameProviderTest {
 
   @Test
   void shouldApply_serviceNameAlreadyInResource() {
-    Resource existing =
-        Resource.builder().put(ResourceAttributes.SERVICE_NAME.getKey(), "shemp").build();
+    Resource existing = Resource.builder().put(SERVICE_NAME.getKey(), "shemp").build();
 
     ConfigProperties config = mock(ConfigProperties.class);
 

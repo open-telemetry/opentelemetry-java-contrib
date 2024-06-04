@@ -1,8 +1,8 @@
 pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.enterprise") version "3.16.2"
-    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    id("com.gradle.enterprise") version "3.17.4"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
   }
 }
 
@@ -63,6 +63,7 @@ include(":aws-resources")
 include(":aws-xray")
 include(":aws-xray-propagator")
 include(":azure-resources")
+include(":baggage-processor")
 include(":compressors:compressor-zstd")
 include(":consistent-sampling")
 include(":dependencyManagement")
@@ -87,3 +88,4 @@ include(":static-instrumenter:bootstrap")
 include(":static-instrumenter:test-app")
 include(":kafka-exporter")
 include(":gcp-resources")
+include(":span-stacktrace")

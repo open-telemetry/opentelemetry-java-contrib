@@ -28,6 +28,26 @@ import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_NAME;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_APP_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_CLOUD_FUNCTIONS;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_CLOUD_RUN;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_COMPUTE_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_KUBERNETES_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.GCP;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_HOSTNAME;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_NAME;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
+import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 
@@ -37,7 +57,6 @@ import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,24 +176,16 @@ class GCPResourceProviderTest {
 
     assertThat(gotResource.getAttributes())
         .hasSize(10)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.GCP)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PLATFORM,
-            ResourceAttributes.CloudPlatformValues.GCP_COMPUTE_ENGINE)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .containsEntry(ResourceAttributes.HOST_ID, detectedAttributes.get(GCE_INSTANCE_ID))
-        .containsEntry(ResourceAttributes.HOST_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
-        .containsEntry(
-            ResourceAttributes.GCP_GCE_INSTANCE_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
-        .containsEntry(
-            ResourceAttributes.GCP_GCE_INSTANCE_HOSTNAME,
-            detectedAttributes.get(GCE_INSTANCE_HOSTNAME))
-        .containsEntry(ResourceAttributes.HOST_TYPE, detectedAttributes.get(GCE_MACHINE_TYPE))
-        .containsEntry(
-            ResourceAttributes.CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(GCE_AVAILABILITY_ZONE))
-        .containsEntry(ResourceAttributes.CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION));
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_COMPUTE_ENGINE)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(HOST_ID, detectedAttributes.get(GCE_INSTANCE_ID))
+        .containsEntry(HOST_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
+        .containsEntry(GCP_GCE_INSTANCE_NAME, detectedAttributes.get(GCE_INSTANCE_NAME))
+        .containsEntry(GCP_GCE_INSTANCE_HOSTNAME, detectedAttributes.get(GCE_INSTANCE_HOSTNAME))
+        .containsEntry(HOST_TYPE, detectedAttributes.get(GCE_MACHINE_TYPE))
+        .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GCE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION));
   }
 
   @Test
@@ -189,10 +200,9 @@ class GCPResourceProviderTest {
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(6)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .containsEntry(
-            ResourceAttributes.CLOUD_REGION, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
-        .doesNotContainKey(ResourceAttributes.CLOUD_AVAILABILITY_ZONE);
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(CLOUD_REGION, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
+        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
   }
 
   @Test
@@ -207,11 +217,10 @@ class GCPResourceProviderTest {
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(6)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
         .containsEntry(
-            ResourceAttributes.CLOUD_AVAILABILITY_ZONE,
-            mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
-        .doesNotContainKey(ResourceAttributes.CLOUD_REGION);
+            CLOUD_AVAILABILITY_ZONE, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
+        .doesNotContainKey(CLOUD_REGION);
   }
 
   @Test
@@ -234,9 +243,9 @@ class GCPResourceProviderTest {
     verify(mockPlatform, Mockito.times(1)).getProjectId();
     assertThat(gotResource.getAttributes())
         .hasSize(5)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .doesNotContainKey(ResourceAttributes.CLOUD_REGION)
-        .doesNotContainKey(ResourceAttributes.CLOUD_AVAILABILITY_ZONE);
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .doesNotContainKey(CLOUD_REGION)
+        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
   }
 
   @Test
@@ -250,22 +259,18 @@ class GCPResourceProviderTest {
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(5)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .doesNotContainKey(ResourceAttributes.CLOUD_REGION)
-        .doesNotContainKey(ResourceAttributes.CLOUD_AVAILABILITY_ZONE);
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .doesNotContainKey(CLOUD_REGION)
+        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
   }
 
   private static void verifyGkeMapping(Resource gotResource, DetectedPlatform detectedPlatform) {
     Map<String, String> detectedAttributes = detectedPlatform.getAttributes();
     assertThat(gotResource.getAttributes())
-        .containsEntry(
-            ResourceAttributes.CLOUD_PLATFORM,
-            ResourceAttributes.CloudPlatformValues.GCP_KUBERNETES_ENGINE)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.GCP)
-        .containsEntry(ResourceAttributes.HOST_ID, detectedAttributes.get(GKE_HOST_ID))
-        .containsEntry(
-            ResourceAttributes.K8S_CLUSTER_NAME, detectedAttributes.get(GKE_CLUSTER_NAME));
+        .containsEntry(CLOUD_PLATFORM, GCP_KUBERNETES_ENGINE)
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(HOST_ID, detectedAttributes.get(GKE_HOST_ID))
+        .containsEntry(K8S_CLUSTER_NAME, detectedAttributes.get(GKE_CLUSTER_NAME));
   }
 
   @Test
@@ -281,9 +286,8 @@ class GCPResourceProviderTest {
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.GCP_CLOUD_RUN)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
   }
 
   @Test
@@ -300,31 +304,21 @@ class GCPResourceProviderTest {
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PLATFORM,
-            ResourceAttributes.CloudPlatformValues.GCP_CLOUD_FUNCTIONS)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
   }
 
   private static void verifyServerlessMapping(
       Resource gotResource, DetectedPlatform detectedPlatform) {
     Map<String, String> detectedAttributes = detectedPlatform.getAttributes();
     assertThat(gotResource.getAttributes())
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
+        .containsEntry(FAAS_VERSION, detectedAttributes.get(SERVERLESS_COMPUTE_REVISION))
+        .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
         .containsEntry(
-            ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.GCP)
-        .containsEntry(
-            ResourceAttributes.FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
-        .containsEntry(
-            ResourceAttributes.FAAS_VERSION, detectedAttributes.get(SERVERLESS_COMPUTE_REVISION))
-        .containsEntry(
-            ResourceAttributes.FAAS_INSTANCE,
-            detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
-        .containsEntry(
-            ResourceAttributes.CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(SERVERLESS_COMPUTE_AVAILABILITY_ZONE))
-        .containsEntry(
-            ResourceAttributes.CLOUD_REGION,
-            detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+            CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(SERVERLESS_COMPUTE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
   }
 
   @Test
@@ -339,19 +333,14 @@ class GCPResourceProviderTest {
 
     assertThat(gotResource.getAttributes())
         .hasSize(8)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.GCP)
-        .containsEntry(
-            ResourceAttributes.CLOUD_PLATFORM,
-            ResourceAttributes.CloudPlatformValues.GCP_APP_ENGINE)
-        .containsEntry(ResourceAttributes.CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
-        .containsEntry(ResourceAttributes.FAAS_NAME, detectedAttributes.get(GAE_MODULE_NAME))
-        .containsEntry(ResourceAttributes.FAAS_VERSION, detectedAttributes.get(GAE_APP_VERSION))
-        .containsEntry(ResourceAttributes.FAAS_INSTANCE, detectedAttributes.get(GAE_INSTANCE_ID))
-        .containsEntry(
-            ResourceAttributes.CLOUD_AVAILABILITY_ZONE,
-            detectedAttributes.get(GAE_AVAILABILITY_ZONE))
-        .containsEntry(ResourceAttributes.CLOUD_REGION, detectedAttributes.get(GAE_CLOUD_REGION));
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_APP_ENGINE)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(FAAS_NAME, detectedAttributes.get(GAE_MODULE_NAME))
+        .containsEntry(FAAS_VERSION, detectedAttributes.get(GAE_APP_VERSION))
+        .containsEntry(FAAS_INSTANCE, detectedAttributes.get(GAE_INSTANCE_ID))
+        .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GAE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(GAE_CLOUD_REGION));
   }
 
   @Test

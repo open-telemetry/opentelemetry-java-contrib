@@ -6,7 +6,9 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
+        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
+        "io.opentelemetry.semconv:opentelemetry-semconv",
+        "io.opentelemetry.semconv:opentelemetry-semconv-incubating"
       ],
       // Renovate's default behavior is only to update from unstable -> unstable if it's for the
       // major.minor.patch, under the assumption that you would want to update to the stable version
@@ -39,15 +41,15 @@
       "enabled": false
     },
     {
-      // pinned version for compatibility
-      "matchPackageNames": ["io.micrometer:micrometer-core"],
-      "matchCurrentVersion": "1.1.0",
+      // system-stubs-jupiter 2.1+ requires Java 11+
+      "matchPackageNames": ["uk.org.webcompere:system-stubs-jupiter"],
+      "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
     {
       // pinned version for compatibility
       "matchPackageNames": ["io.micrometer:micrometer-core"],
-      "matchCurrentVersion": "1.1.0",
+      "matchCurrentVersion": "1.5.0",
       "enabled": false
     },
     {
@@ -59,6 +61,12 @@
     {
       "matchPackagePrefixes": ["com.diffplug.spotless"],
       "groupName": "spotless packages"
+    },
+    {
+      // pinned version for compatibility with java 8 JFR parsing
+      "matchPackagePrefixes": ["org.openjdk.jmc"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }

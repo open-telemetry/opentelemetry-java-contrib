@@ -2,6 +2,83 @@
 
 ## Unreleased
 
+## Version 1.36.0 (2024-05-29)
+
+### AWS resources
+
+- Optimization: don't attempt detection if a cloud provider has already been detected
+  ([#1225](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1225))
+
+### Baggage processor - New 🌟
+
+This module provides a SpanProcessor that stamps baggage onto spans as attributes on start.
+
+### Consistent sampling
+
+- Assume random trace ID and set th-field only for sampled spans
+  ([#1278](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1278))
+
+### GCP Resources
+
+- Optimization: don't attempt detection if a cloud provider has already been detected
+  ([#1225](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1225))
+- Update guidance for manual instrumentation usage
+  ([#1250](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1250))
+
+### JMX metrics
+
+- Remove `slf4j-simple` dependency
+  ([#1283](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1283))
+
+### Maven extension
+
+- Disable metrics and logs by default
+  ([#1276](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1276))
+- Migrate to current semconv
+  ([#1299](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1299))
+- Migrate from Plexus to JSR 330 dependency injection APIs
+  ([#1320](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1320))
+
+### Span stack trace
+
+- Enable publishing to maven central
+  ([#1297](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1297))
+
+## Version 1.35.0 (2024-04-16)
+
+### JMX metrics
+
+- Add support for newly named Tomcat MBean with Spring
+([#1269](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1269))
+
+### Span stack traces - New 🌟
+
+This module provides a SpanProcessor that captures stack traces on spans that meet
+a certain criteria such as exceeding a certain duration threshold.
+
+## Version 1.34.0 (2024-03-27)
+
+### AWS resources
+
+- Add support for `cloud.account.id`, `cloud.availability_zone`, `cloud.region`,
+  and `cloud.resource_id`
+  ([#1171](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1171))
+
+### AWS X-Ray propagator
+
+- Add xray propagators that prioritizes xray environment variable
+  ([#1032](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1032))
+
+### GCP Resources
+
+- Update docs on how to use with Java agent v2.2.0 and later
+  ([#1237](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1237))
+
+### Micrometer MeterProvider
+
+- Implement Metrics incubator APIs to accept advice
+  ([#1190](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1190))
+
 ## Version 1.33.0 (2024-02-21)
 
 ### Compressors

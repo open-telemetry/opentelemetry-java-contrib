@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.sampler.consistent56;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidRandomValue;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
-import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
@@ -32,17 +31,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @return a sampler
    */
   public static ConsistentSampler alwaysOn() {
-    return alwaysOn(RandomValueGenerators.getDefault());
-  }
-
-  /**
-   * Returns a {@link ConsistentSampler} that samples all spans.
-   *
-   * @param randomValueGenerator the function to use for generating the random value
-   * @return a sampler
-   */
-  public static ConsistentSampler alwaysOn(RandomValueGenerator randomValueGenerator) {
-    return new ConsistentAlwaysOnSampler(randomValueGenerator);
+    return ConsistentAlwaysOnSampler.getInstance();
   }
 
   /**
@@ -51,17 +40,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @return a sampler
    */
   public static ConsistentSampler alwaysOff() {
-    return alwaysOff(RandomValueGenerators.getDefault());
-  }
-
-  /**
-   * Returns a {@link ConsistentSampler} that does not sample any span.
-   *
-   * @param randomValueGenerator the function to use for generating the random value
-   * @return a sampler
-   */
-  public static ConsistentSampler alwaysOff(RandomValueGenerator randomValueGenerator) {
-    return new ConsistentAlwaysOffSampler(randomValueGenerator);
+    return ConsistentAlwaysOffSampler.getInstance();
   }
 
   /**
@@ -71,20 +50,8 @@ public abstract class ConsistentSampler implements Sampler {
    * @return a sampler
    */
   public static ConsistentSampler probabilityBased(double samplingProbability) {
-    return probabilityBased(samplingProbability, RandomValueGenerators.getDefault());
-  }
-
-  /**
-   * Returns a {@link ConsistentSampler} that samples each span with a fixed probability.
-   *
-   * @param samplingProbability the sampling probability
-   * @param randomValueGenerator the function to use for generating the r-value
-   * @return a sampler
-   */
-  public static ConsistentSampler probabilityBased(
-      double samplingProbability, RandomValueGenerator randomValueGenerator) {
     long threshold = ConsistentSamplingUtil.calculateThreshold(samplingProbability);
-    return new ConsistentFixedThresholdSampler(threshold, randomValueGenerator);
+    return new ConsistentFixedThresholdSampler(threshold);
   }
 
   /**
@@ -94,19 +61,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param rootSampler the root sampler
    */
   public static ConsistentSampler parentBased(ConsistentSampler rootSampler) {
-    return parentBased(rootSampler, RandomValueGenerators.getDefault());
-  }
-
-  /**
-   * Returns a new {@link ConsistentSampler} that respects the sampling decision of the parent span
-   * or falls-back to the given sampler if it is a root span.
-   *
-   * @param rootSampler the root sampler
-   * @param randomValueGenerator the function to use for generating the random value
-   */
-  public static ConsistentSampler parentBased(
-      ConsistentSampler rootSampler, RandomValueGenerator randomValueGenerator) {
-    return new ConsistentParentBasedSampler(rootSampler, randomValueGenerator);
+    return new ConsistentParentBasedSampler(rootSampler);
   }
 
   /**
@@ -119,8 +74,7 @@ public abstract class ConsistentSampler implements Sampler {
    */
   public static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
-    return rateLimited(
-        targetSpansPerSecondLimit, adaptationTimeSeconds, RandomValueGenerators.getDefault());
+    return rateLimited(targetSpansPerSecondLimit, adaptationTimeSeconds, System::nanoTime);
   }
 
   /**
@@ -130,33 +84,14 @@ public abstract class ConsistentSampler implements Sampler {
    * @param targetSpansPerSecondLimit the desired spans per second limit
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
-   * @param randomValueGenerator the function to use for generating the random value
-   */
-  public static ConsistentSampler rateLimited(
-      double targetSpansPerSecondLimit,
-      double adaptationTimeSeconds,
-      RandomValueGenerator randomValueGenerator) {
-    return rateLimited(
-        targetSpansPerSecondLimit, adaptationTimeSeconds, randomValueGenerator, System::nanoTime);
-  }
-
-  /**
-   * Returns a new {@link ConsistentSampler} that attempts to adjust the sampling probability
-   * dynamically to meet the target span rate.
-   *
-   * @param targetSpansPerSecondLimit the desired spans per second limit
-   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
-   *     exponential smoothing)
-   * @param randomValueGenerator the function to use for generating the random value
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      RandomValueGenerator randomValueGenerator,
       LongSupplier nanoTimeSupplier) {
     return new ConsistentRateLimitingSampler(
-        targetSpansPerSecondLimit, adaptationTimeSeconds, randomValueGenerator, nanoTimeSupplier);
+        targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
   }
 
   /**
@@ -178,8 +113,7 @@ public abstract class ConsistentSampler implements Sampler {
     if (otherConsistentSampler == this) {
       return this;
     }
-    return new ConsistentComposedAndSampler(
-        this, otherConsistentSampler, RandomValueGenerators.getDefault());
+    return new ConsistentComposedAndSampler(this, otherConsistentSampler);
   }
 
   /**
@@ -201,14 +135,7 @@ public abstract class ConsistentSampler implements Sampler {
     if (otherConsistentSampler == this) {
       return this;
     }
-    return new ConsistentComposedOrSampler(
-        this, otherConsistentSampler, RandomValueGenerators.getDefault());
-  }
-
-  private final RandomValueGenerator randomValueGenerator;
-
-  protected ConsistentSampler(RandomValueGenerator randomValueGenerator) {
-    this.randomValueGenerator = requireNonNull(randomValueGenerator);
+    return new ConsistentComposedOrSampler(this, otherConsistentSampler);
   }
 
   @Override
@@ -225,9 +152,6 @@ public abstract class ConsistentSampler implements Sampler {
     boolean isRoot = !parentSpanContext.isValid();
     boolean isParentSampled = parentSpanContext.isSampled();
 
-    boolean isRandomTraceIdFlagSet = false; // TODO in future get the random trace ID flag, compare
-    // https://www.w3.org/TR/trace-context-2/#random-trace-id-flag
-
     TraceState parentTraceState = parentSpanContext.getTraceState();
     String otelTraceStateString = parentTraceState.get(OtelTraceState.TRACE_STATE_KEY);
     OtelTraceState otelTraceState = OtelTraceState.parse(otelTraceStateString);
@@ -235,12 +159,8 @@ public abstract class ConsistentSampler implements Sampler {
     long randomValue;
     if (otelTraceState.hasValidRandomValue()) {
       randomValue = otelTraceState.getRandomValue();
-    } else if (isRandomTraceIdFlagSet) {
-      randomValue = OtelTraceState.parseHex(traceId, 18, 14, getInvalidRandomValue());
     } else {
-      randomValue = randomValueGenerator.generate(traceId);
-      otelTraceState.invalidateThreshold();
-      otelTraceState.setRandomValue(randomValue);
+      randomValue = OtelTraceState.parseHex(traceId, 18, 14, getInvalidRandomValue());
     }
 
     long parentThreshold;
@@ -262,7 +182,11 @@ public abstract class ConsistentSampler implements Sampler {
     boolean isSampled;
     if (isValidThreshold(threshold)) {
       isSampled = (randomValue >= threshold);
-      otelTraceState.setThreshold(threshold);
+      if (isSampled) {
+        otelTraceState.setThreshold(threshold);
+      } else {
+        otelTraceState.invalidateThreshold();
+      }
     } else {
       isSampled = isParentSampled;
       otelTraceState.invalidateThreshold();

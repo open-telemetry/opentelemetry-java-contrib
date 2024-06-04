@@ -7,7 +7,9 @@ package io.opentelemetry.contrib.metrics.micrometer.internal.state;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.contrib.metrics.micrometer.CallbackRegistration;
+import java.util.List;
 import javax.annotation.Nullable;
 
 /**
@@ -21,16 +23,22 @@ public final class InstrumentState {
   private final String name;
   @Nullable private final String description;
   @Nullable private final String unit;
+  @Nullable private final List<AttributeKey<?>> attributes;
+  @Nullable private final List<? extends Number> explicitBucketBoundaries;
 
   public InstrumentState(
       MeterSharedState meterSharedState,
       String name,
       @Nullable String description,
-      @Nullable String unit) {
+      @Nullable String unit,
+      @Nullable List<AttributeKey<?>> attributes,
+      @Nullable List<? extends Number> explicitBucketBoundaries) {
     this.meterSharedState = meterSharedState;
     this.name = name;
     this.description = description;
     this.unit = unit;
+    this.attributes = attributes;
+    this.explicitBucketBoundaries = explicitBucketBoundaries;
   }
 
   public MeterRegistry meterRegistry() {
@@ -61,5 +69,15 @@ public final class InstrumentState {
   @Nullable
   public String unit() {
     return unit;
+  }
+
+  @Nullable
+  public List<AttributeKey<?>> attributesAdvice() {
+    return attributes;
+  }
+
+  @Nullable
+  public List<? extends Number> explicitBucketBoundariesAdvice() {
+    return explicitBucketBoundaries;
   }
 }

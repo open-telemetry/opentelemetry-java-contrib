@@ -5,13 +5,24 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_EC2;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_IMAGE_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_TYPE;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -78,9 +89,8 @@ public final class Ec2Resource {
     String hostname = fetchHostname(hostnameUrl, token);
 
     AttributesBuilder attrBuilders = Attributes.builder();
-    attrBuilders.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AWS);
-    attrBuilders.put(
-        ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EC2);
+    attrBuilders.put(CLOUD_PROVIDER, IncubatingAttributes.CloudProviderValues.AWS);
+    attrBuilders.put(CLOUD_PLATFORM, AWS_EC2);
 
     try (JsonParser parser = JSON_FACTORY.createParser(identity)) {
       parser.nextToken();
@@ -93,22 +103,22 @@ public final class Ec2Resource {
         String value = parser.nextTextValue();
         switch (parser.currentName()) {
           case "instanceId":
-            attrBuilders.put(ResourceAttributes.HOST_ID, value);
+            attrBuilders.put(HOST_ID, value);
             break;
           case "availabilityZone":
-            attrBuilders.put(ResourceAttributes.CLOUD_AVAILABILITY_ZONE, value);
+            attrBuilders.put(CLOUD_AVAILABILITY_ZONE, value);
             break;
           case "instanceType":
-            attrBuilders.put(ResourceAttributes.HOST_TYPE, value);
+            attrBuilders.put(HOST_TYPE, value);
             break;
           case "imageId":
-            attrBuilders.put(ResourceAttributes.HOST_IMAGE_ID, value);
+            attrBuilders.put(HOST_IMAGE_ID, value);
             break;
           case "accountId":
-            attrBuilders.put(ResourceAttributes.CLOUD_ACCOUNT_ID, value);
+            attrBuilders.put(CLOUD_ACCOUNT_ID, value);
             break;
           case "region":
-            attrBuilders.put(ResourceAttributes.CLOUD_REGION, value);
+            attrBuilders.put(CLOUD_REGION, value);
             break;
           default:
             parser.skipChildren();
@@ -119,9 +129,9 @@ public final class Ec2Resource {
       return Resource.empty();
     }
 
-    attrBuilders.put(ResourceAttributes.HOST_NAME, hostname);
+    attrBuilders.put(HOST_NAME, hostname);
 
-    return Resource.create(attrBuilders.build(), ResourceAttributes.SCHEMA_URL);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
   }
 
   private static String fetchToken(URL tokenUrl) {

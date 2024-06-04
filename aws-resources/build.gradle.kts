@@ -12,6 +12,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
 
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 

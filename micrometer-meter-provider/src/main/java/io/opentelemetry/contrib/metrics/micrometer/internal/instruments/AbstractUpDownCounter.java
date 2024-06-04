@@ -19,11 +19,15 @@ abstract class AbstractUpDownCounter extends AbstractInstrument {
   }
 
   protected final void add(Attributes attributes, double value) {
-    counterMap.computeIfAbsent(attributesOrEmpty(attributes), this::createCounter).increment(value);
+    counter(attributes).increment(value);
   }
 
-  protected final void record(double value, Attributes attributes) {
-    counterMap.computeIfAbsent(attributesOrEmpty(attributes), this::createCounter).set(value);
+  protected final void record(Attributes attributes, double value) {
+    counter(attributes).set(value);
+  }
+
+  protected final AtomicDoubleCounter counter(Attributes attributes) {
+    return counterMap.computeIfAbsent(effectiveAttributes(attributes), this::createCounter);
   }
 
   private AtomicDoubleCounter createCounter(Attributes attributes) {

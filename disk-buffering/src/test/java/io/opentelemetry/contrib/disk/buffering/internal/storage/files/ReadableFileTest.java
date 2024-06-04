@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
@@ -95,7 +95,7 @@ class ReadableFileTest {
     temporaryFile = new File(dir, "temporaryFile");
     addFileContents(source);
     temporaryFileProvider = mock();
-    doReturn(temporaryFile).when(temporaryFileProvider).createTemporaryFile(anyString());
+    when(temporaryFileProvider.createTemporaryFile(anyString())).thenReturn(temporaryFile);
     clock = mock();
     readableFile =
         new ReadableFile(
@@ -199,9 +199,8 @@ class ReadableFileTest {
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
     readableFile.readAndProcess(bytes -> true);
-    doReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS))
-        .when(clock)
-        .now();
+    when(clock.now())
+        .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS));
 
     assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
 
