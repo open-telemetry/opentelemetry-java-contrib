@@ -5,6 +5,16 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
+import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
+import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -13,7 +23,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,13 +46,13 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   private static final Map<String, AttributeKey<String>> COMPUTE_MAPPING = new HashMap<>();
 
   static {
-    COMPUTE_MAPPING.put("location", ResourceAttributes.CLOUD_REGION);
-    COMPUTE_MAPPING.put("resourceId", ResourceAttributes.CLOUD_RESOURCE_ID);
-    COMPUTE_MAPPING.put("vmId", ResourceAttributes.HOST_ID);
-    COMPUTE_MAPPING.put("name", ResourceAttributes.HOST_NAME);
-    COMPUTE_MAPPING.put("vmSize", ResourceAttributes.HOST_TYPE);
-    COMPUTE_MAPPING.put("osType", ResourceAttributes.OS_TYPE);
-    COMPUTE_MAPPING.put("version", ResourceAttributes.OS_VERSION);
+    COMPUTE_MAPPING.put("location", CLOUD_REGION);
+    COMPUTE_MAPPING.put("resourceId", CLOUD_RESOURCE_ID);
+    COMPUTE_MAPPING.put("vmId", HOST_ID);
+    COMPUTE_MAPPING.put("name", HOST_NAME);
+    COMPUTE_MAPPING.put("vmSize", HOST_TYPE);
+    COMPUTE_MAPPING.put("osType", OS_TYPE);
+    COMPUTE_MAPPING.put("version", OS_VERSION);
     COMPUTE_MAPPING.put("vmScaleSetName", AttributeKey.stringKey("azure.vm.scaleset.name"));
     COMPUTE_MAPPING.put("sku", AttributeKey.stringKey("azure.vm.sku"));
   }
@@ -87,7 +97,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
 
   private static Resource parseMetadata(String body) {
     AttributesBuilder builder =
-        azureAttributeBuilder(ResourceAttributes.CloudPlatformValues.AZURE_VM);
+        azureAttributeBuilder(CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM);
     try (JsonParser parser = JSON_FACTORY.createParser(body)) {
       parser.nextToken();
       parseResponse(parser, builder);
@@ -100,8 +110,8 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   @NotNull
   static AttributesBuilder azureAttributeBuilder(String platform) {
     AttributesBuilder builder = Attributes.builder();
-    builder.put(ResourceAttributes.CLOUD_PROVIDER, ResourceAttributes.CloudProviderValues.AZURE);
-    builder.put(ResourceAttributes.CLOUD_PLATFORM, platform);
+    builder.put(CLOUD_PROVIDER, CloudIncubatingAttributes.CloudProviderValues.AZURE);
+    builder.put(CLOUD_PLATFORM, platform);
     return builder;
   }
 
