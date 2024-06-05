@@ -5,10 +5,16 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_MAX_MEMORY;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -31,12 +37,12 @@ class AzureFunctionsResourceProviderTest {
   @Test
   void defaultValues() {
     createResource(DEFAULT_ENV_VARS)
-        .containsEntry(ResourceAttributes.CLOUD_PROVIDER, "azure")
-        .containsEntry(ResourceAttributes.CLOUD_PLATFORM, "azure_functions")
-        .containsEntry(ResourceAttributes.FAAS_NAME, TEST_WEBSITE_SITE_NAME)
-        .containsEntry(ResourceAttributes.FAAS_VERSION, TEST_FUNCTION_VERSION)
-        .containsEntry(ResourceAttributes.FAAS_INSTANCE, TEST_WEBSITE_INSTANCE_ID)
-        .containsEntry(ResourceAttributes.FAAS_MAX_MEMORY, Long.parseLong(TEST_MEM_LIMIT));
+        .containsEntry(CLOUD_PROVIDER, "azure")
+        .containsEntry(CLOUD_PLATFORM, "azure_functions")
+        .containsEntry(FAAS_NAME, TEST_WEBSITE_SITE_NAME)
+        .containsEntry(FAAS_VERSION, TEST_FUNCTION_VERSION)
+        .containsEntry(FAAS_INSTANCE, TEST_WEBSITE_INSTANCE_ID)
+        .containsEntry(FAAS_MAX_MEMORY, Long.parseLong(TEST_MEM_LIMIT));
   }
 
   @Test
