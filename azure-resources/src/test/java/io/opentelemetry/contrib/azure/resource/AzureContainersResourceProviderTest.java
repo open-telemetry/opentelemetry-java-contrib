@@ -5,10 +5,15 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -28,11 +33,11 @@ class AzureContainersResourceProviderTest {
   @Test
   void defaultValues() {
     createResource(DEFAULT_ENV_VARS)
-        .containsEntry(ResourceAttributes.CLOUD_PROVIDER, "azure")
-        .containsEntry(ResourceAttributes.CLOUD_PLATFORM, "azure_container_apps")
-        .containsEntry(ResourceAttributes.SERVICE_NAME, TEST_APP_NAME)
-        .containsEntry(ResourceAttributes.SERVICE_INSTANCE_ID, TEST_REPLICA_NAME)
-        .containsEntry(ResourceAttributes.SERVICE_VERSION, TEST_REVISION);
+        .containsEntry(CLOUD_PROVIDER, "azure")
+        .containsEntry(CLOUD_PLATFORM, "azure_container_apps")
+        .containsEntry(SERVICE_NAME, TEST_APP_NAME)
+        .containsEntry(SERVICE_INSTANCE_ID, TEST_REPLICA_NAME)
+        .containsEntry(SERVICE_VERSION, TEST_REVISION);
   }
 
   @Test
