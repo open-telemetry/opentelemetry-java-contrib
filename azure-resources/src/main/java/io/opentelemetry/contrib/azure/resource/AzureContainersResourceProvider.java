@@ -5,12 +5,15 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,9 +27,9 @@ public class AzureContainersResourceProvider extends CloudResourceProvider {
   private static final Map<AttributeKey<String>, String> ENV_VAR_MAPPING = new HashMap<>();
 
   static {
-    ENV_VAR_MAPPING.put(ResourceAttributes.SERVICE_NAME, CONTAINER_APP_NAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.SERVICE_INSTANCE_ID, CONTAINER_APP_REPLICA_NAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.SERVICE_VERSION, CONTAINER_APP_REVISION);
+    ENV_VAR_MAPPING.put(SERVICE_NAME, CONTAINER_APP_NAME);
+    ENV_VAR_MAPPING.put(SERVICE_INSTANCE_ID, CONTAINER_APP_REPLICA_NAME);
+    ENV_VAR_MAPPING.put(SERVICE_VERSION, CONTAINER_APP_REVISION);
   }
 
   private final Map<String, String> env;

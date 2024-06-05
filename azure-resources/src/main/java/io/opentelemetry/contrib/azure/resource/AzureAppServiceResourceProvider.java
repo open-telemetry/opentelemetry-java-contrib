@@ -5,13 +5,20 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -33,10 +40,10 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
   private static final Map<AttributeKey<String>, String> ENV_VAR_MAPPING = new HashMap<>();
 
   static {
-    ENV_VAR_MAPPING.put(ResourceAttributes.CLOUD_REGION, REGION_NAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, WEBSITE_SLOT_NAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.HOST_ID, WEBSITE_HOSTNAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.SERVICE_INSTANCE_ID, WEBSITE_INSTANCE_ID);
+    ENV_VAR_MAPPING.put(CLOUD_REGION, REGION_NAME);
+    ENV_VAR_MAPPING.put(DEPLOYMENT_ENVIRONMENT, WEBSITE_SLOT_NAME);
+    ENV_VAR_MAPPING.put(HOST_ID, WEBSITE_HOSTNAME);
+    ENV_VAR_MAPPING.put(SERVICE_INSTANCE_ID, WEBSITE_INSTANCE_ID);
     ENV_VAR_MAPPING.put(AZURE_APP_SERVICE_STAMP_RESOURCE_ATTRIBUTE, WEBSITE_HOME_STAMPNAME);
   }
 
@@ -65,12 +72,12 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
     String name = Objects.requireNonNull(env.get(WEBSITE_SITE_NAME));
     AttributesBuilder builder =
         AzureVmResourceProvider.azureAttributeBuilder(
-            ResourceAttributes.CloudPlatformValues.AZURE_APP_SERVICE);
-    builder.put(ResourceAttributes.SERVICE_NAME, name);
+            CloudIncubatingAttributes.CloudPlatformValues.AZURE_APP_SERVICE);
+    builder.put(SERVICE_NAME, name);
 
     String resourceUri = resourceUri(name);
     if (resourceUri != null) {
-      builder.put(ResourceAttributes.CLOUD_RESOURCE_ID, resourceUri);
+      builder.put(CLOUD_RESOURCE_ID, resourceUri);
     }
 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);

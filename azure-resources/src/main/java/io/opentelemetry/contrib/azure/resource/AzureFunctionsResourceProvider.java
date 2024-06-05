@@ -5,12 +5,17 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_MAX_MEMORY;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,12 +28,10 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
   static {
     ENV_VAR_MAPPING.put(
-        ResourceAttributes.CLOUD_REGION, AzureAppServiceResourceProvider.REGION_NAME);
-    ENV_VAR_MAPPING.put(
-        ResourceAttributes.FAAS_NAME, AzureAppServiceResourceProvider.WEBSITE_SITE_NAME);
-    ENV_VAR_MAPPING.put(ResourceAttributes.FAAS_VERSION, FUNCTIONS_VERSION);
-    ENV_VAR_MAPPING.put(
-        ResourceAttributes.FAAS_INSTANCE, AzureAppServiceResourceProvider.WEBSITE_INSTANCE_ID);
+        CloudIncubatingAttributes.CLOUD_REGION, AzureAppServiceResourceProvider.REGION_NAME);
+    ENV_VAR_MAPPING.put(FAAS_NAME, AzureAppServiceResourceProvider.WEBSITE_SITE_NAME);
+    ENV_VAR_MAPPING.put(FAAS_VERSION, FUNCTIONS_VERSION);
+    ENV_VAR_MAPPING.put(FAAS_INSTANCE, AzureAppServiceResourceProvider.WEBSITE_INSTANCE_ID);
   }
 
   private final Map<String, String> env;
@@ -56,11 +59,11 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
     AttributesBuilder builder =
         AzureVmResourceProvider.azureAttributeBuilder(
-            ResourceAttributes.CloudPlatformValues.AZURE_FUNCTIONS);
+            CloudIncubatingAttributes.CloudPlatformValues.AZURE_FUNCTIONS);
 
     String limit = env.get(FUNCTIONS_MEM_LIMIT);
     if (limit != null) {
-      builder.put(ResourceAttributes.FAAS_MAX_MEMORY, Long.parseLong(limit));
+      builder.put(FAAS_MAX_MEMORY, Long.parseLong(limit));
     }
 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
