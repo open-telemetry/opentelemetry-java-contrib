@@ -13,7 +13,7 @@ import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
-import static org.mockito.internal.util.Platform.OS_VERSION;
+import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
