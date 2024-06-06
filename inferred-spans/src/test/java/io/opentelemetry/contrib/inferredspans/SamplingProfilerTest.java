@@ -18,13 +18,14 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.LINK_IS_CHILD;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.inferredspans.util.DisabledOnOpenJ9;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
@@ -227,7 +228,7 @@ class SamplingProfilerTest {
         .hasSize(1)
         .anySatisfy(
             link -> {
-              assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
               SpanData expectedSpan = explicitSpanB.get();
               Assertions.assertThat(link.getSpanContext().getTraceId())
                   .isEqualTo(expectedSpan.getTraceId());

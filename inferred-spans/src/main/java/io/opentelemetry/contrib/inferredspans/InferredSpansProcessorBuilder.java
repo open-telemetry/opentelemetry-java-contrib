@@ -18,13 +18,14 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.common.config.WildcardMatcher;
+import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 
+@SuppressWarnings("CanIgnoreReturnValueSuggester")
 public class InferredSpansProcessorBuilder {
   private boolean profilerLoggingEnabled = true;
   private boolean backupDiagnosticFiles = false;
@@ -50,6 +51,8 @@ public class InferredSpansProcessorBuilder {
           WildcardMatcher.caseSensitiveMatcher("io.undertow.*"));
   private Duration profilerInterval = Duration.ofSeconds(5);
   private Duration profilingDuration = Duration.ofSeconds(5);
+
+  @Nullable
   private String profilerLibDirectory = null;
 
   // The following options are only intended to be modified in tests

@@ -18,12 +18,12 @@
  */
 package io.opentelemetry.contrib.inferredspans.asyncprofiler;
 
-import co.elastic.otel.common.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.collections.Long2LongHashMap;
 import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
 import io.opentelemetry.contrib.inferredspans.StackFrame;
 import io.opentelemetry.contrib.inferredspans.collections.Int2IntHashMap;
 import io.opentelemetry.contrib.inferredspans.collections.Int2ObjectHashMap;
+import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import java.io.File;
 import java.io.IOException;

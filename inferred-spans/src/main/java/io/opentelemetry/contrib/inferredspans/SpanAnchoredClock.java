@@ -18,14 +18,13 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.common.WeakConcurrent;
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
 public class SpanAnchoredClock {
-  private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap = WeakConcurrent.createMap();
+  private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap = new WeakConcurrentMap.WithInlinedExpunction<>();
 
   public void onSpanStart(ReadWriteSpan started, Context parentContext) {
     Span parent = Span.fromContext(parentContext);
@@ -57,7 +56,7 @@ public class SpanAnchoredClock {
   }
 
   /**
-   * Translates a timestamp obtained via {@link #nanoTime()} with the help of an anchor obtaines via
+   * Translates a timestamp obtained via {@link #nanoTime()} with the help of an anchor obtained via
    * {@link #getAnchor(Span)} to an absolute nano-precision epoch timestamp.
    */
   public long toEpochNanos(long anchor, long recordedNanoTime) {

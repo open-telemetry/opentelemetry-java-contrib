@@ -14,12 +14,16 @@ dependencies {
   implementation("com.lmax:disruptor")
   implementation("org.jctools:jctools-core")
   implementation("tools.profiler:async-profiler")
+  implementation("com.blogspot.mydailyjava:weak-lock-free")
   //implementation(libs.bundles.semconv)
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-api-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
   //testImplementation("org.awaitility:awaitility")
   //testImplementation(libs.bundles.semconv)
 }

@@ -18,7 +18,7 @@
  */
 package io.opentelemetry.contrib.inferredspans.asyncprofiler;
 
-import static co.elastic.otel.common.config.WildcardMatcher.caseSensitiveMatcher;
+import static io.opentelemetry.contrib.inferredspans.config.WildcardMatcher.caseSensitiveMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.contrib.inferredspans.StackFrame;

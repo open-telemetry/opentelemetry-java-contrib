@@ -18,8 +18,6 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.InferredSpansVersion;
-import co.elastic.otel.common.util.ExecutorUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
@@ -67,7 +65,8 @@ public class InferredSpansProcessor implements SpanProcessor {
    *     lazily.
    */
   public synchronized void setTracerProvider(TracerProvider provider) {
-    tracer = provider.get(TRACER_NAME, InferredSpansVersion.VERSION);
+    //TODO: get version from resource
+    tracer = provider.get(TRACER_NAME, "todo");
   }
 
   @Override
@@ -92,7 +91,12 @@ public class InferredSpansProcessor implements SpanProcessor {
   public CompletableResultCode shutdown() {
     CompletableResultCode result = new CompletableResultCode();
     logger.fine("Stopping Inferred Spans Processor");
-    ThreadFactory threadFactory = ExecutorUtils.threadFactory("inferred-spans-shtudown", false);
+    ThreadFactory threadFactory = r -> {
+      Thread thread = new Thread(r);
+      thread.setDaemon(false);
+      thread.setName("otel-inferred-spans-shutdown");
+      return thread;
+    };
     Executors.newSingleThreadExecutor(threadFactory)
         .submit(
             () -> {
@@ -117,4 +121,5 @@ public class InferredSpansProcessor implements SpanProcessor {
     }
     return tracer;
   }
+
 }

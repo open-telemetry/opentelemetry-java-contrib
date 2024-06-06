@@ -18,11 +18,12 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.CODE_STACKTRACE;
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.LINK_IS_CHILD;
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.SPAN_IS_INFERRED;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.WARNING;
 
-import co.elastic.otel.common.ElasticAttributes;
-import co.elastic.otel.common.util.HexUtils;
 import io.opentelemetry.contrib.inferredspans.collections.LongHashSet;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
@@ -32,7 +33,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
+import io.opentelemetry.contrib.inferredspans.util.HexUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class CallTree implements Recyclable {
   private static final int INITIAL_CHILD_SIZE = 2;
 
   private static final Attributes CHILD_LINK_ATTRIBUTES =
-      Attributes.builder().put(ElasticAttributes.IS_CHILD, true).build();
+      Attributes.builder().put(LINK_IS_CHILD, true).build();
 
   @Nullable private CallTree parent;
   protected int count;
@@ -258,7 +259,7 @@ public class CallTree implements Recyclable {
    * This method is called when we know for sure that the maybe child ids are actually belonging to
    * this call tree. This is the case after we've seen another frame represented by this call tree.
    *
-   * @see #addMaybeChildId(long)
+   * @see #addMaybeChildId(long, long)
    */
   private void transferMaybeChildIdsToChildIds() {
     if (maybeChildIds != null) {
@@ -500,7 +501,7 @@ public class CallTree implements Recyclable {
         tracer
             .spanBuilder(tempBuilder.toString())
             .setParent(parentOtelCtx)
-            .setAttribute(ElasticAttributes.IS_INFERRED, true)
+            .setAttribute(SPAN_IS_INFERRED, true)
             .setStartTimestamp(
                 clock.toEpochNanos(parentContext.getClockAnchor(), this.start),
                 TimeUnit.NANOSECONDS);
@@ -514,7 +515,7 @@ public class CallTree implements Recyclable {
       assert this.parent != null;
       tempBuilder.setLength(0);
       this.parent.fillStackTrace(tempBuilder);
-      spanBuilder.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, tempBuilder.toString());
+      spanBuilder.setAttribute(CODE_STACKTRACE, tempBuilder.toString());
     }
 
     Span span = spanBuilder.startSpan();

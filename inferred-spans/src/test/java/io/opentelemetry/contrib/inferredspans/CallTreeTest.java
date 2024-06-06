@@ -18,20 +18,21 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.CODE_STACKTRACE;
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.LINK_IS_CHILD;
+import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.SPAN_IS_INFERRED;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static java.util.stream.Collectors.toMap;
 
-import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
-import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.inferredspans.util.DisabledOnOpenJ9;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -328,11 +329,11 @@ class CallTreeTest {
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
         .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
     assertThat(spans.get("c").getLinks())
         .hasSize(1)
         .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
   }
 
   /*
@@ -362,11 +363,11 @@ class CallTreeTest {
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
         .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
     assertThat(spans.get("c").getLinks())
         .hasSize(1)
         .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
   }
 
   /*
@@ -577,7 +578,7 @@ class CallTreeTest {
         .hasSize(1)
         .anySatisfy(
             link -> {
-              assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
               SpanData expectedSpan = spans.get("2");
               assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
               assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
@@ -589,7 +590,7 @@ class CallTreeTest {
         .hasSize(1)
         .anySatisfy(
             link -> {
-              assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
               SpanData expectedSpan = spans.get("3");
               assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
               assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
@@ -939,7 +940,7 @@ class CallTreeTest {
             .isEqualTo(durationMs * 1_000_000L);
 
         String actualStacktrace =
-            span.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
+            span.getAttributes().get(CODE_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {
@@ -969,7 +970,7 @@ class CallTreeTest {
       return true;
     }
     for (LinkData link : parent.getLinks()) {
-      Boolean isChild = link.getAttributes().get(ElasticAttributes.IS_CHILD);
+      Boolean isChild = link.getAttributes().get(LINK_IS_CHILD);
       if (isChild != null && isChild) {
         SpanContext linkSpanCtx = link.getSpanContext();
         if (linkSpanCtx.getTraceId().equals(expectedChild.getTraceId())

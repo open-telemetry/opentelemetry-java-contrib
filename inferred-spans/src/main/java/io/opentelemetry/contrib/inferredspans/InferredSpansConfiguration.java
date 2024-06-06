@@ -18,9 +18,10 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.common.config.WildcardMatcher;
 import java.time.Duration;
 import java.util.List;
+import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
+import javax.annotation.Nullable;
 
 public class InferredSpansConfiguration {
 
@@ -34,6 +35,8 @@ public class InferredSpansConfiguration {
   private final List<WildcardMatcher> excludedClasses;
   private final Duration profilerInterval;
   private final Duration profilingDuration;
+
+  @Nullable
   private final String profilerLibDirectory;
 
   InferredSpansConfiguration(
@@ -47,7 +50,7 @@ public class InferredSpansConfiguration {
       List<WildcardMatcher> excludedClasses,
       Duration profilerInterval,
       Duration profilingDuration,
-      String profilerLibDirectory) {
+      @Nullable String profilerLibDirectory) {
     this.profilerLoggingEnabled = profilerLoggingEnabled;
     this.backupDiagnosticFiles = backupDiagnosticFiles;
     this.asyncProfilerSafeMode = asyncProfilerSafeMode;

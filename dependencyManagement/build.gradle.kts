@@ -60,7 +60,8 @@ val DEPENDENCIES = listOf(
   "org.testcontainers:kafka:1.19.8",
   "com.lmax:disruptor:3.4.4",
   "org.jctools:jctools-core:4.0.3",
-  "tools.profiler:async-profiler:3.0"
+  "tools.profiler:async-profiler:3.0",
+  "com.blogspot.mydailyjava:weak-lock-free:0.18"
 )
 
 javaPlatform {

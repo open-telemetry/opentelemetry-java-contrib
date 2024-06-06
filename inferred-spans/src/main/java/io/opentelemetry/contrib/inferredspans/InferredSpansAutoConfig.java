@@ -18,8 +18,8 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.common.config.PropertiesApplier;
 import com.google.auto.service.AutoService;
+import io.opentelemetry.contrib.inferredspans.config.PropertiesApplier;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.logging.Logger;

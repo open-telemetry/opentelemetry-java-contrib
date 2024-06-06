@@ -18,13 +18,13 @@
  */
 package io.opentelemetry.contrib.inferredspans;
 
-import co.elastic.otel.common.util.HexUtils;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import io.opentelemetry.contrib.inferredspans.util.ByteUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.contrib.inferredspans.util.HexUtils;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import javax.annotation.Nullable;
 

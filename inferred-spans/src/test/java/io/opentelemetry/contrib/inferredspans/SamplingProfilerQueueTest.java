@@ -20,11 +20,11 @@ package io.opentelemetry.contrib.inferredspans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.contrib.inferredspans.util.DisabledOnOpenJ9;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;

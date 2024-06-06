@@ -21,10 +21,9 @@ package io.opentelemetry.contrib.inferredspans;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
-import co.elastic.otel.common.config.WildcardMatcher;
-import co.elastic.otel.common.util.ExecutorUtils;
 import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
 import io.opentelemetry.contrib.inferredspans.asyncprofiler.JfrParser;
+import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.pooling.Allocator;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import com.lmax.disruptor.EventFactory;
@@ -53,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Supplier;
@@ -99,7 +99,7 @@ import one.profiler.AsyncProfiler;
  * activation} and at least one stack trace. Once {@linkplain
  * ActivationEvent#handleDeactivationEvent(SamplingProfiler) handling the deactivation event} of the
  * root span in a thread (after which {@link ElasticApmTracer#getActive()} would return {@code
- * null}), the {@link CallTree} is {@linkplain CallTree#spanify(CallTree.Root, TraceContext)
+ * null}), the {@link CallTree} is {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext, SpanAnchoredClock, StringBuilder, Tracer)}
  * converted into regular spans}.
  *
  * <p>Overall, the allocation rate does not depend on the number of {@link ActivationEvent}s but
@@ -107,7 +107,7 @@ import one.profiler.AsyncProfiler;
  * InferredSpansConfiguration#getSamplingInterval()}. Having said that, there are some optimizations
  * so that the JFR file is not processed at all if there have not been any {@link ActivationEvent}
  * in a given profiling session. Also, only if there's a {@link CallTree.Root} for a {@link
- * StackTraceEvent}, we will {@link JfrParser#resolveStackTrace(long, boolean, List, int) resolve
+ * StackTraceEvent}, we will {@link JfrParser#resolveStackTrace(long, List, int) resolve
  * the full stack trace}.
  */
 class SamplingProfiler implements Runnable {
@@ -140,7 +140,6 @@ class SamplingProfiler implements Runnable {
               active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
         }
       };
-  // sizeof(ActivationEvent) is 176B so the ring buffer should be around 880KiB
   static final int RING_BUFFER_SIZE = 4 * 1024;
 
   // Visible for testing
@@ -188,8 +187,9 @@ class SamplingProfiler implements Runnable {
    *
    * <p>This constructor is most likely used for tests that rely on a known set of files
    *
-   * @param tracer tracer
+   * @param config configuration
    * @param nanoClock clock
+   * @param tracerProvider the tracer to use for producing spans
    * @param activationEventsFile activation events file, if {@literal null} a temp file will be used
    * @param jfrFile java flight recorder file, if {@literal null} a temp file will be used instead
    */
@@ -202,8 +202,12 @@ class SamplingProfiler implements Runnable {
     this.config = config;
     this.tracerProvider = tracerProvider;
     this.scheduler =
-        Executors.newSingleThreadScheduledExecutor(
-            ExecutorUtils.threadFactory("inferred-spans", true));
+        Executors.newSingleThreadScheduledExecutor(r -> {
+          Thread thread = new Thread(r);
+          thread.setDaemon(true);
+          thread.setName("otel-inferred-spans");
+          return thread;
+        });
     this.clock = nanoClock;
     this.eventBuffer = createRingBuffer();
     this.sequence = new Sequence();
