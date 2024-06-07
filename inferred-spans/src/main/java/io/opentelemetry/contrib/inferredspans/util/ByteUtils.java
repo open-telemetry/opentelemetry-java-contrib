@@ -6,6 +6,9 @@
 package io.opentelemetry.contrib.inferredspans.util;
 
 public class ByteUtils {
+
+  private ByteUtils() {}
+
   public static void putLong(byte[] buffer, int offset, long l) {
     buffer[offset++] = (byte) (l >> 56);
     buffer[offset++] = (byte) (l >> 48);

@@ -22,7 +22,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,8 +114,8 @@ public class InferredSpansAutoConfigTest {
 
       // Wait until profiler is started
       await()
-          .pollDelay(10, TimeUnit.MILLISECONDS)
-          .timeout(6000, TimeUnit.MILLISECONDS)
+          .pollDelay(Duration.ofMillis(10))
+          .timeout(Duration.ofSeconds(6))
           .until(() -> processor.profiler.getProfilingSessions() > 1);
 
       Tracer tracer = otel.getTracer("manual-spans");
@@ -144,7 +143,7 @@ public class InferredSpansAutoConfigTest {
     }
   }
 
-  private void doSleep() {
+  private static void doSleep() {
     try {
       Thread.sleep(100);
     } catch (InterruptedException e) {
@@ -152,7 +151,7 @@ public class InferredSpansAutoConfigTest {
     }
   }
 
-  private List<String> wildcardsAsStrings(List<WildcardMatcher> wildcardList) {
+  private static List<String> wildcardsAsStrings(List<WildcardMatcher> wildcardList) {
     return wildcardList.stream().map(WildcardMatcher::getMatcher).collect(Collectors.toList());
   }
 }

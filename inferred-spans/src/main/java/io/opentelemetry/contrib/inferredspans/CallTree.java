@@ -17,7 +17,6 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-import org.agrona.collections.LongHashSet;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import io.opentelemetry.contrib.inferredspans.util.HexUtils;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.agrona.collections.LongHashSet;
 
 /**
  * Converts a sequence of stack traces into a tree structure of method calls.
@@ -107,7 +107,7 @@ public class CallTree implements Recyclable {
     return parent;
   }
 
-  public void activation(TraceContext traceContext, long activationTimestamp) {
+  public void activation(@Nullable TraceContext traceContext, long activationTimestamp) {
     this.activeContextOfDirectParent = traceContext;
     this.activationTimestamp = activationTimestamp;
   }
@@ -194,7 +194,7 @@ public class CallTree implements Recyclable {
     CallTree topOfStack = this;
     boolean endChild = true;
     if (index >= 1) {
-      final StackFrame frame = stackFrames.get(--index);
+      StackFrame frame = stackFrames.get(--index);
       if (lastChild != null) {
         if (!lastChild.isEnded() && frame.equals(lastChild.frame)) {
           topOfStack =
@@ -398,7 +398,7 @@ public class CallTree implements Recyclable {
     try {
       toString(sb);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
     return sb.toString();
   }
@@ -473,6 +473,7 @@ public class CallTree implements Recyclable {
     }
 
     tempBuilder.setLength(0);
+    assert frame != null;
     String classFqn = frame.getClassName();
     if (classFqn != null) {
       tempBuilder.append(classFqn, frame.getSimpleClassNameOffset(), classFqn.length());
@@ -543,6 +544,7 @@ public class CallTree implements Recyclable {
       if (resultBuilder.length() > 0) {
         resultBuilder.append('\n');
       }
+      assert frame != null;
       resultBuilder
           .append("at ")
           .append(frame.getClassName())
@@ -713,7 +715,7 @@ public class CallTree implements Recyclable {
      * The context of the transaction or span which is currently active, in its {@linkplain
      * TraceContext#serialize serialized} form.
      */
-    private byte[] activeSpanSerialized = new byte[TraceContext.SERIALIZED_LENGTH];
+    private final byte[] activeSpanSerialized = new byte[TraceContext.SERIALIZED_LENGTH];
 
     @Nullable private CallTree previousTopOfStack;
     @Nullable private CallTree topOfStack;
@@ -834,7 +836,7 @@ public class CallTree implements Recyclable {
     }
 
     @Nullable
-    private CallTree findCommonAncestor(CallTree previousTopOfStack, CallTree topOfStack) {
+    private static CallTree findCommonAncestor(CallTree previousTopOfStack, CallTree topOfStack) {
       int maxDepthOfCommonAncestor = Math.min(previousTopOfStack.getDepth(), topOfStack.getDepth());
       CallTree commonAncestor = null;
       // i = 1 avoids considering the CallTree.Root node which is always the same

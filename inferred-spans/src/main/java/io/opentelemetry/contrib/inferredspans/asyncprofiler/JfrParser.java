@@ -6,10 +6,6 @@
 package io.opentelemetry.contrib.inferredspans.asyncprofiler;
 
 import io.opentelemetry.contrib.inferredspans.StackFrame;
-import org.agrona.collections.Int2IntHashMap;
-import org.agrona.collections.Int2ObjectHashMap;
-import org.agrona.collections.Long2LongHashMap;
-import org.agrona.collections.Long2ObjectHashMap;
 import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import java.io.File;
@@ -23,6 +19,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.agrona.collections.Int2IntHashMap;
+import org.agrona.collections.Int2ObjectHashMap;
+import org.agrona.collections.Long2LongHashMap;
+import org.agrona.collections.Long2ObjectHashMap;
 
 /**
  * Parses the binary JFR file created by async-profiler. May not work with JFR files created by an
@@ -359,6 +359,7 @@ public class JfrParser implements Recyclable {
     }
   }
 
+  @SuppressWarnings("ReferenceEquality")
   private void addFrameIfIncluded(List<StackFrame> stackFrames, int methodId, byte frameType)
       throws IOException {
     if (isJavaFrameType(frameType)) {
@@ -370,9 +371,11 @@ public class JfrParser implements Recyclable {
   }
 
   private boolean isJavaFrameType(byte frameType) {
+    assert isJavaFrameType != null;
     return isJavaFrameType[frameType];
   }
 
+  @SuppressWarnings("ReferenceEquality")
   private String resolveSymbol(int id, boolean classSymbol) throws IOException {
     String symbol = symbolIdToString.get(id);
     if (symbol != SYMBOL_NULL) {
@@ -408,21 +411,27 @@ public class JfrParser implements Recyclable {
   }
 
   private boolean isClassIncluded(CharSequence className) {
+    assert includedClasses != null;
+    assert excludedClasses != null;
     return WildcardMatcher.isAnyMatch(includedClasses, className)
         && WildcardMatcher.isNoneMatch(excludedClasses, className);
   }
 
+  @SuppressWarnings("ReferenceEquality")
   private StackFrame resolveStackFrame(long frameId) throws IOException {
     StackFrame stackFrame = methodIdToFrame.get(frameId);
     if (stackFrame != FRAME_NULL) {
       return stackFrame;
     }
     String className =
-        resolveSymbol(classIdToClassNameSymbolId.get((int) methodIdToClassId.get(frameId)), true);
+        resolveSymbol(
+            classIdToClassNameSymbolId.get((int) methodIdToClassId.get(frameId)),
+            /* classSymbol= */ true);
     if (className == SYMBOL_EXCLUDED) {
       stackFrame = FRAME_EXCLUDED;
     } else {
-      String method = resolveSymbol((int) methodIdToMethodNameSymbol.get(frameId), false);
+      String method =
+          resolveSymbol((int) methodIdToMethodNameSymbol.get(frameId), /* classSymbol= */ false);
       stackFrame = new StackFrame(className, Objects.requireNonNull(method));
     }
     methodIdToFrame.put(frameId, stackFrame);
@@ -450,6 +459,8 @@ public class JfrParser implements Recyclable {
   public interface StackTraceConsumer {
 
     /**
+     * Callback invoked from {@link JfrParser} when a execution sample is encountered.
+     *
      * @param threadId The {@linkplain Thread#getId() Java thread id} for with the event was
      *     recorded.
      * @param stackTraceId The id of the stack trace event. Can be used to resolve the stack trace
@@ -461,26 +472,31 @@ public class JfrParser implements Recyclable {
     void onCallTree(long threadId, long stackTraceId, long nanoTime) throws IOException;
   }
 
-  private interface EventTypeId {
-    int EVENT_METADATA = 0;
-    int EVENT_CHECKPOINT = 1;
+  private static class EventTypeId {
+
+    private EventTypeId() {}
+
+    static final int EVENT_METADATA = 0;
+    static final int EVENT_CHECKPOINT = 1;
 
     // The following event types actually are defined in the metadata of the JFR file itself
     // for simplicity and performance, we hardcode the values used by the async-profiler
     // implementation
-    int EVENT_EXECUTION_SAMPLE = 101;
+    static final int EVENT_EXECUTION_SAMPLE = 101;
   }
 
-  private interface ContentTypeId {
-    int CONTENT_THREAD = 22;
-    int CONTENT_LOG_LEVELS = 33;
-    int CONTENT_STACKTRACE = 26;
-    int CONTENT_CLASS = 21;
-    int CONTENT_METHOD = 28;
-    int CONTENT_SYMBOL = 31;
-    int CONTENT_THREAD_STATE = 25;
-    int CONTENT_FRAME_TYPE = 24;
-    int CONTENT_GC_WHEN = 32;
-    int CONTENT_PACKAGE = 30;
+  private static final class ContentTypeId {
+    private ContentTypeId() {}
+
+    static final int CONTENT_THREAD = 22;
+    static final int CONTENT_LOG_LEVELS = 33;
+    static final int CONTENT_STACKTRACE = 26;
+    static final int CONTENT_CLASS = 21;
+    static final int CONTENT_METHOD = 28;
+    static final int CONTENT_SYMBOL = 31;
+    static final int CONTENT_THREAD_STATE = 25;
+    static final int CONTENT_FRAME_TYPE = 24;
+    static final int CONTENT_GC_WHEN = 32;
+    static final int CONTENT_PACKAGE = 30;
   }
 }

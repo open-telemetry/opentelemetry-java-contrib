@@ -592,7 +592,8 @@ class SamplingProfiler implements Runnable {
    * <p>Returns only events for threads where at least one activation happened (because only those
    * are profiled by async-profiler)
    */
-  private static List<StackTraceEvent> getSortedStackTraceEvents(JfrParser jfrParser) throws IOException {
+  private static List<StackTraceEvent> getSortedStackTraceEvents(JfrParser jfrParser)
+      throws IOException {
     List<StackTraceEvent> stackTraceEvents = new ArrayList<>();
     jfrParser.consumeStackTraces(
         new JfrParser.StackTraceConsumer() {
@@ -608,6 +609,7 @@ class SamplingProfiler implements Runnable {
   void processActivationEventsUpTo(long timestamp, long eof) throws IOException {
     processActivationEventsUpTo(timestamp, eof, new ActivationEvent());
   }
+
   @SuppressWarnings("NullAway")
   public void processActivationEventsUpTo(long timestamp, long eof, ActivationEvent event)
       throws IOException {
@@ -818,7 +820,7 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      set(context, threadId, /*activation=*/ true, previousContext, nanoTime, clock);
+      set(context, threadId, /* activation= */ true, previousContext, nanoTime, clock);
     }
 
     public void deactivation(
@@ -827,7 +829,7 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      set(context, threadId, /*activation=*/ false, previousContext, nanoTime, clock);
+      set(context, threadId, /* activation= */ false, previousContext, nanoTime, clock);
     }
 
     private void set(
@@ -837,12 +839,12 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      TraceContext.serialize(traceContext, clock.getAnchor(traceContext), traceContextBuffer);
+      TraceContext.serialize(traceContextBuffer, traceContext, clock.getAnchor(traceContext));
       this.threadId = threadId;
       this.activation = activation;
       if (previousContext != null) {
         TraceContext.serialize(
-            previousContext, clock.getAnchor(previousContext), previousContextBuffer);
+            previousContextBuffer, previousContext, clock.getAnchor(previousContext));
         rootContext = false;
       } else {
         rootContext = true;
@@ -976,11 +978,11 @@ class SamplingProfiler implements Runnable {
       activation = buf.get() == 1;
     }
 
-    private static TraceContext deserialize(SamplingProfiler samplingProfiler, byte[] traceContextBuffer) {
+    private static TraceContext deserialize(
+        SamplingProfiler samplingProfiler, byte[] traceContextBuffer) {
       samplingProfiler.contextForLogging.deserialize(traceContextBuffer);
       return samplingProfiler.contextForLogging;
     }
-
   }
 
   /**

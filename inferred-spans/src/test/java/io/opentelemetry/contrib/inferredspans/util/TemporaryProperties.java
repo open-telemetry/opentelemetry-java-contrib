@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans.util;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -13,6 +14,7 @@ public class TemporaryProperties implements AutoCloseable {
 
   private final Map<String, String> originalValues = new HashMap<>();
 
+  @CanIgnoreReturnValue
   public TemporaryProperties put(String key, @Nullable String value) {
     if (!originalValues.containsKey(key)) {
       originalValues.put(key, System.getProperty(key));

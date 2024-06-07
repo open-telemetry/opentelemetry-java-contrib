@@ -23,10 +23,10 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,8 +93,8 @@ class SamplingProfilerTest {
 
   private static List<Path> getProfilerTempFiles() {
     Path tempFolder = Paths.get(System.getProperty("java.io.tmpdir"));
-    try {
-      return Files.list(tempFolder)
+    try (Stream<Path> files = Files.list(tempFolder)) {
+      return files
           .filter(f -> f.getFileName().toString().startsWith("apm-"))
           .sorted()
           .collect(Collectors.toList());
@@ -181,8 +181,8 @@ class SamplingProfilerTest {
     }
 
     await()
-        .pollDelay(10, TimeUnit.MILLISECONDS)
-        .timeout(5000, TimeUnit.MILLISECONDS)
+        .pollDelay(Duration.ofMillis(10))
+        .timeout(Duration.ofSeconds(5))
         .untilAsserted(() -> assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6));
 
     assertThat(profilingActiveOnThread).isTrue();
@@ -280,8 +280,8 @@ class SamplingProfilerTest {
     }
 
     await()
-        .pollDelay(10, TimeUnit.MILLISECONDS)
-        .timeout(5000, TimeUnit.MILLISECONDS)
+        .pollDelay(Duration.ofMillis(10))
+        .timeout(Duration.ofSeconds(5))
         .untilAsserted(() -> assertThat(setup.getSpans()).hasSize(2));
 
     Optional<SpanData> explicitSpanB =
@@ -290,7 +290,7 @@ class SamplingProfilerTest {
     assertThat(explicitSpanB.get()).hasParentSpanId(tx.getSpanContext().getSpanId());
   }
 
-  private void aInferred(Tracer tracer) throws Exception {
+  private static void aInferred(Tracer tracer) throws Exception {
     Span span = tracer.spanBuilder("bExplicit").startSpan();
     try (Scope spanScope = span.makeCurrent()) {
       cInferred();
@@ -300,12 +300,12 @@ class SamplingProfilerTest {
     Thread.sleep(50);
   }
 
-  private void cInferred() throws Exception {
+  private static void cInferred() throws Exception {
     dInferred();
     Thread.sleep(50);
   }
 
-  private void dInferred() throws Exception {
+  private static void dInferred() throws Exception {
     Thread.sleep(50);
   }
 
@@ -328,8 +328,8 @@ class SamplingProfilerTest {
   private static void awaitProfilerStarted(SamplingProfiler profiler) {
     // ensure profiler is initialized
     await()
-        .pollDelay(10, TimeUnit.MILLISECONDS)
-        .timeout(6000, TimeUnit.MILLISECONDS)
+        .pollDelay(Duration.ofMillis(10))
+        .timeout(Duration.ofSeconds(6))
         .until(() -> profiler.getProfilingSessions() > 1);
   }
 

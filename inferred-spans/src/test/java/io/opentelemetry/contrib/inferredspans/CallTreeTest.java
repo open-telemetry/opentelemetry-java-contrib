@@ -82,8 +82,6 @@ class CallTreeTest {
         Arrays.asList(StackFrame.of("A", "a")), TimeUnit.MILLISECONDS.toNanos(30), callTreePool, 0);
     root.end(callTreePool, 0);
 
-    System.out.println(root);
-
     assertThat(root.getCount()).isEqualTo(4);
     assertThat(root.getDepth()).isEqualTo(0);
     assertThat(root.getChildren()).hasSize(1);
@@ -844,6 +842,7 @@ class CallTreeTest {
     assertCallTree(stackTraces, expectedTree, null);
   }
 
+  @SuppressWarnings({"unchecked", "ReturnsNullCollection"})
   private Map<String, SpanData> assertCallTree(
       String[] stackTraces, Object[][] expectedTree, @Nullable Object[][] expectedSpans)
       throws Exception {
@@ -878,7 +877,7 @@ class CallTreeTest {
       for (int i = 0; i < expectedSpans.length; i++) {
         Object[] expectedSpan = expectedSpans[i];
         String spanName = ((String) expectedSpan[0]).trim();
-        long durationMs = (int) expectedSpan[1] * 10;
+        int durationMs = (int) expectedSpan[1] * 10;
         List<String> stackTrace =
             expectedSpan.length == 3 ? (List<String>) expectedSpan[2] : Arrays.asList();
         int nestingLevel = getNestingLevel((String) expectedSpan[0]);
@@ -965,7 +964,7 @@ class CallTreeTest {
   }
 
   @Nullable
-  private String getParentName(@Nonnull Object[][] expectedSpans, int i, int nestingLevel) {
+  private static String getParentName(@Nonnull Object[][] expectedSpans, int i, int nestingLevel) {
     if (nestingLevel > 0) {
       for (int j = i - 1; j >= 0; j--) {
         String name = (String) expectedSpans[j][0];
@@ -978,9 +977,9 @@ class CallTreeTest {
     return null;
   }
 
-  private int getNestingLevel(String spanName) {
+  private static int getNestingLevel(String spanName) {
     // nesting is denoted by two spaces
-    return ((spanName).length() - 1) / 2;
+    return (spanName.length() - 1) / 2;
   }
 
   public static CallTree.Root getCallTree(ProfilerTestSetup profilerSetup, String[] stackTraces)
@@ -1056,6 +1055,7 @@ class CallTreeTest {
     }
   }
 
+  @SuppressWarnings("MustBeClosedChecker")
   private static void handleSpanEvent(
       Tracer tracer,
       Map<String, Span> spanMap,

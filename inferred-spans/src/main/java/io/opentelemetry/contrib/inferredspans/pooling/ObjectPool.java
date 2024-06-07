@@ -35,6 +35,7 @@ public interface ObjectPool<T> {
 
   public static <T extends Recyclable> ObjectPool<T> createRecyclable(
       int capacity, Allocator<T> allocator) {
-    return QueueBasedObjectPool.ofRecyclable(new MpmcArrayQueue<>(capacity), false, allocator);
+    return QueueBasedObjectPool.ofRecyclable(
+        new MpmcArrayQueue<>(capacity), /* preAllocate= */ false, allocator);
   }
 }

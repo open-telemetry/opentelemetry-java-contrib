@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class PropertiesApplier {
 
@@ -51,7 +52,7 @@ public class PropertiesApplier {
     }
   }
 
-  private static <T> void applyValue(T value, Consumer<T> funcToApply) {
+  private static <T> void applyValue(@Nullable T value, Consumer<T> funcToApply) {
     if (value != null) {
       funcToApply.accept(value);
     }

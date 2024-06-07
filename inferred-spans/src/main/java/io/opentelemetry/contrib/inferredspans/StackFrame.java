@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.inferredspans;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-public class StackFrame {
+public final class StackFrame {
   @Nullable private final String className;
   private final String methodName;
 
@@ -38,7 +38,7 @@ public class StackFrame {
   }
 
   public void appendFileName(StringBuilder replaceBuilder) {
-    final String unknownCodeSource = "<Unknown>";
+    String unknownCodeSource = "<Unknown>";
     if (className != null) {
       int fileNameEnd = className.indexOf('$');
       if (fileNameEnd < 0) {
@@ -57,7 +57,7 @@ public class StackFrame {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

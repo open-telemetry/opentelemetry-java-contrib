@@ -21,15 +21,13 @@ import org.junit.platform.commons.support.ReflectionSupport;
 
 public class OtelReflectionUtils {
 
+  private OtelReflectionUtils() {}
+
   public static List<SpanProcessor> getSpanProcessors(OpenTelemetry otel) {
     SdkTracerProvider tracer = unwrap(otel.getTracerProvider());
     SpanProcessor active =
         (SpanProcessor) readFieldChain(tracer, "sharedState", "activeSpanProcessor");
-    return flattenCompositeProcessor(active, false);
-  }
-
-  public static List<SpanProcessor> flattenCompositeProcessors(SpanProcessor potentiallyComposite) {
-    return flattenCompositeProcessor(potentiallyComposite, true);
+    return flattenCompositeProcessor(active, /* recurse= */ false);
   }
 
   /**
@@ -38,7 +36,7 @@ public class OtelReflectionUtils {
    */
   public static void shutdownAndResetGlobalOtel() {
     OpenTelemetry otel =
-        (OpenTelemetry) readField(GlobalOpenTelemetry.class, null, "globalOpenTelemetry");
+        (OpenTelemetry) readField(null, "globalOpenTelemetry", GlobalOpenTelemetry.class);
     if (otel != null) {
       // unwrap from obfuscated opentelemetry
       OpenTelemetrySdk sdk = (OpenTelemetrySdk) readField(otel, "delegate");
@@ -56,7 +54,7 @@ public class OtelReflectionUtils {
           (List<SpanProcessor>) readField(active, "spanProcessorsAll");
       if (recurse) {
         return childProcessors.stream()
-            .flatMap(proc -> flattenCompositeProcessor(proc, true).stream())
+            .flatMap(proc -> flattenCompositeProcessor(proc, /* recurse= */ true).stream())
             .collect(Collectors.toList());
       } else {
         return childProcessors;
@@ -85,10 +83,10 @@ public class OtelReflectionUtils {
   }
 
   private static Object readField(Object instance, String fieldName) {
-    return readField(instance.getClass(), instance, fieldName);
+    return readField(instance, fieldName, instance.getClass());
   }
 
-  private static Object readField(Class<?> clazz, Object instance, String fieldName) {
+  private static Object readField(Object instance, String fieldName, Class<?> clazz) {
 
     List<Field> fields =
         ReflectionSupport.findFields(

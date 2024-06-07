@@ -6,14 +6,12 @@
 package io.opentelemetry.contrib.inferredspans.pooling;
 
 /**
- * Defines pooled object factory
+ * Defines a pooled object factory
  *
  * @param <T> pooled object type
  */
 public interface Allocator<T> {
 
-  /**
-   * @return new instance of pooled object type
-   */
+  /** Creates a new instance of pooled object type. */
   T createInstance();
 }

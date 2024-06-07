@@ -30,6 +30,7 @@ public class FixedClock extends SpanAnchoredClock {
   }
 
   @Override
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
   public long toEpochNanos(long anchor, long recordedNanoTime) {
     return recordedNanoTime;
   }

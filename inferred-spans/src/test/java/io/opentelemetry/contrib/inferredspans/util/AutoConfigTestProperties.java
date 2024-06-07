@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans.util;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import javax.annotation.Nullable;
 
 public class AutoConfigTestProperties extends TemporaryProperties {
@@ -17,6 +18,7 @@ public class AutoConfigTestProperties extends TemporaryProperties {
   }
 
   @Override
+  @CanIgnoreReturnValue
   public AutoConfigTestProperties put(String key, @Nullable String value) {
     super.put(key, value);
     return this;

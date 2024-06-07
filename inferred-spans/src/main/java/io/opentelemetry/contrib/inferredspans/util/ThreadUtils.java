@@ -14,6 +14,8 @@ public class ThreadUtils {
 
   private static final MethodHandle VIRTUAL_CHECKER = generateVirtualChecker();
 
+  private ThreadUtils() {}
+
   public static boolean isVirtual(Thread thread) {
     try {
       return (boolean) VIRTUAL_CHECKER.invokeExact(thread);

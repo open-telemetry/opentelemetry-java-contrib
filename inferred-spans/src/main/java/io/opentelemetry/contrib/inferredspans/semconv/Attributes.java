@@ -9,7 +9,7 @@ import io.opentelemetry.api.common.AttributeKey;
 
 public class Attributes {
 
-  private Attributes(){}
+  private Attributes() {}
 
   public static final AttributeKey<String> CODE_STACKTRACE =
       AttributeKey.stringKey("code.stacktrace");

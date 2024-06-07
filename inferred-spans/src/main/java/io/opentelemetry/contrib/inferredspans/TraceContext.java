@@ -75,15 +75,15 @@ public class TraceContext implements Recyclable {
     return id;
   }
 
+  public static long getSpanId(byte[] serialized) {
+    return ByteUtils.getLong(serialized, 16);
+  }
+
   public boolean idEquals(@Nullable TraceContext o) {
     if (o == null) {
       return false;
     }
     return id == o.id;
-  }
-
-  public static long getSpanId(byte[] serialized) {
-    return ByteUtils.getLong(serialized, 16);
   }
 
   public void deserialize(byte[] serialized) {
@@ -117,7 +117,7 @@ public class TraceContext implements Recyclable {
     return id == otherId;
   }
 
-  public static void serialize(Span span, long clockAnchor, byte[] buffer) {
+  public static void serialize(byte[] buffer, Span span, long clockAnchor) {
     SpanContext ctx = span.getSpanContext();
     SpanContext parentSpanCtx = SpanContext.getInvalid();
     if (span instanceof ReadableSpan) {

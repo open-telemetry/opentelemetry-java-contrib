@@ -11,7 +11,7 @@ import org.agrona.collections.LongArrayList;
 public class ChildList {
 
   // this list contains the (spanId,parentIds) flattened
-  private LongArrayList idsWithParentIds = new LongArrayList();
+  private final LongArrayList idsWithParentIds = new LongArrayList();
 
   public void add(long id, long parentId) {
     idsWithParentIds.add(id);

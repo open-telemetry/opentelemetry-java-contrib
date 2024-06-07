@@ -36,6 +36,7 @@ public class ProfilingActivationListener implements Closeable {
   // In normal use-cases there is only one ProfilingActivationListener active or zero
   // (e.g. after SDK shutdown). However, in theory nothing prevents users from starting
   // two SDKs at the same time, so it is safest to use a List here.
+  @SuppressWarnings("NonFinalStaticField")
   private static volatile List<ProfilingActivationListener> activeListeners =
       Collections.emptyList();
 
@@ -69,7 +70,7 @@ public class ProfilingActivationListener implements Closeable {
       };
     }
 
-    Span spanFromContextNullSafe(@Nullable Context context) {
+    private static Span spanFromContextNullSafe(@Nullable Context context) {
       if (context == null) {
         return Span.getInvalid();
       }

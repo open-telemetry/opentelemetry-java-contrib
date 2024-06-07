@@ -16,14 +16,17 @@ import java.util.stream.Collectors;
 
 /**
  * Can be used in combination with the files created by {@link
- * ProfilingConfiguration#backupDiagnosticFiles} to replay the creation of profiler-inferred spans.
- * This is useful, for example, to troubleshoot why {@link
- * co.elastic.apm.agent.impl.transaction.Span#childIds} are set as expected.
+ * InferredSpansProcessorBuilder#backupDiagnosticFiles(boolean)} to replay the creation of
+ * profiler-inferred spans. This is useful, for example, to troubleshoot why child Span-Links are
+ * not set as expected.
  */
 public class SamplingProfilerReplay {
 
+  private SamplingProfilerReplay() {}
+
   private static final Logger logger = Logger.getLogger(SamplingProfilerReplay.class.getName());
 
+  @SuppressWarnings("StreamResourceLeak")
   public static void main(String[] args) throws Exception {
     ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
     File activationEventsFile = File.createTempFile("activations", ".dat");

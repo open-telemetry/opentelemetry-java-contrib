@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
@@ -27,4 +29,19 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
   // testImplementation("org.awaitility:awaitility")
   // testImplementation(libs.bundles.semconv)
+}
+
+tasks {
+  withType<JavaCompile>().configureEach {
+    with(options) {
+      errorprone {
+        // This code uses nullable reference in many places deu to performance
+        // and makes assumptions of when these references are non-null
+        // In the code we express those assumptions as assertions
+        // instead of Object.requireNonNull because the NPEs raised by actual
+        // null dereferencing are more helpful than the ones raised by Object.requireNonNull
+        option("NullAway:AssertsEnabled", "true")
+      }
+    }
+  }
 }

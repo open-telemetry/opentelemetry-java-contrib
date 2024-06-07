@@ -58,6 +58,7 @@ public class HexUtils {
         | hexCharToBinary(hex.charAt(offset + 15));
   }
 
+  @SuppressWarnings("IntLongMath")
   private static long hexCharToBinary(char ch) {
     if ('0' <= ch && ch <= '9') {
       return ch - '0';

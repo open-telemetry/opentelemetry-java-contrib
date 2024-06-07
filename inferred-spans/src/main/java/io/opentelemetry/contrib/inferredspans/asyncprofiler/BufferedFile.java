@@ -14,6 +14,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
@@ -35,6 +37,8 @@ import javax.annotation.Nullable;
  * executing other threads have to wait for it to finish if the JVM wants to reach a safe point.
  */
 class BufferedFile implements Recyclable {
+
+  private final Logger logger = Logger.getLogger(BufferedFile.class.getName());
 
   private static final int SIZE_OF_BYTE = 1;
   private static final int SIZE_OF_SHORT = 2;
@@ -64,6 +68,7 @@ class BufferedFile implements Recyclable {
    * @param smallBuffer the buffer to be used to read chunks of the file in case the file is larger
    *     than bigBuffer. Constantly seeking a file with a large buffer is very bad for performance.
    */
+  @SuppressWarnings("NullAway")
   public BufferedFile(ByteBuffer bigBuffer, ByteBuffer smallBuffer) {
     this.bigBuffer = bigBuffer;
     this.smallBuffer = smallBuffer;
@@ -90,15 +95,6 @@ class BufferedFile implements Recyclable {
   }
 
   /**
-   * Returns the position of the file
-   *
-   * @return the position of the file
-   */
-  public long position() {
-    return offset + buffer.position();
-  }
-
-  /**
    * Skips the provided number of bytes in the file without reading new data.
    *
    * @param bytesToSkip the number of bytes to skip
@@ -112,13 +108,14 @@ class BufferedFile implements Recyclable {
   }
 
   /**
+   * Reads a JFR string.
+   *
    * @param output the buffer to place the string intro
    * @return false, if the string to read is null, true otherwise
    */
-  @Nullable
   public boolean readString(StringBuilder output) throws IOException {
     byte encoding = get();
-    if (encoding == 0) { // 0 encoding represents a null string
+    if (encoding == STRING_ENCODING_NULL) {
       return false;
     }
     readOrSkipString(encoding, output);
@@ -187,6 +184,15 @@ class BufferedFile implements Recyclable {
         return;
       }
     }
+  }
+
+  /**
+   * Returns the position of the file
+   *
+   * @return the position of the file
+   */
+  public long position() {
+    return offset + buffer.position();
   }
 
   /**
@@ -398,6 +404,7 @@ class BufferedFile implements Recyclable {
   }
 
   @Override
+  @SuppressWarnings("NullAway")
   public void resetState() {
     if (fileChannel == null) {
       throw new IllegalStateException("setFile has not been called yet");
@@ -409,6 +416,7 @@ class BufferedFile implements Recyclable {
     try {
       fileChannel.close();
     } catch (IOException ignore) {
+      logger.log(Level.FINE, "Ignored exception on file close", ignore);
     }
     fileChannel = null;
     this.buffer = null;
@@ -420,6 +428,7 @@ class BufferedFile implements Recyclable {
     }
     Buffer buffer = this.buffer;
     buffer.clear();
+    assert fileChannel != null;
     fileChannel.position(offset);
     buffer.limit(limit);
     fileChannel.read(this.buffer);
