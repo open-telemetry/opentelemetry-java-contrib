@@ -18,7 +18,6 @@ import com.lmax.disruptor.WaitStrategy;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.inferredspans.asyncprofiler.JfrParser;
-import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
 import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.pooling.Allocator;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
@@ -47,6 +46,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import one.profiler.AsyncProfiler;
+import org.agrona.collections.Long2ObjectHashMap;
 
 /**
  * Correlates {@link ActivationEvent}s with {@link StackFrame}s which are recorded by {@link

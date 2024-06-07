@@ -61,7 +61,8 @@ val DEPENDENCIES = listOf(
   "com.lmax:disruptor:3.4.4",
   "org.jctools:jctools-core:4.0.3",
   "tools.profiler:async-profiler:3.0",
-  "com.blogspot.mydailyjava:weak-lock-free:0.18"
+  "com.blogspot.mydailyjava:weak-lock-free:0.18",
+  "org.agrona:agrona:1.21.2"
 )
 
 javaPlatform {

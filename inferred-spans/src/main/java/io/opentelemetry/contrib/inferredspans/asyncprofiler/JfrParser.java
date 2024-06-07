@@ -6,10 +6,10 @@
 package io.opentelemetry.contrib.inferredspans.asyncprofiler;
 
 import io.opentelemetry.contrib.inferredspans.StackFrame;
-import io.opentelemetry.contrib.inferredspans.collections.Int2IntHashMap;
-import io.opentelemetry.contrib.inferredspans.collections.Int2ObjectHashMap;
-import io.opentelemetry.contrib.inferredspans.collections.Long2LongHashMap;
-import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
+import org.agrona.collections.Int2IntHashMap;
+import org.agrona.collections.Int2ObjectHashMap;
+import org.agrona.collections.Long2LongHashMap;
+import org.agrona.collections.Long2ObjectHashMap;
 import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import java.io.File;

@@ -5,13 +5,13 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
-import io.opentelemetry.contrib.inferredspans.collections.LongList;
+import org.agrona.collections.LongArrayList;
 
 /** List for maintaining pairs of (spanId,parentIds) both represented as longs. */
 public class ChildList {
 
   // this list contains the (spanId,parentIds) flattened
-  private LongList idsWithParentIds = new LongList();
+  private LongArrayList idsWithParentIds = new LongArrayList();
 
   public void add(long id, long parentId) {
     idsWithParentIds.add(id);
@@ -27,7 +27,7 @@ public class ChildList {
   }
 
   public int getSize() {
-    return idsWithParentIds.getSize() / 2;
+    return idsWithParentIds.size() / 2;
   }
 
   public void addAll(ChildList other) {
@@ -43,7 +43,7 @@ public class ChildList {
   }
 
   public void removeLast() {
-    int size = idsWithParentIds.getSize();
+    int size = idsWithParentIds.size();
     idsWithParentIds.remove(size - 1);
     idsWithParentIds.remove(size - 2);
   }

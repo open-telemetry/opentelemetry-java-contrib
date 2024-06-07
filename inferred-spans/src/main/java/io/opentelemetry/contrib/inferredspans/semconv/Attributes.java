@@ -9,6 +9,8 @@ import io.opentelemetry.api.common.AttributeKey;
 
 public class Attributes {
 
+  private Attributes(){}
+
   public static final AttributeKey<String> CODE_STACKTRACE =
       AttributeKey.stringKey("code.stacktrace");
   public static final AttributeKey<Boolean> LINK_IS_CHILD = AttributeKey.booleanKey("is_child");

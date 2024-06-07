@@ -17,7 +17,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.inferredspans.collections.LongHashSet;
+import org.agrona.collections.LongHashSet;
 import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.pooling.Recyclable;
 import io.opentelemetry.contrib.inferredspans.util.HexUtils;
