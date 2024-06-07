@@ -44,11 +44,63 @@ class GroovyRunnerTest {
   @Test
   @SetSystemProperty(key = "otel.jmx.service.url", value = "requiredValue")
   @SetSystemProperty(key = "otel.jmx.target.system", value = "notAProvidededTargetSystem")
-  void loadUnavailableTargetScript() throws Exception {
+  void loadUnavailableTargetScript() {
     JmxConfig config = new JmxConfig();
 
     assertThatThrownBy(() -> new GroovyRunner(config, null, null))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("Failed to load target-systems/notaprovidededtargetsystem.groovy");
+  }
+
+  @Test
+  @SetSystemProperty(
+      key = "otel.jmx.service.url",
+      value = "service:jmx:rmi:///jndi/rmi://localhost:12345/jmxrmi")
+  @SetSystemProperty(key = "otel.jmx.target.system", value = "jvm,hadoop")
+  @SetSystemProperty(
+      key = "otel.jmx.groovy.script",
+      value = "src/integrationTest/resources/script.groovy")
+  void loadScriptAndTargetSystems() throws Exception {
+    JmxConfig config = new JmxConfig();
+
+    assertThatCode(config::validate).doesNotThrowAnyException();
+
+    JmxClient stub =
+        new JmxClient(config) {
+          @Override
+          public List<ObjectName> query(ObjectName objectName) {
+            return Collections.emptyList();
+          }
+        };
+
+    GroovyRunner runner = new GroovyRunner(config, stub, new GroovyMetricEnvironment(config));
+
+    assertThat(runner.getScripts()).hasSize(3);
+    runner.run();
+  }
+
+  @Test
+  @SetSystemProperty(
+      key = "otel.jmx.service.url",
+      value = "service:jmx:rmi:///jndi/rmi://localhost:12345/jmxrmi")
+  @SetSystemProperty(key = "otel.jmx.target.system", value = "jvm")
+  @SetSystemProperty(key = "otel.jmx.groovy.script", value = "")
+  void loadScriptAndTargetSystemWithBlankInputForScript() throws Exception {
+    JmxConfig config = new JmxConfig();
+
+    assertThatCode(config::validate).doesNotThrowAnyException();
+
+    JmxClient stub =
+        new JmxClient(config) {
+          @Override
+          public List<ObjectName> query(ObjectName objectName) {
+            return Collections.emptyList();
+          }
+        };
+
+    GroovyRunner runner = new GroovyRunner(config, stub, new GroovyMetricEnvironment(config));
+
+    assertThat(runner.getScripts()).hasSize(1);
+    runner.run();
   }
 }
