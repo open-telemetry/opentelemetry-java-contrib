@@ -143,7 +143,7 @@ Inferred span ends before actual span, even though it should be the parent
 ```
 
 ```
-   -------[inferred ]-------                 [actual         ]      
+   -------[inferred ]-------                 [actual         ]
        [actual         ]          ->     -------[inferred ]-------
 ^         ^         ^         ^
 ```
@@ -151,7 +151,7 @@ Inferred span ends before actual span, even though it should be the parent
 Two consecutive method invocations are interpreted as one longer execution
 ```
 [actual]   [actual]   ->  [--------  --------]
-^          ^              
+^          ^
 ```
 
 #### With workaround
@@ -165,9 +165,9 @@ Inferred spans are sent later - after the profiling session ends.
 
 This is how the situation looks like without a workaround:
 ```
-[transaction   ]     [transaction   ]  
-└─[inferred  ]    -> ├─[inferred  ]    
-  └─[actual]         └───[actual]      
+[transaction   ]     [transaction   ]
+└─[inferred  ]    -> ├─[inferred  ]
+  └─[actual]         └───[actual]
 ```
 There are situations where the ordering is off as a result of that.
 
@@ -179,14 +179,14 @@ Workaround: set end timestamp of inferred span to end timestamp of actual span.
 ```
 [inferred ]--------         [inferred  -----]--
          [actual]       ->           [actual]
-^         ^         ^     
+^         ^         ^
 ```
 
 ##### Parent inferred span starts after child
 Workaround: set start timestamp of inferred span to start timestamp of actual span.
 ```
   --------[inferred ]          --[------inferred ]
-    [actual ]           ->       [actual ]        
+    [actual ]           ->       [actual ]
 ^         ^         ^
 ```
 

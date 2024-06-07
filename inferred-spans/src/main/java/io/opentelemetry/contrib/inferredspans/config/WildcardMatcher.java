@@ -1,31 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.inferredspans.config;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
- * The advantage of this class compared to alternatives is that {@linkplain #matches(CharSequence) matching} strings is
- * completely allocation free.
+ * The advantage of this class compared to alternatives is that {@linkplain #matches(CharSequence)
+ * matching} strings is completely allocation free.
  *
  * <p>The wildcard matcher supports the {@code *} wildcard which matches zero or more characters. By
  * default, matches are a case insensitive. Single character wildcards like {@code f?o} are not
@@ -41,11 +28,6 @@ import java.util.List;
 // don't use for-each as it allocates memory by instantiating an iterator
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public abstract class WildcardMatcher {
-  public static final String DOCUMENTATION =
-      "This option supports the wildcard `*`, which matches zero or more characters.\n"
-          + "Examples: `/foo/*/bar/*/baz*`, `*foo*`.\n"
-          + "Matching is case insensitive by default.\n"
-          + "Prepending an element with `(?-i)` makes the matching case sensitive.";
   private static final String CASE_INSENSITIVE_PREFIX = "(?i)";
   private static final String CASE_SENSITIVE_PREFIX = "(?-i)";
   private static final String WILDCARD = "*";
@@ -78,7 +60,7 @@ public abstract class WildcardMatcher {
    * @param wildcardString The wildcard string.
    * @return The {@link WildcardMatcher}
    */
-  public static WildcardMatcher valueOf(final String wildcardString) {
+  public static WildcardMatcher valueOf(String wildcardString) {
     String matcher = wildcardString;
     boolean ignoreCase = true;
     if (matcher.startsWith(CASE_SENSITIVE_PREFIX)) {
@@ -172,12 +154,12 @@ public abstract class WildcardMatcher {
    * Thx to Zach Vorhies
    */
   public static int indexOfIgnoreCase(
-      final CharSequence haystack1,
-      final CharSequence haystack2,
-      final String needle,
-      final boolean ignoreCase,
-      final int start,
-      final int end) {
+      CharSequence haystack1,
+      CharSequence haystack2,
+      String needle,
+      boolean ignoreCase,
+      int start,
+      int end) {
     if (start < 0) {
       return -1;
     }
@@ -187,8 +169,8 @@ public abstract class WildcardMatcher {
       return indexOf(haystack1, needle);
     }
 
-    final int haystack1Length = haystack1.length();
-    final int needleLength = needle.length();
+    int haystack1Length = haystack1.length();
+    int needleLength = needle.length();
     for (int i = start; i < end; i++) {
       // Early out, if possible.
       if (i + needleLength > totalHaystackLength) {
@@ -286,7 +268,7 @@ public abstract class WildcardMatcher {
     public boolean matches(CharSequence s) {
       int offset = 0;
       for (int i = 0; i < wildcardMatchers.size(); i++) {
-        final SimpleWildcardMatcher matcher = wildcardMatchers.get(i);
+        SimpleWildcardMatcher matcher = wildcardMatchers.get(i);
         offset = matcher.indexOf(s, offset);
         if (offset == -1) {
           return false;
@@ -300,7 +282,7 @@ public abstract class WildcardMatcher {
     public boolean matches(CharSequence firstPart, @Nullable CharSequence secondPart) {
       int offset = 0;
       for (int i = 0; i < wildcardMatchers.size(); i++) {
-        final SimpleWildcardMatcher matcher = wildcardMatchers.get(i);
+        SimpleWildcardMatcher matcher = wildcardMatchers.get(i);
         offset = matcher.indexOf(firstPart, secondPart, offset);
         if (offset == -1) {
           return false;
@@ -330,6 +312,7 @@ public abstract class WildcardMatcher {
     private final boolean wildcardAtBeginning;
     private final boolean ignoreCase;
 
+    @SuppressWarnings("UnnecessaryStringBuilder")
     SimpleWildcardMatcher(
         String matcher, boolean wildcardAtBeginning, boolean wildcardAtEnd, boolean ignoreCase) {
       this.matcher = matcher;
@@ -364,7 +347,7 @@ public abstract class WildcardMatcher {
       return indexOf(firstPart, secondPart, 0) != -1;
     }
 
-    int indexOf(final CharSequence s, final int offset) {
+    int indexOf(CharSequence s, int offset) {
       return indexOf(s, "", offset);
     }
 

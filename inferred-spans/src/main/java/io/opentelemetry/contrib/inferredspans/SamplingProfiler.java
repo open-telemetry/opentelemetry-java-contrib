@@ -1,31 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.inferredspans;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
-import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
-import io.opentelemetry.contrib.inferredspans.asyncprofiler.JfrParser;
-import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
-import io.opentelemetry.contrib.inferredspans.pooling.Allocator;
-import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventPoller;
 import com.lmax.disruptor.EventTranslatorTwoArg;
@@ -35,6 +17,11 @@ import com.lmax.disruptor.SequenceBarrier;
 import com.lmax.disruptor.WaitStrategy;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.inferredspans.asyncprofiler.JfrParser;
+import io.opentelemetry.contrib.inferredspans.collections.Long2ObjectHashMap;
+import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
+import io.opentelemetry.contrib.inferredspans.pooling.Allocator;
+import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import java.io.File;
 import java.io.IOException;
 import java.nio.Buffer;
@@ -50,9 +37,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Supplier;
@@ -99,16 +86,16 @@ import one.profiler.AsyncProfiler;
  * activation} and at least one stack trace. Once {@linkplain
  * ActivationEvent#handleDeactivationEvent(SamplingProfiler) handling the deactivation event} of the
  * root span in a thread (after which {@link ElasticApmTracer#getActive()} would return {@code
- * null}), the {@link CallTree} is {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext, SpanAnchoredClock, StringBuilder, Tracer)}
- * converted into regular spans}.
+ * null}), the {@link CallTree} is {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext,
+ * SpanAnchoredClock, StringBuilder, Tracer)} converted into regular spans}.
  *
  * <p>Overall, the allocation rate does not depend on the number of {@link ActivationEvent}s but
  * only on {@link InferredSpansConfiguration#getProfilingInterval()} and {@link
  * InferredSpansConfiguration#getSamplingInterval()}. Having said that, there are some optimizations
  * so that the JFR file is not processed at all if there have not been any {@link ActivationEvent}
  * in a given profiling session. Also, only if there's a {@link CallTree.Root} for a {@link
- * StackTraceEvent}, we will {@link JfrParser#resolveStackTrace(long, List, int) resolve
- * the full stack trace}.
+ * StackTraceEvent}, we will {@link JfrParser#resolveStackTrace(long, List, int) resolve the full
+ * stack trace}.
  */
 class SamplingProfiler implements Runnable {
 
@@ -122,24 +109,10 @@ class SamplingProfiler implements Runnable {
       ACTIVATION_EVENTS_IN_FILE * ActivationEvent.SERIALIZED_SIZE;
   private static final int ACTIVATION_EVENTS_BUFFER_SIZE =
       ActivationEvent.SERIALIZED_SIZE * 4 * 1024;
-  private final EventTranslatorTwoArg<ActivationEvent, Span, Span> ACTIVATION_EVENT_TRANSLATOR =
-      new EventTranslatorTwoArg<ActivationEvent, Span, Span>() {
-        @Override
-        public void translateTo(
-            ActivationEvent event, long sequence, Span active, Span previouslyActive) {
-          event.activation(
-              active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
-        }
-      };
-  private final EventTranslatorTwoArg<ActivationEvent, Span, Span> DEACTIVATION_EVENT_TRANSLATOR =
-      new EventTranslatorTwoArg<ActivationEvent, Span, Span>() {
-        @Override
-        public void translateTo(
-            ActivationEvent event, long sequence, Span active, Span previouslyActive) {
-          event.deactivation(
-              active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
-        }
-      };
+  private final SpanAnchoredClock clock;
+  private final EventTranslatorTwoArg<ActivationEvent, Span, Span> activationEventTranslator;
+
+  private final EventTranslatorTwoArg<ActivationEvent, Span, Span> deactivationEventTranslator;
   static final int RING_BUFFER_SIZE = 4 * 1024;
 
   // Visible for testing
@@ -149,7 +122,6 @@ class SamplingProfiler implements Runnable {
   private final RingBuffer<ActivationEvent> eventBuffer;
   private volatile boolean profilingSessionOngoing = false;
   private final Sequence sequence;
-  private final SpanAnchoredClock clock;
   private final ObjectPool<CallTree.Root> rootPool;
   private final ThreadMatcher threadMatcher = new ThreadMatcher();
   private final EventPoller<ActivationEvent> poller;
@@ -176,8 +148,6 @@ class SamplingProfiler implements Runnable {
 
   private final ProfilingActivationListener activationListener;
 
-  private boolean previouslyEnabled = false;
-
   private final Supplier<Tracer> tracerProvider;
 
   private final AsyncProfiler profiler;
@@ -202,13 +172,22 @@ class SamplingProfiler implements Runnable {
     this.config = config;
     this.tracerProvider = tracerProvider;
     this.scheduler =
-        Executors.newSingleThreadScheduledExecutor(r -> {
-          Thread thread = new Thread(r);
-          thread.setDaemon(true);
-          thread.setName("otel-inferred-spans");
-          return thread;
-        });
+        Executors.newSingleThreadScheduledExecutor(
+            r -> {
+              Thread thread = new Thread(r);
+              thread.setDaemon(true);
+              thread.setName("otel-inferred-spans");
+              return thread;
+            });
     this.clock = nanoClock;
+    activationEventTranslator =
+        (event, sequence, active, previouslyActive) ->
+            event.activation(
+                active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
+    deactivationEventTranslator =
+        (event, sequence, active, previouslyActive) ->
+            event.deactivation(
+                active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
     this.eventBuffer = createRingBuffer();
     this.sequence = new Sequence();
     // tells the ring buffer to not override slots which have not been read yet
@@ -247,7 +226,7 @@ class SamplingProfiler implements Runnable {
     try {
       Files.createDirectories(Paths.get(libDir));
     } catch (IOException e) {
-      throw new RuntimeException("Failed to create directory to extract lib to", e);
+      throw new IllegalStateException("Failed to create directory to extract lib to", e);
     }
     System.setProperty(LIB_DIR_PROPERTY_NAME, libDir);
     return AsyncProfiler.getInstance();
@@ -285,11 +264,6 @@ class SamplingProfiler implements Runnable {
     }
   }
 
-  // visible for benchmarks
-  public void skipToEndOfActivationEventsFile() throws IOException {
-    activationEventsFileChannel.position(activationEventsFileChannel.size());
-  }
-
   /**
    * Makes sure that the first blocks of the file are contiguous to provide fast sequential access
    */
@@ -303,7 +277,7 @@ class SamplingProfiler implements Runnable {
     channel.position(initialPos);
   }
 
-  private RingBuffer<ActivationEvent> createRingBuffer() {
+  private static RingBuffer<ActivationEvent> createRingBuffer() {
     return RingBuffer.<ActivationEvent>createMultiProducer(
         new EventFactory<ActivationEvent>() {
           @Override
@@ -332,7 +306,7 @@ class SamplingProfiler implements Runnable {
         profiler.addThread(Thread.currentThread());
       }
       boolean success =
-          eventBuffer.tryPublishEvent(ACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
+          eventBuffer.tryPublishEvent(activationEventTranslator, activeSpan, previouslyActive);
       if (!success) {
         logger.fine("Could not add activation event to ring buffer as no slots are available");
       }
@@ -358,7 +332,7 @@ class SamplingProfiler implements Runnable {
         profiler.removeThread(Thread.currentThread());
       }
       boolean success =
-          eventBuffer.tryPublishEvent(DEACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
+          eventBuffer.tryPublishEvent(deactivationEventTranslator, activeSpan, previouslyActive);
       if (!success) {
         logger.fine("Could not add deactivation event to ring buffer as no slots are available");
       }
@@ -368,6 +342,7 @@ class SamplingProfiler implements Runnable {
   }
 
   @Override
+  @SuppressWarnings("FutureReturnValueIgnored")
   public void run() {
 
     // lazily create temporary files
@@ -408,6 +383,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
+  @SuppressWarnings({"NonAtomicVolatileUpdate", "EmptyCatch"})
   private void profile(Duration profilingDuration) throws Exception {
     try {
       String startCommand = createStartCommand();
@@ -417,7 +393,6 @@ class SamplingProfiler implements Runnable {
         restoreFilterState(profiler);
       }
       // Doesn't need to be atomic as this field is being updated only by a single thread
-      //noinspection NonAtomicOperationOnVolatileField
       profilingSessions++;
 
       // When post-processing is disabled activation events are ignored, but we still need to invoke
@@ -479,6 +454,7 @@ class SamplingProfiler implements Runnable {
         asyncProfiler);
   }
 
+  @SuppressWarnings("NullAway")
   private void consumeActivationEventsFromRingBufferAndWriteToFile(Duration profilingDuration)
       throws Exception {
     resetActivationEventBuffer();
@@ -532,8 +508,9 @@ class SamplingProfiler implements Runnable {
       backupDiagnosticFiles(eof);
     }
     try {
+      Objects.requireNonNull(jfrFile);
       jfrParser.parse(jfrFile, excludedClasses, includedClasses);
-      final List<StackTraceEvent> stackTraceEvents = getSortedStackTraceEvents(jfrParser);
+      List<StackTraceEvent> stackTraceEvents = getSortedStackTraceEvents(jfrParser);
       if (logger.isLoggable(Level.FINE)) {
         logger.log(Level.FINE, "Processing {0} stack traces", stackTraceEvents.size());
       }
@@ -541,7 +518,7 @@ class SamplingProfiler implements Runnable {
       ActivationEvent event = new ActivationEvent();
       long inferredSpansMinDuration = getInferredSpansMinDurationNs();
       for (StackTraceEvent stackTrace : stackTraceEvents) {
-        processActivationEventsUpTo(stackTrace.nanoTime, event, eof);
+        processActivationEventsUpTo(stackTrace.nanoTime, eof, event);
         CallTree.Root root = profiledThreads.get(stackTrace.threadId);
         if (root != null) {
           jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
@@ -556,7 +533,7 @@ class SamplingProfiler implements Runnable {
             try {
               root.addStackTrace(
                   stackFrames, stackTrace.nanoTime, callTreePool, inferredSpansMinDuration);
-            } catch (Exception e) {
+            } catch (Throwable e) {
               logger.log(
                   Level.WARNING,
                   "Removing call tree for thread {0} because of exception while adding a stack trace: {1} {2}",
@@ -570,7 +547,7 @@ class SamplingProfiler implements Runnable {
       }
       // process all activation events that happened after the last stack trace event
       // otherwise we may miss root deactivations
-      processActivationEventsUpTo(System.nanoTime(), event, eof);
+      processActivationEventsUpTo(System.nanoTime(), eof, event);
     } finally {
       if (logger.isLoggable(Level.FINE)) {
         logger.log(Level.FINE, "Processing traces took {0}us", (System.nanoTime() - start) / 1000);
@@ -580,6 +557,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
+  @SuppressWarnings({"NullAway", "JavaUtilDate"})
   private void backupDiagnosticFiles(long eof) throws IOException {
     String now = String.format("%tFT%<tT.%<tL", new Date());
     Path profilerDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
@@ -614,8 +592,8 @@ class SamplingProfiler implements Runnable {
    * <p>Returns only events for threads where at least one activation happened (because only those
    * are profiled by async-profiler)
    */
-  private List<StackTraceEvent> getSortedStackTraceEvents(JfrParser jfrParser) throws IOException {
-    final List<StackTraceEvent> stackTraceEvents = new ArrayList<>();
+  private static List<StackTraceEvent> getSortedStackTraceEvents(JfrParser jfrParser) throws IOException {
+    List<StackTraceEvent> stackTraceEvents = new ArrayList<>();
     jfrParser.consumeStackTraces(
         new JfrParser.StackTraceConsumer() {
           @Override
@@ -628,10 +606,10 @@ class SamplingProfiler implements Runnable {
   }
 
   void processActivationEventsUpTo(long timestamp, long eof) throws IOException {
-    processActivationEventsUpTo(timestamp, new ActivationEvent(), eof);
+    processActivationEventsUpTo(timestamp, eof, new ActivationEvent());
   }
-
-  public void processActivationEventsUpTo(long timestamp, ActivationEvent event, long eof)
+  @SuppressWarnings("NullAway")
+  public void processActivationEventsUpTo(long timestamp, long eof, ActivationEvent event)
       throws IOException {
     FileChannel activationEventsFileChannel = this.activationEventsFileChannel;
     ByteBuffer buf = activationEventsBuffer;
@@ -652,7 +630,7 @@ class SamplingProfiler implements Runnable {
         event.deserialize(buf);
         try {
           event.handle(this);
-        } catch (Exception e) {
+        } catch (Throwable e) {
           logger.log(
               Level.WARNING,
               "Removing call tree for thread {0} because of exception while handling activation event: {1} {2}",
@@ -666,7 +644,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
-  private void readActivationEventsToBuffer(
+  private static void readActivationEventsToBuffer(
       FileChannel activationEventsFileChannel, long eof, ByteBuffer byteBuffer) throws IOException {
     Buffer buf = byteBuffer;
     buf.clear();
@@ -694,6 +672,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
+  @SuppressWarnings("NullAway")
   private void flushActivationEvents() throws IOException {
     if (activationEventsBuffer.position() > 0) {
       ((Buffer) activationEventsBuffer).flip();
@@ -702,6 +681,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
+  @SuppressWarnings("NullAway")
   long startProcessingActivationEventsFile() throws IOException {
     Buffer activationEventsBuffer = this.activationEventsBuffer;
     if (activationEventsFileChannel.position() > 0) {
@@ -715,6 +695,7 @@ class SamplingProfiler implements Runnable {
     return eof;
   }
 
+  @SuppressWarnings("NullAway")
   void copyFromFiles(Path activationEvents, Path traces) throws IOException {
     createFilesIfRequired();
 
@@ -727,11 +708,12 @@ class SamplingProfiler implements Runnable {
         .transferFrom(otherTracesChannel, 0, otherTracesChannel.size());
   }
 
+  @SuppressWarnings("FutureReturnValueIgnored")
   public void start() {
     scheduler.submit(this);
   }
 
-  public void stop() throws Exception {
+  public void stop() throws InterruptedException, IOException {
     // cancels/interrupts the profiling thread
     // implicitly clears profiled threads
     scheduler.shutdown();
@@ -770,26 +752,6 @@ class SamplingProfiler implements Runnable {
   // for testing
   CallTree.Root getRoot() {
     return profiledThreads.get(Thread.currentThread().getId());
-  }
-
-  void clear() throws IOException {
-    // consume all remaining events from the ring buffer
-    try {
-      poller.poll(
-          new EventPoller.Handler<ActivationEvent>() {
-            @Override
-            public boolean onEvent(ActivationEvent event, long sequence, boolean endOfBatch) {
-              SamplingProfiler.this.sequence.set(sequence);
-              return true;
-            }
-          });
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    resetActivationEventBuffer();
-    profiledThreads.clear();
-    callTreePool.clear();
-    rootPool.clear();
   }
 
   int getProfilingSessions() {
@@ -844,8 +806,8 @@ class SamplingProfiler implements Runnable {
             1; // activation
 
     private long timestamp;
-    private byte[] traceContextBuffer = new byte[TraceContext.SERIALIZED_LENGTH];
-    private byte[] previousContextBuffer = new byte[TraceContext.SERIALIZED_LENGTH];
+    private final byte[] traceContextBuffer = new byte[TraceContext.SERIALIZED_LENGTH];
+    private final byte[] previousContextBuffer = new byte[TraceContext.SERIALIZED_LENGTH];
     private boolean rootContext;
     private long threadId;
     private boolean activation;
@@ -856,7 +818,7 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      set(context, threadId, true, previousContext, nanoTime, clock);
+      set(context, threadId, /*activation=*/ true, previousContext, nanoTime, clock);
     }
 
     public void deactivation(
@@ -865,7 +827,7 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      set(context, threadId, false, previousContext, nanoTime, clock);
+      set(context, threadId, /*activation=*/ false, previousContext, nanoTime, clock);
     }
 
     private void set(
@@ -943,11 +905,6 @@ class SamplingProfiler implements Runnable {
       }
     }
 
-    private TraceContext deserialize(SamplingProfiler samplingProfiler, byte[] traceContextBuffer) {
-      samplingProfiler.contextForLogging.deserialize(traceContextBuffer);
-      return samplingProfiler.contextForLogging;
-    }
-
     private void handleDeactivationEvent(SamplingProfiler samplingProfiler) {
       if (rootContext) {
         stopProfiling(samplingProfiler);
@@ -1018,6 +975,12 @@ class SamplingProfiler implements Runnable {
       threadId = buf.getLong();
       activation = buf.get() == 1;
     }
+
+    private static TraceContext deserialize(SamplingProfiler samplingProfiler, byte[] traceContextBuffer) {
+      samplingProfiler.contextForLogging.deserialize(traceContextBuffer);
+      return samplingProfiler.contextForLogging;
+    }
+
   }
 
   /**
@@ -1040,6 +1003,7 @@ class SamplingProfiler implements Runnable {
   // in allocations
   private class WriteActivationEventToFileHandler implements EventPoller.Handler<ActivationEvent> {
     @Override
+    @SuppressWarnings("NullAway")
     public boolean onEvent(ActivationEvent event, long sequence, boolean endOfBatch)
         throws IOException {
       if (endOfBatch) {

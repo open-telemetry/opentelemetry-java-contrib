@@ -1,35 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.contrib.inferredspans;
 
 import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.CODE_STACKTRACE;
 import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.LINK_IS_CHILD;
-import static io.opentelemetry.contrib.inferredspans.semconv.Attributes.SPAN_IS_INFERRED;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static java.util.stream.Collectors.toMap;
 
-import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.inferredspans.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.util.DisabledOnOpenJ9;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -328,12 +314,10 @@ class CallTreeTest {
             });
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
+        .anySatisfy(link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
     assertThat(spans.get("c").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
+        .anySatisfy(link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
   }
 
   /*
@@ -362,12 +346,10 @@ class CallTreeTest {
             });
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
+        .anySatisfy(link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
     assertThat(spans.get("c").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
+        .anySatisfy(link -> assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true));
   }
 
   /*
@@ -939,8 +921,7 @@ class CallTreeTest {
             .describedAs("Unexpected duration for span %s", span)
             .isEqualTo(durationMs * 1_000_000L);
 
-        String actualStacktrace =
-            span.getAttributes().get(CODE_STACKTRACE);
+        String actualStacktrace = span.getAttributes().get(CODE_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {
