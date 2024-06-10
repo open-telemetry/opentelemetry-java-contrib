@@ -1,9 +1,14 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.inferredspans.semconv;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class AttributesTest {
 
