@@ -18,24 +18,22 @@ dependencies {
   implementation("tools.profiler:async-profiler")
   implementation("com.blogspot.mydailyjava:weak-lock-free")
   implementation("org.agrona:agrona")
-  // implementation(libs.bundles.semconv)
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.25.0-alpha")
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-  // testImplementation("org.awaitility:awaitility")
-  // testImplementation(libs.bundles.semconv)
 }
 
 tasks {
   withType<JavaCompile>().configureEach {
     with(options) {
       errorprone {
-        // This code uses nullable reference in many places deu to performance
+        // This code uses nullable reference in many places due to performance
         // and makes assumptions of when these references are non-null
         // In the code we express those assumptions as assertions
         // instead of Object.requireNonNull because the NPEs raised by actual

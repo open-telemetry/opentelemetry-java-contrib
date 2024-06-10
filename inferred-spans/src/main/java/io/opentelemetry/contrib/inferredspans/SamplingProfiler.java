@@ -454,7 +454,6 @@ class SamplingProfiler implements Runnable {
         asyncProfiler);
   }
 
-  @SuppressWarnings("NullAway")
   private void consumeActivationEventsFromRingBufferAndWriteToFile(Duration profilingDuration)
       throws Exception {
     resetActivationEventBuffer();
@@ -463,6 +462,7 @@ class SamplingProfiler implements Runnable {
     long maxSleep = 10_000_000;
     long sleep = initialSleep;
     while (System.currentTimeMillis() < threshold && !Thread.currentThread().isInterrupted()) {
+      assert activationEventsFileChannel != null;
       if (activationEventsFileChannel.position() < MAX_ACTIVATION_EVENTS_FILE_SIZE) {
         EventPoller.PollState poll = consumeActivationEventsFromRingBufferAndWriteToFile();
         if (poll == EventPoller.PollState.PROCESSING) {
@@ -557,7 +557,7 @@ class SamplingProfiler implements Runnable {
     }
   }
 
-  @SuppressWarnings({"NullAway", "JavaUtilDate"})
+  @SuppressWarnings("JavaUtilDate")
   private void backupDiagnosticFiles(long eof) throws IOException {
     String now = String.format("%tFT%<tT.%<tL", new Date());
     Path profilerDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
@@ -569,6 +569,7 @@ class SamplingProfiler implements Runnable {
             StandardOpenOption.CREATE_NEW,
             StandardOpenOption.WRITE)) {
       if (eof > 0) {
+        assert activationEventsFileChannel != null;
         activationEventsFileChannel.transferTo(0, eof, activationsFile);
       } else {
         int position = activationEventsBuffer.position();
@@ -576,6 +577,7 @@ class SamplingProfiler implements Runnable {
         activationEventsBuffer.position(position);
       }
     }
+    assert jfrFile != null;
     Files.copy(jfrFile.toPath(), profilerDir.resolve(now + "-traces.jfr"));
   }
 
@@ -610,10 +612,10 @@ class SamplingProfiler implements Runnable {
     processActivationEventsUpTo(timestamp, eof, new ActivationEvent());
   }
 
-  @SuppressWarnings("NullAway")
-  public void processActivationEventsUpTo(long timestamp, long eof, ActivationEvent event)
+  private void processActivationEventsUpTo(long timestamp, long eof, ActivationEvent event)
       throws IOException {
     FileChannel activationEventsFileChannel = this.activationEventsFileChannel;
+    assert activationEventsFileChannel != null;
     ByteBuffer buf = activationEventsBuffer;
     long previousTimestamp = 0;
     while (buf.hasRemaining() || activationEventsFileChannel.position() < eof) {
@@ -674,18 +676,18 @@ class SamplingProfiler implements Runnable {
     }
   }
 
-  @SuppressWarnings("NullAway")
   private void flushActivationEvents() throws IOException {
     if (activationEventsBuffer.position() > 0) {
       ((Buffer) activationEventsBuffer).flip();
+      assert activationEventsFileChannel != null;
       activationEventsFileChannel.write(activationEventsBuffer);
       ((Buffer) activationEventsBuffer).clear();
     }
   }
 
-  @SuppressWarnings("NullAway")
   long startProcessingActivationEventsFile() throws IOException {
     Buffer activationEventsBuffer = this.activationEventsBuffer;
+    assert activationEventsFileChannel != null;
     if (activationEventsFileChannel.position() > 0) {
       flushActivationEvents();
       activationEventsBuffer.limit(0);
@@ -697,10 +699,11 @@ class SamplingProfiler implements Runnable {
     return eof;
   }
 
-  @SuppressWarnings("NullAway")
   void copyFromFiles(Path activationEvents, Path traces) throws IOException {
     createFilesIfRequired();
 
+    assert activationEventsFileChannel != null;
+    assert jfrFile != null;
     FileChannel otherActivationsChannel = FileChannel.open(activationEvents, READ);
     activationEventsFileChannel.transferFrom(
         otherActivationsChannel, 0, otherActivationsChannel.size());
@@ -1005,12 +1008,12 @@ class SamplingProfiler implements Runnable {
   // in allocations
   private class WriteActivationEventToFileHandler implements EventPoller.Handler<ActivationEvent> {
     @Override
-    @SuppressWarnings("NullAway")
     public boolean onEvent(ActivationEvent event, long sequence, boolean endOfBatch)
         throws IOException {
       if (endOfBatch) {
         SamplingProfiler.this.sequence.set(sequence);
       }
+      assert activationEventsFileChannel != null;
       if (activationEventsFileChannel.size() < MAX_ACTIVATION_EVENTS_FILE_SIZE) {
         event.serialize(activationEventsBuffer);
         if (!activationEventsBuffer.hasRemaining()) {
