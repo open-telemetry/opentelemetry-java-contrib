@@ -5,7 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
-import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
+import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
+import io.opentelemetry.contrib.inferredspans.internal.SpanAnchoredClock;
 import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
@@ -165,13 +166,13 @@ public class InferredSpansProcessorBuilder {
   }
 
   /** For testing only. */
-  InferredSpansProcessorBuilder clock(SpanAnchoredClock clock) {
+  public InferredSpansProcessorBuilder clock(SpanAnchoredClock clock) {
     this.clock = clock;
     return this;
   }
 
   /** For testing only. */
-  InferredSpansProcessorBuilder startScheduledProfiling(boolean startScheduledProfiling) {
+  public InferredSpansProcessorBuilder startScheduledProfiling(boolean startScheduledProfiling) {
     this.startScheduledProfiling = startScheduledProfiling;
     return this;
   }

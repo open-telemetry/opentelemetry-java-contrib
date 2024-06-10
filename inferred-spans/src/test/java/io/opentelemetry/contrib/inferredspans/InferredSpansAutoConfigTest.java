@@ -13,11 +13,12 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.contrib.inferredspans.config.WildcardMatcher;
-import io.opentelemetry.contrib.inferredspans.util.AutoConfigTestProperties;
-import io.opentelemetry.contrib.inferredspans.util.AutoConfiguredDataCapture;
-import io.opentelemetry.contrib.inferredspans.util.DisabledOnOpenJ9;
-import io.opentelemetry.contrib.inferredspans.util.OtelReflectionUtils;
+import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
+import io.opentelemetry.contrib.inferredspans.internal.ProfilingActivationListener;
+import io.opentelemetry.contrib.inferredspans.internal.util.AutoConfigTestProperties;
+import io.opentelemetry.contrib.inferredspans.internal.util.AutoConfiguredDataCapture;
+import io.opentelemetry.contrib.inferredspans.internal.util.DisabledOnOpenJ9;
+import io.opentelemetry.contrib.inferredspans.internal.util.OtelReflectionUtils;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -68,7 +69,7 @@ public class InferredSpansAutoConfigTest {
                   .findFirst()
                   .get();
 
-      InferredSpansConfiguration config = processor.profiler.config;
+      InferredSpansConfiguration config = processor.profiler.getConfig();
       assertThat(config.isProfilingLoggingEnabled()).isFalse();
       assertThat(config.isBackupDiagnosticFiles()).isTrue();
       assertThat(config.getAsyncProfilerSafeMode()).isEqualTo(16);

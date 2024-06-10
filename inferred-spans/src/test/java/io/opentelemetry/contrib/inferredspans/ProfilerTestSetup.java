@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import io.opentelemetry.contrib.inferredspans.internal.SamplingProfiler;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -15,11 +16,11 @@ import java.util.function.Consumer;
 
 public class ProfilerTestSetup implements AutoCloseable {
 
-  OpenTelemetrySdk sdk;
+  public OpenTelemetrySdk sdk;
 
-  SamplingProfiler profiler;
+  public SamplingProfiler profiler;
 
-  InMemorySpanExporter spanExporter;
+  public InMemorySpanExporter spanExporter;
 
   public ProfilerTestSetup(
       OpenTelemetrySdk sdk, InferredSpansProcessor processor, InMemorySpanExporter spanExporter) {
@@ -38,7 +39,7 @@ public class ProfilerTestSetup implements AutoCloseable {
   }
 
   public static ProfilerTestSetup create(Consumer<InferredSpansProcessorBuilder> configCustomizer) {
-    InferredSpansProcessorBuilder builder = InferredSpansConfiguration.builder();
+    InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
     configCustomizer.accept(builder);
 
     InferredSpansProcessor processor = builder.build();
@@ -55,5 +56,9 @@ public class ProfilerTestSetup implements AutoCloseable {
     OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
 
     return new ProfilerTestSetup(sdk, processor, exporter);
+  }
+
+  public static SamplingProfiler extractProfilerImpl(InferredSpansProcessor processor) {
+    return processor.profiler;
   }
 }
