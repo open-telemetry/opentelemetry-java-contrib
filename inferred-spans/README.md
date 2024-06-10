@@ -1,3 +1,5 @@
+# OpenTelemetry Inferred Spans Extension
+
 OpenTelemetry extension for generating spans via profiling instead of instrumentation.
 This extension enhances traces by running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling mode whenever there is an active sampled OpenTelemetry span.
 
@@ -40,9 +42,6 @@ So if you are using an autoconfigured OpenTelemetry SDK, you'll only need to add
 | otel.inferred.spans.duration <br/> OTEL_INFERRED_SPANS_DURATION                               | `5s`                                                                                                                                                                                                                                                              | The duration of a profiling session. For sampled transactions which fall within a profiling session (they start after and end before the session), so-called inferred spans will be created. They appear in the trace waterfall view like regular spans. <br/> NOTE: It is not recommended to set much higher durations as it may fill the activation events file and async-profiler's frame buffer. Warnings will be logged if the activation events file is full. If you want to have more profiling coverage, try decreasing `profiling_inferred_spans_interval` |
 | otel.inferred.spans.lib.directory <br/> OTEL_INFERRED_SPANS_LIB_DIRECTORY                     | Defaults to the value of `java.io.tmpdir`                                                                                                                                                                                                                         | Profiling requires that the [async-profiler](https://github.com/async-profiler/async-profiler) shared library  is exported to a temporary location and loaded by the JVM. The partition backing this location must be executable, however in some server-hardened environments,  `noexec` may be set on the standard `/tmp` partition, leading to `java.lang.UnsatisfiedLinkError` errors. Set this property to an alternative directory (e.g. `/var/tmp`) to resolve this.                                                                                         |
 
-
-
-
 ### Manual SDK setup
 
 If you manually set-up your `OpenTelemetrySDK`, you need to create and register an `InferredSpansProcessor` with your `TracerProvider`:
@@ -63,7 +62,6 @@ inferredSpans.setTracerProvider(tracerProvider);
 
 The `setTracerProvider(..)` call shown at the end may be omitted, in that case `GlobalOpenTelemetry` will be used for generating the inferred spans.
 
-
 ## Known issues
 
 ### Missing inferred spans
@@ -80,21 +78,27 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
   - Log: `Could not add activation event to ring buffer as no slots are available`
   - Lost activation events can lead to orpaned call trees (lost end event), missing roots (lost start event) and messed up parent/child relationships (lost span activations/deactivations)
     Log:
+
   ```
   DEBUG Illegal state ...
   ```
+
 - Under load, the activation event ring buffer can also get full
 - The actual `otel.inferred.spans.sampling.interval` might be a bit lower. async-profiler aims to keep the interval relatively consistent but if there are too many threads actively running transactions or if there's a traffic spike, the interval can be lower.
 - As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
+
   ```
   DEBUG Created no spans for thread {} (count={})
   ```
+
 - There can be a race condition when putting activation events into the queue which leads to older events being in front of newer ones, like `1, 2, 4, 3, 5`. But this is quite infrequent and the consequences are similar to loosing that activation event or event without any consequence.
   Log:
+
   ```
   Timestamp of current activation event ({}) is lower than the one from the previous event ({})
   ```
+
 ### Incorrect parent/child relationships
 
 #### Without workaround
@@ -106,8 +110,8 @@ Inferred span starts after actual span, even though it should be the parent
 ^         ^         ^
 ```
 
-
 Inferred span ends before actual span, even though it should be the parent
+
 ```
 [inferred   ]------------
              [actual]
@@ -121,6 +125,7 @@ Inferred span ends before actual span, even though it should be the parent
 ```
 
 Two consecutive method invocations are interpreted as one longer execution
+
 ```
 [actual]   [actual]   ->  [--------  --------]
 ^          ^
@@ -136,17 +141,20 @@ This is tricky as regular spans are sent to APM Server right after the event has
 Inferred spans are sent later - after the profiling session ends.
 
 This is how the situation looks like without a workaround:
+
 ```
 [transaction   ]     [transaction   ]
 └─[inferred  ]    -> ├─[inferred  ]
   └─[actual]         └───[actual]
 ```
+
 There are situations where the ordering is off as a result of that.
 
 The workaround is that inferred spans have span-links with a special `is_child` attribute,
 pointing to the regular spans they are the parent of.
 
 ##### Parent inferred span ends before child
+
 Workaround: set end timestamp of inferred span to end timestamp of actual span.
 ```
 [inferred ]--------         [inferred  -----]--
@@ -155,6 +163,7 @@ Workaround: set end timestamp of inferred span to end timestamp of actual span.
 ```
 
 ##### Parent inferred span starts after child
+
 Workaround: set start timestamp of inferred span to start timestamp of actual span.
 ```
   --------[inferred ]          --[------inferred ]
@@ -166,7 +175,6 @@ Workaround: set start timestamp of inferred span to start timestamp of actual sp
 
 In this screenshot, we can see several problems at once
 <img width="1137" alt="inferred spans issues" src="https://user-images.githubusercontent.com/2163464/75677751-710bd880-5c8c-11ea-8bd9-1c6d5f3268d5.png">
-
 
 ## Component owners
 
