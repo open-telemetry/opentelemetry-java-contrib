@@ -69,11 +69,13 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
 - After each profiling session, while the stack traces and activation events are processed, no traces are collected.
   - Under load, processing can take seconds; ~200ms are normal.
   - Log:
+
     ```
     DEBUG Processing {} stack traces
     ...
     DEBUG Processing traces took {}µs
     ```
+
 - While stack traces are processed, activation events are still put into the ring buffer. However, they don't get processed. If, during this period, there are more activation events than the buffer can handle, we're losing activation events.
   - Log: `Could not add activation event to ring buffer as no slots are available`
   - Lost activation events can lead to orpaned call trees (lost end event), missing roots (lost start event) and messed up parent/child relationships (lost span activations/deactivations)
@@ -104,6 +106,7 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
 #### Without workaround
 
 Inferred span starts after actual span, even though it should be the parent
+
 ```
  ---------[inferred ]
  [actual]
@@ -156,6 +159,7 @@ pointing to the regular spans they are the parent of.
 ##### Parent inferred span ends before child
 
 Workaround: set end timestamp of inferred span to end timestamp of actual span.
+
 ```
 [inferred ]--------         [inferred  -----]--
          [actual]       ->           [actual]
@@ -165,6 +169,7 @@ Workaround: set end timestamp of inferred span to end timestamp of actual span.
 ##### Parent inferred span starts after child
 
 Workaround: set start timestamp of inferred span to start timestamp of actual span.
+
 ```
   --------[inferred ]          --[------inferred ]
     [actual ]           ->       [actual ]

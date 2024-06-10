@@ -32,7 +32,7 @@ public class OtelReflectionUtils {
 
   /**
    * The global OpenTelemetry is not properly shutdown between tests by default. This method does
-   * this and resets {@link GlobalOpenTelemetry} to its inital state.
+   * this and resets {@link GlobalOpenTelemetry} to its initial state.
    */
   public static void shutdownAndResetGlobalOtel() {
     OpenTelemetry otel =
