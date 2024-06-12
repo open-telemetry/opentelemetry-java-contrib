@@ -19,7 +19,8 @@ import java.util.function.Predicate;
 public class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
-  /** A {@link Predicate} that returns true for all baggage keys. */
+  /** use {@link #allowAllBaggageKeys()} instead */
+  @Deprecated
   public static final Predicate<String> allowAllBaggageKeys = baggageKey -> true;
 
   /**
@@ -28,6 +29,14 @@ public class BaggageSpanProcessor implements SpanProcessor {
    */
   public BaggageSpanProcessor(Predicate<String> baggageKeyPredicate) {
     this.baggageKeyPredicate = baggageKeyPredicate;
+  }
+
+  /**
+   * Creates a new {@link BaggageSpanProcessor} that copies all baggage entries into the newly
+   * created {@link io.opentelemetry.api.trace.Span}.
+   */
+  public static BaggageSpanProcessor allowAllBaggageKeys() {
+    return new BaggageSpanProcessor(baggageKey -> true);
   }
 
   @Override

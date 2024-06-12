@@ -35,7 +35,7 @@ public class BaggageSpanProcessorCustomizer implements AutoConfigurationCustomiz
 
   static BaggageSpanProcessor createProcessor(List<String> keys) {
     if (keys.size() == 1 && keys.get(0).equals("*")) {
-      return new BaggageSpanProcessor(BaggageSpanProcessor.allowAllBaggageKeys);
+      return BaggageSpanProcessor.allowAllBaggageKeys();
     }
     return new BaggageSpanProcessor(keys::contains);
   }

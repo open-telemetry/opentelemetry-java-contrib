@@ -63,11 +63,9 @@ class BaggageSpanProcessorCustomizerTest {
     await()
         .atMost(Duration.ofSeconds(1))
         .untilAsserted(
-            () -> {
-              TracesAssert.assertThat(spanExporter.getFinishedSpanItems())
-                  .hasTracesSatisfyingExactly(
-                      trace -> trace.hasSpansSatisfyingExactly(spanDataAssertConsumer));
-            });
+            () -> TracesAssert.assertThat(spanExporter.getFinishedSpanItems())
+                .hasTracesSatisfyingExactly(
+                    trace -> trace.hasSpansSatisfyingExactly(spanDataAssertConsumer)));
   }
 
   private static OpenTelemetrySdk getOpenTelemetrySdk(
