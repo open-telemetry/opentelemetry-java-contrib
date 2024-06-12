@@ -21,6 +21,7 @@ components:
     - srprash
   baggage-procesor:
     - mikegoldsmith
+    - zeitlinger
   compressors:
     - jack-berg
   consistent-sampling:
