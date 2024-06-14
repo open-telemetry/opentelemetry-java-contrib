@@ -297,11 +297,21 @@ class AwsXrayPropagatorTest {
   }
 
   @Test
-  void extract_InvalidTraceId_Size() {
+  void extract_InvalidTraceId_Size_TooBig() {
     Map<String, String> invalidHeaders = new LinkedHashMap<>();
     invalidHeaders.put(
         TRACE_HEADER_KEY,
         "Root=1-8a3c60f7-d188f8fa79d48a391a778fa600;Parent=53995c3f42cd8ad8;Sampled=0");
+
+    verifyInvalidBehavior(invalidHeaders);
+  }
+
+  @Test
+  void extract_InvalidTraceId_Size_TooShort() {
+    Map<String, String> invalidHeaders = new LinkedHashMap<>();
+    invalidHeaders.put(
+        TRACE_HEADER_KEY,
+        "Root=1-64fbd5a9-2202432c9dfed25ae1e6996;Parent=53995c3f42cd8ad8;Sampled=0");
 
     verifyInvalidBehavior(invalidHeaders);
   }
