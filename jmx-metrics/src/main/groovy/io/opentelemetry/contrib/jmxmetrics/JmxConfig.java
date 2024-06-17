@@ -33,7 +33,7 @@ class JmxConfig {
   static final String JMX_REALM = PREFIX + "jmx.realm";
 
   // These properties need to be copied into System Properties if provided via the property
-  // file so they are available to the JMX Connection builder
+  // file so that they are available to the JMX Connection builder
   static final List<String> JAVA_SYSTEM_PROPERTIES =
       Arrays.asList(
           "javax.net.ssl.keyStore",
@@ -173,11 +173,6 @@ class JmxConfig {
     if (isBlank(groovyScript) && isBlank(targetSystem)) {
       throw new ConfigurationException(
           GROOVY_SCRIPT + " or " + TARGET_SYSTEM + " must be specified.");
-    }
-
-    if (!isBlank(groovyScript) && !isBlank(targetSystem)) {
-      throw new ConfigurationException(
-          "Only one of " + GROOVY_SCRIPT + " or " + TARGET_SYSTEM + " can be specified.");
     }
 
     if (targetSystems.size() != 0 && !AVAILABLE_TARGET_SYSTEMS.containsAll(targetSystems)) {

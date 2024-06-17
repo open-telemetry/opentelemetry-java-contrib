@@ -48,7 +48,8 @@ public class GroovyRunner {
           String systemResourcePath = "target-systems/" + target + ".groovy";
           scriptSources.add(getTargetSystemResourceAsString(systemResourcePath));
         }
-      } else {
+      }
+      if (config.groovyScript != null && !config.groovyScript.isEmpty()) {
         scriptSources.add(getFileAsString(config.groovyScript));
       }
     } catch (IOException e) {
