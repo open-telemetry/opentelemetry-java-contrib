@@ -11,8 +11,7 @@ import org.jctools.queues.MpmcArrayQueue;
  * Object pool
  *
  * @param <T> pooled object type. Does not have to implement {@link Recyclable} in order to allow
- *     for dealing with objects that are outside of elastic apm agent (like standard JDK or third
- *     party library classes).
+ *     for dealing with external objects (like standard JDK or third party library classes).
  */
 public interface ObjectPool<T> {
 

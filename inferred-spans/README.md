@@ -53,8 +53,7 @@ InferredSpansProcessor inferredSpans = InferredSpansProcessor.builder()
 SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
   .addSpanProcessor(inferredSpans)
   .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder()
-    .setEndpoint("https://<clusterid>.apm.europe-west3.gcp.cloud.es.io:443")
-    .addHeader("Authorization", "Bearer <secrettoken>>")
+    .setEndpoint("http://localhost:4317")
     .build()))
   .build();
 inferredSpans.setTracerProvider(tracerProvider);
@@ -140,7 +139,7 @@ These are some tricky situations we have managed to find a workaround for.
 
 ##### Regular spans as a child of an inferred span
 
-This is tricky as regular spans are sent to APM Server right after the event has ended.
+This is tricky as regular spans are exported right after the event has ended.
 Inferred spans are sent later - after the profiling session ends.
 
 This is how the situation looks like without a workaround:

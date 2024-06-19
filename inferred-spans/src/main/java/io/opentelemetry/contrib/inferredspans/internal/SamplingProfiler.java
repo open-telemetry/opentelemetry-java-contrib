@@ -60,10 +60,10 @@ import org.agrona.collections.Long2ObjectHashMap;
  *
  * <p>The {@link #onActivation} and {@link #onDeactivation} methods are called by {@link
  * ProfilingActivationListener} which register an {@link ActivationEvent} to a {@linkplain
- * #eventBuffer ring buffer} whenever a {@link Span} gets {@link Span#activate()}d or {@link
- * Span#deactivate()}d while a {@linkplain #profilingSessionOngoing profiling session is ongoing}. A
- * background thread consumes the {@link ActivationEvent}s and writes them to a {@linkplain
- * #activationEventsBuffer direct buffer} which is flushed to a {@linkplain
+ * #eventBuffer ring buffer} whenever the active {@link Span} in the {@link
+ * io.opentelemetry.context.Context} changes while a {@linkplain #profilingSessionOngoing profiling
+ * session is ongoing}. A background thread consumes the {@link ActivationEvent}s and writes them to
+ * a {@linkplain #activationEventsBuffer direct buffer} which is flushed to a {@linkplain
  * #activationEventsFileChannel file}. That is necessary because within a profiling session (which
  * lasts 10s by default) there may be many more {@link ActivationEvent}s than the ring buffer {@link
  * #RING_BUFFER_SIZE can hold}. The file can hold {@link #ACTIVATION_EVENTS_IN_FILE} events and each
@@ -82,12 +82,12 @@ import org.agrona.collections.Long2ObjectHashMap;
  * <p>After both the JFR file and the file containing the {@link ActivationEvent}s have been
  * written, it's now time to process them in tandem by correlating based on thread ids and
  * timestamps. The result of this correlation, performed by {@link #processTraces}, are {@link
- * CallTree}s which are created for each thread which has seen an {@linkplain Span#activate()
- * activation} and at least one stack trace. Once {@linkplain
- * ActivationEvent#handleDeactivationEvent(SamplingProfiler) handling the deactivation event} of the
- * root span in a thread (after which {@link ElasticApmTracer#getActive()} would return {@code
- * null}), the {@link CallTree} is {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext,
- * SpanAnchoredClock, StringBuilder, Tracer)} converted into regular spans}.
+ * CallTree}s which are created for each thread which has seen an active {@link Span} and at least
+ * one stack trace. Once {@linkplain ActivationEvent#handleDeactivationEvent(SamplingProfiler)
+ * handling the deactivation event} of the root span in a thread (after which the current {@link
+ * io.opentelemetry.context.Context} would not contain a span anymore), the {@link CallTree} is
+ * {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext, SpanAnchoredClock, StringBuilder,
+ * Tracer)} converted into regular spans}.
  *
  * <p>Overall, the allocation rate does not depend on the number of {@link ActivationEvent}s but
  * only on {@link InferredSpansConfiguration#getProfilingInterval()} and {@link
@@ -249,12 +249,12 @@ public class SamplingProfiler implements Runnable {
 
   private synchronized void createFilesIfRequired() throws IOException {
     if (jfrFile == null || !jfrFile.exists()) {
-      jfrFile = File.createTempFile("apm-traces-", ".jfr");
+      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr");
       jfrFile.deleteOnExit();
       canDeleteJfrFile = true;
     }
     if (activationEventsFile == null || !activationEventsFile.exists()) {
-      activationEventsFile = File.createTempFile("apm-activation-events-", ".bin");
+      activationEventsFile = File.createTempFile("otel-inferred-activation-events-", ".bin");
       activationEventsFile.deleteOnExit();
       canDeleteActivationEventsFile = true;
     }

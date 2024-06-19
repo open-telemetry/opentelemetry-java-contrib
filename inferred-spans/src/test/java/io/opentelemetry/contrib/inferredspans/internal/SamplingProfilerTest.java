@@ -98,7 +98,7 @@ class SamplingProfilerTest {
     Path tempFolder = Paths.get(System.getProperty("java.io.tmpdir"));
     try (Stream<Path> files = Files.list(tempFolder)) {
       return files
-          .filter(f -> f.getFileName().toString().startsWith("apm-"))
+          .filter(f -> f.getFileName().toString().startsWith("otel-inferred-"))
           .sorted()
           .collect(Collectors.toList());
     } catch (IOException e) {
@@ -117,8 +117,8 @@ class SamplingProfilerTest {
       defaultConfig = ProfilerTestSetup.extractProfilerImpl(profiler1).getConfig();
     }
 
-    Path tempFile1 = Files.createTempFile("apm-provided", "test.bin");
-    Path tempFile2 = Files.createTempFile("apm-provided", "test.jfr");
+    Path tempFile1 = Files.createTempFile("otel-inferred-provided", "test.bin");
+    Path tempFile2 = Files.createTempFile("otel-inferred-provided", "test.jfr");
 
     try (OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().build()) {
 
