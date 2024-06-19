@@ -567,6 +567,8 @@ public class SamplingProfiler implements Runnable {
     Path profilerDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
     profilerDir.toFile().mkdir();
 
+    logger.log(Level.FINE, "Backing up profiler diagnostic files to {0}", profilerDir);
+
     try (FileChannel activationsFile =
         FileChannel.open(
             profilerDir.resolve(now + "-activations.dat"),

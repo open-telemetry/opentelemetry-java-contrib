@@ -166,7 +166,12 @@ class SamplingProfilerTest {
 
   @Test
   void testProfileTransaction() throws Exception {
-    setupProfiler(true);
+    setupProfiler(
+        config -> config.startScheduledProfiling(true)
+        // uncomment the following line to enable the backup of the JFR file
+        // The JFR file can be used as input for the JfrParserTest
+        // .backupDiagnosticFiles(true)
+        );
     awaitProfilerStarted(setup.profiler);
 
     Tracer tracer = setup.sdk.getTracer("manual-spans");
