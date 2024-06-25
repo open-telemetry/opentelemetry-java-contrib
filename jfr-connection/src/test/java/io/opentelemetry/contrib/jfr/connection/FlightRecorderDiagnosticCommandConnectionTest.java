@@ -7,19 +7,14 @@ package io.opentelemetry.contrib.jfr.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class FlightRecorderDiagnosticCommandConnectionTest {
 
@@ -74,32 +69,6 @@ class FlightRecorderDiagnosticCommandConnectionTest {
         connection.startRecording(
             new RecordingOptions.Builder().build(), RecordingConfiguration.PROFILE_CONFIGURATION);
     assertEquals(id, 99);
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"5 s", "5m"})
-  void assertCanStartRecordingWithDuration(String duration) {
-    // Issue #1338
-
-    MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
-    RecordingOptions recordingOptions = new RecordingOptions.Builder().duration(duration).build();
-    RecordingConfiguration recordingConfiguration = RecordingConfiguration.PROFILE_CONFIGURATION;
-
-    try {
-      FlightRecorderConnection connection =
-          FlightRecorderDiagnosticCommandConnection.connect(mBeanServer);
-
-      try (Recording recording =
-          connection.newRecording(recordingOptions, recordingConfiguration)) {
-        recording.start();
-        recording.stop();
-      } catch (IOException e) {
-        // Recording is autoclose
-      }
-
-    } catch (IOException | JfrConnectionException e) {
-      fail(e);
-    }
   }
 
   MBeanServerConnection mockMbeanServer(

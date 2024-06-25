@@ -48,6 +48,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
@@ -510,6 +511,45 @@ class RecordingTest {
       fail("IOException not expected: ", ioe);
     } catch (JfrConnectionException badBean) {
       fail("Error thrown by MBean server or FlightRecorderMXBean: ", badBean);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"5 s", "5m"})
+  void assertDiagnosticCommandCanRecordWithDuration(String duration) {
+    // Issue #1338
+    MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    try {
+      FlightRecorderConnection connection =
+          FlightRecorderDiagnosticCommandConnection.connect(mBeanServer);
+      assertCanRecord(connection, duration);
+    } catch (IOException | JfrConnectionException e) {
+      fail(e);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"5 s", "5m"})
+  void assertMbeanCanRecordWithDuration(String duration) {
+    // Ensure fix for issue #1338 doesn't regress MBean recording
+    MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    try {
+      FlightRecorderConnection connection = FlightRecorderConnection.connect(mBeanServer);
+      assertCanRecord(connection, duration);
+    } catch (IOException | JfrConnectionException e) {
+      fail(e);
+    }
+  }
+
+  private static void assertCanRecord(FlightRecorderConnection connection, String duration)
+      throws JfrConnectionException {
+    RecordingOptions recordingOptions = new RecordingOptions.Builder().duration(duration).build();
+    RecordingConfiguration recordingConfiguration = RecordingConfiguration.PROFILE_CONFIGURATION;
+    try (Recording recording = connection.newRecording(recordingOptions, recordingConfiguration)) {
+      recording.start();
+      recording.stop();
+    } catch (IOException e) {
+      // Recording is autoclose
     }
   }
 }
