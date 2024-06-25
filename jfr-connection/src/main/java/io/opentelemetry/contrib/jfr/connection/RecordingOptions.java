@@ -207,7 +207,7 @@ public class RecordingOptions {
      *   <li>"d" (days)
      * </ul>
      *
-     * For example, {@code "2 h"}, {@code "3 m"}.
+     * For example, {@code "2h"}, {@code "3m"}.
      *
      * <p>If the value is {@code null}, {@code duration} will be set to the default value, which is
      * "no limit".
@@ -388,7 +388,7 @@ public class RecordingOptions {
           case "m":
           case "h":
           case "d":
-            return Long.toString(value) + " " + units;
+            return Long.toString(value) + units;
           default:
             // fall through
         }

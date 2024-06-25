@@ -46,15 +46,15 @@ class RecordingOptionsTest {
   @Keep
   static Stream<Arguments> testGetMaxAge() {
     return Stream.of(
-        Arguments.of("3 ns", "3 ns"),
-        Arguments.of("3 us", "3 us"),
-        Arguments.of("3 ms", "3 ms"),
-        Arguments.of("3 s", "3 s"),
-        Arguments.of("3 m", "3 m"),
-        Arguments.of("3 h", "3 h"),
-        Arguments.of("3 h", "3 h"),
-        Arguments.of("+3 d", "3 d"),
-        Arguments.of("3ms", "3 ms"),
+        Arguments.of("3 ns", "3ns"),
+        Arguments.of("3 us", "3us"),
+        Arguments.of("3 ms", "3ms"),
+        Arguments.of("3 s", "3s"),
+        Arguments.of("3 m", "3m"),
+        Arguments.of("3 h", "3h"),
+        Arguments.of("3 h", "3h"),
+        Arguments.of("+3 d", "3d"),
+        Arguments.of("3ms", "3ms"),
         Arguments.of("0", "0"),
         Arguments.of("", "0"),
         Arguments.of((String) null, "0"));
@@ -209,15 +209,15 @@ class RecordingOptionsTest {
   @Keep
   private static Stream<Arguments> testGetDuration() {
     return Stream.of(
-        Arguments.of("3 ns", "3 ns"),
-        Arguments.of("3 us", "3 us"),
-        Arguments.of("3 ms", "3 ms"),
-        Arguments.of("3 s", "3 s"),
-        Arguments.of("3 m", "3 m"),
-        Arguments.of("3 h", "3 h"),
-        Arguments.of("3 h", "3 h"),
-        Arguments.of("+3 d", "3 d"),
-        Arguments.of("3ms", "3 ms"),
+        Arguments.of("3 ns", "3ns"),
+        Arguments.of("3 us", "3us"),
+        Arguments.of("3 ms", "3ms"),
+        Arguments.of("3 s", "3s"),
+        Arguments.of("3 m", "3m"),
+        Arguments.of("3 h", "3h"),
+        Arguments.of("3 h", "3h"),
+        Arguments.of("+3 d", "3d"),
+        Arguments.of("3ms", "3ms"),
         Arguments.of("0", "0"),
         Arguments.of("", "0"),
         Arguments.of(null, "0"));
@@ -263,12 +263,12 @@ class RecordingOptionsTest {
   void testGetRecordingOptions() {
     Map<String, String> expected = new HashMap<>();
     expected.put("name", "test");
-    expected.put("maxAge", "3 m");
+    expected.put("maxAge", "3m");
     expected.put("maxSize", "1048576");
     expected.put("dumpOnExit", "true");
     expected.put("destination", "test.jfr");
     expected.put("disk", "true");
-    expected.put("duration", "120 s");
+    expected.put("duration", "120s");
     RecordingOptions opts =
         new RecordingOptions.Builder()
             .name("test")

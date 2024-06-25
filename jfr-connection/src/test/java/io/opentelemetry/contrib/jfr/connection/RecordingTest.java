@@ -329,6 +329,13 @@ class RecordingTest {
                 String getter =
                     "get" + key.substring(0, 1).toUpperCase(Locale.ROOT) + key.substring(1);
                 String expected = (String) compositeData.get("value");
+
+                // Special case for duration values. The FlightRecorderMXBean wants "<number><unit>"
+                // but returns "<number> <unit>", so we need to normalize the expected value.
+                if (expected != null && expected.matches("([-+]?\\d+)\\s*(\\w*)")) {
+                  expected = expected.replaceAll("\\s", "");
+                }
+
                 try {
                   Method method = RecordingOptions.class.getMethod(getter);
                   String actual = (String) method.invoke(recordingOptions);

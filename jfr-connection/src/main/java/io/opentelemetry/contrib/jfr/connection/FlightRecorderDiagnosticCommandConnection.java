@@ -33,7 +33,7 @@ import javax.management.ReflectionException;
 final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderConnection {
   private static final String DIAGNOSTIC_COMMAND_OBJECT_NAME =
       "com.sun.management:type=DiagnosticCommand";
-  private static final String JFR_START_REGEX = "Started recording (.+?)\\. .*";
+  private static final String JFR_START_REGEX = "Started recording (\\d+?)\\.";
   private static final Pattern JFR_START_PATTERN = Pattern.compile(JFR_START_REGEX, Pattern.DOTALL);
 
   // All JFR commands take String[] parameters
@@ -56,7 +56,11 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
       ObjectInstance objectInstance =
           mBeanServerConnection.getObjectInstance(new ObjectName(DIAGNOSTIC_COMMAND_OBJECT_NAME));
       ObjectName objectName = objectInstance.getObjectName();
-      assertCommercialFeaturesUnlocked(mBeanServerConnection, objectName);
+
+      if (jdkHasUnlockCommercialFeatures()) {
+        assertCommercialFeaturesUnlocked(mBeanServerConnection, objectName);
+      }
+
       return new FlightRecorderDiagnosticCommandConnection(
           mBeanServerConnection, objectInstance.getObjectName());
     } catch (MalformedObjectNameException e) {
@@ -179,7 +183,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   @Override
   public void dumpRecording(long id, String outputFile) throws IOException, JfrConnectionException {
     try {
-      Object[] params = mkParams("filename=" + outputFile, "recording=" + id, "compress=true");
+      Object[] params = mkParams("filename=" + outputFile, "name=" + id);
       mBeanServerConnection.invoke(objectName, "jfrDump", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "dumpRecording", e);
@@ -210,26 +214,34 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     throw new UnsupportedOperationException("closeRecording not supported on Java 8");
   }
 
+  // Do this check separate from assertCommercialFeatures because reliance
+  // on System properties makes it difficult to test.
+  private static boolean jdkHasUnlockCommercialFeatures() {
+    String javaVmVendor = System.getProperty("java.vm.vendor");
+    String javaVersion = System.getProperty("java.version");
+    return javaVmVendor.contains("Oracle Corporation") && javaVersion.matches("(?:^1\\.8|9|10).*");
+  }
+
   // visible for testing
   static void assertCommercialFeaturesUnlocked(
       MBeanServerConnection mBeanServerConnection, ObjectName objectName)
       throws IOException, JfrConnectionException {
+
     try {
       Object unlockedMessage =
           mBeanServerConnection.invoke(objectName, "vmCheckCommercialFeatures", null, null);
       if (unlockedMessage instanceof String) {
         boolean unlocked = ((String) unlockedMessage).contains("unlocked");
         if (!unlocked) {
-          throw new UnsupportedOperationException(
-              "Unlocking commercial features may be required. This must be explicitly enabled by adding -XX:+UnlockCommercialFeatures");
+          throw JfrConnectionException.canonicalJfrConnectionException(
+              FlightRecorderDiagnosticCommandConnection.class,
+              "assertCommercialFeaturesUnlocked",
+              new UnsupportedOperationException(
+                  "Unlocking commercial features may be required. This must be explicitly enabled by adding -XX:+UnlockCommercialFeatures"));
         }
       }
-    } catch (InstanceNotFoundException
-        | MBeanException
-        | ReflectionException
-        | UnsupportedOperationException e) {
-      throw JfrConnectionException.canonicalJfrConnectionException(
-          FlightRecorderDiagnosticCommandConnection.class, "assertCommercialFeaturesUnlocked", e);
+    } catch (InstanceNotFoundException | MBeanException | ReflectionException ignored) {
+      // If the MBean doesn't have the vmCheckCommercialFeatures method, then we can't check it.
     }
   }
 
