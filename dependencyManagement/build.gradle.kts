@@ -58,7 +58,7 @@ val DEPENDENCIES = listOf(
   "org.awaitility:awaitility:4.2.1",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.9.1",
-  "org.skyscreamer:jsonassert:1.5.1",
+  "org.skyscreamer:jsonassert:1.5.3",
   "org.apache.kafka:kafka-clients:3.7.0",
   "org.testcontainers:kafka:1.19.8"
 )
