@@ -57,7 +57,7 @@ class RecordingOptionsTest {
         Arguments.of("3ms", "3ms"),
         Arguments.of("0", "0"),
         Arguments.of("", "0"),
-        Arguments.of((String) null, "0"));
+        Arguments.of(null, "0"));
   }
 
   @ParameterizedTest
