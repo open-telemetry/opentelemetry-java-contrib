@@ -1,5 +1,5 @@
 {
-  "Cluster": "default",
+  "Cluster": "arn:aws:ecs:us-west-2:111122223333:cluster/default",
   "TaskARN": "arn:aws:ecs:us-west-2:111122223333:task/default/158d1c8083dd49d6b527399fd6414f5c",
   "Family": "curltest",
   "Revision": "26",

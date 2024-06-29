@@ -62,6 +62,8 @@ class IncubatingAttributes {
   public static final AttributeKey<String> K8S_CLUSTER_NAME =
       AttributeKey.stringKey("k8s.cluster.name");
 
+  public static final AttributeKey<String> AWS_ECS_CLUSTER_ARN =
+      AttributeKey.stringKey("aws.ecs.cluster.arn");
   public static final AttributeKey<String> AWS_ECS_CONTAINER_ARN =
       AttributeKey.stringKey("aws.ecs.container.arn");
   public static final AttributeKey<String> AWS_ECS_LAUNCHTYPE =

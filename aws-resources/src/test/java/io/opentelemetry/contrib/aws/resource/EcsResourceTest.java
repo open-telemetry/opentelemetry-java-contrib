@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CLUSTER_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ARN;
@@ -78,6 +79,7 @@ class EcsResourceTest {
             entry(CONTAINER_ID, "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946"),
             entry(CONTAINER_IMAGE_NAME, "nrdlngr/nginx-curl"),
             entry(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
+            entry(AWS_ECS_CLUSTER_ARN, "arn:aws:ecs:us-east-2:012345678910:cluster/default"),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
                 "sha256:2e00ae64383cfc865ba0a2ba37f61b50a120d2d9378559dcd458dc0de47bc165"),
@@ -121,6 +123,7 @@ class EcsResourceTest {
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
                 "sha256:d691691e9652791a60114e67b365688d20d19940dde7c4736ea30e660d8d3553"),
+            entry(AWS_ECS_CLUSTER_ARN, "arn:aws:ecs:us-west-2:111122223333:cluster/default"),
             entry(
                 AWS_ECS_CONTAINER_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
