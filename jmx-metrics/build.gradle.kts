@@ -21,7 +21,7 @@ repositories {
   }
 }
 
-val groovyVersion = "3.0.21"
+val groovyVersion = "3.0.22"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
