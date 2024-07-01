@@ -9,4 +9,5 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jfr.connection")
 dependencies {
   testImplementation("org.openjdk.jmc:common:8.3.1")
   testImplementation("org.openjdk.jmc:flightrecorder:8.3.1")
+  testImplementation("org.mockito:mockito-inline")
 }
