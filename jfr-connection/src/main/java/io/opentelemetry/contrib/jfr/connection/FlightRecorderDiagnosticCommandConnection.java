@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.jfr.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +59,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
           mBeanServerConnection.getObjectInstance(new ObjectName(DIAGNOSTIC_COMMAND_OBJECT_NAME));
       ObjectName objectName = objectInstance.getObjectName();
 
-      if (jdkHasUnlockCommercialFeatures()) {
+      if (jdkHasUnlockCommercialFeatures(mBeanServerConnection)) {
         assertCommercialFeaturesUnlocked(mBeanServerConnection, objectName);
       }
 
@@ -216,10 +218,17 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
 
   // Do this check separate from assertCommercialFeatures because reliance
   // on System properties makes it difficult to test.
-  private static boolean jdkHasUnlockCommercialFeatures() {
-    String javaVmVendor = System.getProperty("java.vm.vendor");
-    String javaVersion = System.getProperty("java.version");
-    return javaVmVendor.contains("Oracle Corporation") && javaVersion.matches("(?:^1\\.8|9|10).*");
+  static boolean jdkHasUnlockCommercialFeatures(MBeanServerConnection mBeanServerConnection) {
+    try {
+      RuntimeMXBean runtimeMxBean =
+          ManagementFactory.getPlatformMXBean(mBeanServerConnection, RuntimeMXBean.class);
+      String javaVmVendor = runtimeMxBean.getVmVendor();
+      String javaVersion = runtimeMxBean.getVmVersion();
+      return javaVmVendor.contains("Oracle Corporation")
+          && javaVersion.matches("(?:^1\\.8|9|10).*");
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   // visible for testing

@@ -388,7 +388,7 @@ public class RecordingOptions {
           case "m":
           case "h":
           case "d":
-            return Long.toString(value) + units;
+            return value + units;
           default:
             // fall through
         }
