@@ -540,8 +540,7 @@ class InstrumenterHelperTest {
 
     @SuppressWarnings("unchecked")
     private Consumer<DoublePointAssert>[] assertDoublePoint() {
-      return Stream.<Consumer<DoublePointAssert>>of(
-              point -> point.hasValue(123.456 * 4))
+      return Stream.<Consumer<DoublePointAssert>>of(point -> point.hasValue(123.456 * 4))
           .toArray(Consumer[]::new);
     }
 
