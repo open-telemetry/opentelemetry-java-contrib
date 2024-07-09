@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_CLUSTER_ARN;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_CONTAINER_ARN;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_LAUNCHTYPE;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_ARN;
@@ -163,6 +164,8 @@ public final class EcsResource {
     // account id and region tokens we need later for the cloud.account.id
     // and cloud.region attributes.
     String arn = null;
+    // Cluster can either be ARN or short name.
+    String cluster = null;
 
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
@@ -175,6 +178,9 @@ public final class EcsResource {
           break;
         case "DockerName":
           attrBuilders.put(CONTAINER_NAME, value);
+          break;
+        case "Cluster":
+          cluster = value;
           break;
         case "ContainerARN":
           arn = value;
@@ -229,8 +235,22 @@ public final class EcsResource {
       }
     }
 
-    getRegion(arn).ifPresent(region -> attrBuilders.put(CLOUD_REGION, region));
-    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(CLOUD_ACCOUNT_ID, accountId));
+    String region = getRegion(arn).orElse(null);
+    String account = getAccountId(arn).orElse(null);
+    if (region != null) {
+      attrBuilders.put(CLOUD_REGION, region);
+    }
+    if (account != null) {
+      attrBuilders.put(CLOUD_ACCOUNT_ID, account);
+    }
+    if (cluster != null) {
+      if (cluster.contains(":")) {
+        attrBuilders.put(AWS_ECS_CLUSTER_ARN, cluster);
+      } else {
+        String clusterArn = String.format("arn:aws:ecs:%s:%s:cluster/%s", region, account, cluster);
+        attrBuilders.put(AWS_ECS_CLUSTER_ARN, clusterArn);
+      }
+    }
   }
 
   private EcsResource() {}
