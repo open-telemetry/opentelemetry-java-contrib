@@ -5,26 +5,27 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ARN;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_FAMILY;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_REVISION;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_ARNS;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_NAMES;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_STREAM_ARNS;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_STREAM_NAMES;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.AWS_ECS;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.AWS;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_NAME;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_NAME;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_CLUSTER_ARN;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_CONTAINER_ARN;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_LAUNCHTYPE;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_ARN;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_FAMILY;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_REVISION;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_GROUP_ARNS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_GROUP_NAMES;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_STREAM_ARNS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_STREAM_NAMES;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_ACCOUNT_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_IMAGE_NAME;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_NAME;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_ECS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderValues.AWS;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -163,6 +164,8 @@ public final class EcsResource {
     // account id and region tokens we need later for the cloud.account.id
     // and cloud.region attributes.
     String arn = null;
+    // Cluster can either be ARN or short name.
+    String cluster = null;
 
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       String value = parser.nextTextValue();
@@ -175,6 +178,9 @@ public final class EcsResource {
           break;
         case "DockerName":
           attrBuilders.put(CONTAINER_NAME, value);
+          break;
+        case "Cluster":
+          cluster = value;
           break;
         case "ContainerARN":
           arn = value;
@@ -229,8 +235,22 @@ public final class EcsResource {
       }
     }
 
-    getRegion(arn).ifPresent(region -> attrBuilders.put(CLOUD_REGION, region));
-    getAccountId(arn).ifPresent(accountId -> attrBuilders.put(CLOUD_ACCOUNT_ID, accountId));
+    String region = getRegion(arn).orElse(null);
+    String account = getAccountId(arn).orElse(null);
+    if (region != null) {
+      attrBuilders.put(CLOUD_REGION, region);
+    }
+    if (account != null) {
+      attrBuilders.put(CLOUD_ACCOUNT_ID, account);
+    }
+    if (cluster != null) {
+      if (cluster.contains(":")) {
+        attrBuilders.put(AWS_ECS_CLUSTER_ARN, cluster);
+      } else {
+        String clusterArn = String.format("arn:aws:ecs:%s:%s:cluster/%s", region, account, cluster);
+        attrBuilders.put(AWS_ECS_CLUSTER_ARN, clusterArn);
+      }
+    }
   }
 
   private EcsResource() {}

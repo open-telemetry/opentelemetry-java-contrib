@@ -171,16 +171,16 @@ class JmxConfigTest {
   }
 
   @Test
-  @SetSystemProperty(key = "otel.jmx.service.url", value = "requiredValue")
+  @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
   @SetSystemProperty(key = "otel.jmx.groovy.script", value = "myGroovyScript")
   @SetSystemProperty(key = "otel.jmx.target.system", value = "myTargetSystem")
-  void conflictingScriptAndTargetSystem() {
+  void canSupportScriptAndTargetSystem() {
     JmxConfig config = new JmxConfig();
 
-    assertThatThrownBy(config::validate)
-        .isInstanceOf(ConfigurationException.class)
-        .hasMessage(
-            "Only one of otel.jmx.groovy.script or otel.jmx.target.system can be specified.");
+    assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
+    assertThat(config.groovyScript).isEqualTo("myGroovyScript");
+    assertThat(config.targetSystem).isEqualTo("mytargetsystem");
+    assertThat(config.targetSystems).containsOnly("mytargetsystem");
   }
 
   @Test

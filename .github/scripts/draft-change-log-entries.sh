@@ -27,6 +27,7 @@ declare -A component_names=()
 component_names["aws-resources/"]="AWS resources"
 component_names["aws-xray/"]="AWS X-Ray SDK support"
 component_names["aws-xray-propagator/"]="AWS X-Ray propagator"
+component_names["baggage-processor/"]="Baggage processor"
 component_names["compressors/"]="Compressors"
 component_names["consistent-sampling/"]="Consistent sampling"
 component_names["disk-buffering/"]="Disk buffering"

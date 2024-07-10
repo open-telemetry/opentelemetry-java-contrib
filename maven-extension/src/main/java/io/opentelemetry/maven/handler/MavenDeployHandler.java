@@ -11,13 +11,11 @@ import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.semconv.HttpAttributes;
 import io.opentelemetry.semconv.UrlAttributes;
-import io.opentelemetry.semconv.incubating.PeerIncubatingAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
@@ -36,7 +34,9 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
     spanBuilder.setSpanKind(SpanKind.CLIENT);
 
     MavenProject project = execution.getProject();
-    ArtifactRepository optRepository = project.getDistributionManagementArtifactRepository();
+    @SuppressWarnings("deprecation") // there is no alternative to o.a.m.a.r.ArtifactRepository
+    org.apache.maven.artifact.repository.ArtifactRepository optRepository =
+        project.getDistributionManagementArtifactRepository();
 
     if (optRepository == null) {
       return;
@@ -55,7 +55,7 @@ final class MavenDeployHandler implements MojoGoalExecutionHandler {
         // may not fully comply with the OTel "peer.service" spec as we don't know if the remote
         // service will be instrumented and what it "service.name" would be
         spanBuilder.setAttribute(
-            PeerIncubatingAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
+            MavenOtelSemanticAttributes.PEER_SERVICE, new URL(artifactRepositoryUrl).getHost());
       } catch (MalformedURLException e) {
         logger.debug("Ignore exception parsing artifact repository URL", e);
       }

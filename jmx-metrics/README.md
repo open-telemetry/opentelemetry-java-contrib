@@ -1,14 +1,14 @@
 # JMX Metric Gatherer
 
 This utility provides an easy framework for gathering and reporting metrics based on queried
-MBeans from a JMX server.  It loads an included or custom Groovy script and establishes a helpful,
+MBeans from a JMX server.  It loads included and/or custom Groovy scripts and establishes a helpful,
 bound `otel` object with methods for obtaining MBeans and constructing OpenTelemetry instruments:
 
 ## Usage
 
 The JMX Metric Gatherer is intended to be run as an uber jar and configured with properties from the command line,
 properties file, and stdin (`-`).  Its metric-gathering scripts are specified by supported `otel.jmx.target.system`
-values or a `otel.jmx.groovy.script` path to run your own.
+values and/or a `otel.jmx.groovy.script` path to run your own.
 
 ```bash
 java -D<otel.jmx.property=value> -jar opentelemetry-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
@@ -29,9 +29,11 @@ otel.exporter.otlp.endpoint = http://my-opentelemetry-collector:4317
 
 As configured in this example, the metric gatherer will establish an MBean server connection using the
 specified `otel.jmx.service.url` (required) and credentials and configure an OTLP gRPC metrics exporter reporting to
-`otel.exporter.otlp.endpoint`. If SSL is enabled on the RMI registry for your server, the `otel.jmx.remote.registry.ssl` property must be set to `true`. After loading the included JVM and Kafka metric-gathering scripts determined by
-the comma-separated list in `otel.jmx.target.system`, it will then run the scripts on the desired interval
-length of `otel.jmx.interval.milliseconds` and export the resulting metrics.
+`otel.exporter.otlp.endpoint`. If SSL is enabled on the RMI registry for your server, the
+`otel.jmx.remote.registry.ssl` property must be set to `true`. After loading the included JVM and
+Kafka metric-gathering scripts determined by the comma-separated list in `otel.jmx.target.system`,
+it will then run the scripts on the desired interval length of `otel.jmx.interval.milliseconds` and
+export the resulting metrics.
 
 For custom metrics and unsupported targets, you can provide your own MBean querying scripts to produce
 OpenTelemetry instruments:
@@ -63,8 +65,8 @@ attribute as queried in each interval.
 ## Target Systems
 
 The JMX Metric Gatherer provides built in metric producing Groovy scripts for supported target systems
-capable of being specified via the `otel.jmx.target.system` property as a comma-separated list.  This property is
-mutually exclusive with `otel.jmx.groovy.script`. The currently supported target systems are:
+capable of being specified via the `otel.jmx.target.system` property as a comma-separated list. The
+currently supported target systems are:
 
 | `otel.jmx.target.system` |
 |--------------------------|
