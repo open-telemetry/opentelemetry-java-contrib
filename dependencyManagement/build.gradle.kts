@@ -62,7 +62,7 @@ val DEPENDENCIES = listOf(
   "org.apache.kafka:kafka-clients:3.7.1",
   "org.testcontainers:kafka:1.19.8",
   "com.lmax:disruptor:3.4.4",
-  "org.jctools:jctools-core:4.0.3",
+  "org.jctools:jctools-core:4.0.5",
   "tools.profiler:async-profiler:3.0",
   "com.blogspot.mydailyjava:weak-lock-free:0.18",
   "org.agrona:agrona:1.21.2"
