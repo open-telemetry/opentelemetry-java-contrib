@@ -143,7 +143,8 @@ class SamplingProfilerTest {
   void testStartCommand() {
     setupProfiler(false);
     assertThat(setup.profiler.createStartCommand())
-        .isEqualTo("start,jfr,clock=m,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
+        .isEqualTo(
+            "start,jfr,clock=m,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
 
     setup.close();
     setupProfiler(config -> config.startScheduledProfiling(false).profilerLoggingEnabled(false));
