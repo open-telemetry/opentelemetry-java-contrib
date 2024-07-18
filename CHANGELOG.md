@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Add ECS cluster detection
+  ([#1354](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1354))
+
+### Baggage processor
+
+- Add config support
+  ([#1330](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1330))
+
+### Inferred spans - New 🌟
+
+An OpenTelemetry extension for generating spans via profiling instead of instrumentation.
+This extension enhances traces by running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling mode
+whenever there is an active sampled OpenTelemetry span.
+
+The resulting profiling data is analyzed afterward and spans are "inferred".
+This means there is a delay between the regular and the inferred spans being visible
+in your OpenTelemetry backend/UI.
+
+### JFR connection
+
+- Fix for using diagnostic command to start a recording
+  ([#1352](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1352))
+
+### JMX metrics
+
+- Support both a script and target systems
+  ([#1339](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1339))
+
 ## Version 1.36.0 (2024-05-29)
 
 ### AWS resources

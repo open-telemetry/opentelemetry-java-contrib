@@ -3,7 +3,7 @@
 OpenTelemetry extension for generating spans via profiling instead of instrumentation.
 This extension enhances traces by running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling mode whenever there is an active sampled OpenTelemetry span.
 
-The resulting profiling data is afterwards analyzed and spans are "inferred".
+The resulting profiling data is analyzed afterward and spans are "inferred".
 This means there is a delay between the regular and the inferred spans being visible in your OpenTelemetry backend/UI.
 
 Only platform threads are supported. Virtual threads are not supported and will not be profiled.
