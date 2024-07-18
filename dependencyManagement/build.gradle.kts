@@ -61,7 +61,7 @@ val DEPENDENCIES = listOf(
   "org.skyscreamer:jsonassert:1.5.3",
   "org.apache.kafka:kafka-clients:3.7.1",
   "org.testcontainers:kafka:1.20.0",
-  "com.lmax:disruptor:3.4.4",
+  "com.lmax:disruptor:4.0.0",
   "org.jctools:jctools-core:4.0.5",
   "tools.profiler:async-profiler:3.0",
   "com.blogspot.mydailyjava:weak-lock-free:0.18",
