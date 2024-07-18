@@ -54,7 +54,7 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
   .addSpanProcessor(inferredSpans)
   .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder()
     .setEndpoint("http://localhost:4317")
-    .build()))
+    .build()).build())
   .build();
 inferredSpans.setTracerProvider(tracerProvider);
 ```
