@@ -29,6 +29,12 @@
       "groupName": "gradle enterprise packages"
     },
     {
+      // disruptor 4+ requires Java 11+
+      "matchPackageNames": ["com.lmax:disruptor"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       // junit-pioneer 2+ requires Java 11+
       "matchPackageNames": ["org.junit-pioneer:junit-pioneer"],
       "matchUpdateTypes": ["major"],
