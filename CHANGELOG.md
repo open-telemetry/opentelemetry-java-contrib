@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.37.0 (2024-07-18)
 
 ### AWS resources
 
