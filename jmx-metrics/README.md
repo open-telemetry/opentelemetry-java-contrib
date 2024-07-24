@@ -278,6 +278,7 @@ file contents can also be provided via stdin on startup when using `-config -` a
 - [Sam DeHaan](https://github.com/dehaansa), ObservIQ
 
 ## Emeritus owners
+
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
