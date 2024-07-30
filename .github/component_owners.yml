@@ -40,8 +40,6 @@ components:
   jfr-events:
     - sfriberg
   jmx-metrics:
-    - dehaansa
-    - Mrod1598
     - breedx-splk
   maven-extension:
     - cyrille-leclerc
