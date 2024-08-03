@@ -14,7 +14,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v4
         name: Build
         with:
           arguments: build
@@ -37,7 +37,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v4
         name: Integration test
         with:
           arguments: integrationTest
@@ -119,7 +119,7 @@ jobs:
           java-version: 17
 
       - name: Build and publish artifacts
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
