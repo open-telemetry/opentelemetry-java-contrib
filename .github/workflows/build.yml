@@ -24,11 +24,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          arguments: build -x test
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+      - name: Gradle build and test
+        run: ./gradlew build -x test
         env:
           GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
@@ -60,15 +61,16 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          arguments: >
-            test
-            -PtestJavaVersion=${{ matrix.test-java-version }}
-            -Porg.gradle.java.installations.paths=${{ steps.setup-test-java.outputs.path }}
-            -Porg.gradle.java.installations.auto-download=false
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+      - name: Gradle test
+        run: >
+          ./gradlew test
+          -PtestJavaVersion=${{ matrix.test-java-version }}
+          -Porg.gradle.java.installations.paths=${{ steps.setup-test-java.outputs.path }}
+          -Porg.gradle.java.installations.auto-download=false
         env:
           GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
@@ -83,11 +85,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Integration test
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          arguments: integrationTest
           cache-read-only: ${{ github.event_name == 'pull_request' }}
+      - name: Integration test
+        run: ./gradlew integrationTest
         env:
           GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
@@ -135,13 +138,14 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build and publish snapshots
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
         # skipping release branches because the versions in those branches are not snapshots
         # (also this skips pull requests)
         if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
-        with:
-          arguments: assemble publishToSonatype
+      - name: Build and publish snapshots
+        if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
+        run: ./gradlew assemble publishToSonatype
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}

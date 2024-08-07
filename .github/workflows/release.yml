@@ -14,10 +14,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v3
-        name: Build
-        with:
-          arguments: build
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Gradle build
+        run: ./gradlew build
 
       - uses: actions/upload-artifact@v4
         name: Save unit test results
@@ -37,10 +37,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v3
-        name: Integration test
-        with:
-          arguments: integrationTest
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Integration test
+        run: ./gradlew integrationTest
 
       - uses: actions/upload-artifact@v4
         name: Save integration test results
@@ -118,10 +118,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Build and publish artifacts
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}

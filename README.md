@@ -72,7 +72,7 @@ Emeritus maintainers:
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
+Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
 
 Thanks to all the people who already contributed!
 
