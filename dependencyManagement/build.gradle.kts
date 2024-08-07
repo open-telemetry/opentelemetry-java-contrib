@@ -22,7 +22,7 @@ val autoValueVersion = "1.11.0"
 val errorProneVersion = "2.29.2"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.11.0"
-val slf4jVersion = "2.0.13"
+val slf4jVersion = "2.0.14"
 val semConvVersion = "1.26.0-alpha"
 
 val CORE_DEPENDENCIES = listOf(
