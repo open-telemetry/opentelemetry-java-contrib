@@ -15,7 +15,6 @@ import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.AttributeKey;
@@ -25,58 +24,54 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 
 public class AzureVmResourceProvider extends CloudResourceProvider {
 
-  private static final Map<String, AttributeKey<String>> COMPUTE_MAPPING = new HashMap<>();
+  static class Entry {
+    final AttributeKey<String> key;
+    final Function<String, String> transform;
 
-  static {
-    COMPUTE_MAPPING.put("location", CLOUD_REGION);
-    COMPUTE_MAPPING.put("resourceId", CLOUD_RESOURCE_ID);
-    COMPUTE_MAPPING.put("vmId", HOST_ID);
-    COMPUTE_MAPPING.put("name", HOST_NAME);
-    COMPUTE_MAPPING.put("vmSize", HOST_TYPE);
-    COMPUTE_MAPPING.put("osType", OS_TYPE);
-    COMPUTE_MAPPING.put("version", OS_VERSION);
-    COMPUTE_MAPPING.put("vmScaleSetName", AttributeKey.stringKey("azure.vm.scaleset.name"));
-    COMPUTE_MAPPING.put("sku", AttributeKey.stringKey("azure.vm.sku"));
-  }
+    Entry(AttributeKey<String> key) {
+      this(key, Function.identity());
+    }
 
-  private static final JsonFactory JSON_FACTORY = new JsonFactory();
-
-  private static final Duration TIMEOUT = Duration.ofSeconds(1);
-
-  private static final Logger logger = Logger.getLogger(AzureVmResourceProvider.class.getName());
-  private static final URL METADATA_URL;
-
-  static {
-    try {
-      METADATA_URL = new URL("http://169.254.169.254/metadata/instance?api-version=2021-02-01");
-    } catch (MalformedURLException e) {
-      throw new IllegalStateException(e);
+    Entry(AttributeKey<String> key, Function<String, String> transform) {
+      this.key = key;
+      this.transform = transform;
     }
   }
+
+  private static final Map<String, Entry> COMPUTE_MAPPING = new HashMap<>();
+
+  static {
+    COMPUTE_MAPPING.put("location", new Entry(CLOUD_REGION));
+    COMPUTE_MAPPING.put("resourceId", new Entry(CLOUD_RESOURCE_ID));
+    COMPUTE_MAPPING.put("vmId", new Entry(HOST_ID));
+    COMPUTE_MAPPING.put("name", new Entry(HOST_NAME));
+    COMPUTE_MAPPING.put("vmSize", new Entry(HOST_TYPE));
+    COMPUTE_MAPPING.put("osType", new Entry(OS_TYPE));
+    COMPUTE_MAPPING.put("version", new Entry(OS_VERSION));
+    COMPUTE_MAPPING.put(
+        "vmScaleSetName", new Entry(AttributeKey.stringKey("azure.vm.scaleset.name")));
+    COMPUTE_MAPPING.put("sku", new Entry(AttributeKey.stringKey("azure.vm.sku")));
+  }
+
+  private static final Logger logger = Logger.getLogger(AzureVmResourceProvider.class.getName());
 
   private final Supplier<Optional<String>> client;
 
   // SPI
   public AzureVmResourceProvider() {
-    this(() -> fetchMetadata(METADATA_URL));
+    this(AzureMetadataService.defaultClient());
   }
 
   // visible for testing
@@ -87,20 +82,26 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   @Override
   public int order() {
     // run after the fast cloud resource providers that only check environment variables
+    // and after the AKS provider
     return 100;
   }
 
   @Override
   public Resource createResource(ConfigProperties config) {
-    return client.get().map(AzureVmResourceProvider::parseMetadata).orElse(Resource.empty());
+    return client
+        .get()
+        .map(
+            body ->
+                parseMetadata(
+                    body, COMPUTE_MAPPING, CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM))
+        .orElse(Resource.empty());
   }
 
-  private static Resource parseMetadata(String body) {
-    AttributesBuilder builder =
-        azureAttributeBuilder(CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM);
-    try (JsonParser parser = JSON_FACTORY.createParser(body)) {
+  static Resource parseMetadata(String body, Map<String, Entry> computeMapping, String platform) {
+    AttributesBuilder builder = azureAttributeBuilder(platform);
+    try (JsonParser parser = AzureMetadataService.JSON_FACTORY.createParser(body)) {
       parser.nextToken();
-      parseResponse(parser, builder);
+      parseResponse(parser, builder, computeMapping);
     } catch (IOException e) {
       logger.log(Level.FINE, "Can't get Azure VM metadata", e);
     }
@@ -115,7 +116,9 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
     return builder;
   }
 
-  static void parseResponse(JsonParser parser, AttributesBuilder builder) throws IOException {
+  static void parseResponse(
+      JsonParser parser, AttributesBuilder builder, Map<String, Entry> computeMapping)
+      throws IOException {
     if (!parser.isExpectedStartObjectToken()) {
       logger.log(Level.FINE, "Couldn't parse ECS metadata, invalid JSON");
       return;
@@ -126,7 +129,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
         (name, value) -> {
           try {
             if (name.equals("compute")) {
-              consumeCompute(parser, builder);
+              consumeCompute(parser, builder, computeMapping);
             } else {
               parser.skipChildren();
             }
@@ -136,14 +139,15 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
         });
   }
 
-  private static void consumeCompute(JsonParser parser, AttributesBuilder builder)
+  private static void consumeCompute(
+      JsonParser parser, AttributesBuilder builder, Map<String, Entry> computeMapping)
       throws IOException {
     consumeJson(
         parser,
         (computeName, computeValue) -> {
-          AttributeKey<String> key = COMPUTE_MAPPING.get(computeName);
-          if (key != null) {
-            builder.put(key, computeValue);
+          Entry entry = computeMapping.get(computeName);
+          if (entry != null) {
+            builder.put(entry.key, entry.transform.apply(computeValue));
           } else {
             try {
               parser.skipChildren();
@@ -158,38 +162,6 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
       throws IOException {
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       consumer.accept(parser.currentName(), parser.nextTextValue());
-    }
-  }
-
-  // visible for testing
-  static Optional<String> fetchMetadata(URL url) {
-    OkHttpClient client =
-        new OkHttpClient.Builder()
-            .callTimeout(TIMEOUT)
-            .connectTimeout(TIMEOUT)
-            .readTimeout(TIMEOUT)
-            .build();
-
-    Request request = new Request.Builder().url(url).get().addHeader("Metadata", "true").build();
-
-    try (Response response = client.newCall(request).execute()) {
-      int responseCode = response.code();
-      if (responseCode != 200) {
-        logger.log(
-            Level.FINE,
-            "Error response from "
-                + url
-                + " code ("
-                + responseCode
-                + ") text "
-                + response.message());
-        return Optional.empty();
-      }
-
-      return Optional.of(Objects.requireNonNull(response.body()).string());
-    } catch (IOException e) {
-      logger.log(Level.FINE, "Failed to fetch Azure VM metadata", e);
-      return Optional.empty();
     }
   }
 }
