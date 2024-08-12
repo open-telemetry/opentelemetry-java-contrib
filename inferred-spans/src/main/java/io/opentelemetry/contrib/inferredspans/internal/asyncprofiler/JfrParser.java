@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
@@ -114,7 +115,7 @@ public class JfrParser implements Recyclable {
     short minor = bufferedFile.getShort();
     if (major != 2 || minor != 0) {
       throw new IllegalArgumentException(
-          String.format("Can only parse version 2.0. Was %d.%d", major, minor));
+          String.format(Locale.ROOT, "Can only parse version 2.0. Was %d.%d", major, minor));
     }
     long chunkSize = bufferedFile.getLong();
     long constantPoolOffset = bufferedFile.getLong();

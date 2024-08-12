@@ -14,6 +14,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -243,7 +244,10 @@ class BufferedFile implements Recyclable {
     if (minRemaining > buffer.capacity()) {
       throw new IllegalStateException(
           String.format(
-              "Length (%d) greater than buffer capacity (%d)", minRemaining, buffer.capacity()));
+              Locale.ROOT,
+              "Length (%d) greater than buffer capacity (%d)",
+              minRemaining,
+              buffer.capacity()));
     }
     if (buffer.remaining() < minRemaining) {
       read(position(), maxRead);
