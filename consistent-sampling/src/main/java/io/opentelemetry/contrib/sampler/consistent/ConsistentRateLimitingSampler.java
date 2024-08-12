@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.sampler.consistent;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 import javax.annotation.concurrent.Immutable;
@@ -113,8 +114,10 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     }
     this.description =
         String.format(
+            Locale.ROOT,
             "ConsistentRateLimitingSampler{%.6f, %.6f}",
-            targetSpansPerSecondLimit, adaptationTimeSeconds);
+            targetSpansPerSecondLimit,
+            adaptationTimeSeconds);
     this.nanoTimeSupplier = requireNonNull(nanoTimeSupplier);
 
     this.inverseAdaptationTimeNanos = 1e-9 / adaptationTimeSeconds;
