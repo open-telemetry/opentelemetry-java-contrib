@@ -96,7 +96,7 @@ class InstrumenterHelperTest {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     metricEnvironment = new GroovyMetricEnvironment(meterProvider, "otel.test");
-    otel = new OtelHelper(jmxClient, metricEnvironment);
+    otel = new OtelHelper(jmxClient, metricEnvironment, false);
   }
 
   @AfterEach
@@ -733,7 +733,8 @@ class InstrumenterHelperTest {
             labelFuncs,
             Collections.singletonMap(attribute, null),
             instrument,
-            metricEnvironment);
+            metricEnvironment,
+            false);
     instrumentHelper.update();
   }
 
@@ -754,7 +755,8 @@ class InstrumenterHelperTest {
             labelFuncs,
             attributes,
             instrument,
-            metricEnvironment);
+            metricEnvironment,
+            false);
     instrumentHelper.update();
   }
 

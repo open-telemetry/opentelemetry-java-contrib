@@ -45,6 +45,7 @@ class InstrumentHelper {
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
     private final GroovyMetricEnvironment metricEnvironment
+    private final boolean aggregateAcrossMBeans
 
     /**
      * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.api.metrics.Instrument}
@@ -63,8 +64,9 @@ class InstrumentHelper {
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      * @param metricenvironment - The {@link GroovyMetricEnvironment} used to register callbacks onto the SDK meter for
      *        batch callbacks used to handle {@link CompositeData}
+     * @param aggregateAcrossMBeans - Whether to aggregate multiple MBeans together before recording.
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment, boolean aggregateAcrossMBeans) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
@@ -73,6 +75,7 @@ class InstrumentHelper {
         this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
         this.metricEnvironment = metricEnvironment
+        this.aggregateAcrossMBeans = aggregateAcrossMBeans
     }
 
     void update() {
@@ -191,7 +194,7 @@ class InstrumentHelper {
     private Closure prepareUpdateClosure(List<GroovyMBean> mbeans, attributes) {
         return { result ->
             def aggregations = [:] as Map<String, Aggregation>
-            boolean requireAggregation = mbeans.size() > 1 && instrumentIsValue(instrument)
+            boolean requireAggregation = aggregateAcrossMBeans && mbeans.size() > 1 && instrumentIsValue(instrument)
             [mbeans, attributes].combinations().each { pair ->
                 def (mbean, attribute) = pair
                 def value = MBeanHelper.getBeanAttribute(mbean, attribute)
