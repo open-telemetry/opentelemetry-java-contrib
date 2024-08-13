@@ -115,7 +115,8 @@ class JmxConfig {
     realm = properties.getProperty(JMX_REALM);
 
     registrySsl = Boolean.valueOf(properties.getProperty(REGISTRY_SSL));
-    aggregateAcrossMBeans = Boolean.parseBoolean(properties.getProperty(JMX_AGGREGATE_ACROSS_MBEANS));
+    aggregateAcrossMBeans =
+        Boolean.parseBoolean(properties.getProperty(JMX_AGGREGATE_ACROSS_MBEANS));
 
     // For the list of System Properties, if they have been set in the properties file
     // they need to be set in Java System Properties.
