@@ -438,7 +438,13 @@ class InstrumenterHelperTest {
       String description = "multiple double gauge description";
 
       updateWithHelper(
-          mBeanHelper, instrumentMethod, instrumentName, description, "Double", new HashMap<>());
+          mBeanHelper,
+          instrumentMethod,
+          instrumentName,
+          description,
+          "Double",
+          new HashMap<>(),
+          /* aggregateAcrossMBeans= */ true);
 
       assertThat(metricReader.collectAllMetrics())
           .satisfiesExactly(
@@ -713,7 +719,13 @@ class InstrumenterHelperTest {
     labelFuncs.put(
         "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
     updateWithHelper(
-        mBeanHelper, instrumentMethod, instrumentName, description, attribute, labelFuncs);
+        mBeanHelper,
+        instrumentMethod,
+        instrumentName,
+        description,
+        attribute,
+        labelFuncs,
+        /* aggregateAcrossMBeans= */ false);
   }
 
   void updateWithHelper(
@@ -722,7 +734,8 @@ class InstrumenterHelperTest {
       String instrumentName,
       String description,
       String attribute,
-      Map<String, Closure<?>> labelFuncs) {
+      Map<String, Closure<?>> labelFuncs,
+      boolean aggregateAcrossMBeans) {
     Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
@@ -734,7 +747,7 @@ class InstrumenterHelperTest {
             Collections.singletonMap(attribute, null),
             instrument,
             metricEnvironment,
-            false);
+            aggregateAcrossMBeans);
     instrumentHelper.update();
   }
 
