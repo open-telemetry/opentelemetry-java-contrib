@@ -43,7 +43,7 @@ OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvid
 ### Configuration
 
 Even if autoconfiguration is not yet supported, usages of this module must use the
-`otel.span.stacktrace.min.duration` configuration option (in nanoseconds, defaults to 5ms) to
+`otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) to
 allow consistent configuration across usages.
 
 The following constants are provided as a convenience:
