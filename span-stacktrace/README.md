@@ -54,7 +54,7 @@ The following constants are provided as a convenience:
 This means the default for this feature will capture a stacktrace for all spans that last 5ms or more,
 disabling it must be allowed by setting a negative value to `otel.span.stacktrace.min.duration`.
 Setting `otel.span.stacktrace.min.duration` to zero means a stacktrace will be captured for all
-spans without span duration limit.
+spans.
 
 ## Component owners
 
