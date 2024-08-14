@@ -51,9 +51,9 @@ The following constants are provided as a convenience:
 - `StackTraceSpanProcessor.CONFIG_MIN_DURATION`
 - `StackTraceSpanProcessor.CONFIG_MIN_DURATION_DEFAULT`
 
-It means default this feature will capture a stacktrace for all spans that last 5ms or more,
+This means the default for this feature will capture a stacktrace for all spans that last 5ms or more,
 disabling it must be allowed by setting a negative value to `otel.span.stacktrace.min.duration`.
-Setting `otel.span.stacktrace.min.duration` to zero means stacktrace will be captured for all
+Setting `otel.span.stacktrace.min.duration` to zero means a stacktrace will be captured for all
 spans without span duration limit.
 
 ## Component owners
