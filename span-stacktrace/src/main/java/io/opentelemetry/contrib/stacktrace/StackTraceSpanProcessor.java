@@ -12,11 +12,15 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor {
+
+  public static final String CONFIG_MIN_DURATION = "otel.span.stacktrace.min.duration";
+  public static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
 
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   private static final AttributeKey<String> SPAN_STACKTRACE =

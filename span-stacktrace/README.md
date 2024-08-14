@@ -40,6 +40,16 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
 OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
 ```
 
+### Configuration
+
+Even if autoconfiguration is not yet supported, usages of this module must use the
+`otel.span.stacktrace.min.duration` configuration option (in nanoseconds, defaults to 5ms) to
+allow consistent configuration across usages.
+
+The following constants are provided as a convenience:
+- `StackTraceSpanProcessor.CONFIG_MIN_DURATION`
+- `StackTraceSpanProcessor.CONFIG_MIN_DURATION_DEFAULT`
+
 ## Component owners
 
 - [Jack Shirazi](https://github.com/jackshirazi), Elastic
