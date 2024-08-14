@@ -47,6 +47,7 @@ Even if autoconfiguration is not yet supported, usages of this module must use t
 allow consistent configuration across usages.
 
 The following constants are provided as a convenience:
+
 - `StackTraceSpanProcessor.CONFIG_MIN_DURATION`
 - `StackTraceSpanProcessor.CONFIG_MIN_DURATION_DEFAULT`
 
