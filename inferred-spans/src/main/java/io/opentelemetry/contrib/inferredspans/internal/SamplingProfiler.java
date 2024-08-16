@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -563,7 +564,7 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings("JavaUtilDate")
   private void backupDiagnosticFiles(long eof) throws IOException {
-    String now = String.format("%tFT%<tT.%<tL", new Date());
+    String now = String.format(Locale.ROOT, "%tFT%<tT.%<tL", new Date());
     Path profilerDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
     profilerDir.toFile().mkdir();
 
