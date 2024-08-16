@@ -271,8 +271,14 @@ public class Recording implements AutoCloseable {
         connection.stopRecording(id);
       } catch (IOException | JfrConnectionException ignored) {
         // Stopping the recording is best-effort
-      } finally {
+      }
+    }
+    if (oldState == State.STOPPED || oldState == State.RECORDING) {
+      try {
         connection.closeRecording(id);
+      } catch (IOException | JfrConnectionException | UnsupportedOperationException ignored) {
+        // Closing the recording is best-effort
+        // FlightRecorderDiagnosticCommandConnection close throws UnsupportedOperationException
       }
     }
   }
