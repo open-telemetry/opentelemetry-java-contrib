@@ -20,7 +20,7 @@ section below to configure it.
 ### Manual SDK setup
 
 Here is an example registration of `StackTraceSpanProcessor` to capture stack trace for all
-the spans that have a duration >= 1000 ns. The spans that have an `ignorespan` string attribute
+the spans that have a duration >= 1 ms. The spans that have an `ignorespan` string attribute
 will be ignored.
 
 ```java
