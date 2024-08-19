@@ -7,13 +7,15 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
+val otelInstrumentationVersion = "2.7.0-alpha"
+
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.17.2",
   "com.google.guava:guava-bom:33.3.0-jre",
   "com.linecorp.armeria:armeria-bom:1.30.0",
   "org.junit:junit-bom:5.11.0",
   "io.grpc:grpc-bom:1.66.0",
-  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.7.0-alpha",
+  "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
   "org.testcontainers:testcontainers-bom:1.20.1"
 )
 
