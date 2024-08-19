@@ -27,6 +27,10 @@ will be ignored.
 InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
 SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
 
+Map<String, String> configMap = new HashMap<>();
+configMap.put("otel.span.stacktrace.min.duration", "1ms");
+ConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
+
 Predicate<ReadableSpan> filterPredicate = readableSpan -> {
   if(readableSpan.getAttribute(AttributeKey.stringKey("ignorespan")) != null){
     return false;
@@ -34,7 +38,7 @@ Predicate<ReadableSpan> filterPredicate = readableSpan -> {
   return true;
 };
 SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-    .addSpanProcessor(new StackTraceSpanProcessor(exportProcessor, 1000, filterPredicate))
+    .addSpanProcessor(new StackTraceSpanProcessor(exportProcessor, config, filterPredicate))
     .build();
 
 OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
@@ -42,19 +46,11 @@ OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvid
 
 ### Configuration
 
-Even if autoconfiguration is not yet supported, usages of this module must use the
-`otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) to
-allow consistent configuration across usages.
+The `otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) allows to configure
+the minimal duration for which spans should have a stacktrace captured.
 
-The following constants are provided as a convenience:
-
-- `StackTraceSpanProcessor.CONFIG_MIN_DURATION`
-- `StackTraceSpanProcessor.CONFIG_MIN_DURATION_DEFAULT`
-
-This means the default for this feature will capture a stacktrace for all spans that last 5ms or more,
-disabling it must be allowed by setting a negative value to `otel.span.stacktrace.min.duration`.
-Setting `otel.span.stacktrace.min.duration` to zero means a stacktrace will be captured for all
-spans.
+Setting `otel.span.stacktrace.min.duration` to zero will include all spans, and using a negative
+value will disable the feature.
 
 ## Component owners
 
