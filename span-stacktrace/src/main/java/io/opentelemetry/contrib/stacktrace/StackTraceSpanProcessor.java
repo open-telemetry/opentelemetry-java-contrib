@@ -20,8 +20,8 @@ import java.util.logging.Logger;
 
 public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor {
 
-  public static final String CONFIG_MIN_DURATION = "otel.span.stacktrace.min.duration";
-  public static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
+  private static final String CONFIG_MIN_DURATION = "otel.span.stacktrace.min.duration";
+  private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
 
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   private static final AttributeKey<String> SPAN_STACKTRACE =
