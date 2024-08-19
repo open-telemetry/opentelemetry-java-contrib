@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.38.0 (2024-08-19)
+
 ### JFR connection
 
 - Recording close should not throw exception
