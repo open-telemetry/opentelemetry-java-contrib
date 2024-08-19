@@ -46,7 +46,7 @@ OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvid
 
 ### Configuration
 
-The `otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) allows to configure
+The `otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) allows configuring
 the minimal duration for which spans should have a stacktrace captured.
 
 Setting `otel.span.stacktrace.min.duration` to zero will include all spans, and using a negative
