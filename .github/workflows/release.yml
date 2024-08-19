@@ -132,10 +132,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          instrumentation_version=$(grep -Po "val otelInstrumentationVersion = \"\K[0-9]+.[0-9]+.[0-9]+" dependencyManagement/build.gradle.kts)
+
           # conditional blocks not indented because of the heredoc
           if [[ $VERSION == *.0 ]]; then
           cat > /tmp/release-notes.txt << EOF
-          This release targets the OpenTelemetry SDK $VERSION.
+          This release targets the OpenTelemetry Java Instrumentation
+          [$instrumentation_version](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v$instrumentation_version).
 
           EOF
           else
