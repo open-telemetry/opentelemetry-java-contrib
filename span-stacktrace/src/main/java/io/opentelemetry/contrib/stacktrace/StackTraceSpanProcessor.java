@@ -44,16 +44,13 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterPredicate = filterPredicate;
     if (minSpanDurationNanos < 0) {
-      logger.log(
-          Level.FINE,
-          "Stack traces capture is disabled");
+      logger.log(Level.FINE, "Stack traces capture is disabled");
     } else {
       logger.log(
           Level.FINE,
           "Stack traces will be added to spans with a minimum duration of {0} nanos",
           minSpanDurationNanos);
     }
-
   }
 
   /**
@@ -61,12 +58,13 @@ public class StackTraceSpanProcessor extends AbstractSimpleChainingSpanProcessor
    * @param config configuration
    * @param filterPredicate extra filter function to exclude spans if needed
    */
-  public StackTraceSpanProcessor(SpanProcessor next, ConfigProperties config,
-      Predicate<ReadableSpan> filterPredicate) {
-    this(next, config.getDuration(CONFIG_MIN_DURATION, CONFIG_MIN_DURATION_DEFAULT).toNanos(),
+  public StackTraceSpanProcessor(
+      SpanProcessor next, ConfigProperties config, Predicate<ReadableSpan> filterPredicate) {
+    this(
+        next,
+        config.getDuration(CONFIG_MIN_DURATION, CONFIG_MIN_DURATION_DEFAULT).toNanos(),
         filterPredicate);
   }
-
 
   @Override
   protected boolean requiresStart() {

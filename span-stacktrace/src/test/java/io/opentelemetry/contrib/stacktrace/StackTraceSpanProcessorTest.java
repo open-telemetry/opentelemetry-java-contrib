@@ -73,8 +73,7 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String configString,
-      long spanDurationNanos) {
+      Predicate<ReadableSpan> filterPredicate, String configString, long spanDurationNanos) {
     checkSpan(
         filterPredicate,
         configString,
@@ -87,17 +86,13 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithoutStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String configString,
-      long spanDurationNanos) {
+      Predicate<ReadableSpan> filterPredicate, String configString, long spanDurationNanos) {
     checkSpan(
         filterPredicate,
         configString,
         spanDurationNanos,
         Function.identity(),
-        (stackTrace) ->
-            assertThat(stackTrace)
-                .describedAs("no stack trace expected")
-                .isNull());
+        (stackTrace) -> assertThat(stackTrace).describedAs("no stack trace expected").isNull());
   }
 
   private static void checkSpan(
@@ -117,8 +112,8 @@ class StackTraceSpanProcessorTest {
     }
 
     try (SpanProcessor processor =
-        new StackTraceSpanProcessor(exportProcessor,
-            DefaultConfigProperties.createFromMap(configMap), filterPredicate)) {
+        new StackTraceSpanProcessor(
+            exportProcessor, DefaultConfigProperties.createFromMap(configMap), filterPredicate)) {
 
       OpenTelemetrySdk sdk = TestUtils.sdkWith(processor);
       Tracer tracer = sdk.getTracer("test");
@@ -137,8 +132,8 @@ class StackTraceSpanProcessorTest {
       List<SpanData> finishedSpans = spansExporter.getFinishedSpanItems();
       assertThat(finishedSpans).hasSize(1);
 
-      String stackTrace = finishedSpans.get(0).getAttributes()
-          .get(CodeIncubatingAttributes.CODE_STACKTRACE);
+      String stackTrace =
+          finishedSpans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
 
       stackTraceCheck.accept(stackTrace);
     }
