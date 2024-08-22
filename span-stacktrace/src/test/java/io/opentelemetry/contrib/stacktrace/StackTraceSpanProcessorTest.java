@@ -108,7 +108,7 @@ class StackTraceSpanProcessorTest {
 
     Map<String, String> configMap = new HashMap<>();
     if (configString != null) {
-      configMap.put("otel.span.stacktrace.min.duration", configString);
+      configMap.put("otel.java.experimental.span-stacktrace.min.duration", configString);
     }
 
     try (SpanProcessor processor =

@@ -28,7 +28,7 @@ InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
 SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
 
 Map<String, String> configMap = new HashMap<>();
-configMap.put("otel.span.stacktrace.min.duration", "1ms");
+configMap.put("otel.java.experimental.span-stacktrace.min.duration", "1ms");
 ConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
 
 Predicate<ReadableSpan> filterPredicate = readableSpan -> {
@@ -46,10 +46,10 @@ OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvid
 
 ### Configuration
 
-The `otel.span.stacktrace.min.duration` configuration option (defaults to 5ms) allows configuring
+The `otel.java.experimental.span-stacktrace.min.duration` configuration option (defaults to 5ms) allows configuring
 the minimal duration for which spans should have a stacktrace captured.
 
-Setting `otel.span.stacktrace.min.duration` to zero will include all spans, and using a negative
+Setting `otel.java.experimental.span-stacktrace.min.duration` to zero will include all spans, and using a negative
 value will disable the feature.
 
 ## Component owners
