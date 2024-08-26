@@ -156,14 +156,6 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     return mkParamsArray(params);
   }
 
-  /**
-   * Stop a recording. This method is called from the {@link Recording#stop()} method.
-   *
-   * @param id The id of the recording.
-   * @throws JfrConnectionException Wraps an {@code javax.management.InstanceNotFoundException}, a
-   *     {@code javax.management.MBeanException} or a {@code javax.management.ReflectionException}
-   *     and indicates an issue with the FlightRecorderMXBean in the JVM.
-   */
   @Override
   public void stopRecording(long id) throws JfrConnectionException {
     try {
@@ -174,14 +166,6 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     }
   }
 
-  /**
-   * Writes recording data to the specified file. The recording must be started, but not necessarily
-   * stopped. The {@code outputFile} argument is relevant to the machine where the JVM is running.
-   *
-   * @param id The id of the recording.
-   * @param outputFile the system-dependent file name where data is written, not {@code null}
-   * @throws JfrConnectionException Wraps a {@code javax.management.JMException}.
-   */
   @Override
   public void dumpRecording(long id, String outputFile) throws IOException, JfrConnectionException {
     try {
@@ -192,28 +176,25 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     }
   }
 
-  /**
-   * Not supported on Java 8
-   *
-   * @param id The id of the recording being cloned.
-   * @param stop Whether to stop the cloned recording.
-   * @return id of the recording
-   */
+  /** Not available through the DiagnosticCommand MBean. {@inheritDoc} */
   @Override
   public long cloneRecording(long id, boolean stop) {
-    throw new UnsupportedOperationException("Clone not supported on Java 8");
+    throw new UnsupportedOperationException(
+        "cloneRecording not available through the DiagnosticCommand connection");
   }
 
-  /** Not supported on Java 8 */
+  /** Not available through the DiagnosticCommand MBean. {@inheritDoc} */
   @Override
   public InputStream getStream(long id, Instant startTime, Instant endTime, long blockSize) {
-    throw new UnsupportedOperationException("getStream not supported on Java 8");
+    throw new UnsupportedOperationException(
+        "getStream not available through the DiagnosticCommand connection");
   }
 
-  /** Not supported on Java 8 */
+  /** Not available through the DiagnosticCommand MBean. {@inheritDoc} */
   @Override
   public void closeRecording(long id) {
-    throw new UnsupportedOperationException("closeRecording not supported on Java 8");
+    throw new UnsupportedOperationException(
+        "closeRecording not available through the DiagnosticCommand connection");
   }
 
   // Do this check separate from assertCommercialFeatures because reliance

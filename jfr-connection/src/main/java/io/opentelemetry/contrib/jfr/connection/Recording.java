@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
@@ -54,7 +55,7 @@ public class Recording implements AutoCloseable {
   // {0} is the state the code is trying to transition to.
   // {1} are the states that the instance could be in for a valid transition.
   private static final MessageFormat illegalStateFormat =
-      new MessageFormat("Recording state {0} not in [{1}]");
+      new MessageFormat("Recording state {0} not in [{1}]", Locale.ROOT);
 
   /**
    * Helper for formatting the message for an IllegalStateException that may be thrown by methods of
@@ -270,8 +271,14 @@ public class Recording implements AutoCloseable {
         connection.stopRecording(id);
       } catch (IOException | JfrConnectionException ignored) {
         // Stopping the recording is best-effort
-      } finally {
+      }
+    }
+    if (oldState == State.STOPPED || oldState == State.RECORDING) {
+      try {
         connection.closeRecording(id);
+      } catch (IOException | JfrConnectionException | UnsupportedOperationException ignored) {
+        // Closing the recording is best-effort
+        // FlightRecorderDiagnosticCommandConnection close throws UnsupportedOperationException
       }
     }
   }

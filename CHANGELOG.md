@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## Version 1.38.0 (2024-08-19)
+
+### JFR connection
+
+- Recording close should not throw exception
+  ([#1412](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1412))
+
 ## Version 1.37.0 (2024-07-18)
 
 ### AWS resources
