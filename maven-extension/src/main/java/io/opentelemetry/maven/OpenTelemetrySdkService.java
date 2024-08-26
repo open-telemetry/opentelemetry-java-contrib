@@ -11,8 +11,12 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +40,10 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   private final OpenTelemetrySdk openTelemetrySdk;
 
+  private Resource resource;
+
+  private ConfigProperties configProperties;
+
   private final Tracer tracer;
 
   private final boolean mojosInstrumentationEnabled;
@@ -47,25 +55,50 @@ public final class OpenTelemetrySdkService implements Closeable {
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
-    // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
-    // The impacts are
-    // * If no otel exporter settings are passed, then the Maven extension will not export
-    //   rather than exporting on OTLP GRPC to http://localhost:4317
-    // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_[TRACES,METRICS,LOGS]_EXPORTER,
-    //   is not, then don't export
-    Map<String, String> properties = new HashMap<>();
-    properties.put("otel.traces.exporter", "none");
-    properties.put("otel.metrics.exporter", "none");
-    properties.put("otel.logs.exporter", "none");
-
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
-            .addPropertiesSupplier(() -> properties)
+            .addPropertiesCustomizer(configProperties -> {
+              // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
+              if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
+                Map<String, String> properties = new HashMap<>();
+                if (configProperties.getString("otel.exporter.otlp.traces.endpoint") == null) {
+                  properties.put("otel.traces.exporter", "none");
+                }
+                if (configProperties.getString("otel.exporter.otlp.metrics.endpoint") == null) {
+                  properties.put("otel.metrics.exporter", "none");
+                }
+                if (configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
+                  properties.put("otel.logs.exporter", "none");
+                }
+                return properties;
+              } else {
+                return Collections.emptyMap();
+              }
+            })
+            .addPropertiesCustomizer(config -> {
+              // keep a reference to the computed config properties for future use in the extension
+              this.configProperties = config;
+              return Collections.emptyMap();
+            })
+            .addResourceCustomizer((res, configProperties) -> {
+              // keep a reference to the computed Resource for future use in the extension
+              this.resource = Resource.builder().putAll(res).build();
+              return this.resource;
+            })
             .disableShutdownHook()
             .build();
 
+    if (this.resource == null) {
+      this.resource = Resource.empty();
+    }
+    if (this.configProperties == null) {
+      this.configProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
+    }
+
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
+
+    logger.debug("OpenTelemetry: OpenTelemetrySdkService initialized, resource:{}", resource);
 
     Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null || mojoSpansEnabled;
@@ -95,6 +128,14 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   public Tracer getTracer() {
     return this.tracer;
+  }
+
+  public Resource getResource() {
+    return resource;
+  }
+
+  public ConfigProperties getConfigProperties() {
+    return configProperties;
   }
 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
