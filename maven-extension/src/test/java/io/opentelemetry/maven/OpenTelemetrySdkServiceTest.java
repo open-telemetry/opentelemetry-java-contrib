@@ -39,29 +39,29 @@ public class OpenTelemetrySdkServiceTest {
     System.setProperty("otel.service.name", "my-maven");
     System.setProperty("otel.resource.attributes", "key1=val1,key2=val2");
 
-      try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
+    try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
-        Resource resource = openTelemetrySdkService.getResource();
-        assertThat(resource.getAttribute(stringKey("service.name"))).isEqualTo("my-maven");
-        assertThat(resource.getAttribute(stringKey("key1"))).isEqualTo("val1");
-        assertThat(resource.getAttribute(stringKey("key2"))).isEqualTo("val2");
+      Resource resource = openTelemetrySdkService.getResource();
+      assertThat(resource.getAttribute(stringKey("service.name"))).isEqualTo("my-maven");
+      assertThat(resource.getAttribute(stringKey("key1"))).isEqualTo("val1");
+      assertThat(resource.getAttribute(stringKey("key2"))).isEqualTo("val2");
 
     } finally {
-        System.clearProperty("otel.service.name");
-        System.clearProperty("otel.resource.attributes");
+      System.clearProperty("otel.service.name");
+      System.clearProperty("otel.resource.attributes");
     }
   }
 
-  /** Verify overwritten `"otel.exporter.otlp.endpoint" */
+  /** Verify defining `otel.exporter.otlp.endpoint` works */
   @Test
   public void testOverwrittenExporterConfiguration_1() {
-    System.setProperty("otel.exporter.otlp.endpoint", "http://example.com:4318");
+    System.setProperty("otel.exporter.otlp.endpoint", "http://example.com:4317");
 
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
-
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
-      assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isEqualTo("http://example.com:4318");
+      assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isEqualTo(
+          "http://example.com:4317");
       assertThat(configProperties.getString("otel.traces.exporter")).isNull();
       assertThat(configProperties.getString("otel.metrics.exporter")).isNull();
       assertThat(configProperties.getString("otel.logs.exporter")).isNull();
@@ -71,18 +71,44 @@ public class OpenTelemetrySdkServiceTest {
     }
   }
 
-  /** Verify overwritten `"otel.exporter.otlp.traces.endpoint" */
+  /** Verify defining `otel.exporter.otlp.traces.endpoint` works */
   @Test
   public void testOverwrittenExporterConfiguration_2() {
     System.clearProperty("otel.exporter.otlp.endpoint");
-    System.setProperty("otel.exporter.otlp.traces.endpoint", "http://example.com:4318/v1/traces");
-    System.setProperty("otel.exporter.otlp.traces.protocol", "http/protobuf");
+    System.clearProperty("otel.traces.exporter");
+    System.setProperty("otel.exporter.otlp.traces.endpoint", "http://example.com:4317/");
 
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
       assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isNull();
-      assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint")).isEqualTo("http://example.com:4318/v1/traces");
+      assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint")).isEqualTo(
+          "http://example.com:4317/");
+      assertThat(configProperties.getString("otel.traces.exporter")).isNull();
+      assertThat(configProperties.getString("otel.metrics.exporter")).isEqualTo("none");
+      assertThat(configProperties.getString("otel.logs.exporter")).isEqualTo("none");
+
+    } finally {
+      System.clearProperty("otel.exporter.otlp.endpoint");
+      System.clearProperty("otel.traces.exporter");
+      System.clearProperty("otel.exporter.otlp.traces.endpoint");
+    }
+  }
+
+  /** Verify defining `otel.exporter.otlp.traces.endpoint` and `otel.traces.exporter` works */
+  @Test
+  public void testOverwrittenExporterConfiguration_3() {
+    System.clearProperty("otel.exporter.otlp.endpoint");
+    System.setProperty("otel.traces.exporter", "otlp");
+    System.setProperty("otel.exporter.otlp.traces.endpoint", "http://example.com:4317/");
+
+    try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
+
+      ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
+      assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isNull();
+      assertThat(
+          configProperties.getString("otel.exporter.otlp.traces.endpoint")).isEqualTo(
+          "http://example.com:4317/");
       assertThat(configProperties.getString("otel.traces.exporter")).isNull();
       assertThat(configProperties.getString("otel.metrics.exporter")).isEqualTo("none");
       assertThat(configProperties.getString("otel.logs.exporter")).isEqualTo("none");

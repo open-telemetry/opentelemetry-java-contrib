@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
@@ -59,16 +60,26 @@ public final class OpenTelemetrySdkService implements Closeable {
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
             .addPropertiesCustomizer(configProperties -> {
-              // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
+              // The OTel SDK by default sends data to the OTLP gRPC endpoint at localhost:4317.
+              // Change this behavior to disable by default the OTel SDK in the Maven extension so
+              // that it must be explicitly enabled by the user.
+              // To change this default behavior, we set "otel.[traces,metrics,logs].exporter" to
+              // "none" if the endpoint has not been specified
               if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
                 Map<String, String> properties = new HashMap<>();
-                if (configProperties.getString("otel.exporter.otlp.traces.endpoint") == null) {
+                if (Objects.equals("otlp",
+                    configProperties.getString("otel.traces.exporter", "otlp"))
+                    && configProperties.getString("otel.exporter.otlp.traces.endpoint") == null) {
                   properties.put("otel.traces.exporter", "none");
                 }
-                if (configProperties.getString("otel.exporter.otlp.metrics.endpoint") == null) {
+                if (Objects.equals("otlp",
+                    configProperties.getString("otel.metrics.exporter", "otlp"))
+                    && configProperties.getString("otel.exporter.otlp.metrics.endpoint") == null) {
                   properties.put("otel.metrics.exporter", "none");
                 }
-                if (configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
+                if (Objects.equals("otlp",
+                    configProperties.getString("otel.logs.exporter", "otlp"))
+                    && configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
                   properties.put("otel.logs.exporter", "none");
                 }
                 return properties;
