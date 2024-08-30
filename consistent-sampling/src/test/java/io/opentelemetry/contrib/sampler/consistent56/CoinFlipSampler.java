@@ -20,7 +20,7 @@ import javax.annotation.concurrent.Immutable;
  * unit tests.
  */
 @Immutable
-final class CoinFlipSampler extends ComposableSampler {
+final class CoinFlipSampler extends ConsistentSampler {
 
   private static final Random random = new Random(System.currentTimeMillis());
 
@@ -48,7 +48,7 @@ final class CoinFlipSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

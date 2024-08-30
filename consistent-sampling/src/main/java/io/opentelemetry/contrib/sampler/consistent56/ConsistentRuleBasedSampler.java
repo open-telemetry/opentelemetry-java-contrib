@@ -21,7 +21,7 @@ import javax.annotation.concurrent.Immutable;
  * ComposableSamplers into PredicatedSamplers.
  */
 @Immutable
-final class ConsistentRuleBasedSampler extends ComposableSampler {
+final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
   @Nullable private final SpanKind spanKindToMatch;
   private final PredicatedSampler[] samplers;
@@ -57,7 +57,7 @@ final class ConsistentRuleBasedSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

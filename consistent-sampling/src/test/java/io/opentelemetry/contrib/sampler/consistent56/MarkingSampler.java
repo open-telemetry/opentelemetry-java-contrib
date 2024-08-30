@@ -23,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
  * tests, but could be also offered as a general utility.
  */
 @Immutable
-final class MarkingSampler extends ComposableSampler {
+final class MarkingSampler extends ConsistentSampler {
 
   private final ComposableSampler delegate;
   private final AttributeKey<String> attributeKey;
@@ -54,7 +54,7 @@ final class MarkingSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

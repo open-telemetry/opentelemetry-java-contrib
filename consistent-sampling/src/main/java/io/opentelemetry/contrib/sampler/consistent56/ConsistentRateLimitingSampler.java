@@ -93,7 +93,7 @@ import javax.annotation.concurrent.Immutable;
  *
  * <p>{@code 1 / (adaptationTimeSeconds * targetSpansPerSecondLimit)}
  */
-final class ConsistentRateLimitingSampler extends ComposableSampler {
+final class ConsistentRateLimitingSampler extends ConsistentSampler {
 
   private static final double NANOS_IN_SECONDS = 1e-9;
 
@@ -189,7 +189,7 @@ final class ConsistentRateLimitingSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

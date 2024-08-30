@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidRandomValue;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
 
 import io.opentelemetry.api.common.Attributes;
@@ -24,14 +23,14 @@ import java.util.function.LongSupplier;
 
 /** Abstract base class for consistent samplers. */
 @SuppressWarnings("InconsistentOverloads")
-public abstract class ConsistentSampler implements Sampler {
+public abstract class ConsistentSampler implements Sampler, ComposableSampler {
 
   /**
    * Returns a {@link ConsistentSampler} that samples all spans.
    *
    * @return a sampler
    */
-  public static ComposableSampler alwaysOn() {
+  public static ConsistentSampler alwaysOn() {
     return ConsistentAlwaysOnSampler.getInstance();
   }
 
@@ -40,7 +39,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @return a sampler
    */
-  public static ComposableSampler alwaysOff() {
+  public static ConsistentSampler alwaysOff() {
     return ConsistentAlwaysOffSampler.getInstance();
   }
 
@@ -50,7 +49,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param samplingProbability the sampling probability
    * @return a sampler
    */
-  public static ComposableSampler probabilityBased(double samplingProbability) {
+  public static ConsistentSampler probabilityBased(double samplingProbability) {
     long threshold = ConsistentSamplingUtil.calculateThreshold(samplingProbability);
     return new ConsistentFixedThresholdSampler(threshold);
   }
@@ -61,7 +60,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @param rootSampler the root sampler
    */
-  public static ComposableSampler parentBased(ComposableSampler rootSampler) {
+  public static ConsistentSampler parentBased(ComposableSampler rootSampler) {
     return new ConsistentParentBasedSampler(rootSampler);
   }
 
@@ -87,7 +86,7 @@ public abstract class ConsistentSampler implements Sampler {
    *     exponential smoothing)
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  static ComposableSampler rateLimited(
+  static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       LongSupplier nanoTimeSupplier) {
@@ -107,7 +106,7 @@ public abstract class ConsistentSampler implements Sampler {
    *     exponential smoothing)
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  static ComposableSampler rateLimited(
+  static ConsistentSampler rateLimited(
       ComposableSampler delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
@@ -117,117 +116,58 @@ public abstract class ConsistentSampler implements Sampler {
   }
 
   /**
-   * Returns a {@link ConsistentSampler} that samples a span if both this and the other given
-   * consistent sampler would sample the span.
-   *
-   * <p>If the other consistent sampler is the same as this, this consistent sampler will be
-   * returned.
-   *
-   * <p>The returned sampler takes care of setting the trace state correctly, which would not happen
-   * if the {@link #shouldSample(Context, String, String, SpanKind, Attributes, List)} method was
-   * called for each sampler individually. Also, the combined sampler is more efficient than
-   * evaluating the two samplers individually and combining both results afterwards.
-   *
-   * @param otherConsistentSampler the other consistent sampler
-   * @return the composed consistent sampler
-   */
-  public ConsistentSampler and(ConsistentSampler otherConsistentSampler) {
-    if (otherConsistentSampler == this) {
-      return this;
-    }
-    return new ConsistentComposedAndSampler(this, otherConsistentSampler);
-  }
-
-  /**
-   * Returns a {@link ConsistentSampler} that samples a span if this or the other given consistent
-   * sampler would sample the span.
-   *
-   * <p>If the other consistent sampler is the same as this, this consistent sampler will be
-   * returned.
-   *
-   * <p>The returned sampler takes care of setting the trace state correctly, which would not happen
-   * if the {@link #shouldSample(Context, String, String, SpanKind, Attributes, List)} method was
-   * called for each sampler individually. Also, the combined sampler is more efficient than
-   * evaluating the two samplers individually and combining both results afterwards.
-   *
-   * @param otherConsistentSampler the other consistent sampler
-   * @return the composed consistent sampler
-   */
-  public ConsistentSampler or(ConsistentSampler otherConsistentSampler) {
-    if (otherConsistentSampler == this) {
-      return this;
-    }
-    return new ConsistentComposedOrSampler(this, otherConsistentSampler);
-  }
-
-  /**
    * Returns a {@link ConsistentSampler} that queries its delegate Samplers for their sampling
    * threshold before determining what threshold to use. The intention is to make a positive
    * sampling decision if any of the delegates would make a positive decision.
    *
+   * <p>The returned sampler takes care of setting the trace state correctly, which would not happen
+   * if the {@link #shouldSample(Context, String, String, SpanKind, Attributes, List)} method was
+   * called for each sampler individually. Also, the combined sampler is more efficient than
+   * evaluating the samplers individually and combining the results afterwards.
+   *
    * @param delegates the delegate samplers, at least one delegate must be specified
    * @return the ConsistentAnyOf sampler
    */
-  public static ComposableSampler anyOf(ComposableSampler... delegates) {
+  public static ConsistentSampler anyOf(ComposableSampler... delegates) {
     return new ConsistentAnyOf(delegates);
   }
 
   @Override
-  public SamplingResult shouldSample(
+  public final SamplingResult shouldSample(
       Context parentContext,
       String traceId,
       String name,
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
-
     Span parentSpan = Span.fromContext(parentContext);
     SpanContext parentSpanContext = parentSpan.getSpanContext();
-    boolean isRoot = !parentSpanContext.isValid();
-    boolean isParentSampled = parentSpanContext.isSampled();
 
     TraceState parentTraceState = parentSpanContext.getTraceState();
     String otelTraceStateString = parentTraceState.get(OtelTraceState.TRACE_STATE_KEY);
     OtelTraceState otelTraceState = OtelTraceState.parse(otelTraceStateString);
 
-    long randomValue;
-    if (otelTraceState.hasValidRandomValue()) {
-      randomValue = otelTraceState.getRandomValue();
-    } else {
-      randomValue = OtelTraceState.parseHex(traceId, 18, 14, getInvalidRandomValue());
-    }
-
-    long parentThreshold;
-    if (otelTraceState.hasValidThreshold()) {
-      long threshold = otelTraceState.getThreshold();
-      if ((randomValue >= threshold) == isParentSampled) { // test invariant
-        parentThreshold = threshold;
-      } else {
-        parentThreshold = getInvalidThreshold();
-      }
-    } else {
-      parentThreshold = getInvalidThreshold();
-    }
-
-    // determine new threshold that is used for the sampling decision
-    long threshold = getThreshold(parentThreshold, isRoot);
+    SamplingIntent intent =
+        getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
+    long threshold = intent.getThreshold();
 
     // determine sampling decision
     boolean isSampled;
     if (isValidThreshold(threshold)) {
-      isSampled = (randomValue >= threshold);
-      if (isSampled) {
-        otelTraceState.setThreshold(threshold);
-      } else {
-        otelTraceState.invalidateThreshold();
-      }
-    } else {
-      isSampled = isParentSampled;
-      otelTraceState.invalidateThreshold();
+      long randomness = getRandomness(otelTraceState, traceId);
+      isSampled = threshold <= randomness;
+    } else { // DROP
+      isSampled = false;
     }
 
-    SamplingDecision samplingDecision =
-        isSampled ? SamplingDecision.RECORD_AND_SAMPLE : SamplingDecision.DROP;
+    SamplingDecision samplingDecision;
+    if (isSampled) {
+      samplingDecision = SamplingDecision.RECORD_AND_SAMPLE;
+      otelTraceState.setThreshold(threshold);
+    } else {
+      samplingDecision = SamplingDecision.DROP;
+      otelTraceState.invalidateThreshold();
+    }
 
     String newOtTraceState = otelTraceState.serialize();
 
@@ -240,31 +180,23 @@ public abstract class ConsistentSampler implements Sampler {
 
       @Override
       public Attributes getAttributes() {
-        return Attributes.empty();
+        return intent.getAttributes();
       }
 
       @Override
       public TraceState getUpdatedTraceState(TraceState parentTraceState) {
-        return parentTraceState.toBuilder()
+        return intent.updateTraceState(parentTraceState).toBuilder()
             .put(OtelTraceState.TRACE_STATE_KEY, newOtTraceState)
             .build();
       }
     };
   }
 
-  /**
-   * Returns the threshold that is used for the sampling decision.
-   *
-   * <p>NOTE: In future, further information like span attributes could be also added as arguments
-   * such that the sampling probability could be made dependent on those extra arguments. However,
-   * in any case the returned threshold value must not depend directly or indirectly on the random
-   * value. In particular this means that the parent sampled flag must not be used for the
-   * calculation of the threshold as the sampled flag depends itself on the random value.
-   *
-   * @param parentThreshold is the threshold (if known) that was used for a consistent sampling
-   *     decision by the parent
-   * @param isRoot is true for the root span
-   * @return the threshold to be used for the sampling decision
-   */
-  protected abstract long getThreshold(long parentThreshold, boolean isRoot);
+  private static long getRandomness(OtelTraceState otelTraceState, String traceId) {
+    if (otelTraceState.hasValidRandomValue()) {
+      return otelTraceState.getRandomValue();
+    } else {
+      return OtelTraceState.parseHex(traceId, 18, 14, getInvalidRandomValue());
+    }
+  }
 }

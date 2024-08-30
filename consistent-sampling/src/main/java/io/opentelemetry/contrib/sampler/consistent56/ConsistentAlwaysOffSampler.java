@@ -15,7 +15,7 @@ import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-final class ConsistentAlwaysOffSampler extends ComposableSampler {
+final class ConsistentAlwaysOffSampler extends ConsistentSampler {
 
   private static final ConsistentAlwaysOffSampler INSTANCE = new ConsistentAlwaysOffSampler();
 
@@ -26,7 +26,7 @@ final class ConsistentAlwaysOffSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

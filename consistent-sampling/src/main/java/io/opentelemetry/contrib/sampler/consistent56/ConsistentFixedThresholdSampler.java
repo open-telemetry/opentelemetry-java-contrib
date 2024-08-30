@@ -16,7 +16,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
 
-public class ConsistentFixedThresholdSampler extends ComposableSampler {
+public class ConsistentFixedThresholdSampler extends ConsistentSampler {
 
   private final long threshold;
   private final String description;
@@ -49,7 +49,7 @@ public class ConsistentFixedThresholdSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

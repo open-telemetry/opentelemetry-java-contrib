@@ -22,7 +22,7 @@ import javax.annotation.concurrent.Immutable;
  * uses the minimum threshold value received.
  */
 @Immutable
-final class ConsistentAnyOf extends ComposableSampler {
+final class ConsistentAnyOf extends ConsistentSampler {
 
   private final ComposableSampler[] delegates;
 
@@ -53,7 +53,7 @@ final class ConsistentAnyOf extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,

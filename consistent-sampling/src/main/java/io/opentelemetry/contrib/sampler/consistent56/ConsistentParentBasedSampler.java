@@ -23,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
  * sampling decision is delegated to the root sampler.
  */
 @Immutable
-final class ConsistentParentBasedSampler extends ComposableSampler {
+final class ConsistentParentBasedSampler extends ConsistentSampler {
 
   private final ComposableSampler rootSampler;
 
@@ -42,7 +42,7 @@ final class ConsistentParentBasedSampler extends ComposableSampler {
   }
 
   @Override
-  protected SamplingIntent getSamplingIntent(
+  public SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,
