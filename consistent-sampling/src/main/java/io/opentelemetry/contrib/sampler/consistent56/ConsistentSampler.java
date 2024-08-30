@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.function.LongSupplier;
 
 /** Abstract base class for consistent samplers. */
+@SuppressWarnings("InconsistentOverloads")
 public abstract class ConsistentSampler implements Sampler {
 
   /**
@@ -30,7 +31,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @return a sampler
    */
-  public static ConsistentSampler alwaysOn() {
+  public static ComposableSampler alwaysOn() {
     return ConsistentAlwaysOnSampler.getInstance();
   }
 
@@ -39,7 +40,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @return a sampler
    */
-  public static ConsistentSampler alwaysOff() {
+  public static ComposableSampler alwaysOff() {
     return ConsistentAlwaysOffSampler.getInstance();
   }
 
@@ -49,7 +50,7 @@ public abstract class ConsistentSampler implements Sampler {
    * @param samplingProbability the sampling probability
    * @return a sampler
    */
-  public static ConsistentSampler probabilityBased(double samplingProbability) {
+  public static ComposableSampler probabilityBased(double samplingProbability) {
     long threshold = ConsistentSamplingUtil.calculateThreshold(samplingProbability);
     return new ConsistentFixedThresholdSampler(threshold);
   }
@@ -60,7 +61,7 @@ public abstract class ConsistentSampler implements Sampler {
    *
    * @param rootSampler the root sampler
    */
-  public static ConsistentSampler parentBased(ConsistentSampler rootSampler) {
+  public static ComposableSampler parentBased(ComposableSampler rootSampler) {
     return new ConsistentParentBasedSampler(rootSampler);
   }
 
@@ -86,12 +87,33 @@ public abstract class ConsistentSampler implements Sampler {
    *     exponential smoothing)
    * @param nanoTimeSupplier a supplier for the current nano time
    */
-  static ConsistentSampler rateLimited(
+  static ComposableSampler rateLimited(
+      double targetSpansPerSecondLimit,
+      double adaptationTimeSeconds,
+      LongSupplier nanoTimeSupplier) {
+    return rateLimited(
+        alwaysOn(), targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that honors the delegate sampling decision as long as
+   * it seems to meet the target span rate. In case the delegate sampling rate seems to exceed the
+   * target, the sampler attempts to decrease the effective sampling probability dynamically to meet
+   * the target span rate.
+   *
+   * @param delegate the delegate sampler
+   * @param targetSpansPerSecondLimit the desired spans per second limit
+   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
+   *     exponential smoothing)
+   * @param nanoTimeSupplier a supplier for the current nano time
+   */
+  static ComposableSampler rateLimited(
+      ComposableSampler delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       LongSupplier nanoTimeSupplier) {
     return new ConsistentRateLimitingSampler(
-        targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
+        delegate, targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
   }
 
   /**
@@ -138,8 +160,20 @@ public abstract class ConsistentSampler implements Sampler {
     return new ConsistentComposedOrSampler(this, otherConsistentSampler);
   }
 
+  /**
+   * Returns a {@link ConsistentSampler} that queries its delegate Samplers for their sampling
+   * threshold before determining what threshold to use. The intention is to make a positive
+   * sampling decision if any of the delegates would make a positive decision.
+   *
+   * @param delegates the delegate samplers, at least one delegate must be specified
+   * @return the ConsistentAnyOf sampler
+   */
+  public static ComposableSampler anyOf(ComposableSampler... delegates) {
+    return new ConsistentAnyOf(delegates);
+  }
+
   @Override
-  public final SamplingResult shouldSample(
+  public SamplingResult shouldSample(
       Context parentContext,
       String traceId,
       String name,

@@ -5,11 +5,19 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateSamplingProbability;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
 import static java.util.Objects.requireNonNull;
 
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 import javax.annotation.concurrent.Immutable;
@@ -66,8 +74,26 @@ import javax.annotation.concurrent.Immutable;
  *   <li>{@code decayFactor} corresponds to {@code b(n)}
  *   <li>{@code adaptationTimeSeconds} corresponds to {@code -1 / ln(1 - a)}
  * </ul>
+ *
+ * <p>
+ *
+ * <p>The sampler also keeps track of the average sampling probability delivered by the delegate
+ * sampler, using exponential smoothing. Given the sequence of the observed probabilities {@code
+ * P(k)}, the exponentially smoothed values {@code S(k)} are calculated according to the following
+ * formula:
+ *
+ * <p>{@code S(0) = 1}
+ *
+ * <p>{@code S(n) = alpha * P(n) + (1 - alpha) * S(n-1)}, for {@code n > 0}
+ *
+ * <p>where {@code alpha} is the smoothing factor ({@code 0 < alpha < 1}).
+ *
+ * <p>The smoothing factor is chosen heuristically to be approximately proportional to the expected
+ * maximum volume of spans sampled within the adaptation time window, i.e.
+ *
+ * <p>{@code 1 / (adaptationTimeSeconds * targetSpansPerSecondLimit)}
  */
-final class ConsistentRateLimitingSampler extends ConsistentSampler {
+final class ConsistentRateLimitingSampler extends ComposableSampler {
 
   private static final double NANOS_IN_SECONDS = 1e-9;
 
@@ -75,12 +101,18 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private static final class State {
     private final double effectiveWindowCount;
     private final double effectiveWindowNanos;
+    private final double effectiveDelegateProbability;
     private final long lastNanoTime;
 
-    public State(double effectiveWindowCount, double effectiveWindowNanos, long lastNanoTime) {
+    public State(
+        double effectiveWindowCount,
+        double effectiveWindowNanos,
+        long lastNanoTime,
+        double effectiveDelegateProbability) {
       this.effectiveWindowCount = effectiveWindowCount;
       this.effectiveWindowNanos = effectiveWindowNanos;
       this.lastNanoTime = lastNanoTime;
+      this.effectiveDelegateProbability = effectiveDelegateProbability;
     }
   }
 
@@ -88,7 +120,9 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private final LongSupplier nanoTimeSupplier;
   private final double inverseAdaptationTimeNanos;
   private final double targetSpansPerNanosecondLimit;
+  private final double probabilitySmoothingFactor;
   private final AtomicReference<State> state;
+  private final ComposableSampler delegate;
 
   /**
    * Constructor.
@@ -99,9 +133,12 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   ConsistentRateLimitingSampler(
+      ComposableSampler delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       LongSupplier nanoTimeSupplier) {
+
+    this.delegate = requireNonNull(delegate);
 
     if (targetSpansPerSecondLimit < 0.0) {
       throw new IllegalArgumentException("Limit for sampled spans per second must be nonnegative!");
@@ -120,36 +157,88 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this.inverseAdaptationTimeNanos = NANOS_IN_SECONDS / adaptationTimeSeconds;
     this.targetSpansPerNanosecondLimit = NANOS_IN_SECONDS * targetSpansPerSecondLimit;
 
-    this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
+    double t = 1.0 / (targetSpansPerSecondLimit * adaptationTimeSeconds);
+    this.probabilitySmoothingFactor = t / (1.0 + t);
+
+    this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong(), 1.0));
   }
 
-  private State updateState(State oldState, long currentNanoTime) {
+  private State updateState(State oldState, long currentNanoTime, double delegateProbability) {
     if (currentNanoTime <= oldState.lastNanoTime) {
       return new State(
-          oldState.effectiveWindowCount + 1, oldState.effectiveWindowNanos, oldState.lastNanoTime);
+          oldState.effectiveWindowCount + 1,
+          oldState.effectiveWindowNanos,
+          oldState.lastNanoTime,
+          oldState.effectiveDelegateProbability);
     }
     long nanoTimeDelta = currentNanoTime - oldState.lastNanoTime;
     double decayFactor = Math.exp(-nanoTimeDelta * inverseAdaptationTimeNanos);
     double currentEffectiveWindowCount = oldState.effectiveWindowCount * decayFactor + 1;
     double currentEffectiveWindowNanos =
         oldState.effectiveWindowNanos * decayFactor + nanoTimeDelta;
-    return new State(currentEffectiveWindowCount, currentEffectiveWindowNanos, currentNanoTime);
+
+    double currentAverageProbability =
+        oldState.effectiveDelegateProbability * (1.0 - probabilitySmoothingFactor)
+            + delegateProbability * probabilitySmoothingFactor;
+
+    return new State(
+        currentEffectiveWindowCount,
+        currentEffectiveWindowNanos,
+        currentNanoTime,
+        currentAverageProbability);
   }
 
   @Override
-  protected long getThreshold(long parentThreshold, boolean isRoot) {
-    long currentNanoTime = nanoTimeSupplier.getAsLong();
-    State currentState = state.updateAndGet(s -> updateState(s, currentNanoTime));
+  protected SamplingIntent getSamplingIntent(
+      Context parentContext,
+      String name,
+      SpanKind spanKind,
+      Attributes attributes,
+      List<LinkData> parentLinks) {
+    double suggestedProbability;
+    long suggestedThreshold;
 
-    double samplingProbability =
-        (currentState.effectiveWindowNanos * targetSpansPerNanosecondLimit)
-            / currentState.effectiveWindowCount;
+    SamplingIntent delegateIntent =
+        delegate.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
+    long delegateThreshold = delegateIntent.getThreshold();
 
-    if (samplingProbability >= 1.) {
-      return getMinThreshold();
+    if (isValidThreshold(delegateThreshold)) {
+      double delegateProbability = calculateSamplingProbability(delegateThreshold);
+      long currentNanoTime = nanoTimeSupplier.getAsLong();
+      State currentState =
+          state.updateAndGet(s -> updateState(s, currentNanoTime, delegateProbability));
+
+      double targetMaxProbability =
+          (currentState.effectiveWindowNanos * targetSpansPerNanosecondLimit)
+              / currentState.effectiveWindowCount;
+
+      if (currentState.effectiveDelegateProbability > targetMaxProbability) {
+        suggestedProbability =
+            targetMaxProbability / currentState.effectiveDelegateProbability * delegateProbability;
+      } else {
+        suggestedProbability = delegateProbability;
+      }
+      suggestedThreshold = calculateThreshold(suggestedProbability);
     } else {
-      return calculateThreshold(samplingProbability);
+      suggestedThreshold = getInvalidThreshold();
     }
+
+    return new SamplingIntent() {
+      @Override
+      public long getThreshold() {
+        return suggestedThreshold;
+      }
+
+      @Override
+      public Attributes getAttributes() {
+        return delegateIntent.getAttributes();
+      }
+
+      @Override
+      public TraceState updateTraceState(TraceState previousState) {
+        return delegateIntent.updateTraceState(previousState);
+      }
+    };
   }
 
   @Override
