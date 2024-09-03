@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 /** A class for holding a pair (Predicate, ComposableSampler) */
 public final class PredicatedSampler {
 
-  public static PredicatedSampler create(Predicate predicate, ComposableSampler sampler) {
+  public static PredicatedSampler onMatch(Predicate predicate, ComposableSampler sampler) {
     return new PredicatedSampler(predicate, sampler);
   }
 

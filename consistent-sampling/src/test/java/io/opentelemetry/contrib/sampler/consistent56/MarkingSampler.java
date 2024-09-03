@@ -18,12 +18,12 @@ import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A consistent sampler that makes the same sampling decision as the delegate, but it additionally
- * sets a Span attribute according to the provided attribute key and value. This is used by unit
- * tests, but could be also offered as a general utility.
+ * A Composable that creates the same sampling intent as the delegate, but it additionally sets a
+ * Span attribute according to the provided attribute key and value. This is used by unit tests, but
+ * could be also offered as a general utility.
  */
 @Immutable
-final class MarkingSampler extends ConsistentSampler {
+final class MarkingSampler implements ComposableSampler {
 
   private final ComposableSampler delegate;
   private final AttributeKey<String> attributeKey;

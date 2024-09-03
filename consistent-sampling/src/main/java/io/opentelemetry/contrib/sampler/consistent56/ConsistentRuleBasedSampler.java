@@ -28,21 +28,7 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
   private final String description;
 
-  /**
-   * Constructs a new consistent rule based sampler using the given sequence of Predicates and
-   * delegate Samplers.
-   *
-   * @param spanKindToMatch the SpanKind for which the Sampler applies, null value indicates all
-   *     SpanKinds
-   * @param samplers the PredicatedSamplers to evaluate and query
-   */
-  public static ConsistentRuleBasedSampler create(
-      @Nullable SpanKind spanKindToMatch, PredicatedSampler... samplers) {
-    return new ConsistentRuleBasedSampler(spanKindToMatch, samplers);
-  }
-
-  private ConsistentRuleBasedSampler(
-      @Nullable SpanKind spanKindToMatch, PredicatedSampler... samplers) {
+  ConsistentRuleBasedSampler(@Nullable SpanKind spanKindToMatch, PredicatedSampler... samplers) {
     this.spanKindToMatch = spanKindToMatch;
     this.samplers = samplers;
 

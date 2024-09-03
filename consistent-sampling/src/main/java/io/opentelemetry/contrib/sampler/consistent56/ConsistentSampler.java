@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
 import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /** Abstract base class for consistent samplers. */
 @SuppressWarnings("InconsistentOverloads")
@@ -65,6 +66,19 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
   }
 
   /**
+   * Constructs a new consistent rule based sampler using the given sequence of Predicates and
+   * delegate Samplers.
+   *
+   * @param spanKindToMatch the SpanKind for which the Sampler applies, null value indicates all
+   *     SpanKinds
+   * @param samplers the PredicatedSamplers to evaluate and query
+   */
+  public static ConsistentRuleBasedSampler ruleBased(
+      @Nullable SpanKind spanKindToMatch, PredicatedSampler... samplers) {
+    return new ConsistentRuleBasedSampler(spanKindToMatch, samplers);
+  }
+
+  /**
    * Returns a new {@link ConsistentSampler} that attempts to adjust the sampling probability
    * dynamically to meet the target span rate.
    *
@@ -72,9 +86,26 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
    * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
    *     exponential smoothing)
    */
-  public static ConsistentSampler rateLimited(
+  static ConsistentSampler rateLimited(
       double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
-    return rateLimited(targetSpansPerSecondLimit, adaptationTimeSeconds, System::nanoTime);
+    return rateLimited(alwaysOn(), targetSpansPerSecondLimit, adaptationTimeSeconds);
+  }
+
+  /**
+   * Returns a new {@link ConsistentSampler} that honors the delegate sampling decision as long as
+   * it seems to meet the target span rate. In case the delegate sampling rate seems to exceed the
+   * target, the sampler attempts to decrease the effective sampling probability dynamically to meet
+   * the target span rate.
+   *
+   * @param delegate the delegate sampler
+   * @param targetSpansPerSecondLimit the desired spans per second limit
+   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
+   *     exponential smoothing)
+   */
+  public static ConsistentSampler rateLimited(
+      ComposableSampler delegate, double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+    return rateLimited(
+        delegate, targetSpansPerSecondLimit, adaptationTimeSeconds, System::nanoTime);
   }
 
   /**

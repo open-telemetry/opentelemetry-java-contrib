@@ -30,7 +30,7 @@ public interface Predicate {
   /*
    * Return a Predicate that will match ROOT Spans only
    */
-  static Predicate forRootSpan() {
+  static Predicate isRootSpan() {
     return (parentContext, name, spanKind, attributes, parentLinks) -> {
       Span parentSpan = Span.fromContext(parentContext);
       SpanContext parentSpanContext = parentSpan.getSpanContext();
@@ -41,9 +41,33 @@ public interface Predicate {
   /*
    * Return a Predicate that matches all Spans
    */
-  static Predicate forAnySpan() {
+  static Predicate anySpan() {
     return (parentContext, name, spanKind, attributes, parentLinks) -> true;
   }
 
-  // TO DO: allow for composing Predicates: and(p1,p2), or(p1,p2), and not(p1).
+  /*
+   * Return a Predicate that represents logical AND of the argument predicates
+   */
+  static Predicate and(Predicate p1, Predicate p2) {
+    return (parentContext, name, spanKind, attributes, parentLinks) ->
+        p1.spanMatches(parentContext, name, spanKind, attributes, parentLinks)
+            && p2.spanMatches(parentContext, name, spanKind, attributes, parentLinks);
+  }
+
+  /*
+   * Return a Predicate that represents logical negation of the argument predicate
+   */
+  static Predicate not(Predicate p) {
+    return (parentContext, name, spanKind, attributes, parentLinks) ->
+        !p.spanMatches(parentContext, name, spanKind, attributes, parentLinks);
+  }
+
+  /*
+   * Return a Predicate that represents logical OR of the argument predicates
+   */
+  static Predicate or(Predicate p1, Predicate p2) {
+    return (parentContext, name, spanKind, attributes, parentLinks) ->
+        p1.spanMatches(parentContext, name, spanKind, attributes, parentLinks)
+            || p2.spanMatches(parentContext, name, spanKind, attributes, parentLinks);
+  }
 }
