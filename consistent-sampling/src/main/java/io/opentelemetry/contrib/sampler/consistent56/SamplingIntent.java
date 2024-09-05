@@ -31,7 +31,7 @@ public interface SamplingIntent {
 
   /**
    * Given an input Tracestate and sampling Decision provide a Tracestate to be associated with the
-   * Span
+   * Span.
    *
    * @param parentState the TraceState of the parent Span
    * @return a TraceState
