@@ -33,7 +33,7 @@ final class ConsistentAnyOf extends ConsistentSampler {
    *
    * @param delegates the delegate samplers
    */
-  ConsistentAnyOf(ComposableSampler... delegates) {
+  ConsistentAnyOf(@Nullable ComposableSampler... delegates) {
     if (delegates.length == 0) {
       throw new IllegalArgumentException(
           "At least one delegate must be specified for ConsistentAnyOf");
