@@ -9,29 +9,31 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-* [AWS Resources](./aws-resources/README.md)
-* [AWS X-Ray SDK Support](./aws-xray/README.md)
-* [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
-* [Baggage Span Processor](./baggage-processor/README.md)
-* [zstd Compressor](./compressors/compressor-zstd/README.md)
-* [Consistent Sampling](./consistent-sampling/README.md)
-* [Disk Buffering](./disk-buffering/README.md)
-* [GCP Resources](./gcp-resources/README.md)
-* [Inferred Spans](./inferred-spans/README.md)
-* [JFR Connection](./jfr-connection/README.md)
-* [JFR Events](./jfr-events/README.md)
-* [JMX Metric Gatherer](./jmx-metrics/README.md)
-* [Kafka Support](./kafka-exporter/README.md)
-* [OpenTelemetry Maven Extension](./maven-extension/README.md)
-* [Micrometer MeterProvider](./micrometer-meter-provider/README.md)
-* [No-Op API](./noop-api/README.md)
-* [Intercept and Process Signals Globally](./processors/README.md)
-* [Prometheus Client Bridge](./prometheus-client-bridge/README.md)
-* [Resource Providers](./resource-providers/README.md)
-* [Runtime Attach](./runtime-attach/README.md)
-* [Samplers](./samplers/README.md)
-* [Span Stacktrace Capture](./span-stacktrace/README.md)
-* [Static Instrumenter](./static-instrumenter/README.md)
+| Status | Library                                                           |
+| ------ | ----------------------------------------------------------------- |
+| beta   | [AWS Resources](./aws-resources/README.md)                        |
+| stable | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
+| beta   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
+| beta   | [Baggage Span Processor](./baggage-processor/README.md)           |
+| beta   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
+| beta   | [Consistent Sampling](./consistent-sampling/README.md)            |
+| beta   | [Disk Buffering](./disk-buffering/README.md)                      |
+| beta   | [GCP Resources](./gcp-resources/README.md)                        |
+| beta   | [Inferred Spans](./inferred-spans/README.md)                      |
+| beta   | [JFR Connection](./jfr-connection/README.md)                      |
+| beta   | [JFR Events](./jfr-events/README.md)                              |
+| beta   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
+| beta   | [Kafka Support](./kafka-exporter/README.md)                       |
+| beta   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
+| beta   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
+| beta   | [No-Op API](./noop-api/README.md)                                 |
+| beta   | [Intercept and Process Signals Globally](./processors/README.md)  |
+| beta   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
+| beta   | [Resource Providers](./resource-providers/README.md)              |
+| beta   | [Runtime Attach](./runtime-attach/README.md)                      |
+| beta   | [Samplers](./samplers/README.md)                                  |
+| beta   | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
+| beta   | [Static Instrumenter](./static-instrumenter/README.md)            |
 
 ## Getting Started
 
