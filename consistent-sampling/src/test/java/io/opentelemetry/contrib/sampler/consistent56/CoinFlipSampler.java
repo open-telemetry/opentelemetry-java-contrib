@@ -22,7 +22,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class CoinFlipSampler extends ConsistentSampler {
 
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final SplittableRandomrandom = new SplittableRandom(0x160a50a2073e17e6L);
 
   private final ComposableSampler samplerA;
   private final ComposableSampler samplerB;
