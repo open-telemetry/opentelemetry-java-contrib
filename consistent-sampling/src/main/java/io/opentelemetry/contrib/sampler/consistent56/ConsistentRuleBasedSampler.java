@@ -32,14 +32,7 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
     this.spanKindToMatch = spanKindToMatch;
     this.samplers = samplers;
 
-    StringBuilder builder = new StringBuilder("ConsistentRuleBasedSampler{");
-    builder.append("span_kind=" + spanKindToMatch);
-    for (PredicatedSampler delegate : samplers) {
-      builder.append(",");
-      builder.append(delegate.getSampler().getDescription());
-    }
-    builder.append("}");
-    this.description = builder.toString();
+    this.description = Stream.of(samplers).collect(Collectors.joining(",", "ConsistentRuleBasedSampler{", "}"));
   }
 
   @Override
