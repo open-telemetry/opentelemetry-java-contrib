@@ -12,6 +12,8 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -28,11 +30,15 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
   private final String description;
 
-  ConsistentRuleBasedSampler(@Nullable SpanKind spanKindToMatch, @Nullable PredicatedSampler... samplers) {
+  ConsistentRuleBasedSampler(
+      @Nullable SpanKind spanKindToMatch, @Nullable PredicatedSampler... samplers) {
     this.spanKindToMatch = spanKindToMatch;
-    this.samplers = (samplers != null)?samplers:new PredicatedSampler[0];
+    this.samplers = (samplers != null) ? samplers : new PredicatedSampler[0];
 
-    this.description = Stream.of(samplers).collect(Collectors.joining(",", "ConsistentRuleBasedSampler{", "}"));
+    this.description =
+        Stream.of(samplers)
+            .map((s) -> s.getSampler().getDescription())
+            .collect(Collectors.joining(",", "ConsistentRuleBasedSampler{", "}"));
   }
 
   @Override

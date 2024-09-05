@@ -15,6 +15,9 @@ import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -41,7 +44,10 @@ final class ConsistentAnyOf extends ConsistentSampler {
 
     this.delegates = delegates;
 
-    this.description = Stream.of(delegates).map(Object::toString).collect(Collectors.joining(",", "ConsistentAnyOf{", "}"));
+    this.description =
+        Stream.of(delegates)
+            .map(Object::toString)
+            .collect(Collectors.joining(",", "ConsistentAnyOf{", "}"));
   }
 
   @Override

@@ -157,10 +157,33 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     this.inverseAdaptationTimeNanos = NANOS_IN_SECONDS / adaptationTimeSeconds;
     this.targetSpansPerNanosecondLimit = NANOS_IN_SECONDS * targetSpansPerSecondLimit;
 
-    double t = 1.0 / (targetSpansPerSecondLimit * adaptationTimeSeconds);
-    this.probabilitySmoothingFactor = t / (1.0 + t);
+    this.probabilitySmoothingFactor =
+        determineProbabilitySmoothingFactor(targetSpansPerSecondLimit, adaptationTimeSeconds);
 
     this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong(), 1.0));
+  }
+
+  private static double determineProbabilitySmoothingFactor(
+      double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+    // The probability smoothing factor alpha will be the weight for the newly observed
+    // probability P, while (1-alpha) will be the weight for the cumulative average probability
+    // observed so far (newC = P * alpha + oldC * (1 - alpha)). Any smoothing factor
+    // alpha from the interval (0.0, 1.0) is mathematically acceptable.
+    // However, we'd like the weight associated with the newly observed data point to be inversely
+    // proportional to the adaptation time (larger adaptation time will allow longer time for the
+    // cumulative probability to stabilize) and inversely proportional to the order of magnitude of
+    // the data points arriving within a given time unit (because with a lot of data points we can
+    // afford to give a smaller weight to each single one). We do not know the true rate of Spans
+    // coming in to get sampled, but we optimistically assume that the user knows what they are
+    // doing and that the targetSpansPerSecondLimit will be of similar order of magnitude.
+
+    // First approximation of the probability smoothing factor alpha.
+    double t = 1.0 / (targetSpansPerSecondLimit * adaptationTimeSeconds);
+
+    // We expect that t is a small number, but we have to make sure that alpha is smaller than 1.
+    // Therefore we apply a "bending" transformation which almost preserves small values, but makes
+    // sure that the result is within the expected interval.
+    return t / (1.0 + t);
   }
 
   private State updateState(State oldState, long currentNanoTime, double delegateProbability) {

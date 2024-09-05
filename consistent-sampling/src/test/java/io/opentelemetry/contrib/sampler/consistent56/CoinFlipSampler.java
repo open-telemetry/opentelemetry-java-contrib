@@ -12,7 +12,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
-import java.util.Random;
+import java.util.SplittableRandom;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -22,7 +22,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class CoinFlipSampler extends ConsistentSampler {
 
-  private static final SplittableRandomrandom = new SplittableRandom(0x160a50a2073e17e6L);
+  private static final SplittableRandom random = new SplittableRandom(0x160a50a2073e17e6L);
 
   private final ComposableSampler samplerA;
   private final ComposableSampler samplerB;
