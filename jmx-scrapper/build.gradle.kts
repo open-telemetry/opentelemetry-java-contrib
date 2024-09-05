@@ -19,9 +19,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
-
 }
-
 
 tasks {
   shadowJar {
