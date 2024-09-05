@@ -30,6 +30,6 @@ public interface ComposableSampler {
       Attributes attributes,
       List<LinkData> parentLinks);
 
-  /** Return the string providing a description of the implementation */
+  /** Return the string providing a description of the implementation. */
   String getDescription();
 }
