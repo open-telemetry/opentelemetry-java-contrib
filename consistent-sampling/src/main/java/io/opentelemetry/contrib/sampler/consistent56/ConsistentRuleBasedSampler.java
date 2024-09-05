@@ -28,7 +28,7 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
   private final String description;
 
-  ConsistentRuleBasedSampler(@Nullable SpanKind spanKindToMatch, PredicatedSampler... samplers) {
+  ConsistentRuleBasedSampler(@Nullable SpanKind spanKindToMatch, @Nullable PredicatedSampler... samplers) {
     this.spanKindToMatch = spanKindToMatch;
     this.samplers = samplers;
 
