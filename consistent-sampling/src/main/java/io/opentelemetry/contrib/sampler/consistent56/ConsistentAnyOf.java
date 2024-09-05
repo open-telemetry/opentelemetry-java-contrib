@@ -41,15 +41,7 @@ final class ConsistentAnyOf extends ConsistentSampler {
 
     this.delegates = delegates;
 
-    StringBuilder builder = new StringBuilder("ConsistentAnyOf{");
-    for (int i = 0; i < delegates.length; ++i) {
-      builder.append(delegates[i].getDescription());
-      if (i < delegates.length - 1) {
-        builder.append(",");
-      }
-    }
-    builder.append("}");
-    this.description = builder.toString();
+    this.description = Stream.of(delegates).map(Object::toString).collect(Collectors.joining(",", "ConsistentAnyOf{", "}"));
   }
 
   @Override
