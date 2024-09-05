@@ -14,7 +14,7 @@ public interface SamplingIntent {
 
   /**
    * Returns the suggested rejection threshold value. The returned value must be either from the
-   * interval [0, 2^26) or be equal to ConsistentSamplingUtil.getInvalidThreshold().
+   * interval [0, 2^56) or be equal to ConsistentSamplingUtil.getInvalidThreshold().
    *
    * @return a threshold value
    */
