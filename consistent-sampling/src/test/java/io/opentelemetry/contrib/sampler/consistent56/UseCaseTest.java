@@ -30,7 +30,6 @@ class UseCaseTest {
   private static final long nanoTime() {
     return nanoTime[0];
   }
-  ;
 
   private static void advanceTime(long nanosIncrement) {
     nanoTime[0] += nanosIncrement;
