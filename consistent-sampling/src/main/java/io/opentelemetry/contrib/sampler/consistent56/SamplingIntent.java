@@ -21,7 +21,7 @@ public interface SamplingIntent {
   long getThreshold();
 
   /**
-   * Returns a set of Attributes to be added to the Span in case of positive sampling decision
+   * Returns a set of Attributes to be added to the Span in case of positive sampling decision.
    *
    * @return Attributes
    */
