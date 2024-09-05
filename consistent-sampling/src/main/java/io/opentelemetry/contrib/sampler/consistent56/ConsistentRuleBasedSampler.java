@@ -30,7 +30,7 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
   ConsistentRuleBasedSampler(@Nullable SpanKind spanKindToMatch, @Nullable PredicatedSampler... samplers) {
     this.spanKindToMatch = spanKindToMatch;
-    this.samplers = samplers;
+    this.samplers = (samplers != null)?samplers:new PredicatedSampler[0];
 
     this.description = Stream.of(samplers).collect(Collectors.joining(",", "ConsistentRuleBasedSampler{", "}"));
   }
