@@ -13,6 +13,7 @@ application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
 repositories {
   mavenCentral()
+  mavenLocal()
   maven {
     setUrl("https://repo.terracotta.org/maven2")
     content {
