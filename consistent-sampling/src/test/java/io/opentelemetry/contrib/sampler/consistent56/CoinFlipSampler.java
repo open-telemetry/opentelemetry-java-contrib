@@ -16,8 +16,8 @@ import java.util.SplittableRandom;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A consistent sampler that delegates the decision randomly to one of its two delegates. Used by
- * unit tests.
+ * A consistent sampler that delegates the decision randomly, with a predefined probability, to one
+ * of its two delegates. Used by unit tests.
  */
 @Immutable
 final class CoinFlipSampler extends ConsistentSampler {
@@ -26,20 +26,36 @@ final class CoinFlipSampler extends ConsistentSampler {
 
   private final ComposableSampler samplerA;
   private final ComposableSampler samplerB;
-
+  private final double probability;
   private final String description;
 
   /**
-   * Constructs a new consistent CoinFlipSampler using the given two delegates.
+   * Constructs a new consistent CoinFlipSampler using the given two delegates with equal
+   * probability.
    *
    * @param samplerA the first delegate sampler
    * @param samplerB the second delegate sampler
    */
   CoinFlipSampler(ComposableSampler samplerA, ComposableSampler samplerB) {
+    this(samplerA, samplerB, 0.5);
+  }
+
+  /**
+   * Constructs a new consistent CoinFlipSampler using the given two delegates, and the probability
+   * to use the first one.
+   *
+   * @param probability the probability to use the first sampler
+   * @param samplerA the first delegate sampler
+   * @param samplerB the second delegate sampler
+   */
+  CoinFlipSampler(ComposableSampler samplerA, ComposableSampler samplerB, double probability) {
     this.samplerA = requireNonNull(samplerA);
     this.samplerB = requireNonNull(samplerB);
+    this.probability = probability;
     this.description =
-        "CoinFlipSampler{samplerA="
+        "CoinFlipSampler{p="
+            + (float) probability
+            + ",samplerA="
             + samplerA.getDescription()
             + ','
             + "samplerB="
@@ -55,7 +71,7 @@ final class CoinFlipSampler extends ConsistentSampler {
       Attributes attributes,
       List<LinkData> parentLinks) {
 
-    if (random.nextDouble() <= 0.5) {
+    if (random.nextDouble() < probability) {
       return samplerA.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
     } else {
       return samplerB.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
