@@ -29,6 +29,7 @@ class ConsistentRateLimitingSamplerTest {
 
   private long[] nanoTime;
   private LongSupplier nanoTimeSupplier;
+  private LongSupplier lowResolutionTimeSupplier;
   private Context parentContext;
   private String name;
   private SpanKind spanKind;
@@ -40,6 +41,7 @@ class ConsistentRateLimitingSamplerTest {
   void init() {
     nanoTime = new long[] {0L};
     nanoTimeSupplier = () -> nanoTime[0];
+    lowResolutionTimeSupplier = () -> (nanoTime[0] / 1000000) * 1000000; // 1ms resolution
     parentContext = Context.root();
     name = "name";
     spanKind = SpanKind.SERVER;
@@ -67,6 +69,47 @@ class ConsistentRateLimitingSamplerTest {
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
             delegate, targetSpansPerSecondLimit, adaptationTimeSeconds, nanoTimeSupplier);
+
+    long nanosBetweenSpans = TimeUnit.MICROSECONDS.toNanos(100);
+    int numSpans = 1000000;
+
+    List<Long> spanSampledNanos = new ArrayList<>();
+
+    for (int i = 0; i < numSpans; ++i) {
+      advanceTime(nanosBetweenSpans);
+      SamplingResult samplingResult =
+          sampler.shouldSample(
+              parentContext,
+              generateRandomTraceId(random),
+              name,
+              spanKind,
+              attributes,
+              parentLinks);
+      if (SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision())) {
+        spanSampledNanos.add(getCurrentTimeNanos());
+      }
+    }
+
+    long numSampledSpansInLast5Seconds =
+        spanSampledNanos.stream()
+            .filter(x -> x > TimeUnit.SECONDS.toNanos(95) && x <= TimeUnit.SECONDS.toNanos(100))
+            .count();
+
+    assertThat(numSampledSpansInLast5Seconds / 5.)
+        .isCloseTo(targetSpansPerSecondLimit, Percentage.withPercentage(5));
+  }
+
+  @Test
+  void testConstantRateLowResolution() {
+
+    double targetSpansPerSecondLimit = 1000;
+    double adaptationTimeSeconds = 5;
+
+    ComposableSampler delegate =
+        new CoinFlipSampler(ConsistentSampler.alwaysOff(), ConsistentSampler.probabilityBased(0.8));
+    ConsistentSampler sampler =
+        ConsistentSampler.rateLimited(
+            delegate, targetSpansPerSecondLimit, adaptationTimeSeconds, lowResolutionTimeSupplier);
 
     long nanosBetweenSpans = TimeUnit.MICROSECONDS.toNanos(100);
     int numSpans = 1000000;

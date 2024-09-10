@@ -187,22 +187,25 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   }
 
   private State updateState(State oldState, long currentNanoTime, double delegateProbability) {
-    if (currentNanoTime <= oldState.lastNanoTime) {
+    double currentAverageProbability =
+        oldState.effectiveDelegateProbability * (1.0 - probabilitySmoothingFactor)
+            + delegateProbability * probabilitySmoothingFactor;
+
+    long nanoTimeDelta = currentNanoTime - oldState.lastNanoTime;
+    if (nanoTimeDelta <= 0.0) {
+      // Low clock resolution or clock jumping backwards.
+      // Assume time delta equal to zero.
       return new State(
           oldState.effectiveWindowCount + 1,
           oldState.effectiveWindowNanos,
           oldState.lastNanoTime,
-          oldState.effectiveDelegateProbability);
+          currentAverageProbability);
     }
-    long nanoTimeDelta = currentNanoTime - oldState.lastNanoTime;
+
     double decayFactor = Math.exp(-nanoTimeDelta * inverseAdaptationTimeNanos);
     double currentEffectiveWindowCount = oldState.effectiveWindowCount * decayFactor + 1;
     double currentEffectiveWindowNanos =
         oldState.effectiveWindowNanos * decayFactor + nanoTimeDelta;
-
-    double currentAverageProbability =
-        oldState.effectiveDelegateProbability * (1.0 - probabilitySmoothingFactor)
-            + delegateProbability * probabilitySmoothingFactor;
 
     return new State(
         currentEffectiveWindowCount,
