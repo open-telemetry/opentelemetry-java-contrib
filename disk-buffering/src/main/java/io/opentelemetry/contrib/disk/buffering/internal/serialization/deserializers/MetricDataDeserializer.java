@@ -28,4 +28,9 @@ public final class MetricDataDeserializer implements SignalDeserializer<MetricDa
       throw new IllegalArgumentException(e);
     }
   }
+
+  @Override
+  public String signalType() {
+    return "metrics";
+  }
 }

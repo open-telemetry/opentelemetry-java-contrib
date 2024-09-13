@@ -24,5 +24,11 @@ public interface SignalDeserializer<SDK_ITEM> {
     return LogRecordDataDeserializer.getInstance();
   }
 
+  /** Deserializes the given byte array into a list of telemetry items. */
   List<SDK_ITEM> deserialize(byte[] source);
+
+  /** Returns the name of the type of signal -- one of "metrics", "traces", or "logs". */
+  default String signalType() {
+    return "unknown";
+  }
 }

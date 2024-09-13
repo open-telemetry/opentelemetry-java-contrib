@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public final class FolderManager {
   private final File folder;
@@ -42,6 +43,7 @@ public final class FolderManager {
     return null;
   }
 
+  @NotNull
   public synchronized WritableFile createWritableFile() throws IOException {
     long systemCurrentTimeMillis = nowMillis(clock);
     File[] existingFiles = folder.listFiles();

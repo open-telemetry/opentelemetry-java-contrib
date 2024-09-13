@@ -18,6 +18,9 @@ public abstract class StorageConfiguration {
   /** The root storage location for buffered telemetry. */
   public abstract File getRootDir();
 
+  /** Returns true if the storage has been configured with debug verbosity enabled. */
+  public abstract boolean isDebugEnabled();
+
   /** The max amount of time a file can receive new data. */
   public abstract long getMaxFileAgeForWriteMillis();
 
@@ -62,6 +65,7 @@ public abstract class StorageConfiguration {
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
         .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18))
+        .setDebugEnabled(false)
         .setTemporaryFileProvider(fileProvider);
   }
 
@@ -80,6 +84,8 @@ public abstract class StorageConfiguration {
     public abstract Builder setTemporaryFileProvider(TemporaryFileProvider value);
 
     public abstract Builder setRootDir(File rootDir);
+
+    public abstract Builder setDebugEnabled(boolean debugEnabled);
 
     public abstract StorageConfiguration build();
   }

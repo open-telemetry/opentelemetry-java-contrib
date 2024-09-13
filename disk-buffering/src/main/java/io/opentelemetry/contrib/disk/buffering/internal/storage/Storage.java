@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static java.util.logging.Level.WARNING;
+
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
@@ -13,17 +16,23 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 public final class Storage implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
+  private static final Logger logger = Logger.getLogger(FromDiskExporterImpl.class.getName());
+
   private final FolderManager folderManager;
+  private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   @Nullable private WritableFile writableFile;
   @Nullable private ReadableFile readableFile;
 
-  public Storage(FolderManager folderManager) {
+  public Storage(FolderManager folderManager, boolean debugEnabled) {
     this.folderManager = folderManager;
+    this.debugEnabled = debugEnabled;
   }
 
   public static StorageBuilder builder() {
@@ -42,13 +51,16 @@ public final class Storage implements Closeable {
 
   private boolean write(byte[] item, int attemptNumber) throws IOException {
     if (isClosed.get()) {
+      log("Refusing to write to storage after being closed.");
       return false;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
+      log("Max number of attempts to write buffered data exceeded.", WARNING);
       return false;
     }
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
+      log("Created new writableFile: " + writableFile);
     }
     WritableResult result = writableFile.append(item);
     if (result != WritableResult.SUCCEEDED) {
@@ -72,17 +84,22 @@ public final class Storage implements Closeable {
   private ReadableResult readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
+      log("Refusing to read from storage after being closed.");
       return ReadableResult.FAILED;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
+      log("Maximum number of attempts to read and process buffered data exceeded.", WARNING);
       return ReadableResult.FAILED;
     }
     if (readableFile == null) {
+      log("Obtaining a new readableFile from the folderManager.");
       readableFile = folderManager.getReadableFile();
       if (readableFile == null) {
+        log("Unable to get or create readable file.");
         return ReadableResult.FAILED;
       }
     }
+    log("Attempting to read data from " + readableFile);
     ReadableResult result = readableFile.readAndProcess(processing);
     switch (result) {
       case SUCCEEDED:
@@ -95,8 +112,19 @@ public final class Storage implements Closeable {
     }
   }
 
+  private void log(String msg) {
+    log(msg, Level.INFO);
+  }
+
+  private void log(String msg, Level level) {
+    if (debugEnabled) {
+      logger.log(level, msg);
+    }
+  }
+
   @Override
   public void close() throws IOException {
+    log("Closing disk buffering storage.");
     if (isClosed.compareAndSet(false, true)) {
       if (writableFile != null) {
         writableFile.close();

@@ -28,4 +28,9 @@ public final class LogRecordDataDeserializer implements SignalDeserializer<LogRe
       throw new IllegalArgumentException(e);
     }
   }
+
+  @Override
+  public String signalType() {
+    return "logs";
+  }
 }

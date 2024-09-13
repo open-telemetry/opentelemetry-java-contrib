@@ -28,4 +28,9 @@ public final class SpanDataDeserializer implements SignalDeserializer<SpanData> 
       throw new IllegalArgumentException(e);
     }
   }
+
+  @Override
+  public String signalType() {
+    return "spans";
+  }
 }
