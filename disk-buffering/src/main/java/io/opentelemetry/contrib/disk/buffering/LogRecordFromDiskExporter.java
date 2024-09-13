@@ -25,6 +25,7 @@ public class LogRecordFromDiskExporter implements FromDiskExporter {
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofLogs())
             .setExportFunction(exporter::export)
+            .setDebugEnabled(config.isDebugEnabled())
             .build();
     return new LogRecordFromDiskExporter(delegate);
   }

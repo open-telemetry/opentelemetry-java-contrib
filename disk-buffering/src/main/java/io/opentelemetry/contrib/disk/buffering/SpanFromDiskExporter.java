@@ -25,6 +25,7 @@ public class SpanFromDiskExporter implements FromDiskExporter {
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofSpans())
             .setExportFunction(exporter::export)
+            .setDebugEnabled(config.isDebugEnabled())
             .build();
     return new SpanFromDiskExporter(delegate);
   }

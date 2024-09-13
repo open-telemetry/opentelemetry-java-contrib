@@ -20,14 +20,17 @@ public class ToDiskExporter<EXPORT_DATA> {
   private final Storage storage;
   private final SignalSerializer<EXPORT_DATA> serializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
+  private final boolean debugEnabled;
 
   ToDiskExporter(
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      Storage storage) {
+      Storage storage,
+      boolean debugEnabled) {
     this.serializer = serializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
+    this.debugEnabled = debugEnabled;
   }
 
   public static <T> ToDiskExporterBuilder<T> builder() {
@@ -35,19 +38,31 @@ public class ToDiskExporter<EXPORT_DATA> {
   }
 
   public CompletableResultCode export(Collection<EXPORT_DATA> data) {
-    logger.log(Level.FINER, "Intercepting exporter batch.");
+    log("Intercepting exporter batch.", Level.FINER);
     try {
       if (storage.write(serializer.serialize(data))) {
         return CompletableResultCode.ofSuccess();
       }
-      logger.log(Level.INFO, "Could not store batch in disk. Exporting it right away.");
+      log("Could not store batch in disk. Exporting it right away.");
       return exportFunction.apply(data);
     } catch (IOException e) {
-      logger.log(
-          Level.WARNING,
-          "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
-          e);
+      if (debugEnabled) {
+        logger.log(
+            Level.WARNING,
+            "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
+            e);
+      }
       return exportFunction.apply(data);
+    }
+  }
+
+  private void log(String msg) {
+    log(msg, Level.INFO);
+  }
+
+  private void log(String msg, Level level) {
+    if (debugEnabled) {
+      logger.log(level, msg);
     }
   }
 

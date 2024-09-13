@@ -66,6 +66,11 @@ public class FromDiskExporterBuilder<T> {
   }
 
   @CanIgnoreReturnValue
+  public FromDiskExporterBuilder<T> enableDebug() {
+    return setDebugEnabled(true);
+  }
+
+  @CanIgnoreReturnValue
   public FromDiskExporterBuilder<T> setDebugEnabled(boolean debugEnabled) {
     this.debugEnabled = debugEnabled;
     return this;

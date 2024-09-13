@@ -25,6 +25,7 @@ public class MetricFromDiskExporter implements FromDiskExporter {
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofMetrics())
             .setExportFunction(exporter::export)
+            .setDebugEnabled(config.isDebugEnabled())
             .build();
     return new MetricFromDiskExporter(delegate);
   }
