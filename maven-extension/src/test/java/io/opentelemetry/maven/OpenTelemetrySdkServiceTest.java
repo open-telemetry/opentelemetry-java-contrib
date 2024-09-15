@@ -60,8 +60,8 @@ public class OpenTelemetrySdkServiceTest {
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
-      assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isEqualTo(
-          "http://example.com:4317");
+      assertThat(configProperties.getString("otel.exporter.otlp.endpoint"))
+          .isEqualTo("http://example.com:4317");
       assertThat(configProperties.getString("otel.traces.exporter")).isNull();
       assertThat(configProperties.getString("otel.metrics.exporter")).isNull();
       assertThat(configProperties.getString("otel.logs.exporter")).isNull();
@@ -82,8 +82,8 @@ public class OpenTelemetrySdkServiceTest {
 
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
       assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isNull();
-      assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint")).isEqualTo(
-          "http://example.com:4317/");
+      assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint"))
+          .isEqualTo("http://example.com:4317/");
       assertThat(configProperties.getString("otel.traces.exporter")).isNull();
       assertThat(configProperties.getString("otel.metrics.exporter")).isEqualTo("none");
       assertThat(configProperties.getString("otel.logs.exporter")).isEqualTo("none");
@@ -106,9 +106,8 @@ public class OpenTelemetrySdkServiceTest {
 
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
       assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isNull();
-      assertThat(
-          configProperties.getString("otel.exporter.otlp.traces.endpoint")).isEqualTo(
-          "http://example.com:4317/");
+      assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint"))
+          .isEqualTo("http://example.com:4317/");
       assertThat(configProperties.getString("otel.traces.exporter")).isNull();
       assertThat(configProperties.getString("otel.metrics.exporter")).isEqualTo("none");
       assertThat(configProperties.getString("otel.logs.exporter")).isEqualTo("none");

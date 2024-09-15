@@ -59,44 +59,52 @@ public final class OpenTelemetrySdkService implements Closeable {
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
-            .addPropertiesCustomizer(configProperties -> {
-              // The OTel SDK by default sends data to the OTLP gRPC endpoint at localhost:4317.
-              // Change this behavior to disable by default the OTel SDK in the Maven extension so
-              // that it must be explicitly enabled by the user.
-              // To change this default behavior, we set "otel.[traces,metrics,logs].exporter" to
-              // "none" if the endpoint has not been specified
-              if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
-                Map<String, String> properties = new HashMap<>();
-                if (Objects.equals("otlp",
-                    configProperties.getString("otel.traces.exporter", "otlp"))
-                    && configProperties.getString("otel.exporter.otlp.traces.endpoint") == null) {
-                  properties.put("otel.traces.exporter", "none");
-                }
-                if (Objects.equals("otlp",
-                    configProperties.getString("otel.metrics.exporter", "otlp"))
-                    && configProperties.getString("otel.exporter.otlp.metrics.endpoint") == null) {
-                  properties.put("otel.metrics.exporter", "none");
-                }
-                if (Objects.equals("otlp",
-                    configProperties.getString("otel.logs.exporter", "otlp"))
-                    && configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
-                  properties.put("otel.logs.exporter", "none");
-                }
-                return properties;
-              } else {
-                return Collections.emptyMap();
-              }
-            })
-            .addPropertiesCustomizer(config -> {
-              // keep a reference to the computed config properties for future use in the extension
-              this.configProperties = config;
-              return Collections.emptyMap();
-            })
-            .addResourceCustomizer((res, configProperties) -> {
-              // keep a reference to the computed Resource for future use in the extension
-              this.resource = Resource.builder().putAll(res).build();
-              return this.resource;
-            })
+            .addPropertiesCustomizer(
+                configProperties -> {
+                  // The OTel SDK by default sends data to the OTLP gRPC endpoint at localhost:4317.
+                  // Change this behavior to disable by default the OTel SDK in the Maven extension
+                  // so
+                  // that it must be explicitly enabled by the user.
+                  // To change this default behavior, we set "otel.[traces,metrics,logs].exporter"
+                  // to
+                  // "none" if the endpoint has not been specified
+                  if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
+                    Map<String, String> properties = new HashMap<>();
+                    if (Objects.equals(
+                            "otlp", configProperties.getString("otel.traces.exporter", "otlp"))
+                        && configProperties.getString("otel.exporter.otlp.traces.endpoint")
+                            == null) {
+                      properties.put("otel.traces.exporter", "none");
+                    }
+                    if (Objects.equals(
+                            "otlp", configProperties.getString("otel.metrics.exporter", "otlp"))
+                        && configProperties.getString("otel.exporter.otlp.metrics.endpoint")
+                            == null) {
+                      properties.put("otel.metrics.exporter", "none");
+                    }
+                    if (Objects.equals(
+                            "otlp", configProperties.getString("otel.logs.exporter", "otlp"))
+                        && configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
+                      properties.put("otel.logs.exporter", "none");
+                    }
+                    return properties;
+                  } else {
+                    return Collections.emptyMap();
+                  }
+                })
+            .addPropertiesCustomizer(
+                config -> {
+                  // keep a reference to the computed config properties for future use in the
+                  // extension
+                  this.configProperties = config;
+                  return Collections.emptyMap();
+                })
+            .addResourceCustomizer(
+                (res, configProperties) -> {
+                  // keep a reference to the computed Resource for future use in the extension
+                  this.resource = Resource.builder().putAll(res).build();
+                  return this.resource;
+                })
             .disableShutdownHook()
             .build();
 
