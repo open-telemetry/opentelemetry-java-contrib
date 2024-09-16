@@ -20,12 +20,16 @@ section below to configure it.
 ### Manual SDK setup
 
 Here is an example registration of `StackTraceSpanProcessor` to capture stack trace for all
-the spans that have a duration >= 1000 ns. The spans that have an `ignorespan` string attribute
+the spans that have a duration >= 1 ms. The spans that have an `ignorespan` string attribute
 will be ignored.
 
 ```java
 InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
 SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
+
+Map<String, String> configMap = new HashMap<>();
+configMap.put("otel.java.experimental.span-stacktrace.min.duration", "1ms");
+ConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
 
 Predicate<ReadableSpan> filterPredicate = readableSpan -> {
   if(readableSpan.getAttribute(AttributeKey.stringKey("ignorespan")) != null){
@@ -34,11 +38,19 @@ Predicate<ReadableSpan> filterPredicate = readableSpan -> {
   return true;
 };
 SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-    .addSpanProcessor(new StackTraceSpanProcessor(exportProcessor, 1000, filterPredicate))
+    .addSpanProcessor(new StackTraceSpanProcessor(exportProcessor, config, filterPredicate))
     .build();
 
 OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
 ```
+
+### Configuration
+
+The `otel.java.experimental.span-stacktrace.min.duration` configuration option (defaults to 5ms) allows configuring
+the minimal duration for which spans should have a stacktrace captured.
+
+Setting `otel.java.experimental.span-stacktrace.min.duration` to zero will include all spans, and using a negative
+value will disable the feature.
 
 ## Component owners
 
