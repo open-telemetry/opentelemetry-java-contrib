@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class LogRecordFromDiskExporter implements FromDiskExporter {
       LogRecordExporter exporter, StorageConfiguration config) throws IOException {
     FromDiskExporterImpl<LogRecordData> delegate =
         FromDiskExporterImpl.<LogRecordData>builder()
-            .setFolderName("logs")
+            .setFolderName(SignalTypes.logs.name())
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofLogs())
             .setExportFunction(exporter::export)

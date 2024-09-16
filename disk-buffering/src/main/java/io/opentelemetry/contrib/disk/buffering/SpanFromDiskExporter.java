@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class SpanFromDiskExporter implements FromDiskExporter {
       throws IOException {
     FromDiskExporterImpl<SpanData> delegate =
         FromDiskExporterImpl.<SpanData>builder()
-            .setFolderName("spans")
+            .setFolderName(SignalTypes.spans.name())
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofSpans())
             .setExportFunction(exporter::export)
