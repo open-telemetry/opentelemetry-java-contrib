@@ -12,6 +12,8 @@ To use:
 * Follow the [instructions](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/incubator/README.md#file-configuration) to configure OpenTelemetry with declarative configuration.
 * Configure the `.tracer_provider.sampler` to include the `rule_based_routing` sampler.
 
+NOTE: Not yet available for use with the OTEL java agent, but should be in the near future. Please check back for updates.
+
 Schema for `rule_based_routing` sampler:
 
 ```yaml
@@ -34,11 +36,11 @@ rules:
 
 * The `parent_based` sampler samples based on the sampling status of the parent.
 * Or, if there is no parent, delegates to the `rule_based_routing` sampler.
-* The `rule_based_routing` sampler drops spans where `kind=SERVER` and `url.full matches .*/actuator.*`, else it samples and records.
+* The `rule_based_routing` sampler drops spans where `kind=SERVER` and `url.full matches /actuator.*`, else it samples and records.
 
 ```yaml
 // ... the rest of the configuration file is omitted for brevity
-// For more example see: https://github.com/open-telemetry/opentelemetry-configuration/blob/main/README.md#starter-templates
+// For more examples see: https://github.com/open-telemetry/opentelemetry-configuration/blob/main/README.md#starter-templates
 tracer_provider:
   sampler:
     parent_based:
