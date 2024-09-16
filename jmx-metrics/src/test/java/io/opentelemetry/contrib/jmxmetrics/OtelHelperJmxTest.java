@@ -132,7 +132,7 @@ class OtelHelperJmxTest {
   }
 
   private static OtelHelper setupHelper(JmxConfig config) throws Exception {
-    return new OtelHelper(new JmxClient(config), new GroovyMetricEnvironment(config));
+    return new OtelHelper(new JmxClient(config), new GroovyMetricEnvironment(config), false);
   }
 
   private static void verifyClient(Properties props) throws Exception {

@@ -45,6 +45,7 @@ class InstrumentHelper {
     private final Map<String, Closure> labelFuncs
     private final Closure instrument
     private final GroovyMetricEnvironment metricEnvironment
+    private final boolean aggregateAcrossMBeans
 
     /**
      * An InstrumentHelper provides the ability to easily create and update {@link io.opentelemetry.api.metrics.Instrument}
@@ -63,8 +64,9 @@ class InstrumentHelper {
      *        (e.g. new OtelHelper().&doubleValueRecorder)
      * @param metricenvironment - The {@link GroovyMetricEnvironment} used to register callbacks onto the SDK meter for
      *        batch callbacks used to handle {@link CompositeData}
+     * @param aggregateAcrossMBeans - Whether to aggregate multiple MBeans together before recording.
      */
-    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment) {
+    InstrumentHelper(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure<?>> labelFuncs, Map<String, Map<String, Closure<?>>> MBeanAttributes, Closure<?> instrument, GroovyMetricEnvironment metricEnvironment, boolean aggregateAcrossMBeans) {
         this.mBeanHelper = mBeanHelper
         this.instrumentName = instrumentName
         this.description = description
@@ -73,6 +75,7 @@ class InstrumentHelper {
         this.mBeanAttributes = MBeanAttributes
         this.instrument = instrument
         this.metricEnvironment = metricEnvironment
+        this.aggregateAcrossMBeans = aggregateAcrossMBeans
     }
 
     void update() {
@@ -181,18 +184,38 @@ class InstrumentHelper {
         return labels
     }
 
+    private static String getAggregationKey(String instrumentName, Map<String, String> labels) {
+        def labelsKey = labels.sort().collect { key, value -> "${key}:${value}" }.join(";")
+        return "${instrumentName}/${labelsKey}"
+    }
+
     // Create a closure for simple attributes that will retrieve mbean information on
     // callback to ensure that metrics are collected on request
     private Closure prepareUpdateClosure(List<GroovyMBean> mbeans, attributes) {
         return { result ->
+            def aggregations = [:] as Map<String, Aggregation>
+            boolean requireAggregation = aggregateAcrossMBeans && mbeans.size() > 1 && instrumentIsValue(instrument)
             [mbeans, attributes].combinations().each { pair ->
                 def (mbean, attribute) = pair
                 def value = MBeanHelper.getBeanAttribute(mbean, attribute)
                 if (value != null) {
                     def labels = getLabels(mbean, labelFuncs, mBeanAttributes[attribute])
-                    logger.fine("Recording ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
-                    recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
+                    if (requireAggregation) {
+                        def key = getAggregationKey(instrumentName, labels)
+                        if (aggregations[key] == null) {
+                            aggregations[key] = new Aggregation(labels)
+                        }
+                        logger.fine("Aggregating ${mbean.name()} ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+                        aggregations[key].add(value)
+                    } else {
+                        logger.fine("Recording ${mbean.name()} ${instrumentName} - ${instrument.method} w/ ${value} - ${labels}")
+                        recordDataPoint(instrument, result, value, GroovyMetricEnvironment.mapToAttributes(labels))
+                    }
                 }
+            }
+            aggregations.each { entry ->
+                logger.fine("Recording ${instrumentName} - ${instrument.method} - w/ ${entry.value.value} - ${entry.value.labels}")
+                recordDataPoint(instrument, result, entry.value.value, GroovyMetricEnvironment.mapToAttributes(entry.value.labels))
             }
         }
     }
@@ -253,6 +276,14 @@ class InstrumentHelper {
     }
 
     @PackageScope
+    static boolean instrumentIsValue(inst) {
+        return [
+            "doubleValueCallback",
+            "longValueCallback"
+        ].contains(inst.method)
+    }
+
+    @PackageScope
     static boolean instrumentIsCounter(inst) {
         return [
           "doubleCounter",
@@ -260,5 +291,19 @@ class InstrumentHelper {
           "longCounter",
           "longUpDownCounter"
         ].contains(inst.method)
+    }
+
+    static class Aggregation {
+        private final Map<String, String> labels
+        private def value
+
+        Aggregation(Map<String, String> labels) {
+            this.labels = labels
+            this.value = 0.0
+        }
+
+        void add(value) {
+            this.value += value
+        }
     }
 }
