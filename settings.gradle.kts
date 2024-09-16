@@ -12,8 +12,6 @@ plugins {
 
 dependencyResolutionManagement {
   repositories {
-    // TODO: remove mavenLocal() before merging
-    mavenLocal()
     mavenCentral()
   }
 }

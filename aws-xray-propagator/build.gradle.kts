@@ -13,7 +13,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  // TODO: remove -SNAPSHOT before merging
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator:1.42.0-alpha-SNAPSHOT")
+
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.3")
 }
