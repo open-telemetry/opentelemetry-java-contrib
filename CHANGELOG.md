@@ -24,6 +24,11 @@
 - Add option to aggregate across multiple MBeans
   ([#1366](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1366))
 
+### Samplers
+
+- Add declarative config support for `RuleBasedRoutingSampler`
+  ([#1440](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1440))
+
 ### Span stack traces
 
 - Add config option `otel.java.experimental.span-stacktrace.min.duration`
