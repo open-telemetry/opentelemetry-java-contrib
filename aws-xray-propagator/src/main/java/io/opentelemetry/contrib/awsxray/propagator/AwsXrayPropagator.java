@@ -169,6 +169,11 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     return getContextFromHeader(context, carrier, getter);
   }
 
+  @Override
+  public String toString() {
+    return "AwsXrayPropagator";
+  }
+
   private static <C> Context getContextFromHeader(
       Context context, @Nullable C carrier, TextMapGetter<C> getter) {
     String traceHeader = getter.get(carrier, TRACE_HEADER_KEY);
