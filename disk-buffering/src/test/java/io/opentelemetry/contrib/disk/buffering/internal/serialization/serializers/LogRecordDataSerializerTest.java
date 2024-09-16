@@ -6,12 +6,12 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.BaseSignalSerializerTest;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Log body"))
+          .setBodyValue(Value.of("Log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -36,7 +36,7 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(Attributes.empty())
-          .setBody(Body.string("Log body"))
+          .setBodyValue(Value.of("Log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("")
           .setTimestampEpochNanos(100L)
