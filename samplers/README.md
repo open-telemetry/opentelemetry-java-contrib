@@ -59,6 +59,7 @@ tracer_provider:
 
 ## Component owners
 
+- [Jack Berg](https://github.com/jack-berg), New Relic
 - [Trask Stalnaker](https://github.com/trask), Microsoft
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
