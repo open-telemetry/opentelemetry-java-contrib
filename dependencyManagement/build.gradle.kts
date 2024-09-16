@@ -12,7 +12,7 @@ val otelInstrumentationVersion = "2.8.0-alpha"
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.17.2",
   "com.google.guava:guava-bom:33.3.0-jre",
-  "com.linecorp.armeria:armeria-bom:1.30.0",
+  "com.linecorp.armeria:armeria-bom:1.30.1",
   "org.junit:junit-bom:5.11.0",
   "io.grpc:grpc-bom:1.66.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
@@ -21,7 +21,7 @@ val DEPENDENCY_BOMS = listOf(
 
 val autoServiceVersion = "1.1.1"
 val autoValueVersion = "1.11.0"
-val errorProneVersion = "2.30.0"
+val errorProneVersion = "2.31.0"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.11.0"
 val slf4jVersion = "2.0.16"
