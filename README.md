@@ -35,7 +35,7 @@ feature or via instrumentation, this project is hopefully for you.
 | beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
 | alpha   | [Static Instrumenter](./static-instrumenter/README.md)            |
 
-* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
+\* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
 To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
 On reaching stable status, the `otel.stable` value in `gradle.properties` should be set to `true`.
 Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
