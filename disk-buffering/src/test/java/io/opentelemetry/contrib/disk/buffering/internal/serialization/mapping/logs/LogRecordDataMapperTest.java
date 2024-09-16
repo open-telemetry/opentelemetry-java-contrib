@@ -7,12 +7,12 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.l
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class LogRecordDataMapperTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Log body"))
+          .setBodyValue(Value.of("Log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
