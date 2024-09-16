@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.IOException;
 import java.util.Collection;
@@ -16,11 +17,10 @@ import java.util.logging.Logger;
 
 public class ToDiskExporter<EXPORT_DATA> {
 
-  private static final Logger logger = Logger.getLogger(ToDiskExporter.class.getName());
+  private final DebugLogger logger;
   private final Storage storage;
   private final SignalSerializer<EXPORT_DATA> serializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
-  private final boolean debugEnabled;
 
   ToDiskExporter(
       SignalSerializer<EXPORT_DATA> serializer,
@@ -30,7 +30,7 @@ public class ToDiskExporter<EXPORT_DATA> {
     this.serializer = serializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
-    this.debugEnabled = debugEnabled;
+    this.logger = DebugLogger.wrap(Logger.getLogger(ToDiskExporter.class.getName()), debugEnabled);
   }
 
   public static <T> ToDiskExporterBuilder<T> builder() {
@@ -38,31 +38,19 @@ public class ToDiskExporter<EXPORT_DATA> {
   }
 
   public CompletableResultCode export(Collection<EXPORT_DATA> data) {
-    log("Intercepting exporter batch.", Level.FINER);
+    logger.log("Intercepting exporter batch.", Level.FINER);
     try {
       if (storage.write(serializer.serialize(data))) {
         return CompletableResultCode.ofSuccess();
       }
-      log("Could not store batch in disk. Exporting it right away.");
+      logger.log("Could not store batch in disk. Exporting it right away.");
       return exportFunction.apply(data);
     } catch (IOException e) {
-      if (debugEnabled) {
-        logger.log(
-            Level.WARNING,
-            "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
-            e);
-      }
+      logger.log(
+          "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
+          Level.WARNING,
+          e);
       return exportFunction.apply(data);
-    }
-  }
-
-  private void log(String msg) {
-    log(msg, Level.INFO);
-  }
-
-  private void log(String msg, Level level) {
-    if (debugEnabled) {
-      logger.log(level, msg);
     }
   }
 
