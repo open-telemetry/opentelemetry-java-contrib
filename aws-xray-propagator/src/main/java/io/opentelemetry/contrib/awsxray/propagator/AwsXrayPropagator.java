@@ -290,7 +290,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     int secondDelimiter = xrayTraceId.indexOf(TRACE_ID_DELIMITER, firstDelimiter + 2);
     if (firstDelimiter != TRACE_ID_DELIMITER_INDEX_1
         || secondDelimiter == -1
-        || secondDelimiter > TRACE_ID_DELIMITER_INDEX_2) {
+        || secondDelimiter > TRACE_ID_DELIMITER_INDEX_2
+        || xrayTraceId.length() < secondDelimiter + 25) {
       return TraceId.getInvalid();
     }
 
