@@ -9,31 +9,37 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-| Status | Library                                                           |
-| ------ | ----------------------------------------------------------------- |
-| beta   | [AWS Resources](./aws-resources/README.md)                        |
-| stable | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
-| beta   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
-| beta   | [Baggage Span Processor](./baggage-processor/README.md)           |
-| beta   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
-| beta   | [Consistent Sampling](./consistent-sampling/README.md)            |
-| beta   | [Disk Buffering](./disk-buffering/README.md)                      |
-| beta   | [GCP Resources](./gcp-resources/README.md)                        |
-| beta   | [Inferred Spans](./inferred-spans/README.md)                      |
-| beta   | [JFR Connection](./jfr-connection/README.md)                      |
-| beta   | [JFR Events](./jfr-events/README.md)                              |
-| beta   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
-| beta   | [Kafka Support](./kafka-exporter/README.md)                       |
-| beta   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
-| beta   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
-| beta   | [No-Op API](./noop-api/README.md)                                 |
-| beta   | [Intercept and Process Signals Globally](./processors/README.md)  |
-| beta   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
-| beta   | [Resource Providers](./resource-providers/README.md)              |
-| beta   | [Runtime Attach](./runtime-attach/README.md)                      |
-| beta   | [Samplers](./samplers/README.md)                                  |
-| beta   | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
-| beta   | [Static Instrumenter](./static-instrumenter/README.md)            |
+| Status* | Library                                                           |
+| ------- | ----------------------------------------------------------------- |
+| beta    | [AWS Resources](./aws-resources/README.md)                        |
+| stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
+| alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
+| alpha   | [Baggage Span Processor](./baggage-processor/README.md)           |
+| alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
+| alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
+| alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
+| beta    | [GCP Resources](./gcp-resources/README.md)                        |
+| beta    | [Inferred Spans](./inferred-spans/README.md)                      |
+| alpha   | [JFR Connection](./jfr-connection/README.md)                      |
+| alpha   | [JFR Events](./jfr-events/README.md)                              |
+| alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
+| alpha   | [Kafka Support](./kafka-exporter/README.md)                       |
+| alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
+| alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
+| alpha   | [No-Op API](./noop-api/README.md)                                 |
+| alpha   | [Intercept and Process Signals Globally](./processors/README.md)  |
+| alpha   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
+| alpha   | [Resource Providers](./resource-providers/README.md)              |
+| alpha   | [Runtime Attach](./runtime-attach/README.md)                      |
+| alpha   | [Samplers](./samplers/README.md)                                  |
+| beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
+| alpha   | [Static Instrumenter](./static-instrumenter/README.md)            |
+
+* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
+To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
+On reaching stable status, the `otel.stable` value in `gradle.properties` should be set to `true`.
+Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
+status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
 
 ## Getting Started
 
