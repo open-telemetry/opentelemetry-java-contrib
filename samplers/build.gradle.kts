@@ -16,5 +16,5 @@ dependencies {
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator:1.42.0-alpha")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 }
