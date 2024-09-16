@@ -4,23 +4,23 @@ This module provides GCP resource detectors for OpenTelemetry.
 
 The following OpenTelemetry semantic conventions will be detected:
 
-| Resource attribute | GCE | GKE | GCR | GCF | GAE |
-| ------------------ | --- | --- | --- | --- | --- |
-| cloud.platform | gcp_compute_engine | gcp_kubernetes_engine | gcp_cloud_run | gcp_cloud_run | gcp_app_engine |
-| cloud.provider | gcp | gcp | gcp | gcp | gcp |
-| cloud.account.id | auto | auto | auto | auto | auto |
-| cloud.availability_zone | auto | auto | auto | auto | auto |
-| cloud.region | auto | auto | auto | auto | auto |
-| host.id | auto | auto | | | |
-| host.name | auto | auto | | | |
-| host.type | auto | auto | | | |
-| k8s.pod.name | | downward API or auto | | | |
-| k8s.namespace.name | | downward API | | | |
-| k8s.container.name | | hardcoded (manual) | | | |
-| k8s.cluster.name | | auto | | | |
-| faas.name | | | auto | auto | auto |
-| faas.version | | | auto | auto | auto |
-| faas.instance | | | auto | auto | auto |
+| Resource attribute      | [GCE](https://cloud.google.com/compute/docs) | [GKE](https://cloud.google.com/kubernetes-engine/docs) | [GCR](https://cloud.google.com/run/docs) | [GCF](https://cloud.google.com/functions/docs) | [GAE](https://cloud.google.com/appengine/docs) |
+|-------------------------|----------------------------------------------|--------------------------------------------------------|------------------------------------------|------------------------------------------------|------------------------------------------------|
+| cloud.platform          | gcp_compute_engine                           | gcp_kubernetes_engine                                  | gcp_cloud_run                            | gcp_cloud_functions                            | gcp_app_engine                                 |
+| cloud.provider          | gcp                                          | gcp                                                    | gcp                                      | gcp                                            | gcp                                            |
+| cloud.account.id        | auto                                         | auto                                                   | auto                                     | auto                                           | auto                                           |
+| cloud.availability_zone | auto                                         | auto                                                   | auto                                     | auto                                           | auto                                           |
+| cloud.region            | auto                                         | auto                                                   | auto                                     | auto                                           | auto                                           |
+| host.id                 | auto                                         | auto                                                   |                                          |                                                |                                                |
+| host.name               | auto                                         | auto                                                   |                                          |                                                |                                                |
+| host.type               | auto                                         | auto                                                   |                                          |                                                |                                                |
+| k8s.pod.name            |                                              | downward API or auto                                   |                                          |                                                |                                                |
+| k8s.namespace.name      |                                              | downward API                                           |                                          |                                                |                                                |
+| k8s.container.name      |                                              | hardcoded (manual)                                     |                                          |                                                |                                                |
+| k8s.cluster.name        |                                              | auto                                                   |                                          |                                                |                                                |
+| faas.name               |                                              |                                                        | auto                                     | auto                                           | auto                                           |
+| faas.version            |                                              |                                                        | auto                                     | auto                                           | auto                                           |
+| faas.instance           |                                              |                                                        | auto                                     | auto                                           | auto                                           |
 
 ## Downward API
 
