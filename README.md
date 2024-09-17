@@ -9,29 +9,37 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-* [AWS Resources](./aws-resources/README.md)
-* [AWS X-Ray SDK Support](./aws-xray/README.md)
-* [AWS X-Ray Propagator](./aws-xray-propagator/README.md)
-* [Baggage Span Processor](./baggage-processor/README.md)
-* [zstd Compressor](./compressors/compressor-zstd/README.md)
-* [Consistent Sampling](./consistent-sampling/README.md)
-* [Disk Buffering](./disk-buffering/README.md)
-* [GCP Resources](./gcp-resources/README.md)
-* [Inferred Spans](./inferred-spans/README.md)
-* [JFR Connection](./jfr-connection/README.md)
-* [JFR Events](./jfr-events/README.md)
-* [JMX Metric Gatherer](./jmx-metrics/README.md)
-* [Kafka Support](./kafka-exporter/README.md)
-* [OpenTelemetry Maven Extension](./maven-extension/README.md)
-* [Micrometer MeterProvider](./micrometer-meter-provider/README.md)
-* [No-Op API](./noop-api/README.md)
-* [Intercept and Process Signals Globally](./processors/README.md)
-* [Prometheus Client Bridge](./prometheus-client-bridge/README.md)
-* [Resource Providers](./resource-providers/README.md)
-* [Runtime Attach](./runtime-attach/README.md)
-* [Samplers](./samplers/README.md)
-* [Span Stacktrace Capture](./span-stacktrace/README.md)
-* [Static Instrumenter](./static-instrumenter/README.md)
+| Status* | Library                                                           |
+| ------- | ----------------------------------------------------------------- |
+| beta    | [AWS Resources](./aws-resources/README.md)                        |
+| stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
+| alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
+| alpha   | [Baggage Span Processor](./baggage-processor/README.md)           |
+| alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
+| alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
+| alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
+| beta    | [GCP Resources](./gcp-resources/README.md)                        |
+| beta    | [Inferred Spans](./inferred-spans/README.md)                      |
+| alpha   | [JFR Connection](./jfr-connection/README.md)                      |
+| alpha   | [JFR Events](./jfr-events/README.md)                              |
+| alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
+| alpha   | [Kafka Support](./kafka-exporter/README.md)                       |
+| alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
+| alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
+| alpha   | [No-Op API](./noop-api/README.md)                                 |
+| alpha   | [Intercept and Process Signals Globally](./processors/README.md)  |
+| alpha   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
+| alpha   | [Resource Providers](./resource-providers/README.md)              |
+| alpha   | [Runtime Attach](./runtime-attach/README.md)                      |
+| alpha   | [Samplers](./samplers/README.md)                                  |
+| beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
+| alpha   | [Static Instrumenter](./static-instrumenter/README.md)            |
+
+\* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
+To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
+On reaching stable status, the `otel.stable` value in `gradle.properties` should be set to `true`.
+Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
+status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
 
 ## Getting Started
 
