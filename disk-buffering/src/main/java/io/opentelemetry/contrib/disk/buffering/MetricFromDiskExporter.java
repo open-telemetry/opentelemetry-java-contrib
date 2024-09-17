@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.IOException;
@@ -21,10 +22,11 @@ public class MetricFromDiskExporter implements FromDiskExporter {
       throws IOException {
     FromDiskExporterImpl<MetricData> delegate =
         FromDiskExporterImpl.<MetricData>builder()
-            .setFolderName("metrics")
+            .setFolderName(SignalTypes.metrics.name())
             .setStorageConfiguration(config)
             .setDeserializer(SignalDeserializer.ofMetrics())
             .setExportFunction(exporter::export)
+            .setDebugEnabled(config.isDebugEnabled())
             .build();
     return new MetricFromDiskExporter(delegate);
   }

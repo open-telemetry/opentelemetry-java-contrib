@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.ProtoSpansDataMapper;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
@@ -27,5 +28,10 @@ public final class SpanDataDeserializer implements SignalDeserializer<SpanData> 
     } catch (IOException e) {
       throw new IllegalArgumentException(e);
     }
+  }
+
+  @Override
+  public String signalType() {
+    return SignalTypes.spans.name();
   }
 }

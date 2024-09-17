@@ -39,7 +39,7 @@ class StorageTest {
     writableFile = createWritableFile();
     processing = mock();
     when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
-    storage = new Storage(folderManager);
+    storage = new Storage(folderManager, true);
   }
 
   @Test
