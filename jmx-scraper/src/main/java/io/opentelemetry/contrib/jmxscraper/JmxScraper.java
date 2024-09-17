@@ -5,29 +5,38 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.contrib.jmxscraper.client.JmxRemoteClient;
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
-import io.opentelemetry.contrib.jmxscraper.jmx.JmxClient;
+import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
+import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
 
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final int EXECUTOR_TERMINATION_TIMEOUT_MS = 5000;
   private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
   private final JmxScraperConfig config;
+  private final JmxRemoteClient client;
+  private final JmxMetricInsight service;
+  @Nullable private MBeanServerConnection connection;
 
   /**
    * Main method to create and run a {@link JmxScraper} instance.
@@ -43,14 +52,7 @@ public class JmxScraper {
       JmxScraper jmxScraper = new JmxScraper(config);
       jmxScraper.start();
 
-      Runtime.getRuntime()
-          .addShutdownHook(
-              new Thread() {
-                @Override
-                public void run() {
-                  jmxScraper.shutdown();
-                }
-              });
+      Runtime.getRuntime().addShutdownHook(new Thread(jmxScraper::shutdown));
     } catch (ArgumentsParsingException e) {
       System.err.println(
           "Usage: java -jar <path_to_jmxscraper.jar> "
@@ -106,29 +108,34 @@ public class JmxScraper {
   JmxScraper(JmxScraperConfig config) throws ConfigurationException {
     this.config = config;
 
-    try {
-      @SuppressWarnings("unused") // TODO: Temporary
-      JmxClient jmxClient = new JmxClient(config);
-    } catch (MalformedURLException e) {
-      throw new ConfigurationException("Malformed serviceUrl: ", e);
+    String serviceUrl = config.getServiceUrl();
+    if (serviceUrl == null) {
+      throw new ConfigurationException("missing service URL");
     }
+    int interval = config.getIntervalMilliseconds();
+    if (interval < 0) {
+      throw new ConfigurationException("interval must be positive");
+    }
+    this.client = JmxRemoteClient.createNew(serviceUrl);
+    this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
   }
 
-  @SuppressWarnings("FutureReturnValueIgnored") // TODO: Temporary
   private void start() {
-    exec.scheduleWithFixedDelay(
-        () -> {
-          logger.fine("JMX scraping triggered");
-          //            try {
-          //              runner.run();
-          //            } catch (Throwable e) {
-          //              logger.log(Level.SEVERE, "Error gathering JMX metrics", e);
-          //            }
-        },
-        0,
-        config.getIntervalMilliseconds(),
-        TimeUnit.MILLISECONDS);
+    try {
+      JMXConnector connector = client.connect();
+      connection = connector.getMBeanServerConnection();
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+    service.startRemote(getMetricConfig(config), () -> Collections.singletonList(connection));
     logger.info("JMX scraping started");
+  }
+
+  @SuppressWarnings("unused")
+  private static MetricConfiguration getMetricConfig(JmxScraperConfig config) {
+    MetricConfiguration metricConfig = new MetricConfiguration();
+
+    return metricConfig;
   }
 
   private void shutdown() {

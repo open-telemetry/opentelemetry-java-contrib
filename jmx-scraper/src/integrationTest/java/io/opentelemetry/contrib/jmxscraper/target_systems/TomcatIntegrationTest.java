@@ -13,6 +13,11 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
+  protected String getTargetSystem() {
+    return "tomcat";
+  }
+
+  @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>(
             new ImageFromDockerfile()
