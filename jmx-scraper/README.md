@@ -1,4 +1,4 @@
-# JMX Metric Scrapper
+# JMX Metric Scraper
 
 This utility provides a way to query JMX metrics and export them to an OTLP endpoint.
 The JMX MBeans and their metrics mapping is defined in YAML.

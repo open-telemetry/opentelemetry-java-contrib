@@ -1,0 +1,2 @@
+io.opentelemetry.contrib.awsxray.propagator.internal.AwsXrayComponentProvider
+io.opentelemetry.contrib.awsxray.propagator.internal.AwsXrayLambdaComponentProvider

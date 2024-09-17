@@ -6,10 +6,10 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "JMX metrics scrapper"
-otelJava.moduleName.set("io.opentelemetry.contrib.jmxscrapper")
+description = "JMX metrics scraper"
+otelJava.moduleName.set("io.opentelemetry.contrib.jmxscraper")
 
-application.mainClass.set("io.opentelemetry.contrib.jmxscrapper.JmxMetrics")
+application.mainClass.set("io.opentelemetry.contrib.jmxscraper.JmxScraper")
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
@@ -19,6 +19,8 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
+
+  testImplementation("org.junit-pioneer:junit-pioneer")
 }
 
 tasks {

@@ -70,7 +70,8 @@ public class GroovyRunner {
     Binding binding = new Binding();
     binding.setVariable("log", logger);
 
-    OtelHelper otelHelper = new OtelHelper(jmxClient, this.groovyMetricEnvironment);
+    OtelHelper otelHelper =
+        new OtelHelper(jmxClient, this.groovyMetricEnvironment, config.aggregateAcrossMBeans);
     binding.setVariable("otel", otelHelper);
 
     for (final Script script : scripts) {

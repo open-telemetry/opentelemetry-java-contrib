@@ -22,10 +22,12 @@ class OtelHelper {
 
     private final JmxClient jmxClient
     private final GroovyMetricEnvironment groovyMetricEnvironment
+    private final boolean aggregateAcrossMBeans
 
-    OtelHelper(JmxClient jmxClient, GroovyMetricEnvironment groovyMetricEnvironment) {
+    OtelHelper(JmxClient jmxClient, GroovyMetricEnvironment groovyMetricEnvironment, boolean aggregateAcrossMBeans) {
         this.jmxClient = jmxClient
         this.groovyMetricEnvironment = groovyMetricEnvironment
+        this.aggregateAcrossMBeans = aggregateAcrossMBeans
     }
 
     /**
@@ -99,7 +101,7 @@ class OtelHelper {
      * attribute value(s).  The parameters map to the InstrumentHelper constructor.
      */
     InstrumentHelper instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> attributes, Closure otelInstrument) {
-        def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, attributes, otelInstrument, groovyMetricEnvironment)
+        def instrumentHelper = new InstrumentHelper(mBeanHelper, instrumentName, description, unit, labelFuncs, attributes, otelInstrument, groovyMetricEnvironment, aggregateAcrossMBeans)
         instrumentHelper.update()
         return instrumentHelper
     }

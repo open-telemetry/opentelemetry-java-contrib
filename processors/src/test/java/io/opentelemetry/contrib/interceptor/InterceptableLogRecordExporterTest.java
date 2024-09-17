@@ -10,18 +10,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +75,7 @@ class InterceptableLogRecordExporterTest {
   void verifyLogFiltering() {
     interceptor.add(
         item -> {
-          if (item.getBody().asString().contains("deleted")) {
+          if (Objects.requireNonNull(item.getBodyValue()).asString().contains("deleted")) {
             return null;
           }
           return item;
@@ -87,8 +88,8 @@ class InterceptableLogRecordExporterTest {
     List<LogRecordData> finishedLogRecordItems =
         memoryLogRecordExporter.getFinishedLogRecordItems();
     assertEquals(2, finishedLogRecordItems.size());
-    assertEquals("One log", finishedLogRecordItems.get(0).getBody().asString());
-    assertEquals("Another log", finishedLogRecordItems.get(1).getBody().asString());
+    assertEquals(Value.of("One log"), finishedLogRecordItems.get(0).getBodyValue());
+    assertEquals(Value.of("Another log"), finishedLogRecordItems.get(1).getBodyValue());
   }
 
   private static class ModifiableLogRecordData implements LogRecordData {
@@ -136,7 +137,8 @@ class InterceptableLogRecordExporterTest {
     }
 
     @Override
-    public Body getBody() {
+    @SuppressWarnings("deprecation") // implement deprecated method
+    public io.opentelemetry.sdk.logs.data.Body getBody() {
       return delegate.getBody();
     }
 

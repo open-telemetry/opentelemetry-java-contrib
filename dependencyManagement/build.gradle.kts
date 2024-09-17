@@ -7,12 +7,12 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-val otelInstrumentationVersion = "2.7.0-alpha"
+val otelInstrumentationVersion = "2.8.0-alpha"
 
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.17.2",
   "com.google.guava:guava-bom:33.3.0-jre",
-  "com.linecorp.armeria:armeria-bom:1.30.0",
+  "com.linecorp.armeria:armeria-bom:1.30.1",
   "org.junit:junit-bom:5.11.0",
   "io.grpc:grpc-bom:1.66.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
@@ -21,7 +21,7 @@ val DEPENDENCY_BOMS = listOf(
 
 val autoServiceVersion = "1.1.1"
 val autoValueVersion = "1.11.0"
-val errorProneVersion = "2.31.0"
+val errorProneVersion = "2.32.0"
 val prometheusVersion = "0.16.0"
 val mockitoVersion = "4.11.0"
 val slf4jVersion = "2.0.16"
@@ -55,7 +55,7 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:annotations:3.0.1u2",
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.12.0",
-  "com.uber.nullaway:nullaway:0.11.2",
+  "com.uber.nullaway:nullaway:0.11.3",
   "org.assertj:assertj-core:3.26.3",
   "org.awaitility:awaitility:4.2.2",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
