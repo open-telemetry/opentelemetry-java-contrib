@@ -32,14 +32,10 @@ public class JmxRemoteClient {
 
   private final String host;
   private final int port;
-  @Nullable
-  private String userName;
-  @Nullable
-  private String password;
-  @Nullable
-  private String profile;
-  @Nullable
-  private String realm;
+  @Nullable private String userName;
+  @Nullable private String password;
+  @Nullable private String profile;
+  @Nullable private String realm;
   private boolean sslRegistry;
 
   private JmxRemoteClient(@Nonnull String host, int port) {
