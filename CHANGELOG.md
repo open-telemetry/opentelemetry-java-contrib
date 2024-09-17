@@ -9,10 +9,20 @@
 - Add declarative config support for aws xray propagators
   ([#1442](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1442))
 
+### AWS X-Ray SDK support
+
+- Fix native mode error cause by static init of random
+  ([#862](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/862))
+
 ### Consistent sampling
 
 - Composite Samplers prototype
   ([#1443](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1443))
+
+### Disk buffering
+
+- Add debug mode for verbose logging
+  ([#1455](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1455))
 
 ### GCP Resources
 
