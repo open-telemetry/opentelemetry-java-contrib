@@ -10,8 +10,12 @@ import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StorageBuilder {
+
+  private static final Logger logger = Logger.getLogger(StorageBuilder.class.getName());
 
   private String folderName = "data";
   private StorageConfiguration configuration = StorageConfiguration.getDefault(new File("."));
@@ -40,7 +44,10 @@ public class StorageBuilder {
   public Storage build() throws IOException {
     File folder = ensureSubdir(configuration.getRootDir(), folderName);
     FolderManager folderManager = new FolderManager(folder, configuration, clock);
-    return new Storage(folderManager);
+    if (configuration.isDebugEnabled()) {
+      logger.log(Level.INFO, "Building storage with configuration => " + configuration);
+    }
+    return new Storage(folderManager, configuration.isDebugEnabled());
   }
 
   private static File ensureSubdir(File rootDir, String child) throws IOException {

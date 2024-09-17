@@ -49,7 +49,7 @@ class ToDiskExporterTest {
           exportedFnSeen = x;
           return exportFnResultToReturn.get();
         };
-    toDiskExporter = new ToDiskExporter<>(serializer, exportFn, storage);
+    toDiskExporter = new ToDiskExporter<>(serializer, exportFn, storage, true);
     when(serializer.serialize(records)).thenReturn(serialized);
   }
 
