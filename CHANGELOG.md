@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.39.0 (2024-09-17)
 
 ### AWS X-Ray propagator
 
