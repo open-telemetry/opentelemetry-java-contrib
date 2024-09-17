@@ -108,7 +108,7 @@ public class OpenTelemetrySdkServiceTest {
       assertThat(configProperties.getString("otel.exporter.otlp.endpoint")).isNull();
       assertThat(configProperties.getString("otel.exporter.otlp.traces.endpoint"))
           .isEqualTo("http://example.com:4317/");
-      assertThat(configProperties.getString("otel.traces.exporter")).isNull();
+      assertThat(configProperties.getString("otel.traces.exporter")).isEqualTo("otlp");
       assertThat(configProperties.getString("otel.metrics.exporter")).isEqualTo("none");
       assertThat(configProperties.getString("otel.logs.exporter")).isEqualTo("none");
 
