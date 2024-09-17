@@ -23,6 +23,17 @@ dependencies {
   testImplementation("org.junit-pioneer:junit-pioneer")
 }
 
+testing {
+  suites {
+    val integrationTest by registering(JvmTestSuite::class) {
+      dependencies {
+        implementation("org.testcontainers:junit-jupiter")
+        implementation("org.slf4j:slf4j-simple")
+      }
+    }
+  }
+}
+
 tasks {
   shadowJar {
     mergeServiceFiles()
@@ -40,7 +51,9 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    dependsOn(named("appJar"))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+    systemProperty("app.jar.path", named<Jar>("appJar").get().archiveFile.get().asFile.absolutePath)
     systemProperty("gradle.project.version", "${project.version}")
   }
 
@@ -49,6 +62,14 @@ tasks {
   // the POM anyways so in practice we shouldn't be losing anything.
   withType<GenerateModuleMetadata>().configureEach {
     enabled = false
+  }
+}
+
+tasks.register<Jar>("appJar") {
+  from(sourceSets.get("integrationTest").output)
+  archiveClassifier.set("app")
+  manifest {
+    attributes["Main-Class"] = "io.opentelemetry.contrib.jmxscraper.TestApp"
   }
 }
 
