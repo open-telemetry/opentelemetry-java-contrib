@@ -108,7 +108,7 @@ public class JmxRemoteClient {
                 }
               });
     } catch (ReflectiveOperationException e) {
-      logger.log(Level.WARNING, "SASL unsupported in current environment: " + e.getMessage(), e);
+      logger.log(Level.WARNING, "SASL unsupported in current environment: " + e.getMessage());
     }
 
     try {
