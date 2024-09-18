@@ -86,6 +86,7 @@ public class JmxRemoteClient {
 
     try {
       // Not all supported versions of Java contain this Provider
+      // Also it might not be accessible due to java.security.sasl module not accessible
       Class<?> klass = Class.forName("com.sun.security.sasl.Provider");
       Provider provider = (Provider) klass.getDeclaredConstructor().newInstance();
       Security.addProvider(provider);

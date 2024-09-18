@@ -112,7 +112,7 @@ public abstract class TargetSystemIntegrationTest {
     scraper =
         createScraperContainer(otlpEndpoint, getTargetSystem(), null, "target_system", JMX_PORT);
     logger.info(
-        "starting scraper with JVM arguments : {}", String.join(" ", scraper.getCommandParts()));
+        "starting scraper with command: {}", String.join(" ", scraper.getCommandParts()));
 
     scraper.start();
 
