@@ -37,7 +37,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 public abstract class TargetSystemIntegrationTest {
 
   private static final Logger logger = LoggerFactory.getLogger(TargetSystemIntegrationTest.class);
-  public static final String TARGET_SYSTEM_NETWORK_ALIAS = "targetsystem";
+  private static final String TARGET_SYSTEM_NETWORK_ALIAS = "targetsystem";
   private static String otlpEndpoint;
 
   /**
