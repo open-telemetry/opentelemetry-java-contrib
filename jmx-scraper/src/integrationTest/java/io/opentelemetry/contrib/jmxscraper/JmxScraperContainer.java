@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
@@ -43,16 +44,19 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     this.intervalMillis = 1000;
   }
 
+  @CanIgnoreReturnValue
   public JmxScraperContainer withTargetSystem(String targetSystem) {
     targetSystems.add(targetSystem);
     return this;
   }
 
+  @CanIgnoreReturnValue
   public JmxScraperContainer withIntervalMillis(int intervalMillis) {
     this.intervalMillis = intervalMillis;
     return this;
   }
 
+  @CanIgnoreReturnValue
   public JmxScraperContainer withService(String host, int port) {
     // TODO: adding a way to provide 'host:port' syntax would make this easier for end users
     this.serviceUrl =
@@ -61,6 +65,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public JmxScraperContainer withCustomYaml(String yamlPath) {
     this.customYaml.add(yamlPath);
     return this;

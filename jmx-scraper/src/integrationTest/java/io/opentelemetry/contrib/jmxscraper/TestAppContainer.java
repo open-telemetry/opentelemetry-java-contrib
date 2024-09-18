@@ -62,10 +62,6 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
-  public int getPort() {
-    return getMappedPort(port);
-  }
-
   @Override
   protected void doStart() {
     super.doStart();

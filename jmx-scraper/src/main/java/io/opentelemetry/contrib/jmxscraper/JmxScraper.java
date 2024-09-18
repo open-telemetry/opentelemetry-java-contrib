@@ -5,38 +5,29 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.contrib.jmxscraper.client.JmxRemoteClient;
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
-import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
-import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
-  private static final int EXECUTOR_TERMINATION_TIMEOUT_MS = 5000;
-  private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-  private final JmxScraperConfig config;
+
   private final JmxRemoteClient client;
-  private final JmxMetricInsight service;
-  @Nullable private MBeanServerConnection connection;
+
+  // TODO depend on instrumentation 2.9.0 snapshot
+  // private final JmxMetricInsight service;
 
   /**
    * Main method to create and run a {@link JmxScraper} instance.
@@ -52,7 +43,6 @@ public class JmxScraper {
       JmxScraper jmxScraper = new JmxScraper(config);
       jmxScraper.start();
 
-      Runtime.getRuntime().addShutdownHook(new Thread(jmxScraper::shutdown));
     } catch (ArgumentsParsingException e) {
       System.err.println(
           "Usage: java -jar <path_to_jmxscraper.jar> "
@@ -106,7 +96,6 @@ public class JmxScraper {
   }
 
   JmxScraper(JmxScraperConfig config) throws ConfigurationException {
-    this.config = config;
 
     String serviceUrl = config.getServiceUrl();
     if (serviceUrl == null) {
@@ -117,46 +106,25 @@ public class JmxScraper {
       throw new ConfigurationException("interval must be positive");
     }
     this.client = JmxRemoteClient.createNew(serviceUrl);
-    this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
+    // TODO: depend on instrumentation 2.9.0 snapshot
+    // this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
   }
 
   private void start() {
+    @SuppressWarnings("unused")
+    MBeanServerConnection connection;
     try {
       JMXConnector connector = client.connect();
       connection = connector.getMBeanServerConnection();
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
-    service.startRemote(getMetricConfig(config), () -> Collections.singletonList(connection));
+
+    // TODO: depend on instrumentation 2.9.0 snapshot
+    // MetricConfiguration metricConfig = new MetricConfiguration();
+    // TODO create JMX insight config from scraper config
+    // service.startRemote(metricConfig, () -> Collections.singletonList(connection));
+
     logger.info("JMX scraping started");
-  }
-
-  @SuppressWarnings("unused")
-  private static MetricConfiguration getMetricConfig(JmxScraperConfig config) {
-    MetricConfiguration metricConfig = new MetricConfiguration();
-
-    return metricConfig;
-  }
-
-  private void shutdown() {
-    logger.info("Shutting down JmxScraper and exporting final metrics.");
-    // Prevent new tasks to be submitted
-    exec.shutdown();
-    try {
-      // Wait a while for existing tasks to terminate
-      if (!exec.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-        // Cancel currently executing tasks
-        exec.shutdownNow();
-        // Wait a while for tasks to respond to being cancelled
-        if (!exec.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-          logger.warning("Thread pool did not terminate in time: " + exec);
-        }
-      }
-    } catch (InterruptedException e) {
-      // (Re-)Cancel if current thread also interrupted
-      exec.shutdownNow();
-      // Preserve interrupt status
-      Thread.currentThread().interrupt();
-    }
   }
 }
