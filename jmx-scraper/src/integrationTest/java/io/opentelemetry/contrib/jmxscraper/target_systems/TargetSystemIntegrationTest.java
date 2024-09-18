@@ -37,6 +37,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 public abstract class TargetSystemIntegrationTest {
 
   private static final Logger logger = LoggerFactory.getLogger(TargetSystemIntegrationTest.class);
+  public static final String TARGET_SYSTEM_NETWORK_ALIAS = "targetsystem";
   private static String otlpEndpoint;
 
   /**
@@ -95,20 +96,13 @@ public abstract class TargetSystemIntegrationTest {
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .withNetwork(network)
             .withExposedPorts(JMX_PORT)
-            .withNetworkAliases("target_system");
+            .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
     target.start();
 
     String targetHost = target.getHost();
     Integer targetPort = target.getMappedPort(JMX_PORT);
     logger.info(
         "Target system started, JMX port: {} mapped to {}:{}", JMX_PORT, targetHost, targetPort);
-
-    scraper = new JmxScraperContainer(otlpEndpoint).withService("target_system", JMX_PORT);
-
-    scraper = customizeScraperContainer(scraper);
-    logger.info("starting scraper with command: {}", String.join(" ", scraper.getCommandParts()));
-
-    scraper.start();
 
     // TODO : wait for metrics to be sent and add assertions on what is being captured
     // for now we just test that we can connect to remote JMX using our client.
@@ -117,6 +111,15 @@ public abstract class TargetSystemIntegrationTest {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    scraper =
+        new JmxScraperContainer(otlpEndpoint)
+            .withNetwork(network)
+            .withService(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
+
+    scraper = customizeScraperContainer(scraper);
+    scraper.start();
+
     // TODO: replace with real assertions
     assertThat(otlpServer.getMetrics()).isEmpty();
   }

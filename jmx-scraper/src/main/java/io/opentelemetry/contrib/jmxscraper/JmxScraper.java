@@ -126,5 +126,12 @@ public class JmxScraper {
     // service.startRemote(metricConfig, () -> Collections.singletonList(connection));
 
     logger.info("JMX scraping started");
+
+    // TODO: wait a bit to keep the JVM running, this won't be needed once calling jmx insight
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException(e);
+    }
   }
 }

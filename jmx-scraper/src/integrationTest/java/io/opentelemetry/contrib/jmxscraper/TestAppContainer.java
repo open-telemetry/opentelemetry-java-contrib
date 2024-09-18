@@ -16,8 +16,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.shaded.com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -25,8 +23,6 @@ import org.testcontainers.utility.MountableFile;
 
 /** Test container that allows to execute {@link TestApp} in an isolated container */
 public class TestAppContainer extends GenericContainer<TestAppContainer> {
-
-  private static final Logger logger = LoggerFactory.getLogger(TestAppContainer.class);
 
   private final Map<String, String> properties;
   private int port;
@@ -101,11 +97,11 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     this.withEnv("JAVA_TOOL_OPTIONS", confArgs);
 
-    logger.info("Test application JAVA_TOOL_OPTIONS = " + confArgs);
+    logger().info("Test application JAVA_TOOL_OPTIONS = " + confArgs);
 
     super.start();
 
-    logger.info("Test application JMX port mapped to {}:{}", getHost(), getMappedPort(port));
+    logger().info("Test application JMX port mapped to {}:{}", getHost(), getMappedPort(port));
   }
 
   private static Path createPwdFile(String login, String pwd) {

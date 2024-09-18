@@ -7,13 +7,13 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
@@ -107,6 +107,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     arguments.add("/scraper.jar");
 
     this.withCommand(arguments.toArray(new String[0]));
+
+    logger().info("Starting scraper with command: " + String.join(" ", arguments));
 
     super.start();
   }
