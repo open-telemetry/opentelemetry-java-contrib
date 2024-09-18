@@ -5,17 +5,13 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
-
-  @Override
-  protected String getTargetSystem() {
-    return "tomcat";
-  }
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
@@ -42,5 +38,10 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                 + jmxPort)
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forListeningPort());
+  }
+
+  @Override
+  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+    return scraper.withTargetSystem("tomcat");
   }
 }
