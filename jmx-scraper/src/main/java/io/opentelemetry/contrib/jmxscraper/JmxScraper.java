@@ -5,29 +5,30 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import io.opentelemetry.contrib.jmxscraper.client.JmxRemoteClient;
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
-import io.opentelemetry.contrib.jmxscraper.jmx.JmxClient;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
 
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
-  private static final int EXECUTOR_TERMINATION_TIMEOUT_MS = 5000;
-  private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-  private final JmxScraperConfig config;
+
+  private final JmxRemoteClient client;
+
+  // TODO depend on instrumentation 2.9.0 snapshot
+  // private final JmxMetricInsight service;
 
   /**
    * Main method to create and run a {@link JmxScraper} instance.
@@ -36,21 +37,13 @@ public class JmxScraper {
    */
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
+    JmxScraperConfig config;
+    JmxScraper jmxScraper = null;
     try {
       JmxScraperConfigFactory factory = new JmxScraperConfigFactory();
-      JmxScraperConfig config = JmxScraper.createConfigFromArgs(Arrays.asList(args), factory);
+      config = JmxScraper.createConfigFromArgs(Arrays.asList(args), factory);
+      jmxScraper = new JmxScraper(config);
 
-      JmxScraper jmxScraper = new JmxScraper(config);
-      jmxScraper.start();
-
-      Runtime.getRuntime()
-          .addShutdownHook(
-              new Thread() {
-                @Override
-                public void run() {
-                  jmxScraper.shutdown();
-                }
-              });
     } catch (ArgumentsParsingException e) {
       System.err.println(
           "Usage: java -jar <path_to_jmxscraper.jar> "
@@ -59,6 +52,13 @@ public class JmxScraper {
     } catch (ConfigurationException e) {
       System.err.println(e.getMessage());
       System.exit(1);
+    }
+
+    try {
+      Objects.requireNonNull(jmxScraper).start();
+    } catch (IOException e) {
+      System.err.println("Unable to connect " + e.getMessage());
+      System.exit(2);
     }
   }
 
@@ -104,52 +104,35 @@ public class JmxScraper {
   }
 
   JmxScraper(JmxScraperConfig config) throws ConfigurationException {
-    this.config = config;
-
-    try {
-      @SuppressWarnings("unused") // TODO: Temporary
-      JmxClient jmxClient = new JmxClient(config);
-    } catch (MalformedURLException e) {
-      throw new ConfigurationException("Malformed serviceUrl: ", e);
+    String serviceUrl = config.getServiceUrl();
+    int interval = config.getIntervalMilliseconds();
+    if (interval < 0) {
+      throw new ConfigurationException("interval must be positive");
     }
+    this.client = JmxRemoteClient.createNew(serviceUrl);
+    // TODO: depend on instrumentation 2.9.0 snapshot
+    // this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
   }
 
-  @SuppressWarnings("FutureReturnValueIgnored") // TODO: Temporary
-  private void start() {
-    exec.scheduleWithFixedDelay(
-        () -> {
-          logger.fine("JMX scraping triggered");
-          //            try {
-          //              runner.run();
-          //            } catch (Throwable e) {
-          //              logger.log(Level.SEVERE, "Error gathering JMX metrics", e);
-          //            }
-        },
-        0,
-        config.getIntervalMilliseconds(),
-        TimeUnit.MILLISECONDS);
+  private void start() throws IOException {
+
+    JMXConnector connector = client.connect();
+
+    @SuppressWarnings("unused")
+    MBeanServerConnection connection = connector.getMBeanServerConnection();
+
+    // TODO: depend on instrumentation 2.9.0 snapshot
+    // MetricConfiguration metricConfig = new MetricConfiguration();
+    // TODO create JMX insight config from scraper config
+    // service.startRemote(metricConfig, () -> Collections.singletonList(connection));
+
     logger.info("JMX scraping started");
-  }
 
-  private void shutdown() {
-    logger.info("Shutting down JmxScraper and exporting final metrics.");
-    // Prevent new tasks to be submitted
-    exec.shutdown();
+    // TODO: wait a bit to keep the JVM running, this won't be needed once calling jmx insight
     try {
-      // Wait a while for existing tasks to terminate
-      if (!exec.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-        // Cancel currently executing tasks
-        exec.shutdownNow();
-        // Wait a while for tasks to respond to being cancelled
-        if (!exec.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-          logger.warning("Thread pool did not terminate in time: " + exec);
-        }
-      }
+      Thread.sleep(5000);
     } catch (InterruptedException e) {
-      // (Re-)Cancel if current thread also interrupted
-      exec.shutdownNow();
-      // Preserve interrupt status
-      Thread.currentThread().interrupt();
+      throw new IllegalStateException(e);
     }
   }
 }

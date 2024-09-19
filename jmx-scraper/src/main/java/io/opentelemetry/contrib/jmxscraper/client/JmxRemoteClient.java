@@ -11,10 +11,10 @@ import java.net.MalformedURLException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -30,21 +30,23 @@ public class JmxRemoteClient {
 
   private static final Logger logger = Logger.getLogger(JmxRemoteClient.class.getName());
 
-  private final String host;
-  private final int port;
+  private final JMXServiceURL url;
   @Nullable private String userName;
   @Nullable private String password;
   @Nullable private String profile;
   @Nullable private String realm;
   private boolean sslRegistry;
 
-  private JmxRemoteClient(@Nonnull String host, int port) {
-    this.host = host;
-    this.port = port;
+  private JmxRemoteClient(JMXServiceURL url) {
+    this.url = url;
   }
 
   public static JmxRemoteClient createNew(String host, int port) {
-    return new JmxRemoteClient(host, port);
+    return new JmxRemoteClient(buildUrl(host, port));
+  }
+
+  public static JmxRemoteClient createNew(String url) {
+    return new JmxRemoteClient(buildUrl(url));
   }
 
   @CanIgnoreReturnValue
@@ -84,6 +86,7 @@ public class JmxRemoteClient {
 
     try {
       // Not all supported versions of Java contain this Provider
+      // Also it might not be accessible due to java.security.sasl module not accessible
       Class<?> klass = Class.forName("com.sun.security.sasl.Provider");
       Provider provider = (Provider) klass.getDeclaredConstructor().newInstance();
       Security.addProvider(provider);
@@ -106,10 +109,9 @@ public class JmxRemoteClient {
                 }
               });
     } catch (ReflectiveOperationException e) {
-      logger.log(Level.WARNING, "SASL unsupported in current environment: " + e.getMessage(), e);
+      logger.log(Level.WARNING, "SASL unsupported in current environment: " + e.getMessage());
     }
 
-    JMXServiceURL url = buildUrl(host, port);
     try {
       if (sslRegistry) {
         return doConnectSslRegistry(url, env);
@@ -132,14 +134,14 @@ public class JmxRemoteClient {
   }
 
   private static JMXServiceURL buildUrl(String host, int port) {
-    StringBuilder sb = new StringBuilder("service:jmx:rmi:///jndi/rmi://");
-    if (host != null) {
-      sb.append(host);
-    }
-    sb.append(":").append(port).append("/jmxrmi");
+    return buildUrl(
+        String.format(
+            Locale.getDefault(), "service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port));
+  }
 
+  private static JMXServiceURL buildUrl(String url) {
     try {
-      return new JMXServiceURL(sb.toString());
+      return new JMXServiceURL(url);
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException("invalid url", e);
     }
