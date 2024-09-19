@@ -147,8 +147,7 @@ class JmxScraperConfigFactoryTest {
     // When and Then
     assertThatThrownBy(() -> configFactory.createConfig(properties))
         .isInstanceOf(ConfigurationException.class)
-        .hasMessage(
-            "otel.jmx.custom.scraping.config or otel.jmx.target.system must be specified.");
+        .hasMessage("otel.jmx.custom.scraping.config or otel.jmx.target.system must be specified.");
   }
 
   @Test

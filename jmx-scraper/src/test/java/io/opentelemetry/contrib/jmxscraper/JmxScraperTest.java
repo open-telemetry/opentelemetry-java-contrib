@@ -46,7 +46,8 @@ class JmxScraperTest {
   void shouldCreateConfig_propertiesLoadedFromFile()
       throws ConfigurationException, ArgumentsParsingException {
     // Given
-    String filePath = ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
+    String filePath =
+        ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
     List<String> args = Arrays.asList("-config", filePath);
     JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
 
@@ -61,7 +62,8 @@ class JmxScraperTest {
   void shouldCreateConfig_propertiesLoadedFromStdIn()
       throws ConfigurationException, ArgumentsParsingException, IOException {
     InputStream originalIn = System.in;
-    try(InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("validConfig.properties")) {
+    try (InputStream stream =
+        ClassLoader.getSystemClassLoader().getResourceAsStream("validConfig.properties")) {
       // Given
       System.setIn(stream);
       List<String> args = Arrays.asList("-config", "-");
