@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
@@ -36,7 +37,7 @@ public class JmxScraper {
    */
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
-    JmxScraperConfig config = null;
+    JmxScraperConfig config;
     JmxScraper jmxScraper = null;
     try {
       JmxScraperConfigFactory factory = new JmxScraperConfigFactory();
@@ -54,9 +55,9 @@ public class JmxScraper {
     }
 
     try {
-      jmxScraper.start();
+      Objects.requireNonNull(jmxScraper).start();
     } catch (IOException e) {
-      System.err.println("Unable to connect to " + config.getServiceUrl() + " " + e.getMessage());
+      System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
     }
   }
