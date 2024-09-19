@@ -3,7 +3,9 @@ plugins {
   id("com.github.johnrengelman.shadow")
 
   id("otel.java-conventions")
-  id("otel.publish-conventions")
+
+  // publishing disabled until component is ready to be used
+  // id("otel.publish-conventions")
 }
 
 description = "JMX metrics scraper"
