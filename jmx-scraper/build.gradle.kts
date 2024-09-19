@@ -3,7 +3,9 @@ plugins {
   id("com.github.johnrengelman.shadow")
 
   id("otel.java-conventions")
-  id("otel.publish-conventions")
+
+  // publishing disabled until component is ready to be used
+  // id("otel.publish-conventions")
 }
 
 description = "JMX metrics scraper"
@@ -16,11 +18,11 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  implementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 }
 
 testing {
