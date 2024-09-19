@@ -25,7 +25,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private final Set<String> targetSystems;
   private String serviceUrl;
   private int intervalMillis;
-  private final Set<String> customYaml;
+  private final Set<String> customYamlFiles;
 
   public JmxScraperContainer(String otlpEndpoint) {
     super("openjdk:8u272-jre-slim");
@@ -40,7 +40,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     this.endpoint = otlpEndpoint;
     this.targetSystems = new HashSet<>();
-    this.customYaml = new HashSet<>();
+    this.customYamlFiles = new HashSet<>();
     this.intervalMillis = 1000;
   }
 
@@ -67,7 +67,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
   @CanIgnoreReturnValue
   public JmxScraperContainer withCustomYaml(String yamlPath) {
-    this.customYaml.add(yamlPath);
+    this.customYamlFiles.add(yamlPath);
     return this;
   }
 
@@ -88,19 +88,11 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     arguments.add("-Dotel.jmx.service.url=" + serviceUrl);
     arguments.add("-Dotel.jmx.interval.milliseconds=" + intervalMillis);
 
-    if (!customYaml.isEmpty()) {
-      int i = 0;
-      StringBuilder sb = new StringBuilder("-Dotel.jmx.config=");
-      for (String yaml : customYaml) {
-        String containerPath = "/custom_" + i + ".yaml";
-        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), containerPath);
-        if (i > 0) {
-          sb.append(",");
-        }
-        sb.append(containerPath);
-        i++;
+    if (!customYamlFiles.isEmpty()) {
+      for (String yaml : customYamlFiles) {
+        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
       }
-      arguments.add(sb.toString());
+      arguments.add("-Dotel.jmx.config=" + String.join(",", customYamlFiles));
     }
 
     arguments.add("-jar");

@@ -59,11 +59,6 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   }
 
   @Override
-  protected void doStart() {
-    super.doStart();
-  }
-
-  @Override
   public void start() {
 
     // TODO: add support for ssl

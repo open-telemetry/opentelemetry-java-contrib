@@ -36,12 +36,12 @@ public class JmxScraper {
    */
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
+    JmxScraperConfig config = null;
+    JmxScraper jmxScraper = null;
     try {
       JmxScraperConfigFactory factory = new JmxScraperConfigFactory();
-      JmxScraperConfig config = JmxScraper.createConfigFromArgs(Arrays.asList(args), factory);
-
-      JmxScraper jmxScraper = new JmxScraper(config);
-      jmxScraper.start();
+      config = JmxScraper.createConfigFromArgs(Arrays.asList(args), factory);
+      jmxScraper = new JmxScraper(config);
 
     } catch (ArgumentsParsingException e) {
       System.err.println(
@@ -51,6 +51,13 @@ public class JmxScraper {
     } catch (ConfigurationException e) {
       System.err.println(e.getMessage());
       System.exit(1);
+    }
+
+    try {
+      jmxScraper.start();
+    } catch (IOException e) {
+      System.err.println("Unable to connect to " + config.getServiceUrl() + " " + e.getMessage());
+      System.exit(2);
     }
   }
 
@@ -96,11 +103,7 @@ public class JmxScraper {
   }
 
   JmxScraper(JmxScraperConfig config) throws ConfigurationException {
-
     String serviceUrl = config.getServiceUrl();
-    if (serviceUrl == null) {
-      throw new ConfigurationException("missing service URL");
-    }
     int interval = config.getIntervalMilliseconds();
     if (interval < 0) {
       throw new ConfigurationException("interval must be positive");
@@ -110,15 +113,12 @@ public class JmxScraper {
     // this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
   }
 
-  private void start() {
+  private void start() throws IOException {
+
+    JMXConnector connector = client.connect();
+
     @SuppressWarnings("unused")
-    MBeanServerConnection connection;
-    try {
-      JMXConnector connector = client.connect();
-      connection = connector.getMBeanServerConnection();
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+    MBeanServerConnection connection = connector.getMBeanServerConnection();
 
     // TODO: depend on instrumentation 2.9.0 snapshot
     // MetricConfiguration metricConfig = new MetricConfiguration();
