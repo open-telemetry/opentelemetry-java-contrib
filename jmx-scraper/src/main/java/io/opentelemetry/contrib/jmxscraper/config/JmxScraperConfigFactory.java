@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class JmxScraperConfigFactory {
   private static final String PREFIX = "otel.";
   static final String SERVICE_URL = PREFIX + "jmx.service.url";
-  static final String CUSTOM_JMX_SCRAPING_CONFIG = PREFIX + "jmx.custom.jmx.scraping.config";
+  static final String CUSTOM_JMX_SCRAPING_CONFIG = PREFIX + "jmx.custom.scraping.config";
   static final String TARGET_SYSTEM = PREFIX + "jmx.target.system";
   static final String INTERVAL_MILLISECONDS = PREFIX + "jmx.interval.milliseconds";
   static final String METRICS_EXPORTER_TYPE = PREFIX + "metrics.exporter";

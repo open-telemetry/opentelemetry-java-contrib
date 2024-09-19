@@ -148,7 +148,7 @@ class JmxScraperConfigFactoryTest {
     assertThatThrownBy(() -> configFactory.createConfig(properties))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage(
-            "otel.jmx.custom.jmx.scraping.config or otel.jmx.target.system must be specified.");
+            "otel.jmx.custom.scraping.config or otel.jmx.target.system must be specified.");
   }
 
   @Test
@@ -178,6 +178,36 @@ class JmxScraperConfigFactoryTest {
     assertThatThrownBy(() -> configFactory.createConfig(properties))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("otel.exporter.otlp.endpoint must be specified for otlp format.");
+  }
+
+  @Test
+  void shouldPassValidation_noMetricsExporterType() throws ConfigurationException {
+    // Given
+    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
+    Properties properties = (Properties) validProperties.clone();
+    properties.remove(JmxScraperConfigFactory.OTLP_ENDPOINT);
+    properties.remove(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE);
+
+    // When
+    JmxScraperConfig config = configFactory.createConfig(properties);
+
+    // Then
+    assertThat(config).isNotNull();
+  }
+
+  @Test
+  void shouldPassValidation_nonOtlpMetricsExporterType() throws ConfigurationException {
+    // Given
+    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
+    Properties properties = (Properties) validProperties.clone();
+    properties.remove(JmxScraperConfigFactory.OTLP_ENDPOINT);
+    properties.setProperty(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE, "logging");
+
+    // When
+    JmxScraperConfig config = configFactory.createConfig(properties);
+
+    // Then
+    assertThat(config).isNotNull();
   }
 
   @Test
