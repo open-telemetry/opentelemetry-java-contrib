@@ -5,11 +5,11 @@ extensions:
   health_check:
 
 exporters:
-  logging:
+  debug:
 
 service:
   extensions: [health_check]
   pipelines:
     traces:
       receivers: [awsxray]
-      exporters: [logging]
+      exporters: [debug]
