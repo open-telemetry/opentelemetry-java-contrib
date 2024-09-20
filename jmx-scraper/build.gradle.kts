@@ -4,7 +4,7 @@ plugins {
 
   id("otel.java-conventions")
 
-  // publishing disabled until component is ready to be used
+  // TODO publishing disabled until component is ready to be used
   // id("otel.publish-conventions")
 }
 
@@ -14,6 +14,9 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxscraper")
 application.mainClass.set("io.opentelemetry.contrib.jmxscraper.JmxScraper")
 
 dependencies {
+  // TODO remove snapshot dependency on upstream once 2.9.0 is released
+  // api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.9.0-SNAPSHOT-alpha",))
+
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
