@@ -7,11 +7,9 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
-import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
