@@ -81,10 +81,6 @@ public class JmxScraperConfigFactory {
     int interval = getProperty(INTERVAL_MILLISECONDS, 0);
     config.intervalMilliseconds = (interval == 0 ? 10000 : interval);
     getAndSetPropertyIfUndefined(EXPORTER_INTERVAL, config.intervalMilliseconds);
-    if (config.intervalMilliseconds < 0) {
-      throw new ConfigurationException(
-          "interval must be positive, got " + config.intervalMilliseconds);
-    }
 
     config.metricsExporterType = getAndSetPropertyIfUndefined(METRICS_EXPORTER_TYPE, "logging");
     config.otlpExporterEndpoint = properties.getProperty(OTLP_ENDPOINT);
