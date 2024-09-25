@@ -12,7 +12,7 @@ import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
-import io.opentelemetry.contrib.jmxscraper.client.JmxRemoteClient;
+import io.opentelemetry.contrib.jmxscraper.JmxConnectorBuilder;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
@@ -106,7 +106,7 @@ public abstract class TargetSystemIntegrationTest {
 
     // TODO : wait for metrics to be sent and add assertions on what is being captured
     // for now we just test that we can connect to remote JMX using our client.
-    try (JMXConnector connector = JmxRemoteClient.createNew(targetHost, targetPort).connect()) {
+    try (JMXConnector connector = JmxConnectorBuilder.createNew(targetHost, targetPort).build()) {
       assertThat(connector.getMBeanServerConnection()).isNotNull();
     } catch (IOException e) {
       throw new RuntimeException(e);

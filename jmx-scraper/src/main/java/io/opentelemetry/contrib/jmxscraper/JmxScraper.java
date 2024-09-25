@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import io.opentelemetry.contrib.jmxscraper.client.JmxRemoteClient;
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
@@ -25,7 +24,7 @@ public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
 
-  private final JmxRemoteClient client;
+  private final JmxConnectorBuilder client;
 
   // TODO depend on instrumentation 2.9.0 snapshot
   // private final JmxMetricInsight service;
@@ -41,7 +40,7 @@ public class JmxScraper {
       JmxScraperConfig config = JmxScraper.createConfigFromArgs(Arrays.asList(args));
       // TODO: depend on instrumentation 2.9.0 snapshot
       // service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
-      JmxScraper jmxScraper = new JmxScraper(JmxRemoteClient.createNew(config.getServiceUrl()));
+      JmxScraper jmxScraper = new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()));
       jmxScraper.start();
 
     } catch (ArgumentsParsingException e) {
@@ -109,13 +108,13 @@ public class JmxScraper {
     }
   }
 
-  JmxScraper(JmxRemoteClient client) {
+  JmxScraper(JmxConnectorBuilder client) {
     this.client = client;
   }
 
   private void start() throws IOException {
 
-    JMXConnector connector = client.connect();
+    JMXConnector connector = client.build();
 
     @SuppressWarnings("unused")
     MBeanServerConnection connection = connector.getMBeanServerConnection();

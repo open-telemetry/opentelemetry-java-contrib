@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxscraper.client;
+package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.contrib.jmxscraper.TestApp;
-import io.opentelemetry.contrib.jmxscraper.TestAppContainer;
 import java.io.IOException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -17,7 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.Network;
 
-public class JmxRemoteClientTest {
+public class JmxConnectorBuilderTest {
 
   private static Network network;
 
@@ -36,7 +34,7 @@ public class JmxRemoteClientTest {
     try (TestAppContainer app = new TestAppContainer().withNetwork(network).withJmxPort(9990)) {
       app.start();
       testConnector(
-          () -> JmxRemoteClient.createNew(app.getHost(), app.getMappedPort(9990)).connect());
+          () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(9990)).build());
     }
   }
 
@@ -49,9 +47,9 @@ public class JmxRemoteClientTest {
       app.start();
       testConnector(
           () ->
-              JmxRemoteClient.createNew(app.getHost(), app.getMappedPort(9999))
+              JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(9999))
                   .userCredentials(login, pwd)
-                  .connect());
+                  .build());
     }
   }
 
