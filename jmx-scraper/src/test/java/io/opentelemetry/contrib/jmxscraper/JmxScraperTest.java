@@ -24,10 +24,9 @@ class JmxScraperTest {
   void shouldThrowExceptionWhenInvalidCommandLineArgsProvided() {
     // Given
     List<String> emptyArgs = Collections.singletonList("-nonExistentOption");
-    JmxScraperConfigFactory configFactoryMock = mock(JmxScraperConfigFactory.class);
 
     // When and Then
-    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(emptyArgs, configFactoryMock))
+    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(emptyArgs))
         .isInstanceOf(ArgumentsParsingException.class);
   }
 
@@ -35,10 +34,9 @@ class JmxScraperTest {
   void shouldThrowExceptionWhenTooManyCommandLineArgsProvided() {
     // Given
     List<String> args = Arrays.asList("-config", "path", "-nonExistentOption");
-    JmxScraperConfigFactory configFactoryMock = mock(JmxScraperConfigFactory.class);
 
     // When and Then
-    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(args, configFactoryMock))
+    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(args))
         .isInstanceOf(ArgumentsParsingException.class);
   }
 
@@ -49,10 +47,9 @@ class JmxScraperTest {
     String filePath =
         ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
     List<String> args = Arrays.asList("-config", filePath);
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
 
     // When
-    JmxScraperConfig config = JmxScraper.createConfigFromArgs(args, configFactory);
+    JmxScraperConfig config = JmxScraper.createConfigFromArgs(args);
 
     // Then
     assertThat(config).isNotNull();
@@ -67,10 +64,9 @@ class JmxScraperTest {
       // Given
       System.setIn(stream);
       List<String> args = Arrays.asList("-config", "-");
-      JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
 
       // When
-      JmxScraperConfig config = JmxScraper.createConfigFromArgs(args, configFactory);
+      JmxScraperConfig config = JmxScraper.createConfigFromArgs(args);
 
       // Then
       assertThat(config).isNotNull();
