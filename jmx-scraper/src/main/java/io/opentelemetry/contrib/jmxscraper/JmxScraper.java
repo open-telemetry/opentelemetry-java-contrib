@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
@@ -38,11 +37,12 @@ public class JmxScraper {
    */
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
-    JmxScraperConfig config;
-    JmxScraper jmxScraper = null;
     try {
-      config = JmxScraper.createConfigFromArgs(Arrays.asList(args));
-      jmxScraper = new JmxScraper(config);
+      JmxScraperConfig config = JmxScraper.createConfigFromArgs(Arrays.asList(args));
+      // TODO: depend on instrumentation 2.9.0 snapshot
+      // service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
+      JmxScraper jmxScraper = new JmxScraper(JmxRemoteClient.createNew(config.getServiceUrl()));
+      jmxScraper.start();
 
     } catch (ArgumentsParsingException e) {
       System.err.println("ERROR: " + e.getMessage());
@@ -53,14 +53,11 @@ public class JmxScraper {
     } catch (ConfigurationException e) {
       System.err.println(e.getMessage());
       System.exit(1);
-    }
-
-    try {
-      Objects.requireNonNull(jmxScraper).start();
     } catch (IOException e) {
       System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
     }
+
   }
 
   /**
@@ -112,15 +109,8 @@ public class JmxScraper {
     }
   }
 
-  JmxScraper(JmxScraperConfig config) throws ConfigurationException {
-    String serviceUrl = config.getServiceUrl();
-    int interval = config.getIntervalMilliseconds();
-    if (interval < 0) {
-      throw new ConfigurationException("interval must be positive");
-    }
-    this.client = JmxRemoteClient.createNew(serviceUrl);
-    // TODO: depend on instrumentation 2.9.0 snapshot
-    // this.service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), interval);
+  JmxScraper(JmxRemoteClient client) {
+    this.client = client;
   }
 
   private void start() throws IOException {
