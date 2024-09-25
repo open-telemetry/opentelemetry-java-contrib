@@ -81,28 +81,32 @@ public class JmxScraper {
       throw new ArgumentsParsingException("unexpected first argument must be '" + CONFIG_ARG + "'");
     }
 
-    Properties loadedProperties = new Properties();
+    Properties properties;
     String path = args.get(1);
     if (path.trim().equals("-")) {
-      loadPropertiesFromStdin(loadedProperties);
+      properties = loadPropertiesFromStdin();
     } else {
-      loadPropertiesFromPath(loadedProperties, path);
+      properties = loadPropertiesFromPath(path);
     }
-    return new JmxScraperConfigFactory().createConfig(loadedProperties);
+    return new JmxScraperConfigFactory().createConfig(properties);
   }
 
-  private static void loadPropertiesFromStdin(Properties props) throws ConfigurationException {
+  private static Properties loadPropertiesFromStdin() throws ConfigurationException {
+    Properties properties = new Properties();
     try (InputStream is = new DataInputStream(System.in)) {
-      props.load(is);
+      properties.load(is);
+      return properties;
     } catch (IOException e) {
       throw new ConfigurationException("Failed to read config properties from stdin", e);
     }
   }
 
-  private static void loadPropertiesFromPath(Properties props, String path)
+  private static Properties loadPropertiesFromPath(String path)
       throws ConfigurationException {
+    Properties properties = new Properties();
     try (InputStream is = Files.newInputStream(Paths.get(path))) {
-      props.load(is);
+      properties.load(is);
+      return properties;
     } catch (IOException e) {
       throw new ConfigurationException("Failed to read config properties file: '" + path + "'", e);
     }
