@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Properties;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,13 +38,14 @@ class JmxScraperConfigTest {
   @AfterEach
   void afterEach() {
     // make sure that no test leaked in global system properties
-    Properties systemProperties = System.getProperties();
-    for (Object k : systemProperties.keySet()) {
-      String key = k.toString();
-      if (key.startsWith("otel.") || key.startsWith("javax.net.ssl.")) {
-        System.clearProperty(key);
-      }
-    }
+    Stream.of(System.getProperties().keySet())
+        .map(Object::toString)
+        .forEach(
+            key -> {
+              if (key.startsWith("otel.") || key.startsWith("javax.net.ssl.")) {
+                System.clearProperty(key);
+              }
+            });
   }
 
   @Test
