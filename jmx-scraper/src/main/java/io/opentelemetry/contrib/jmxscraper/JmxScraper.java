@@ -24,6 +24,7 @@ import javax.management.remote.JMXConnector;
 
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
+  private static final String CONFIG_ARG = "-config";
 
   private final JmxRemoteClient client;
 
@@ -40,11 +41,11 @@ public class JmxScraper {
     JmxScraperConfig config;
     JmxScraper jmxScraper = null;
     try {
-      JmxScraperConfigFactory factory = new JmxScraperConfigFactory();
-      config = JmxScraper.createConfigFromArgs(Arrays.asList(args), factory);
+      config = JmxScraper.createConfigFromArgs(Arrays.asList(args));
       jmxScraper = new JmxScraper(config);
 
     } catch (ArgumentsParsingException e) {
+      System.err.println("ERROR: " + e.getMessage());
       System.err.println(
           "Usage: java -jar <path_to_jmxscraper.jar> "
               + "-config <path_to_config.properties or - for stdin>");
@@ -67,23 +68,27 @@ public class JmxScraper {
    *
    * @param args application commandline arguments
    */
-  static JmxScraperConfig createConfigFromArgs(List<String> args, JmxScraperConfigFactory factory)
+  static JmxScraperConfig createConfigFromArgs(List<String> args)
       throws ArgumentsParsingException, ConfigurationException {
-    if (!args.isEmpty() && (args.size() != 2 || !args.get(0).equalsIgnoreCase("-config"))) {
-      throw new ArgumentsParsingException();
+
+    if (args.isEmpty()) {
+      throw new ArgumentsParsingException("no argument provided");
+    }
+    if (args.size() != 2) {
+      throw new ArgumentsParsingException("exactly two arguments expected, got " + args.size());
+    }
+    if (!args.get(0).equalsIgnoreCase(CONFIG_ARG)) {
+      throw new ArgumentsParsingException("unexpected first argument must be '" + CONFIG_ARG + "'");
     }
 
     Properties loadedProperties = new Properties();
-    if (args.size() == 2) {
-      String path = args.get(1);
-      if (path.trim().equals("-")) {
-        loadPropertiesFromStdin(loadedProperties);
-      } else {
-        loadPropertiesFromPath(loadedProperties, path);
-      }
+    String path = args.get(1);
+    if (path.trim().equals("-")) {
+      loadPropertiesFromStdin(loadedProperties);
+    } else {
+      loadPropertiesFromPath(loadedProperties, path);
     }
-
-    return factory.createConfig(loadedProperties);
+    return new JmxScraperConfigFactory().createConfig(loadedProperties);
   }
 
   private static void loadPropertiesFromStdin(Properties props) throws ConfigurationException {
