@@ -14,51 +14,49 @@ import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
-class JmxScraperConfigFactoryTest {
+class JmxScraperConfigTest {
   private static Properties validProperties;
 
   @BeforeAll
   static void setUp() {
     validProperties = new Properties();
     validProperties.setProperty(
-        JmxScraperConfigFactory.SERVICE_URL,
-        "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    validProperties.setProperty(JmxScraperConfigFactory.CUSTOM_JMX_SCRAPING_CONFIG, "");
-    validProperties.setProperty(JmxScraperConfigFactory.TARGET_SYSTEM, "tomcat, activemq");
-    validProperties.setProperty(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE, "otel");
-    validProperties.setProperty(JmxScraperConfigFactory.INTERVAL_MILLISECONDS, "1410");
-    validProperties.setProperty(JmxScraperConfigFactory.REGISTRY_SSL, "true");
-    validProperties.setProperty(JmxScraperConfigFactory.OTLP_ENDPOINT, "http://localhost:4317");
-    validProperties.setProperty(JmxScraperConfigFactory.JMX_USERNAME, "some-user");
-    validProperties.setProperty(JmxScraperConfigFactory.JMX_PASSWORD, "some-password");
-    validProperties.setProperty(JmxScraperConfigFactory.JMX_REMOTE_PROFILE, "some-profile");
-    validProperties.setProperty(JmxScraperConfigFactory.JMX_REALM, "some-realm");
+        JmxScraperConfig.SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    validProperties.setProperty(JmxScraperConfig.CUSTOM_JMX_SCRAPING_CONFIG, "");
+    validProperties.setProperty(JmxScraperConfig.TARGET_SYSTEM, "tomcat, activemq");
+    validProperties.setProperty(JmxScraperConfig.METRICS_EXPORTER_TYPE, "otel");
+    validProperties.setProperty(JmxScraperConfig.INTERVAL_MILLISECONDS, "1410");
+    validProperties.setProperty(JmxScraperConfig.REGISTRY_SSL, "true");
+    validProperties.setProperty(JmxScraperConfig.OTLP_ENDPOINT, "http://localhost:4317");
+    validProperties.setProperty(JmxScraperConfig.JMX_USERNAME, "some-user");
+    validProperties.setProperty(JmxScraperConfig.JMX_PASSWORD, "some-password");
+    validProperties.setProperty(JmxScraperConfig.JMX_REMOTE_PROFILE, "some-profile");
+    validProperties.setProperty(JmxScraperConfig.JMX_REALM, "some-realm");
   }
 
   @Test
   void shouldCreateMinimalValidConfiguration() throws ConfigurationException {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = new Properties();
     properties.setProperty(
-        JmxScraperConfigFactory.SERVICE_URL,
-        "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    properties.setProperty(JmxScraperConfigFactory.CUSTOM_JMX_SCRAPING_CONFIG, "/file.properties");
+        JmxScraperConfig.SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    properties.setProperty(JmxScraperConfig.CUSTOM_JMX_SCRAPING_CONFIG, "/file.properties");
 
     // When
-    JmxScraperConfig config = configFactory.createConfig(properties);
+    JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, new Properties());
 
     // Then
-    assertThat(config.serviceUrl).isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    assertThat(config.customJmxScrapingConfigPath).isEqualTo("/file.properties");
-    assertThat(config.targetSystems).isEmpty();
-    assertThat(config.intervalMilliseconds).isEqualTo(10000);
-    assertThat(config.metricsExporterType).isEqualTo("logging");
-    assertThat(config.otlpExporterEndpoint).isNull();
-    assertThat(config.username).isNull();
-    assertThat(config.password).isNull();
-    assertThat(config.remoteProfile).isNull();
-    assertThat(config.realm).isNull();
+    assertThat(config.getServiceUrl())
+        .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("/file.properties");
+    assertThat(config.getTargetSystems()).isEmpty();
+    assertThat(config.getIntervalMilliseconds()).isEqualTo(10000);
+    assertThat(config.getMetricsExporterType()).isEqualTo("logging");
+    assertThat(config.getOtlpExporterEndpoint()).isNull();
+    assertThat(config.getUsername()).isNull();
+    assertThat(config.getPassword()).isNull();
+    assertThat(config.getRemoteProfile()).isNull();
+    assertThat(config.getRealm()).isNull();
   }
 
   @Test
@@ -70,7 +68,6 @@ class JmxScraperConfigFactoryTest {
   @ClearSystemProperty(key = "javax.net.ssl.trustStoreType")
   void shouldUseValuesFromProperties() throws ConfigurationException {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     // Properties to be propagated to system, properties
     Properties properties = (Properties) validProperties.clone();
     properties.setProperty("javax.net.ssl.keyStore", "/my/key/store");
@@ -81,20 +78,22 @@ class JmxScraperConfigFactoryTest {
     properties.setProperty("javax.net.ssl.trustStoreType", "JKS");
 
     // When
-    JmxScraperConfig config = configFactory.createConfig(properties);
+    JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, new Properties());
+    config.propagateSystemProperties();
 
     // Then
-    assertThat(config.serviceUrl).isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    assertThat(config.customJmxScrapingConfigPath).isEqualTo("");
-    assertThat(config.targetSystems).containsOnly("tomcat", "activemq");
-    assertThat(config.intervalMilliseconds).isEqualTo(1410);
-    assertThat(config.metricsExporterType).isEqualTo("otel");
-    assertThat(config.otlpExporterEndpoint).isEqualTo("http://localhost:4317");
-    assertThat(config.username).isEqualTo("some-user");
-    assertThat(config.password).isEqualTo("some-password");
-    assertThat(config.remoteProfile).isEqualTo("some-profile");
-    assertThat(config.realm).isEqualTo("some-realm");
-    assertThat(config.registrySsl).isTrue();
+    assertThat(config.getServiceUrl())
+        .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("");
+    assertThat(config.getTargetSystems()).containsOnly("tomcat", "activemq");
+    assertThat(config.getIntervalMilliseconds()).isEqualTo(1410);
+    assertThat(config.getMetricsExporterType()).isEqualTo("otel");
+    assertThat(config.getOtlpExporterEndpoint()).isEqualTo("http://localhost:4317");
+    assertThat(config.getUsername()).isEqualTo("some-user");
+    assertThat(config.getPassword()).isEqualTo("some-password");
+    assertThat(config.getRemoteProfile()).isEqualTo("some-profile");
+    assertThat(config.getRealm()).isEqualTo("some-realm");
+    assertThat(config.isRegistrySsl()).isTrue();
 
     // These properties are set from the config file loading into JmxConfig
     assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
@@ -110,13 +109,12 @@ class JmxScraperConfigFactoryTest {
   @SetSystemProperty(key = "javax.net.ssl.keyStorePassword", value = "originalPassword")
   void shouldRetainPredefinedSystemProperties() throws ConfigurationException {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     // Properties to be propagated to system, properties
     Properties properties = (Properties) validProperties.clone();
     properties.setProperty("javax.net.ssl.keyStorePassword", "abc123");
 
     // When
-    configFactory.createConfig(properties);
+    JmxScraperConfig.fromProperties(properties, new Properties());
 
     // Then
     assertThat(System.getProperty("otel.jmx.service.url")).isEqualTo("originalServiceUrl");
@@ -126,12 +124,11 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldFailValidation_missingServiceUrl() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JmxScraperConfigFactory.SERVICE_URL);
+    properties.remove(JmxScraperConfig.SERVICE_URL);
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("otel.jmx.service.url must be specified.");
   }
@@ -139,13 +136,12 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldFailValidation_missingConfigPathAndTargetSystem() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JmxScraperConfigFactory.CUSTOM_JMX_SCRAPING_CONFIG);
-    properties.remove(JmxScraperConfigFactory.TARGET_SYSTEM);
+    properties.remove(JmxScraperConfig.CUSTOM_JMX_SCRAPING_CONFIG);
+    properties.remove(JmxScraperConfig.TARGET_SYSTEM);
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("otel.jmx.custom.scraping.config or otel.jmx.target.system must be specified.");
   }
@@ -153,28 +149,24 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldFailValidation_invalidTargetSystem() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JmxScraperConfigFactory.TARGET_SYSTEM, "hal9000");
+    properties.setProperty(JmxScraperConfig.TARGET_SYSTEM, "hal9000");
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
-        .hasMessage(
-            "[hal9000] must specify targets from "
-                + JmxScraperConfigFactory.AVAILABLE_TARGET_SYSTEMS);
+        .hasMessageStartingWith("[hal9000] must specify targets from ");
   }
 
   @Test
   void shouldFailValidation_missingOtlpEndpoint() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JmxScraperConfigFactory.OTLP_ENDPOINT);
-    properties.setProperty(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE, "otlp");
+    properties.remove(JmxScraperConfig.OTLP_ENDPOINT);
+    properties.setProperty(JmxScraperConfig.METRICS_EXPORTER_TYPE, "otlp");
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("otel.exporter.otlp.endpoint must be specified for otlp format.");
   }
@@ -182,13 +174,12 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldPassValidation_noMetricsExporterType() throws ConfigurationException {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JmxScraperConfigFactory.OTLP_ENDPOINT);
-    properties.remove(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE);
+    properties.remove(JmxScraperConfig.OTLP_ENDPOINT);
+    properties.remove(JmxScraperConfig.METRICS_EXPORTER_TYPE);
 
     // When
-    JmxScraperConfig config = configFactory.createConfig(properties);
+    JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, new Properties());
 
     // Then
     assertThat(config).isNotNull();
@@ -197,13 +188,12 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldPassValidation_nonOtlpMetricsExporterType() throws ConfigurationException {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JmxScraperConfigFactory.OTLP_ENDPOINT);
-    properties.setProperty(JmxScraperConfigFactory.METRICS_EXPORTER_TYPE, "logging");
+    properties.remove(JmxScraperConfig.OTLP_ENDPOINT);
+    properties.setProperty(JmxScraperConfig.METRICS_EXPORTER_TYPE, "logging");
 
     // When
-    JmxScraperConfig config = configFactory.createConfig(properties);
+    JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, new Properties());
 
     // Then
     assertThat(config).isNotNull();
@@ -212,12 +202,11 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldFailValidation_negativeInterval() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JmxScraperConfigFactory.INTERVAL_MILLISECONDS, "-1");
+    properties.setProperty(JmxScraperConfig.INTERVAL_MILLISECONDS, "-1");
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("otel.jmx.interval.milliseconds must be positive.");
   }
@@ -225,12 +214,11 @@ class JmxScraperConfigFactoryTest {
   @Test
   void shouldFailConfigCreation_invalidInterval() {
     // Given
-    JmxScraperConfigFactory configFactory = new JmxScraperConfigFactory();
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JmxScraperConfigFactory.INTERVAL_MILLISECONDS, "abc");
+    properties.setProperty(JmxScraperConfig.INTERVAL_MILLISECONDS, "abc");
 
     // When and Then
-    assertThatThrownBy(() -> configFactory.createConfig(properties))
+    assertThatThrownBy(() -> JmxScraperConfig.fromProperties(properties, new Properties()))
         .isInstanceOf(ConfigurationException.class)
         .hasMessage("Failed to parse otel.jmx.interval.milliseconds");
   }

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 class JmxScraperTest {
@@ -24,7 +25,7 @@ class JmxScraperTest {
     List<String> emptyArgs = Collections.singletonList("-nonExistentOption");
 
     // When and Then
-    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(emptyArgs))
+    assertThatThrownBy(() -> JmxScraper.parseArgs(emptyArgs))
         .isInstanceOf(ArgumentsParsingException.class);
   }
 
@@ -34,7 +35,7 @@ class JmxScraperTest {
     List<String> args = Arrays.asList("-config", "path", "-nonExistentOption");
 
     // When and Then
-    assertThatThrownBy(() -> JmxScraper.createConfigFromArgs(args))
+    assertThatThrownBy(() -> JmxScraper.parseArgs(args))
         .isInstanceOf(ArgumentsParsingException.class);
   }
 
@@ -47,7 +48,8 @@ class JmxScraperTest {
     List<String> args = Arrays.asList("-config", filePath);
 
     // When
-    JmxScraperConfig config = JmxScraper.createConfigFromArgs(args);
+    JmxScraperConfig config =
+        JmxScraperConfig.fromProperties(JmxScraper.parseArgs(args), new Properties());
 
     // Then
     assertThat(config).isNotNull();
@@ -64,7 +66,8 @@ class JmxScraperTest {
       List<String> args = Arrays.asList("-config", "-");
 
       // When
-      JmxScraperConfig config = JmxScraper.createConfigFromArgs(args);
+      JmxScraperConfig config =
+          JmxScraperConfig.fromProperties(JmxScraper.parseArgs(args), new Properties());
 
       // Then
       assertThat(config).isNotNull();

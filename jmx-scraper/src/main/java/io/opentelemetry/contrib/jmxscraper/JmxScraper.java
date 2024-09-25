@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
-import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfigFactory;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,9 +36,13 @@ public class JmxScraper {
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
     try {
-      JmxScraperConfig config = JmxScraper.createConfigFromArgs(Arrays.asList(args));
+      JmxScraperConfig config =
+          JmxScraperConfig.fromProperties(parseArgs(Arrays.asList(args)), System.getProperties());
+      // propagate effective user-provided configuration to JVM system properties
+      config.propagateSystemProperties();
       // TODO: depend on instrumentation 2.9.0 snapshot
-      // service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
+      // service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(),
+      // config.getIntervalMilliseconds());
       JmxScraper jmxScraper = new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()));
       jmxScraper.start();
 
@@ -56,15 +59,14 @@ public class JmxScraper {
       System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
     }
-
   }
 
   /**
-   * Create {@link JmxScraperConfig} object basing on command line options
+   * Create {@link Properties} from command line options
    *
    * @param args application commandline arguments
    */
-  static JmxScraperConfig createConfigFromArgs(List<String> args)
+  static Properties parseArgs(List<String> args)
       throws ArgumentsParsingException, ConfigurationException {
 
     if (args.isEmpty()) {
@@ -77,14 +79,12 @@ public class JmxScraper {
       throw new ArgumentsParsingException("unexpected first argument must be '" + CONFIG_ARG + "'");
     }
 
-    Properties properties;
     String path = args.get(1);
     if (path.trim().equals("-")) {
-      properties = loadPropertiesFromStdin();
+      return loadPropertiesFromStdin();
     } else {
-      properties = loadPropertiesFromPath(path);
+      return loadPropertiesFromPath(path);
     }
-    return new JmxScraperConfigFactory().createConfig(properties);
   }
 
   private static Properties loadPropertiesFromStdin() throws ConfigurationException {
@@ -97,8 +97,7 @@ public class JmxScraper {
     }
   }
 
-  private static Properties loadPropertiesFromPath(String path)
-      throws ConfigurationException {
+  private static Properties loadPropertiesFromPath(String path) throws ConfigurationException {
     Properties properties = new Properties();
     try (InputStream is = Files.newInputStream(Paths.get(path))) {
       properties.load(is);
