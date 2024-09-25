@@ -70,7 +70,9 @@ public class JmxScraper {
       throws ArgumentsParsingException, ConfigurationException {
 
     if (args.isEmpty()) {
-      throw new ArgumentsParsingException("no argument provided");
+      // empty properties from stdin or external file
+      // config could still be provided through JVM system properties
+      return new Properties();
     }
     if (args.size() != 2) {
       throw new ArgumentsParsingException("exactly two arguments expected, got " + args.size());
