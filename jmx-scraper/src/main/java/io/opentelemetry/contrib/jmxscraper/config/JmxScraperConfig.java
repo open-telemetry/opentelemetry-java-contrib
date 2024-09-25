@@ -169,8 +169,8 @@ public class JmxScraperConfig {
   public void propagateSystemProperties() {
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
 
-      String key = (String) entry.getKey();
-      String value = (String) entry.getValue();
+      String key = entry.getKey().toString();
+      String value = entry.getValue().toString();
       if (key.startsWith("otel.")
           || key.startsWith("javax.net.ssl.keyStore")
           || key.startsWith("javax.net.ssl.trustStore")) {

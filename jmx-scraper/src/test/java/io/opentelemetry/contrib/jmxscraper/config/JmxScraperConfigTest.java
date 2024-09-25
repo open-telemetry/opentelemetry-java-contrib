@@ -9,10 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Properties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
-import org.junitpioneer.jupiter.SetSystemProperty;
 
 class JmxScraperConfigTest {
   private static Properties validProperties;
@@ -32,6 +32,18 @@ class JmxScraperConfigTest {
     validProperties.setProperty(JmxScraperConfig.JMX_PASSWORD, "some-password");
     validProperties.setProperty(JmxScraperConfig.JMX_REMOTE_PROFILE, "some-profile");
     validProperties.setProperty(JmxScraperConfig.JMX_REALM, "some-realm");
+  }
+
+  @AfterEach
+  void afterEach() {
+    // make sure that no test leaked in global system properties
+    Properties systemProperties = System.getProperties();
+    for (Object k : systemProperties.keySet()) {
+      String key = k.toString();
+      if (key.startsWith("otel.") || key.startsWith("javax.net.ssl.")) {
+        System.clearProperty(key);
+      }
+    }
   }
 
   @Test
@@ -77,6 +89,10 @@ class JmxScraperConfigTest {
     properties.setProperty("javax.net.ssl.trustStorePassword", "def456");
     properties.setProperty("javax.net.ssl.trustStoreType", "JKS");
 
+    assertThat(System.getProperty("javax.net.ssl.keyStore"))
+        .describedAs("keystore config should not be set")
+        .isNull();
+
     // When
     JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, new Properties());
     config.propagateSystemProperties();
@@ -105,16 +121,24 @@ class JmxScraperConfigTest {
   }
 
   @Test
-  @SetSystemProperty(key = "otel.jmx.service.url", value = "originalServiceUrl")
-  @SetSystemProperty(key = "javax.net.ssl.keyStorePassword", value = "originalPassword")
+  @ClearSystemProperty(key = "otel.jmx.service.url")
+  @ClearSystemProperty(key = "javax.net.ssl.keyStorePassword")
   void shouldRetainPredefinedSystemProperties() throws ConfigurationException {
     // Given
-    // Properties to be propagated to system, properties
+    // user properties to be propagated to system properties
     Properties properties = (Properties) validProperties.clone();
     properties.setProperty("javax.net.ssl.keyStorePassword", "abc123");
 
+    // system properties
+    Properties systemProperties = new Properties();
+    systemProperties.put("otel.jmx.service.url", "originalServiceUrl");
+    systemProperties.put("javax.net.ssl.keyStorePassword", "originalPassword");
+
     // When
-    JmxScraperConfig.fromProperties(properties, new Properties());
+    JmxScraperConfig config = JmxScraperConfig.fromProperties(properties, systemProperties);
+    // even when effective configuration is propagated to system properties original values are kept
+    // due to priority of system properties over user-provided ones.
+    config.propagateSystemProperties();
 
     // Then
     assertThat(System.getProperty("otel.jmx.service.url")).isEqualTo("originalServiceUrl");
