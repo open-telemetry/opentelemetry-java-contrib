@@ -6,7 +6,9 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import java.time.Duration;
+import java.util.List;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -43,5 +45,10 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
     return scraper.withTargetSystem("tomcat");
+  }
+
+  @Override
+  protected void verifyMetrics(List<ExportMetricsServiceRequest> metrics) {
+    // TODO: Verify gathered metrics
   }
 }

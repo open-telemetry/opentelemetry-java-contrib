@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper.config;
 
-import static io.opentelemetry.contrib.jmxscraper.util.StringUtils.isBlank;
+import static io.opentelemetry.contrib.jmxscraper.internal.StringUtils.isBlank;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,19 +35,20 @@ public class JmxScraperConfig {
   static final String JMX_REALM = "otel.jmx.realm";
 
   static final List<String> AVAILABLE_TARGET_SYSTEMS =
-      Arrays.asList(
-          "activemq",
-          "cassandra",
-          "hbase",
-          "hadoop",
-          "jetty",
-          "jvm",
-          "kafka",
-          "kafka-consumer",
-          "kafka-producer",
-          "solr",
-          "tomcat",
-          "wildfly");
+      Collections.unmodifiableList(
+          Arrays.asList(
+              "activemq",
+              "cassandra",
+              "hbase",
+              "hadoop",
+              "jetty",
+              "jvm",
+              "kafka",
+              "kafka-consumer",
+              "kafka-producer",
+              "solr",
+              "tomcat",
+              "wildfly"));
 
   private String serviceUrl = "";
   private String customJmxScrapingConfigPath = "";
@@ -164,7 +165,7 @@ public class JmxScraperConfig {
   /**
    * Sets system properties from effective configuration, must be called once and early before any
    * OTel SDK or SSL/TLS stack initialization. This allows to override JVM system properties using
-   * user-providded configuration and also to set standard OTel SDK configuration.
+   * user-provided configuration and also to set standard OTel SDK configuration.
    */
   public void propagateSystemProperties() {
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
