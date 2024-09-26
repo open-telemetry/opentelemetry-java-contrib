@@ -120,9 +120,10 @@ public abstract class TargetSystemIntegrationTest {
     scraper = customizeScraperContainer(scraper);
     scraper.start();
 
-    // TODO: replace with real assertions
-    assertThat(otlpServer.getMetrics()).isEmpty();
+    verifyMetrics(otlpServer.getMetrics());
   }
+
+  protected abstract void verifyMetrics(List<ExportMetricsServiceRequest> metrics);
 
   protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
     return scraper;

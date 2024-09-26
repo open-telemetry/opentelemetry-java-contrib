@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import io.opentelemetry.contrib.jmxscraper.TestAppContainer;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
+import java.util.List;
 import org.testcontainers.containers.GenericContainer;
 
 public class JvmIntegrationTest extends TargetSystemIntegrationTest {
@@ -20,5 +22,10 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
     return scraper.withTargetSystem("jvm");
+  }
+
+  @Override
+  protected void verifyMetrics(List<ExportMetricsServiceRequest> metrics) {
+    // TODO: Verify gathered metrics
   }
 }
