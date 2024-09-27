@@ -37,7 +37,7 @@ class JmxScraperConfigTest {
         SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
     validProperties.setProperty(CUSTOM_JMX_SCRAPING_CONFIG, "");
     validProperties.setProperty(TARGET_SYSTEM, "tomcat, activemq");
-    validProperties.setProperty(METRICS_EXPORTER_TYPE, "otel");
+    validProperties.setProperty(METRICS_EXPORTER_TYPE, "otlp");
     validProperties.setProperty(INTERVAL_MILLISECONDS, "1410");
     validProperties.setProperty(REGISTRY_SSL, "true");
     validProperties.setProperty(OTLP_ENDPOINT, "http://localhost:4317");
@@ -77,11 +77,27 @@ class JmxScraperConfigTest {
     assertThat(config.getTargetSystems()).isEmpty();
     assertThat(config.getIntervalMilliseconds()).isEqualTo(10000);
     assertThat(config.getMetricsExporterType()).isEqualTo("logging");
-    assertThat(config.getOtlpExporterEndpoint()).isNull();
+    assertThat(config.getOtlpExporterEndpoint()).isBlank();
     assertThat(config.getUsername()).isNull();
     assertThat(config.getPassword()).isNull();
     assertThat(config.getRemoteProfile()).isNull();
     assertThat(config.getRealm()).isNull();
+  }
+
+  @Test
+  void shouldCreateConfig_defaultOtlEndpoint() throws ConfigurationException {
+    // Given
+    Properties properties = new Properties();
+    properties.setProperty(SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    properties.setProperty(CUSTOM_JMX_SCRAPING_CONFIG, "/file.properties");
+    properties.setProperty(METRICS_EXPORTER_TYPE, "otlp");
+
+    // When
+    JmxScraperConfig config = fromProperties(properties, new Properties());
+
+    // Then
+    assertThat(config.getMetricsExporterType()).isEqualTo("otlp");
+    assertThat(config.getOtlpExporterEndpoint()).isEqualTo("http://localhost:4318");
   }
 
   @Test
@@ -116,7 +132,7 @@ class JmxScraperConfigTest {
     assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("");
     assertThat(config.getTargetSystems()).containsOnly("tomcat", "activemq");
     assertThat(config.getIntervalMilliseconds()).isEqualTo(1410);
-    assertThat(config.getMetricsExporterType()).isEqualTo("otel");
+    assertThat(config.getMetricsExporterType()).isEqualTo("otlp");
     assertThat(config.getOtlpExporterEndpoint()).isEqualTo("http://localhost:4317");
     assertThat(config.getUsername()).isEqualTo("some-user");
     assertThat(config.getPassword()).isEqualTo("some-password");
@@ -196,10 +212,10 @@ class JmxScraperConfigTest {
   }
 
   @Test
-  void shouldFailValidation_missingOtlpEndpoint() {
+  void shouldFailValidation_blankOtlpEndpointProvided() {
     // Given
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(OTLP_ENDPOINT);
+    properties.setProperty(OTLP_ENDPOINT, "");
     properties.setProperty(METRICS_EXPORTER_TYPE, "otlp");
 
     // When and Then
