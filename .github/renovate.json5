@@ -29,6 +29,11 @@
       "groupName": "gradle enterprise packages"
     },
     {
+      // prevent 3.0.1u2 -> 3.0.1
+      "matchPackageNames": ["com.google.code.findbugs:annotations"],
+      "allowedVersions": "!/^3\\.0\\.1$/"
+    },
+    {
       // disruptor 4+ requires Java 11+
       "matchPackageNames": ["com.lmax:disruptor"],
       "matchUpdateTypes": ["major"],
