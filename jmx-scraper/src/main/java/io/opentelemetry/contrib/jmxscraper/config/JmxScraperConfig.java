@@ -34,6 +34,8 @@ public class JmxScraperConfig {
   static final String JMX_REMOTE_PROFILE = "otel.jmx.remote.profile";
   static final String JMX_REALM = "otel.jmx.realm";
 
+  static final String OTLP_METRICS_EXPORTER = "otlp";
+
   static final List<String> AVAILABLE_TARGET_SYSTEMS =
       Collections.unmodifiableList(
           Arrays.asList(
@@ -148,8 +150,10 @@ public class JmxScraperConfig {
 
     config.metricsExporterType =
         getAndSetPropertyIfUndefined(properties, METRICS_EXPORTER_TYPE, "logging");
-    config.otlpExporterEndpoint = properties.getProperty(OTLP_ENDPOINT);
-
+    if (OTLP_METRICS_EXPORTER.equalsIgnoreCase(config.metricsExporterType)) {
+      config.otlpExporterEndpoint =
+          getAndSetPropertyIfUndefined(properties, OTLP_ENDPOINT, "http://localhost:4318");
+    }
     config.username = properties.getProperty(JMX_USERNAME);
     config.password = properties.getProperty(JMX_PASSWORD);
 
@@ -232,9 +236,8 @@ public class JmxScraperConfig {
               "%s must specify targets from %s", config.targetSystems, AVAILABLE_TARGET_SYSTEMS));
     }
 
-    if (isBlank(config.otlpExporterEndpoint)
-        && (!isBlank(config.metricsExporterType)
-            && config.metricsExporterType.equalsIgnoreCase("otlp"))) {
+    if (OTLP_METRICS_EXPORTER.equalsIgnoreCase(config.metricsExporterType)
+        && isBlank(config.otlpExporterEndpoint)) {
       throw new ConfigurationException(OTLP_ENDPOINT + " must be specified for otlp format.");
     }
 
