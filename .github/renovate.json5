@@ -47,6 +47,12 @@
       "enabled": false
     },
     {
+      // agrona 1.23+ requires Java 17+
+      "matchPackageNames": ["org.agrona:agrona:"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
       // system-stubs-jupiter 2.1+ requires Java 11+
       "matchPackageNames": ["uk.org.webcompere:system-stubs-jupiter"],
       "matchUpdateTypes": ["major", "minor"],
