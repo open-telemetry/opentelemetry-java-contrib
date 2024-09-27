@@ -41,6 +41,10 @@ components:
     - sfriberg
   jmx-metrics:
     - breedx-splk
+  jmx-scraper:
+    - breedx-splk
+    - robsunday
+    - sylvainjuge
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan

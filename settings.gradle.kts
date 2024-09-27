@@ -13,6 +13,7 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
+    mavenLocal()
   }
 }
 
@@ -70,6 +71,7 @@ include(":example")
 include(":jfr-events")
 include(":jfr-connection")
 include(":jmx-metrics")
+include(":jmx-scraper")
 include(":maven-extension")
 include(":micrometer-meter-provider")
 include(":noop-api")
