@@ -53,7 +53,7 @@
     },
     {
       // agrona 1.23+ requires Java 17+
-      "matchPackageNames": ["org.agrona:agrona:"],
+      "matchPackageNames": ["org.agrona:agrona"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
