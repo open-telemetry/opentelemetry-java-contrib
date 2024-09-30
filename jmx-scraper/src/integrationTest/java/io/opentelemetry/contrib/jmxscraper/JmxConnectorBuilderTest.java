@@ -34,7 +34,10 @@ public class JmxConnectorBuilderTest {
     try (TestAppContainer app = new TestAppContainer().withNetwork(network).withJmxPort(9990)) {
       app.start();
       testConnector(
-          () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(9990)).build());
+          () -> {
+            throw new RuntimeException("TEST");
+          }
+      );
     }
   }
 
