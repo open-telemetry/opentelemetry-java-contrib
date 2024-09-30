@@ -36,8 +36,7 @@ public class JmxConnectorBuilderTest {
       testConnector(
           () -> {
             throw new RuntimeException("TEST");
-          }
-      );
+          });
     }
   }
 
