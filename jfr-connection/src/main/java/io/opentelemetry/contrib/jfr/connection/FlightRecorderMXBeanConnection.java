@@ -28,6 +28,8 @@ import javax.management.openmbean.TabularData;
  *
  * @see FlightRecorderConnection#connectToFlightRecorderMXBean(MBeanServerConnection)
  */
+@SuppressWarnings("MemberName")
+
 final class FlightRecorderMXBeanConnection implements FlightRecorderConnection {
 
   private static final String JFR_OBJECT_NAME = "jdk.management.jfr:type=FlightRecorder";
