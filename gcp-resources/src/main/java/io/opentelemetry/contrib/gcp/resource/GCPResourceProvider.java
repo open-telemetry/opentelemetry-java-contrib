@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+@SuppressWarnings("MemberName")
 public class GCPResourceProvider implements ConditionalResourceProvider {
 
   private static final Logger LOGGER = Logger.getLogger(GCPResourceProvider.class.getSimpleName());
