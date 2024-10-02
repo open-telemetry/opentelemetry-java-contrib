@@ -5,16 +5,22 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
+import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
+import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
+import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -23,10 +29,13 @@ public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
 
-  private final JmxConnectorBuilder client;
+  private static final String OTEL_AUTOCONFIGURE = "otel.java.global-autoconfigure.enabled";
 
-  // TODO depend on instrumentation 2.9.0 snapshot
-  // private final JmxMetricInsight service;
+  private final JmxConnectorBuilder client;
+  private final JmxMetricInsight service;
+  private final JmxScraperConfig config;
+
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /**
    * Main method to create and run a {@link JmxScraper} instance.
@@ -35,15 +44,23 @@ public class JmxScraper {
    */
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
+
+    // enable SDK auto-configure if not explicitly set by user
+    if (System.getProperty(OTEL_AUTOCONFIGURE) == null) {
+      System.setProperty(OTEL_AUTOCONFIGURE, "true");
+    }
+
     try {
       JmxScraperConfig config =
           JmxScraperConfig.fromProperties(parseArgs(Arrays.asList(args)), System.getProperties());
       // propagate effective user-provided configuration to JVM system properties
+      // this also enables SDK auto-configuration to use those properties
       config.propagateSystemProperties();
-      // TODO: depend on instrumentation 2.9.0 snapshot
-      // service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(),
-      // config.getIntervalMilliseconds());
-      JmxScraper jmxScraper = new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()));
+
+      JmxMetricInsight service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(),
+          config.getIntervalMilliseconds());
+      JmxScraper jmxScraper = new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()),
+          service, config);
       jmxScraper.start();
 
     } catch (ArgumentsParsingException e) {
@@ -109,29 +126,63 @@ public class JmxScraper {
     }
   }
 
-  JmxScraper(JmxConnectorBuilder client) {
+  JmxScraper(JmxConnectorBuilder client, JmxMetricInsight service, JmxScraperConfig config) {
     this.client = client;
+    this.service = service;
+    this.config = config;
   }
 
   private void start() throws IOException {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      logger.info("JMX scraping stopped");
+      running.set(false);
+    }));
 
-    JMXConnector connector = client.build();
+    try (JMXConnector connector = client.build()) {
+      MBeanServerConnection connection = connector.getMBeanServerConnection();
+      service.startRemote(getMetricConfig(config), () -> Collections.singletonList(connection));
 
-    @SuppressWarnings("unused")
-    MBeanServerConnection connection = connector.getMBeanServerConnection();
+      running.set(true);
+      logger.info("JMX scraping started");
 
-    // TODO: depend on instrumentation 2.9.0 snapshot
-    // MetricConfiguration metricConfig = new MetricConfiguration();
-    // TODO create JMX insight config from scraper config
-    // service.startRemote(metricConfig, () -> Collections.singletonList(connection));
-
-    logger.info("JMX scraping started");
-
-    // TODO: wait a bit to keep the JVM running, this won't be needed once calling jmx insight
-    try {
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      throw new IllegalStateException(e);
+      while (running.get()) {
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          // silenty ignored
+        }
+      }
     }
   }
+
+  private static MetricConfiguration getMetricConfig(JmxScraperConfig scraperConfig) {
+    MetricConfiguration config = new MetricConfiguration();
+    for (String system : scraperConfig.getTargetSystems()) {
+      try {
+        addRulesForSystem(system, config);
+      } catch (RuntimeException e) {
+        logger.warning("unable to load rules for system " + system + ": " + e.getMessage());
+      }
+    }
+    // TODO : add ability for user to provide custom yaml configurations
+
+    return config;
+  }
+
+  private static void addRulesForSystem(String system, MetricConfiguration conf) {
+    String yamlResource = system + ".yaml";
+    try (InputStream inputStream =
+        JmxScraper.class.getClassLoader().getResourceAsStream(yamlResource)) {
+      if (inputStream != null) {
+        RuleParser parserInstance = RuleParser.get();
+        parserInstance.addMetricDefsTo(conf, inputStream, system);
+      } else {
+        throw new IllegalStateException("no support for " + system);
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException("error while loading rules for system " + system, e);
+    }
+  }
+
+
 }
