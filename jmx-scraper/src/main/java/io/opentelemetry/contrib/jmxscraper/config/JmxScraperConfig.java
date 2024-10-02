@@ -55,9 +55,9 @@ public class JmxScraperConfig {
   private String serviceUrl = "";
   private String customJmxScrapingConfigPath = "";
   private Set<String> targetSystems = Collections.emptySet();
-  private int intervalMilliseconds;
-  private String metricsExporterType = "";
-  private String otlpExporterEndpoint = "";
+  private int intervalMilliseconds; // TODO only used to set 'otel.metric.export.interval' from SDK
+  private String metricsExporterType = ""; // TODO only used to default to 'logging' if not set
+  private String otlpExporterEndpoint = ""; // TODO not really needed here as handled by SDK
   private String username = "";
   private String password = "";
   private String realm = "";

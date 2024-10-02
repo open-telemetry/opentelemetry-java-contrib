@@ -20,9 +20,7 @@ repositories {
   maven {
     setUrl("https://oss.sonatype.org/content/repositories/snapshots")
   }
-
 }
-
 
 dependencies {
   // TODO remove snapshot dependency on upstream once 2.9.0 is released

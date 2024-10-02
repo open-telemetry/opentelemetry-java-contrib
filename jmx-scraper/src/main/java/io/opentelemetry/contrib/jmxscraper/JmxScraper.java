@@ -46,6 +46,7 @@ public class JmxScraper {
   public static void main(String[] args) {
 
     // enable SDK auto-configure if not explicitly set by user
+    // TODO: refactor this to use AutoConfiguredOpenTelemetrySdk
     if (System.getProperty(OTEL_AUTOCONFIGURE) == null) {
       System.setProperty(OTEL_AUTOCONFIGURE, "true");
     }
@@ -57,10 +58,11 @@ public class JmxScraper {
       // this also enables SDK auto-configuration to use those properties
       config.propagateSystemProperties();
 
-      JmxMetricInsight service = JmxMetricInsight.createService(GlobalOpenTelemetry.get(),
-          config.getIntervalMilliseconds());
-      JmxScraper jmxScraper = new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()),
-          service, config);
+      JmxMetricInsight service =
+          JmxMetricInsight.createService(
+              GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
+      JmxScraper jmxScraper =
+          new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()), service, config);
       jmxScraper.start();
 
     } catch (ArgumentsParsingException e) {
@@ -133,10 +135,13 @@ public class JmxScraper {
   }
 
   private void start() throws IOException {
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      logger.info("JMX scraping stopped");
-      running.set(false);
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  logger.info("JMX scraping stopped");
+                  running.set(false);
+                }));
 
     try (JMXConnector connector = client.build()) {
       MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -183,6 +188,4 @@ public class JmxScraper {
       throw new IllegalStateException("error while loading rules for system " + system, e);
     }
   }
-
-
 }
