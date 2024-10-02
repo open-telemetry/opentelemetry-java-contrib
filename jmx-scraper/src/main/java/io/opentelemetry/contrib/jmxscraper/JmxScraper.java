@@ -154,7 +154,7 @@ public class JmxScraper {
         try {
           Thread.sleep(100);
         } catch (InterruptedException e) {
-          // silenty ignored
+          // silently ignored
         }
       }
     }
