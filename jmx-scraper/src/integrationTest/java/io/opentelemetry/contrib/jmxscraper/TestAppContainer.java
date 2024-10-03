@@ -25,7 +25,6 @@ import org.testcontainers.utility.MountableFile;
 public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   private final Map<String, String> properties;
-  private int port;
   private String login;
   private String pwd;
 
@@ -46,9 +45,16 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   @CanIgnoreReturnValue
   public TestAppContainer withJmxPort(int port) {
-    this.port = port;
     properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
-    return this.withExposedPorts(port);
+    properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(port));
+
+    // To get host->container JMX connection working docker must expose JMX/RMI port under the same
+    // port number. Because of this testcontainers' standard exposed port randomization approach
+    // can't be used.
+    // Explanation:
+    // https://forums.docker.com/t/exposing-mapped-jmx-ports-from-multiple-containers/5287/6
+    addFixedExposedPort(port, port);
+    return this;
   }
 
   @CanIgnoreReturnValue
@@ -58,9 +64,17 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public TestAppContainer withJmxAccessibleFromHost() {
+    properties.put("java.rmi.server.hostname", getHost());
+    return this;
+  }
+
   @Override
   public void start() {
-
+    //    properties.put("com.sun.management.jmxremote.local.only", "false");
+    //    properties.put("java.rmi.server.logCalls", "true");
+    //
     // TODO: add support for ssl
     properties.put("com.sun.management.jmxremote.ssl", "false");
 
@@ -92,11 +106,9 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     this.withEnv("JAVA_TOOL_OPTIONS", confArgs);
 
-    logger().info("Test application JAVA_TOOL_OPTIONS = " + confArgs);
+    logger().info("Test application JAVA_TOOL_OPTIONS = {}", confArgs);
 
     super.start();
-
-    logger().info("Test application JMX port mapped to {}:{}", getHost(), getMappedPort(port));
   }
 
   private static Path createPwdFile(String login, String pwd) {
