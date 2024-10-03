@@ -93,7 +93,7 @@ public abstract class TargetSystemIntegrationTest {
 
     target =
         createTargetContainer(JMX_PORT)
-            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .withLogConsumer(new Slf4jLogConsumer(logger).withPrefix("target-system"))
             .withNetwork(network)
             .withExposedPorts(JMX_PORT)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
@@ -114,6 +114,7 @@ public abstract class TargetSystemIntegrationTest {
 
     scraper =
         new JmxScraperContainer(otlpEndpoint)
+            .withLogConsumer(new Slf4jLogConsumer(logger).withPrefix("jmx-scraper"))
             .withNetwork(network)
             .withService(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 

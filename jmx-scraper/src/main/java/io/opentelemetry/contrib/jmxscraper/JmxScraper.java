@@ -77,6 +77,9 @@ public class JmxScraper {
     } catch (IOException e) {
       System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
+    } catch (RuntimeException e) {
+      System.err.println("ERROR: " + e.getMessage());
+      System.exit(3);
     }
   }
 
@@ -163,14 +166,9 @@ public class JmxScraper {
   private static MetricConfiguration getMetricConfig(JmxScraperConfig scraperConfig) {
     MetricConfiguration config = new MetricConfiguration();
     for (String system : scraperConfig.getTargetSystems()) {
-      try {
         addRulesForSystem(system, config);
-      } catch (RuntimeException e) {
-        logger.warning("unable to load rules for system " + system + ": " + e.getMessage());
-      }
     }
     // TODO : add ability for user to provide custom yaml configurations
-
     return config;
   }
 
@@ -182,7 +180,7 @@ public class JmxScraper {
         RuleParser parserInstance = RuleParser.get();
         parserInstance.addMetricDefsTo(conf, inputStream, system);
       } else {
-        throw new IllegalStateException("no support for " + system);
+        throw new IllegalStateException("no support for system" + system);
       }
     } catch (Exception e) {
       throw new IllegalStateException("error while loading rules for system " + system, e);
