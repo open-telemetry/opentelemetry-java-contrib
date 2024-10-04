@@ -337,7 +337,8 @@ public class SamplingProfiler implements Runnable {
         profiler.removeThread(Thread.currentThread());
       }
       boolean success =
-          eventBuffer.tryPublishEvent(deactivationEventTranslator, deactivatedSpan, previouslyActive);
+          eventBuffer.tryPublishEvent(
+              deactivationEventTranslator, deactivatedSpan, previouslyActive);
       if (!success) {
         logger.fine("Could not add deactivation event to ring buffer as no slots are available");
       }
