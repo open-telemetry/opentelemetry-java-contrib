@@ -168,6 +168,18 @@ class AwsXrayRemoteSamplerTest {
     }
   }
 
+  @Test
+  void parentBasedXraySamplerAfterDefaultSampler() {
+    try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
+      await()
+          .untilAsserted(
+              () -> {
+                assertThat(sampler.getDescription())
+                    .startsWith("AwsXrayRemoteSampler{ParentBased{root:XrayRulesSampler{[");
+              });
+    }
+  }
+
   // https://github.com/open-telemetry/opentelemetry-java-contrib/issues/376
   @Test
   void testJitterTruncation() {
