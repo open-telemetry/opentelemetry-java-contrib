@@ -326,18 +326,18 @@ public class SamplingProfiler implements Runnable {
    * <p>This and {@link #onActivation} are the only methods which are executed in a multi-threaded
    * context.
    *
-   * @param activeSpan the span which is about to be activated
+   * @param deactivatedSpan the span which is about to be deactivated
    * @param previouslyActive the span which has previously been activated
    * @return {@code true}, if the event could be processed, {@code false} if the internal event
    *     queue is full which means the event has been discarded
    */
-  public boolean onDeactivation(Span activeSpan, @Nullable Span previouslyActive) {
+  public boolean onDeactivation(Span deactivatedSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
         profiler.removeThread(Thread.currentThread());
       }
       boolean success =
-          eventBuffer.tryPublishEvent(deactivationEventTranslator, activeSpan, previouslyActive);
+          eventBuffer.tryPublishEvent(deactivationEventTranslator, deactivatedSpan, previouslyActive);
       if (!success) {
         logger.fine("Could not add deactivation event to ring buffer as no slots are available");
       }
