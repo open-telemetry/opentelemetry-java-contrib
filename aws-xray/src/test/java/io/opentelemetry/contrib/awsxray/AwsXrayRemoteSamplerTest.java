@@ -170,8 +170,15 @@ class AwsXrayRemoteSamplerTest {
 
   @Test
   void parentBasedXraySamplerAfterDefaultSampler() {
-    try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
+    rulesResponse.set(RULE_RESPONSE_1);
+    try (AwsXrayRemoteSampler samplerWithLongerPollingInterval =
+        AwsXrayRemoteSampler.newBuilder(Resource.empty())
+            .setInitialSampler(Sampler.alwaysOn())
+            .setEndpoint(server.httpUri().toString())
+            .setPollingInterval(Duration.ofMillis(5))
+            .build()) {
       await()
+          .pollDelay(Duration.ofMillis(10))
           .untilAsserted(
               () -> {
                 assertThat(sampler.getDescription())
