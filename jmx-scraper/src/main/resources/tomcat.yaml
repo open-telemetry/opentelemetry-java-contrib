@@ -13,7 +13,7 @@ rules:
       context: param(context)
     mapping:
       activeSessions:
-        metric: sessions
+        metric: tomcat.sessions
         type: gauge
         unit: sessions
         desc: The number of active sessions
@@ -39,24 +39,24 @@ rules:
         metric: max_time
         type: gauge
         unit: ms
-        desc: The total requests
+        desc: Maximum time to process a request
       processingTime:
         metric: processing_time
-        type: gauge
+        type: counter
         unit: ms
         desc: The total processing time
       bytesSent:
         metric: traffic
         type: counter
         unit: by
-        desc: The number of bytes transmitted
+        desc: The number of bytes transmitted and received
         metricAttribute:
           direction: const(sent)
       bytesReceived:
         metric: traffic
         type: counter
         unit: by
-        desc: The number of bytes received
+        desc: The number of bytes transmitted and received
         metricAttribute:
           direction: const(received)
 
@@ -69,13 +69,15 @@ rules:
     mapping:
       currentThreadCount:
         metric: threads
-        type: updowncounter
+        desc: The number of threads
+        type: gauge
         unit: threads
         metricAttribute:
           state: const(idle)
       currentThreadsBusy:
         metric: threads
-        type: updowncounter
+        desc: The number of threads
+        type: gauge
         unit: threads
         metricAttribute:
           state: const(busy)

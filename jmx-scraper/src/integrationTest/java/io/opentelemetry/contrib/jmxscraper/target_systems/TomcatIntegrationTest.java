@@ -5,10 +5,12 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static org.assertj.core.api.Assertions.entry;
+
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
-import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import java.time.Duration;
-import java.util.List;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -48,7 +50,67 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics(List<ExportMetricsServiceRequest> metrics) {
-    // TODO: Verify gathered metrics
+  protected void verifyMetrics() {
+    waitAndAssertMetrics(
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "tomcat.sessions",
+                "The number of active sessions",
+                "sessions",
+                attrs -> attrs.containsKey("context")),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.errors",
+                "The number of errors encountered",
+                "errors",
+                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.processing_time",
+                "The total processing time",
+                "ms",
+                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.traffic",
+                "The number of bytes transmitted and received",
+                "by",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("proto_handler", "\"http-nio-8080\""), entry("direction", "sent")),
+                attrs ->
+                    attrs.containsOnly(
+                        entry("proto_handler", "\"http-nio-8080\""),
+                        entry("direction", "received"))),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "tomcat.threads",
+                "The number of threads",
+                "threads",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "idle")),
+                attrs ->
+                    attrs.containsOnly(
+                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "busy"))),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "tomcat.max_time",
+                "Maximum time to process a request",
+                "ms",
+                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "tomcat.request_count",
+                "The total requests",
+                "requests",
+                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))));
   }
 }

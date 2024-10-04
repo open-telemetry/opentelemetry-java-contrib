@@ -166,7 +166,7 @@ public class JmxScraper {
   private static MetricConfiguration getMetricConfig(JmxScraperConfig scraperConfig) {
     MetricConfiguration config = new MetricConfiguration();
     for (String system : scraperConfig.getTargetSystems()) {
-        addRulesForSystem(system, config);
+      addRulesForSystem(system, config);
     }
     // TODO : add ability for user to provide custom yaml configurations
     return config;

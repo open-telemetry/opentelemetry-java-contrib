@@ -6,23 +6,28 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 import io.grpc.stub.StreamObserver;
-import io.opentelemetry.contrib.jmxscraper.JmxConnectorBuilder;
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
-import java.io.IOException;
+import io.opentelemetry.proto.metrics.v1.Metric;
+import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import javax.management.remote.JMXConnector;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -104,14 +109,6 @@ public abstract class TargetSystemIntegrationTest {
     logger.info(
         "Target system started, JMX port: {} mapped to {}:{}", JMX_PORT, targetHost, targetPort);
 
-    // TODO : wait for metrics to be sent and add assertions on what is being captured
-    // for now we just test that we can connect to remote JMX using our client.
-    try (JMXConnector connector = JmxConnectorBuilder.createNew(targetHost, targetPort).build()) {
-      assertThat(connector.getMBeanServerConnection()).isNotNull();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
     scraper =
         new JmxScraperContainer(otlpEndpoint)
             .withLogConsumer(new Slf4jLogConsumer(logger).withPrefix("jmx-scraper"))
@@ -121,10 +118,45 @@ public abstract class TargetSystemIntegrationTest {
     scraper = customizeScraperContainer(scraper);
     scraper.start();
 
-    verifyMetrics(otlpServer.getMetrics());
+    verifyMetrics();
   }
 
-  protected abstract void verifyMetrics(List<ExportMetricsServiceRequest> metrics);
+  protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
+    await()
+        .atMost(Duration.ofSeconds(30))
+        .untilAsserted(
+            () -> {
+              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
+              assertThat(receivedMetrics).describedAs("no metric received").isNotEmpty();
+
+              List<Metric> metrics =
+                  receivedMetrics.stream()
+                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
+                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+                      .flatMap(Collection::stream)
+                      .filter(
+                          // TODO: disabling batch span exporter might help remove unwanted metrics
+                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
+                      .flatMap(sm -> sm.getMetricsList().stream())
+                      .collect(Collectors.toList());
+
+              assertThat(metrics)
+                  .describedAs("metrics reported but none from JMX scraper")
+                  .isNotEmpty();
+
+              for (Consumer<Metric> assertion : assertions) {
+                assertThat(metrics).anySatisfy(assertion);
+              }
+            });
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("varargs")
+  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
+    waitAndAssertMetrics(Arrays.asList(assertions));
+  }
+
+  protected abstract void verifyMetrics();
 
   protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
     return scraper;
@@ -153,6 +185,10 @@ public abstract class TargetSystemIntegrationTest {
                     public void export(
                         ExportMetricsServiceRequest request,
                         StreamObserver<ExportMetricsServiceResponse> responseObserver) {
+
+                      // verbose but helpful to diagnose what is received
+                      logger.info("receiving metrics {}", request);
+
                       metricRequests.add(request);
                       responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
                       responseObserver.onCompleted();
