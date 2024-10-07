@@ -168,6 +168,25 @@ class AwsXrayRemoteSamplerTest {
     }
   }
 
+  @Test
+  void parentBasedXraySamplerAfterDefaultSampler() {
+    rulesResponse.set(RULE_RESPONSE_1);
+    try (AwsXrayRemoteSampler samplerWithLongerPollingInterval =
+        AwsXrayRemoteSampler.newBuilder(Resource.empty())
+            .setInitialSampler(Sampler.alwaysOn())
+            .setEndpoint(server.httpUri().toString())
+            .setPollingInterval(Duration.ofMillis(5))
+            .build()) {
+      await()
+          .pollDelay(Duration.ofMillis(10))
+          .untilAsserted(
+              () -> {
+                assertThat(sampler.getDescription())
+                    .startsWith("AwsXrayRemoteSampler{ParentBased{root:XrayRulesSampler{[");
+              });
+    }
+  }
+
   // https://github.com/open-telemetry/opentelemetry-java-contrib/issues/376
   @Test
   void testJitterTruncation() {
