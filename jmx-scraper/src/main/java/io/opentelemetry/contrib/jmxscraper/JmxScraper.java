@@ -97,10 +97,10 @@ public class JmxScraper {
       return new Properties();
     }
     if (args.size() != 2) {
-      throw new ArgumentsParsingException("exactly two arguments expected, got " + args.size());
+      throw new ArgumentsParsingException("Exactly two arguments expected, got " + args.size());
     }
     if (!args.get(0).equalsIgnoreCase(CONFIG_ARG)) {
-      throw new ArgumentsParsingException("unexpected first argument must be '" + CONFIG_ARG + "'");
+      throw new ArgumentsParsingException("Unexpected first argument must be '" + CONFIG_ARG + "'");
     }
 
     String path = args.get(1);
@@ -180,10 +180,10 @@ public class JmxScraper {
         RuleParser parserInstance = RuleParser.get();
         parserInstance.addMetricDefsTo(conf, inputStream, system);
       } else {
-        throw new IllegalStateException("no support for system" + system);
+        throw new IllegalArgumentException("No support for system" + system);
       }
     } catch (Exception e) {
-      throw new IllegalStateException("error while loading rules for system " + system, e);
+      throw new IllegalStateException("Error while loading rules for system " + system, e);
     }
   }
 }
