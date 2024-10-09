@@ -43,17 +43,15 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
         .withCommand("java", "-jar", "/app.jar");
   }
 
+  /**
+   * Configures app container for container-to-container access
+   *
+   * @param port mapped port to use
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withJmxPort(int port) {
     properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
-    properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(port));
-
-    // To get host->container JMX connection working docker must expose JMX/RMI port under the same
-    // port number. Because of this testcontainers' standard exposed port randomization approach
-    // can't be used.
-    // Explanation:
-    // https://forums.docker.com/t/exposing-mapped-jmx-ports-from-multiple-containers/5287/6
-    addFixedExposedPort(port, port);
     return this;
   }
 
@@ -64,9 +62,25 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Configures app container for host-to-container access, port will be used as-is from host to
+   * work-around JMX in docker. This is optional on Linux as there is a network route and the container
+   * is accessible, but not on Mac where the container runs in an isolated VM.
+   *
+   * @param port port to use, must be available on host.
+   * @return this
+   */
   @CanIgnoreReturnValue
-  public TestAppContainer withJmxAccessibleFromHost() {
+  public TestAppContainer withHostAccessFixedJmxPort(int port) {
+    // To get host->container JMX connection working docker must expose JMX/RMI port under the same
+    // port number. Because of this testcontainers' standard exposed port randomization approach
+    // can't be used.
+    // Explanation:
+    // https://forums.docker.com/t/exposing-mapped-jmx-ports-from-multiple-containers/5287/6
+    properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
+    properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(port));
     properties.put("java.rmi.server.hostname", getHost());
+    addFixedExposedPort(port, port);
     return this;
   }
 

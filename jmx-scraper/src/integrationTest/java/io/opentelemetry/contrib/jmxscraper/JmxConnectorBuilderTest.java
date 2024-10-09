@@ -33,7 +33,7 @@ public class JmxConnectorBuilderTest {
   void noAuth() {
     int port = PortSelector.getAvailableRandomPort();
     try (TestAppContainer app =
-        new TestAppContainer().withJmxPort(port).withJmxAccessibleFromHost()) {
+        new TestAppContainer().withHostAccessFixedJmxPort(port)) {
       app.start();
       testConnector(
           () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(port)).build());
@@ -47,8 +47,7 @@ public class JmxConnectorBuilderTest {
     String pwd = "t0p!Secret";
     try (TestAppContainer app =
         new TestAppContainer()
-            .withJmxPort(port)
-            .withJmxAccessibleFromHost()
+            .withHostAccessFixedJmxPort(port)
             .withUserAuth(login, pwd)) {
       app.start();
       testConnector(
