@@ -76,6 +76,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     // for now only configure through JVM args
     List<String> arguments = new ArrayList<>();
     arguments.add("java");
+    arguments.add("-Dotel.metrics.exporter=otlp");
     arguments.add("-Dotel.exporter.otlp.endpoint=" + endpoint);
 
     if (!targetSystems.isEmpty()) {

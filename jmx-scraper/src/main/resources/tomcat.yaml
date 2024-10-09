@@ -1,0 +1,83 @@
+---
+
+# For Tomcat, the default JMX domain is "Catalina:", however with some deployments like embedded in spring-boot
+# we can have the "Tomcat:" domain used, thus we use both MBean names for the metrics.
+
+rules:
+
+  - beans:
+      - Catalina:type=Manager,host=localhost,context=*
+      - Tomcat:type=Manager,host=localhost,context=*
+    metricAttribute:
+      # minor divergence from tomcat.groovy to capture metric for all deployed webapps
+      context: param(context)
+    mapping:
+      activeSessions:
+        metric: tomcat.sessions
+        type: gauge
+        unit: sessions
+        desc: The number of active sessions
+
+  - beans:
+      - Catalina:type=GlobalRequestProcessor,name=*
+      - Tomcat:type=GlobalRequestProcessor,name=*
+    prefix: tomcat.
+    metricAttribute:
+      proto_handler: param(name)
+    mapping:
+      errorCount:
+        metric: errors
+        type: counter
+        unit: errors
+        desc: The number of errors encountered
+      requestCount:
+        metric: request_count
+        type: counter
+        unit: requests
+        desc: The total requests
+      maxTime:
+        metric: max_time
+        type: gauge
+        unit: ms
+        desc: Maximum time to process a request
+      processingTime:
+        metric: processing_time
+        type: counter
+        unit: ms
+        desc: The total processing time
+      bytesSent:
+        metric: traffic
+        type: counter
+        unit: by
+        desc: The number of bytes transmitted and received
+        metricAttribute:
+          direction: const(sent)
+      bytesReceived:
+        metric: traffic
+        type: counter
+        unit: by
+        desc: The number of bytes transmitted and received
+        metricAttribute:
+          direction: const(received)
+
+  - beans:
+      - Catalina:type=ThreadPool,name=*
+      - Tomcat:type=ThreadPool,name=*
+    prefix: tomcat.
+    metricAttribute:
+      proto_handler: param(name)
+    mapping:
+      currentThreadCount:
+        metric: threads
+        desc: The number of threads
+        type: gauge
+        unit: threads
+        metricAttribute:
+          state: const(idle)
+      currentThreadsBusy:
+        metric: threads
+        desc: The number of threads
+        type: gauge
+        unit: threads
+        metricAttribute:
+          state: const(busy)

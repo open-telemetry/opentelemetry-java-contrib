@@ -1,0 +1,91 @@
+---
+
+rules:
+
+  - bean: java.lang:type=ClassLoading
+    mapping:
+      LoadedClassCount:
+        metric: jvm.classes.loaded
+        type: gauge
+        unit: '1'
+        desc: number of loaded classes
+
+  - bean: java.lang:type=GarbageCollector,name=*
+    mapping:
+      CollectionCount:
+        metric: jvm.gc.collections.count
+        type: counter
+        unit: '1'
+        desc: total number of collections that have occurred
+        metricAttribute:
+          name: param(name)
+      CollectionTime:
+        metric: jvm.gc.collections.elapsed
+        type: counter
+        unit: ms
+        desc: the approximate accumulated collection elapsed time in milliseconds
+        metricAttribute:
+          name: param(name)
+
+  - bean: java.lang:type=Memory
+    unit: by
+    prefix: jvm.memory.
+    mapping:
+      HeapMemoryUsage.committed:
+        metric: heap.committed
+        desc: current heap usage
+        type: gauge
+      HeapMemoryUsage.init:
+        metric: heap.init
+        desc: current heap usage
+        type: gauge
+      HeapMemoryUsage.max:
+        metric: heap.max
+        desc: current heap usage
+        type: gauge
+      HeapMemoryUsage.used:
+        metric: heap.used
+        desc: current heap usage
+        type: gauge
+      NonHeapMemoryUsage.committed:
+        metric: nonheap.committed
+        desc: current non-heap usage
+        type: gauge
+      NonHeapMemoryUsage.init:
+        metric: nonheap.init
+        desc: current non-heap usage
+        type: gauge
+      NonHeapMemoryUsage.max:
+        metric: nonheap.max
+        desc: current non-heap usage
+        type: gauge
+      NonHeapMemoryUsage.used:
+        metric: nonheap.used
+        desc: current non-heap usage
+        type: gauge
+
+  - bean: java.lang:type=MemoryPool,name=*
+    type: gauge
+    unit: by
+    metricAttribute:
+      name: param(name)
+    mapping:
+      Usage.committed:
+        metric: jvm.memory.pool.committed
+        desc: current memory pool usage
+      Usage.init:
+        metric: jvm.memory.pool.init
+        desc: current memory pool usage
+      Usage.max:
+        metric: jvm.memory.pool.max
+        desc: current memory pool usage
+      Usage.used:
+        metric: jvm.memory.pool.used
+        desc: current memory pool usage
+
+  - bean: java.lang:type=Threading
+    mapping:
+      ThreadCount:
+        metric: jvm.threads.count
+        unit: '1'
+        desc: number of threads
