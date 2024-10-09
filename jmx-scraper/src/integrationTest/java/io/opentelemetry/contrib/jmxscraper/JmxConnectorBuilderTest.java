@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.linecorp.armeria.internal.common.util.PortUtil;
 import java.io.IOException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -31,9 +32,8 @@ public class JmxConnectorBuilderTest {
 
   @Test
   void noAuth() {
-    int port = PortSelector.getAvailableRandomPort();
-    try (TestAppContainer app =
-        new TestAppContainer().withHostAccessFixedJmxPort(port)) {
+    int port = PortUtil.unusedTcpPort();
+    try (TestAppContainer app = new TestAppContainer().withHostAccessFixedJmxPort(port)) {
       app.start();
       testConnector(
           () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(port)).build());
@@ -42,13 +42,11 @@ public class JmxConnectorBuilderTest {
 
   @Test
   void loginPwdAuth() {
-    int port = PortSelector.getAvailableRandomPort();
+    int port = PortUtil.unusedTcpPort();
     String login = "user";
     String pwd = "t0p!Secret";
     try (TestAppContainer app =
-        new TestAppContainer()
-            .withHostAccessFixedJmxPort(port)
-            .withUserAuth(login, pwd)) {
+        new TestAppContainer().withHostAccessFixedJmxPort(port).withUserAuth(login, pwd)) {
       app.start();
       testConnector(
           () ->

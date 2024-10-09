@@ -64,8 +64,8 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   /**
    * Configures app container for host-to-container access, port will be used as-is from host to
-   * work-around JMX in docker. This is optional on Linux as there is a network route and the container
-   * is accessible, but not on Mac where the container runs in an isolated VM.
+   * work-around JMX in docker. This is optional on Linux as there is a network route and the
+   * container is accessible, but not on Mac where the container runs in an isolated VM.
    *
    * @param port port to use, must be available on host.
    * @return this
