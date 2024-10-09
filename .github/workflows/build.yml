@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@v4
@@ -46,6 +48,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - id: setup-test-java
         name: Set up JDK ${{ matrix.test-java-version }} for running tests
@@ -78,6 +82,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@v4
@@ -131,6 +137,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@v4
