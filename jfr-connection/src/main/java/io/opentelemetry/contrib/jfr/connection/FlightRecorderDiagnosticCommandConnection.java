@@ -123,21 +123,22 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     Object[] params = formOptions(recordingOptions, recordingConfiguration);
 
     // jfrStart returns "Started recording 2." and some more stuff, but all we care about is the
-    // name of the recording.
+    // id of the recording.
+    String jfrStart;
     try {
-      String jfrStart =
-          (String) mBeanServerConnection.invoke(objectName, "jfrStart", params, signature);
-      String name;
+      jfrStart = (String) mBeanServerConnection.invoke(objectName, "jfrStart", params, signature);
       Matcher matcher = JFR_START_PATTERN.matcher(jfrStart);
       if (matcher.find()) {
-        name = matcher.group(1);
-        return Long.parseLong(name);
+        String id = matcher.group(1);
+        return Long.parseLong(id);
       }
     } catch (InstanceNotFoundException | ReflectionException | MBeanException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "startRecording", e);
     }
     throw JfrConnectionException.canonicalJfrConnectionException(
-        getClass(), "startRecording", new IllegalStateException("Failed to parse jfrStart output"));
+        getClass(),
+        "startRecording",
+        new IllegalStateException("Failed to parse: '" + jfrStart + "'"));
   }
 
   private static Object[] formOptions(
@@ -159,7 +160,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   @Override
   public void stopRecording(long id) throws JfrConnectionException {
     try {
-      Object[] params = mkParams("name=" + id);
+      Object[] params = mkParams("recording=" + id);
       mBeanServerConnection.invoke(objectName, "jfrStop", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException | IOException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "stopRecording", e);
@@ -169,7 +170,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   @Override
   public void dumpRecording(long id, String outputFile) throws IOException, JfrConnectionException {
     try {
-      Object[] params = mkParams("filename=" + outputFile, "name=" + id);
+      Object[] params = mkParams("filename=" + outputFile, "recording=" + id);
       mBeanServerConnection.invoke(objectName, "jfrDump", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "dumpRecording", e);
