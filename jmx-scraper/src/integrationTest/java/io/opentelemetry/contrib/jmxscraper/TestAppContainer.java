@@ -25,7 +25,6 @@ import org.testcontainers.utility.MountableFile;
 public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   private final Map<String, String> properties;
-  private int port;
   private String login;
   private String pwd;
 
@@ -44,11 +43,16 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
         .withCommand("java", "-jar", "/app.jar");
   }
 
+  /**
+   * Configures app container for container-to-container access
+   *
+   * @param port mapped port to use
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withJmxPort(int port) {
-    this.port = port;
     properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
-    return this.withExposedPorts(port);
+    return this;
   }
 
   @CanIgnoreReturnValue
@@ -58,9 +62,33 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Configures app container for host-to-container access, port will be used as-is from host to
+   * work-around JMX in docker. This is optional on Linux as there is a network route and the
+   * container is accessible, but not on Mac where the container runs in an isolated VM.
+   *
+   * @param port port to use, must be available on host.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withHostAccessFixedJmxPort(int port) {
+    // To get host->container JMX connection working docker must expose JMX/RMI port under the same
+    // port number. Because of this testcontainers' standard exposed port randomization approach
+    // can't be used.
+    // Explanation:
+    // https://forums.docker.com/t/exposing-mapped-jmx-ports-from-multiple-containers/5287/6
+    properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
+    properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(port));
+    properties.put("java.rmi.server.hostname", getHost());
+    addFixedExposedPort(port, port);
+    return this;
+  }
+
   @Override
   public void start() {
-
+    //    properties.put("com.sun.management.jmxremote.local.only", "false");
+    //    properties.put("java.rmi.server.logCalls", "true");
+    //
     // TODO: add support for ssl
     properties.put("com.sun.management.jmxremote.ssl", "false");
 
@@ -92,11 +120,9 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     this.withEnv("JAVA_TOOL_OPTIONS", confArgs);
 
-    logger().info("Test application JAVA_TOOL_OPTIONS = " + confArgs);
+    logger().info("Test application JAVA_TOOL_OPTIONS = {}", confArgs);
 
     super.start();
-
-    logger().info("Test application JMX port mapped to {}:{}", getHost(), getMappedPort(port));
   }
 
   private static Path createPwdFile(String login, String pwd) {
