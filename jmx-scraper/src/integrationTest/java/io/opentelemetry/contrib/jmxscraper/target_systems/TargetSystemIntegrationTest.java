@@ -5,12 +5,12 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import com.linecorp.armeria.internal.common.util.PortUtil;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.PortSelector;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
@@ -85,7 +85,7 @@ public abstract class TargetSystemIntegrationTest {
 
   @Test
   void endToEndTest() {
-    int jmxPort = PortUtil.unusedTcpPort();
+    int jmxPort = PortSelector.getAvailableRandomPort();
 
     target =
         createTargetContainer(jmxPort)
