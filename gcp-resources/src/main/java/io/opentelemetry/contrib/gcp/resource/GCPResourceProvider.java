@@ -16,6 +16,8 @@ import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANC
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_ID;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_NAME;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_MACHINE_TYPE;
+import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_EXECUTION_KEY;
+import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_TASK_INDEX;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_NAME;
@@ -59,6 +61,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+@SuppressWarnings("MemberName")
 public class GCPResourceProvider implements ConditionalResourceProvider {
 
   private static final Logger LOGGER = Logger.getLogger(GCPResourceProvider.class.getSimpleName());
@@ -105,6 +108,9 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
         break;
       case GOOGLE_CLOUD_FUNCTIONS:
         addGcfAttributes(attrBuilder, detectedPlatform.getAttributes());
+        break;
+      case GOOGLE_CLOUD_RUN_JOB:
+        addGcrJobAttributes(attrBuilder, detectedPlatform.getAttributes());
         break;
       case GOOGLE_APP_ENGINE:
         addGaeAttributes(attrBuilder, detectedPlatform.getAttributes());
@@ -192,8 +198,8 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
   }
 
   /**
-   * Updates the attributes with the required keys for a GCR (Google Cloud Run) environment. The
-   * attributes are not updated in case the environment is not deemed to be GCR.
+   * Updates the attributes with the required keys for a GCR (Google Cloud Run) Service environment.
+   * The attributes are not updated in case the environment is not deemed to be GCR.
    *
    * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
    *     necessary keys.
@@ -215,6 +221,34 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
       AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
     attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS);
     addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
+  }
+
+  /**
+   * Update the attributes with the required keys for a GCR (Google Cloud Run) Jobs environment. The
+   * attributes are not updated in case the environment is not deemed to be GCR jobs environment.
+   *
+   * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
+   *     necessary keys.
+   */
+  private static void addGcrJobAttributes(
+      AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
+    attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
+    Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_NAME))
+        .ifPresent(name -> attrBuilder.put(FAAS_NAME, name));
+    Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_INSTANCE_ID))
+        .ifPresent(instanceId -> attrBuilder.put(FAAS_INSTANCE, instanceId));
+    Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION))
+        .ifPresent(cloudRegion -> attrBuilder.put(CLOUD_REGION, cloudRegion));
+    Optional.ofNullable(attributesMap.get(GCR_JOB_EXECUTION_KEY))
+        .ifPresent(
+            jobExecutionKey ->
+                attrBuilder.put(IncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION, jobExecutionKey));
+    Optional.ofNullable(attributesMap.get(GCR_JOB_TASK_INDEX))
+        .ifPresent(
+            jobTaskIndex ->
+                attrBuilder.put(
+                    IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX,
+                    Integer.parseInt(jobTaskIndex)));
   }
 
   /**

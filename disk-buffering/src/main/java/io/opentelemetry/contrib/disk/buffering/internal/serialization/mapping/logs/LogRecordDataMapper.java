@@ -7,8 +7,10 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.l
 
 import static io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.SpanDataMapper.flagsFromInt;
 import static io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools.toUnsignedInt;
+import static java.util.stream.Collectors.toList;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceState;
@@ -19,9 +21,9 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.proto.logs.v1.SeverityNumber;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.stream.Collectors;
 
 public final class LogRecordDataMapper {
 
@@ -42,8 +44,8 @@ public final class LogRecordDataMapper {
     if (source.getSeverityText() != null) {
       logRecord.severity_text(source.getSeverityText());
     }
-    if (source.getBody() != null) {
-      logRecord.body(bodyToAnyValue(source.getBody()));
+    if (source.getBodyValue() != null) {
+      logRecord.body(bodyToAnyValue(source.getBodyValue()));
     }
 
     byte flags = source.getSpanContext().getTraceFlags().asByte();
@@ -73,7 +75,7 @@ public final class LogRecordDataMapper {
     logRecordData.setSeverity(severityNumberToSdk(source.severity_number));
     logRecordData.setSeverityText(source.severity_text);
     if (source.body != null) {
-      logRecordData.setBody(anyValueToBody(source.body));
+      logRecordData.setBodyValue(anyValueToBody(source.body));
     }
 
     addExtrasToSdkItemBuilder(source, logRecordData, resource, scopeInfo);
@@ -99,7 +101,7 @@ public final class LogRecordDataMapper {
     target.setInstrumentationScopeInfo(scopeInfo);
   }
 
-  private static AnyValue bodyToAnyValue(Body body) {
+  private static AnyValue bodyToAnyValue(Value<?> body) {
     return new AnyValue.Builder().string_value(body.asString()).build();
   }
 
@@ -107,12 +109,30 @@ public final class LogRecordDataMapper {
     return SeverityNumber.fromValue(severity.getSeverityNumber());
   }
 
-  private static Body anyValueToBody(AnyValue source) {
+  private static Value<?> anyValueToBody(AnyValue source) {
     if (source.string_value != null) {
-      return Body.string(source.string_value);
-    } else {
-      return Body.empty();
+      return Value.of(source.string_value);
+    } else if (source.int_value != null) {
+      return Value.of(source.int_value);
+    } else if (source.double_value != null) {
+      return Value.of(source.double_value);
+    } else if (source.bool_value != null) {
+      return Value.of(source.bool_value);
+    } else if (source.bytes_value != null) {
+      return Value.of(source.bytes_value.toByteArray());
+    } else if (source.kvlist_value != null) {
+      return Value.of(
+          source.kvlist_value.values.stream()
+              .collect(
+                  Collectors.toMap(
+                      keyValue -> keyValue.key, keyValue -> anyValueToBody(keyValue.value))));
+    } else if (source.array_value != null) {
+      return Value.of(
+          source.array_value.values.stream()
+              .map(LogRecordDataMapper::anyValueToBody)
+              .collect(toList()));
     }
+    throw new IllegalArgumentException("Unrecognized AnyValue type");
   }
 
   private static Severity severityNumberToSdk(SeverityNumber source) {

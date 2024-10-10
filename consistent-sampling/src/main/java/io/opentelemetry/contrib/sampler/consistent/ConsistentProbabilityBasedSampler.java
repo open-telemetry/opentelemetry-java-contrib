@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.consistent;
 
+import java.util.Locale;
 import javax.annotation.concurrent.Immutable;
 
 /** A consistent sampler that samples with a fixed probability. */
@@ -32,7 +33,7 @@ final class ConsistentProbabilityBasedSampler extends ConsistentSampler {
       throw new IllegalArgumentException("Sampling probability must be in range [0.0, 1.0]!");
     }
     this.description =
-        String.format("ConsistentProbabilityBasedSampler{%.6f}", samplingProbability);
+        String.format(Locale.ROOT, "ConsistentProbabilityBasedSampler{%.6f}", samplingProbability);
     this.randomGenerator = randomGenerator;
 
     lowerPValue = getLowerBoundP(samplingProbability);

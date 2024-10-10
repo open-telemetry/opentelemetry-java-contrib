@@ -41,6 +41,10 @@ components:
     - sfriberg
   jmx-metrics:
     - breedx-splk
+  jmx-scraper:
+    - breedx-splk
+    - robsunday
+    - sylvainjuge
   maven-extension:
     - cyrille-leclerc
     - kenfinnigan
@@ -61,6 +65,7 @@ components:
     - jeanbisutti
   samplers:
     - trask
+    - jack-berg
   static-instrumenter:
     - anosek-an
   kafka-exporter:
@@ -74,3 +79,5 @@ components:
     - jackshirazi
     - jonaskunz
     - sylvainjuge
+  opamp-client:
+    - LikeTheSalad

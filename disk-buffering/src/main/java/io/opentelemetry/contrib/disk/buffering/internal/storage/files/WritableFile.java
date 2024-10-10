@@ -89,4 +89,9 @@ public final class WritableFile implements FileOperations {
       out.close();
     }
   }
+
+  @Override
+  public String toString() {
+    return "WritableFile{" + "file=" + file + '}';
+  }
 }

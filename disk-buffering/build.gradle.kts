@@ -7,7 +7,7 @@ plugins {
   id("com.github.johnrengelman.shadow")
   id("me.champeau.jmh") version "0.7.2"
   id("ru.vyarus.animalsniffer") version "1.7.1"
-  id("com.squareup.wire") version "5.0.0"
+  id("com.squareup.wire") version "5.1.0"
 }
 
 description = "Exporter implementations that store signals on disk"

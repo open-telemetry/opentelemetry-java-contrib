@@ -7,6 +7,11 @@ package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
 
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.data.LinkData;
+import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
@@ -21,8 +26,14 @@ final class ConsistentAlwaysOnSampler extends ConsistentSampler {
   }
 
   @Override
-  protected long getThreshold(long parentThreshold, boolean isRoot) {
-    return getMinThreshold();
+  public SamplingIntent getSamplingIntent(
+      Context parentContext,
+      String name,
+      SpanKind spanKind,
+      Attributes attributes,
+      List<LinkData> parentLinks) {
+
+    return () -> getMinThreshold();
   }
 
   @Override

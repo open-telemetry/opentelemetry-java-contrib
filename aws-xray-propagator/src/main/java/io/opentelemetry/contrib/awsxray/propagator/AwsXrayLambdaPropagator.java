@@ -79,6 +79,11 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
         MapGetter.INSTANCE);
   }
 
+  @Override
+  public String toString() {
+    return "AwsXrayLambdaPropagator";
+  }
+
   private static boolean isEmptyOrNull(@Nullable String value) {
     return value == null || value.isEmpty();
   }

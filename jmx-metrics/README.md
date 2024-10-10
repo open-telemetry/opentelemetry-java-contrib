@@ -35,6 +35,10 @@ Kafka metric-gathering scripts determined by the comma-separated list in `otel.j
 it will then run the scripts on the desired interval length of `otel.jmx.interval.milliseconds` and
 export the resulting metrics.
 
+Some metrics (e.g. `tomcat.sessions`) are configured to query multiple MBeans. By default, only the value in the first MBean
+is recorded for the metric and all other values are dropped. To aggregate the MBean values together, set the
+`otel.jmx.aggregate.across.mbeans` property to `true`.
+
 For custom metrics and unsupported targets, you can provide your own MBean querying scripts to produce
 OpenTelemetry instruments:
 

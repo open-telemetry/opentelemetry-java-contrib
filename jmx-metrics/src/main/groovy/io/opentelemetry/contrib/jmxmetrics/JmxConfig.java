@@ -31,6 +31,7 @@ class JmxConfig {
   static final String JMX_PASSWORD = PREFIX + "jmx.password";
   static final String JMX_REMOTE_PROFILE = PREFIX + "jmx.remote.profile";
   static final String JMX_REALM = PREFIX + "jmx.realm";
+  static final String JMX_AGGREGATE_ACROSS_MBEANS = PREFIX + "jmx.aggregate.across.mbeans";
 
   // These properties need to be copied into System Properties if provided via the property
   // file so that they are available to the JMX Connection builder
@@ -77,6 +78,8 @@ class JmxConfig {
   final boolean registrySsl;
   final Properties properties;
 
+  final boolean aggregateAcrossMBeans;
+
   JmxConfig(final Properties props) {
     properties = new Properties();
     // putAll() instead of using constructor defaults
@@ -112,6 +115,8 @@ class JmxConfig {
     realm = properties.getProperty(JMX_REALM);
 
     registrySsl = Boolean.valueOf(properties.getProperty(REGISTRY_SSL));
+    aggregateAcrossMBeans =
+        Boolean.parseBoolean(properties.getProperty(JMX_AGGREGATE_ACROSS_MBEANS));
 
     // For the list of System Properties, if they have been set in the properties file
     // they need to be set in Java System Properties.

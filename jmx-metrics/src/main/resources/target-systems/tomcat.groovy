@@ -15,10 +15,10 @@
  */
 
 
-def beantomcatmanager = otel.mbean("Catalina:type=Manager,host=localhost,context=*")
-otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&doubleValueCallback)
+def beantomcatmanager = otel.mbeans("Catalina:type=Manager,host=localhost,context=*")
+otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&longValueCallback)
 
-def beantomcatrequestProcessor = otel.mbean("Catalina:type=GlobalRequestProcessor,name=*")
+def beantomcatrequestProcessor = otel.mbeans("Catalina:type=GlobalRequestProcessor,name=*")
 otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "errorCount", otel.&longCounterCallback)
@@ -37,15 +37,15 @@ otel.instrument(beantomcatrequestProcessor, "tomcat.traffic",
   ["bytesReceived":["direction" : {"received"}], "bytesSent": ["direction" : {"sent"}]],
   otel.&longCounterCallback)
 
-def beantomcatconnectors = otel.mbean("Catalina:type=ThreadPool,name=*")
+def beantomcatconnectors = otel.mbeans("Catalina:type=ThreadPool,name=*")
 otel.instrument(beantomcatconnectors, "tomcat.threads", "The number of threads", "threads",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)
 
-def beantomcatnewmanager = otel.mbean("Tomcat:type=Manager,host=localhost,context=*")
-otel.instrument(beantomcatnewmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&doubleValueCallback)
+def beantomcatnewmanager = otel.mbeans("Tomcat:type=Manager,host=localhost,context=*")
+otel.instrument(beantomcatnewmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&longValueCallback)
 
-def beantomcatnewrequestProcessor = otel.mbean("Tomcat:type=GlobalRequestProcessor,name=*")
+def beantomcatnewrequestProcessor = otel.mbeans("Tomcat:type=GlobalRequestProcessor,name=*")
 otel.instrument(beantomcatnewrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     "errorCount", otel.&longCounterCallback)
@@ -64,7 +64,7 @@ otel.instrument(beantomcatnewrequestProcessor, "tomcat.traffic",
     ["bytesReceived":["direction" : {"received"}], "bytesSent": ["direction" : {"sent"}]],
     otel.&longCounterCallback)
 
-def beantomcatnewconnectors = otel.mbean("Tomcat:type=ThreadPool,name=*")
+def beantomcatnewconnectors = otel.mbeans("Tomcat:type=ThreadPool,name=*")
 otel.instrument(beantomcatnewconnectors, "tomcat.threads", "The number of threads", "threads",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)

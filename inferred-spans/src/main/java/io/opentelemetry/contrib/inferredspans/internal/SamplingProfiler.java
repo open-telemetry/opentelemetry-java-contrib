@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -325,18 +326,19 @@ public class SamplingProfiler implements Runnable {
    * <p>This and {@link #onActivation} are the only methods which are executed in a multi-threaded
    * context.
    *
-   * @param activeSpan the span which is about to be activated
+   * @param deactivatedSpan the span which is about to be deactivated
    * @param previouslyActive the span which has previously been activated
    * @return {@code true}, if the event could be processed, {@code false} if the internal event
    *     queue is full which means the event has been discarded
    */
-  public boolean onDeactivation(Span activeSpan, @Nullable Span previouslyActive) {
+  public boolean onDeactivation(Span deactivatedSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
         profiler.removeThread(Thread.currentThread());
       }
       boolean success =
-          eventBuffer.tryPublishEvent(deactivationEventTranslator, activeSpan, previouslyActive);
+          eventBuffer.tryPublishEvent(
+              deactivationEventTranslator, deactivatedSpan, previouslyActive);
       if (!success) {
         logger.fine("Could not add deactivation event to ring buffer as no slots are available");
       }
@@ -563,7 +565,7 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings("JavaUtilDate")
   private void backupDiagnosticFiles(long eof) throws IOException {
-    String now = String.format("%tFT%<tT.%<tL", new Date());
+    String now = String.format(Locale.ROOT, "%tFT%<tT.%<tL", new Date());
     Path profilerDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
     profilerDir.toFile().mkdir();
 

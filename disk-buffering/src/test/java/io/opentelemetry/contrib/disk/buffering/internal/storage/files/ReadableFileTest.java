@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
@@ -24,7 +25,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.common.Clock;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,7 +53,7 @@ class ReadableFileTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("First log body"))
+          .setBodyValue(Value.of("First log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -67,7 +67,7 @@ class ReadableFileTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Second log body"))
+          .setBodyValue(Value.of("Second log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -81,7 +81,7 @@ class ReadableFileTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Third log body"))
+          .setBodyValue(Value.of("Third log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
