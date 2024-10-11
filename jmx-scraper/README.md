@@ -6,3 +6,11 @@ The JMX MBeans and their metric mappings are defined in YAML and reuse implement
 
 This is currently a work-in-progress component not ready to be used in production.
 The end goal is to provide an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
+
+## Component owners
+
+- [Jason Plumb](https://github.com/breedx-splk), Splunk
+- [Robert Niedziela](https://github.com/robsunday), Splunk
+- [Sylvain Juge](https://github.com/sylvainjuge), Elastic
+
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
