@@ -37,6 +37,8 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
       "com.sun.management:type=DiagnosticCommand";
   private static final String JFR_START_REGEX = "Started recording (\\d+?)\\.";
   private static final Pattern JFR_START_PATTERN = Pattern.compile(JFR_START_REGEX, Pattern.DOTALL);
+  private static final String JFR_CHECK_REGEX = "(recording|name)=(\\d+?)";
+  private static final Pattern JFR_CHECK_PATTERN = Pattern.compile(JFR_CHECK_REGEX, Pattern.DOTALL);
 
   // All JFR commands take String[] parameters
   private static final String[] signature = new String[] {"[Ljava.lang.String;"};
@@ -157,10 +159,35 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     return mkParamsArray(params);
   }
 
+  //
+  // Whether to use the 'name' or 'recording' parameter depends on the JVM.
+  // Use JFR.check to determine which one to use.
+  //
+  private String getRecordingParam(long recordingId) throws JfrConnectionException, IOException {
+    try {
+      Object[] params = new String[]{};
+      String jfrCheck = (String) mBeanServerConnection.invoke(objectName, "jfrCheck", params, signature);
+      Matcher matcher = JFR_CHECK_PATTERN.matcher(jfrCheck);
+      while (matcher.find()) {
+        String id = matcher.group(2);
+        if (id.equals(Long.toString(recordingId))) {
+          return matcher.group(0);
+        }
+      }
+    } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
+      throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "jfrCheck", e);
+    }
+    throw JfrConnectionException.canonicalJfrConnectionException(
+        getClass(),
+        "jfrCheck",
+        new IllegalStateException("No recording found for id: '" + recordingId + "'"));
+
+  }
+
   @Override
   public void stopRecording(long id) throws JfrConnectionException {
     try {
-      Object[] params = mkParams("recording=" + id);
+      Object[] params = mkParams(getRecordingParam(id));
       mBeanServerConnection.invoke(objectName, "jfrStop", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException | IOException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "stopRecording", e);
@@ -170,7 +197,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   @Override
   public void dumpRecording(long id, String outputFile) throws IOException, JfrConnectionException {
     try {
-      Object[] params = mkParams("filename=" + outputFile, "recording=" + id);
+      Object[] params = mkParams("filename=" + outputFile, getRecordingParam(id));
       mBeanServerConnection.invoke(objectName, "jfrDump", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "dumpRecording", e);
