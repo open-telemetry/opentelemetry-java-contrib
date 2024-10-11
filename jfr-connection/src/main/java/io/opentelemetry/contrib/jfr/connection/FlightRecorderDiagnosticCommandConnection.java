@@ -165,8 +165,9 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   //
   private String getRecordingParam(long recordingId) throws JfrConnectionException, IOException {
     try {
-      Object[] params = new String[]{};
-      String jfrCheck = (String) mBeanServerConnection.invoke(objectName, "jfrCheck", params, signature);
+      Object[] params = new String[] {};
+      String jfrCheck =
+          (String) mBeanServerConnection.invoke(objectName, "jfrCheck", params, signature);
       Matcher matcher = JFR_CHECK_PATTERN.matcher(jfrCheck);
       while (matcher.find()) {
         String id = matcher.group(2);
@@ -181,7 +182,6 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
         getClass(),
         "jfrCheck",
         new IllegalStateException("No recording found for id: '" + recordingId + "'"));
-
   }
 
   @Override
