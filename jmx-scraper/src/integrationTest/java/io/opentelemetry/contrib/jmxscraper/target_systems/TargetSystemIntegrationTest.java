@@ -51,6 +51,10 @@ public abstract class TargetSystemIntegrationTest {
 
   private static final String OTLP_HOST = "host.testcontainers.internal";
 
+  // JMX communication only happens between container, and we don't have to use JMX
+  // from host to container, we can use a fixed port.
+  private static final int JMX_PORT = 9999;
+
   @BeforeAll
   static void beforeAll() {
     network = Network.newNetwork();
@@ -85,10 +89,9 @@ public abstract class TargetSystemIntegrationTest {
 
   @Test
   void endToEndTest() {
-    int jmxPort = PortSelector.getAvailableRandomPort();
 
     target =
-        createTargetContainer(jmxPort)
+        createTargetContainer(JMX_PORT)
             .withLogConsumer(new Slf4jLogConsumer(targetSystemLogger))
             .withNetwork(network)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
@@ -98,7 +101,7 @@ public abstract class TargetSystemIntegrationTest {
         new JmxScraperContainer(otlpEndpoint)
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
-            .withService(TARGET_SYSTEM_NETWORK_ALIAS, jmxPort);
+            .withService(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 
     scraper = customizeScraperContainer(scraper);
     scraper.start();
