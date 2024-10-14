@@ -20,7 +20,7 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  testImplementation("io.micrometer:micrometer-core:1.13.5")
+  testImplementation("io.micrometer:micrometer-core:1.13.6")
 }
 
 testing {
