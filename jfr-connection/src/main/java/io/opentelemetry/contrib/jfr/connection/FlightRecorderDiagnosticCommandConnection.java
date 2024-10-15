@@ -245,20 +245,13 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
 
       if (operation.isPresent()) {
         mBeanServerConnection.invoke(objectName, "vmUnlockCommercialFeatures", params, signature);
-      } else {
-        // No vmUnlockCommercialFeatures command.
-        return;
       }
     } catch (InstanceNotFoundException
         | IntrospectionException
         | MBeanException
         | ReflectionException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(
-          FlightRecorderDiagnosticCommandConnection.class,
-          "assertCommercialFeaturesUnlocked",
-          new UnsupportedOperationException(
-              "Unlocking commercial features may be required. This must be explicitly enabled by adding -XX:+UnlockCommercialFeatures",
-              e));
+          FlightRecorderDiagnosticCommandConnection.class, "assertCommercialFeaturesUnlocked", e);
     }
   }
 
