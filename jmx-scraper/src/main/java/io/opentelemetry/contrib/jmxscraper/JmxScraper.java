@@ -78,7 +78,7 @@ public class JmxScraper {
       System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
     } catch (RuntimeException e) {
-      System.err.println("ERROR: " + e.getMessage());
+      e.printStackTrace(System.err);
       System.exit(3);
     }
   }
@@ -180,7 +180,7 @@ public class JmxScraper {
         RuleParser parserInstance = RuleParser.get();
         parserInstance.addMetricDefsTo(conf, inputStream, system);
       } else {
-        throw new IllegalArgumentException("No support for system" + system);
+        throw new IllegalArgumentException("No support for system " + system);
       }
     } catch (Exception e) {
       throw new IllegalStateException("Error while loading rules for system " + system, e);
