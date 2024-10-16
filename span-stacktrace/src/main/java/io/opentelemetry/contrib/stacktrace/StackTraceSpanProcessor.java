@@ -30,6 +30,10 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
    */
   public StackTraceSpanProcessor(
       long minSpanDurationNanos, Predicate<ReadableSpan> filterPredicate) {
+    if (minSpanDurationNanos < 0) {
+      throw new IllegalArgumentException("minimal span duration must be positive or zero");
+    }
+
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterPredicate = filterPredicate;
   }

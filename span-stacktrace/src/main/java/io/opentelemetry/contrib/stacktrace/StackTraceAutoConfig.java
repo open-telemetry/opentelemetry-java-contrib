@@ -34,8 +34,10 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
           long minDuration = getMinDuration(properties);
-          Predicate<ReadableSpan> filter = getFilterPredicate(properties);
-          providerBuilder.addSpanProcessor(new StackTraceSpanProcessor(minDuration, filter));
+          if (minDuration >= 0) {
+            Predicate<ReadableSpan> filter = getFilterPredicate(properties);
+            providerBuilder.addSpanProcessor(new StackTraceSpanProcessor(minDuration, filter));
+          }
           return providerBuilder;
         });
   }
