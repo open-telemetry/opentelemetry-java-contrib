@@ -10,13 +10,15 @@ As a consequence it should only be used when the span duration is known, thus on
 
 This extension supports autoconfiguration.
 
-`otel.java.experimental.span-stacktrace.min.duration`:
+`otel.java.experimental.span-stacktrace.min.duration`
+
   - allows to configure the minimal duration for which spans have a stacktrace captured
   - defaults to 5ms
   - a value of zero will include all spans
   - a negative value will disable the feature
 
-`otel.java.experimental.span-stacktrace.filter`:
+`otel.java.experimental.span-stacktrace.filter`
+
 - allows to filter spans to be excluded from stacktrace capture
 - defaults to include all spans.
 - value is the class name of a class implementing `java.util.function.Predicate<ReadableSpan>`
