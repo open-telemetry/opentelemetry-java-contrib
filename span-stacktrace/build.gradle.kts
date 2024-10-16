@@ -22,4 +22,6 @@ dependencies {
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
+
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
 }

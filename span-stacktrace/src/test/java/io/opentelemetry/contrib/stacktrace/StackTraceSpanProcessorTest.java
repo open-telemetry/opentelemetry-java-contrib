@@ -12,13 +12,12 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,43 +38,57 @@ class StackTraceSpanProcessorTest {
   @Test
   void durationAndFiltering() {
     // on duration threshold
-    checkSpanWithStackTrace(span -> true, "1ms", msToNs(1));
+    checkSpanWithStackTrace("1ms", msToNs(1));
     // over duration threshold
-    checkSpanWithStackTrace(span -> true, "1ms", msToNs(2));
+    checkSpanWithStackTrace("1ms", msToNs(2));
     // under duration threshold
-    checkSpanWithoutStackTrace(span -> true, "2ms", msToNs(1));
+    checkSpanWithoutStackTrace(YesPredicate.class, "2ms", msToNs(1));
 
     // filtering out span
-    checkSpanWithoutStackTrace(span -> false, "1ms", 20);
+    checkSpanWithoutStackTrace(NoPredicate.class, "1ms", 20);
+  }
+
+  public static class YesPredicate implements Predicate<ReadableSpan> {
+
+    @Override
+    public boolean test(ReadableSpan readableSpan) {
+      return true;
+    }
+  }
+
+  public static class NoPredicate implements Predicate<ReadableSpan> {
+    @Override
+    public boolean test(ReadableSpan readableSpan) {
+      return false;
+    }
   }
 
   @Test
   void defaultConfig() {
     long expectedDefault = msToNs(5);
-    checkSpanWithStackTrace(span -> true, null, expectedDefault);
-    checkSpanWithStackTrace(span -> true, null, expectedDefault + 1);
-    checkSpanWithoutStackTrace(span -> true, null, expectedDefault - 1);
+    checkSpanWithStackTrace(null, expectedDefault);
+    checkSpanWithStackTrace(null, expectedDefault + 1);
+    checkSpanWithoutStackTrace(YesPredicate.class, null, expectedDefault - 1);
   }
 
   @Test
   void disabledConfig() {
-    checkSpanWithoutStackTrace(span -> true, "-1", 5);
+    checkSpanWithoutStackTrace(YesPredicate.class, "-1", 5);
   }
 
   @Test
   void spanWithExistingStackTrace() {
     checkSpan(
-        span -> true,
+        YesPredicate.class,
         "1ms",
         Duration.ofMillis(1).toNanos(),
         sb -> sb.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, "hello"),
         stacktrace -> assertThat(stacktrace).isEqualTo("hello"));
   }
 
-  private static void checkSpanWithStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String minDurationString, long spanDurationNanos) {
+  private static void checkSpanWithStackTrace(String minDurationString, long spanDurationNanos) {
     checkSpan(
-        filterPredicate,
+        YesPredicate.class,
         minDurationString,
         spanDurationNanos,
         Function.identity(),
@@ -86,9 +99,10 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithoutStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String minDurationString, long spanDurationNanos) {
+      Class<? extends Predicate<?>> predicateClass, String minDurationString,
+      long spanDurationNanos) {
     checkSpan(
-        filterPredicate,
+        predicateClass,
         minDurationString,
         spanDurationNanos,
         Function.identity(),
@@ -96,33 +110,38 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpan(
-      Predicate<ReadableSpan> filterPredicate,
+      Class<? extends Predicate<?>> predicateClass,
       String minDurationString,
       long spanDurationNanos,
       Function<SpanBuilder, SpanBuilder> customizeSpanBuilder,
       Consumer<String> stackTraceCheck) {
 
-    // they must be re-created as they are shutdown when the span processor is closed
+    // must be re-created on every test as exporter is shut down on span processor close
     InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
-    SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
 
-    Map<String, String> configMap = new HashMap<>();
-    if (minDurationString != null) {
-      configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
-    }
-    long minDuration =
-        StackTraceAutoConfig.getMinDuration(DefaultConfigProperties.createFromMap(configMap));
+    AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder = AutoConfiguredOpenTelemetrySdk.builder();
+    sdkBuilder.addPropertiesSupplier(() -> {
+      Map<String, String> configMap = new HashMap<>();
 
-    StackTraceSpanProcessor processor = new StackTraceSpanProcessor(minDuration, filterPredicate);
+      configMap.put("otel.metrics.exporter", "none");
+      configMap.put("otel.traces.exporter", "logging");
+      configMap.put("otel.logs.exporter", "none");
 
-    try (OpenTelemetrySdk sdk =
-        OpenTelemetrySdk.builder()
-            .setTracerProvider(
-                SdkTracerProvider.builder()
-                    .addSpanProcessor(processor)
-                    .addSpanProcessor(exportProcessor)
-                    .build())
-            .build()) {
+      if (minDurationString != null) {
+        configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
+      }
+      if (predicateClass != null) {
+        configMap.put("otel.java.experimental.span-stacktrace.filter", predicateClass.getName());
+      }
+      return configMap;
+    });
+    // duplicate export to our in-memory span exporter
+    sdkBuilder.addSpanExporterCustomizer(
+        (exporter, config) -> SpanExporter.composite(exporter, spansExporter));
+
+    new StackTraceAutoConfig().customize(sdkBuilder);
+
+    try (OpenTelemetrySdk sdk = sdkBuilder.build().getOpenTelemetrySdk()) {
 
       Tracer tracer = sdk.getTracer("test");
 
