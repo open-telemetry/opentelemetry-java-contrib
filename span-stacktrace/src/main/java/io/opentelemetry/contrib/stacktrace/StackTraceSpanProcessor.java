@@ -53,7 +53,7 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
 
   @Override
   public void onEnding(ReadWriteSpan span) {
-    if (minSpanDurationNanos < 0 || span.getLatencyNanos() < minSpanDurationNanos) {
+    if (span.getLatencyNanos() < minSpanDurationNanos) {
       return;
     }
     if (span.getAttribute(SPAN_STACKTRACE) != null) {

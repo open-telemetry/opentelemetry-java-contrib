@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.stacktrace;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -36,6 +37,12 @@ class StackTraceSpanProcessorTest {
   }
 
   @Test
+  void tryInvalidMinDuration() {
+    assertThatCode(() -> new StackTraceSpanProcessor(-1, null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
   void durationAndFiltering() {
     // on duration threshold
     checkSpanWithStackTrace("1ms", msToNs(1));
@@ -45,7 +52,7 @@ class StackTraceSpanProcessorTest {
     checkSpanWithoutStackTrace(YesPredicate.class, "2ms", msToNs(1));
 
     // filtering out span
-    checkSpanWithoutStackTrace(NoPredicate.class, "1ms", 20);
+    checkSpanWithoutStackTrace(NoPredicate.class, "1ms", msToNs(20));
   }
 
   public static class YesPredicate implements Predicate<ReadableSpan> {
@@ -99,7 +106,8 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithoutStackTrace(
-      Class<? extends Predicate<?>> predicateClass, String minDurationString,
+      Class<? extends Predicate<?>> predicateClass,
+      String minDurationString,
       long spanDurationNanos) {
     checkSpan(
         predicateClass,
@@ -120,21 +128,23 @@ class StackTraceSpanProcessorTest {
     InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
 
     AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder = AutoConfiguredOpenTelemetrySdk.builder();
-    sdkBuilder.addPropertiesSupplier(() -> {
-      Map<String, String> configMap = new HashMap<>();
+    sdkBuilder.addPropertiesSupplier(
+        () -> {
+          Map<String, String> configMap = new HashMap<>();
 
-      configMap.put("otel.metrics.exporter", "none");
-      configMap.put("otel.traces.exporter", "logging");
-      configMap.put("otel.logs.exporter", "none");
+          configMap.put("otel.metrics.exporter", "none");
+          configMap.put("otel.traces.exporter", "logging");
+          configMap.put("otel.logs.exporter", "none");
 
-      if (minDurationString != null) {
-        configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
-      }
-      if (predicateClass != null) {
-        configMap.put("otel.java.experimental.span-stacktrace.filter", predicateClass.getName());
-      }
-      return configMap;
-    });
+          if (minDurationString != null) {
+            configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
+          }
+          if (predicateClass != null) {
+            configMap.put(
+                "otel.java.experimental.span-stacktrace.filter", predicateClass.getName());
+          }
+          return configMap;
+        });
     // duplicate export to our in-memory span exporter
     sdkBuilder.addSpanExporterCustomizer(
         (exporter, config) -> SpanExporter.composite(exporter, spansExporter));
