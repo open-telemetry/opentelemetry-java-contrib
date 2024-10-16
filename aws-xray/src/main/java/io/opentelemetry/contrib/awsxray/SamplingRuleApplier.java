@@ -464,11 +464,11 @@ final class SamplingRuleApplier {
   }
 
   private Sampler createRateLimited(int numPerSecond) {
-    return Sampler.parentBased(new RateLimitingSampler(numPerSecond, clock));
+    return new RateLimitingSampler(numPerSecond, clock);
   }
 
   private static Sampler createFixedRate(double rate) {
-    return Sampler.parentBased(Sampler.traceIdRatioBased(rate));
+    return Sampler.traceIdRatioBased(rate);
   }
 
   // We keep track of sampling requests and decisions to report to X-Ray to allow it to allocate

@@ -138,6 +138,7 @@ public class JmxConnectorBuilder {
   @SuppressWarnings("BanJNDI")
   private static JMXConnector doConnect(JMXServiceURL url, Map<String, Object> env)
       throws IOException {
+    logger.info("Connecting to " + url);
     return JMXConnectorFactory.connect(url, env);
   }
 
