@@ -190,7 +190,7 @@ public abstract class TargetSystemIntegrationTest {
                         StreamObserver<ExportMetricsServiceResponse> responseObserver) {
 
                       // verbose but helpful to diagnose what is received
-                      logger.info("receiving metrics {}", request);
+                      logger.debug("receiving metrics {}", request);
 
                       metricRequests.add(request);
                       responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
