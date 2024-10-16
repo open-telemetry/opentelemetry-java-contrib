@@ -8,8 +8,8 @@ package io.opentelemetry.contrib.aws.resource;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_LAMBDA;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_LAMBDA;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.FAAS_VERSION;
 

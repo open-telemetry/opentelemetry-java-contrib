@@ -10,7 +10,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_A
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_EC2;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_IMAGE_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_NAME;
@@ -89,7 +89,7 @@ public final class Ec2Resource {
     String hostname = fetchHostname(hostnameUrl, token);
 
     AttributesBuilder attrBuilders = Attributes.builder();
-    attrBuilders.put(CLOUD_PROVIDER, IncubatingAttributes.CloudProviderValues.AWS);
+    attrBuilders.put(CLOUD_PROVIDER, IncubatingAttributes.CloudProviderIncubatingValues.AWS);
     attrBuilders.put(CLOUD_PLATFORM, AWS_EC2);
 
     try (JsonParser parser = JSON_FACTORY.createParser(identity)) {

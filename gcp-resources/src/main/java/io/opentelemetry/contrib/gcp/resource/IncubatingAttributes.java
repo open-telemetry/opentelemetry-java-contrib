@@ -25,8 +25,8 @@ class IncubatingAttributes {
       AttributeKey.stringKey("cloud.provider");
   public static final AttributeKey<String> CLOUD_REGION = AttributeKey.stringKey("cloud.region");
 
-  public static final class CloudPlatformValues {
-    private CloudPlatformValues() {}
+  public static final class CloudPlatformIncubatingValues {
+    private CloudPlatformIncubatingValues() {}
 
     public static final String GCP_COMPUTE_ENGINE = "gcp_compute_engine";
     public static final String GCP_CLOUD_RUN = "gcp_cloud_run";

@@ -24,8 +24,8 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_R
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_IMAGE_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_NAME;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_ECS;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_ECS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
