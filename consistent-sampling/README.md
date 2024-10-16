@@ -55,7 +55,6 @@ The implementation of the current proposal is contained by the package `io/opent
 * **ConsistentRuleBasedSampler**
   a sampler that performs stratified sampling by evaluating qualifying conditions and propagating the sampling decision from one of its delegate samplers
 
-
 ## Component owners
 
 - [Otmar Ertl](https://github.com/oertl), Dynatrace
