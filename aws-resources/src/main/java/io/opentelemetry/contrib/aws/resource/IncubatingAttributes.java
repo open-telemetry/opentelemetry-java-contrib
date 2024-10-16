@@ -27,20 +27,20 @@ class IncubatingAttributes {
   public static final AttributeKey<String> CLOUD_RESOURCE_ID =
       AttributeKey.stringKey("cloud.resource_id");
 
-  public static final class CloudPlatformValues {
+  public static final class CloudPlatformIncubatingValues {
     public static final String AWS_EC2 = "aws_ec2";
     public static final String AWS_ECS = "aws_ecs";
     public static final String AWS_EKS = "aws_eks";
     public static final String AWS_LAMBDA = "aws_lambda";
     public static final String AWS_ELASTIC_BEANSTALK = "aws_elastic_beanstalk";
 
-    private CloudPlatformValues() {}
+    private CloudPlatformIncubatingValues() {}
   }
 
-  public static final class CloudProviderValues {
+  public static final class CloudProviderIncubatingValues {
     public static final String AWS = "aws";
 
-    private CloudProviderValues() {}
+    private CloudProviderIncubatingValues() {}
   }
 
   public static final AttributeKey<String> SERVICE_INSTANCE_ID =
