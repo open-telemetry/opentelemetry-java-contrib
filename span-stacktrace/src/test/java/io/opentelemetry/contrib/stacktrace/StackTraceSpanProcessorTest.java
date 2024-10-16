@@ -110,11 +110,10 @@ class StackTraceSpanProcessorTest {
     if (minDurationString != null) {
       configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
     }
-    long minDuration = StackTraceAutoConfig.getMinDuration(
-        DefaultConfigProperties.createFromMap(configMap));
+    long minDuration =
+        StackTraceAutoConfig.getMinDuration(DefaultConfigProperties.createFromMap(configMap));
 
-    StackTraceSpanProcessor processor =
-        new StackTraceSpanProcessor(minDuration, filterPredicate);
+    StackTraceSpanProcessor processor = new StackTraceSpanProcessor(minDuration, filterPredicate);
 
     try (OpenTelemetrySdk sdk =
         OpenTelemetrySdk.builder()
