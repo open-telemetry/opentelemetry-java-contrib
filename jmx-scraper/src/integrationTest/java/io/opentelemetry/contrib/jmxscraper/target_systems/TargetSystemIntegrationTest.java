@@ -107,11 +107,6 @@ public abstract class TargetSystemIntegrationTest {
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
     target.start();
 
-    String targetHost = target.getHost();
-    Integer targetPort = target.getMappedPort(JMX_PORT);
-    logger.info(
-        "Target system started, JMX port: {} mapped to {}:{}", JMX_PORT, targetHost, targetPort);
-
     scraper =
         new JmxScraperContainer(otlpEndpoint)
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
