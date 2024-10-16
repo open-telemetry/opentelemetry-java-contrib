@@ -31,23 +31,25 @@ public class JmxConnectorBuilderTest {
 
   @Test
   void noAuth() {
-    try (TestAppContainer app = new TestAppContainer().withNetwork(network).withJmxPort(9990)) {
+    int port = PortSelector.getAvailableRandomPort();
+    try (TestAppContainer app = new TestAppContainer().withHostAccessFixedJmxPort(port)) {
       app.start();
       testConnector(
-          () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(9990)).build());
+          () -> JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(port)).build());
     }
   }
 
   @Test
   void loginPwdAuth() {
+    int port = PortSelector.getAvailableRandomPort();
     String login = "user";
     String pwd = "t0p!Secret";
     try (TestAppContainer app =
-        new TestAppContainer().withNetwork(network).withJmxPort(9999).withUserAuth(login, pwd)) {
+        new TestAppContainer().withHostAccessFixedJmxPort(port).withUserAuth(login, pwd)) {
       app.start();
       testConnector(
           () ->
-              JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(9999))
+              JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(port))
                   .userCredentials(login, pwd)
                   .build());
     }
