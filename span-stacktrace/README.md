@@ -8,7 +8,8 @@ As a consequence it should only be used when the span duration is known, thus on
 
 ## Usage and configuration
 
-This extension supports autoconfiguration.
+This extension supports autoconfiguration, so it will be automatically enabled by OpenTelemetry
+SDK when included in the application runtime dependencies.
 
 `otel.java.experimental.span-stacktrace.min.duration`
 
