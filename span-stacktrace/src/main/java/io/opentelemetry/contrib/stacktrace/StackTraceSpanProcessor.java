@@ -15,8 +15,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Duration;
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
 
@@ -27,8 +25,6 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   private static final AttributeKey<String> SPAN_STACKTRACE =
       AttributeKey.stringKey("code.stacktrace");
-
-  private static final Logger logger = Logger.getLogger(StackTraceSpanProcessor.class.getName());
 
   private final long minSpanDurationNanos;
 
@@ -42,14 +38,6 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
       long minSpanDurationNanos, Predicate<ReadableSpan> filterPredicate) {
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterPredicate = filterPredicate;
-    if (minSpanDurationNanos < 0) {
-      logger.log(Level.FINE, "Stack traces capture is disabled");
-    } else {
-      logger.log(
-          Level.FINE,
-          "Stack traces will be added to spans with a minimum duration of {0} nanos",
-          minSpanDurationNanos);
-    }
   }
 
   /**
