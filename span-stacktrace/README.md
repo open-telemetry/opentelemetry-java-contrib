@@ -19,10 +19,10 @@ This extension supports autoconfiguration.
 
 `otel.java.experimental.span-stacktrace.filter`
 
-- allows to filter spans to be excluded from stacktrace capture
-- defaults to include all spans.
-- value is the class name of a class implementing `java.util.function.Predicate<ReadableSpan>`
-- filter class must be publicly accessible and provide a no-arg constructor
+  - allows to filter spans to be excluded from stacktrace capture
+  - defaults to include all spans.
+  - value is the class name of a class implementing `java.util.function.Predicate<ReadableSpan>`
+  - filter class must be publicly accessible and provide a no-arg constructor
 
 ## Component owners
 
