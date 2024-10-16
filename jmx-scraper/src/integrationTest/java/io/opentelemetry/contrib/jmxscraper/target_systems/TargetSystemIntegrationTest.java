@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
@@ -13,11 +16,18 @@ import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
+import io.opentelemetry.proto.metrics.v1.Metric;
+import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +40,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 public abstract class TargetSystemIntegrationTest {
+  private static final Logger logger = LoggerFactory.getLogger(TargetSystemIntegrationTest.class);
   private static final Logger targetSystemLogger = LoggerFactory.getLogger("TargetSystemContainer");
   private static final Logger jmxScraperLogger = LoggerFactory.getLogger("JmxScraperContainer");
   private static final String TARGET_SYSTEM_NETWORK_ALIAS = "targetsystem";
@@ -105,10 +116,45 @@ public abstract class TargetSystemIntegrationTest {
     scraper = customizeScraperContainer(scraper);
     scraper.start();
 
-    verifyMetrics(otlpServer.getMetrics());
+    verifyMetrics();
   }
 
-  protected abstract void verifyMetrics(List<ExportMetricsServiceRequest> metrics);
+  protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
+    await()
+        .atMost(Duration.ofSeconds(30))
+        .untilAsserted(
+            () -> {
+              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
+              assertThat(receivedMetrics).describedAs("no metric received").isNotEmpty();
+
+              List<Metric> metrics =
+                  receivedMetrics.stream()
+                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
+                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+                      .flatMap(Collection::stream)
+                      .filter(
+                          // TODO: disabling batch span exporter might help remove unwanted metrics
+                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
+                      .flatMap(sm -> sm.getMetricsList().stream())
+                      .collect(Collectors.toList());
+
+              assertThat(metrics)
+                  .describedAs("metrics reported but none from JMX scraper")
+                  .isNotEmpty();
+
+              for (Consumer<Metric> assertion : assertions) {
+                assertThat(metrics).anySatisfy(assertion);
+              }
+            });
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("varargs")
+  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
+    waitAndAssertMetrics(Arrays.asList(assertions));
+  }
+
+  protected abstract void verifyMetrics();
 
   protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
     return scraper;
@@ -137,6 +183,10 @@ public abstract class TargetSystemIntegrationTest {
                     public void export(
                         ExportMetricsServiceRequest request,
                         StreamObserver<ExportMetricsServiceResponse> responseObserver) {
+
+                      // verbose but helpful to diagnose what is received
+                      logger.debug("receiving metrics {}", request);
+
                       metricRequests.add(request);
                       responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
                       responseObserver.onCompleted();
