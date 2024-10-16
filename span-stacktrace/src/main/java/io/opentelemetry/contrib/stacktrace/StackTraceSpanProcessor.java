@@ -7,20 +7,14 @@ package io.opentelemetry.contrib.stacktrace;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.Duration;
 import java.util.function.Predicate;
 
 public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
-
-  private static final String CONFIG_MIN_DURATION =
-      "otel.java.experimental.span-stacktrace.min.duration";
-  private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
 
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   private static final AttributeKey<String> SPAN_STACKTRACE =
@@ -38,16 +32,6 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
       long minSpanDurationNanos, Predicate<ReadableSpan> filterPredicate) {
     this.minSpanDurationNanos = minSpanDurationNanos;
     this.filterPredicate = filterPredicate;
-  }
-
-  /**
-   * @param config configuration
-   * @param filterPredicate extra filter function to exclude spans if needed
-   */
-  public StackTraceSpanProcessor(ConfigProperties config, Predicate<ReadableSpan> filterPredicate) {
-    this(
-        config.getDuration(CONFIG_MIN_DURATION, CONFIG_MIN_DURATION_DEFAULT).toNanos(),
-        filterPredicate);
   }
 
   @Override

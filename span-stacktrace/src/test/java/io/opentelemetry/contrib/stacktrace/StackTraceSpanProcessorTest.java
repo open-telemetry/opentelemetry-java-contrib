@@ -73,10 +73,10 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String configString, long spanDurationNanos) {
+      Predicate<ReadableSpan> filterPredicate, String minDurationString, long spanDurationNanos) {
     checkSpan(
         filterPredicate,
-        configString,
+        minDurationString,
         spanDurationNanos,
         Function.identity(),
         (stackTrace) ->
@@ -86,10 +86,10 @@ class StackTraceSpanProcessorTest {
   }
 
   private static void checkSpanWithoutStackTrace(
-      Predicate<ReadableSpan> filterPredicate, String configString, long spanDurationNanos) {
+      Predicate<ReadableSpan> filterPredicate, String minDurationString, long spanDurationNanos) {
     checkSpan(
         filterPredicate,
-        configString,
+        minDurationString,
         spanDurationNanos,
         Function.identity(),
         (stackTrace) -> assertThat(stackTrace).describedAs("no stack trace expected").isNull());
@@ -97,7 +97,7 @@ class StackTraceSpanProcessorTest {
 
   private static void checkSpan(
       Predicate<ReadableSpan> filterPredicate,
-      String configString,
+      String minDurationString,
       long spanDurationNanos,
       Function<SpanBuilder, SpanBuilder> customizeSpanBuilder,
       Consumer<String> stackTraceCheck) {
@@ -107,13 +107,14 @@ class StackTraceSpanProcessorTest {
     SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
 
     Map<String, String> configMap = new HashMap<>();
-    if (configString != null) {
-      configMap.put("otel.java.experimental.span-stacktrace.min.duration", configString);
+    if (minDurationString != null) {
+      configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
     }
+    long minDuration = StackTraceAutoConfig.getMinDuration(
+        DefaultConfigProperties.createFromMap(configMap));
 
     StackTraceSpanProcessor processor =
-        new StackTraceSpanProcessor(
-            DefaultConfigProperties.createFromMap(configMap), filterPredicate);
+        new StackTraceSpanProcessor(minDuration, filterPredicate);
 
     try (OpenTelemetrySdk sdk =
         OpenTelemetrySdk.builder()
