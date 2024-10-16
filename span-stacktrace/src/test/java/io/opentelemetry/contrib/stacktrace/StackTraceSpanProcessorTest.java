@@ -11,11 +11,11 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.contrib.stacktrace.internal.TestUtils;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
@@ -111,11 +111,19 @@ class StackTraceSpanProcessorTest {
       configMap.put("otel.java.experimental.span-stacktrace.min.duration", configString);
     }
 
-    try (SpanProcessor processor =
+    StackTraceSpanProcessor processor =
         new StackTraceSpanProcessor(
-            exportProcessor, DefaultConfigProperties.createFromMap(configMap), filterPredicate)) {
+            DefaultConfigProperties.createFromMap(configMap), filterPredicate);
 
-      OpenTelemetrySdk sdk = TestUtils.sdkWith(processor);
+    try (OpenTelemetrySdk sdk =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(processor)
+                    .addSpanProcessor(exportProcessor)
+                    .build())
+            .build()) {
+
       Tracer tracer = sdk.getTracer("test");
 
       Instant start = Instant.now();
