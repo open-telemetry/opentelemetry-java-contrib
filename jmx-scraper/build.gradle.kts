@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
   // TODO remove snapshot dependency on upstream once 2.9.0 is released
-  api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.9.0-alpha-SNAPSHOT"))
+  api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.10.0-alpha-SNAPSHOT"))
 
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
