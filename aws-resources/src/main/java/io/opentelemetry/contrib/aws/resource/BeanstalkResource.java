@@ -7,8 +7,8 @@ package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK;
-import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderValues.AWS;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_ELASTIC_BEANSTALK;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.SERVICE_NAMESPACE;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;

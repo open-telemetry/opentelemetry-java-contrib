@@ -56,6 +56,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   @Nullable private volatile ScheduledFuture<?> pollFuture;
   @Nullable private volatile ScheduledFuture<?> fetchTargetsFuture;
   @Nullable private volatile GetSamplingRulesResponse previousRulesResponse;
+  @Nullable private volatile XrayRulesSampler internalXrayRulesSampler;
   private volatile Sampler sampler;
 
   /**
@@ -125,7 +126,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       GetSamplingRulesResponse response =
           client.getSamplingRules(GetSamplingRulesRequest.create(null));
       if (!response.equals(previousRulesResponse)) {
-        sampler =
+        updateInternalSamplers(
             new XrayRulesSampler(
                 clientId,
                 resource,
@@ -133,7 +134,8 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
                 initialSampler,
                 response.getSamplingRules().stream()
                     .map(SamplingRuleRecord::getRule)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())));
+
         previousRulesResponse = response;
         ScheduledFuture<?> existingFetchTargetsFuture = fetchTargetsFuture;
         if (existingFetchTargetsFuture != null) {
@@ -170,11 +172,11 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   }
 
   private void fetchTargets() {
-    if (!(sampler instanceof XrayRulesSampler)) {
+    if (this.internalXrayRulesSampler == null) {
       throw new IllegalStateException("Programming bug.");
     }
 
-    XrayRulesSampler xrayRulesSampler = (XrayRulesSampler) sampler;
+    XrayRulesSampler xrayRulesSampler = this.internalXrayRulesSampler;
     try {
       Date now = Date.from(Instant.ofEpochSecond(0, clock.now()));
       List<SamplingStatisticsDocument> statistics = xrayRulesSampler.snapshot(now);
@@ -188,8 +190,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       Map<String, SamplingTargetDocument> targets =
           response.getDocuments().stream()
               .collect(Collectors.toMap(SamplingTargetDocument::getRuleName, Function.identity()));
-      sampler =
-          xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
+      updateInternalSamplers(xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now));
     } catch (Throwable t) {
       // Might be a transient API failure, try again after a default interval.
       fetchTargetsFuture =
@@ -223,6 +224,11 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       clientIdChars[i] = hex[rand.nextInt(hex.length)];
     }
     return new String(clientIdChars);
+  }
+
+  private void updateInternalSamplers(XrayRulesSampler xrayRulesSampler) {
+    this.internalXrayRulesSampler = xrayRulesSampler;
+    this.sampler = Sampler.parentBased(internalXrayRulesSampler);
   }
 
   // Visible for testing

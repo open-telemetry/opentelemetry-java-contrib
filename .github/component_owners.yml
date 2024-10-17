@@ -41,6 +41,7 @@ components:
     - sfriberg
   jmx-metrics:
     - breedx-splk
+    - sylvainjuge
   jmx-scraper:
     - breedx-splk
     - robsunday

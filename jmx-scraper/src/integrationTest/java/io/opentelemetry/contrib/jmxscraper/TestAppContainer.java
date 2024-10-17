@@ -86,9 +86,6 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   @Override
   public void start() {
-    //    properties.put("com.sun.management.jmxremote.local.only", "false");
-    //    properties.put("java.rmi.server.logCalls", "true");
-    //
     // TODO: add support for ssl
     properties.put("com.sun.management.jmxremote.ssl", "false");
 

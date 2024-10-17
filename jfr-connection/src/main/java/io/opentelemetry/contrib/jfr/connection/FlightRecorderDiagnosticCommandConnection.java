@@ -7,18 +7,21 @@ package io.opentelemetry.contrib.jfr.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
@@ -37,6 +40,8 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
       "com.sun.management:type=DiagnosticCommand";
   private static final String JFR_START_REGEX = "Started recording (\\d+?)\\.";
   private static final Pattern JFR_START_PATTERN = Pattern.compile(JFR_START_REGEX, Pattern.DOTALL);
+  private static final String JFR_CHECK_REGEX = "(?:recording|name)=(\\d+)";
+  private static final Pattern JFR_CHECK_PATTERN = Pattern.compile(JFR_CHECK_REGEX, Pattern.DOTALL);
 
   // All JFR commands take String[] parameters
   private static final String[] signature = new String[] {"[Ljava.lang.String;"};
@@ -59,9 +64,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
           mBeanServerConnection.getObjectInstance(new ObjectName(DIAGNOSTIC_COMMAND_OBJECT_NAME));
       ObjectName objectName = objectInstance.getObjectName();
 
-      if (jdkHasUnlockCommercialFeatures(mBeanServerConnection)) {
-        assertCommercialFeaturesUnlocked(mBeanServerConnection, objectName);
-      }
+      assertCommercialFeaturesUnlocked(mBeanServerConnection, objectName);
 
       return new FlightRecorderDiagnosticCommandConnection(
           mBeanServerConnection, objectInstance.getObjectName());
@@ -123,21 +126,22 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     Object[] params = formOptions(recordingOptions, recordingConfiguration);
 
     // jfrStart returns "Started recording 2." and some more stuff, but all we care about is the
-    // name of the recording.
+    // id of the recording.
+    String jfrStart;
     try {
-      String jfrStart =
-          (String) mBeanServerConnection.invoke(objectName, "jfrStart", params, signature);
-      String name;
+      jfrStart = (String) mBeanServerConnection.invoke(objectName, "jfrStart", params, signature);
       Matcher matcher = JFR_START_PATTERN.matcher(jfrStart);
       if (matcher.find()) {
-        name = matcher.group(1);
-        return Long.parseLong(name);
+        String id = matcher.group(1);
+        return Long.parseLong(id);
       }
     } catch (InstanceNotFoundException | ReflectionException | MBeanException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "startRecording", e);
     }
     throw JfrConnectionException.canonicalJfrConnectionException(
-        getClass(), "startRecording", new IllegalStateException("Failed to parse jfrStart output"));
+        getClass(),
+        "startRecording",
+        new IllegalStateException("Failed to parse: '" + jfrStart + "'"));
   }
 
   private static Object[] formOptions(
@@ -156,10 +160,33 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
     return mkParamsArray(params);
   }
 
+  //
+  // Whether to use the 'name' or 'recording' parameter depends on the JVM.
+  // Use JFR.check to determine which one to use.
+  //
+  private String getRecordingParam(long recordingId) throws JfrConnectionException, IOException {
+    String jfrCheck;
+    try {
+      Object[] params = new Object[] {new String[] {}};
+      jfrCheck = (String) mBeanServerConnection.invoke(objectName, "jfrCheck", params, signature);
+      Matcher matcher = JFR_CHECK_PATTERN.matcher(jfrCheck);
+      while (matcher.find()) {
+        String id = matcher.group(1);
+        if (id.equals(Long.toString(recordingId))) {
+          return matcher.group(0);
+        }
+      }
+    } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
+      throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "jfrCheck", e);
+    }
+    throw JfrConnectionException.canonicalJfrConnectionException(
+        getClass(), "jfrCheck", new IllegalStateException("Failed to parse: '" + jfrCheck + "'"));
+  }
+
   @Override
   public void stopRecording(long id) throws JfrConnectionException {
     try {
-      Object[] params = mkParams("name=" + id);
+      Object[] params = mkParams(getRecordingParam(id));
       mBeanServerConnection.invoke(objectName, "jfrStop", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException | IOException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "stopRecording", e);
@@ -169,7 +196,7 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
   @Override
   public void dumpRecording(long id, String outputFile) throws IOException, JfrConnectionException {
     try {
-      Object[] params = mkParams("filename=" + outputFile, "name=" + id);
+      Object[] params = mkParams("filename=" + outputFile, getRecordingParam(id));
       mBeanServerConnection.invoke(objectName, "jfrDump", params, signature);
     } catch (InstanceNotFoundException | MBeanException | ReflectionException e) {
       throw JfrConnectionException.canonicalJfrConnectionException(getClass(), "dumpRecording", e);
@@ -197,41 +224,34 @@ final class FlightRecorderDiagnosticCommandConnection implements FlightRecorderC
         "closeRecording not available through the DiagnosticCommand connection");
   }
 
-  // Do this check separate from assertCommercialFeatures because reliance
-  // on System properties makes it difficult to test.
-  static boolean jdkHasUnlockCommercialFeatures(MBeanServerConnection mBeanServerConnection) {
-    try {
-      RuntimeMXBean runtimeMxBean =
-          ManagementFactory.getPlatformMXBean(mBeanServerConnection, RuntimeMXBean.class);
-      String javaVmVendor = runtimeMxBean.getVmVendor();
-      String javaVersion = runtimeMxBean.getVmVersion();
-      return javaVmVendor.contains("Oracle Corporation")
-          && javaVersion.matches("(?:^1\\.8|9|10).*");
-    } catch (IOException e) {
-      return false;
-    }
-  }
-
   // visible for testing
   static void assertCommercialFeaturesUnlocked(
       MBeanServerConnection mBeanServerConnection, ObjectName objectName)
       throws IOException, JfrConnectionException {
 
     try {
-      Object unlockedMessage =
-          mBeanServerConnection.invoke(objectName, "vmCheckCommercialFeatures", null, null);
-      if (unlockedMessage instanceof String) {
-        boolean unlocked = ((String) unlockedMessage).contains("unlocked");
-        if (!unlocked) {
-          throw JfrConnectionException.canonicalJfrConnectionException(
-              FlightRecorderDiagnosticCommandConnection.class,
-              "assertCommercialFeaturesUnlocked",
-              new UnsupportedOperationException(
-                  "Unlocking commercial features may be required. This must be explicitly enabled by adding -XX:+UnlockCommercialFeatures"));
-        }
+      Object[] params = new Object[] {new String[] {}};
+      MBeanInfo mBeanInfo = mBeanServerConnection.getMBeanInfo(objectName);
+      if (mBeanInfo == null) {
+        throw JfrConnectionException.canonicalJfrConnectionException(
+            FlightRecorderDiagnosticCommandConnection.class,
+            "assertCommercialFeaturesUnlocked",
+            new NullPointerException("Could not get MBeanInfo for " + objectName));
       }
-    } catch (InstanceNotFoundException | MBeanException | ReflectionException ignored) {
-      // If the MBean doesn't have the vmCheckCommercialFeatures method, then we can't check it.
+      Optional<MBeanOperationInfo> operation =
+          Arrays.stream(mBeanInfo.getOperations())
+              .filter(it -> "vmUnlockCommercialFeatures".equals(it.getName()))
+              .findFirst();
+
+      if (operation.isPresent()) {
+        mBeanServerConnection.invoke(objectName, "vmUnlockCommercialFeatures", params, signature);
+      }
+    } catch (InstanceNotFoundException
+        | IntrospectionException
+        | MBeanException
+        | ReflectionException e) {
+      throw JfrConnectionException.canonicalJfrConnectionException(
+          FlightRecorderDiagnosticCommandConnection.class, "assertCommercialFeaturesUnlocked", e);
     }
   }
 

@@ -40,8 +40,9 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 public abstract class TargetSystemIntegrationTest {
-
   private static final Logger logger = LoggerFactory.getLogger(TargetSystemIntegrationTest.class);
+  private static final Logger targetSystemLogger = LoggerFactory.getLogger("TargetSystemContainer");
+  private static final Logger jmxScraperLogger = LoggerFactory.getLogger("JmxScraperContainer");
   private static final String TARGET_SYSTEM_NETWORK_ALIAS = "targetsystem";
   private static String otlpEndpoint;
 
@@ -59,6 +60,9 @@ public abstract class TargetSystemIntegrationTest {
   private JmxScraperContainer scraper;
 
   private static final String OTLP_HOST = "host.testcontainers.internal";
+
+  // JMX communication only happens between container, and we don't have to use JMX
+  // from host to container, we can use a fixed port.
   private static final int JMX_PORT = 9999;
 
   @BeforeAll
@@ -98,20 +102,14 @@ public abstract class TargetSystemIntegrationTest {
 
     target =
         createTargetContainer(JMX_PORT)
-            .withLogConsumer(new Slf4jLogConsumer(logger).withPrefix("target-system"))
+            .withLogConsumer(new Slf4jLogConsumer(targetSystemLogger))
             .withNetwork(network)
-            .withExposedPorts(JMX_PORT)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
     target.start();
 
-    String targetHost = target.getHost();
-    Integer targetPort = target.getMappedPort(JMX_PORT);
-    logger.info(
-        "Target system started, JMX port: {} mapped to {}:{}", JMX_PORT, targetHost, targetPort);
-
     scraper =
         new JmxScraperContainer(otlpEndpoint)
-            .withLogConsumer(new Slf4jLogConsumer(logger).withPrefix("jmx-scraper"))
+            .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
             .withService(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 
@@ -187,7 +185,7 @@ public abstract class TargetSystemIntegrationTest {
                         StreamObserver<ExportMetricsServiceResponse> responseObserver) {
 
                       // verbose but helpful to diagnose what is received
-                      logger.info("receiving metrics {}", request);
+                      logger.debug("receiving metrics {}", request);
 
                       metricRequests.add(request);
                       responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
