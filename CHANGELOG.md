@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- Ensure all XRay Sampler functionality is under ParentBased logic
+  ([#1488](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1488))
+
+### GCP Resources
+
+- Add gcr job support
+  ([#1462](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1462))
+
+### Inferred spans
+
+- Rename param and description to proper value
+  ([#1486](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1486))
+
+### JFR connection
+
+- Fix wrong parameter sent to JFR DiagnosticCommand
+  ([#1492](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1492))
+
+### Span stack traces
+
+- Support autoconfigure
+  ([#1499](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1499))
+
 ## Version 1.39.0 (2024-09-17)
 
 ### AWS X-Ray propagator
