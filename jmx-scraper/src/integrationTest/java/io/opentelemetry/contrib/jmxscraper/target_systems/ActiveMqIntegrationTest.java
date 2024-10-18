@@ -26,6 +26,8 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     builder -> builder.from("apache/activemq-classic:5.18.6").build()))
         .withEnv("LOCAL_JMX", "no")
         .withCopyFileToContainer(
+            // Overwrite default ActiveMQ configuration in order to let ActiveMQ use JMX options
+            // stored in $ACTIVEMQ_JMX_OPTS env variable defined below
             MountableFile.forClasspathResource("activemq/env"), "/opt/apache-activemq/bin/env")
         .withEnv(
             "ACTIVEMQ_JMX_OPTS",

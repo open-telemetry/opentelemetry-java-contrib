@@ -114,4 +114,6 @@
  # (set JAVACMD to "auto" for automatic detection)
  #JAVA_HOME=""
  JAVACMD="auto"
- ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS $ACTIVEMQ_JMX_OPTS -Dhawtio.authenticationEnabled=false -Dhawtio.realm=activemq -Dhawtio.role=admins -Dhawtio.rolePrincipalClasses=org.apache.activemq.jaas.GroupPrincipal"
+
+ # Use JMX options defined in environment variable
+ ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS $ACTIVEMQ_JMX_OPTS"
