@@ -51,6 +51,8 @@ rules:
 
   - bean: org.apache.activemq:type=Broker,brokerName=*
     metricAttribute:
+      # minor divergence from activemq.groovy to capture broker name, making it closer to
+      # the definition in JMX Insights
       broker: param(brokerName)
     prefix: activemq.
     unit: "%"
