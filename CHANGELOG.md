@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.40.0 (2024-10-18)
+
 ### AWS X-Ray SDK support
 
 - Ensure all XRay Sampler functionality is under ParentBased logic
