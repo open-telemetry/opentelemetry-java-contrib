@@ -7,7 +7,7 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-val otelInstrumentationVersion = "2.8.0-alpha"
+val otelInstrumentationVersion = "2.9.0-alpha"
 
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.18.0",
@@ -36,6 +36,8 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
   "io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha",
+  // these two constraints can be removed once the opentelemetry-instrumentation-bom-alpha
+  // is updated to contain the latest version of opentelemetry-semconv
   "io.opentelemetry.semconv:opentelemetry-semconv:${semConvVersion}",
   "io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semConvVersion}",
   "io.prometheus:simpleclient:${prometheusVersion}",
@@ -76,6 +78,12 @@ javaPlatform {
 
 dependencies {
   for (bom in DEPENDENCY_BOMS) {
+    // this is needed until io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha
+    // is updated to contain the latest version of opentelemetry-semconv
+    if (bom.equals("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}")) {
+      api(platform(bom))
+      continue
+    }
     api(enforcedPlatform(bom))
     val split = bom.split(':')
     dependencyVersions[split[0]] = split[2]
