@@ -12,6 +12,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import org.junit.jupiter.api.Test;
 
+/**
+ * TODO: once otel-java-contrib requires Java 11+, use junit-pioneer's {@code @SetSystemProperty}
+ * and {@code @ClearSystemProperty}
+ */
 public class OpenTelemetrySdkServiceTest {
 
   /** Verify default config */
