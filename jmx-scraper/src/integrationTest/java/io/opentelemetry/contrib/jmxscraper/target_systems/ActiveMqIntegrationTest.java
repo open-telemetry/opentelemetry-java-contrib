@@ -14,7 +14,6 @@ import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.utility.MountableFile;
 
 public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
 
@@ -24,13 +23,8 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
             new ImageFromDockerfile()
                 .withDockerfileFromBuilder(
                     builder -> builder.from("apache/activemq-classic:5.18.6").build()))
-        .withEnv("LOCAL_JMX", "no")
-        .withCopyFileToContainer(
-            // Overwrite default ActiveMQ configuration in order to let ActiveMQ use JMX options
-            // stored in $ACTIVEMQ_JMX_OPTS env variable defined below
-            MountableFile.forClasspathResource("activemq/env"), "/opt/apache-activemq/bin/env")
         .withEnv(
-            "ACTIVEMQ_JMX_OPTS",
+            "JAVA_TOOL_OPTIONS",
             "-Dcom.sun.management.jmxremote.port="
                 + jmxPort
                 + " -Dcom.sun.management.jmxremote.rmi.port="
