@@ -30,7 +30,6 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                                 "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
                                 "/usr/local/tomcat/webapps/ROOT.war")
                             .build()))
-        .withEnv("LOCAL_JMX", "no")
         .withEnv(
             "CATALINA_OPTS",
             "-Dcom.sun.management.jmxremote.local.only=false"
