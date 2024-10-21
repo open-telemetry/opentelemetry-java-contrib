@@ -1,0 +1,3 @@
+[submodule "opamp-client/opamp-spec"]
+	path = opamp-client/opamp-spec
+	url = git@github.com:open-telemetry/opamp-spec.git
