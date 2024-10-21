@@ -5,27 +5,29 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /** A simple HTTP client based on OkHttp. Not meant for high throughput. */
 final class SimpleHttpClient {
@@ -34,56 +36,57 @@ final class SimpleHttpClient {
 
   private static final Duration TIMEOUT = Duration.ofSeconds(2);
 
-  private static final RequestBody EMPTY_BODY = RequestBody.create(new byte[0]);
+  @Nullable
+  private static SSLSocketFactory getSslSocketFactoryForCertPath(@Nullable String certPath) {
+    if (Objects.isNull(certPath)) {
+      return null;
+    }
+
+    KeyStore keyStore = getKeystoreForTrustedCert(certPath);
+    X509TrustManager trustManager = buildTrustManager(keyStore);
+    return buildSslSocketFactory(trustManager);
+  }
+
+  private static HttpURLConnection setupUrlConnection(
+      String urlStr, String httpMethod, Map<String, String> headers) throws Exception {
+    try {
+      HttpURLConnection urlConnection = (HttpURLConnection) new URL(urlStr).openConnection();
+      urlConnection.setRequestMethod(httpMethod);
+      headers.forEach(urlConnection::setRequestProperty);
+      urlConnection.setConnectTimeout((int) TIMEOUT.toMillis());
+      urlConnection.setReadTimeout((int) TIMEOUT.toMillis());
+      urlConnection.setDoInput(true);
+      urlConnection.setDoOutput(false);
+      return urlConnection;
+    } catch (IOException e) {
+      logger.log(Level.WARNING, "Cannot open connection to " + urlStr, e);
+      throw e;
+    }
+  }
 
   /** Fetch a string from a remote server. */
   public String fetchString(
       String httpMethod, String urlStr, Map<String, String> headers, @Nullable String certPath) {
 
-    OkHttpClient.Builder clientBuilder =
-        new OkHttpClient.Builder()
-            .callTimeout(TIMEOUT)
-            .connectTimeout(TIMEOUT)
-            .readTimeout(TIMEOUT);
-
-    if (urlStr.startsWith("https") && certPath != null) {
-      KeyStore keyStore = getKeystoreForTrustedCert(certPath);
-      X509TrustManager trustManager = buildTrustManager(keyStore);
-      SSLSocketFactory socketFactory = buildSslSocketFactory(trustManager);
-      if (socketFactory != null) {
-        clientBuilder.sslSocketFactory(socketFactory, trustManager);
+    try {
+      HttpURLConnection httpUrlConnection = setupUrlConnection(urlStr, httpMethod, headers);
+      if (urlStr.startsWith("https")) {
+        HttpsURLConnection urlConnection = (HttpsURLConnection) httpUrlConnection;
+        SSLSocketFactory sslSocketFactory = getSslSocketFactoryForCertPath(certPath);
+        urlConnection.setSSLSocketFactory(sslSocketFactory);
       }
-    }
 
-    OkHttpClient client = clientBuilder.build();
+      int responseCode = httpUrlConnection.getResponseCode();
+      String responseBody = convert(httpUrlConnection.getInputStream());
 
-    // AWS incorrectly uses PUT despite having no request body, OkHttp will only allow us to send
-    // GET with null body or PUT with empty string body
-    RequestBody requestBody = null;
-    if (httpMethod.equals("PUT")) {
-      requestBody = EMPTY_BODY;
-    }
-    Request.Builder requestBuilder =
-        new Request.Builder().url(urlStr).method(httpMethod, requestBody);
-
-    headers.forEach(requestBuilder::addHeader);
-
-    try (Response response = client.newCall(requestBuilder.build()).execute()) {
-      int responseCode = response.code();
       if (responseCode != 200) {
         logger.log(
             Level.FINE,
-            "Error response from "
-                + urlStr
-                + " code ("
-                + responseCode
-                + ") text "
-                + response.message());
+            "Error response from " + urlStr + " code (" + responseCode + ") text " + responseBody);
         return "";
       }
-      ResponseBody body = response.body();
-      return body != null ? body.string() : "";
-    } catch (IOException e) {
+      return responseBody;
+    } catch (Exception e) {
       logger.log(Level.FINE, "SimpleHttpClient fetch string failed.", e);
     }
 
@@ -141,5 +144,15 @@ final class SimpleHttpClient {
       logger.log(Level.WARNING, "Cannot load KeyStore from " + certPath);
       return null;
     }
+  }
+
+  public static String convert(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int length;
+    while ((length = inputStream.read(buffer)) != -1) {
+      result.write(buffer, 0, length);
+    }
+    return result.toString(StandardCharsets.UTF_8.name());
   }
 }
