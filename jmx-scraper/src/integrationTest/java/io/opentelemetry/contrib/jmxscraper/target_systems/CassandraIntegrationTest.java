@@ -10,11 +10,11 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertion
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 import static org.assertj.core.api.Assertions.entry;
 
+import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import org.assertj.core.api.MapAssert;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -26,14 +26,10 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>(
             new ImageFromDockerfile()
-                .withDockerfileFromBuilder(
-                    builder ->
-                        builder
-                            .from("cassandra:5.0.2")
-                            .build()))
+                .withDockerfileFromBuilder(builder -> builder.from("cassandra:5.0.2").build()))
         .withEnv(
             "JVM_EXTRA_OPTS",
-                " -Dcassandra.jmx.remote.port="
+            " -Dcassandra.jmx.remote.port="
                 + jmxPort
                 + " -Dcom.sun.management.jmxremote.rmi.port="
                 + jmxPort
