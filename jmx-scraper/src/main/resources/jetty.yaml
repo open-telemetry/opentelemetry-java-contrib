@@ -1,0 +1,14 @@
+---
+
+rules:
+
+  - bean: org.eclipse.jetty.server.session:context=*,type=sessionhandler,id=*
+    prefix: jetty.session.
+    metricAttribute:
+      resource: param(context)
+    mapping:
+      sessionsCreated:
+        metric: count
+        type: counter
+        unit: "{sessions}"
+        desc: The number of sessions established in total.
