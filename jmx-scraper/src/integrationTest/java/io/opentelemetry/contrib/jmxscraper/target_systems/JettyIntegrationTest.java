@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -62,6 +63,13 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.session.time.total",
                 "The total time sessions have been active.",
+                "s",
+                attrs -> attrs.containsKey("resource")),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "jetty.session.time.max",
+                "The maximum amount of time a session has been active.",
                 "s",
                 attrs -> attrs.containsKey("resource")));
   }

@@ -17,3 +17,10 @@ rules:
         type: counter
         unit: s
         desc: The total time sessions have been active.
+      sessionTimeMax:
+        metric: time.max
+        # here a 'counter' metric type would suit better, but gauge reflects
+        # how it's currently implemented in jetty.groovy
+        type: gauge
+        unit: s
+        desc: The maximum amount of time a session has been active.
