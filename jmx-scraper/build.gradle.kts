@@ -13,19 +13,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxscraper")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxscraper.JmxScraper")
 
-repositories {
-  mavenCentral()
-  mavenLocal()
-  // TODO: remove snapshot repository once 2.9.0 is released
-  maven {
-    setUrl("https://oss.sonatype.org/content/repositories/snapshots")
-  }
-}
-
 dependencies {
-  // TODO remove snapshot dependency on upstream once 2.9.0 is released
-  api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.9.0-alpha-SNAPSHOT"))
-
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")

@@ -72,10 +72,23 @@ class MetricAssertions {
       String description,
       String unit,
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    assertSumWithAttributes(
+        metric, name, description, unit, /* isMonotonic= */ true, attributeGroupAssertions);
+  }
+
+  @SafeVarargs
+  static void assertSumWithAttributes(
+      Metric metric,
+      String name,
+      String description,
+      String unit,
+      boolean isMonotonic,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 

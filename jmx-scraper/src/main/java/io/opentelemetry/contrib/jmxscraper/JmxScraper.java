@@ -78,7 +78,7 @@ public class JmxScraper {
       System.err.println("Unable to connect " + e.getMessage());
       System.exit(2);
     } catch (RuntimeException e) {
-      System.err.println("ERROR: " + e.getMessage());
+      e.printStackTrace(System.err);
       System.exit(3);
     }
   }
