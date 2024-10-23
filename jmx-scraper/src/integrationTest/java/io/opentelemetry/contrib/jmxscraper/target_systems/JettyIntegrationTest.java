@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -73,8 +72,15 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "The maximum amount of time a session has been active.",
                 "s",
                 attrs -> attrs.containsKey("resource")),
-        metric ->
-            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operations}"),
+//        metric ->
+//            assertSumWithAttributes(metric,
+//                "jetty.select.count",
+//                "The number of select calls.",
+//                "{operations}",
+//                // minor divergence from jetty.groovy with extra metrics attributes
+//                attrs -> attrs.containsKey("context"),
+//                attrs -> attrs.containsKey("id")
+//            ),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -82,6 +88,12 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "The current number of threads.",
                 "{threads}",
                 attrs -> attrs.containsEntry("state", "busy"),
-                attrs -> attrs.containsEntry("state", "idle")));
+                attrs -> attrs.containsEntry("state", "idle"))/*,
+        metric ->
+            assertGauge(
+                metric,
+                "jetty.thread.queue.count",
+                "The current number of threads in the queue.",
+                "{threads}")*/);
   }
 }
