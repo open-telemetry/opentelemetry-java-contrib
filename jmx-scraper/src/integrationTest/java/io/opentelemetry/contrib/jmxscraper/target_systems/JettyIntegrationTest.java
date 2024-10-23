@@ -56,6 +56,13 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "jetty.session.count",
                 "The number of sessions established in total.",
                 "{sessions}",
+                attrs -> attrs.containsKey("resource")),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "jetty.session.time.total",
+                "The total time sessions have been active.",
+                "s",
                 attrs -> attrs.containsKey("resource")));
   }
 }

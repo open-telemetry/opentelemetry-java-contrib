@@ -12,3 +12,8 @@ rules:
         type: counter
         unit: "{sessions}"
         desc: The number of sessions established in total.
+      sessionTimeTotal:
+        metric: time.total
+        type: counter
+        unit: s
+        desc: The total time sessions have been active.
