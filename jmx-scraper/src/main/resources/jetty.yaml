@@ -32,3 +32,18 @@ rules:
         type: gauge
         unit: s
         desc: The maximum amount of time a session has been active.
+
+  - bean: org.eclipse.jetty.util.thread:type=queuedthreadpool,id=*
+    prefix: jetty.thread.
+    unit: "{threads}"
+    mapping:
+      busyThreads:
+        metric: count
+        desc: The current number of threads.
+        metricAttribute:
+          state: const(busy)
+      idleThreads:
+        metric: count
+        desc: The current number of threads.
+        metricAttribute:
+          state: const(idle)

@@ -74,6 +74,14 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "s",
                 attrs -> attrs.containsKey("resource")),
         metric ->
-            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operations}"));
+            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operations}"),
+        metric ->
+            assertGaugeWithAttributes(
+                metric,
+                "jetty.thread.count",
+                "The current number of threads.",
+                "{threads}",
+                attrs -> attrs.containsEntry("state", "busy"),
+                attrs -> attrs.containsEntry("state", "idle")));
   }
 }
