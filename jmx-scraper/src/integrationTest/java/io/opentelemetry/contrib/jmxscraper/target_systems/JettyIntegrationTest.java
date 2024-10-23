@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -71,6 +72,8 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "jetty.session.time.max",
                 "The maximum amount of time a session has been active.",
                 "s",
-                attrs -> attrs.containsKey("resource")));
+                attrs -> attrs.containsKey("resource")),
+        metric ->
+            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operations}"));
   }
 }

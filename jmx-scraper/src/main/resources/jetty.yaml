@@ -2,6 +2,14 @@
 
 rules:
 
+  - bean: org.eclipse.jetty.io:context=*,type=managedselector,id=*
+    mapping:
+      selectCount:
+        metric: jetty.select.count
+        type: counter
+        unit: "{operations}"
+        desc: The number of select calls.
+
   - bean: org.eclipse.jetty.server.session:context=*,type=sessionhandler,id=*
     prefix: jetty.session.
     metricAttribute:
