@@ -39,17 +39,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.rnorth.ducttape.unreliables.Unreliables;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaSpanExporterIntegrationTest {
   private static final DockerImageName KAFKA_TEST_IMAGE =
-      DockerImageName.parse("confluentinc/cp-kafka:6.2.1")
+      DockerImageName.parse("confluentinc/cp-kafka:7.4.0")
           .asCompatibleSubstituteFor("apache/kafka");
   private static final String TOPIC = "span_topic";
-  private KafkaContainer kafka;
+  private ConfluentKafkaContainer kafka;
   private KafkaConsumer<String, ExportTraceServiceRequest> consumer;
   private SpanDataSerializer spanDataSerializer;
   private ImmutableMap<String, Object> producerConfig;
@@ -58,7 +58,7 @@ class KafkaSpanExporterIntegrationTest {
   @BeforeAll
   void setUp() throws Exception {
     spanDataSerializer = new SpanDataSerializer();
-    kafka = new KafkaContainer(KAFKA_TEST_IMAGE);
+    kafka = new ConfluentKafkaContainer(KAFKA_TEST_IMAGE);
     kafka.start();
     init(kafka.getBootstrapServers());
 
