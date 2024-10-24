@@ -28,7 +28,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private final Set<String> customYamlFiles;
 
   public JmxScraperContainer(String otlpEndpoint) {
-    super("openjdk:8u272-jre-slim");
+    super("openjdk:8u342-jre-slim");
 
     String scraperJarPath = System.getProperty("shadow.jar.path");
     assertThat(scraperJarPath).isNotNull();
