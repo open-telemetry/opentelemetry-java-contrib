@@ -75,14 +75,14 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 "s",
                 attrs -> attrs.containsKey("resource")),
         metric ->
-            assertSumWithAttributesMultiplePoints(metric,
+            assertSumWithAttributesMultiplePoints(
+                metric,
                 "jetty.select.count",
                 "The number of select calls.",
                 "{operations}",
                 /* isMonotonic= */ true,
                 // minor divergence from jetty.groovy with extra metrics attributes
-                attrs -> attrs.containsKey("context").containsKey("id")
-            ),
+                attrs -> attrs.containsKey("context").containsKey("id")),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -96,7 +96,6 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.thread.queue.count",
                 "The current number of threads in the queue.",
-                "{threads}"
-            ));
+                "{threads}"));
   }
 }

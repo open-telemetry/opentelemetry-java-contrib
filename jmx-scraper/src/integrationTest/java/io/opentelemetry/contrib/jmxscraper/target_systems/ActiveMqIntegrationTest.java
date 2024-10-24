@@ -23,9 +23,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
             new ImageFromDockerfile()
                 .withDockerfileFromBuilder(
                     builder -> builder.from("apache/activemq-classic:5.18.6").build()))
-        .withEnv(
-            "JAVA_TOOL_OPTIONS",
-            genericJmxJvmArguments(jmxPort))
+        .withEnv("JAVA_TOOL_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forListeningPort());
   }

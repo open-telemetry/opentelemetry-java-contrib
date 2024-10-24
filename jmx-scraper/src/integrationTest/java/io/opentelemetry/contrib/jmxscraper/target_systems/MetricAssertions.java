@@ -161,11 +161,14 @@ class MetricAssertions {
 
     points.stream()
         .map(NumberDataPoint::getAttributesList)
-        .forEach(kvList -> {
-          Map<String, String> kvMap = kvList.stream()
-              .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
-          Arrays.stream(attributeGroupAssertions)
-              .forEach(assertion -> assertion.accept(assertThat(kvMap)));
-        });
+        .forEach(
+            kvList -> {
+              Map<String, String> kvMap =
+                  kvList.stream()
+                      .collect(
+                          Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
+              Arrays.stream(attributeGroupAssertions)
+                  .forEach(assertion -> assertion.accept(assertThat(kvMap)));
+            });
   }
 }
