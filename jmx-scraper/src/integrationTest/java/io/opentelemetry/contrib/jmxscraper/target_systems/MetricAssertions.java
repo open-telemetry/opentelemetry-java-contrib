@@ -93,6 +93,22 @@ class MetricAssertions {
   }
 
   @SafeVarargs
+  static void assertSumWithAttributesMultiplePoints(
+      Metric metric,
+      String name,
+      String description,
+      String unit,
+      boolean isMonotonic,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getDescription()).isEqualTo(description);
+    assertThat(metric.getUnit()).isEqualTo(unit);
+    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
+    assertAttributedMultiplePoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
+  }
+
+  @SafeVarargs
   static void assertGaugeWithAttributes(
       Metric metric,
       String name,
@@ -127,6 +143,7 @@ class MetricAssertions {
         Arrays.stream(attributeGroupAssertions)
             .map(assertion -> (Consumer<Map<String, String>>) m -> assertion.accept(assertThat(m)))
             .toArray(Consumer[]::new);
+
     assertThat(points)
         .extracting(
             numberDataPoint ->
@@ -135,5 +152,23 @@ class MetricAssertions {
                         Collectors.toMap(
                             KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
         .satisfiesExactlyInAnyOrder(assertions);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void assertAttributedMultiplePoints(
+      List<NumberDataPoint> points,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+
+    points.stream()
+        .map(NumberDataPoint::getAttributesList)
+        .forEach(
+            kvList -> {
+              Map<String, String> kvMap =
+                  kvList.stream()
+                      .collect(
+                          Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
+              Arrays.stream(attributeGroupAssertions)
+                  .forEach(assertion -> assertion.accept(assertThat(kvMap)));
+            });
   }
 }
