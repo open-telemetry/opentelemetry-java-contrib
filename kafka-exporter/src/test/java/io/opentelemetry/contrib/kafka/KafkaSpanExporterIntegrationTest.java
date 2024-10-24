@@ -46,7 +46,8 @@ import org.testcontainers.utility.DockerImageName;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaSpanExporterIntegrationTest {
   private static final DockerImageName KAFKA_TEST_IMAGE =
-      DockerImageName.parse("confluentinc/cp-kafka:6.2.1");
+      DockerImageName.parse("confluentinc/cp-kafka:6.2.1")
+          .asCompatibleSubstituteFor("apache/kafka");
   private static final String TOPIC = "span_topic";
   private KafkaContainer kafka;
   private KafkaConsumer<String, ExportTraceServiceRequest> consumer;
