@@ -84,8 +84,8 @@ Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/
 Emeritus maintainers:
 
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
-- [Nikita Salnikov-Tarnovski](https://github.com/iNikem), Splunk
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
+- [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
+- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
 
