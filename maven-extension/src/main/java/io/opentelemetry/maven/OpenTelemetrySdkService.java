@@ -55,6 +55,9 @@ public final class OpenTelemetrySdkService implements Closeable {
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
+    this.resource = Resource.empty();
+    this.configProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
+
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
@@ -75,13 +78,6 @@ public final class OpenTelemetrySdkService implements Closeable {
                 })
             .disableShutdownHook()
             .build();
-
-    if (this.resource == null) {
-      this.resource = Resource.empty();
-    }
-    if (this.configProperties == null) {
-      this.configProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
-    }
 
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
 
