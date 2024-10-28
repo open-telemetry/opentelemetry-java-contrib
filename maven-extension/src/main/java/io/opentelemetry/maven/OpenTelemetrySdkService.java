@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
@@ -60,38 +59,7 @@ public final class OpenTelemetrySdkService implements Closeable {
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
             .addPropertiesCustomizer(
-                configProperties -> {
-                  // The OTel SDK by default sends data to the OTLP gRPC endpoint at localhost:4317.
-                  // Change this behavior to disable by default the OTel SDK in the Maven extension
-                  // so
-                  // that it must be explicitly enabled by the user.
-                  // To change this default behavior, we set "otel.[traces,metrics,logs].exporter"
-                  // to
-                  // "none" if the endpoint has not been specified
-                  if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
-                    Map<String, String> properties = new HashMap<>();
-                    if (Objects.equals(
-                            "otlp", configProperties.getString("otel.traces.exporter", "otlp"))
-                        && configProperties.getString("otel.exporter.otlp.traces.endpoint")
-                            == null) {
-                      properties.put("otel.traces.exporter", "none");
-                    }
-                    if (Objects.equals(
-                            "otlp", configProperties.getString("otel.metrics.exporter", "otlp"))
-                        && configProperties.getString("otel.exporter.otlp.metrics.endpoint")
-                            == null) {
-                      properties.put("otel.metrics.exporter", "none");
-                    }
-                    if (Objects.equals(
-                            "otlp", configProperties.getString("otel.logs.exporter", "otlp"))
-                        && configProperties.getString("otel.exporter.otlp.logs.endpoint") == null) {
-                      properties.put("otel.logs.exporter", "none");
-                    }
-                    return properties;
-                  } else {
-                    return Collections.emptyMap();
-                  }
-                })
+                OpenTelemetrySdkService::requireExplicitConfigOfTheOtlpExporter)
             .addPropertiesCustomizer(
                 config -> {
                   // keep a reference to the computed config properties for future use in the
@@ -119,10 +87,60 @@ public final class OpenTelemetrySdkService implements Closeable {
 
     logger.debug("OpenTelemetry: OpenTelemetrySdkService initialized, resource:{}", resource);
 
+    // TODO should we replace `getBooleanConfig(name)` by `configProperties.getBoolean(name)`?
     Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
     this.mojosInstrumentationEnabled = mojoSpansEnabled == null || mojoSpansEnabled;
 
     this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
+  }
+
+  /**
+   * The OTel SDK by default sends data to the OTLP gRPC endpoint localhost:4317 if no exporter and
+   * no OTLP exporter endpoint are defined. This is not suited for a build tool for which we want
+   * the OTel SDK to be disabled by default.
+   *
+   * <p>Change the OTel SDL behavior: if none of the exporter and the OTLP exporter endpoint are
+   * defined, explicitly disable the exporter setting "{@code
+   * otel.[traces,metrics,logs].exporter=none}"
+   *
+   * @return The properties to be returned by {@link
+   *     io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder#addPropertiesCustomizer(java.util.function.Function)}
+   */
+  static Map<String, String> requireExplicitConfigOfTheOtlpExporter(
+      ConfigProperties configProperties) {
+
+    Map<String, String> properties = new HashMap<>();
+    if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
+      for (SignalType signalType : SignalType.values()) {
+        boolean isExporterImplicitlyConfiguredToOtlp =
+            configProperties.getString("otel." + signalType.value + ".exporter") == null;
+        boolean isOtlpExporterEndpointSpecified =
+            configProperties.getString("otel.exporter.otlp." + signalType.value + ".endpoint")
+                != null;
+
+        if (isExporterImplicitlyConfiguredToOtlp && !isOtlpExporterEndpointSpecified) {
+          logger.debug(
+              "OpenTelemetry: Disabling default OTLP exporter endpoint for signal {} exporter",
+              signalType.value);
+          properties.put("otel." + signalType.value + ".exporter", "none");
+        }
+      }
+    } else {
+      logger.debug("OpenTelemetry: OTLP exporter endpoint is explicitly configured");
+    }
+    return properties;
+  }
+
+  enum SignalType {
+    TRACES("traces"),
+    METRICS("metrics"),
+    LOGS("logs");
+
+    private final String value;
+
+    SignalType(String value) {
+      this.value = value;
+    }
   }
 
   @PreDestroy
