@@ -7,6 +7,8 @@ rules:
       selectCount:
         metric: jetty.select.count
         type: counter
+        # Unit should not use a plural form, left as-is for compatibility with jetty.groovy
+        # https://opentelemetry.io/docs/specs/semconv/general/metrics/#instrument-units
         unit: "{operations}"
         desc: The number of select calls.
         metricAttribute:
@@ -25,6 +27,8 @@ rules:
       sessionsCreated:
         metric: count
         type: counter
+        # Unit should not use a plural form, left as-is for compatibility with jetty.groovy
+        # https://opentelemetry.io/docs/specs/semconv/general/metrics/#instrument-units
         unit: "{sessions}"
         desc: The number of sessions established in total.
       sessionTimeTotal:
@@ -42,6 +46,8 @@ rules:
   - bean: org.eclipse.jetty.util.thread:type=queuedthreadpool,id=*
     # here the 'id' can be ignored as it's usually a single value equal to '0'
     prefix: jetty.thread.
+    # Unit should not use a plural form, left as-is for compatibility with jetty.groovy
+    # https://opentelemetry.io/docs/specs/semconv/general/metrics/#instrument-units
     unit: "{threads}"
     mapping:
       busyThreads:
