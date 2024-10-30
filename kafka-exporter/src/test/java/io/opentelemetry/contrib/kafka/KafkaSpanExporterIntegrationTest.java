@@ -38,7 +38,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.rnorth.ducttape.unreliables.Unreliables;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -46,7 +46,7 @@ import org.testcontainers.utility.DockerImageName;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaSpanExporterIntegrationTest {
   private static final DockerImageName KAFKA_TEST_IMAGE =
-      DockerImageName.parse("confluentinc/cp-kafka:6.2.1");
+      DockerImageName.parse("apache/kafka:3.8.1");
   private static final String TOPIC = "span_topic";
   private KafkaContainer kafka;
   private KafkaConsumer<String, ExportTraceServiceRequest> consumer;
