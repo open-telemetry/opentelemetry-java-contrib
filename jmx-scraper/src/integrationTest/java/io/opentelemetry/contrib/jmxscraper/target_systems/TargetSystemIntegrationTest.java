@@ -196,4 +196,14 @@ public abstract class TargetSystemIntegrationTest {
       sb.http(0);
     }
   }
+
+  protected static String genericJmxJvmArguments(int port) {
+    return "-Dcom.sun.management.jmxremote.local.only=false"
+        + " -Dcom.sun.management.jmxremote.authenticate=false"
+        + " -Dcom.sun.management.jmxremote.ssl=false"
+        + " -Dcom.sun.management.jmxremote.port="
+        + port
+        + " -Dcom.sun.management.jmxremote.rmi.port="
+        + port;
+  }
 }
