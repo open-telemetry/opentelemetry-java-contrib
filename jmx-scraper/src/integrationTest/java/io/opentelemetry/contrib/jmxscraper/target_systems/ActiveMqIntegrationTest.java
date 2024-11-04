@@ -29,7 +29,8 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+  protected JmxScraperContainer customizeScraperContainer(
+      JmxScraperContainer scraper, GenericContainer<?> target) {
     return scraper.withTargetSystem("activemq");
   }
 

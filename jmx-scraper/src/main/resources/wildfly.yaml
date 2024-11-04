@@ -1,0 +1,12 @@
+---
+
+rules:
+
+  - bean: jboss.as:deployment=*,subsystem=undertow
+    metricAttribute:
+      deployment: param(deployment)
+    mapping:
+      sessionsCreated:
+        metric: wildfly.session.count
+        unit: "{session}"
+        desc: The number of sessions created.

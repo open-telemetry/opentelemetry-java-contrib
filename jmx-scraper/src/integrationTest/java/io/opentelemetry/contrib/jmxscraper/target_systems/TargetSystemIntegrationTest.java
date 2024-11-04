@@ -113,7 +113,7 @@ public abstract class TargetSystemIntegrationTest {
             .withNetwork(network)
             .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 
-    scraper = customizeScraperContainer(scraper);
+    scraper = customizeScraperContainer(scraper, target);
     scraper.start();
 
     verifyMetrics();
@@ -156,7 +156,8 @@ public abstract class TargetSystemIntegrationTest {
 
   protected abstract void verifyMetrics();
 
-  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+  protected JmxScraperContainer customizeScraperContainer(
+      JmxScraperContainer scraper, GenericContainer<?> target) {
     return scraper;
   }
 
