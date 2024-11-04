@@ -22,9 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -200,25 +198,13 @@ public abstract class TargetSystemIntegrationTest {
   }
 
   protected static String genericJmxJvmArguments(int port) {
-    Map<String, Object> args = new HashMap<>();
-    args.put("com.sun.management.jmxremote.local.only", "false");
-    args.put("com.sun.management.jmxremote.authenticate", "false");
-    args.put("com.sun.management.jmxremote.ssl", "false");
-    args.put("com.sun.management.jmxremote.port", port);
-    args.put("com.sun.management.jmxremote.rmi.port", port);
-    List<String> list =
-        args.entrySet().stream()
-            .map((e) -> toJvmArg(e.getKey(), e.getValue()))
-            .collect(Collectors.toList());
-    return String.join(" ", list);
+    return "-Dcom.sun.management.jmxremote.local.only=false"
+        + " -Dcom.sun.management.jmxremote.authenticate=false"
+        + " -Dcom.sun.management.jmxremote.ssl=false"
+        + " -Dcom.sun.management.jmxremote.port="
+        + port
+        + " -Dcom.sun.management.jmxremote.rmi.port="
+        + port;
   }
 
-  private static String toJvmArg(String key, Object value) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("-D").append(key);
-    if (value != null) {
-      sb.append("=").append(value);
-    }
-    return sb.toString();
-  }
 }
