@@ -56,7 +56,7 @@ class JettyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "jetty.session.count",
                 "The number of sessions established in total.",
-                "{sessions}",
+                "{session}",
                 attrs -> attrs.containsKey("resource")),
         metric ->
             assertSumWithAttributes(
@@ -73,13 +73,13 @@ class JettyIntegrationTest extends AbstractIntegrationTest {
                 "s",
                 attrs -> attrs.containsKey("resource")),
         metric ->
-            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operations}"),
+            assertSum(metric, "jetty.select.count", "The number of select calls.", "{operation}"),
         metric ->
             assertGaugeWithAttributes(
                 metric,
                 "jetty.thread.count",
                 "The current number of threads.",
-                "{threads}",
+                "{thread}",
                 attrs -> attrs.contains(entry("state", "busy")),
                 attrs -> attrs.contains(entry("state", "idle"))),
         metric ->
@@ -87,6 +87,6 @@ class JettyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "jetty.thread.queue.count",
                 "The current number of threads in the queue.",
-                "{threads}"));
+                "{thread}"));
   }
 }

@@ -57,7 +57,7 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.session.count",
                 "The number of sessions established in total.",
-                "{sessions}",
+                "{session}",
                 attrs -> attrs.containsKey("resource")),
         metric ->
             assertSumWithAttributes(
@@ -78,7 +78,7 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.select.count",
                 "The number of select calls.",
-                "{operations}",
+                "{operation}",
                 /* isMonotonic= */ true,
                 // minor divergence from jetty.groovy with extra metrics attributes
                 attrs -> attrs.containsKey("context").containsKey("id")),
@@ -87,7 +87,7 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.thread.count",
                 "The current number of threads.",
-                "{threads}",
+                "{thread}",
                 attrs -> attrs.containsEntry("state", "busy"),
                 attrs -> attrs.containsEntry("state", "idle")),
         metric ->
@@ -95,6 +95,6 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "jetty.thread.queue.count",
                 "The current number of threads in the queue.",
-                "{threads}"));
+                "{thread}"));
   }
 }
