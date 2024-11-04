@@ -26,6 +26,9 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String serviceUrl;
   private int intervalMillis;
   private final Set<String> customYamlFiles;
+  private String user;
+  private String password;
+  private final List<String> extraJars;
 
   public JmxScraperContainer(String otlpEndpoint) {
     super("openjdk:8u342-jre-slim");
@@ -42,6 +45,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     this.targetSystems = new HashSet<>();
     this.customYamlFiles = new HashSet<>();
     this.intervalMillis = 1000;
+    this.extraJars = new ArrayList<>();
   }
 
   @CanIgnoreReturnValue
@@ -57,11 +61,52 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   }
 
   @CanIgnoreReturnValue
-  public JmxScraperContainer withService(String host, int port) {
+  public JmxScraperContainer withRmiServiceUrl(String host, int port) {
     // TODO: adding a way to provide 'host:port' syntax would make this easier for end users
-    this.serviceUrl =
+    return withServiceUrl(
         String.format(
-            Locale.getDefault(), "service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port);
+            Locale.getDefault(), "service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port));
+  }
+
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withServiceUrl(String serviceUrl) {
+    this.serviceUrl = serviceUrl;
+    return this;
+  }
+
+  /**
+   * Sets JMX user login
+   *
+   * @param user user login
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withUser(String user) {
+    this.user = user;
+    return this;
+  }
+
+  /**
+   * Sets JMX password
+   *
+   * @param password user password
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withPassword(String password) {
+    this.password = password;
+    return this;
+  }
+
+  /**
+   * Adds path to an extra jar for classpath
+   *
+   * @param jarPath path to an extra jar that should be added to jmx scraper classpath
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withExtraJar(String jarPath) {
+    this.extraJars.add(jarPath);
     return this;
   }
 
@@ -89,6 +134,13 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     arguments.add("-Dotel.jmx.service.url=" + serviceUrl);
     arguments.add("-Dotel.jmx.interval.milliseconds=" + intervalMillis);
 
+    if (user != null) {
+      arguments.add("-Dotel.jmx.username=" + user);
+    }
+    if (password != null) {
+      arguments.add("-Dotel.jmx.password=" + password);
+    }
+
     if (!customYamlFiles.isEmpty()) {
       for (String yaml : customYamlFiles) {
         this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
@@ -96,8 +148,16 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       arguments.add("-Dotel.jmx.config=" + String.join(",", customYamlFiles));
     }
 
-    arguments.add("-jar");
-    arguments.add("/scraper.jar");
+    if (extraJars.isEmpty()) {
+      // using "java -jar" to start
+      arguments.add("-jar");
+      arguments.add("/scraper.jar");
+    } else {
+      // using "java -cp" to start
+      arguments.add("-cp");
+      arguments.add("/scraper.jar:" + String.join(":", extraJars));
+      arguments.add("io.opentelemetry.contrib.jmxscraper.JmxScraper");
+    }
 
     this.withCommand(arguments.toArray(new String[0]));
 

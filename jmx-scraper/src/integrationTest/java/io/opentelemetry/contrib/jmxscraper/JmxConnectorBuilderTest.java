@@ -50,7 +50,8 @@ public class JmxConnectorBuilderTest {
       testConnector(
           () ->
               JmxConnectorBuilder.createNew(app.getHost(), app.getMappedPort(port))
-                  .userCredentials(login, pwd)
+                  .withUser(login)
+                  .withPassword(pwd)
                   .build());
     }
   }
