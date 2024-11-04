@@ -29,13 +29,9 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                 .withDockerfileFromBuilder(builder -> builder.from("cassandra:5.0.2").build()))
         .withEnv(
             "JVM_EXTRA_OPTS",
-            " -Dcassandra.jmx.remote.port="
-                + jmxPort
-                + " -Dcom.sun.management.jmxremote.rmi.port="
-                + jmxPort
-                + " -Dcom.sun.management.jmxremote.local.only=false"
-                + " -Dcom.sun.management.jmxremote.ssl=false"
-                + " -Dcom.sun.management.jmxremote.authenticate=false")
+            genericJmxJvmArguments(jmxPort)
+                // making cassandra startup faster for single node, from ~1min to ~15s
+                + " -Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0")
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forLogMessage(".*Startup complete.*", 1));
   }
