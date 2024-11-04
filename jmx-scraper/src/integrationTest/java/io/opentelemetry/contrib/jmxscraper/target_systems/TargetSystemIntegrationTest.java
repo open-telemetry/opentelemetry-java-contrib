@@ -111,7 +111,7 @@ public abstract class TargetSystemIntegrationTest {
         new JmxScraperContainer(otlpEndpoint)
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
-            .withService(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
+            .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 
     scraper = customizeScraperContainer(scraper);
     scraper.start();

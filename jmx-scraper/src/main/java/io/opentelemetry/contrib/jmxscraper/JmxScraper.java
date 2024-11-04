@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
@@ -61,8 +62,12 @@ public class JmxScraper {
       JmxMetricInsight service =
           JmxMetricInsight.createService(
               GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
-      JmxScraper jmxScraper =
-          new JmxScraper(JmxConnectorBuilder.createNew(config.getServiceUrl()), service, config);
+      JmxConnectorBuilder connectorBuilder = JmxConnectorBuilder.createNew(config.getServiceUrl());
+
+      Optional.ofNullable(config.getUsername()).ifPresent(connectorBuilder::withUser);
+      Optional.ofNullable(config.getPassword()).ifPresent(connectorBuilder::withPassword);
+
+      JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, config);
       jmxScraper.start();
 
     } catch (ArgumentsParsingException e) {
