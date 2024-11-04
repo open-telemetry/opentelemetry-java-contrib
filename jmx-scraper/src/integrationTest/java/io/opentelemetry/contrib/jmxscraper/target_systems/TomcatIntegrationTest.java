@@ -30,7 +30,15 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                                 "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
                                 "/usr/local/tomcat/webapps/ROOT.war")
                             .build()))
-        .withEnv("CATALINA_OPTS", genericJmxJvmArguments(jmxPort))
+        .withEnv(
+            "CATALINA_OPTS",
+            "-Dcom.sun.management.jmxremote.local.only=false"
+                + " -Dcom.sun.management.jmxremote.authenticate=false"
+                + " -Dcom.sun.management.jmxremote.ssl=false"
+                + " -Dcom.sun.management.jmxremote.port="
+                + jmxPort
+                + " -Dcom.sun.management.jmxremote.rmi.port="
+                + jmxPort)
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forListeningPort());
   }

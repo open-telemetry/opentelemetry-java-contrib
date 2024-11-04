@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static org.assertj.core.api.Assertions.entry;
+
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,9 +18,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.MountableFile;
-
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
-import static org.assertj.core.api.Assertions.entry;
 
 public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
@@ -126,7 +126,6 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                     attrs.containsOnly(
                         entry("server", "default-server"),
                         entry("listener", "default"),
-                        entry("state", "out")))
-    );
+                        entry("state", "out"))));
   }
 }
