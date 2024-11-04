@@ -16,6 +16,9 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.MountableFile;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static org.assertj.core.api.Assertions.entry;
+
 public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
   @SuppressWarnings("NonFinalStaticField")
@@ -27,8 +30,6 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
       Files.delete(tempJbossClient);
     }
   }
-
-  // /opt/jboss/wildfly/standalone/tmp/auth/
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
@@ -68,16 +69,64 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
     return scraper
         .withTargetSystem("wildfly")
-        // copy jboss-client.jar and add it to scraper classpath
+        // Copy jboss-client.jar and add it to scraper classpath
         .withCopyFileToContainer(MountableFile.forHostPath(tempJbossClient), "/jboss-client.jar")
         .withExtraJar("/jboss-client.jar")
-        // using jboss remote HTTP protocol provided in jboss-client.jar
+        // Using jboss remote HTTP protocol provided in jboss-client.jar
         .withServiceUrl("service:jmx:remote+http://targetsystem:9990")
-        // admin user created when creating container
+        // Admin user created when creating container
+        // When scraper is running on same host as jboss/wildfly a local file challenge can be used
+        // for authentication, but here we have to use valid credentials for remote access
         .withUser("user")
         .withPassword("password");
   }
 
   @Override
-  protected void verifyMetrics() {}
+  protected void verifyMetrics() {
+    waitAndAssertMetrics(
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.request.count",
+                "The number of requests received.",
+                "{request}",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.request.time",
+                "The total amount of time spent on requests.",
+                "ns",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.request.server_error",
+                "The number of requests that have resulted in a 5xx response.",
+                "{request}",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("server", "default-server"), entry("listener", "default"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.network.io",
+                "The number of bytes transmitted.",
+                "by",
+                attrs ->
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "default"),
+                        entry("state", "in")),
+                attrs ->
+                    attrs.containsOnly(
+                        entry("server", "default-server"),
+                        entry("listener", "default"),
+                        entry("state", "out")))
+    );
+  }
 }

@@ -54,7 +54,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "wildfly.request.count",
                 "The number of requests received.",
-                "{requests}",
+                "{request}",
                 attrs ->
                     attrs.containsOnly(
                         entry("server", "default-server"), entry("listener", "default"))),
@@ -72,7 +72,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "wildfly.request.server_error",
                 "The number of requests that have resulted in a 5xx response.",
-                "{requests}",
+                "{request}",
                 attrs ->
                     attrs.containsOnly(
                         entry("server", "default-server"), entry("listener", "default"))),
@@ -92,12 +92,14 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                         entry("server", "default-server"),
                         entry("listener", "default"),
                         entry("state", "out"))),
+
+        // TODO from here:
         metric ->
             assertSumWithAttributes(
                 metric,
                 "wildfly.jdbc.connection.open",
                 "The number of open jdbc connections.",
-                "{connections}",
+                "{connection}",
                 attrs ->
                     attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "active")),
                 attrs ->
@@ -107,20 +109,20 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "wildfly.jdbc.request.wait",
                 "The number of jdbc connections that had to wait before opening.",
-                "{requests}",
+                "{request}",
                 attrs -> attrs.containsOnly(entry("data_source", "ExampleDS"))),
         metric ->
             assertSum(
                 metric,
                 "wildfly.jdbc.transaction.count",
                 "The number of transactions created.",
-                "{transactions}"),
+                "{transaction}"),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "wildfly.jdbc.rollback.count",
                 "The number of transactions rolled back.",
-                "{transactions}",
+                "{transaction}",
                 attrs -> attrs.containsOnly(entry("cause", "system")),
                 attrs -> attrs.containsOnly(entry("cause", "resource")),
                 attrs -> attrs.containsOnly(entry("cause", "application"))));

@@ -2,6 +2,7 @@
 
 rules:
 
+  # TODO: sessions are not tested in the original groovy implementation
   - bean: jboss.as:deployment=*,subsystem=undertow
     metricAttribute:
       deployment: param(deployment)
@@ -10,3 +11,35 @@ rules:
         metric: wildfly.session.count
         unit: "{session}"
         desc: The number of sessions created.
+
+  - bean: jboss.as:subsystem=undertow,server=*,http-listener=*
+    metricAttribute:
+      server: param(server)
+      listener: param(http-listener)
+    prefix: wildfly.
+    type: counter
+    mapping:
+      requestCount:
+        metric: request.count
+        unit: "{request}"
+        desc: The number of requests received.
+      processingTime:
+        metric: request.time
+        unit: ns
+        desc: The total amount of time spent on requests.
+      errorCount:
+        metric: request.server_error
+        unit: "{request}"
+        desc: The number of requests that have resulted in a 5xx response.
+      bytesSent:
+        metric: network.io
+        unit: "by"
+        desc: "The number of bytes transmitted."
+        metricAttribute:
+          state: const(out)
+      bytesReceived:
+        metric: network.io
+        unit: "by"
+        desc: "The number of bytes transmitted."
+        metricAttribute:
+          state: const(in)
