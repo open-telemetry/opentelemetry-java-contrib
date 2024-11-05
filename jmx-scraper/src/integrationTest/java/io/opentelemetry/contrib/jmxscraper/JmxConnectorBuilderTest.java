@@ -76,7 +76,7 @@ public class JmxConnectorBuilderTest {
           .satisfies(
               connection -> {
                 try {
-                  ObjectName name = new ObjectName(TestApp.OBJECT_NAME);
+                  ObjectName name = new ObjectName("io.opentelemetry.test:name=TestApp");
                   Object value = connection.getAttribute(name, "IntValue");
                   assertThat(value).isEqualTo(42);
                 } catch (Exception e) {

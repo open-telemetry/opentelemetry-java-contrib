@@ -9,14 +9,11 @@ import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-@SuppressWarnings("all")
 public class TestApp implements TestAppMXBean {
-
-  public static final String APP_STARTED_MSG = "app started";
-  public static final String OBJECT_NAME = "io.opentelemetry.test:name=TestApp";
 
   private volatile boolean running;
 
+  @SuppressWarnings("BusyWait")
   public static void main(String[] args) {
     TestApp app = TestApp.start();
     while (app.isRunning()) {
@@ -34,13 +31,13 @@ public class TestApp implements TestAppMXBean {
     TestApp app = new TestApp();
     MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     try {
-      ObjectName objectName = new ObjectName(OBJECT_NAME);
+      ObjectName objectName = new ObjectName("io.opentelemetry.test:name=TestApp");
       mbs.registerMBean(app, objectName);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     app.running = true;
-    System.out.println(APP_STARTED_MSG);
+    System.out.println("app started");
     return app;
   }
 
