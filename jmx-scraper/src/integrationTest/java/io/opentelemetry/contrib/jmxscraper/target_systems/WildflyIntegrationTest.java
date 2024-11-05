@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 import static org.assertj.core.api.Assertions.entry;
 
@@ -126,6 +127,39 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                     attrs.containsOnly(
                         entry("server", "default-server"),
                         entry("listener", "default"),
-                        entry("state", "out"))));
+                        entry("state", "out"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.connection.open",
+                "The number of open jdbc connections.",
+                "{connection}",
+                attrs ->
+                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "active")),
+                attrs ->
+                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "idle"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.request.wait",
+                "The number of jdbc connections that had to wait before opening.",
+                "{request}",
+                attrs -> attrs.containsOnly(entry("data_source", "ExampleDS"))),
+        metric ->
+            assertSum(
+                metric,
+                "wildfly.jdbc.transaction.count",
+                "The number of transactions created.",
+                "{transaction}"),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.jdbc.rollback.count",
+                "The number of transactions rolled back.",
+                "{transaction}",
+                attrs -> attrs.containsOnly(entry("cause", "system")),
+                attrs -> attrs.containsOnly(entry("cause", "resource")),
+                attrs -> attrs.containsOnly(entry("cause", "application")))
+    );
   }
 }

@@ -2,16 +2,6 @@
 
 rules:
 
-  # TODO: sessions are not tested in the original groovy implementation
-  - bean: jboss.as:deployment=*,subsystem=undertow
-    metricAttribute:
-      deployment: param(deployment)
-    mapping:
-      sessionsCreated:
-        metric: wildfly.session.count
-        unit: "{session}"
-        desc: The number of sessions created.
-
   - bean: jboss.as:subsystem=undertow,server=*,http-listener=*
     metricAttribute:
       server: param(server)
@@ -43,3 +33,50 @@ rules:
         desc: "The number of bytes transmitted."
         metricAttribute:
           state: const(in)
+
+  - bean: jboss.as:subsystem=datasources,data-source=*,statistics=pool
+    metricAttribute:
+      data_source: param(data-source)
+    type: counter
+    prefix: wildfly.jdbc.
+    mapping:
+      ActiveCount:
+        metric: connection.open
+        unit: "{connection}"
+        desc: The number of open jdbc connections.
+        metricAttribute:
+          state: const(active)
+      IdleCount:
+        metric: connection.open
+        unit: "{connection}"
+        desc: The number of open jdbc connections.
+        metricAttribute:
+          state: const(idle)
+      WaitCount:
+        metric: request.wait
+        unit: "{request}"
+        desc: The number of jdbc connections that had to wait before opening.
+
+  - bean: jboss.as:subsystem=transactions
+    prefix: wildfly.jdbc.
+    unit: "{transaction}"
+    type: counter
+    mapping:
+      numberOfTransactions:
+        metric: transaction.count
+        desc: The number of transactions created.
+      numberOfSystemRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(system)
+      numberOfResourceRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(resource)
+      numberOfApplicationRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(application)
