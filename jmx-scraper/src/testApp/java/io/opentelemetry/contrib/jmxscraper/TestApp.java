@@ -9,11 +9,11 @@ import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+@SuppressWarnings("all") // for busy wait + stdout
 public class TestApp implements TestAppMXBean {
 
   private volatile boolean running;
 
-  @SuppressWarnings("BusyWait")
   public static void main(String[] args) {
     TestApp app = TestApp.start();
     while (app.isRunning()) {

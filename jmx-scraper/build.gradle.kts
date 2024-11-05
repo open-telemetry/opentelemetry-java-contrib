@@ -43,6 +43,11 @@ testing {
   }
 }
 
+sourceSets {
+  create("testApp") {
+  }
+}
+
 tasks {
   shadowJar {
     mergeServiceFiles()
@@ -75,7 +80,7 @@ tasks {
 }
 
 tasks.register<Jar>("appJar") {
-  from(sourceSets.get("integrationTest").output)
+  from(sourceSets.get("testApp").output)
   archiveClassifier.set("app")
   manifest {
     attributes["Main-Class"] = "io.opentelemetry.contrib.jmxscraper.TestApp"
