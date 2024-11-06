@@ -63,7 +63,7 @@ val DEPENDENCIES = listOf(
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.9.1",
   "org.skyscreamer:jsonassert:1.5.3",
-  "org.apache.kafka:kafka-clients:3.8.1",
+  "org.apache.kafka:kafka-clients:3.9.0",
   "org.testcontainers:kafka:1.20.3",
   "com.lmax:disruptor:3.4.4",
   "org.jctools:jctools-core:4.0.5",
