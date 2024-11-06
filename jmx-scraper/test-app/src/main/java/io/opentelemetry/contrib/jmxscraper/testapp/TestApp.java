@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxscraper;
+package io.opentelemetry.contrib.jmxscraper.testapp;
 
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 @SuppressWarnings("all") // for busy wait + stdout
-public class TestApp implements TestAppMXBean {
+public class TestApp implements TestAppMxBean {
 
   private volatile boolean running;
 

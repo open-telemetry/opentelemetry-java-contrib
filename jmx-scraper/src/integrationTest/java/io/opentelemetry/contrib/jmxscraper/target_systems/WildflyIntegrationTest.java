@@ -7,12 +7,14 @@ package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import org.junit.jupiter.api.AfterAll;
 import org.testcontainers.containers.GenericContainer;
@@ -36,12 +38,16 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     // JMX port is ignored here as we are using HTTP management interface
 
+    String appWar = System.getProperty("app.war.path");
+    Path appWarPath = Paths.get(appWar);
+    assertThat(appWarPath).isNotEmptyFile().isReadable();
+
     return new GenericContainer<>(
             new ImageFromDockerfile()
                 .withDockerfileFromBuilder(
                     builder ->
                         builder
-                            .from("jboss/wildfly:23.0.1.Final")
+                            .from("quay.io/wildfly/wildfly:32.0.1.Final-jdk11")
                             // user/pwd needed for remote JMX access
                             .run("/opt/jboss/wildfly/bin/add-user.sh user password --silent")
                             // standalone with management (HTTP) interface enabled
@@ -49,8 +55,17 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                                 "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
                             .expose(8080, 9990)
                             .build()))
+        .withCopyFileToContainer(
+            MountableFile.forHostPath(appWarPath),
+            "/opt/jboss/wildfly/standalone/deployments/testapp.war")
         .withStartupTimeout(Duration.ofMinutes(2))
         .waitingFor(Wait.forLogMessage(".*Http management interface listening on.*", 1));
+  }
+
+  @Override
+  protected String scraperBaseImage() {
+    // we need to run the scraper with Java 11+ because jboss client jar is using Java 11
+    return "eclipse-temurin:11.0.25_9-jdk-noble";
   }
 
   @Override
@@ -159,7 +174,6 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                 "{transaction}",
                 attrs -> attrs.containsOnly(entry("cause", "system")),
                 attrs -> attrs.containsOnly(entry("cause", "resource")),
-                attrs -> attrs.containsOnly(entry("cause", "application")))
-    );
+                attrs -> attrs.containsOnly(entry("cause", "application"))));
   }
 }

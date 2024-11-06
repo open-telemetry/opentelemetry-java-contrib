@@ -30,8 +30,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String password;
   private final List<String> extraJars;
 
-  public JmxScraperContainer(String otlpEndpoint) {
-    super("openjdk:8u342-jre-slim");
+  public JmxScraperContainer(String otlpEndpoint, String baseImage) {
+    super(baseImage);
 
     String scraperJarPath = System.getProperty("shadow.jar.path");
     assertThat(scraperJarPath).isNotNull();

@@ -43,11 +43,6 @@ testing {
   }
 }
 
-sourceSets {
-  create("testApp") {
-  }
-}
-
 tasks {
   shadowJar {
     mergeServiceFiles()
@@ -65,9 +60,16 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
-    dependsOn(named("appJar"))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
-    systemProperty("app.jar.path", named<Jar>("appJar").get().archiveFile.get().asFile.absolutePath)
+
+    val testAppTask = project("test-app").tasks.named<Jar>("jar")
+    dependsOn(testAppTask)
+    systemProperty("app.jar.path", testAppTask.get().archiveFile.get().asFile.absolutePath)
+
+    val testWarTask = project("test-webapp").tasks.named<Jar>("war")
+    dependsOn(testWarTask)
+    systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
+
     systemProperty("gradle.project.version", "${project.version}")
   }
 
@@ -76,14 +78,6 @@ tasks {
   // the POM anyways so in practice we shouldn't be losing anything.
   withType<GenerateModuleMetadata>().configureEach {
     enabled = false
-  }
-}
-
-tasks.register<Jar>("appJar") {
-  from(sourceSets.get("testApp").output)
-  archiveClassifier.set("app")
-  manifest {
-    attributes["Main-Class"] = "io.opentelemetry.contrib.jmxscraper.TestApp"
   }
 }
 

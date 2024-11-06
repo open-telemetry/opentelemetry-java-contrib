@@ -38,8 +38,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     this.withCopyFileToContainer(MountableFile.forHostPath(appJar), "/app.jar")
         .waitingFor(
-            Wait.forLogMessage("app started\\n", 1)
-                .withStartupTimeout(Duration.ofSeconds(5)))
+            Wait.forLogMessage("app started\\n", 1).withStartupTimeout(Duration.ofSeconds(5)))
         .withCommand("java", "-jar", "/app.jar");
   }
 

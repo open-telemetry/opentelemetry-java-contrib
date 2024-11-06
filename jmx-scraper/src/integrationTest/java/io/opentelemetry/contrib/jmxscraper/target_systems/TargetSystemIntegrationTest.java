@@ -97,6 +97,10 @@ public abstract class TargetSystemIntegrationTest {
     }
   }
 
+  protected String scraperBaseImage() {
+    return "openjdk:8u342-jre-slim";
+  }
+
   @Test
   void endToEndTest() {
 
@@ -108,7 +112,7 @@ public abstract class TargetSystemIntegrationTest {
     target.start();
 
     scraper =
-        new JmxScraperContainer(otlpEndpoint)
+        new JmxScraperContainer(otlpEndpoint, scraperBaseImage())
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
             .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
