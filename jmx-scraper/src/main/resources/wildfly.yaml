@@ -1,6 +1,28 @@
 ---
 
 rules:
+  - bean: jboss.as:deployment=*,subsystem=undertow
+    metricAttribute:
+      deployment: param(deployment)
+    prefix: wildfly.session.
+    unit: "{session}"
+    mapping:
+      sessionsCreated:
+        metric: count
+        type: counter
+        desc: The number of sessions created.
+      activeSessions:
+        metric: active
+        type: updowncounter
+        desc: The number of currently active sessions.
+      expiredSessions:
+        metric: expired
+        type: counter
+        desc: The number of sessions that have expired.
+      rejectedSessions:
+        metric: rejected
+        type: counter
+        desc: The number of sessions that have been rejected.
 
   - bean: jboss.as:subsystem=undertow,server=*,http-listener=*
     metricAttribute:

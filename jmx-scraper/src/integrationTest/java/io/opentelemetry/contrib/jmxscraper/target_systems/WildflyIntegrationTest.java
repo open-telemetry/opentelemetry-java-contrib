@@ -103,6 +103,35 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
         metric ->
             assertSumWithAttributes(
                 metric,
+                "wildfly.session.count",
+                "The number of sessions created.",
+                "{session}",
+                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.session.active",
+                "The number of currently active sessions.",
+                "{session}",
+                /* isMonotonic= */ false,
+                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.session.expired",
+                "The number of sessions that have expired.",
+                "{session}",
+                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
+                "wildfly.session.rejected",
+                "The number of sessions that have been rejected.",
+                "{session}",
+                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
+        metric ->
+            assertSumWithAttributes(
+                metric,
                 "wildfly.request.count",
                 "The number of requests received.",
                 "{request}",
