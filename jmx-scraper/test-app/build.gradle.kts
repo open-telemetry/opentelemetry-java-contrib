@@ -4,6 +4,12 @@ plugins {
 
 description = "JMX metrics scraper - test application"
 
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(8)
+  }
+}
+
 tasks {
   jar {
     manifest {
