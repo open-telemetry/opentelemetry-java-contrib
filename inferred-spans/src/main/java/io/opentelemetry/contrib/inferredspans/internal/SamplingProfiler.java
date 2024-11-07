@@ -952,7 +952,10 @@ public class SamplingProfiler implements Runnable {
           callTree.end(
               samplingProfiler.callTreePool, samplingProfiler.getInferredSpansMinDurationNs());
           int createdSpans =
-              callTree.spanify(samplingProfiler.getClock(), samplingProfiler.tracerProvider.get());
+              callTree.spanify(
+                  samplingProfiler.getClock(),
+                  samplingProfiler.tracerProvider.get(),
+                  samplingProfiler.config.getParentOverrideHandler());
           if (logger.isLoggable(Level.FINE)) {
             if (createdSpans > 0) {
               logger.log(

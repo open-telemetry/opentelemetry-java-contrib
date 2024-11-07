@@ -5,12 +5,16 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.contrib.inferredspans.internal.CallTree;
 import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
 import io.opentelemetry.contrib.inferredspans.internal.SpanAnchoredClock;
 import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("CanIgnoreReturnValueSuggester")
@@ -48,6 +52,8 @@ public class InferredSpansProcessorBuilder {
 
   @Nullable private File activationEventsFile = null;
   @Nullable private File jfrFile = null;
+  private BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler =
+      CallTree.DEFAULT_PARENT_OVERRIDE;
 
   InferredSpansProcessorBuilder() {}
 
@@ -64,7 +70,8 @@ public class InferredSpansProcessorBuilder {
             excludedClasses,
             profilerInterval,
             profilingDuration,
-            profilerLibDirectory);
+            profilerLibDirectory,
+            parentOverrideHandler);
     return new InferredSpansProcessor(
         config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
   }
@@ -186,6 +193,19 @@ public class InferredSpansProcessorBuilder {
   /** For testing only. */
   InferredSpansProcessorBuilder jfrFile(@Nullable File jfrFile) {
     this.jfrFile = jfrFile;
+    return this;
+  }
+
+  /**
+   * Defines the action to perform when a inferred span is discovered to actually be the parent of a
+   * normal span. The first argument of the handler is the modifiable inferred span, the second
+   * argument the span context of the normal span which should be somehow marked as child of the
+   * inferred one. By default, a span link is added to the inferred span to represent this
+   * relationship.
+   */
+  InferredSpansProcessorBuilder parentOverrideHandler(
+      BiConsumer<SpanBuilder, SpanContext> handler) {
+    this.parentOverrideHandler = handler;
     return this;
   }
 }
