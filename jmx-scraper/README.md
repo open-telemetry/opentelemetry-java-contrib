@@ -13,12 +13,14 @@ The general command to invoke JMX scraper is `java -jar scraper.jar <config>`, w
 is the `build/libs/opentelemetry-jmx-scraper-<version>.jar` packaged binary when building this module.
 
 Minimal configuration required
+
 - `otel.jmx.service.url` for example `service:jmx:rmi:///jndi/rmi://server:9999/jmxrmi` for `server`
   host on port `9999` with RMI JMX connector.
 - `otel.jmx.target.system` or `otel.jmx.custom.scraping.config`
 
 Configuration can be provided through:
-- command line arguments: `java -jar scraper.jar --config `
+
+- command line arguments: `java -jar scraper.jar --config otel.jmx.target.system=...`
 - system properties `java -jar scraper.jar`
 - java properties file: `java -jar config.properties`
 
@@ -38,6 +40,7 @@ needs to be used to support `otel.jmx.service.url` = `service:jmx:remote+http://
 
 When doing so, the `java -jar` command can´t be used, we have to provide the classpath with
 `-cp`/`--class-path`/`-classpath` option and provide the main class file name:
+
 ```
 java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScraper <config>
 ```
