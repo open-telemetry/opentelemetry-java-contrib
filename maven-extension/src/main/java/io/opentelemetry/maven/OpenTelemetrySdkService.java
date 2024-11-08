@@ -106,37 +106,26 @@ public final class OpenTelemetrySdkService implements Closeable {
       ConfigProperties configProperties) {
 
     Map<String, String> properties = new HashMap<>();
-    if (configProperties.getString("otel.exporter.otlp.endpoint") == null) {
-      for (SignalType signalType : SignalType.values()) {
-        boolean isExporterImplicitlyConfiguredToOtlp =
-            configProperties.getString("otel." + signalType.value + ".exporter") == null;
-        boolean isOtlpExporterEndpointSpecified =
-            configProperties.getString("otel.exporter.otlp." + signalType.value + ".endpoint")
-                != null;
-
-        if (isExporterImplicitlyConfiguredToOtlp && !isOtlpExporterEndpointSpecified) {
-          logger.debug(
-              "OpenTelemetry: Disabling default OTLP exporter endpoint for signal {} exporter",
-              signalType.value);
-          properties.put("otel." + signalType.value + ".exporter", "none");
-        }
-      }
-    } else {
+    if (configProperties.getString("otel.exporter.otlp.endpoint") != null) {
       logger.debug("OpenTelemetry: OTLP exporter endpoint is explicitly configured");
+      return properties;
     }
+    String[] signalTypes = {"traces", "metrics", "logs"};
+    for (String signalType : signalTypes) {
+      boolean isExporterImplicitlyConfiguredToOtlp =
+          configProperties.getString("otel." + signalType + ".exporter") == null;
+      boolean isOtlpExporterEndpointSpecified =
+          configProperties.getString("otel.exporter.otlp." + signalType + ".endpoint") != null;
+
+      if (isExporterImplicitlyConfiguredToOtlp && !isOtlpExporterEndpointSpecified) {
+        logger.debug(
+            "OpenTelemetry: Disabling default OTLP exporter endpoint for signal {} exporter",
+            signalType);
+        properties.put("otel." + signalType + ".exporter", "none");
+      }
+    }
+
     return properties;
-  }
-
-  enum SignalType {
-    TRACES("traces"),
-    METRICS("metrics"),
-    LOGS("logs");
-
-    private final String value;
-
-    SignalType(String value) {
-      this.value = value;
-    }
   }
 
   @PreDestroy
