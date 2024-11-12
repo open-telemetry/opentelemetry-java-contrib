@@ -32,7 +32,8 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             .build()))
         .withEnv("CATALINA_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forListeningPort());
+        .withExposedPorts(8080, jmxPort)
+        .waitingFor(Wait.forListeningPorts(8080, jmxPort));
   }
 
   @Override

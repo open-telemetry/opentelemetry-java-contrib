@@ -25,7 +25,8 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     builder -> builder.from("apache/activemq-classic:5.18.6").build()))
         .withEnv("JAVA_TOOL_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*", 1));
+        .withExposedPorts(61616, jmxPort)
+        .waitingFor(Wait.forListeningPorts(61616, jmxPort));
   }
 
   @Override

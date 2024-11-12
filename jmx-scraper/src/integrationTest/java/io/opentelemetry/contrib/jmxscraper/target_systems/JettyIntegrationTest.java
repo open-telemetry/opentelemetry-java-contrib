@@ -39,7 +39,8 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
     container
         .withEnv("JAVA_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Started Server.*", 1));
+        .withExposedPorts(8080, jmxPort)
+        .waitingFor(Wait.forListeningPorts(8080, jmxPort));
 
     return container;
   }

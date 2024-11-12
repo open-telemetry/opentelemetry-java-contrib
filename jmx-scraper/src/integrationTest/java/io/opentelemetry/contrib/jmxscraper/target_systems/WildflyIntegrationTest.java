@@ -59,7 +59,8 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
             MountableFile.forHostPath(appWarPath),
             "/opt/jboss/wildfly/standalone/deployments/testapp.war")
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Http management interface listening on.*", 1));
+        .withExposedPorts(8080, 9990)
+        .waitingFor(Wait.forListeningPorts(8080, 9990));
   }
 
   @Override

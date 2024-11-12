@@ -14,13 +14,18 @@ import io.opentelemetry.contrib.jmxscraper.TestAppContainer;
 import java.util.Arrays;
 import java.util.List;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 public class JvmIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     // reusing test application for JVM metrics and custom yaml
-    return new TestAppContainer().withJmxPort(jmxPort);
+    //noinspection resource
+    return new TestAppContainer()
+        .withJmxPort(jmxPort)
+        .withExposedPorts(jmxPort)
+        .waitingFor(Wait.forListeningPorts(jmxPort));
   }
 
   @Override

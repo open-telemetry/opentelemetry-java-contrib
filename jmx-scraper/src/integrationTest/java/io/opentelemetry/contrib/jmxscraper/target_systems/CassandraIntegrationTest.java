@@ -30,7 +30,8 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                 // making cassandra startup faster for single node, from ~1min to ~15s
                 + " -Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0")
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Startup complete.*", 1));
+        .withExposedPorts(9042, jmxPort)
+        .waitingFor(Wait.forListeningPorts(9042, jmxPort));
   }
 
   @Override
