@@ -16,16 +16,16 @@
 
 def beanMasterServer = otel.mbeans("Hadoop:service=HBase,name=Master,sub=Server")
 otel.instrument(beanMasterServer, "hbase.master.region_server.count",
-  "The number of region servers.", "{servers}",
+  "The number of region servers.", "{server}",
   ["numDeadRegionServers":["state" : {"dead"}], "numRegionServers": ["state" : {"live"}]],
   otel.&longUpDownCounterCallback)
 
 def beanMasterAssignmentManager = otel.mbean("Hadoop:service=HBase,name=Master,sub=AssignmentManager")
 otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.count",
-  "The number of regions that are in transition.", "{regions}",
+  "The number of regions that are in transition.", "{region}",
   "ritCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.over_threshold",
-  "The number of regions that have been in transition longer than a threshold time.", "{regions}",
+  "The number of regions that have been in transition longer than a threshold time.", "{region}",
   "ritCountOverThreshold", otel.&longUpDownCounterCallback)
 otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition.oldest_age",
   "The age of the longest region in transition.", "ms",
@@ -33,11 +33,11 @@ otel.instrument(beanMasterAssignmentManager, "hbase.master.regions_in_transition
 
 def beanRegionServerServer = otel.mbean("Hadoop:service=HBase,name=RegionServer,sub=Server")
 otel.instrument(beanRegionServerServer, "hbase.region_server.region.count",
-  "The number of regions hosted by the region server.", "{regions}",
+  "The number of regions hosted by the region server.", "{region}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "regionCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.disk.store_file.count",
-  "The number of store files on disk currently managed by the region server.", "{files}",
+  "The number of store files on disk currently managed by the region server.", "{file}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "storeFileCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.disk.store_file.size",
@@ -45,16 +45,16 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.disk.store_file.siz
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "storeFileSize", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.write_ahead_log.count",
-  "The number of write ahead logs not yet archived.", "{logs}",
+  "The number of write ahead logs not yet archived.", "{log}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "hlogFileCount", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.request.count",
-  "The number of requests received.", "{requests}",
+  "The number of requests received.", "{request}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["writeRequestCount":["state" : {"write"}], "readRequestCount": ["state" : {"read"}]],
   otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.queue.length",
-  "The number of RPC handlers actively servicing requests.", "{handlers}",
+  "The number of RPC handlers actively servicing requests.", "{handler}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["flushQueueLength":["state" : {"flush"}], "compactionQueueLength": ["state" : {"compaction"}]],
   otel.&longUpDownCounterCallback)
@@ -63,7 +63,7 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.blocked_update.time
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "updatesBlockedTime", otel.&longValueCallback)
 otel.instrument(beanRegionServerServer, "hbase.region_server.block_cache.operation.count",
-  "Number of block cache hits/misses.", "{operations}",
+  "Number of block cache hits/misses.", "{operation}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["blockCacheMissCount":["state" : {"miss"}], "blockCacheHitCount": ["state" : {"hit"}]],
   otel.&longValueCallback)
@@ -199,7 +199,7 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operation.increment
   "Increment_median", otel.&longValueCallback)
 
 otel.instrument(beanRegionServerServer, "hbase.region_server.operations.slow",
-  "Number of operations that took over 1000ms to complete.", "{operations}",
+  "Number of operations that took over 1000ms to complete.", "{operation}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   [
     "slowDeleteCount":["operation" : {"delete"}],
@@ -212,15 +212,15 @@ otel.instrument(beanRegionServerServer, "hbase.region_server.operations.slow",
 
 def beanRegionServerIPC = otel.mbean("Hadoop:service=HBase,name=RegionServer,sub=IPC")
 otel.instrument(beanRegionServerIPC, "hbase.region_server.open_connection.count",
-  "The number of open connections at the RPC layer.", "{connections}",
+  "The number of open connections at the RPC layer.", "{connection}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "numOpenConnections", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerIPC, "hbase.region_server.active_handler.count",
-  "The number of RPC handlers actively servicing requests.", "{handlers}",
+  "The number of RPC handlers actively servicing requests.", "{handler}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "numActiveHandler", otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerIPC, "hbase.region_server.queue.request.count",
-  "The number of currently enqueued requests.", "{requests}",
+  "The number of currently enqueued requests.", "{request}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   [
     "numCallsInReplicationQueue":["state" : {"replication"}],
@@ -229,7 +229,7 @@ otel.instrument(beanRegionServerIPC, "hbase.region_server.queue.request.count",
   ],
   otel.&longUpDownCounterCallback)
 otel.instrument(beanRegionServerIPC, "hbase.region_server.authentication.count",
-  "Number of client connection authentication failures/successes.", "{authentication requests}",
+  "Number of client connection authentication failures/successes.", "{authentication request}",
   ["region_server" : { mbean -> mbean.getProperty("tag.Hostname") }],
   ["authenticationSuccesses":["state" : {"successes"}], "authenticationFailures": ["state" : {"failures"}]],
   otel.&longUpDownCounterCallback)
