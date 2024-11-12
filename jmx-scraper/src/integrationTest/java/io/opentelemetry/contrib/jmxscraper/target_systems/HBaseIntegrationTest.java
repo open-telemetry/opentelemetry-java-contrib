@@ -5,18 +5,19 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import java.time.Duration;
-
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGauge;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 import static org.assertj.core.data.MapEntry.entry;
 
+import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import java.time.Duration;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+
 public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
+  private static final int DEFAULT_MASTER_SERVICE_PORT = 16000;
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
@@ -25,8 +26,8 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
         .withEnv("HBASE_OPTS", "-XX:+UseConcMarkSweepGC")
         .withEnv("HBASE_MASTER_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(jmxPort)
-        .waitingFor(Wait.forListeningPort());
+        .withExposedPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT)
+        .waitingFor(Wait.forListeningPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT));
   }
 
   @Override
@@ -156,7 +157,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Percent of store file data that can be read from the local.",
                 "%",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -192,7 +192,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Append operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -228,7 +227,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Delete operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -264,7 +262,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Put operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -300,7 +297,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Get operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -336,7 +332,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "Replay operation median latency.",
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
-
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -384,7 +379,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 attrs -> attrs.contains(entry("operation", "get")),
                 attrs -> attrs.contains(entry("operation", "put")),
                 attrs -> attrs.contains(entry("operation", "increment"))),
-
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -420,7 +414,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("state", "successes")),
                 attrs -> attrs.contains(entry("state", "failures"))),
-
         metric ->
             assertSumWithAttributes(
                 metric,
@@ -441,7 +434,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                 "hbase.region_server.gc.old_gen.time",
                 "Time spent in garbage collection of the old generation.",
                 "ms",
-                attrs -> attrs.containsKey("region_server"))
-       );
+                attrs -> attrs.containsKey("region_server")));
   }
 }
