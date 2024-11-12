@@ -27,7 +27,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).isTrue();
+    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
     assertThat(metric.getGauge().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
   }
@@ -41,10 +41,12 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
+    assertThat(metric.getSum().getIsMonotonic())
+        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
+        .isEqualTo(isMonotonic);
     assertThat(metric.getSum().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
-    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
   }
 
   static void assertTypedGauge(
@@ -52,7 +54,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).isTrue();
+    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
     assertTypedPoints(metric.getGauge().getDataPointsList(), types);
   }
 
@@ -61,7 +63,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
     assertTypedPoints(metric.getSum().getDataPointsList(), types);
   }
 
@@ -87,8 +89,10 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
-    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
+    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
+    assertThat(metric.getSum().getIsMonotonic())
+        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
+        .isEqualTo(isMonotonic);
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -118,7 +122,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).isTrue();
+    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
     assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -145,6 +149,7 @@ class MetricAssertions {
             .toArray(Consumer[]::new);
 
     assertThat(points)
+        .withFailMessage("Invalid metric attributes. Actual: " + points)
         .extracting(
             numberDataPoint ->
                 numberDataPoint.getAttributesList().stream()

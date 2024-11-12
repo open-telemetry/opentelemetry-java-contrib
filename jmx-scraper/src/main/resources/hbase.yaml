@@ -1,0 +1,329 @@
+---
+
+rules:
+
+  - bean: Hadoop:service=HBase,name=Master,sub=Server
+    prefix: hbase.master.
+    unit: "{server}"
+    type: updowncounter
+    mapping:
+      numDeadRegionServers:
+        metric: &metric region_server.count
+        desc: &desc The number of region servers.
+        metricAttribute:
+          state: const(dead)
+      numRegionServers:
+        metric: *metric
+        desc: *desc
+        metricAttribute:
+          state: const(live)
+
+  - bean: Hadoop:service=HBase,name=Master,sub=AssignmentManager
+    prefix: hbase.master.regions_in_transition.
+    unit: "{region}"
+    type: updowncounter
+    mapping:
+      ritCount:
+        metric: count
+        desc: The number of regions that are in transition.
+      ritCountOverThreshold:
+        metric: over_threshold
+        desc: The number of regions that have been in transition longer than a threshold time.
+      ritOldestAge:
+        metric: oldest_age
+        unit: ms
+        type: gauge
+        desc: The age of the longest region in transition.
+
+  - bean: Hadoop:service=HBase,name=RegionServer,sub=Server
+    prefix: hbase.region_server.
+    type: updowncounter
+    metricAttribute:
+      region_server: &hostname beanattr(tag\.Hostname)
+    mapping:
+      regionCount:
+        metric: region.count
+        unit: "{region}"
+        desc: The number of regions hosted by the region server.
+
+      storeFileCount:
+        metric: disk.store_file.count
+        unit: "{file}"
+        desc: The number of store files on disk currently managed by the region server.
+
+      storeFileSize:
+        metric: disk.store_file.size
+        unit: By
+        desc: Aggregate size of the store files on disk.
+
+      hlogFileCount:
+        metric: write_ahead_log.count
+        unit: "{log}"
+        desc: The number of write ahead logs not yet archived.
+
+      writeRequestCount:
+        metric: &metric request.count
+        unit: &unit "{request}"
+        desc: &desc The number of requests received.
+        metricAttribute:
+          state: const(write)
+          region_server: *hostname
+      readRequestCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(read)
+          region_server: *hostname
+
+      flushQueueLength:
+        metric: &metric queue.length
+        unit: &unit "{handler}"
+        desc: &desc The number of RPC handlers actively servicing requests.
+        metricAttribute:
+          state: const(flush)
+          region_server: *hostname
+      compactionQueueLength:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(compaction)
+          region_server: *hostname
+
+      updatesBlockedTime:
+        metric: blocked_update.time
+        type: gauge
+        unit: ms
+        desc: Amount of time updates have been blocked so the memstore can be flushed.
+
+      blockCacheMissCount:
+        metric: &metric block_cache.operation.count
+        type: &type gauge
+        unit: &unit "{operation}"
+        desc: &desc Number of block cache hits/misses.
+        metricAttribute:
+          state: const(miss)
+          region_server: *hostname
+      blockCacheHitCount:
+        metric: *metric
+        type: *type
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(hit)
+          region_server: *hostname
+
+      percentFilesLocal:
+        metric: files.local
+        type: gauge
+        unit: "%"
+        desc: Percent of store file data that can be read from the local.
+
+      slowDeleteCount:
+        metric: &metric operations.slow
+        unit: &unit "{operation}"
+        desc: &desc Number of operations that took over 1000ms to complete.
+        metricAttribute:
+          operation: const(delete)
+          region_server: &hostname beanattr(tag\.Hostname)
+      slowAppendCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          operation: const(append)
+          region_server: *hostname
+      slowGetCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          operation: const(get)
+          region_server: *hostname
+      slowPutCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          operation: const(put)
+          region_server: *hostname
+      slowIncrementCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          operation: const(increment)
+          region_server: *hostname
+
+  - bean: Hadoop:service=HBase,name=RegionServer,sub=Server
+    prefix: hbase.region_server.
+    type: gauge
+    unit: ms
+    metricAttribute:
+      region_server: *hostname
+    mapping:
+      Append_99th_percentile:
+        metric: operation.append.latency.p99
+        desc: Append operation 99th Percentile latency.
+      Append_max:
+        metric: operation.append.latency.max
+        desc: Append operation max latency.
+      Append_min:
+        metric: operation.append.latency.min
+        desc: Append operation minimum latency.
+      Append_mean:
+        metric: operation.append.latency.mean
+        desc: Append operation mean latency.
+      Append_median:
+        metric: operation.append.latency.median
+        desc: Append operation median latency.
+
+      Delete_99th_percentile:
+        metric: operation.delete.latency.p99
+        desc: Delete operation 99th Percentile latency.
+      Delete_max:
+        metric: operation.delete.latency.max
+        desc: Delete operation max latency.
+      Delete_min:
+        metric: operation.delete.latency.min
+        desc: Delete operation minimum latency.
+      Delete_mean:
+        metric: operation.delete.latency.mean
+        desc: Delete operation mean latency.
+      Delete_median:
+        metric: operation.delete.latency.median
+        desc: Delete operation median latency.
+
+      Put_99th_percentile:
+        metric: operation.put.latency.p99
+        desc: Put operation 99th Percentile latency.
+      Put_max:
+        metric: operation.put.latency.max
+        desc: Put operation max latency.
+      Put_min:
+        metric: operation.put.latency.min
+        desc: Put operation minimum latency.
+      Put_mean:
+        metric: operation.put.latency.mean
+        desc: Put operation mean latency.
+      Put_median:
+        metric: operation.put.latency.median
+        desc: Put operation median latency.
+
+      Get_99th_percentile:
+        metric: operation.get.latency.p99
+        desc: Get operation 99th Percentile latency.
+      Get_max:
+        metric: operation.get.latency.max
+        desc: Get operation max latency.
+      Get_min:
+        metric: operation.get.latency.min
+        desc: Get operation minimum latency.
+      Get_mean:
+        metric: operation.get.latency.mean
+        desc: Get operation mean latency.
+      Get_median:
+        metric: operation.get.latency.median
+        desc: Get operation median latency.
+
+      Replay_99th_percentile:
+        metric: operation.replay.latency.p99
+        desc: Replay operation 99th Percentile latency.
+      Replay_max:
+        metric: operation.replay.latency.max
+        desc: Replay operation max latency.
+      Replay_min:
+        metric: operation.replay.latency.min
+        desc: Replay operation minimum latency.
+      Replay_mean:
+        metric: operation.replay.latency.mean
+        desc: Replay operation mean latency.
+      Replay_median:
+        metric: operation.replay.latency.median
+        desc: Replay operation median latency.
+
+      Increment_99th_percentile:
+        metric: operation.increment.latency.p99
+        desc: Increment operation 99th Percentile latency.
+      Increment_max:
+        metric: operation.increment.latency.max
+        desc: Increment operation max latency.
+      Increment_min:
+        metric: operation.increment.latency.min
+        desc: Increment operation minimum latency.
+      Increment_mean:
+        metric: operation.increment.latency.mean
+        desc: Increment operation mean latency.
+      Increment_median:
+        metric: operation.increment.latency.median
+        desc: Increment operation median latency.
+
+  - bean: Hadoop:service=HBase,name=RegionServer,sub=IPC
+    prefix: hbase.region_server.
+    type: updowncounter
+    metricAttribute:
+      region_server: *hostname
+    mapping:
+      numOpenConnections:
+        metric: open_connection.count
+        unit: "{connection}"
+        desc: The number of open connections at the RPC layer.
+      numActiveHandler:
+        metric: active_handler.count
+        unit: "{handler}"
+        desc: The number of RPC handlers actively servicing requests.
+
+      numCallsInReplicationQueue:
+        metric: &metric queue.request.count
+        unit: &unit "{request}"
+        desc: &desc The number of currently enqueued requests.
+        metricAttribute:
+          state: const(replication)
+          region_server: *hostname
+      numCallsInGeneralQueue:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(user)
+          region_server: *hostname
+      numCallsInPriorityQueue:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(priority)
+          region_server: *hostname
+
+      authenticationSuccesses:
+        metric: &metric authentication.count
+        unit: &unit "{authentication request}"
+        desc: &desc Number of client connection authentication failures/successes.
+        metricAttribute:
+          state: const(successes)
+          region_server: *hostname
+      authenticationFailures:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(failures)
+          region_server: *hostname
+
+  - bean: Hadoop:service=HBase,name=JvmMetrics
+    prefix: hbase.region_server.gc.
+    unit: ms
+    type: counter
+    metricAttribute:
+      region_server: *hostname
+    mapping:
+      GcTimeMillis:
+        metric: time
+        desc: Time spent in garbage collection.
+      GcTimeMillisParNew:
+        metric: young_gen.time
+        desc: Time spent in garbage collection of the young generation.
+      GcTimeMillisConcurrentMarkSweep:
+        metric: old_gen.time
+        desc: Time spent in garbage collection of the old generation.
