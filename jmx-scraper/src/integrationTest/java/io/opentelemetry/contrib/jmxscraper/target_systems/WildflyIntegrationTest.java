@@ -24,6 +24,9 @@ import org.testcontainers.utility.MountableFile;
 
 public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int WILDFLY_SERVICE_PORT = 8080;
+  private static final int WILDFLY_MANAGEMENT_PORT = 9990;
+
   @SuppressWarnings("NonFinalStaticField")
   private static Path tempJbossClient = null;
 
@@ -53,14 +56,14 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                             // standalone with management (HTTP) interface enabled
                             .cmd(
                                 "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
-                            .expose(8080, 9990)
+                            .expose(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
                             .build()))
         .withCopyFileToContainer(
             MountableFile.forHostPath(appWarPath),
             "/opt/jboss/wildfly/standalone/deployments/testapp.war")
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(8080, 9990)
-        .waitingFor(Wait.forListeningPorts(8080, 9990));
+        .withExposedPorts(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
+        .waitingFor(Wait.forListeningPorts(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT));
   }
 
   @Override
@@ -90,7 +93,7 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
         .withCopyFileToContainer(MountableFile.forHostPath(tempJbossClient), "/jboss-client.jar")
         .withExtraJar("/jboss-client.jar")
         // Using jboss remote HTTP protocol provided in jboss-client.jar
-        .withServiceUrl("service:jmx:remote+http://targetsystem:9990")
+        .withServiceUrl("service:jmx:remote+http://targetsystem:" + WILDFLY_MANAGEMENT_PORT)
         // Admin user created when creating container
         // When scraper is running on same host as jboss/wildfly a local file challenge can be used
         // for authentication, but here we have to use valid credentials for remote access

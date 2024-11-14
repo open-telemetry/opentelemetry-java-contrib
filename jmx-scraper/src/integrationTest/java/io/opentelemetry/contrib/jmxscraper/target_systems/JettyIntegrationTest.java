@@ -18,6 +18,8 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class JettyIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int JETTY_PORT = 8080;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     GenericContainer<?> container =
@@ -39,8 +41,8 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
     container
         .withEnv("JAVA_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(8080, jmxPort)
-        .waitingFor(Wait.forListeningPorts(8080, jmxPort));
+        .withExposedPorts(JETTY_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(JETTY_PORT, jmxPort));
 
     return container;
   }

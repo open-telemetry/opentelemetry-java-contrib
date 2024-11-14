@@ -21,6 +21,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int CASSANDRA_PORT = 9042;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("cassandra:5.0.2")
@@ -30,8 +32,8 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                 // making cassandra startup faster for single node, from ~1min to ~15s
                 + " -Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0")
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(9042, jmxPort)
-        .waitingFor(Wait.forListeningPorts(9042, jmxPort));
+        .withExposedPorts(CASSANDRA_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(CASSANDRA_PORT, jmxPort));
   }
 
   @Override

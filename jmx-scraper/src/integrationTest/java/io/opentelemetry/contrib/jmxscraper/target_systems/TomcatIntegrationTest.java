@@ -17,6 +17,8 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int TOMCAT_PORT = 8080;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>(
@@ -32,8 +34,8 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             .build()))
         .withEnv("CATALINA_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(8080, jmxPort)
-        .waitingFor(Wait.forListeningPorts(8080, jmxPort));
+        .withExposedPorts(TOMCAT_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(TOMCAT_PORT, jmxPort));
   }
 
   @Override

@@ -17,6 +17,8 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int ACTIVEMQ_PORT = 61616;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>(
@@ -25,8 +27,8 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     builder -> builder.from("apache/activemq-classic:5.18.6").build()))
         .withEnv("JAVA_TOOL_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(61616, jmxPort)
-        .waitingFor(Wait.forListeningPorts(61616, jmxPort));
+        .withExposedPorts(ACTIVEMQ_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(ACTIVEMQ_PORT, jmxPort));
   }
 
   @Override
