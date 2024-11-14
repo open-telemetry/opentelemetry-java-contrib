@@ -44,15 +44,15 @@ rules:
         unit: "{request}"
         desc: The number of requests that have resulted in a 5xx response.
       bytesSent:
-        metric: network.io
-        unit: By
-        desc: "The number of bytes transmitted."
+        metric: &metric network.io
+        unit: &unit By
+        desc: &desc "The number of bytes transmitted."
         metricAttribute:
           state: const(out)
       bytesReceived:
-        metric: network.io
-        unit: By
-        desc: "The number of bytes transmitted."
+        metric: *metric
+        unit: *unit
+        desc: *desc
         metricAttribute:
           state: const(in)
 
@@ -63,15 +63,15 @@ rules:
     prefix: wildfly.jdbc.
     mapping:
       ActiveCount:
-        metric: connection.open
-        unit: "{connection}"
-        desc: The number of open jdbc connections.
+        metric: &metric connection.open
+        unit: &unit "{connection}"
+        desc: &desc The number of open jdbc connections.
         metricAttribute:
           state: const(active)
       IdleCount:
-        metric: connection.open
-        unit: "{connection}"
-        desc: The number of open jdbc connections.
+        metric: *metric
+        unit: *unit
+        desc: *desc
         metricAttribute:
           state: const(idle)
       WaitCount:
