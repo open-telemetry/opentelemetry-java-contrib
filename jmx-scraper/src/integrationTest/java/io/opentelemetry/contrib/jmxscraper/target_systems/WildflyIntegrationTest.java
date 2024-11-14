@@ -35,18 +35,18 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
     assertThat(appWarPath).isNotEmptyFile().isReadable();
 
     return new GenericContainer<>(
-        new ImageFromDockerfile()
-            .withDockerfileFromBuilder(
-                builder ->
-                    builder
-                        .from("quay.io/wildfly/wildfly:32.0.1.Final-jdk11")
-                        // user/pwd needed for remote JMX access
-                        .run("/opt/jboss/wildfly/bin/add-user.sh user password --silent")
-                        // standalone with management (HTTP) interface enabled
-                        .cmd(
-                            "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
-                        .expose(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
-                        .build()))
+            new ImageFromDockerfile()
+                .withDockerfileFromBuilder(
+                    builder ->
+                        builder
+                            .from("quay.io/wildfly/wildfly:32.0.1.Final-jdk11")
+                            // user/pwd needed for remote JMX access
+                            .run("/opt/jboss/wildfly/bin/add-user.sh user password --silent")
+                            // standalone with management (HTTP) interface enabled
+                            .cmd(
+                                "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
+                            .expose(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
+                            .build()))
         .withCopyFileToContainer(
             MountableFile.forHostPath(appWarPath),
             "/opt/jboss/wildfly/standalone/deployments/testapp.war")
