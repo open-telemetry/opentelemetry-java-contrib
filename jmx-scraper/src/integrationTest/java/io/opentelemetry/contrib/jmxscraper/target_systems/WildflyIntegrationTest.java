@@ -153,7 +153,7 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
                 metric,
                 "wildfly.network.io",
                 "The number of bytes transmitted.",
-                "by",
+                "By",
                 attrs ->
                     attrs.containsOnly(
                         entry("server", "default-server"),

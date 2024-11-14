@@ -81,7 +81,7 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "wildfly.network.io",
                 "The number of bytes transmitted.",
-                "by",
+                "By",
                 attrs ->
                     attrs.containsOnly(
                         entry("server", "default-server"),
@@ -93,7 +93,6 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                         entry("listener", "default"),
                         entry("state", "out"))),
 
-        // TODO from here:
         metric ->
             assertSumWithAttributes(
                 metric,
