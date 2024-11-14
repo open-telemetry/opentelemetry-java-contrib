@@ -18,6 +18,7 @@ import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.Testcontainers;
@@ -102,7 +104,7 @@ public abstract class TargetSystemIntegrationTest {
   }
 
   @Test
-  void endToEndTest() {
+  void endToEndTest(@TempDir Path tmpDir) {
 
     target =
         createTargetContainer(JMX_PORT)
@@ -117,7 +119,7 @@ public abstract class TargetSystemIntegrationTest {
             .withNetwork(network)
             .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
 
-    scraper = customizeScraperContainer(scraper, target);
+    scraper = customizeScraperContainer(scraper, target, tmpDir);
     scraper.start();
 
     verifyMetrics();
@@ -161,7 +163,7 @@ public abstract class TargetSystemIntegrationTest {
   protected abstract void verifyMetrics();
 
   protected JmxScraperContainer customizeScraperContainer(
-      JmxScraperContainer scraper, GenericContainer<?> target) {
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper;
   }
 

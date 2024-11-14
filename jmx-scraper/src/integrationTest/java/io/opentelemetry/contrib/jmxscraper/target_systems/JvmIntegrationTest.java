@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertion
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import io.opentelemetry.contrib.jmxscraper.TestAppContainer;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import org.testcontainers.containers.GenericContainer;
@@ -30,7 +31,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected JmxScraperContainer customizeScraperContainer(
-      JmxScraperContainer scraper, GenericContainer<?> target) {
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper.withTargetSystem("jvm");
   }
 

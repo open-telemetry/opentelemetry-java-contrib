@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertion
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributesMultiplePoints;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import java.nio.file.Path;
 import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -49,7 +50,7 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected JmxScraperContainer customizeScraperContainer(
-      JmxScraperContainer scraper, GenericContainer<?> target) {
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper.withTargetSystem("jetty");
   }
 

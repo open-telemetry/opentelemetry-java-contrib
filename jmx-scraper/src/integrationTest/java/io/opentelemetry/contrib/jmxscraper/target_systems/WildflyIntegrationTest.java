@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import org.junit.jupiter.api.AfterAll;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -27,16 +26,6 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
   private static final int WILDFLY_SERVICE_PORT = 8080;
   private static final int WILDFLY_MANAGEMENT_PORT = 9990;
 
-  @SuppressWarnings("NonFinalStaticField")
-  private static Path tempJbossClient = null;
-
-  @AfterAll
-  public static void cleanup() throws IOException {
-    if (tempJbossClient != null) {
-      Files.delete(tempJbossClient);
-    }
-  }
-
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     // JMX port is ignored here as we are using HTTP management interface
@@ -46,18 +35,18 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
     assertThat(appWarPath).isNotEmptyFile().isReadable();
 
     return new GenericContainer<>(
-            new ImageFromDockerfile()
-                .withDockerfileFromBuilder(
-                    builder ->
-                        builder
-                            .from("quay.io/wildfly/wildfly:32.0.1.Final-jdk11")
-                            // user/pwd needed for remote JMX access
-                            .run("/opt/jboss/wildfly/bin/add-user.sh user password --silent")
-                            // standalone with management (HTTP) interface enabled
-                            .cmd(
-                                "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
-                            .expose(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
-                            .build()))
+        new ImageFromDockerfile()
+            .withDockerfileFromBuilder(
+                builder ->
+                    builder
+                        .from("quay.io/wildfly/wildfly:32.0.1.Final-jdk11")
+                        // user/pwd needed for remote JMX access
+                        .run("/opt/jboss/wildfly/bin/add-user.sh user password --silent")
+                        // standalone with management (HTTP) interface enabled
+                        .cmd(
+                            "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0")
+                        .expose(WILDFLY_SERVICE_PORT, WILDFLY_MANAGEMENT_PORT)
+                        .build()))
         .withCopyFileToContainer(
             MountableFile.forHostPath(appWarPath),
             "/opt/jboss/wildfly/standalone/deployments/testapp.war")
@@ -74,17 +63,16 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected JmxScraperContainer customizeScraperContainer(
-      JmxScraperContainer scraper, GenericContainer<?> target) {
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
 
-    if (tempJbossClient == null) {
-      // copy jboss-client.jar from jboss/wildfly container
-      try {
-        tempJbossClient = Files.createTempFile("jboss_", "_test").toAbsolutePath();
-        target.copyFileFromContainer(
-            "/opt/jboss/wildfly/bin/client/jboss-client.jar", tempJbossClient.toString());
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
-      }
+    Path tempJbossClient;
+    // copy jboss-client.jar from jboss/wildfly container
+    try {
+      tempJbossClient = Files.createTempFile(tempDir, "jboss_", "_test").toAbsolutePath();
+      target.copyFileFromContainer(
+          "/opt/jboss/wildfly/bin/client/jboss-client.jar", tempJbossClient.toString());
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
 
     return scraper
