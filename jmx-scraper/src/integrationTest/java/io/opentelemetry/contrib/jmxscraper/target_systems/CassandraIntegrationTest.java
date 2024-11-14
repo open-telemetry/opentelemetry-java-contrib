@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertion
 import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +22,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int CASSANDRA_PORT = 9042;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("cassandra:5.0.2")
@@ -30,11 +33,13 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                 // making cassandra startup faster for single node, from ~1min to ~15s
                 + " -Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0")
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Startup complete.*", 1));
+        .withExposedPorts(CASSANDRA_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(CASSANDRA_PORT, jmxPort));
   }
 
   @Override
-  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+  protected JmxScraperContainer customizeScraperContainer(
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper.withTargetSystem("cassandra");
   }
 

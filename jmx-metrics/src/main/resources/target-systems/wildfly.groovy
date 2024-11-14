@@ -15,46 +15,50 @@
  */
 
 def beanWildflyDeployment = otel.mbeans("jboss.as:deployment=*,subsystem=undertow")
-otel.instrument(beanWildflyDeployment, "wildfly.session.count", "The number of sessions created.", "{sessions}",
+// no test covers sessions
+otel.instrument(beanWildflyDeployment, "wildfly.session.count", "The number of sessions created.", "{session}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "sessionsCreated", otel.&longCounterCallback)
-otel.instrument(beanWildflyDeployment, "wildfly.session.active", "The number of currently active sessions.", "{sessions}",
+
+otel.instrument(beanWildflyDeployment, "wildfly.session.active", "The number of currently active sessions.", "{session}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "activeSessions", otel.&longUpDownCounterCallback)
-otel.instrument(beanWildflyDeployment, "wildfly.session.expired", "The number of sessions that have expired.", "{sessions}",
+otel.instrument(beanWildflyDeployment, "wildfly.session.expired", "The number of sessions that have expired.", "{session}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "expiredSessions", otel.&longCounterCallback)
-otel.instrument(beanWildflyDeployment, "wildfly.session.rejected", "The number of sessions that have been rejected.", "{sessions}",
+otel.instrument(beanWildflyDeployment, "wildfly.session.rejected", "The number of sessions that have been rejected.", "{session}",
   ["deployment": { mbean -> mbean.name().getKeyProperty("deployment")}],
   "rejectedSessions", otel.&longCounterCallback)
 
+
+
 def beanWildflyHttpListener = otel.mbeans("jboss.as:subsystem=undertow,server=*,http-listener=*")
-otel.instrument(beanWildflyHttpListener, "wildfly.request.count", "The number of requests received.", "{requests}",
+otel.instrument(beanWildflyHttpListener, "wildfly.request.count", "The number of requests received.", "{request}",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "requestCount", otel.&longCounterCallback)
 otel.instrument(beanWildflyHttpListener, "wildfly.request.time", "The total amount of time spent on requests.", "ns",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "processingTime", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpListener, "wildfly.request.server_error", "The number of requests that have resulted in a 5xx response.", "{requests}",
+otel.instrument(beanWildflyHttpListener, "wildfly.request.server_error", "The number of requests that have resulted in a 5xx response.", "{request}",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "errorCount", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of bytes transmitted.", "by",
+otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of bytes transmitted.", "By",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   ["bytesSent":["state":{"out"}], "bytesReceived":["state":{"in"}]],
   otel.&longCounterCallback)
 
 def beanWildflyDataSource = otel.mbeans("jboss.as:subsystem=datasources,data-source=*,statistics=pool")
-otel.instrument(beanWildflyDataSource, "wildfly.jdbc.connection.open", "The number of open jdbc connections.", "{connections}",
+otel.instrument(beanWildflyDataSource, "wildfly.jdbc.connection.open", "The number of open jdbc connections.", "{connection}",
   ["data_source": { mbean -> mbean.name().getKeyProperty("data-source")}],
   ["ActiveCount":["state":{"active"}], "IdleCount":["state":{"idle"}]],
   otel.&longUpDownCounterCallback)
-otel.instrument(beanWildflyDataSource, "wildfly.jdbc.request.wait", "The number of jdbc connections that had to wait before opening.", "{requests}",
+otel.instrument(beanWildflyDataSource, "wildfly.jdbc.request.wait", "The number of jdbc connections that had to wait before opening.", "{request}",
   ["data_source": { mbean -> mbean.name().getKeyProperty("data-source")}],
   "WaitCount", otel.&longCounterCallback)
 
 def beanWildflyTransaction = otel.mbean("jboss.as:subsystem=transactions")
-otel.instrument(beanWildflyTransaction, "wildfly.jdbc.transaction.count", "The number of transactions created.", "{transactions}",
+otel.instrument(beanWildflyTransaction, "wildfly.jdbc.transaction.count", "The number of transactions created.", "{transaction}",
   "numberOfTransactions", otel.&longCounterCallback)
-otel.instrument(beanWildflyTransaction, "wildfly.jdbc.rollback.count", "The number of transactions rolled back.", "{transactions}",
+otel.instrument(beanWildflyTransaction, "wildfly.jdbc.rollback.count", "The number of transactions rolled back.", "{transaction}",
   ["numberOfSystemRollbacks":["cause":{"system"}], "numberOfResourceRollbacks":["cause":{"resource"}], "numberOfApplicationRollbacks":["cause":{"application"}]],
   otel.&longCounterCallback)

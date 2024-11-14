@@ -31,7 +31,7 @@ public class JmxConnectorBuilder {
   private static final Logger logger = Logger.getLogger(JmxConnectorBuilder.class.getName());
 
   private final JMXServiceURL url;
-  @Nullable private String userName;
+  @Nullable private String user;
   @Nullable private String password;
   @Nullable private String profile;
   @Nullable private String realm;
@@ -50,8 +50,13 @@ public class JmxConnectorBuilder {
   }
 
   @CanIgnoreReturnValue
-  public JmxConnectorBuilder userCredentials(String userName, String password) {
-    this.userName = userName;
+  public JmxConnectorBuilder withUser(String user) {
+    this.user = user;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public JmxConnectorBuilder withPassword(String password) {
     this.password = password;
     return this;
   }
@@ -97,8 +102,8 @@ public class JmxConnectorBuilder {
 
   private Map<String, Object> buildEnv() {
     Map<String, Object> env = new HashMap<>();
-    if (userName != null && password != null) {
-      env.put(JMXConnector.CREDENTIALS, new String[] {userName, password});
+    if (user != null && password != null) {
+      env.put(JMXConnector.CREDENTIALS, new String[] {user, password});
     }
 
     if (profile != null) {
@@ -118,7 +123,7 @@ public class JmxConnectorBuilder {
               callbacks -> {
                 for (Callback callback : callbacks) {
                   if (callback instanceof NameCallback) {
-                    ((NameCallback) callback).setName(userName);
+                    ((NameCallback) callback).setName(user);
                   } else if (callback instanceof PasswordCallback) {
                     char[] pwd = password == null ? null : password.toCharArray();
                     ((PasswordCallback) callback).setPassword(pwd);

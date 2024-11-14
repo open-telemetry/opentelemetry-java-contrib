@@ -21,7 +21,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.shaded.com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.testcontainers.utility.MountableFile;
 
-/** Test container that allows to execute {@link TestApp} in an isolated container */
+/** Test container that allows to execute TestApp in an isolated container */
 public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   private final Map<String, String> properties;
@@ -38,8 +38,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     this.withCopyFileToContainer(MountableFile.forHostPath(appJar), "/app.jar")
         .waitingFor(
-            Wait.forLogMessage(TestApp.APP_STARTED_MSG + "\\n", 1)
-                .withStartupTimeout(Duration.ofSeconds(5)))
+            Wait.forLogMessage("app started\\n", 1).withStartupTimeout(Duration.ofSeconds(5)))
         .withCommand("java", "-jar", "/app.jar");
   }
 

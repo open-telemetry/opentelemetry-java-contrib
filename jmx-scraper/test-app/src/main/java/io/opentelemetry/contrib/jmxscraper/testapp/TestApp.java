@@ -3,17 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxscraper;
+package io.opentelemetry.contrib.jmxscraper.testapp;
 
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-@SuppressWarnings("all")
-public class TestApp implements TestAppMXBean {
-
-  public static final String APP_STARTED_MSG = "app started";
-  public static final String OBJECT_NAME = "io.opentelemetry.test:name=TestApp";
+@SuppressWarnings("all") // for busy wait + stdout
+public class TestApp implements TestAppMxBean {
 
   private volatile boolean running;
 
@@ -34,13 +31,13 @@ public class TestApp implements TestAppMXBean {
     TestApp app = new TestApp();
     MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     try {
-      ObjectName objectName = new ObjectName(OBJECT_NAME);
+      ObjectName objectName = new ObjectName("io.opentelemetry.test:name=TestApp");
       mbs.registerMBean(app, objectName);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     app.running = true;
-    System.out.println(APP_STARTED_MSG);
+    System.out.println("app started");
     return app;
   }
 

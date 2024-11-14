@@ -87,7 +87,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.hasSum()).describedAs("sum expected").isTrue();
     assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }

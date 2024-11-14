@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxscraper;
+package io.opentelemetry.contrib.jmxscraper.testapp;
 
+import javax.management.MXBean;
+
+@MXBean
 @SuppressWarnings("unused")
-public interface TestAppMXBean {
+public interface TestAppMxBean {
 
   int getIntValue();
 
