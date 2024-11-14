@@ -20,9 +20,13 @@ Minimal configuration required
 
 Configuration can be provided through:
 
-- command line arguments: `java -jar scraper.jar --config otel.jmx.target.system=...`
-- system properties `java -jar scraper.jar`
-- java properties file: `java -jar config.properties`
+- command line arguments:
+  `java -jar scraper.jar --config otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi otel.jmx.target.system=tomcat`.
+- command line arguments JVM system properties:
+  `java -Dotel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi -Dotel.jmx.target.system=tomcat -jar scraper.jar`.
+- java properties file: `java -jar scraper.jar -config config.properties`.
+- stdin: `java -jar scraper.jar -config -` where `otel.jmx.target.system=tomcat` and
+  `otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi` is written to stdin.
 
 TODO: update this once autoconfiguration is supported
 
