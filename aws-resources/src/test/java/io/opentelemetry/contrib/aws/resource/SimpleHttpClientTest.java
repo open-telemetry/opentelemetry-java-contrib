@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.linecorp.armeria.common.AggregatedHttpRequest;
 import com.linecorp.armeria.common.HttpResponse;
+import com.linecorp.armeria.common.TlsKeyPair;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.testing.junit5.server.SelfSignedCertificateExtension;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
@@ -68,7 +69,7 @@ class SimpleHttpClientTest {
         new ServerExtension() {
           @Override
           protected void configure(ServerBuilder sb) {
-            sb.tls(certificate.certificateFile(), certificate.privateKeyFile());
+            sb.tls(TlsKeyPair.of(certificate.privateKeyFile(), certificate.certificateFile()));
 
             sb.service("/", (ctx, req) -> HttpResponse.of("Thanks for trusting me"));
           }
