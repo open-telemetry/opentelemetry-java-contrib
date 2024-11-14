@@ -92,7 +92,6 @@ class WildflyIntegrationTest extends AbstractIntegrationTest {
                         entry("server", "default-server"),
                         entry("listener", "default"),
                         entry("state", "out"))),
-
         metric ->
             assertSumWithAttributes(
                 metric,
