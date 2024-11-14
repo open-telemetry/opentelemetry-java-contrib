@@ -42,7 +42,7 @@ otel.instrument(beanWildflyHttpListener, "wildfly.request.time", "The total amou
 otel.instrument(beanWildflyHttpListener, "wildfly.request.server_error", "The number of requests that have resulted in a 5xx response.", "{request}",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   "errorCount", otel.&longCounterCallback)
-otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of bytes transmitted.", "by",
+otel.instrument(beanWildflyHttpListener, "wildfly.network.io", "The number of bytes transmitted.", "By",
   ["server": { mbean -> mbean.name().getKeyProperty("server")}, "listener": { mbean -> mbean.name().getKeyProperty("http-listener")}],
   ["bytesSent":["state":{"out"}], "bytesReceived":["state":{"in"}]],
   otel.&longCounterCallback)

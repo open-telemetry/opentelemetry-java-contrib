@@ -45,13 +45,13 @@ rules:
         desc: The number of requests that have resulted in a 5xx response.
       bytesSent:
         metric: network.io
-        unit: "by"
+        unit: By
         desc: "The number of bytes transmitted."
         metricAttribute:
           state: const(out)
       bytesReceived:
         metric: network.io
-        unit: "by"
+        unit: By
         desc: "The number of bytes transmitted."
         metricAttribute:
           state: const(in)
