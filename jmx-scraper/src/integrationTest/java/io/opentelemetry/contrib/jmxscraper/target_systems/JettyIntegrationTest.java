@@ -11,12 +11,15 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertion
 import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributesMultiplePoints;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import java.nio.file.Path;
 import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class JettyIntegrationTest extends TargetSystemIntegrationTest {
+
+  private static final int JETTY_PORT = 8080;
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
@@ -39,13 +42,15 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
     container
         .withEnv("JAVA_OPTIONS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .waitingFor(Wait.forLogMessage(".*Started Server.*", 1));
+        .withExposedPorts(JETTY_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(JETTY_PORT, jmxPort));
 
     return container;
   }
 
   @Override
-  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+  protected JmxScraperContainer customizeScraperContainer(
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper.withTargetSystem("jetty");
   }
 

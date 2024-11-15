@@ -12,7 +12,7 @@ val otelInstrumentationVersion = "2.9.0-alpha"
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.18.1",
   "com.google.guava:guava-bom:33.3.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.30.1",
+  "com.linecorp.armeria:armeria-bom:1.31.0",
   "org.junit:junit-bom:5.11.3",
   "io.grpc:grpc-bom:1.68.1",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
