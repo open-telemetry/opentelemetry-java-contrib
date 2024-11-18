@@ -28,7 +28,7 @@ logger_provider:
     - event_to_span_event_bridge: {}
 ```
 
-// TODO(jack-berg): remove "{}" after merging / rle https://github.com/open-telemetry/opentelemetry-java/pull/6891/files
+// TODO(jack-berg): remove "{}" after releasing [opentelemetry-java#6891](https://github.com/open-telemetry/opentelemetry-java/pull/6891/files)
 
 ## Component owners
 
