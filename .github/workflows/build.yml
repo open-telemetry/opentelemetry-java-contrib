@@ -153,7 +153,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
 
   required-status-check:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && always()
     needs:
       - build
       - integration-test
