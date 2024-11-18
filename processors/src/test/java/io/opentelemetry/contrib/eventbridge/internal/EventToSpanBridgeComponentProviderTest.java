@@ -18,7 +18,7 @@ class EventToSpanBridgeComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 0.1\n"
+        "file_format: 0.3\n"
             + "logger_provider:\n"
             + "  processors:\n"
             // TODO(jack-berg): remove "{}" after releasing
