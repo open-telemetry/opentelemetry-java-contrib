@@ -13,5 +13,13 @@ java {
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+
+  // For EventToSpanEventBridge
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
+  implementation("com.fasterxml.jackson.core:jackson-core")
+
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 }
