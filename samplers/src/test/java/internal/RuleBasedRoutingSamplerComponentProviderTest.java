@@ -38,7 +38,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 0.1\n"
+        "file_format: 0.3\n"
             + "tracer_provider:\n"
             + "  sampler:\n"
             + "    parent_based:\n"
