@@ -12,52 +12,51 @@ rules:
         unit: by
         desc: The current used capacity across all data nodes reporting to the name node.
 #      CapacityTotal:
-#        metric: capacity.CapacityTotal
+#        metric: capacity.limit
 #        type: updowncounter
-#        unit: By
+#        unit: by
+#        desc: The total capacity allotted to data nodes reporting to the name node.
 #      BlocksTotal:
-#        metric: block.BlocksTotal
+#        metric: block.count
 #        type: updowncounter
 #        unit: "{blocks}"
-#        desc: Current number of allocated blocks in the system
+#        desc: The total number of blocks on the name node.
 #      MissingBlocks:
-#        metric: block.MissingBlocks
+#        metric: block.missing
 #        type: updowncounter
 #        unit: "{blocks}"
-#        desc: Current number of missing blocks
+#        desc: The number of blocks reported as missing to the name node.
 #      CorruptBlocks:
-#        metric: block.CorruptBlocks
+#        metric: block.corrupt
 #        type: updowncounter
 #        unit: "{blocks}"
-#        desc: Current number of blocks with corrupt replicas
+#        desc: The number of blocks reported as corrupt to the name node.
 #      VolumeFailuresTotal:
-#        metric: volume.VolumeFailuresTotal
+#        metric: volume.failed
 #        type: updowncounter
 #        unit: "{volumes}"
-#        desc: Total number of volume failures across all data nodes
-#        metricAttribute:
-#          direction: const(sent)
+#        desc: The number of failed volumes reported to the name node.
 #      FilesTotal:
-#        metric: file.FilesTotal
+#        metric: file.count
 #        type: updowncounter
 #        unit: "{files}"
-#        desc: Current number of files and directories
+#        desc: The total number of files being tracked by the name node.
 #      TotalLoad:
-#        metric: file.TotalLoad
+#        metric: file.load
 #        type: updowncounter
 #        unit: "{operations}"
-#        desc: Current number of connections
+#        desc: The current number of concurrent file accesses.
 #      NumLiveDataNodes:
-#        metric: datenode.Count
+#        metric: data_node.count
 #        type: updowncounter
 #        unit: "{nodes}"
-#        desc: The Number of data nodes
+#        desc: The number of live data nodes reporting to the name node.
 #        metricAttribute:
 #          state: const(live)
 #      NumDeadDataNodes:
-#        metric: datenode.Count
+#        metric: data_node.count
 #        type: updowncounter
 #        unit: "{nodes}"
-#        desc: The Number of data nodes
+#        desc: The number of data nodes reporting to the name node.
 #        metricAttribute:
 #          state: const(dead)
