@@ -1,14 +1,10 @@
 plugins {
+  id("otel.java-conventions")
+
   application
 }
 
 description = "JMX metrics scraper - test application"
-
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(8)
-  }
-}
 
 tasks {
   jar {
