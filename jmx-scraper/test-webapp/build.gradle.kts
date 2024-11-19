@@ -9,7 +9,7 @@ dependencies {
 }
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(8)
-  }
+  // keeping java 8 compatibility to allow running this sample app in most containers
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
 }
