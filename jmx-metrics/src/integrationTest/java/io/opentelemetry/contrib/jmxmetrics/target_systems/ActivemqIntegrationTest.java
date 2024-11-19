@@ -43,7 +43,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.consumer.count",
                 "The number of consumers currently reading from the broker.",
-                "consumers",
+                "{consumer}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -53,7 +53,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.producer.count",
                 "The number of producers currently attached to the broker.",
-                "producers",
+                "{producer}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -63,7 +63,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.connection.count",
                 "The total number of current connections.",
-                "connections",
+                "{connection}",
                 /* isMonotonic= */ false),
         metric ->
             assertGaugeWithAttributes(
@@ -92,7 +92,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.current",
                 "The current number of messages waiting to be consumed.",
-                "messages",
+                "{message}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -102,7 +102,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.current",
                 "The current number of messages waiting to be consumed.",
-                "messages",
+                "{message}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -112,7 +112,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.expired",
                 "The total number of messages not delivered because they expired.",
-                "messages",
+                "{message}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -122,7 +122,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.enqueued",
                 "The total number of messages received by the broker.",
-                "messages",
+                "{message}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
@@ -132,7 +132,7 @@ class ActivemqIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "activemq.message.dequeued",
                 "The total number of messages delivered to consumers.",
-                "messages",
+                "{message}",
                 attrs ->
                     attrs.containsOnly(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
