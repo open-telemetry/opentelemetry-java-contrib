@@ -84,6 +84,13 @@
       "matchPackagePrefixes": ["org.openjdk.jmc"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      // pinned version for compatibility
+      "matchFileNames": ["jmx-scraper/test-webapp/**"],
+      "matchPackagePrefixes": ["jakarta.servlet:"],
+      "matchCurrentVersion": "5.0.0",
+      "enabled": false
     }
   ]
 }
