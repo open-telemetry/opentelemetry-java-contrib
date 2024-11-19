@@ -20,15 +20,14 @@ For details of how the event log record is translated to span event, see [EventT
 `EventToSpanEventBridge` can be referenced in [declarative configuration](https://opentelemetry.io/docs/languages/java/configuration/#declarative-configuration) as follows:
 
 ```yaml
-// Configure tracer provider as usual, omitted for brevity
+# Configure tracer provider as usual, omitted for brevity
 tracer_provider: ...
 
 logger_provider:
   processors:
-    - event_to_span_event_bridge: {}
+      # TODO(jack-berg): remove "{}" after releasing [opentelemetry-java#6891](https://github.com/open-telemetry/opentelemetry-java/pull/6891/files)
+      - event_to_span_event_bridge: {}
 ```
-
-// TODO(jack-berg): remove "{}" after releasing [opentelemetry-java#6891](https://github.com/open-telemetry/opentelemetry-java/pull/6891/files)
 
 ## Component owners
 

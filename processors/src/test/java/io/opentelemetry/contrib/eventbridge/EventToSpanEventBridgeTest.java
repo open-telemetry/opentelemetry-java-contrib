@@ -14,7 +14,10 @@ import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.incubator.events.EventLogger;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
@@ -22,6 +25,7 @@ import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.internal.SdkEventLoggerProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.testing.time.TestClock;
+import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
@@ -77,6 +81,8 @@ class EventToSpanEventBridgeTest {
   void withRecordingSpan_BridgesEvent() {
     testClock.setTime(Instant.ofEpochMilli(1));
 
+    // The test tracerProvider has a sampler which records and samples SERVER spans, and drops all
+    // others. We create a recording span by setting kind to SERVER.
     Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.SERVER).startSpan();
     try (Scope unused = span.makeCurrent()) {
       eventLogger
@@ -123,23 +129,9 @@ class EventToSpanEventBridgeTest {
   }
 
   @Test
-  void noSpan_doesNotBridgeEvent() {
-    eventLogger
-        .builder("my.event-name")
-        .setTimestamp(100, TimeUnit.NANOSECONDS)
-        .setSeverity(Severity.DEBUG)
-        .put("foo", "bar")
-        .put("number", 1)
-        .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
-        .setAttributes(Attributes.builder().put("color", "red").build())
-        .setAttributes(Attributes.builder().put("shape", "square").build())
-        .emit();
-
-    assertThat(spanExporter.getFinishedSpanItems()).isEmpty();
-  }
-
-  @Test
   void nonRecordingSpan_doesNotBridgeEvent() {
+    // The test tracerProvider has a sampler which records and samples server spans, and drops all
+    // others. We create a non-recording span by setting kind to INTERNAL.
     Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.INTERNAL).startSpan();
     try (Scope unused = span.makeCurrent()) {
       eventLogger
@@ -155,6 +147,56 @@ class EventToSpanEventBridgeTest {
     } finally {
       span.end();
     }
+
+    assertThat(spanExporter.getFinishedSpanItems())
+        .allSatisfy(spanData -> assertThat(spanData.getEvents()).isEmpty());
+  }
+
+  @Test
+  void differentSpanContext_doesNotBridgeEvent() {
+    // The test tracerProvider has a sampler which records and samples SERVER spans, and drops all
+    // others. We create a recording span by setting kind to SERVER.
+    Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.SERVER).startSpan();
+    try (Scope unused = span.makeCurrent()) {
+      eventLogger
+          .builder("my.event-name")
+          // Manually override the context
+          .setContext(
+              Span.wrap(
+                      SpanContext.create(
+                          IdGenerator.random().generateTraceId(),
+                          IdGenerator.random().generateSpanId(),
+                          TraceFlags.getDefault(),
+                          TraceState.getDefault()))
+                  .storeInContext(Context.current()))
+          .setTimestamp(100, TimeUnit.NANOSECONDS)
+          .setSeverity(Severity.DEBUG)
+          .put("foo", "bar")
+          .put("number", 1)
+          .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
+          .setAttributes(Attributes.builder().put("color", "red").build())
+          .setAttributes(Attributes.builder().put("shape", "square").build())
+          .emit();
+    } finally {
+      span.end();
+    }
+
+    assertThat(spanExporter.getFinishedSpanItems())
+        .allSatisfy(spanData -> assertThat(spanData.getEvents()).isEmpty());
+  }
+
+  @Test
+  void noSpan_doesNotBridgeEvent() {
+    eventLogger
+        .builder("my.event-name")
+        .setTimestamp(100, TimeUnit.NANOSECONDS)
+        .setSeverity(Severity.DEBUG)
+        .put("foo", "bar")
+        .put("number", 1)
+        .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
+        .setAttributes(Attributes.builder().put("color", "red").build())
+        .setAttributes(Attributes.builder().put("shape", "square").build())
+        .emit();
 
     assertThat(spanExporter.getFinishedSpanItems()).isEmpty();
   }
