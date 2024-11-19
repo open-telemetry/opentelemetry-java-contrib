@@ -431,7 +431,7 @@ public class CallTree implements Recyclable {
       @Nullable Span parentSpan,
       TraceContext parentContext,
       SpanAnchoredClock clock,
-      BiConsumer<SpanBuilder, SpanContext> normalSpanParentOverride,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder,
       Tracer tracer) {
     int createdSpans = 0;
@@ -443,14 +443,7 @@ public class CallTree implements Recyclable {
     if (!isPillar() || isLeaf()) {
       createdSpans++;
       span =
-          asSpan(
-              root,
-              parentSpan,
-              parentContext,
-              tracer,
-              clock,
-              normalSpanParentOverride,
-              tempBuilder);
+          asSpan(root, parentSpan, parentContext, tracer, clock, spanParentOverride, tempBuilder);
       this.isSpan = true;
     }
     List<CallTree> children = getChildren();
@@ -463,7 +456,7 @@ public class CallTree implements Recyclable {
                   span != null ? span : parentSpan,
                   parentContext,
                   clock,
-                  normalSpanParentOverride,
+                  spanParentOverride,
                   tempBuilder,
                   tracer);
     }
@@ -476,7 +469,7 @@ public class CallTree implements Recyclable {
       TraceContext parentContext,
       Tracer tracer,
       SpanAnchoredClock clock,
-      BiConsumer<SpanBuilder, SpanContext> normalSpanParentOverride,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder) {
 
     Context parentOtelCtx;
@@ -512,7 +505,7 @@ public class CallTree implements Recyclable {
         spanBuilder,
         Span.fromContext(parentOtelCtx).getSpanContext(),
         parentContext,
-        normalSpanParentOverride,
+        spanParentOverride,
         tempBuilder);
 
     // we're not interested in the very bottom of the stack which contains things like accepting and
@@ -536,7 +529,7 @@ public class CallTree implements Recyclable {
       SpanBuilder span,
       SpanContext parentContext,
       TraceContext nonInferredParent,
-      BiConsumer<SpanBuilder, SpanContext> normalSpanParentOverride,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder) {
     if (childIds == null || childIds.isEmpty()) {
       return;
@@ -553,7 +546,7 @@ public class CallTree implements Recyclable {
                 tempBuilder.toString(),
                 parentContext.getTraceFlags(),
                 parentContext.getTraceState());
-        normalSpanParentOverride.accept(span, childSpanContext);
+        spanParentOverride.accept(span, childSpanContext);
       }
     }
   }
