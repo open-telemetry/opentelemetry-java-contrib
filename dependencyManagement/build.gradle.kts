@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
-  "io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha",
+  "io.opentelemetry.proto:opentelemetry-proto:1.3.2-alpha",
   // these two constraints can be removed once the opentelemetry-instrumentation-bom-alpha
   // is updated to contain the latest version of opentelemetry-semconv
   "io.opentelemetry.semconv:opentelemetry-semconv:${semConvVersion}",
