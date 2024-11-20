@@ -85,6 +85,13 @@
       "matchPackagePrefixes": ["org.openjdk.jmc"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      // pinned version for compatibility
+      "matchFileNames": ["jmx-scraper/test-webapp/build.gradle.kts"],
+      "matchPackagePrefixes": ["jakarta.servlet:"],
+      "matchCurrentVersion": "5.0.0",
+      "enabled": false
     }
   ]
 }
