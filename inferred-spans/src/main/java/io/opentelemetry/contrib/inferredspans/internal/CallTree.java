@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.agrona.collections.LongHashSet;
@@ -50,8 +51,11 @@ public class CallTree implements Recyclable {
 
   private static final int INITIAL_CHILD_SIZE = 2;
 
-  private static final Attributes CHILD_LINK_ATTRIBUTES =
+  public static final Attributes CHILD_LINK_ATTRIBUTES =
       Attributes.builder().put(LINK_IS_CHILD, true).build();
+
+  public static final BiConsumer<SpanBuilder, SpanContext> DEFAULT_PARENT_OVERRIDE =
+      (inferredSpan, child) -> inferredSpan.addLink(child, CHILD_LINK_ATTRIBUTES);
 
   @Nullable private CallTree parent;
   protected int count;
@@ -427,6 +431,7 @@ public class CallTree implements Recyclable {
       @Nullable Span parentSpan,
       TraceContext parentContext,
       SpanAnchoredClock clock,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder,
       Tracer tracer) {
     int createdSpans = 0;
@@ -437,7 +442,8 @@ public class CallTree implements Recyclable {
     Span span = null;
     if (!isPillar() || isLeaf()) {
       createdSpans++;
-      span = asSpan(root, parentSpan, parentContext, tracer, clock, tempBuilder);
+      span =
+          asSpan(root, parentSpan, parentContext, tracer, clock, spanParentOverride, tempBuilder);
       this.isSpan = true;
     }
     List<CallTree> children = getChildren();
@@ -450,6 +456,7 @@ public class CallTree implements Recyclable {
                   span != null ? span : parentSpan,
                   parentContext,
                   clock,
+                  spanParentOverride,
                   tempBuilder,
                   tracer);
     }
@@ -462,6 +469,7 @@ public class CallTree implements Recyclable {
       TraceContext parentContext,
       Tracer tracer,
       SpanAnchoredClock clock,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder) {
 
     Context parentOtelCtx;
@@ -494,7 +502,11 @@ public class CallTree implements Recyclable {
                 clock.toEpochNanos(parentContext.getClockAnchor(), this.start),
                 TimeUnit.NANOSECONDS);
     insertChildIdLinks(
-        spanBuilder, Span.fromContext(parentOtelCtx).getSpanContext(), parentContext, tempBuilder);
+        spanBuilder,
+        Span.fromContext(parentOtelCtx).getSpanContext(),
+        parentContext,
+        spanParentOverride,
+        tempBuilder);
 
     // we're not interested in the very bottom of the stack which contains things like accepting and
     // handling connections
@@ -517,6 +529,7 @@ public class CallTree implements Recyclable {
       SpanBuilder span,
       SpanContext parentContext,
       TraceContext nonInferredParent,
+      BiConsumer<SpanBuilder, SpanContext> spanParentOverride,
       StringBuilder tempBuilder) {
     if (childIds == null || childIds.isEmpty()) {
       return;
@@ -527,13 +540,13 @@ public class CallTree implements Recyclable {
       if (nonInferredParent.getSpanId() == childIds.getParentId(i)) {
         tempBuilder.setLength(0);
         HexUtils.appendLongAsHex(childIds.getId(i), tempBuilder);
-        SpanContext spanContext =
+        SpanContext childSpanContext =
             SpanContext.create(
                 parentContext.getTraceId(),
                 tempBuilder.toString(),
                 parentContext.getTraceFlags(),
                 parentContext.getTraceState());
-        span.addLink(spanContext, CHILD_LINK_ATTRIBUTES);
+        spanParentOverride.accept(span, childSpanContext);
       }
     }
   }
@@ -863,13 +876,18 @@ public class CallTree implements Recyclable {
      * possible to update the parent ID of a regular span so that it correctly reflects being a
      * child of an inferred span.
      */
-    public int spanify(SpanAnchoredClock clock, Tracer tracer) {
+    public int spanify(
+        SpanAnchoredClock clock,
+        Tracer tracer,
+        BiConsumer<SpanBuilder, SpanContext> normalSpanOverride) {
       StringBuilder tempBuilder = new StringBuilder();
       int createdSpans = 0;
       List<CallTree> callTrees = getChildren();
       for (int i = 0, size = callTrees.size(); i < size; i++) {
         createdSpans +=
-            callTrees.get(i).spanify(this, null, rootContext, clock, tempBuilder, tracer);
+            callTrees
+                .get(i)
+                .spanify(this, null, rootContext, clock, normalSpanOverride, tempBuilder, tracer);
       }
       return createdSpans;
     }
