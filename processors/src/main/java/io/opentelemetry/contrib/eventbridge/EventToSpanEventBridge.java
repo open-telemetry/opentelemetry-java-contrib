@@ -114,10 +114,10 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       try {
         marshaler.writeJsonTo(out);
+        builder.put(LOG_RECORD_BODY, out.toString(StandardCharsets.UTF_8.name()));
       } catch (IOException e) {
         logger.log(Level.WARNING, "Error converting log record body to JSON", e);
       }
-      builder.put(LOG_RECORD_BODY, new String(out.toByteArray(), StandardCharsets.UTF_8));
     }
 
     int droppedAttributesCount =
