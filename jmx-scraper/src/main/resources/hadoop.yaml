@@ -4,59 +4,59 @@ rules:
     unit: "1"
     prefix: hadoop.name_node.
     metricAttribute:
-      node_name: param(tag.Hostname)
+      node_name: beanattr(tag\.Hostname)
     mapping:
       CapacityUsed:
         metric: capacity.usage
         type: updowncounter
         unit: by
         desc: The current used capacity across all data nodes reporting to the name node.
-#      CapacityTotal:
-#        metric: capacity.limit
-#        type: updowncounter
-#        unit: by
-#        desc: The total capacity allotted to data nodes reporting to the name node.
-#      BlocksTotal:
-#        metric: block.count
-#        type: updowncounter
-#        unit: "{blocks}"
-#        desc: The total number of blocks on the name node.
-#      MissingBlocks:
-#        metric: block.missing
-#        type: updowncounter
-#        unit: "{blocks}"
-#        desc: The number of blocks reported as missing to the name node.
-#      CorruptBlocks:
-#        metric: block.corrupt
-#        type: updowncounter
-#        unit: "{blocks}"
-#        desc: The number of blocks reported as corrupt to the name node.
-#      VolumeFailuresTotal:
-#        metric: volume.failed
-#        type: updowncounter
-#        unit: "{volumes}"
-#        desc: The number of failed volumes reported to the name node.
-#      FilesTotal:
-#        metric: file.count
-#        type: updowncounter
-#        unit: "{files}"
-#        desc: The total number of files being tracked by the name node.
-#      TotalLoad:
-#        metric: file.load
-#        type: updowncounter
-#        unit: "{operations}"
-#        desc: The current number of concurrent file accesses.
-#      NumLiveDataNodes:
-#        metric: data_node.count
-#        type: updowncounter
-#        unit: "{nodes}"
-#        desc: The number of live data nodes reporting to the name node.
-#        metricAttribute:
-#          state: const(live)
-#      NumDeadDataNodes:
-#        metric: data_node.count
-#        type: updowncounter
-#        unit: "{nodes}"
-#        desc: The number of data nodes reporting to the name node.
-#        metricAttribute:
-#          state: const(dead)
+      CapacityTotal:
+        metric: capacity.limit
+        type: updowncounter
+        unit: by
+        desc: The total capacity allotted to data nodes reporting to the name node.
+      BlocksTotal:
+        metric: block.count
+        type: updowncounter
+        unit: "{blocks}"
+        desc: The total number of blocks on the name node.
+      MissingBlocks:
+        metric: block.missing
+        type: updowncounter
+        unit: "{blocks}"
+        desc: The number of blocks reported as missing to the name node.
+      CorruptBlocks:
+        metric: block.corrupt
+        type: updowncounter
+        unit: "{blocks}"
+        desc: The number of blocks reported as corrupt to the name node.
+      VolumeFailuresTotal:
+        metric: volume.failed
+        type: updowncounter
+        unit: "{volumes}"
+        desc: The number of failed volumes reported to the name node.
+      FilesTotal:
+        metric: file.count
+        type: updowncounter
+        unit: "{files}"
+        desc: The total number of files being tracked by the name node.
+      TotalLoad:
+        metric: file.load
+        type: updowncounter
+        unit: "{operations}"
+        desc: The current number of concurrent file accesses.
+      NumLiveDataNodes:
+        metric: &metric data_node.count
+        type: updowncounter
+        unit: &unit "{nodes}"
+        desc: &desc The number of data nodes reporting to the name node.
+        metricAttribute:
+          state: const(live)
+      NumDeadDataNodes:
+        metric: *metric
+        type: updowncounter
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(dead)
