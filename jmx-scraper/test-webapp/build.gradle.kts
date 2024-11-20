@@ -7,5 +7,5 @@ plugins {
 description = "JMX metrics scraper - test web application"
 
 dependencies {
-  providedCompile("jakarta.servlet:jakarta.servlet-api:5.0.0")
+  providedCompile("jakarta.servlet:jakarta.servlet-api:6.1.0")
 }
