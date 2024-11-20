@@ -1,4 +1,5 @@
 plugins {
+  id("otel.java-conventions")
   application
   id("com.github.johnrengelman.shadow")
 
