@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.41.0 (2024-11-21)
+
 ### Inferred spans
 
 - Allow customization of parent-override behavior
