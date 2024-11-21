@@ -7,6 +7,7 @@ rules:
     unit: "{server}"
     type: updowncounter
     mapping:
+      # Group of properties to build hbase.master.region_server.count metric
       numDeadRegionServers:
         metric: &metric region_server.count
         desc: &desc The number of region servers.
@@ -26,9 +27,11 @@ rules:
       ritCount:
         metric: count
         desc: The number of regions that are in transition.
+
       ritCountOverThreshold:
         metric: over_threshold
         desc: The number of regions that have been in transition longer than a threshold time.
+
       ritOldestAge:
         metric: oldest_age
         unit: ms
@@ -61,6 +64,19 @@ rules:
         unit: "{log}"
         desc: The number of write ahead logs not yet archived.
 
+      percentFilesLocal:
+        metric: files.local
+        type: gauge
+        unit: "%"
+        desc: Percent of store file data that can be read from the local.
+
+      updatesBlockedTime:
+        metric: blocked_update.time
+        type: gauge
+        unit: ms
+        desc: Amount of time updates have been blocked so the memstore can be flushed.
+
+      # Group of properties to build hbase.region_server.request.count metric
       writeRequestCount:
         metric: &metric request.count
         unit: &unit "{request}"
@@ -76,6 +92,7 @@ rules:
           state: const(read)
           region_server: *hostname
 
+      # Group of properties to build hbase.region_server.queue.length metric
       flushQueueLength:
         metric: &metric queue.length
         unit: &unit "{handler}"
@@ -91,12 +108,7 @@ rules:
           state: const(compaction)
           region_server: *hostname
 
-      updatesBlockedTime:
-        metric: blocked_update.time
-        type: gauge
-        unit: ms
-        desc: Amount of time updates have been blocked so the memstore can be flushed.
-
+      # Group of properties to build hbase.region_server.block_cache.operation.count metric
       blockCacheMissCount:
         metric: &metric block_cache.operation.count
         type: &type gauge
@@ -114,19 +126,14 @@ rules:
           state: const(hit)
           region_server: *hostname
 
-      percentFilesLocal:
-        metric: files.local
-        type: gauge
-        unit: "%"
-        desc: Percent of store file data that can be read from the local.
-
+      # Group of properties to build hbase.region_server.operations.slow metric
       slowDeleteCount:
         metric: &metric operations.slow
         unit: &unit "{operation}"
         desc: &desc Number of operations that took over 1000ms to complete.
         metricAttribute:
           operation: const(delete)
-          region_server: &hostname beanattr(tag\.Hostname)
+          region_server: *hostname
       slowAppendCount:
         metric: *metric
         unit: *unit
@@ -156,6 +163,7 @@ rules:
           operation: const(increment)
           region_server: *hostname
 
+  # RegionServer statistical metrics
   - bean: Hadoop:service=HBase,name=RegionServer,sub=Server
     prefix: hbase.region_server.
     type: gauge
@@ -163,6 +171,7 @@ rules:
     metricAttribute:
       region_server: *hostname
     mapping:
+      # Statistics for 'append' operation
       Append_99th_percentile:
         metric: operation.append.latency.p99
         desc: Append operation 99th Percentile latency.
@@ -179,6 +188,7 @@ rules:
         metric: operation.append.latency.median
         desc: Append operation median latency.
 
+      # Statistics for 'delete' operation
       Delete_99th_percentile:
         metric: operation.delete.latency.p99
         desc: Delete operation 99th Percentile latency.
@@ -195,6 +205,7 @@ rules:
         metric: operation.delete.latency.median
         desc: Delete operation median latency.
 
+      # Statistics for 'put' operation
       Put_99th_percentile:
         metric: operation.put.latency.p99
         desc: Put operation 99th Percentile latency.
@@ -211,6 +222,7 @@ rules:
         metric: operation.put.latency.median
         desc: Put operation median latency.
 
+      # Statistics for 'get' operation
       Get_99th_percentile:
         metric: operation.get.latency.p99
         desc: Get operation 99th Percentile latency.
@@ -227,6 +239,7 @@ rules:
         metric: operation.get.latency.median
         desc: Get operation median latency.
 
+      # Statistics for 'replay' operation
       Replay_99th_percentile:
         metric: operation.replay.latency.p99
         desc: Replay operation 99th Percentile latency.
@@ -243,6 +256,7 @@ rules:
         metric: operation.replay.latency.median
         desc: Replay operation median latency.
 
+      # Statistics for 'increment' operation
       Increment_99th_percentile:
         metric: operation.increment.latency.p99
         desc: Increment operation 99th Percentile latency.
@@ -269,11 +283,13 @@ rules:
         metric: open_connection.count
         unit: "{connection}"
         desc: The number of open connections at the RPC layer.
+
       numActiveHandler:
         metric: active_handler.count
         unit: "{handler}"
         desc: The number of RPC handlers actively servicing requests.
 
+      # Group of properties to build hbase.region_server.queue.request.count metric
       numCallsInReplicationQueue:
         metric: &metric queue.request.count
         unit: &unit "{request}"
@@ -296,6 +312,7 @@ rules:
           state: const(priority)
           region_server: *hostname
 
+      # Group of properties to build hbase.region_server.authentication.count metric
       authenticationSuccesses:
         metric: &metric authentication.count
         unit: &unit "{authentication request}"
@@ -321,9 +338,11 @@ rules:
       GcTimeMillis:
         metric: time
         desc: Time spent in garbage collection.
+
       GcTimeMillisParNew:
         metric: young_gen.time
         desc: Time spent in garbage collection of the young generation.
+
       GcTimeMillisConcurrentMarkSweep:
         metric: old_gen.time
         desc: Time spent in garbage collection of the old generation.

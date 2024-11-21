@@ -27,7 +27,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
+    assertMetricWithGauge(metric);
     assertThat(metric.getGauge().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
   }
@@ -41,10 +41,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
-    assertThat(metric.getSum().getIsMonotonic())
-        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
-        .isEqualTo(isMonotonic);
+    assertMetricWithSum(metric, isMonotonic);
     assertThat(metric.getSum().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
   }
@@ -54,7 +51,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
+    assertMetricWithGauge(metric);
     assertTypedPoints(metric.getGauge().getDataPointsList(), types);
   }
 
@@ -63,7 +60,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
+    assertMetricWithSum(metric);
     assertTypedPoints(metric.getSum().getDataPointsList(), types);
   }
 
@@ -89,10 +86,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).withFailMessage("Invalid metric type").isTrue();
-    assertThat(metric.getSum().getIsMonotonic())
-        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
-        .isEqualTo(isMonotonic);
+    assertMetricWithSum(metric, isMonotonic);
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -107,8 +101,7 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
-    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
+    assertMetricWithSum(metric, isMonotonic);
     assertAttributedMultiplePoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -122,8 +115,23 @@ class MetricAssertions {
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).withFailMessage("Invalid metric type").isTrue();
+    assertMetricWithGauge(metric);
     assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
+  }
+
+  private static void assertMetricWithGauge(Metric metric) {
+    assertThat(metric.hasGauge()).withFailMessage("Metric with gauge expected").isTrue();
+  }
+
+  private static void assertMetricWithSum(Metric metric) {
+    assertThat(metric.hasSum()).withFailMessage("Metric with sum expected").isTrue();
+  }
+
+  private static void assertMetricWithSum(Metric metric, boolean isMonotonic) {
+    assertMetricWithSum(metric);
+    assertThat(metric.getSum().getIsMonotonic())
+        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
+        .isEqualTo(isMonotonic);
   }
 
   @SuppressWarnings("unchecked")

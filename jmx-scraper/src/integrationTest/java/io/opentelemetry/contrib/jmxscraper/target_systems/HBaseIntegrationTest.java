@@ -23,8 +23,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("dajobe/hbase")
-        .withEnv("JAVA_HOME", "/usr/lib/jvm/java-8-openjdk-amd64")
-        .withEnv("HBASE_OPTS", "-XX:+UseConcMarkSweepGC")
         .withEnv("HBASE_MASTER_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
         .withExposedPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT)
