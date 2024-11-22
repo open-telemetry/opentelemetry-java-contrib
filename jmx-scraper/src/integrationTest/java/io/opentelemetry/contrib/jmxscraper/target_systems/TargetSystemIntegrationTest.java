@@ -125,7 +125,8 @@ public abstract class TargetSystemIntegrationTest {
     verifyMetrics();
   }
 
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are migrated to MetricsVerifier
+  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
+  // migrated to MetricsVerifier
   protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
     await()
         .atMost(Duration.ofSeconds(30))
@@ -155,7 +156,8 @@ public abstract class TargetSystemIntegrationTest {
             });
   }
 
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are migrated to MetricsVerifier
+  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
+  // migrated to MetricsVerifier
   @SafeVarargs
   @SuppressWarnings("varargs")
   protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
@@ -164,7 +166,7 @@ public abstract class TargetSystemIntegrationTest {
 
   protected void verifyMetrics() {
     await()
-        .atMost(Duration.ofSeconds(5)) // TODO: Revert to 30
+        .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
@@ -190,7 +192,8 @@ public abstract class TargetSystemIntegrationTest {
             });
   }
 
-  // TODO: This method is going to be abstract once all integration tests are migrated to MetricsVerifier
+  // TODO: This method is going to be abstract once all integration tests are migrated to
+  // MetricsVerifier
   protected MetricsVerifier createMetricsVerifier() {
     return MetricsVerifier.create();
   }

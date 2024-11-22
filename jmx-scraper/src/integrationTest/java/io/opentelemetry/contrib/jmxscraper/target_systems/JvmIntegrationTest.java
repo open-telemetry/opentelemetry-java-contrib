@@ -47,15 +47,15 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
     return MetricsVerifier.create()
         .assertGauge("jvm.classes.loaded", "number of loaded classes", "1")
         .assertTypedSum(
-                "jvm.gc.collections.count",
-                "total number of collections that have occurred",
-                "1",
-                gcCollectionLabels)
+            "jvm.gc.collections.count",
+            "total number of collections that have occurred",
+            "1",
+            gcCollectionLabels)
         .assertTypedSum(
-                "jvm.gc.collections.elapsed",
-                "the approximate accumulated collection elapsed time in milliseconds",
-                "ms",
-                gcCollectionLabels)
+            "jvm.gc.collections.elapsed",
+            "the approximate accumulated collection elapsed time in milliseconds",
+            "ms",
+            gcCollectionLabels)
         .assertGauge("jvm.memory.heap.committed", "current heap usage", "by")
         .assertGauge("jvm.memory.heap.init", "current heap usage", "by")
         .assertGauge("jvm.memory.heap.max", "current heap usage", "by")
