@@ -7,7 +7,7 @@ rules:
     unit: "{server}"
     type: updowncounter
     mapping:
-      # Group of properties to build hbase.master.region_server.count metric
+      # hbase.master.region_server.count
       numDeadRegionServers:
         metric: &metric region_server.count
         desc: &desc The number of region servers.
@@ -76,7 +76,7 @@ rules:
         unit: ms
         desc: Amount of time updates have been blocked so the memstore can be flushed.
 
-      # Group of properties to build hbase.region_server.request.count metric
+      # hbase.region_server.request.count
       writeRequestCount:
         metric: &metric request.count
         unit: &unit "{request}"
@@ -92,7 +92,7 @@ rules:
           state: const(read)
           region_server: *hostname
 
-      # Group of properties to build hbase.region_server.queue.length metric
+      # hbase.region_server.queue.length
       flushQueueLength:
         metric: &metric queue.length
         unit: &unit "{handler}"
@@ -108,7 +108,7 @@ rules:
           state: const(compaction)
           region_server: *hostname
 
-      # Group of properties to build hbase.region_server.block_cache.operation.count metric
+      # hbase.region_server.block_cache.operation.count
       blockCacheMissCount:
         metric: &metric block_cache.operation.count
         type: &type gauge
@@ -126,7 +126,7 @@ rules:
           state: const(hit)
           region_server: *hostname
 
-      # Group of properties to build hbase.region_server.operations.slow metric
+      # hbase.region_server.operations.slow
       slowDeleteCount:
         metric: &metric operations.slow
         unit: &unit "{operation}"
@@ -289,7 +289,7 @@ rules:
         unit: "{handler}"
         desc: The number of RPC handlers actively servicing requests.
 
-      # Group of properties to build hbase.region_server.queue.request.count metric
+      # hbase.region_server.queue.request.count
       numCallsInReplicationQueue:
         metric: &metric queue.request.count
         unit: &unit "{request}"
@@ -312,7 +312,7 @@ rules:
           state: const(priority)
           region_server: *hostname
 
-      # Group of properties to build hbase.region_server.authentication.count metric
+      # hbase.region_server.authentication.count
       authenticationSuccesses:
         metric: &metric authentication.count
         unit: &unit "{authentication request}"
