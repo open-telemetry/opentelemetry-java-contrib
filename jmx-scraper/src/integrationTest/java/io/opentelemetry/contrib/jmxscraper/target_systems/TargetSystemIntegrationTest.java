@@ -125,6 +125,7 @@ public abstract class TargetSystemIntegrationTest {
     verifyMetrics();
   }
 
+  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are migrated to MetricsVerifier
   protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
     await()
         .atMost(Duration.ofSeconds(30))
@@ -154,13 +155,45 @@ public abstract class TargetSystemIntegrationTest {
             });
   }
 
+  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are migrated to MetricsVerifier
   @SafeVarargs
   @SuppressWarnings("varargs")
   protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
     waitAndAssertMetrics(Arrays.asList(assertions));
   }
 
-  protected abstract void verifyMetrics();
+  protected void verifyMetrics() {
+    await()
+        .atMost(Duration.ofSeconds(5)) // TODO: Revert to 30
+        .untilAsserted(
+            () -> {
+              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
+              assertThat(receivedMetrics).describedAs("No metric received").isNotEmpty();
+
+              List<Metric> metrics =
+                  receivedMetrics.stream()
+                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
+                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+                      .flatMap(Collection::stream)
+                      .filter(
+                          // TODO: disabling batch span exporter might help remove unwanted metrics
+                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
+                      .flatMap(sm -> sm.getMetricsList().stream())
+                      .collect(Collectors.toList());
+
+              assertThat(metrics)
+                  .describedAs("metrics reported but none from JMX scraper")
+                  .isNotEmpty();
+
+              MetricsVerifier metricsVerifier = createMetricsVerifier();
+              metricsVerifier.verify(metrics);
+            });
+  }
+
+  // TODO: This method is going to be abstract once all integration tests are migrated to MetricsVerifier
+  protected MetricsVerifier createMetricsVerifier() {
+    return MetricsVerifier.create();
+  }
 
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
