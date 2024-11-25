@@ -165,6 +165,7 @@ public abstract class TargetSystemIntegrationTest {
   }
 
   protected void verifyMetrics() {
+    MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
         .atMost(Duration.ofSeconds(30))
         .untilAsserted(
@@ -187,7 +188,6 @@ public abstract class TargetSystemIntegrationTest {
                   .describedAs("metrics reported but none from JMX scraper")
                   .isNotEmpty();
 
-              MetricsVerifier metricsVerifier = createMetricsVerifier();
               metricsVerifier.verify(metrics);
             });
   }

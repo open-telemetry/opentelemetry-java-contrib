@@ -65,6 +65,59 @@ public class MetricsVerifier {
   }
 
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  public MetricsVerifier assertCounter(String metricName, String description, String unit) {
+    return assertSum(metricName, description, unit, /* isMonotonic= */ true);
+  }
+
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  public MetricsVerifier assertUpDownCounter(String metricName, String description, String unit) {
+    return assertSum(metricName, description, unit, /* isMonotonic= */ false);
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  public final MetricsVerifier assertCounterWithAttributes(
+      String metricName,
+      String description,
+      String unit,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    return assertSumWithAttributes(
+        metricName, description, unit, /* isMonotonic= */ true, attributeGroupAssertions);
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  public final MetricsVerifier assertUpDownCounterWithAttributes(
+      String metricName,
+      String description,
+      String unit,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    return assertSumWithAttributes(
+        metricName, description, unit, /* isMonotonic= */ false, attributeGroupAssertions);
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  private final MetricsVerifier assertSumWithAttributes(
+      String metricName,
+      String description,
+      String unit,
+      boolean isMonotonic,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    assertions.put(
+        metricName,
+        metric -> {
+          assertDescription(metric, description);
+          assertUnit(metric, unit);
+          assertMetricWithSum(metric, isMonotonic);
+          assertAttributedPoints(
+              metricName, metric.getSum().getDataPointsList(), attributeGroupAssertions);
+        });
+
+    return this;
+  }
+
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
   public MetricsVerifier assertTypedSum(
       String metricName, String description, String unit, List<String> types) {
     assertions.put(
@@ -72,7 +125,7 @@ public class MetricsVerifier {
         metric -> {
           assertDescription(metric, description);
           assertUnit(metric, unit);
-          assertMetricWithSum(metric);
+          assertMetricWithSum(metric, /* isMonotonic= */ true);
           assertTypedPoints(metricName, metric.getSum().getDataPointsList(), types);
         });
 
@@ -95,8 +148,9 @@ public class MetricsVerifier {
   }
 
   public void verify(List<Metric> metrics) {
+    verifyAllExpectedMetricsWereReceived(metrics);
+
     Set<String> unverifiedMetrics = new HashSet<>();
-    Set<String> skippedAssertions = assertions.keySet();
 
     for (Metric metric : metrics) {
       String metricName = metric.getName();
@@ -104,34 +158,54 @@ public class MetricsVerifier {
 
       if (assertion != null) {
         assertion.accept(metric);
-        skippedAssertions.remove(metricName);
       } else {
         unverifiedMetrics.add(metricName);
       }
     }
 
-    if (!skippedAssertions.isEmpty()) {
-      fail("The following metrics was expected but not received: " + skippedAssertions);
-    }
     if (strictMode && !unverifiedMetrics.isEmpty()) {
-      fail("The following metrics was received but not verified: " + unverifiedMetrics);
+      fail("The following metrics were received but not verified: " + unverifiedMetrics);
     }
+  }
+
+  @SuppressWarnings("SystemOut")
+  private void verifyAllExpectedMetricsWereReceived(List<Metric> metrics) {
+    Set<String> receivedMetricNames =
+        metrics.stream().map(Metric::getName).collect(Collectors.toSet());
+    Set<String> assertionNames = new HashSet<>(assertions.keySet());
+
+    assertionNames.removeAll(receivedMetricNames);
+    if (!assertionNames.isEmpty()) {
+      fail("The following metrics were expected but not received: " + assertionNames);
+    }
+  }
+
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  private MetricsVerifier assertSum(
+      String metricName, String description, String unit, boolean isMonotonic) {
+    assertions.put(
+        metricName,
+        metric -> {
+          assertDescription(metric, description);
+          assertUnit(metric, unit);
+          assertMetricWithSum(metric, isMonotonic);
+          assertThat(metric.getSum().getDataPointsList())
+              .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
+        });
+
+    return this;
   }
 
   private static void assertMetricWithGauge(Metric metric) {
     assertThat(metric.hasGauge()).withFailMessage("Metric with gauge expected").isTrue();
   }
 
-  private static void assertMetricWithSum(Metric metric) {
+  private static void assertMetricWithSum(Metric metric, boolean isMonotonic) {
     assertThat(metric.hasSum()).withFailMessage("Metric with sum expected").isTrue();
+    assertThat(metric.getSum().getIsMonotonic())
+        .withFailMessage((isMonotonic ? "Monotonic" : "Non monotonic") + " sum expected")
+        .isEqualTo(isMonotonic);
   }
-
-  //  private static void assertMetricWithSum(Metric metric, boolean isMonotonic) {
-  //    assertMetricWithSum(metric);
-  //    assertThat(metric.getSum().getIsMonotonic())
-  //        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
-  //        .isEqualTo(isMonotonic);
-  //  }
 
   private static void assertDescription(Metric metric, String expectedDescription) {
     assertThat(metric.getDescription())
