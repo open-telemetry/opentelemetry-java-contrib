@@ -3,40 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxmetrics.target_systems;
+package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static org.assertj.core.api.Assertions.entry;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGauge;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static org.assertj.core.data.MapEntry.entry;
 
-import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
+import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import java.nio.file.Path;
 import java.time.Duration;
-import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.MountableFile;
 
-class HbaseIntegrationTest extends AbstractIntegrationTest {
+public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
+  private static final int DEFAULT_MASTER_SERVICE_PORT = 16000;
 
-  HbaseIntegrationTest() {
-    super(/* configFromStdin= */ false, "target-systems/hbase.properties");
+  @Override
+  protected GenericContainer<?> createTargetContainer(int jmxPort) {
+    return new GenericContainer<>("dajobe/hbase")
+        .withEnv("HBASE_MASTER_OPTS", genericJmxJvmArguments(jmxPort))
+        .withStartupTimeout(Duration.ofMinutes(2))
+        .withExposedPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT)
+        .waitingFor(Wait.forListeningPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT));
   }
 
-  @Container
-  GenericContainer<?> hbase =
-      new GenericContainer<>("dajobe/hbase")
-          .withNetwork(Network.SHARED)
-          .withEnv("LOCAL_JMX", "no")
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("hbase/hbase-env.sh", 0400),
-              "/opt/hbase/conf/hbase-env.sh")
-          .withNetworkAliases("hbase")
-          .withExposedPorts(9900)
-          .withStartupTimeout(Duration.ofMinutes(2))
-          .waitingFor(Wait.forListeningPort());
+  @Override
+  protected JmxScraperContainer customizeScraperContainer(
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
+    return scraper.withTargetSystem("hbase");
+  }
 
-  @Test
-  void endToEnd() {
+  @Override
+  protected void verifyMetrics() {
     waitAndAssertMetrics(
         metric ->
             assertSumWithAttributes(
@@ -44,6 +44,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.master.region_server.count",
                 "The number of region servers.",
                 "{server}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("state", "dead")),
                 attrs -> attrs.contains(entry("state", "live"))),
         metric ->
@@ -72,6 +73,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.region.count",
                 "The number of regions hosted by the region server.",
                 "{region}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -79,6 +81,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.disk.store_file.count",
                 "The number of store files on disk currently managed by the region server.",
                 "{file}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -86,6 +89,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.disk.store_file.size",
                 "Aggregate size of the store files on disk.",
                 "By",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -93,6 +97,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.write_ahead_log.count",
                 "The number of write ahead logs not yet archived.",
                 "{log}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -100,16 +105,30 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.request.count",
                 "The number of requests received.",
                 "{request}",
-                attrs -> attrs.contains(entry("state", "write")),
-                attrs -> attrs.contains(entry("state", "read"))),
+                /* isMonotonic= */ false,
+                attrs -> {
+                  attrs.contains(entry("state", "write"));
+                  attrs.containsKey("region_server");
+                },
+                attrs -> {
+                  attrs.contains(entry("state", "read"));
+                  attrs.containsKey("region_server");
+                }),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hbase.region_server.queue.length",
                 "The number of RPC handlers actively servicing requests.",
                 "{handler}",
-                attrs -> attrs.contains(entry("state", "flush")),
-                attrs -> attrs.contains(entry("state", "compaction"))),
+                /* isMonotonic= */ false,
+                attrs -> {
+                  attrs.contains(entry("state", "flush"));
+                  attrs.containsKey("region_server");
+                },
+                attrs -> {
+                  attrs.contains(entry("state", "compaction"));
+                  attrs.containsKey("region_server");
+                }),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -118,13 +137,19 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "ms",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
-            assertSumWithAttributes(
+            assertGaugeWithAttributes(
                 metric,
-                "hbase.region_server.request.count",
-                "The number of requests received.",
-                "{request}",
-                attrs -> attrs.contains(entry("state", "write")),
-                attrs -> attrs.contains(entry("state", "read"))),
+                "hbase.region_server.block_cache.operation.count",
+                "Number of block cache hits/misses.",
+                "{operation}",
+                attrs -> {
+                  attrs.contains(entry("state", "miss"));
+                  attrs.containsKey("region_server");
+                },
+                attrs -> {
+                  attrs.contains(entry("state", "hit"));
+                  attrs.containsKey("region_server");
+                }),
         metric ->
             assertGaugeWithAttributes(
                 metric,
@@ -348,6 +373,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.operations.slow",
                 "Number of operations that took over 1000ms to complete.",
                 "{operation}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("operation", "delete")),
                 attrs -> attrs.contains(entry("operation", "append")),
                 attrs -> attrs.contains(entry("operation", "get")),
@@ -359,6 +385,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.open_connection.count",
                 "The number of open connections at the RPC layer.",
                 "{connection}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -366,6 +393,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.active_handler.count",
                 "The number of RPC handlers actively servicing requests.",
                 "{handler}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -373,6 +401,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.queue.request.count",
                 "The number of currently enqueued requests.",
                 "{request}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("state", "replication")),
                 attrs -> attrs.contains(entry("state", "user")),
                 attrs -> attrs.contains(entry("state", "priority"))),
@@ -382,6 +411,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 "hbase.region_server.authentication.count",
                 "Number of client connection authentication failures/successes.",
                 "{authentication request}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("state", "successes")),
                 attrs -> attrs.contains(entry("state", "failures"))),
         metric ->
