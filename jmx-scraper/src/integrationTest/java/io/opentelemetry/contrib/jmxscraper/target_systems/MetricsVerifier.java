@@ -96,29 +96,8 @@ public class MetricsVerifier {
         metricName, description, unit, /* isMonotonic= */ false, attributeGroupAssertions);
   }
 
-  @SafeVarargs
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
-  private final MetricsVerifier assertSumWithAttributes(
-      String metricName,
-      String description,
-      String unit,
-      boolean isMonotonic,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    assertions.put(
-        metricName,
-        metric -> {
-          assertDescription(metric, description);
-          assertUnit(metric, unit);
-          assertMetricWithSum(metric, isMonotonic);
-          assertAttributedPoints(
-              metricName, metric.getSum().getDataPointsList(), attributeGroupAssertions);
-        });
-
-    return this;
-  }
-
-  @SuppressWarnings("CanIgnoreReturnValueSuggester")
-  public MetricsVerifier assertTypedSum(
+  public MetricsVerifier assertTypedCounter(
       String metricName, String description, String unit, List<String> types) {
     assertions.put(
         metricName,
@@ -164,7 +143,7 @@ public class MetricsVerifier {
     }
 
     if (strictMode && !unverifiedMetrics.isEmpty()) {
-      fail("The following metrics were received but not verified: " + unverifiedMetrics);
+      fail("Metrics received but not verified because no assertion exists: " + unverifiedMetrics);
     }
   }
 
@@ -176,7 +155,7 @@ public class MetricsVerifier {
 
     assertionNames.removeAll(receivedMetricNames);
     if (!assertionNames.isEmpty()) {
-      fail("The following metrics were expected but not received: " + assertionNames);
+      fail("Metrics expected but not received: " + assertionNames);
     }
   }
 
@@ -191,6 +170,27 @@ public class MetricsVerifier {
           assertMetricWithSum(metric, isMonotonic);
           assertThat(metric.getSum().getDataPointsList())
               .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
+        });
+
+    return this;
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("CanIgnoreReturnValueSuggester")
+  private final MetricsVerifier assertSumWithAttributes(
+      String metricName,
+      String description,
+      String unit,
+      boolean isMonotonic,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+    assertions.put(
+        metricName,
+        metric -> {
+          assertDescription(metric, description);
+          assertUnit(metric, unit);
+          assertMetricWithSum(metric, isMonotonic);
+          assertAttributedPoints(
+              metricName, metric.getSum().getDataPointsList(), attributeGroupAssertions);
         });
 
     return this;

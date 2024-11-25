@@ -46,12 +46,12 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
 
     return MetricsVerifier.create()
         .assertGauge("jvm.classes.loaded", "number of loaded classes", "1")
-        .assertTypedSum(
+        .assertTypedCounter(
             "jvm.gc.collections.count",
             "total number of collections that have occurred",
             "1",
             gcCollectionLabels)
-        .assertTypedSum(
+        .assertTypedCounter(
             "jvm.gc.collections.elapsed",
             "the approximate accumulated collection elapsed time in milliseconds",
             "ms",
