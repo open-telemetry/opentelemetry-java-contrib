@@ -42,7 +42,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.capacity.usage",
                 "The current used capacity across all data nodes reporting to the name node.",
                 "by",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -50,7 +50,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.capacity.limit",
                 "The total capacity allotted to data nodes reporting to the name node.",
                 "by",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -58,7 +58,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.block.count",
                 "The total number of blocks on the name node.",
                 "{block}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -66,7 +66,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.block.missing",
                 "The number of blocks reported as missing to the name node.",
                 "{block}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -74,7 +74,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.block.corrupt",
                 "The number of blocks reported as corrupt to the name node.",
                 "{block}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -82,7 +82,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.volume.failed",
                 "The number of failed volumes reported to the name node.",
                 "{volume}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -90,7 +90,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.file.count",
                 "The total number of files being tracked by the name node.",
                 "{file}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -98,7 +98,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.file.load",
                 "The current number of concurrent file accesses.",
                 "{operation}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -106,12 +106,10 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
                 "hadoop.name_node.data_node.count",
                 "The number of data nodes reporting to the name node.",
                 "{node}",
-                /* isMonotonic= */false,
+                /* isMonotonic= */ false,
                 attrs ->
                     attrs.containsOnly(entry("node_name", "test-host"), entry("state", "live")),
                 attrs ->
-                    attrs.containsOnly(entry("node_name", "test-host"), entry("state", "dead")))
-    );
+                    attrs.containsOnly(entry("node_name", "test-host"), entry("state", "dead"))));
   }
 }
-
