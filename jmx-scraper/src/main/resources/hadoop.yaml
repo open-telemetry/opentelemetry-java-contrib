@@ -19,37 +19,37 @@ rules:
       BlocksTotal:
         metric: block.count
         type: updowncounter
-        unit: "{blocks}"
+        unit: "{block}"
         desc: The total number of blocks on the name node.
       MissingBlocks:
         metric: block.missing
         type: updowncounter
-        unit: "{blocks}"
+        unit: "{block}"
         desc: The number of blocks reported as missing to the name node.
       CorruptBlocks:
         metric: block.corrupt
         type: updowncounter
-        unit: "{blocks}"
+        unit: "{block}"
         desc: The number of blocks reported as corrupt to the name node.
       VolumeFailuresTotal:
         metric: volume.failed
         type: updowncounter
-        unit: "{volumes}"
+        unit: "{volume}"
         desc: The number of failed volumes reported to the name node.
       FilesTotal:
         metric: file.count
         type: updowncounter
-        unit: "{files}"
+        unit: "{file}"
         desc: The total number of files being tracked by the name node.
       TotalLoad:
         metric: file.load
         type: updowncounter
-        unit: "{operations}"
+        unit: "{operation}"
         desc: The current number of concurrent file accesses.
       NumLiveDataNodes:
         metric: &metric data_node.count
         type: updowncounter
-        unit: &unit "{nodes}"
+        unit: &unit "{node}"
         desc: &desc The number of data nodes reporting to the name node.
         metricAttribute:
           state: const(live)
