@@ -9,6 +9,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.Cloc
 
 import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
@@ -83,7 +84,7 @@ public final class ReadableFile implements FileOperations {
    *     If the processing function returns TRUE, then the provided line will be deleted from the
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    */
-  public synchronized ReadableResult readAndProcess(Function<byte[], Boolean> processing)
+  public synchronized ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
       throws IOException {
     if (isClosed.get()) {
       return ReadableResult.FAILED;
@@ -97,20 +98,25 @@ public final class ReadableFile implements FileOperations {
       cleanUp();
       return ReadableResult.FAILED;
     }
-    if (processing.apply(read.content)) {
-      unconsumedResult = null;
-      readBytes += read.totalReadLength;
-      int amountOfBytesToTransfer = originalFileSize - readBytes;
-      if (amountOfBytesToTransfer > 0) {
-        fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
-      } else {
+    switch (processing.apply(read.content)) {
+      case SUCCEEDED:
+        unconsumedResult = null;
+        readBytes += read.totalReadLength;
+        int amountOfBytesToTransfer = originalFileSize - readBytes;
+        if (amountOfBytesToTransfer > 0) {
+          fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
+        } else {
+          cleanUp();
+        }
+        return ReadableResult.SUCCEEDED;
+      case TRY_LATER:
+        unconsumedResult = read;
+        return ReadableResult.PROCESSING_FAILED;
+      case CONTENT_INVALID:
         cleanUp();
-      }
-      return ReadableResult.SUCCEEDED;
-    } else {
-      unconsumedResult = read;
-      return ReadableResult.PROCESSING_FAILED;
+        return ReadableResult.PROCESSING_FAILED;
     }
+    return ReadableResult.FAILED;
   }
 
   @Nullable

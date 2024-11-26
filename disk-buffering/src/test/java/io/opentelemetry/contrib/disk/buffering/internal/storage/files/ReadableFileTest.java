@@ -22,6 +22,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvi
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -120,7 +121,7 @@ class ReadableFileTest {
     readableFile.readAndProcess(
         bytes -> {
           assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
-          return true;
+          return ProcessResult.SUCCEEDED;
         });
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
@@ -132,17 +133,20 @@ class ReadableFileTest {
 
   @Test
   void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
-    assertEquals(ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> true));
+    assertEquals(
+        ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
   }
 
   @Test
   void whenProcessingFails_returnProcessFailedStatus() throws IOException {
-    assertEquals(ReadableResult.PROCESSING_FAILED, readableFile.readAndProcess(bytes -> false));
+    assertEquals(
+        ReadableResult.PROCESSING_FAILED,
+        readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER));
   }
 
   @Test
   void deleteTemporaryFileWhenClosing() throws IOException {
-    readableFile.readAndProcess(bytes -> true);
+    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
     readableFile.close();
 
     assertFalse(temporaryFile.exists());
@@ -150,8 +154,8 @@ class ReadableFileTest {
 
   @Test
   void readMultipleLinesAndRemoveThem() throws IOException {
-    readableFile.readAndProcess(bytes -> true);
-    readableFile.readAndProcess(bytes -> true);
+    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
+    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
@@ -161,7 +165,7 @@ class ReadableFileTest {
 
   @Test
   void whenConsumerReturnsFalse_doNotRemoveLineFromSource() throws IOException {
-    readableFile.readAndProcess(bytes -> false);
+    readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER);
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
@@ -188,7 +192,8 @@ class ReadableFileTest {
         new ReadableFile(
             emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider, dir));
 
-    assertEquals(ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> true));
+    assertEquals(
+        ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
 
     assertTrue(emptyReadableFile.isClosed());
     assertFalse(emptyFile.exists());
@@ -198,21 +203,23 @@ class ReadableFileTest {
   void
       whenReadingAfterTheConfiguredReadingTimeExpired_deleteOriginalFile_close_and_returnFileExpiredException()
           throws IOException {
-    readableFile.readAndProcess(bytes -> true);
+    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS));
 
-    assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
+    assertEquals(
+        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
 
     assertTrue(readableFile.isClosed());
   }
 
   @Test
   void whenReadingAfterClosed_returnFailedStatus() throws IOException {
-    readableFile.readAndProcess(bytes -> true);
+    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
     readableFile.close();
 
-    assertEquals(ReadableResult.FAILED, readableFile.readAndProcess(bytes -> true));
+    assertEquals(
+        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)
@@ -224,7 +231,7 @@ class ReadableFileTest {
           readableFile.readAndProcess(
               bytes -> {
                 result.add(deserialize(bytes));
-                return true;
+                return ProcessResult.SUCCEEDED;
               });
     }
 

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import java.io.IOException;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test;
 class StorageTest {
   private FolderManager folderManager;
   private Storage storage;
-  private Function<byte[], Boolean> processing;
+  private Function<byte[], ProcessResult> processing;
   private ReadableFile readableFile;
   private WritableFile writableFile;
 

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -64,11 +65,15 @@ public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter
                       + " "
                       + deserializer.signalType()
                       + " bytes from storage.");
-              List<EXPORT_DATA> telemetry = deserializer.deserialize(bytes);
-              logger.log(
-                  "Now exporting batch of " + telemetry.size() + " " + deserializer.signalType());
-              CompletableResultCode join = exportFunction.apply(telemetry).join(timeout, unit);
-              return join.isSuccess();
+              try {
+                List<EXPORT_DATA> telemetry = deserializer.deserialize(bytes);
+                logger.log(
+                    "Now exporting batch of " + telemetry.size() + " " + deserializer.signalType());
+                CompletableResultCode join = exportFunction.apply(telemetry).join(timeout, unit);
+                return join.isSuccess() ? ProcessResult.SUCCEEDED : ProcessResult.TRY_LATER;
+              } catch (IllegalArgumentException e) {
+                return ProcessResult.CONTENT_INVALID;
+              }
             });
     return result == ReadableResult.SUCCEEDED;
   }
