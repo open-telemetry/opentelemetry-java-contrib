@@ -12,11 +12,14 @@ import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.internal.Integers;
 import org.assertj.core.internal.Iterables;
+import org.assertj.core.internal.Maps;
 import org.assertj.core.internal.Objects;
 
 public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
@@ -24,6 +27,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   private static final Objects objects = Objects.instance();
   private static final Iterables iterables = Iterables.instance();
   private static final Integers integers = Integers.instance();
+  private static final Maps maps = Maps.instance();
 
   MetricAssert(Metric actual) {
     super(actual, MetricAssert.class);
@@ -171,5 +175,40 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     // at least one data point must be reported
     info.description("at least one data point expected for metric '%s'", actual.getName());
     iterables.assertNotEmpty(info, dataPoints);
+  }
+
+  /**
+   * Verifies that all data points have all the expected attributes
+   *
+   * @param attributes expected attributes
+   * @return this
+   */
+  @SafeVarargs
+  @CanIgnoreReturnValue
+  public final MetricAssert hasDataPointsAttributes(Map.Entry<String, String>... attributes) {
+    return checkDataPoints(
+        dataPoints -> {
+          dataPointsCommonCheck(dataPoints);
+
+          for (NumberDataPoint dataPoint : dataPoints) {
+            Map<String, String> attributesMap = toMap(dataPoint.getAttributesList());
+
+            info.description(
+                "missing/unexpected data points attributes for metric '%s'", actual.getName());
+            containsExactly(attributesMap, attributes);
+          }
+        });
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("varargs") // required to avoid warning
+  private final void containsExactly(
+      Map<String, String> map, Map.Entry<String, String>... entries) {
+    maps.assertContainsExactly(info, map, entries);
+  }
+
+  private static Map<String, String> toMap(List<KeyValue> list) {
+    return list.stream()
+        .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
   }
 }
