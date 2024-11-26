@@ -76,15 +76,19 @@ public class MetricsVerifier {
 
   @SafeVarargs
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
-  public final MetricsVerifier assertGaugeWithAttributes(String metricName, String description,
-      String unit, Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+  public final MetricsVerifier assertGaugeWithAttributes(
+      String metricName,
+      String description,
+      String unit,
+      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertions.put(
         metricName,
         metric -> {
           assertDescription(metric, description);
           assertUnit(metric, unit);
           assertMetricWithGauge(metric);
-          assertAttributedPoints(metricName, metric.getGauge().getDataPointsList(), attributeGroupAssertions);
+          assertAttributedPoints(
+              metricName, metric.getGauge().getDataPointsList(), attributeGroupAssertions);
         });
 
     return this;

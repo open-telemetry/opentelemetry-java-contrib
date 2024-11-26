@@ -40,83 +40,83 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
   protected MetricsVerifier createMetricsVerifier() {
     return MetricsVerifier.create()
         .assertUpDownCounterWithAttributes(
-                "activemq.consumer.count",
-                "The number of consumers currently reading from the broker.",
-                "{consumer}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertUpDownCounterWithAttributes(
-                "activemq.producer.count",
-                "The number of producers currently attached to the broker.",
-                "{producer}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertUpDownCounterWithAttributes(
-                "activemq.connection.count",
-                "The total number of current connections.",
-                "{connection}",
-                attrs -> attrs.containsOnly(entry("broker", "localhost")))
-      .assertGaugeWithAttributes(
-                "activemq.memory.usage",
-                "The percentage of configured memory used.",
-                "%",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertGaugeWithAttributes(
-                "activemq.disk.store_usage",
-                "The percentage of configured disk used for persistent messages.",
-                "%",
-                attrs -> attrs.containsOnly(entry("broker", "localhost")))
-      .assertGaugeWithAttributes(
-                "activemq.disk.temp_usage",
-                "The percentage of configured disk used for non-persistent messages.",
-                "%",
-                attrs -> attrs.containsOnly(entry("broker", "localhost")))
-      .assertUpDownCounterWithAttributes(
-                "activemq.message.current",
-                "The current number of messages waiting to be consumed.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertCounterWithAttributes(
-                "activemq.message.expired",
-                "The total number of messages not delivered because they expired.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertCounterWithAttributes(
-                "activemq.message.enqueued",
-                "The total number of messages received by the broker.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertCounterWithAttributes(
-                "activemq.message.dequeued",
-                "The total number of messages delivered to consumers.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
-      .assertGaugeWithAttributes(
-                "activemq.message.wait_time.avg",
-                "The average time a message was held on a destination.",
-                "ms",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")));
+            "activemq.consumer.count",
+            "The number of consumers currently reading from the broker.",
+            "{consumer}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertUpDownCounterWithAttributes(
+            "activemq.producer.count",
+            "The number of producers currently attached to the broker.",
+            "{producer}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertUpDownCounterWithAttributes(
+            "activemq.connection.count",
+            "The total number of current connections.",
+            "{connection}",
+            attrs -> attrs.containsOnly(entry("broker", "localhost")))
+        .assertGaugeWithAttributes(
+            "activemq.memory.usage",
+            "The percentage of configured memory used.",
+            "%",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertGaugeWithAttributes(
+            "activemq.disk.store_usage",
+            "The percentage of configured disk used for persistent messages.",
+            "%",
+            attrs -> attrs.containsOnly(entry("broker", "localhost")))
+        .assertGaugeWithAttributes(
+            "activemq.disk.temp_usage",
+            "The percentage of configured disk used for non-persistent messages.",
+            "%",
+            attrs -> attrs.containsOnly(entry("broker", "localhost")))
+        .assertUpDownCounterWithAttributes(
+            "activemq.message.current",
+            "The current number of messages waiting to be consumed.",
+            "{message}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertCounterWithAttributes(
+            "activemq.message.expired",
+            "The total number of messages not delivered because they expired.",
+            "{message}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertCounterWithAttributes(
+            "activemq.message.enqueued",
+            "The total number of messages received by the broker.",
+            "{message}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertCounterWithAttributes(
+            "activemq.message.dequeued",
+            "The total number of messages delivered to consumers.",
+            "{message}",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")))
+        .assertGaugeWithAttributes(
+            "activemq.message.wait_time.avg",
+            "The average time a message was held on a destination.",
+            "ms",
+            attrs ->
+                attrs.containsOnly(
+                    entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                    entry("broker", "localhost")));
   }
 }
