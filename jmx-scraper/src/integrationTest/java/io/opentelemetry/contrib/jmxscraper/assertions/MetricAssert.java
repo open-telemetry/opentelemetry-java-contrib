@@ -29,6 +29,12 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     super(actual, MetricAssert.class);
   }
 
+  /**
+   * Verifies metric description
+   *
+   * @param description expected description
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert hasDescription(String description) {
     isNotNull();
@@ -38,6 +44,12 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     return this;
   }
 
+  /**
+   * Verifies metric unit
+   *
+   * @param unit expected unit
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert hasUnit(String unit) {
     isNotNull();
@@ -47,6 +59,11 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     return this;
   }
 
+  /**
+   * Verifies the metric to be a gauge
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert isGauge() {
     isNotNull();
@@ -69,14 +86,21 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     return this;
   }
 
+  /**
+   * Verifies the metric is a counter
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert isCounter() {
+    // counters have a monotonic sum as their value can't decrease
     hasSum(true);
     return this;
   }
 
   @CanIgnoreReturnValue
   public MetricAssert isUpDownCounter() {
+    // up down counters are non-monotonic as their value can increase & decrease
     hasSum(false);
     return this;
   }

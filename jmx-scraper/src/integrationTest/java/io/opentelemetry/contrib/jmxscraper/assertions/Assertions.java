@@ -7,6 +7,9 @@ package io.opentelemetry.contrib.jmxscraper.assertions;
 
 import io.opentelemetry.proto.metrics.v1.Metric;
 
+/**
+ * Dedicated Assertj extension to provide convenient fluent API for metrics testing
+ */
 public class Assertions extends org.assertj.core.api.Assertions {
 
   public static MetricAssert assertThat(Metric metric) {
