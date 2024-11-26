@@ -104,7 +104,7 @@ public final class Storage implements Closeable {
     ReadableResult result = readableFile.readAndProcess(processing);
     switch (result) {
       case SUCCEEDED:
-      case PROCESSING_FAILED:
+      case TRY_LATER:
         return result;
       default:
         // Retry with new file

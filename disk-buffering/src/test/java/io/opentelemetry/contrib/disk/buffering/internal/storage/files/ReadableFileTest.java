@@ -138,9 +138,9 @@ class ReadableFileTest {
   }
 
   @Test
-  void whenProcessingFails_returnProcessFailedStatus() throws IOException {
+  void whenProcessingFails_returnTryLaterStatus() throws IOException {
     assertEquals(
-        ReadableResult.PROCESSING_FAILED,
+        ReadableResult.TRY_LATER,
         readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER));
   }
 
@@ -175,6 +175,15 @@ class ReadableFileTest {
   @Test
   void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
+
+    assertFalse(source.exists());
+    assertTrue(readableFile.isClosed());
+  }
+
+  @Test
+  void whenTheFileContentIsInvalid_deleteOriginalFile_and_close() throws IOException {
+    assertEquals(
+        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.CONTENT_INVALID));
 
     assertFalse(source.exists());
     assertTrue(readableFile.isClosed());

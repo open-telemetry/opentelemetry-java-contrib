@@ -111,10 +111,10 @@ public final class ReadableFile implements FileOperations {
         return ReadableResult.SUCCEEDED;
       case TRY_LATER:
         unconsumedResult = read;
-        return ReadableResult.PROCESSING_FAILED;
+        return ReadableResult.TRY_LATER;
       case CONTENT_INVALID:
         cleanUp();
-        return ReadableResult.PROCESSING_FAILED;
+        return ReadableResult.FAILED;
     }
     return ReadableResult.FAILED;
   }
