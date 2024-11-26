@@ -143,14 +143,10 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedCounter(
       String metricName, String description, String unit, List<String> types) {
-    return registerAssert(
+    return register(
         metricName,
         metric ->
-            assertThat(metric)
-                .hasDescription(description)
-                .hasUnit(unit)
-                .isCounter()
-                .hasTypedDataPoints(types));
+            metric.hasDescription(description).hasUnit(unit).isCounter().hasTypedDataPoints(types));
   }
 
   @CanIgnoreReturnValue
