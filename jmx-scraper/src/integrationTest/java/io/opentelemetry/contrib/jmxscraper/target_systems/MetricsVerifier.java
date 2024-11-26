@@ -49,9 +49,15 @@ public class MetricsVerifier {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public MetricsVerifier register(String metricName, Consumer<Metric> assertion) {
+    assertions.put(metricName, assertion);
+    return this;
+  };
+
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
   public MetricsVerifier assertGauge(String metricName, String description, String unit) {
-    assertions.put(
+    return register(
         metricName,
         metric -> {
           assertDescription(metric, description);
@@ -60,8 +66,6 @@ public class MetricsVerifier {
           assertThat(metric.getGauge().getDataPointsList())
               .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
         });
-
-    return this;
   }
 
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
@@ -81,7 +85,7 @@ public class MetricsVerifier {
       String description,
       String unit,
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    assertions.put(
+    return register(
         metricName,
         metric -> {
           assertDescription(metric, description);
@@ -90,8 +94,6 @@ public class MetricsVerifier {
           assertAttributedPoints(
               metricName, metric.getGauge().getDataPointsList(), attributeGroupAssertions);
         });
-
-    return this;
   }
 
   @SafeVarargs
@@ -119,7 +121,7 @@ public class MetricsVerifier {
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
   public MetricsVerifier assertTypedCounter(
       String metricName, String description, String unit, List<String> types) {
-    assertions.put(
+    return register(
         metricName,
         metric -> {
           assertDescription(metric, description);
@@ -127,14 +129,12 @@ public class MetricsVerifier {
           assertMetricWithSum(metric, /* isMonotonic= */ true);
           assertTypedPoints(metricName, metric.getSum().getDataPointsList(), types);
         });
-
-    return this;
   }
 
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
   public MetricsVerifier assertTypedGauge(
       String metricName, String description, String unit, List<String> types) {
-    assertions.put(
+    return register(
         metricName,
         metric -> {
           assertDescription(metric, description);
@@ -142,8 +142,6 @@ public class MetricsVerifier {
           assertMetricWithGauge(metric);
           assertTypedPoints(metricName, metric.getGauge().getDataPointsList(), types);
         });
-
-    return this;
   }
 
   public void verify(List<Metric> metrics) {
@@ -182,7 +180,7 @@ public class MetricsVerifier {
   @SuppressWarnings("CanIgnoreReturnValueSuggester")
   private MetricsVerifier assertSum(
       String metricName, String description, String unit, boolean isMonotonic) {
-    assertions.put(
+    return register(
         metricName,
         metric -> {
           assertDescription(metric, description);
@@ -191,8 +189,6 @@ public class MetricsVerifier {
           assertThat(metric.getSum().getDataPointsList())
               .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
         });
-
-    return this;
   }
 
   @SafeVarargs
