@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
@@ -140,8 +141,7 @@ class ReadableFileTest {
   @Test
   void whenProcessingFails_returnTryLaterStatus() throws IOException {
     assertEquals(
-        ReadableResult.TRY_LATER,
-        readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER));
+        ReadableResult.TRY_LATER, readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER));
   }
 
   @Test
@@ -250,6 +250,10 @@ class ReadableFileTest {
   }
 
   private static LogRecordData deserialize(byte[] data) {
-    return DESERIALIZER.deserialize(data).get(0);
+    try {
+      return DESERIALIZER.deserialize(data).get(0);
+    } catch (DeserializationException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

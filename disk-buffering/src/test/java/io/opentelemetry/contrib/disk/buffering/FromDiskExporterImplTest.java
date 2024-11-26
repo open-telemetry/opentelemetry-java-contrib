@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -88,12 +89,23 @@ class FromDiskExporterImplTest {
     assertThat(new File(rootDir, STORAGE_FOLDER_NAME).exists()).isTrue();
   }
 
+  @Test
+  void whenDeserializationFails_returnFalse() throws IOException {
+    when(deserializer.deserialize(any()))
+        .thenAnswer(
+            invocation -> {
+              throw new DeserializationException(new IOException("Some exception"));
+            });
+
+    assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isFalse();
+  }
+
   private void createDummyFile() throws IOException {
     File file = new File(rootDir, STORAGE_FOLDER_NAME + "/" + 1000L);
     Files.write(file.toPath(), singletonList("First line"));
   }
 
-  private void setUpSerializer() {
+  private void setUpSerializer() throws DeserializationException {
     deserializer = mock();
     when(deserializer.deserialize(any())).thenReturn(deserializedData);
   }

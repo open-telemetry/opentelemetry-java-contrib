@@ -22,11 +22,11 @@ public final class MetricDataDeserializer implements SignalDeserializer<MetricDa
   }
 
   @Override
-  public List<MetricData> deserialize(byte[] source) {
+  public List<MetricData> deserialize(byte[] source) throws DeserializationException {
     try {
       return ProtoMetricsDataMapper.getInstance().fromProto(MetricsData.ADAPTER.decode(source));
     } catch (IOException e) {
-      throw new IllegalArgumentException(e);
+      throw new DeserializationException(e);
     }
   }
 

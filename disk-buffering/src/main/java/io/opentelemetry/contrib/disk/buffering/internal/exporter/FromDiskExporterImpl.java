@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
@@ -71,7 +72,7 @@ public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter
                     "Now exporting batch of " + telemetry.size() + " " + deserializer.signalType());
                 CompletableResultCode join = exportFunction.apply(telemetry).join(timeout, unit);
                 return join.isSuccess() ? ProcessResult.SUCCEEDED : ProcessResult.TRY_LATER;
-              } catch (IllegalArgumentException e) {
+              } catch (DeserializationException e) {
                 return ProcessResult.CONTENT_INVALID;
               }
             });
