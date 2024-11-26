@@ -78,12 +78,13 @@ public final class Storage implements Closeable {
    * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
    * @throws IOException If an unexpected error happens.
    */
-  public ReadableResult readAndProcess(Function<byte[], ProcessResult> processing) throws IOException {
+  public ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
+      throws IOException {
     return readAndProcess(processing, 1);
   }
 
-  private ReadableResult readAndProcess(Function<byte[], ProcessResult> processing, int attemptNumber)
-      throws IOException {
+  private ReadableResult readAndProcess(
+      Function<byte[], ProcessResult> processing, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to read from storage after being closed.");
       return ReadableResult.FAILED;
