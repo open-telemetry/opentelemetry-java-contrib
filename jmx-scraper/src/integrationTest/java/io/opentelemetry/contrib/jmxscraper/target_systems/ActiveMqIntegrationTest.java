@@ -39,12 +39,16 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected MetricsVerifier createMetricsVerifier() {
     return MetricsVerifier.create()
-        .assertUpDownCounterWithAttributes(
+        .register(
             "activemq.consumer.count",
-            "The number of consumers currently reading from the broker.",
-            "{consumer}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
+            metric ->
+                metric
+                    .hasDescription("The number of consumers currently reading from the broker.")
+                    .hasUnit("{consumer}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
         .assertUpDownCounterWithAttributes(
             "activemq.producer.count",
             "The number of producers currently attached to the broker.",

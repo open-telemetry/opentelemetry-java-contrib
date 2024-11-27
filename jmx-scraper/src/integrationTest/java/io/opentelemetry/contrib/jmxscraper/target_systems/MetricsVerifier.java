@@ -97,6 +97,7 @@ public class MetricsVerifier {
                 .hasDataPointsWithoutAttributes());
   }
 
+  // TODO: can now be inlined
   @SafeVarargs
   @CanIgnoreReturnValue
   public final MetricsVerifier assertGaugeWithAttributes( // only used in activemq
@@ -111,9 +112,10 @@ public class MetricsVerifier {
                 .hasDataPointsAttributes(attributes));
   }
 
+  // TODO: can now be inlined
   @SafeVarargs
   @CanIgnoreReturnValue
-  public final MetricsVerifier assertCounterWithAttributes( // TODO: used for cassandra
+  public final MetricsVerifier assertCounterWithAttributes(
       String metricName, String description, String unit, Map<String, String>... attributeSets) {
     return register(
         metricName,
@@ -125,6 +127,7 @@ public class MetricsVerifier {
                 .hasDataPointsAttributes(attributeSets));
   }
 
+  // TODO: can now be inlined
   @SafeVarargs
   @CanIgnoreReturnValue
   public final MetricsVerifier assertCounterWithAttributes(
@@ -139,6 +142,7 @@ public class MetricsVerifier {
                 .hasDataPointsAttributes(attributes));
   }
 
+  // TODO: can now be inlined
   @SafeVarargs
   @CanIgnoreReturnValue
   public final MetricsVerifier assertUpDownCounterWithAttributes(
@@ -153,6 +157,7 @@ public class MetricsVerifier {
                 .hasDataPointsAttributes(attributes));
   }
 
+  // TODO: can now be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedCounter(
       String metricName, String description, String unit, List<String> types) {
@@ -162,6 +167,7 @@ public class MetricsVerifier {
             metric.hasDescription(description).hasUnit(unit).isCounter().hasTypedDataPoints(types));
   }
 
+  // TODO: can be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedGauge(
       String metricName, String description, String unit, List<String> types) {

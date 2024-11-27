@@ -102,7 +102,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   @CanIgnoreReturnValue
-  public MetricAssert hasSum(boolean monotonic) {
+  private MetricAssert hasSum(boolean monotonic) {
     isNotNull();
 
     info.description("sum expected for metric '%s'", actual.getName());
@@ -174,6 +174,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
   @CanIgnoreReturnValue
   public MetricAssert hasTypedDataPoints(Collection<String> types) {
+    // TODO: we could replace this with 'hasDataPointsAttributes'
     return checkDataPoints(
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);
