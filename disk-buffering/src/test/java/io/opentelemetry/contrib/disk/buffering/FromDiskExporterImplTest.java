@@ -10,6 +10,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -91,11 +92,7 @@ class FromDiskExporterImplTest {
 
   @Test
   void whenDeserializationFails_returnFalse() throws IOException {
-    when(deserializer.deserialize(any()))
-        .thenAnswer(
-            invocation -> {
-              throw new DeserializationException(new IOException("Some exception"));
-            });
+    doThrow(DeserializationException.class).when(deserializer).deserialize(any());
 
     assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isFalse();
   }
