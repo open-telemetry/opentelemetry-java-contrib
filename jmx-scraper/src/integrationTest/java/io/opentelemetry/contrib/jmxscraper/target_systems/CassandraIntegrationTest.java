@@ -5,15 +5,11 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static org.assertj.core.api.Assertions.entry;
-
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import org.assertj.core.api.MapAssert;
+import java.util.HashMap;
+import java.util.Map;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -101,31 +97,34 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             "cassandra.client.request.count",
             "Number of requests by operation",
             "1",
-            attrs -> attrs.containsOnly(entry("operation", "RangeSlice")),
-            attrs -> attrs.containsOnly(entry("operation", "Read")),
-            attrs -> attrs.containsOnly(entry("operation", "Write")))
+            requestCountAttributes("RangeSlice"),
+            requestCountAttributes("Read"),
+            requestCountAttributes("Write"))
         .assertCounterWithAttributes(
             "cassandra.client.request.error.count",
             "Number of request errors by operation",
             "1",
-            getRequestErrorCountAttributes());
+            errorCountAttributes("RangeSlice", "Timeout"),
+            errorCountAttributes("RangeSlice", "Failure"),
+            errorCountAttributes("RangeSlice", "Unavailable"),
+            errorCountAttributes("Read", "Timeout"),
+            errorCountAttributes("Read", "Failure"),
+            errorCountAttributes("Read", "Unavailable"),
+            errorCountAttributes("Write", "Timeout"),
+            errorCountAttributes("Write", "Failure"),
+            errorCountAttributes("Write", "Unavailable"));
   }
 
-  @SuppressWarnings("unchecked")
-  private static Consumer<MapAssert<String, String>>[] getRequestErrorCountAttributes() {
-    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
-    List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
+  private static Map<String, String> errorCountAttributes(String operation, String status) {
+    Map<String, String> map = new HashMap<>();
+    map.put("operation", operation);
+    map.put("status", status);
+    return map;
+  }
 
-    return operations.stream()
-        .flatMap(
-            op ->
-                statuses.stream()
-                    .map(
-                        st ->
-                            (Consumer<MapAssert<String, String>>)
-                                attrs ->
-                                    attrs.containsOnly(
-                                        entry("operation", op), entry("status", st))))
-        .toArray(Consumer[]::new);
+  private static Map<String, String> requestCountAttributes(String operation) {
+    Map<String, String> map = new HashMap<>();
+    map.put("operation", operation);
+    return map;
   }
 }

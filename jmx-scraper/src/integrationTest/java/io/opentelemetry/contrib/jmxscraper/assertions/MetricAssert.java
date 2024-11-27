@@ -218,14 +218,79 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);
 
+          Map<String, String> attributesMap = new HashMap<>();
+          for (Map.Entry<String, String> attributeEntry : attributes) {
+            attributesMap.put(attributeEntry.getKey(), attributeEntry.getValue());
+          }
           for (NumberDataPoint dataPoint : dataPoints) {
-            Map<String, String> attributesMap = toMap(dataPoint.getAttributesList());
+            Map<String, String> dataPointAttributes = toMap(dataPoint.getAttributesList());
 
+            // all attributes must match
             info.description(
                 "missing/unexpected data points attributes for metric '%s'", actual.getName());
-            containsExactly(attributesMap, attributes);
+            containsExactly(dataPointAttributes, attributes);
+            maps.assertContainsAllEntriesOf(info, dataPointAttributes, attributesMap);
           }
         });
+  }
+
+  /**
+   * Verifies that all data points have their attributes match one of the attributes set and that
+   * all provided attributes sets matched at least once.
+   *
+   * @param attributeSets sets of attributes as maps
+   * @return this
+   */
+  @SafeVarargs
+  @CanIgnoreReturnValue
+  @SuppressWarnings("varargs") // required to avoid warning
+  public final MetricAssert hasDataPointsAttributes(Map<String, String>... attributeSets) {
+    return checkDataPoints(
+        dataPoints -> {
+          dataPointsCommonCheck(dataPoints);
+
+          boolean[] matchedSets = new boolean[attributeSets.length];
+
+          // validate each datapoint attributes match exactly one of the provided attributes set
+          for (NumberDataPoint dataPoint : dataPoints) {
+            Map<String, String> map = toMap(dataPoint.getAttributesList());
+
+            int matchCount = 0;
+            for (int i = 0; i < attributeSets.length; i++) {
+              if (mapEquals(map, attributeSets[i])) {
+                matchedSets[i] = true;
+                matchCount++;
+              }
+            }
+
+            info.description(
+                "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'",
+                map, actual.getName(), Arrays.asList(attributeSets));
+            integers.assertEqual(info, matchCount, 1);
+          }
+
+          // check that all attribute sets matched at least once
+          for (int i = 0; i < matchedSets.length; i++) {
+            info.description(
+                "no data point matched attribute set '%s' for metric '%s'",
+                attributeSets[i], actual.getName());
+            objects.assertEqual(info, matchedSets[i], true);
+          }
+        });
+  }
+
+  /**
+   * map equality utility
+   *
+   * @param m1 first map
+   * @param m2 second map
+   * @return true if the maps have exactly the same keys and values
+   */
+  private static boolean mapEquals(Map<String, String> m1, Map<String, String> m2) {
+    if (m1.size() != m2.size()) {
+      return false;
+    }
+    return m1.entrySet().stream().allMatch(e -> e.getValue().equals(m2.get(e.getKey())));
   }
 
   @SafeVarargs

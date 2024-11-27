@@ -10,10 +10,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.jmxscraper.assertions.MetricAssert;
-import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
-import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,11 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.assertj.core.api.MapAssert;
 
 public class MetricsVerifier {
-  private static final String METRIC_VERIFICATION_FAILURE_MESSAGE =
-      "Verification of %s metric failed";
 
   private final Map<String, Consumer<Metric>> assertions = new HashMap<>();
   private boolean strictMode = true;
@@ -38,27 +32,29 @@ public class MetricsVerifier {
    * allowingExtraMetrics() method.
    *
    * @return new instance of MetricsVerifier
-   * @see #allowExtraMetrics()
+   * @see #disableStrictMode()
    */
   public static MetricsVerifier create() {
     return new MetricsVerifier();
   }
 
   @CanIgnoreReturnValue
-  public MetricsVerifier allowExtraMetrics() {
+  public MetricsVerifier disableStrictMode() {
     strictMode = false;
     return this;
   }
 
   @CanIgnoreReturnValue
-  private MetricsVerifier registerAssert(String metricName, Consumer<Metric> assertion) {
-    assertions.put(metricName, assertion);
-    return this;
-  }
-
-  @CanIgnoreReturnValue
   public MetricsVerifier register(String metricName, Consumer<MetricAssert> assertion) {
-    assertions.put(metricName, metric -> assertion.accept(assertThat(metric)));
+    assertions.put(
+        metricName,
+        metric -> {
+          MetricAssert metricAssert = assertThat(metric);
+          assertion.accept(metricAssert);
+          if (strictMode) {
+            metricAssert.validateAssertions();
+          }
+        });
     return this;
   }
 
@@ -103,41 +99,58 @@ public class MetricsVerifier {
 
   @SafeVarargs
   @CanIgnoreReturnValue
-  public final MetricsVerifier assertGaugeWithAttributes(
-      String metricName,
-      String description,
-      String unit,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    return registerAssert(
+  public final MetricsVerifier assertGaugeWithAttributes( // only used in activemq
+      String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
+    return register(
         metricName,
-        metric -> {
-          assertThat(metric).hasDescription(description).hasUnit(unit).isGauge();
+        metric ->
+            metric
+                .hasDescription(description)
+                .hasUnit(unit)
+                .isGauge()
+                .hasDataPointsAttributes(attributes));
+  }
 
-          assertAttributedPoints(
-              metricName, metric.getGauge().getDataPointsList(), attributeGroupAssertions);
-        });
+  @SafeVarargs
+  @CanIgnoreReturnValue
+  public final MetricsVerifier assertCounterWithAttributes( // TODO: used for cassandra
+      String metricName, String description, String unit, Map<String, String>... attributeSets) {
+    return register(
+        metricName,
+        metric ->
+            metric
+                .hasDescription(description)
+                .hasUnit(unit)
+                .isCounter()
+                .hasDataPointsAttributes(attributeSets));
   }
 
   @SafeVarargs
   @CanIgnoreReturnValue
   public final MetricsVerifier assertCounterWithAttributes(
-      String metricName,
-      String description,
-      String unit,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    return assertSumWithAttributes(
-        metricName, description, unit, /* isMonotonic= */ true, attributeGroupAssertions);
+      String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
+    return register(
+        metricName,
+        metric ->
+            metric
+                .hasDescription(description)
+                .hasUnit(unit)
+                .isCounter()
+                .hasDataPointsAttributes(attributes));
   }
 
   @SafeVarargs
   @CanIgnoreReturnValue
   public final MetricsVerifier assertUpDownCounterWithAttributes(
-      String metricName,
-      String description,
-      String unit,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    return assertSumWithAttributes(
-        metricName, description, unit, /* isMonotonic= */ false, attributeGroupAssertions);
+      String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
+    return register(
+        metricName,
+        metric ->
+            metric
+                .hasDescription(description)
+                .hasUnit(unit)
+                .isUpDownCounter()
+                .hasDataPointsAttributes(attributes));
   }
 
   @CanIgnoreReturnValue
@@ -152,14 +165,10 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedGauge(
       String metricName, String description, String unit, List<String> types) {
-    return registerAssert(
+    return register(
         metricName,
         metric ->
-            assertThat(metric)
-                .hasDescription(description)
-                .hasUnit(unit)
-                .isGauge()
-                .hasTypedDataPoints(types));
+            metric.hasDescription(description).hasUnit(unit).isGauge().hasTypedDataPoints(types));
   }
 
   public void verify(List<Metric> metrics) {
@@ -193,44 +202,5 @@ public class MetricsVerifier {
     if (!assertionNames.isEmpty()) {
       fail("Metrics expected but not received: " + assertionNames);
     }
-  }
-
-  @SafeVarargs
-  @SuppressWarnings("CanIgnoreReturnValueSuggester")
-  private final MetricsVerifier assertSumWithAttributes(
-      String metricName,
-      String description,
-      String unit,
-      boolean isMonotonic,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    return registerAssert(
-        metricName,
-        metric -> {
-          assertThat(metric).hasDescription(description).hasUnit(unit).hasSum(isMonotonic);
-
-          assertAttributedPoints(
-              metricName, metric.getSum().getDataPointsList(), attributeGroupAssertions);
-        });
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void assertAttributedPoints(
-      String metricName,
-      List<NumberDataPoint> points,
-      Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
-    Consumer<Map<String, String>>[] assertions =
-        Arrays.stream(attributeGroupAssertions)
-            .map(assertion -> (Consumer<Map<String, String>>) m -> assertion.accept(assertThat(m)))
-            .toArray(Consumer[]::new);
-
-    assertThat(points)
-        .describedAs(METRIC_VERIFICATION_FAILURE_MESSAGE, metricName)
-        .extracting(
-            numberDataPoint ->
-                numberDataPoint.getAttributesList().stream()
-                    .collect(
-                        Collectors.toMap(
-                            KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
-        .satisfiesExactlyInAnyOrder(assertions);
   }
 }
