@@ -9,7 +9,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +34,13 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   private boolean descriptionChecked;
   private boolean unitChecked;
   private boolean typeChecked;
+  private boolean dataPointAttributesChecked;
 
   MetricAssert(Metric actual) {
     super(actual, MetricAssert.class);
   }
 
-  public void validateAssertions(){
+  public void validateAssertions() {
     info.description("missing assertion on description for metric '%s'", actual.getName());
     objects.assertEqual(info, descriptionChecked, true);
 
@@ -46,6 +49,9 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("missing assertion on type for metric '%s'", actual.getName());
     objects.assertEqual(info, typeChecked, true);
+
+    info.description("missing assertion on data point attributes for metric '%s", actual.getName());
+    objects.assertEqual(info, dataPointAttributesChecked, true);
   }
 
   /**
@@ -161,6 +167,8 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     }
     info.description("at least one set of data points expected for metric '%s'", actual.getName());
     integers.assertGreaterThan(info, count, 0);
+
+    dataPointAttributesChecked = true;
     return this;
   }
 
