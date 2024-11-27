@@ -22,11 +22,11 @@ public final class SpanDataDeserializer implements SignalDeserializer<SpanData> 
   }
 
   @Override
-  public List<SpanData> deserialize(byte[] source) {
+  public List<SpanData> deserialize(byte[] source) throws DeserializationException {
     try {
       return ProtoSpansDataMapper.getInstance().fromProto(TracesData.ADAPTER.decode(source));
     } catch (IOException e) {
-      throw new IllegalArgumentException(e);
+      throw new DeserializationException(e);
     }
   }
 
