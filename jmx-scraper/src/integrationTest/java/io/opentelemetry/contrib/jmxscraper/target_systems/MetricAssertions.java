@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
@@ -45,24 +44,6 @@ class MetricAssertions {
     assertThat(metric.getSum().getDataPointsList())
         .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
     assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
-  }
-
-  static void assertTypedGauge(
-      Metric metric, String name, String description, String unit, List<String> types) {
-    assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasGauge()).isTrue();
-    assertTypedPoints(metric.getGauge().getDataPointsList(), types);
-  }
-
-  static void assertTypedSum(
-      Metric metric, String name, String description, String unit, List<String> types) {
-    assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertThat(metric.hasSum()).isTrue();
-    assertTypedPoints(metric.getSum().getDataPointsList(), types);
   }
 
   @SafeVarargs
@@ -120,19 +101,6 @@ class MetricAssertions {
     assertThat(metric.getUnit()).isEqualTo(unit);
     assertThat(metric.hasGauge()).isTrue();
     assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
-    Consumer<MapAssert<String, String>>[] assertions =
-        types.stream()
-            .map(
-                type ->
-                    (Consumer<MapAssert<String, String>>)
-                        attrs -> attrs.containsOnly(entry("name", type)))
-            .toArray(Consumer[]::new);
-
-    assertAttributedPoints(points, assertions);
   }
 
   @SuppressWarnings("unchecked")
