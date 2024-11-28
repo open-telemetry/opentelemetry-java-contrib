@@ -50,10 +50,9 @@ public class MetricsVerifier {
         metricName,
         metric -> {
           MetricAssert metricAssert = assertThat(metric);
+          metricAssert.setStrict(strictMode);
           assertion.accept(metricAssert);
-          if (strictMode) {
-            metricAssert.validateAssertions();
-          }
+          metricAssert.strictCheck();
         });
     return this;
   }

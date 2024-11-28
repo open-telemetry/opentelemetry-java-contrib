@@ -31,6 +31,8 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   private static final Integers integers = Integers.instance();
   private static final Maps maps = Maps.instance();
 
+  private boolean strict;
+
   private boolean descriptionChecked;
   private boolean unitChecked;
   private boolean typeChecked;
@@ -40,20 +42,26 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     super(actual, MetricAssert.class);
   }
 
-  public void validateAssertions() {
-    info.description("missing assertion on description for metric '%s'", actual.getName());
-    objects.assertEqual(info, descriptionChecked, true);
-
-    info.description("missing assertion on unit for metric '%s'", actual.getName());
-    objects.assertEqual(info, unitChecked, true);
-
-    info.description("missing assertion on type for metric '%s'", actual.getName());
-    objects.assertEqual(info, typeChecked, true);
-
-    info.description("missing assertion on data point attributes for metric '%s", actual.getName());
-    objects.assertEqual(info, dataPointAttributesChecked, true);
+  public void setStrict(boolean strict) {
+    this.strict = strict;
   }
 
+  public void strictCheck() {
+    strictCheck("description", true, descriptionChecked);
+    strictCheck("unit", true, unitChecked);
+    strictCheck("type", true, typeChecked);
+    strictCheck("data point attributes", true, dataPointAttributesChecked);
+  }
+
+  private void strictCheck(String attribute, boolean expectedValue, boolean value) {
+    if(!strict) {
+      return;
+    }
+    String failMsgPrefix = expectedValue ? "duplicate" : "missing";
+    info.description("%s assertion on %s for metric '%s'", failMsgPrefix, attribute,
+        actual.getName());
+    objects.assertEqual(info, value, expectedValue);
+  }
   /**
    * Verifies metric description
    *
@@ -66,6 +74,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected description for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getDescription(), description);
+    strictCheck("description", false, descriptionChecked);
     descriptionChecked = true;
     return this;
   }
@@ -82,6 +91,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected unit for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getUnit(), unit);
+    strictCheck("unit", false, unitChecked);
     unitChecked = true;
     return this;
   }
@@ -97,6 +107,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("gauge expected for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.hasGauge(), true);
+    strictCheck("type", false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -123,6 +134,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert isCounter() {
     // counters have a monotonic sum as their value can't decrease
     hasSum(true);
+    strictCheck("type", false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -131,6 +143,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert isUpDownCounter() {
     // up down counters are non-monotonic as their value can increase & decrease
     hasSum(false);
+    strictCheck("type", false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -168,6 +181,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     info.description("at least one set of data points expected for metric '%s'", actual.getName());
     integers.assertGreaterThan(info, count, 0);
 
+    strictCheck("data point attributes", false, dataPointAttributesChecked);
     dataPointAttributesChecked = true;
     return this;
   }
