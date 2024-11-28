@@ -49,62 +49,102 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
                         entry("broker", "localhost")))
-        .assertUpDownCounterWithAttributes(
+        .add(
             "activemq.producer.count",
-            "The number of producers currently attached to the broker.",
-            "{producer}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertUpDownCounterWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The number of producers currently attached to the broker.")
+                    .hasUnit("{producer}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.connection.count",
-            "The total number of current connections.",
-            "{connection}",
-            entry("broker", "localhost"))
-        .assertGaugeWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The total number of current connections.")
+                    .hasUnit("{connection}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
             "activemq.memory.usage",
-            "The percentage of configured memory used.",
-            "%",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertGaugeWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The percentage of configured memory used.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.disk.store_usage",
-            "The percentage of configured disk used for persistent messages.",
-            "%",
-            entry("broker", "localhost"))
-        .assertGaugeWithAttributes(
+            metric ->
+                metric
+                    .hasDescription(
+                        "The percentage of configured disk used for persistent messages.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
             "activemq.disk.temp_usage",
-            "The percentage of configured disk used for non-persistent messages.",
-            "%",
-            entry("broker", "localhost"))
-        .assertUpDownCounterWithAttributes(
+            metric ->
+                metric
+                    .hasDescription(
+                        "The percentage of configured disk used for non-persistent messages.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
             "activemq.message.current",
-            "The current number of messages waiting to be consumed.",
-            "{message}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertCounterWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The current number of messages waiting to be consumed.")
+                    .hasUnit("{message}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.message.expired",
-            "The total number of messages not delivered because they expired.",
-            "{message}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertCounterWithAttributes(
+            metric ->
+                metric
+                    .hasDescription(
+                        "The total number of messages not delivered because they expired.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.message.enqueued",
-            "The total number of messages received by the broker.",
-            "{message}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertCounterWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The total number of messages received by the broker.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.message.dequeued",
-            "The total number of messages delivered to consumers.",
-            "{message}",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"))
-        .assertGaugeWithAttributes(
+            metric ->
+                metric
+                    .hasDescription("The total number of messages delivered to consumers.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")))
+        .add(
             "activemq.message.wait_time.avg",
-            "The average time a message was held on a destination.",
-            "ms",
-            entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-            entry("broker", "localhost"));
+            metric ->
+                metric
+                    .hasDescription("The average time a message was held on a destination.")
+                    .hasUnit("ms")
+                    .isGauge()
+                    .hasDataPointsAttributes(
+                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
+                        entry("broker", "localhost")));
   }
 }
