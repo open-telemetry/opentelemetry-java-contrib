@@ -54,14 +54,15 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   private void strictCheck(String attribute, boolean expectedValue, boolean value) {
-    if(!strict) {
+    if (!strict) {
       return;
     }
     String failMsgPrefix = expectedValue ? "duplicate" : "missing";
-    info.description("%s assertion on %s for metric '%s'", failMsgPrefix, attribute,
-        actual.getName());
+    info.description(
+        "%s assertion on %s for metric '%s'", failMsgPrefix, attribute, actual.getName());
     objects.assertEqual(info, value, expectedValue);
   }
+
   /**
    * Verifies metric description
    *
