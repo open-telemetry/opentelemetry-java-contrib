@@ -39,7 +39,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected MetricsVerifier createMetricsVerifier() {
     return MetricsVerifier.create()
-        .register(
+        .add(
             "activemq.consumer.count",
             metric ->
                 metric

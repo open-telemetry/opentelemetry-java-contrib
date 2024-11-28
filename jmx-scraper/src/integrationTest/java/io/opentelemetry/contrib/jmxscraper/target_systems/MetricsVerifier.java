@@ -45,7 +45,7 @@ public class MetricsVerifier {
   }
 
   @CanIgnoreReturnValue
-  public MetricsVerifier register(String metricName, Consumer<MetricAssert> assertion) {
+  public MetricsVerifier add(String metricName, Consumer<MetricAssert> assertion) {
     assertions.put(
         metricName,
         metric -> {
@@ -60,7 +60,7 @@ public class MetricsVerifier {
   // TODO: can now be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertGauge(String metricName, String description, String unit) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -73,7 +73,7 @@ public class MetricsVerifier {
   // TODO: can now be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertCounter(String metricName, String description, String unit) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -86,7 +86,7 @@ public class MetricsVerifier {
   // TODO: can now be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertUpDownCounter(String metricName, String description, String unit) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -101,7 +101,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public final MetricsVerifier assertGaugeWithAttributes( // only used in activemq
       String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -116,7 +116,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public final MetricsVerifier assertCounterWithAttributes(
       String metricName, String description, String unit, Map<String, String>... attributeSets) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -131,7 +131,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public final MetricsVerifier assertCounterWithAttributes(
       String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -146,7 +146,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public final MetricsVerifier assertUpDownCounterWithAttributes(
       String metricName, String description, String unit, Map.Entry<String, String>... attributes) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric
@@ -160,7 +160,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedCounter(
       String metricName, String description, String unit, List<String> types) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric.hasDescription(description).hasUnit(unit).isCounter().hasTypedDataPoints(types));
@@ -170,7 +170,7 @@ public class MetricsVerifier {
   @CanIgnoreReturnValue
   public MetricsVerifier assertTypedGauge(
       String metricName, String description, String unit, List<String> types) {
-    return register(
+    return add(
         metricName,
         metric ->
             metric.hasDescription(description).hasUnit(unit).isGauge().hasTypedDataPoints(types));

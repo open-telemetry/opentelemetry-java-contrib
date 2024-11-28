@@ -52,7 +52,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
                 "total number of collections that have occurred",
                 "1",
                 gcCollectionLabels)
-            .register(
+            .add(
                 "jvm.gc.collections.elapsed",
                 metric ->
                     metric
