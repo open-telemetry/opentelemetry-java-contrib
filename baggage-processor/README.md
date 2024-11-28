@@ -1,7 +1,7 @@
 # OpenTelemetry Baggage Span Processor
 
-The `BaggageSpanProcessor` and `BaggageLogRecordPRocessor` read entries stored in Baggage from the 
-parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as 
+The `BaggageSpanProcessor` and `BaggageLogRecordPRocessor` read entries stored in Baggage from the
+parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as
 attributes on start, respectively emit.
 
 Add this span and log processors to the tracer and logger providers.
@@ -51,7 +51,7 @@ new BaggageLogRecordProcessor(baggageKey -> pattern.matcher(baggageKey).matches(
 
 ## Usage with SDK auto-configuration
 
-If you are using the OpenTelemetry SDK auto-configuration, you can add the span and log baggage 
+If you are using the OpenTelemetry SDK auto-configuration, you can add the span and log baggage
 processors through configuration.
 
 | Property                                                           | Description                                                                                       |
