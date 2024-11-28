@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
@@ -26,11 +26,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterPro
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
-import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
-import io.opentelemetry.sdk.testing.assertj.TracesAssert;
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.time.Duration;
 import java.util.Collections;
@@ -51,18 +50,23 @@ class BaggageProcessorCustomizerTest {
 
   @Test
   void test_customizer() {
-    assertCustomizer(Collections.emptyMap(), span -> span.hasTotalAttributeCount(0));
+    assertCustomizer(
+        Collections.emptyMap(),
+        span -> assertThat(span).hasTotalAttributeCount(0),
+        logRecord -> assertThat(logRecord).hasTotalAttributeCount(0));
     Map<String, String> properties = new HashMap<>();
     properties.put("otel.java.experimental.span-attributes.copy-from-baggage.include", "key");
     properties.put("otel.java.experimental.log-attributes.copy-from-baggage.include", "key");
-    // TODO try use
-    //  AttributeAssertion attributeAssertion =
-    // OpenTelemetryAssertions.equalTo(AttributeKey.stringKey("key"), "value");
-    assertCustomizer(properties, span -> span.hasAttribute(AttributeKey.stringKey("key"), "value"));
+    assertCustomizer(
+        properties,
+        span -> assertThat(span.getAttributes()).containsEntry("key", "value"),
+        logRecord -> assertThat(logRecord.getAttributes()).containsEntry("key", "value"));
   }
 
   private static void assertCustomizer(
-      Map<String, String> properties, Consumer<SpanDataAssert> spanDataAssertConsumer) {
+      Map<String, String> properties,
+      Consumer<SpanData> spanDataRequirements,
+      Consumer<LogRecordData> logRecordRequirements) {
 
     InMemorySpanExporter spanExporter = InMemorySpanExporter.create();
     InMemoryLogRecordExporter logExporter = InMemoryLogRecordExporter.create();
@@ -72,16 +76,17 @@ class BaggageProcessorCustomizerTest {
       sdk.getTracer("test").spanBuilder("test").startSpan().end();
       sdk.getLogsBridge().get("test").logRecordBuilder().setBody("test").emit();
     }
-    // TODO verify log record attributes
+
     await()
         .atMost(Duration.ofSeconds(1))
         .untilAsserted(
             () -> {
-              TracesAssert.assertThat(spanExporter.getFinishedSpanItems())
-                  .hasTracesSatisfyingExactly(
-                      trace -> trace.hasSpansSatisfyingExactly(spanDataAssertConsumer));
-              List<LogRecordData> finishedLogRecordItems = logExporter.getFinishedLogRecordItems();
-                  assertThat(finishedLogRecordItems).hasSize(1);
+              assertThat(spanExporter.getFinishedSpanItems())
+                  .hasSize(1)
+                  .allSatisfy(spanDataRequirements);
+              assertThat(logExporter.getFinishedLogRecordItems())
+                  .hasSize(1)
+                  .allSatisfy(logRecordRequirements);
             });
   }
 
