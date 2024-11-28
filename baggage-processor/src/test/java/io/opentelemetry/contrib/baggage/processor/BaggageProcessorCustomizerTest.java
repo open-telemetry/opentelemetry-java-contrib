@@ -20,14 +20,19 @@ import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
+import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.assertj.TracesAssert;
+import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -38,16 +43,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class BaggageSpanProcessorCustomizerTest {
+class BaggageProcessorCustomizerTest {
 
   private static final String MEMORY_EXPORTER = "memory";
 
   @Test
   void test_customizer() {
     assertCustomizer(Collections.emptyMap(), span -> span.hasTotalAttributeCount(0));
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.java.experimental.span-attributes.copy-from-baggage.include", "key");
+    properties.put("otel.java.experimental.log-attributes.copy-from-baggage.include", "key");
+    // TODO try use
+    //  AttributeAssertion attributeAssertion = OpenTelemetryAssertions.equalTo(AttributeKey.stringKey("key"), "value");
     assertCustomizer(
-        Collections.singletonMap(
-            "otel.java.experimental.span-attributes.copy-from-baggage.include", "key"),
+        properties,
         span -> span.hasAttribute(AttributeKey.stringKey("key"), "value"));
   }
 
@@ -55,11 +64,14 @@ class BaggageSpanProcessorCustomizerTest {
       Map<String, String> properties, Consumer<SpanDataAssert> spanDataAssertConsumer) {
 
     InMemorySpanExporter spanExporter = InMemorySpanExporter.create();
+    InMemoryLogRecordExporter logExporter = InMemoryLogRecordExporter.create();
 
-    OpenTelemetrySdk sdk = getOpenTelemetrySdk(properties, spanExporter);
+    OpenTelemetrySdk sdk = getOpenTelemetrySdk(properties, spanExporter, logExporter);
     try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
       sdk.getTracer("test").spanBuilder("test").startSpan().end();
+      sdk.getLogsBridge().get("test").logRecordBuilder().setBody ("test").emit();
     }
+    // TODO verify log record attributes
     await()
         .atMost(Duration.ofSeconds(1))
         .untilAsserted(
@@ -70,9 +82,10 @@ class BaggageSpanProcessorCustomizerTest {
   }
 
   private static OpenTelemetrySdk getOpenTelemetrySdk(
-      Map<String, String> properties, InMemorySpanExporter spanExporter) {
+      Map<String, String> properties, InMemorySpanExporter spanExporter,
+      InMemoryLogRecordExporter logRecordExporter) {
     SpiHelper spiHelper =
-        SpiHelper.create(BaggageSpanProcessorCustomizerTest.class.getClassLoader());
+        SpiHelper.create(BaggageProcessorCustomizerTest.class.getClassLoader());
 
     AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder =
         AutoConfiguredOpenTelemetrySdk.builder()
@@ -88,7 +101,7 @@ class BaggageSpanProcessorCustomizerTest {
                         "otel.metrics.exporter",
                         "none",
                         "otel.logs.exporter",
-                        "none"))
+                        MEMORY_EXPORTER))
             .addPropertiesSupplier(() -> properties);
     AutoConfigureUtil.setComponentLoader(
         sdkBuilder,
@@ -110,6 +123,20 @@ class BaggageSpanProcessorCustomizerTest {
                           return MEMORY_EXPORTER;
                         }
                       });
+            } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
+              return Collections.singletonList(
+                  (T)
+                      new ConfigurableLogRecordExporterProvider() {
+                        @Override
+                        public LogRecordExporter createExporter(ConfigProperties configProperties) {
+                          return logRecordExporter;
+                        }
+
+                        @Override
+                        public String getName() {
+                          return MEMORY_EXPORTER;
+                        }
+                      });
             }
             return spiHelper.load(spiClass);
           }
@@ -120,7 +147,7 @@ class BaggageSpanProcessorCustomizerTest {
   @Test
   public void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
-        BaggageSpanProcessorCustomizer.createProcessor(Collections.singletonList("*"))) {
+        BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("*"))) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onStart(Context.current(), span);
         verify(span).setAttribute("key", "value");
@@ -132,7 +159,7 @@ class BaggageSpanProcessorCustomizerTest {
   public void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
-        BaggageSpanProcessorCustomizer.createProcessor(Collections.singletonList("key"))) {
+        BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("key"))) {
       try (Scope ignore =
           Baggage.current().toBuilder()
               .put("key", "value")
@@ -142,6 +169,35 @@ class BaggageSpanProcessorCustomizerTest {
         processor.onStart(Context.current(), span);
         verify(span).setAttribute("key", "value");
         verify(span, Mockito.never()).setAttribute("other", "value");
+      }
+    }
+  }
+
+  @Test
+  public void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(@Mock ReadWriteLogRecord logRecord) {
+    try (BaggageLogRecordProcessor processor =
+        BaggageProcessorCustomizer.createBaggageLogRecordProcessor(Collections.singletonList("*"))) {
+      try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
+        processor.onEmit(Context.current(), logRecord);
+        verify(logRecord).setAttribute(AttributeKey.stringKey("key"), "value");
+      }
+    }
+  }
+
+  @Test
+  public void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
+      @Mock ReadWriteLogRecord logRecord) {
+    try (BaggageLogRecordProcessor processor =
+        BaggageProcessorCustomizer.createBaggageLogRecordProcessor(Collections.singletonList("key"))) {
+      try (Scope ignore =
+          Baggage.current().toBuilder()
+              .put("key", "value")
+              .put("other", "value")
+              .build()
+              .makeCurrent()) {
+        processor.onEmit(Context.current(), logRecord);
+        verify(logRecord).setAttribute(AttributeKey.stringKey("key"), "value");
+        verify(logRecord, Mockito.never()).setAttribute(AttributeKey.stringKey("other"), "value");
       }
     }
   }
