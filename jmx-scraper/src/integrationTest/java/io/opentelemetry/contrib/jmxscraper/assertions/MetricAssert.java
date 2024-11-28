@@ -75,7 +75,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected description for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getDescription(), description);
-    strictCheck("description", /* expectedValue= */false, descriptionChecked);
+    strictCheck("description", /* expectedValue= */ false, descriptionChecked);
     descriptionChecked = true;
     return this;
   }
@@ -92,7 +92,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected unit for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getUnit(), unit);
-    strictCheck("unit", /* expectedValue= */false, unitChecked);
+    strictCheck("unit", /* expectedValue= */ false, unitChecked);
     unitChecked = true;
     return this;
   }
@@ -108,7 +108,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("gauge expected for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.hasGauge(), true);
-    strictCheck("type", /* expectedValue= */false, typeChecked);
+    strictCheck("type", /* expectedValue= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -135,7 +135,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert isCounter() {
     // counters have a monotonic sum as their value can't decrease
     hasSum(true);
-    strictCheck("type", /* expectedValue= */false, typeChecked);
+    strictCheck("type", /* expectedValue= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -144,7 +144,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert isUpDownCounter() {
     // up down counters are non-monotonic as their value can increase & decrease
     hasSum(false);
-    strictCheck("type", /* expectedValue= */false, typeChecked);
+    strictCheck("type", /* expectedValue= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -182,14 +182,13 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     info.description("at least one set of data points expected for metric '%s'", actual.getName());
     integers.assertGreaterThan(info, count, 0);
 
-    strictCheck("data point attributes", /* expectedValue= */false, dataPointAttributesChecked);
+    strictCheck("data point attributes", /* expectedValue= */ false, dataPointAttributesChecked);
     dataPointAttributesChecked = true;
     return this;
   }
 
   @CanIgnoreReturnValue
   public MetricAssert hasTypedDataPoints(Collection<String> types) {
-    // TODO: we could replace this with 'hasDataPointsAttributes'
     return checkDataPoints(
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);

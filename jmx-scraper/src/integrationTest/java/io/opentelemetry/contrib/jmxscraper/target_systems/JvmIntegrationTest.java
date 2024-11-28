@@ -44,38 +44,147 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "PS Survivor Space");
     List<String> gcCollectionLabels = Arrays.asList("PS MarkSweep", "PS Scavenge");
 
-    MetricsVerifier metricsVerifier =
-        MetricsVerifier.create()
-            .assertGauge("jvm.classes.loaded", "number of loaded classes", "1")
-            .assertTypedCounter(
-                "jvm.gc.collections.count",
-                "total number of collections that have occurred",
-                "1",
-                gcCollectionLabels)
-            .add(
-                "jvm.gc.collections.elapsed",
-                metric ->
-                    metric
-                        .hasDescription(
-                            "the approximate accumulated collection elapsed time in milliseconds")
-                        .hasUnit("ms")
-                        .isCounter()
-                        .hasTypedDataPoints(gcCollectionLabels))
-            .assertGauge("jvm.memory.heap.committed", "current heap usage", "by")
-            .assertGauge("jvm.memory.heap.init", "current heap usage", "by")
-            .assertGauge("jvm.memory.heap.max", "current heap usage", "by")
-            .assertGauge("jvm.memory.heap.used", "current heap usage", "by")
-            .assertGauge("jvm.memory.nonheap.committed", "current non-heap usage", "by")
-            .assertGauge("jvm.memory.nonheap.init", "current non-heap usage", "by")
-            .assertGauge("jvm.memory.nonheap.max", "current non-heap usage", "by")
-            .assertGauge("jvm.memory.nonheap.used", "current non-heap usage", "by")
-            .assertTypedGauge(
-                "jvm.memory.pool.committed", "current memory pool usage", "by", gcLabels)
-            .assertTypedGauge("jvm.memory.pool.init", "current memory pool usage", "by", gcLabels)
-            .assertTypedGauge("jvm.memory.pool.max", "current memory pool usage", "by", gcLabels)
-            .assertTypedGauge("jvm.memory.pool.used", "current memory pool usage", "by", gcLabels)
-            .assertGauge("jvm.threads.count", "number of threads", "1");
-
-    return metricsVerifier;
+    return MetricsVerifier.create()
+        .add(
+            "jvm.classes.loaded",
+            metric ->
+                metric
+                    .hasDescription("number of loaded classes")
+                    .hasUnit("1")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.gc.collections.count",
+            metric ->
+                metric
+                    .hasDescription("total number of collections that have occurred")
+                    .hasUnit("1")
+                    .isCounter()
+                    .hasTypedDataPoints(gcCollectionLabels))
+        .add(
+            "jvm.gc.collections.elapsed",
+            metric ->
+                metric
+                    .hasDescription(
+                        "the approximate accumulated collection elapsed time in milliseconds")
+                    .hasUnit("ms")
+                    .isCounter()
+                    .hasTypedDataPoints(gcCollectionLabels))
+        .add(
+            "jvm.memory.heap.committed",
+            metric ->
+                metric
+                    .hasDescription("current heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.heap.init",
+            metric ->
+                metric
+                    .hasDescription("current heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.heap.max",
+            metric ->
+                metric
+                    .hasDescription("current heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.heap.used",
+            metric ->
+                metric
+                    .hasDescription("current heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.nonheap.committed",
+            metric ->
+                metric
+                    .hasDescription("current non-heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.nonheap.init",
+            metric ->
+                metric
+                    .hasDescription("current non-heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.nonheap.max",
+            metric ->
+                metric
+                    .hasDescription("current non-heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.nonheap.used",
+            metric ->
+                metric
+                    .hasDescription("current non-heap usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "jvm.memory.pool.committed",
+            metric ->
+                metric
+                    .hasDescription("current memory pool usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasTypedDataPoints(gcLabels))
+        .add(
+            "jvm.memory.pool.init",
+            metric ->
+                metric
+                    .hasDescription("current memory pool usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasTypedDataPoints(gcLabels))
+        .add(
+            "jvm.memory.pool.max",
+            metric ->
+                metric
+                    .hasDescription("current memory pool usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasTypedDataPoints(gcLabels))
+        .add(
+            "jvm.memory.pool.used",
+            metric ->
+                metric
+                    .hasDescription("current memory pool usage")
+                    .hasUnit("by")
+                    .isGauge()
+                    .hasTypedDataPoints(gcLabels))
+        .add(
+            "jvm.threads.count",
+            metric ->
+                metric
+                    .hasDescription("number of threads")
+                    .hasUnit("1")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes());
   }
+
+  /*
+     List<String> gcLabels =
+       Arrays.asList(
+           "Code Cache",
+           "PS Eden Space",
+           "PS Old Gen",
+           "Metaspace",
+           "Compressed Class Space",
+           "PS Survivor Space");
+   List<String> gcCollectionLabels = Arrays.asList("PS MarkSweep", "PS Scavenge");
+  */
 }

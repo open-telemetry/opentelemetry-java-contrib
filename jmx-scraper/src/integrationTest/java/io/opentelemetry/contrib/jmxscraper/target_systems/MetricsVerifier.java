@@ -70,6 +70,15 @@ public class MetricsVerifier {
                 .hasDataPointsWithoutAttributes());
   }
 
+  @CanIgnoreReturnValue
+  public MetricsVerifier assertTypedGauge(
+      String metricName, String description, String unit, List<String> types) {
+    return add(
+        metricName,
+        metric ->
+            metric.hasDescription(description).hasUnit(unit).isGauge().hasTypedDataPoints(types));
+  }
+
   // TODO: can now be inlined
   @CanIgnoreReturnValue
   public MetricsVerifier assertCounter(String metricName, String description, String unit) {
@@ -164,16 +173,6 @@ public class MetricsVerifier {
         metricName,
         metric ->
             metric.hasDescription(description).hasUnit(unit).isCounter().hasTypedDataPoints(types));
-  }
-
-  // TODO: can be inlined
-  @CanIgnoreReturnValue
-  public MetricsVerifier assertTypedGauge(
-      String metricName, String description, String unit, List<String> types) {
-    return add(
-        metricName,
-        metric ->
-            metric.hasDescription(description).hasUnit(unit).isGauge().hasTypedDataPoints(types));
   }
 
   public void verify(List<Metric> metrics) {
