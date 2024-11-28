@@ -11,6 +11,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -18,10 +19,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -40,9 +40,9 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   private final OpenTelemetrySdk openTelemetrySdk;
 
-  private Resource resource;
+  private final Resource resource;
 
-  private ConfigProperties configProperties;
+  private final ConfigProperties configProperties;
 
   private final Tracer tracer;
 
@@ -55,37 +55,26 @@ public final class OpenTelemetrySdkService implements Closeable {
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
-    this.resource = Resource.empty();
-    this.configProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
-
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
             .addPropertiesCustomizer(
                 OpenTelemetrySdkService::requireExplicitConfigOfTheOtlpExporter)
-            .addPropertiesCustomizer(
-                config -> {
-                  // keep a reference to the computed config properties for future use in the
-                  // extension
-                  this.configProperties = config;
-                  return Collections.emptyMap();
-                })
-            .addResourceCustomizer(
-                (res, configProperties) -> {
-                  // keep a reference to the computed Resource for future use in the extension
-                  this.resource = Resource.builder().putAll(res).build();
-                  return this.resource;
-                })
             .disableShutdownHook()
             .build();
 
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
+    this.configProperties =
+        Optional.ofNullable(AutoConfigureUtil.getConfig(autoConfiguredOpenTelemetrySdk))
+            .orElseGet(() -> DefaultConfigProperties.createFromMap(Collections.emptyMap()));
+    this.resource =
+        Optional.ofNullable(AutoConfigureUtil2.getResource(autoConfiguredOpenTelemetrySdk))
+            .orElseGet(Resource::getDefault);
 
     logger.debug("OpenTelemetry: OpenTelemetrySdkService initialized, resource:{}", resource);
 
-    // TODO should we replace `getBooleanConfig(name)` by `configProperties.getBoolean(name)`?
-    Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
-    this.mojosInstrumentationEnabled = mojoSpansEnabled == null || mojoSpansEnabled;
+    this.mojosInstrumentationEnabled =
+        configProperties.getBoolean("otel.instrumentation.maven.mojo.enabled", true);
 
     this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
   }
@@ -167,18 +156,5 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   public boolean isMojosInstrumentationEnabled() {
     return mojosInstrumentationEnabled;
-  }
-
-  @Nullable
-  private static Boolean getBooleanConfig(String name) {
-    String value = System.getProperty(name);
-    if (value != null) {
-      return Boolean.parseBoolean(value);
-    }
-    value = System.getenv(name.toUpperCase(Locale.ROOT).replace('.', '_'));
-    if (value != null) {
-      return Boolean.parseBoolean(value);
-    }
-    return null;
   }
 }
