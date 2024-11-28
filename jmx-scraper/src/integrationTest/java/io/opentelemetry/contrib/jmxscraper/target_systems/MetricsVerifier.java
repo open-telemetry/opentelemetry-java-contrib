@@ -29,7 +29,7 @@ public class MetricsVerifier {
   /**
    * Create instance of MetricsVerifier configured to fail verification if any metric was not
    * verified because there is no assertion defined for it. This behavior can be changed by calling
-   * allowingExtraMetrics() method.
+   * {@link #disableStrictMode()} method.
    *
    * @return new instance of MetricsVerifier
    * @see #disableStrictMode()
@@ -38,12 +38,29 @@ public class MetricsVerifier {
     return new MetricsVerifier();
   }
 
+  /**
+   * Disable strict checks of metric assertions. It means that all metrics checks added after
+   * calling this method will not enforce asserting all metric properties and will not detect
+   * duplicate property assertions. Also, there will be no error reported if any of metrics was
+   * skipped because no assertion was added for it.
+   *
+   * @return this
+   * @see #verify(List)
+   * @see #add(String, Consumer)
+   */
   @CanIgnoreReturnValue
   public MetricsVerifier disableStrictMode() {
     strictMode = false;
     return this;
   }
 
+  /**
+   * Add assertion for given metric
+   *
+   * @param metricName name of metric to be verified by provided assertion
+   * @param assertion an assertion to verify properties of the metric
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricsVerifier add(String metricName, Consumer<MetricAssert> assertion) {
     assertions.put(
@@ -57,6 +74,15 @@ public class MetricsVerifier {
     return this;
   }
 
+  /**
+   * Execute all defined assertions against provided list of metrics. Error is reported if any of
+   * defined assertions failed. Error is also reported if any of expected metrics was not present in
+   * the metrics list, unless strict mode is disabled with {@link #disableStrictMode()}.
+   *
+   * @param metrics list of metrics to be verified
+   * @see #add(String, Consumer)
+   * @see #disableStrictMode()
+   */
   public void verify(List<Metric> metrics) {
     verifyAllExpectedMetricsWereReceived(metrics);
 
@@ -78,7 +104,6 @@ public class MetricsVerifier {
     }
   }
 
-  @SuppressWarnings("SystemOut")
   private void verifyAllExpectedMetricsWereReceived(List<Metric> metrics) {
     Set<String> receivedMetricNames =
         metrics.stream().map(Metric::getName).collect(Collectors.toSet());

@@ -47,20 +47,22 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   public void strictCheck() {
-    strictCheck("description", /* expectedValue= */ true, descriptionChecked);
-    strictCheck("unit", /* expectedValue= */ true, unitChecked);
-    strictCheck("type", /* expectedValue= */ true, typeChecked);
-    strictCheck("data point attributes", /* expectedValue= */ true, dataPointAttributesChecked);
+    strictCheck("description", /* expectedCheckStatus= */ true, descriptionChecked);
+    strictCheck("unit", /* expectedCheckStatus= */ true, unitChecked);
+    strictCheck("type", /* expectedCheckStatus= */ true, typeChecked);
+    strictCheck(
+        "data point attributes", /* expectedCheckStatus= */ true, dataPointAttributesChecked);
   }
 
-  private void strictCheck(String attribute, boolean expectedValue, boolean value) {
+  private void strictCheck(
+      String metricProperty, boolean expectedCheckStatus, boolean actualCheckStatus) {
     if (!strict) {
       return;
     }
-    String failMsgPrefix = expectedValue ? "duplicate" : "missing";
+    String failMsgPrefix = expectedCheckStatus ? "duplicate" : "missing";
     info.description(
-        "%s assertion on %s for metric '%s'", failMsgPrefix, attribute, actual.getName());
-    objects.assertEqual(info, value, expectedValue);
+        "%s assertion on %s for metric '%s'", failMsgPrefix, metricProperty, actual.getName());
+    objects.assertEqual(info, actualCheckStatus, expectedCheckStatus);
   }
 
   /**
@@ -75,7 +77,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected description for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getDescription(), description);
-    strictCheck("description", /* expectedValue= */ false, descriptionChecked);
+    strictCheck("description", /* expectedCheckStatus= */ false, descriptionChecked);
     descriptionChecked = true;
     return this;
   }
@@ -92,13 +94,13 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("unexpected unit for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.getUnit(), unit);
-    strictCheck("unit", /* expectedValue= */ false, unitChecked);
+    strictCheck("unit", /* expectedCheckStatus= */ false, unitChecked);
     unitChecked = true;
     return this;
   }
 
   /**
-   * Verifies the metric to be a gauge
+   * Verifies the metric is a gauge
    *
    * @return this
    */
@@ -108,7 +110,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
     info.description("gauge expected for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.hasGauge(), true);
-    strictCheck("type", /* expectedValue= */ false, typeChecked);
+    strictCheck("type", /* expectedCheckStatus= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -135,16 +137,21 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert isCounter() {
     // counters have a monotonic sum as their value can't decrease
     hasSum(true);
-    strictCheck("type", /* expectedValue= */ false, typeChecked);
+    strictCheck("type", /* expectedCheckStatus= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
 
+  /**
+   * Verifies the metric is an up-down counter
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert isUpDownCounter() {
     // up down counters are non-monotonic as their value can increase & decrease
     hasSum(false);
-    strictCheck("type", /* expectedValue= */ false, typeChecked);
+    strictCheck("type", /* expectedCheckStatus= */ false, typeChecked);
     typeChecked = true;
     return this;
   }
@@ -169,7 +176,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   @CanIgnoreReturnValue
   private MetricAssert checkDataPoints(Consumer<List<NumberDataPoint>> listConsumer) {
     // in practice usually one set of data points is provided but the
-    // protobuf does not enforce that so we have to ensure checking at least one
+    // protobuf does not enforce that, so we have to ensure checking at least one
     int count = 0;
     if (actual.hasGauge()) {
       count++;
@@ -182,7 +189,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     info.description("at least one set of data points expected for metric '%s'", actual.getName());
     integers.assertGreaterThan(info, count, 0);
 
-    strictCheck("data point attributes", /* expectedValue= */ false, dataPointAttributesChecked);
+    strictCheck("data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
     dataPointAttributesChecked = true;
     return this;
   }
@@ -295,7 +302,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   /**
-   * map equality utility
+   * Map equality utility
    *
    * @param m1 first map
    * @param m2 second map

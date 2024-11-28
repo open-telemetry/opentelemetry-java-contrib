@@ -41,10 +41,7 @@ class MetricAssertions {
     assertThat(metric.hasSum()).isTrue();
     assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
 
-    assertThat(metric)
-        .hasDescription(description)
-        .hasUnit(unit)
-        .hasDataPointsWithoutAttributes();
+    assertThat(metric).hasDescription(description).hasUnit(unit).hasDataPointsWithoutAttributes();
   }
 
   @SafeVarargs
@@ -86,9 +83,7 @@ class MetricAssertions {
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
 
     assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric)
-        .hasDescription(description)
-        .hasUnit(unit);
+    assertThat(metric).hasDescription(description).hasUnit(unit);
 
     assertThat(metric.hasSum()).isTrue();
     assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
@@ -104,10 +99,7 @@ class MetricAssertions {
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertThat(metric.getName()).isEqualTo(name);
 
-    assertThat(metric)
-        .hasDescription(description)
-        .hasUnit(unit)
-        .isGauge();
+    assertThat(metric).hasDescription(description).hasUnit(unit).isGauge();
 
     assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
   }
