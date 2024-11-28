@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
@@ -23,6 +24,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.testing.assertj.SpanDataAssert;
 import io.opentelemetry.sdk.testing.assertj.TracesAssert;
@@ -74,10 +76,13 @@ class BaggageProcessorCustomizerTest {
     await()
         .atMost(Duration.ofSeconds(1))
         .untilAsserted(
-            () ->
-                TracesAssert.assertThat(spanExporter.getFinishedSpanItems())
-                    .hasTracesSatisfyingExactly(
-                        trace -> trace.hasSpansSatisfyingExactly(spanDataAssertConsumer)));
+            () -> {
+              TracesAssert.assertThat(spanExporter.getFinishedSpanItems())
+                  .hasTracesSatisfyingExactly(
+                      trace -> trace.hasSpansSatisfyingExactly(spanDataAssertConsumer));
+              List<LogRecordData> finishedLogRecordItems = logExporter.getFinishedLogRecordItems();
+                  assertThat(finishedLogRecordItems).hasSize(1);
+            });
   }
 
   private static OpenTelemetrySdk getOpenTelemetrySdk(
@@ -91,9 +96,11 @@ class BaggageProcessorCustomizerTest {
             .addPropertiesSupplier(
                 () ->
                     ImmutableMap.of(
-                        // We set the export interval of the spans to 100 ms. The default value is 5
+                        // We set the export interval of the spans to 10 ms. The default value is 5
                         // seconds.
-                        "otel.bsp.schedule.delay",
+                        "otel.bsp.schedule.delay", // span exporter
+                        "10",
+                        "otel.blrp.schedule.delay", // log exporter
                         "10",
                         "otel.traces.exporter",
                         MEMORY_EXPORTER,
