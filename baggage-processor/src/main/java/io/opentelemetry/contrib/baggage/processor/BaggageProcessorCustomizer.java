@@ -58,6 +58,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
 
     sdkLoggerProviderBuilder.addLogRecordProcessor(createBaggageLogRecordProcessor(keys));
   }
+
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
     if (keys.size() == 1 && keys.get(0).equals("*")) {
       return BaggageLogRecordProcessor.allowAllBaggageKeys();
