@@ -58,7 +58,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
       }
     }

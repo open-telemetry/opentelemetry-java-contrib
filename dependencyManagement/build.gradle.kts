@@ -12,11 +12,11 @@ val otelInstrumentationVersion = "2.10.0-alpha"
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.18.1",
   "com.google.guava:guava-bom:33.3.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.30.1",
+  "com.linecorp.armeria:armeria-bom:1.31.1",
   "org.junit:junit-bom:5.11.3",
   "io.grpc:grpc-bom:1.68.1",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
-  "org.testcontainers:testcontainers-bom:1.20.3"
+  "org.testcontainers:testcontainers-bom:1.20.4"
 )
 
 val autoServiceVersion = "1.1.1"
@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
-  "io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha",
+  "io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha",
   // these two constraints can be removed once the opentelemetry-instrumentation-bom-alpha
   // is updated to contain the latest version of opentelemetry-semconv
   "io.opentelemetry.semconv:opentelemetry-semconv:${semConvVersion}",
@@ -64,7 +64,7 @@ val DEPENDENCIES = listOf(
   "org.junit-pioneer:junit-pioneer:1.9.1",
   "org.skyscreamer:jsonassert:1.5.3",
   "org.apache.kafka:kafka-clients:3.9.0",
-  "org.testcontainers:kafka:1.20.3",
+  "org.testcontainers:kafka:1.20.4",
   "com.lmax:disruptor:3.4.4",
   "org.jctools:jctools-core:4.0.5",
   "tools.profiler:async-profiler:3.0",

@@ -10,10 +10,12 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.sdk.common.Clock;
@@ -88,12 +90,19 @@ class FromDiskExporterImplTest {
     assertThat(new File(rootDir, STORAGE_FOLDER_NAME).exists()).isTrue();
   }
 
+  @Test
+  void whenDeserializationFails_returnFalse() throws IOException {
+    doThrow(DeserializationException.class).when(deserializer).deserialize(any());
+
+    assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isFalse();
+  }
+
   private void createDummyFile() throws IOException {
     File file = new File(rootDir, STORAGE_FOLDER_NAME + "/" + 1000L);
     Files.write(file.toPath(), singletonList("First line"));
   }
 
-  private void setUpSerializer() {
+  private void setUpSerializer() throws DeserializationException {
     deserializer = mock();
     when(deserializer.deserialize(any())).thenReturn(deserializedData);
   }

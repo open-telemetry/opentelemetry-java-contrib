@@ -2,7 +2,7 @@
 
 ## Declarative configuration
 
-The following samplers support [declarative configuration](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/configuration#declarative-configuration):
+The following samplers support [declarative configuration](https://opentelemetry.io/docs/languages/java/configuration/#declarative-configuration):
 
 * `RuleBasedRoutingSampler`
 

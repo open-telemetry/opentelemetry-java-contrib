@@ -6,12 +6,15 @@
 package io.opentelemetry.contrib.inferredspans;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -34,6 +37,8 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
   static final String INTERVAL_OPTION = "otel.inferred.spans.interval";
   static final String DURATION_OPTION = "otel.inferred.spans.duration";
   static final String LIB_DIRECTORY_OPTION = "otel.inferred.spans.lib.directory";
+  static final String PARENT_OVERRIDE_HANDLER_OPTION =
+      "otel.inferred.spans.parent.override.handler";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
@@ -56,6 +61,12 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
             applier.applyDuration(DURATION_OPTION, builder::profilingDuration);
             applier.applyString(LIB_DIRECTORY_OPTION, builder::profilerLibDirectory);
 
+            String parentOverrideHandlerName = properties.getString(PARENT_OVERRIDE_HANDLER_OPTION);
+            if (parentOverrideHandlerName != null && !parentOverrideHandlerName.isEmpty()) {
+              builder.parentOverrideHandler(
+                  constructParentOverrideHandler(parentOverrideHandlerName));
+            }
+
             providerBuilder.addSpanProcessor(builder.build());
           } else {
             log.finest(
@@ -63,6 +74,16 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
           }
           return providerBuilder;
         });
+  }
+
+  @SuppressWarnings("unchecked")
+  private static BiConsumer<SpanBuilder, SpanContext> constructParentOverrideHandler(String name) {
+    try {
+      Class<?> clazz = Class.forName(name);
+      return (BiConsumer<SpanBuilder, SpanContext>) clazz.getConstructor().newInstance();
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Could not construct parent override handler", e);
+    }
   }
 
   private static class PropertiesApplier {

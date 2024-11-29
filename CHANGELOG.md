@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## Version 1.41.0 (2024-11-21)
+
+### Inferred spans
+
+- Allow customization of parent-override behavior
+  ([#1533](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1533))
+
+### Telemetry processors
+
+- Add LogRecordProcessor to record event log records as span events
+  ([#1551](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1551))
+
 ## Version 1.40.0 (2024-10-18)
 
 ### AWS X-Ray SDK support

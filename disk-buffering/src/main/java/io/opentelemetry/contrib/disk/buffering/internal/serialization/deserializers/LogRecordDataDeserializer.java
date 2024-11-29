@@ -22,11 +22,11 @@ public final class LogRecordDataDeserializer implements SignalDeserializer<LogRe
   }
 
   @Override
-  public List<LogRecordData> deserialize(byte[] source) {
+  public List<LogRecordData> deserialize(byte[] source) throws DeserializationException {
     try {
       return ProtoLogsDataMapper.getInstance().fromProto(LogsData.ADAPTER.decode(source));
     } catch (IOException e) {
-      throw new IllegalArgumentException(e);
+      throw new DeserializationException(e);
     }
   }
 

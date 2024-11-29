@@ -53,7 +53,7 @@ wire {
   java {}
 
   sourcePath {
-    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.1.0-alpha")
+    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
   }
 
   root(
