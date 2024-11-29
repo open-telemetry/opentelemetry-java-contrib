@@ -175,16 +175,4 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
                     .isGauge()
                     .hasDataPointsWithoutAttributes());
   }
-
-  /*
-     List<String> gcLabels =
-       Arrays.asList(
-           "Code Cache",
-           "PS Eden Space",
-           "PS Old Gen",
-           "Metaspace",
-           "Compressed Class Space",
-           "PS Survivor Space");
-   List<String> gcCollectionLabels = Arrays.asList("PS MarkSweep", "PS Scavenge");
-  */
 }
