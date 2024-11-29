@@ -189,7 +189,8 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     info.description("at least one set of data points expected for metric '%s'", actual.getName());
     integers.assertGreaterThan(info, count, 0);
 
-    strictCheck("data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
+    strictCheck(
+        "data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
     dataPointAttributesChecked = true;
     return this;
   }
