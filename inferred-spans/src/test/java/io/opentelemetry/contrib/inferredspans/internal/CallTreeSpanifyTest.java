@@ -48,7 +48,10 @@ class CallTreeSpanifyTest {
       setup.profiler.setProfilingSessionOngoing(true);
       CallTree.Root callTree =
           CallTreeTest.getCallTree(setup, new String[] {" dd   ", " cc   ", " bbb  ", "aaaaee"});
-      assertThat(callTree.spanify(nanoClock, setup.sdk.getTracer("dummy-tracer"))).isEqualTo(4);
+      assertThat(
+              callTree.spanify(
+                  nanoClock, setup.sdk.getTracer("dummy-tracer"), CallTree.DEFAULT_PARENT_OVERRIDE))
+          .isEqualTo(4);
       assertThat(setup.getSpans()).hasSize(5);
       assertThat(setup.getSpans().stream().map(SpanData::getName))
           .containsExactly(
@@ -158,7 +161,8 @@ class CallTreeSpanifyTest {
                     .build());
 
     try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
-      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+      root.spanify(
+          nanoClock, outputSdk.getTracer("dummy-tracer"), CallTree.DEFAULT_PARENT_OVERRIDE);
 
       List<SpanData> spans = exporter.getFinishedSpanItems();
       assertThat(spans).hasSize(2);
@@ -206,7 +210,8 @@ class CallTreeSpanifyTest {
                     .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                     .build());
     try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
-      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+      root.spanify(
+          nanoClock, outputSdk.getTracer("dummy-tracer"), CallTree.DEFAULT_PARENT_OVERRIDE);
 
       List<SpanData> spans = exporter.getFinishedSpanItems();
       assertThat(spans).hasSize(1);
@@ -249,7 +254,8 @@ class CallTreeSpanifyTest {
                     .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                     .build());
     try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
-      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+      root.spanify(
+          nanoClock, outputSdk.getTracer("dummy-tracer"), CallTree.DEFAULT_PARENT_OVERRIDE);
 
       List<SpanData> spans = exporter.getFinishedSpanItems();
       assertThat(spans).hasSize(1);

@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -32,7 +33,7 @@ public class LogRecordToDiskExporter implements LogRecordExporter {
       LogRecordExporter delegate, StorageConfiguration config) throws IOException {
     ToDiskExporter<LogRecordData> toDisk =
         ToDiskExporter.<LogRecordData>builder()
-            .setFolderName("logs")
+            .setFolderName(SignalTypes.logs.name())
             .setStorageConfiguration(config)
             .setSerializer(SignalSerializer.ofLogs())
             .setExportFunction(delegate::export)

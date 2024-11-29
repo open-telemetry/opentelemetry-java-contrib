@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -42,7 +43,7 @@ public class MetricToDiskExporter implements MetricExporter {
       throws IOException {
     ToDiskExporter<MetricData> toDisk =
         ToDiskExporter.<MetricData>builder()
-            .setFolderName("metrics")
+            .setFolderName(SignalTypes.metrics.name())
             .setStorageConfiguration(config)
             .setSerializer(SignalSerializer.ofMetrics())
             .setExportFunction(delegate::export)

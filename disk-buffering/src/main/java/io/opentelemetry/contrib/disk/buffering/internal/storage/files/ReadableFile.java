@@ -9,6 +9,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.Cloc
 
 import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
@@ -23,6 +24,7 @@ import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Reads from a file and updates it in parallel in order to avoid re-reading the same items later.
@@ -34,7 +36,7 @@ import javax.annotation.Nullable;
  * <p>More information on the overall storage process in the CONTRIBUTING.md file.
  */
 public final class ReadableFile implements FileOperations {
-  private final File file;
+  @NotNull private final File file;
   private final int originalFileSize;
   private final StreamReader reader;
   private final FileTransferUtil fileTransferUtil;
@@ -82,7 +84,7 @@ public final class ReadableFile implements FileOperations {
    *     If the processing function returns TRUE, then the provided line will be deleted from the
    *     source file. If the function returns FALSE, no changes will be applied to the source file.
    */
-  public synchronized ReadableResult readAndProcess(Function<byte[], Boolean> processing)
+  public synchronized ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
       throws IOException {
     if (isClosed.get()) {
       return ReadableResult.FAILED;
@@ -96,20 +98,25 @@ public final class ReadableFile implements FileOperations {
       cleanUp();
       return ReadableResult.FAILED;
     }
-    if (processing.apply(read.content)) {
-      unconsumedResult = null;
-      readBytes += read.totalReadLength;
-      int amountOfBytesToTransfer = originalFileSize - readBytes;
-      if (amountOfBytesToTransfer > 0) {
-        fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
-      } else {
+    switch (processing.apply(read.content)) {
+      case SUCCEEDED:
+        unconsumedResult = null;
+        readBytes += read.totalReadLength;
+        int amountOfBytesToTransfer = originalFileSize - readBytes;
+        if (amountOfBytesToTransfer > 0) {
+          fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
+        } else {
+          cleanUp();
+        }
+        return ReadableResult.SUCCEEDED;
+      case TRY_LATER:
+        unconsumedResult = read;
+        return ReadableResult.TRY_LATER;
+      case CONTENT_INVALID:
         cleanUp();
-      }
-      return ReadableResult.SUCCEEDED;
-    } else {
-      unconsumedResult = read;
-      return ReadableResult.PROCESSING_FAILED;
+        return ReadableResult.FAILED;
     }
+    return ReadableResult.FAILED;
   }
 
   @Nullable
@@ -140,6 +147,7 @@ public final class ReadableFile implements FileOperations {
     return isClosed.get();
   }
 
+  @NotNull
   @Override
   public File getFile() {
     return file;
@@ -169,5 +177,10 @@ public final class ReadableFile implements FileOperations {
         out.write(buffer, 0, lengthRead);
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return "ReadableFile{" + "file=" + file + '}';
   }
 }

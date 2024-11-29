@@ -1,0 +1,146 @@
+rules:
+
+  # Compaction task
+  - bean: org.apache.cassandra.metrics:type=Compaction,name=CompletedTasks
+    mapping:
+      Value:
+        metric: cassandra.compaction.tasks.completed
+        type: counter
+        unit: "1"
+        desc: Number of completed compactions since server [re]start
+
+  - bean: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks
+    mapping:
+      Value:
+        metric: cassandra.compaction.tasks.pending
+        type: gauge
+        unit: "1"
+        desc: Estimated number of compactions remaining to perform
+
+  # Storage
+  - bean: org.apache.cassandra.metrics:type=Storage,name=Load
+    mapping:
+      Count:
+        metric: cassandra.storage.load.count
+        type: updowncounter
+        unit: by
+        desc: Size of the on disk data size this node manages
+
+  - bean: org.apache.cassandra.metrics:type=Storage,name=TotalHints
+    mapping:
+      Count:
+        metric: cassandra.storage.total_hints.count
+        type: counter
+        unit: "1"
+        desc: Number of hint messages written to this node since [re]start
+
+  - bean: org.apache.cassandra.metrics:type=Storage,name=TotalHintsInProgress
+    mapping:
+      Count:
+        metric: cassandra.storage.total_hints.in_progress.count
+        type: updowncounter
+        unit: "1"
+        desc: Number of hints attempting to be sent currently
+
+  # Client latency
+  - bean: org.apache.cassandra.metrics:type=ClientRequest,scope=RangeSlice,name=Latency
+    prefix: cassandra.client.request.range_slice.latency.
+    unit: us
+    type: gauge
+    mapping:
+      50thPercentile:
+        metric: 50p
+        desc: Token range read request latency - 50th percentile
+      99thPercentile:
+        metric: 99p
+        desc: Token range read request latency - 99th percentile
+      Max:
+        metric: max
+        desc: Maximum token range read request latency
+
+  - bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency
+    prefix: cassandra.client.request.read.latency.
+    unit: us
+    type: gauge
+    mapping:
+      50thPercentile:
+        metric: 50p
+        desc: Standard read request latency - 50th percentile
+      99thPercentile:
+        metric: 99p
+        desc: Standard read request latency - 99th percentile
+      Max:
+        metric: max
+        desc: Maximum standard read request latency
+
+  - bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
+    prefix: cassandra.client.request.write.latency.
+    unit: us
+    type: gauge
+    mapping:
+      50thPercentile:
+        metric: 50p
+        desc: Regular write request latency - 50th percentile
+      99thPercentile:
+        metric: 99p
+        desc: Regular write request latency - 99th percentile
+      Max:
+        metric: max
+        desc: Maximum regular write request latency
+
+  # Client request count
+  - beans:
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=RangeSlice,name=Latency
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
+    metricAttribute:
+      operation: param(scope)
+    mapping:
+      Count:
+        metric: cassandra.client.request.count
+        type: counter
+        unit: "1"
+        desc: Number of requests by operation
+
+  # Client error count
+  - beans:
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=RangeSlice,name=Unavailables
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Unavailables
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Unavailables
+    metricAttribute:
+      operation: param(scope)
+      status: const(Unavailable)
+    mapping:
+      Count:
+        metric: cassandra.client.request.error.count
+        type: counter
+        unit: "1"
+        desc: Number of request errors by operation
+
+  - beans:
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=RangeSlice,name=Timeouts
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Timeouts
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Timeouts
+    metricAttribute:
+      operation: param(scope)
+      status: const(Timeout)
+    mapping:
+      Count:
+        metric: cassandra.client.request.error.count
+        type: counter
+        unit: "1"
+        desc: Number of request errors by operation
+
+  - beans:
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=RangeSlice,name=Failures
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Failures
+      - org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Failures
+    metricAttribute:
+      operation: param(scope)
+      status: const(Failure)
+    mapping:
+      Count:
+        metric: cassandra.client.request.error.count
+        type: counter
+        unit: "1"
+        desc: Number of request errors by operation

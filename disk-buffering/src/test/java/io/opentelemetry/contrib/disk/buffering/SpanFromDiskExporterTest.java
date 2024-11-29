@@ -23,6 +23,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFi
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
@@ -84,11 +85,14 @@ class SpanFromDiskExporterTest {
     List<SpanData> spans = Arrays.asList(span1, span2);
 
     SignalSerializer<SpanData> serializer = SignalSerializer.ofSpans();
-    File subdir = new File(config.getRootDir(), "spans");
+    File subdir = new File(config.getRootDir(), SignalTypes.spans.name());
     assertTrue(subdir.mkdir());
 
     Storage storage =
-        Storage.builder().setStorageConfiguration(config).setFolderName("spans").build();
+        Storage.builder()
+            .setStorageConfiguration(config)
+            .setFolderName(SignalTypes.spans.name())
+            .build();
     storage.write(serializer.serialize(spans));
     storage.close();
     return spans;

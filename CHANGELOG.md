@@ -2,6 +2,89 @@
 
 ## Unreleased
 
+## Version 1.41.0 (2024-11-21)
+
+### Inferred spans
+
+- Allow customization of parent-override behavior
+  ([#1533](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1533))
+
+### Telemetry processors
+
+- Add LogRecordProcessor to record event log records as span events
+  ([#1551](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1551))
+
+## Version 1.40.0 (2024-10-18)
+
+### AWS X-Ray SDK support
+
+- Ensure all XRay Sampler functionality is under ParentBased logic
+  ([#1488](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1488))
+
+### GCP Resources
+
+- Add gcr job support
+  ([#1462](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1462))
+
+### Inferred spans
+
+- Rename param and description to proper value
+  ([#1486](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1486))
+
+### JFR connection
+
+- Fix wrong parameter sent to JFR DiagnosticCommand
+  ([#1492](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1492))
+
+### Span stack traces
+
+- Support autoconfigure
+  ([#1499](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1499))
+
+## Version 1.39.0 (2024-09-17)
+
+### AWS X-Ray propagator
+
+- Handle too short `X-Amzn-Trace-Id` header
+  ([#1036](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1036))
+- Add declarative config support for aws xray propagators
+  ([#1442](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1442))
+
+### AWS X-Ray SDK support
+
+- Fix native mode error cause by static init of random
+  ([#862](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/862))
+
+### Consistent sampling
+
+- Composite Samplers prototype
+  ([#1443](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1443))
+
+### Disk buffering
+
+- Add debug mode for verbose logging
+  ([#1455](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1455))
+
+### GCP Resources
+
+- Fix incorrect `cloud.platform` value for GCF
+  ([#1454](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1454))
+
+### JMX metrics
+
+- Add option to aggregate across multiple MBeans
+  ([#1366](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1366))
+
+### Samplers
+
+- Add declarative config support for `RuleBasedRoutingSampler`
+  ([#1440](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1440))
+
+### Span stack traces
+
+- Add config option `otel.java.experimental.span-stacktrace.min.duration`
+  ([#1414](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1414))
+
 ## Version 1.38.0 (2024-08-19)
 
 ### JFR connection

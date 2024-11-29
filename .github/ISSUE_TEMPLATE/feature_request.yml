@@ -17,6 +17,7 @@ body:
         - jfr-connection
         - jfr-events
         - jmx-metrics
+        - jmx-scraper
         - maven-extension
         - micrometer-meter-provider
         - noop-api

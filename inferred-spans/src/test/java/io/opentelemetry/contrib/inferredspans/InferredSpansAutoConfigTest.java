@@ -11,6 +11,8 @@ import static org.awaitility.Awaitility.await;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
@@ -23,6 +25,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +41,12 @@ public class InferredSpansAutoConfigTest {
   public void resetGlobalOtel() {
     ProfilingActivationListener.ensureInitialized();
     OtelReflectionUtils.shutdownAndResetGlobalOtel();
+  }
+
+  public static class NoOpParentOverrideHandler implements BiConsumer<SpanBuilder, SpanContext> {
+
+    @Override
+    public void accept(SpanBuilder spanBuilder, SpanContext spanContext) {}
   }
 
   @Test
@@ -57,7 +66,10 @@ public class InferredSpansAutoConfigTest {
             .put(InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
             .put(InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
             .put(InferredSpansAutoConfig.DURATION_OPTION, "3s")
-            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)) {
+            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)
+            .put(
+                InferredSpansAutoConfig.PARENT_OVERRIDE_HANDLER_OPTION,
+                NoOpParentOverrideHandler.class.getName())) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
@@ -81,6 +93,7 @@ public class InferredSpansAutoConfigTest {
       assertThat(config.getProfilingInterval()).isEqualTo(Duration.ofSeconds(2));
       assertThat(config.getProfilingDuration()).isEqualTo(Duration.ofSeconds(3));
       assertThat(config.getProfilerLibDirectory()).isEqualTo(libDir);
+      assertThat(config.getParentOverrideHandler()).isInstanceOf(NoOpParentOverrideHandler.class);
     }
   }
 

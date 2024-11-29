@@ -1,0 +1,104 @@
+---
+
+rules:
+  - bean: jboss.as:deployment=*,subsystem=undertow
+    metricAttribute:
+      deployment: param(deployment)
+    prefix: wildfly.session.
+    unit: "{session}"
+    mapping:
+      sessionsCreated:
+        metric: count
+        type: counter
+        desc: The number of sessions created.
+      activeSessions:
+        metric: active
+        type: updowncounter
+        desc: The number of currently active sessions.
+      expiredSessions:
+        metric: expired
+        type: counter
+        desc: The number of sessions that have expired.
+      rejectedSessions:
+        metric: rejected
+        type: counter
+        desc: The number of sessions that have been rejected.
+
+  - bean: jboss.as:subsystem=undertow,server=*,http-listener=*
+    metricAttribute:
+      server: param(server)
+      listener: param(http-listener)
+    prefix: wildfly.
+    type: counter
+    mapping:
+      requestCount:
+        metric: request.count
+        unit: "{request}"
+        desc: The number of requests received.
+      processingTime:
+        metric: request.time
+        unit: ns
+        desc: The total amount of time spent on requests.
+      errorCount:
+        metric: request.server_error
+        unit: "{request}"
+        desc: The number of requests that have resulted in a 5xx response.
+      bytesSent:
+        metric: &metric network.io
+        unit: &unit By
+        desc: &desc "The number of bytes transmitted."
+        metricAttribute:
+          state: const(out)
+      bytesReceived:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(in)
+
+  - bean: jboss.as:subsystem=datasources,data-source=*,statistics=pool
+    metricAttribute:
+      data_source: param(data-source)
+    type: counter
+    prefix: wildfly.jdbc.
+    mapping:
+      ActiveCount:
+        metric: &metric connection.open
+        unit: &unit "{connection}"
+        desc: &desc The number of open jdbc connections.
+        metricAttribute:
+          state: const(active)
+      IdleCount:
+        metric: *metric
+        unit: *unit
+        desc: *desc
+        metricAttribute:
+          state: const(idle)
+      WaitCount:
+        metric: request.wait
+        unit: "{request}"
+        desc: The number of jdbc connections that had to wait before opening.
+
+  - bean: jboss.as:subsystem=transactions
+    prefix: wildfly.jdbc.
+    unit: "{transaction}"
+    type: counter
+    mapping:
+      numberOfTransactions:
+        metric: transaction.count
+        desc: The number of transactions created.
+      numberOfSystemRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(system)
+      numberOfResourceRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(resource)
+      numberOfApplicationRollbacks:
+        metric: rollback.count
+        desc: The number of transactions rolled back.
+        metricAttribute:
+          cause: const(application)

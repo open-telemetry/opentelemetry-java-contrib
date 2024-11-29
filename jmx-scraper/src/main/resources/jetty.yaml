@@ -1,0 +1,65 @@
+---
+
+rules:
+
+  - bean: org.eclipse.jetty.io:context=*,type=managedselector,id=*
+    mapping:
+      selectCount:
+        metric: jetty.select.count
+        type: counter
+        unit: "{operation}"
+        desc: The number of select calls.
+        metricAttribute:
+          # minor divergence from jetty.groovy with extra attribute(s)
+          # 'id' is a numerical value in [0,9] by default
+          # 'context' is a high cardinality value like 'HTTP_1_1@7674f035' but likely stable for the
+          # duration of the jetty process lifecycle
+          context: param(context)
+          id: param(id)
+
+  - bean: org.eclipse.jetty.server.session:context=*,type=sessionhandler,id=*
+    prefix: jetty.session.
+    metricAttribute:
+      resource: param(context)
+    mapping:
+      sessionsCreated:
+        metric: count
+        type: counter
+        unit: "{session}"
+        desc: The number of sessions established in total.
+      sessionTimeTotal:
+        metric: time.total
+        type: counter
+        unit: s
+        desc: The total time sessions have been active.
+      sessionTimeMax:
+        metric: time.max
+        # here a 'counter' seems more appropriate but gauge reflects jetty.groovy impl.
+        type: gauge
+        unit: s
+        desc: The maximum amount of time a session has been active.
+
+  - bean: org.eclipse.jetty.util.thread:type=queuedthreadpool,id=*
+    # here the 'id' can be ignored as it's usually a single value equal to '0'
+    prefix: jetty.thread.
+    unit: "{thread}"
+    mapping:
+      busyThreads:
+        metric: count
+        # here an 'updowncounter' seems more appropriate but gauge reflects jetty.groovy impl.
+        type: gauge
+        desc: The current number of threads.
+        metricAttribute:
+          state: const(busy)
+      idleThreads:
+        metric: count
+        # here an 'updowncounter' seems more appropriate but gauge reflects jetty.groovy impl.
+        type: gauge
+        desc: The current number of threads.
+        metricAttribute:
+          state: const(idle)
+      queueSize:
+        metric: queue.count
+        # here an 'updowncounter' seems more appropriate but gauge reflects jetty.groovy impl.
+        type: gauge
+        desc: The current number of threads in the queue.

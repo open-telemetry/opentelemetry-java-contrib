@@ -169,6 +169,11 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     return getContextFromHeader(context, carrier, getter);
   }
 
+  @Override
+  public String toString() {
+    return "AwsXrayPropagator";
+  }
+
   private static <C> Context getContextFromHeader(
       Context context, @Nullable C carrier, TextMapGetter<C> getter) {
     String traceHeader = getter.get(carrier, TRACE_HEADER_KEY);
@@ -290,7 +295,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     int secondDelimiter = xrayTraceId.indexOf(TRACE_ID_DELIMITER, firstDelimiter + 2);
     if (firstDelimiter != TRACE_ID_DELIMITER_INDEX_1
         || secondDelimiter == -1
-        || secondDelimiter > TRACE_ID_DELIMITER_INDEX_2) {
+        || secondDelimiter > TRACE_ID_DELIMITER_INDEX_2
+        || xrayTraceId.length() < secondDelimiter + 25) {
       return TraceId.getInvalid();
     }
 

@@ -21,6 +21,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
@@ -103,7 +104,7 @@ public class IntegrationTest {
       SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter)
       throws IOException {
     return ToDiskExporter.<T>builder()
-        .setFolderName("spans")
+        .setFolderName(SignalTypes.spans.name())
         .setStorageConfiguration(storageConfig)
         .setSerializer(serializer)
         .setExportFunction(exporter)
@@ -119,7 +120,7 @@ public class IntegrationTest {
       throws IOException {
     return builder
         .setExportFunction(exportFunction)
-        .setFolderName("spans")
+        .setFolderName(SignalTypes.spans.name())
         .setStorageConfiguration(storageConfig)
         .setDeserializer(deserializer)
         .setStorageClock(clock)

@@ -5,9 +5,12 @@
 
 package io.opentelemetry.contrib.inferredspans.internal;
 
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.contrib.inferredspans.WildcardMatcher;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 public class InferredSpansConfiguration {
@@ -22,8 +25,8 @@ public class InferredSpansConfiguration {
   private final List<WildcardMatcher> excludedClasses;
   private final Duration profilerInterval;
   private final Duration profilingDuration;
-
   @Nullable private final String profilerLibDirectory;
+  private final BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler;
 
   @SuppressWarnings("TooManyParameters")
   public InferredSpansConfiguration(
@@ -37,7 +40,8 @@ public class InferredSpansConfiguration {
       List<WildcardMatcher> excludedClasses,
       Duration profilerInterval,
       Duration profilingDuration,
-      @Nullable String profilerLibDirectory) {
+      @Nullable String profilerLibDirectory,
+      BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler) {
     this.profilerLoggingEnabled = profilerLoggingEnabled;
     this.backupDiagnosticFiles = backupDiagnosticFiles;
     this.asyncProfilerSafeMode = asyncProfilerSafeMode;
@@ -49,6 +53,7 @@ public class InferredSpansConfiguration {
     this.profilerInterval = profilerInterval;
     this.profilingDuration = profilingDuration;
     this.profilerLibDirectory = profilerLibDirectory;
+    this.parentOverrideHandler = parentOverrideHandler;
   }
 
   public boolean isProfilingLoggingEnabled() {
@@ -99,5 +104,9 @@ public class InferredSpansConfiguration {
 
   public boolean isPostProcessingEnabled() {
     return postProcessingEnabled;
+  }
+
+  public BiConsumer<SpanBuilder, SpanContext> getParentOverrideHandler() {
+    return parentOverrideHandler;
   }
 }

@@ -1,7 +1,7 @@
 pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.gradle.develocity") version "3.18"
+    id("com.gradle.develocity") version "3.18.2"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
   }
 }
@@ -13,6 +13,7 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
+    mavenLocal()
   }
 }
 
@@ -70,6 +71,9 @@ include(":example")
 include(":jfr-events")
 include(":jfr-connection")
 include(":jmx-metrics")
+include(":jmx-scraper")
+include(":jmx-scraper:test-app")
+include(":jmx-scraper:test-webapp")
 include(":maven-extension")
 include(":micrometer-meter-provider")
 include(":noop-api")
@@ -88,3 +92,4 @@ include(":kafka-exporter")
 include(":gcp-resources")
 include(":span-stacktrace")
 include(":inferred-spans")
+include(":opamp-client")

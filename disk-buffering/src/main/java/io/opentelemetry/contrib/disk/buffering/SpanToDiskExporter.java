@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -33,7 +34,7 @@ public class SpanToDiskExporter implements SpanExporter {
       throws IOException {
     ToDiskExporter<SpanData> toDisk =
         ToDiskExporter.<SpanData>builder()
-            .setFolderName("spans")
+            .setFolderName(SignalTypes.spans.name())
             .setStorageConfiguration(config)
             .setSerializer(SignalSerializer.ofSpans())
             .setExportFunction(delegate::export)

@@ -43,7 +43,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.master.region_server.count",
                 "The number of region servers.",
-                "{servers}",
+                "{server}",
                 attrs -> attrs.contains(entry("state", "dead")),
                 attrs -> attrs.contains(entry("state", "live"))),
         metric ->
@@ -51,14 +51,14 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.master.regions_in_transition.count",
                 "The number of regions that are in transition.",
-                "{regions}",
+                "{region}",
                 /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "hbase.master.regions_in_transition.over_threshold",
                 "The number of regions that have been in transition longer than a threshold time.",
-                "{regions}",
+                "{region}",
                 /* isMonotonic= */ false),
         metric ->
             assertGauge(
@@ -71,14 +71,14 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.region.count",
                 "The number of regions hosted by the region server.",
-                "{regions}",
+                "{region}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hbase.region_server.disk.store_file.count",
                 "The number of store files on disk currently managed by the region server.",
-                "{files}",
+                "{file}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
@@ -92,14 +92,14 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.write_ahead_log.count",
                 "The number of write ahead logs not yet archived.",
-                "{logs}",
+                "{log}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hbase.region_server.request.count",
                 "The number of requests received.",
-                "{requests}",
+                "{request}",
                 attrs -> attrs.contains(entry("state", "write")),
                 attrs -> attrs.contains(entry("state", "read"))),
         metric ->
@@ -107,7 +107,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.queue.length",
                 "The number of RPC handlers actively servicing requests.",
-                "{handlers}",
+                "{handler}",
                 attrs -> attrs.contains(entry("state", "flush")),
                 attrs -> attrs.contains(entry("state", "compaction"))),
         metric ->
@@ -122,7 +122,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.request.count",
                 "The number of requests received.",
-                "{requests}",
+                "{request}",
                 attrs -> attrs.contains(entry("state", "write")),
                 attrs -> attrs.contains(entry("state", "read"))),
         metric ->
@@ -347,7 +347,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.operations.slow",
                 "Number of operations that took over 1000ms to complete.",
-                "{operations}",
+                "{operation}",
                 attrs -> attrs.contains(entry("operation", "delete")),
                 attrs -> attrs.contains(entry("operation", "append")),
                 attrs -> attrs.contains(entry("operation", "get")),
@@ -358,21 +358,21 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.open_connection.count",
                 "The number of open connections at the RPC layer.",
-                "{connections}",
+                "{connection}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hbase.region_server.active_handler.count",
                 "The number of RPC handlers actively servicing requests.",
-                "{handlers}",
+                "{handler}",
                 attrs -> attrs.containsKey("region_server")),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "hbase.region_server.queue.request.count",
                 "The number of currently enqueued requests.",
-                "{requests}",
+                "{request}",
                 attrs -> attrs.contains(entry("state", "replication")),
                 attrs -> attrs.contains(entry("state", "user")),
                 attrs -> attrs.contains(entry("state", "priority"))),
@@ -381,7 +381,7 @@ class HbaseIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "hbase.region_server.authentication.count",
                 "Number of client connection authentication failures/successes.",
-                "{authentication requests}",
+                "{authentication request}",
                 attrs -> attrs.contains(entry("state", "successes")),
                 attrs -> attrs.contains(entry("state", "failures"))),
         metric ->

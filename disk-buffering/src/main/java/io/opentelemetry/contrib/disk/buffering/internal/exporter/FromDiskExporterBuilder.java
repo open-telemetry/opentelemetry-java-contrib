@@ -25,6 +25,8 @@ public class FromDiskExporterBuilder<T> {
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
 
+  private boolean debugEnabled = false;
+
   @NotNull
   private static <T> SignalDeserializer<T> noopDeserializer() {
     return x -> emptyList();
@@ -63,8 +65,19 @@ public class FromDiskExporterBuilder<T> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public FromDiskExporterBuilder<T> enableDebug() {
+    return setDebugEnabled(true);
+  }
+
+  @CanIgnoreReturnValue
+  public FromDiskExporterBuilder<T> setDebugEnabled(boolean debugEnabled) {
+    this.debugEnabled = debugEnabled;
+    return this;
+  }
+
   public FromDiskExporterImpl<T> build() throws IOException {
     Storage storage = storageBuilder.build();
-    return new FromDiskExporterImpl<>(serializer, exportFunction, storage);
+    return new FromDiskExporterImpl<>(serializer, exportFunction, storage, debugEnabled);
   }
 }

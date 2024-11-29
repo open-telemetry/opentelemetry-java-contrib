@@ -15,10 +15,10 @@
  */
 
 def beanSelector = otel.mbean("org.eclipse.jetty.io:context=*,type=managedselector,id=*")
-otel.instrument(beanSelector, "jetty.select.count", "The number of select calls.", "{operations}","selectCount", otel.&longCounterCallback)
+otel.instrument(beanSelector, "jetty.select.count", "The number of select calls.", "{operation}","selectCount", otel.&longCounterCallback)
 
 def beanSessions = otel.mbean("org.eclipse.jetty.server.session:context=*,type=sessionhandler,id=*")
-otel.instrument(beanSessions, "jetty.session.count", "The number of sessions established in total.", "{sessions}",
+otel.instrument(beanSessions, "jetty.session.count", "The number of sessions established in total.", "{session}",
   ["resource" : { mbean -> mbean.name().getKeyProperty("context") }],
   "sessionsCreated", otel.&longCounterCallback)
 otel.instrument(beanSessions, "jetty.session.time.total", "The total time sessions have been active.", "s",
@@ -29,9 +29,9 @@ otel.instrument(beanSessions, "jetty.session.time.max", "The maximum amount of t
   "sessionTimeMax", otel.&longValueCallback)
 
 def beanThreads = otel.mbean("org.eclipse.jetty.util.thread:type=queuedthreadpool,id=*")
-otel.instrument(beanThreads, "jetty.thread.count", "The current number of threads.", "{threads}",
+otel.instrument(beanThreads, "jetty.thread.count", "The current number of threads.", "{thread}",
   [
     "busyThreads":["state" : {"busy"}],
     "idleThreads": ["state" : {"idle"}]
   ], otel.&longValueCallback)
-otel.instrument(beanThreads, "jetty.thread.queue.count", "The current number of threads in the queue.", "{threads}","queueSize", otel.&longValueCallback)
+otel.instrument(beanThreads, "jetty.thread.queue.count", "The current number of threads in the queue.", "{thread}","queueSize", otel.&longValueCallback)

@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.l
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -15,7 +16,6 @@ import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,7 +31,7 @@ class ProtoLogsDataMapperTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Log body"))
+          .setBodyValue(Value.of("Log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -45,7 +45,7 @@ class ProtoLogsDataMapperTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Other log body"))
+          .setBodyValue(Value.of("Other log body"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -59,7 +59,7 @@ class ProtoLogsDataMapperTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Same resource other scope log"))
+          .setBodyValue(Value.of("Same resource other scope log"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
@@ -73,7 +73,7 @@ class ProtoLogsDataMapperTest {
           .setSpanContext(TestData.SPAN_CONTEXT)
           .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_WITHOUT_VERSION)
           .setAttributes(TestData.ATTRIBUTES)
-          .setBody(Body.string("Different resource log"))
+          .setBodyValue(Value.of("Different resource log"))
           .setSeverity(Severity.DEBUG)
           .setSeverityText("Log severity text")
           .setTimestampEpochNanos(100L)
