@@ -6,19 +6,20 @@
 package io.opentelemetry.maven;
 
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
-import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.resources.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/** Utility class to use the {@link AutoConfiguredOpenTelemetrySdk}. */
 public class AutoConfigureUtil2 {
 
   private AutoConfigureUtil2() {}
 
   /**
-   * Returns the {@link Resource} that was auto-configured.
+   * Returns the {@link Resource} that was autoconfigured.
    *
-   * @see AutoConfigureUtil#getConfig(AutoConfiguredOpenTelemetrySdk)
+   * <p>Inspired by {@link
+   * io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil#getConfig(AutoConfiguredOpenTelemetrySdk)}
    */
   public static Resource getResource(
       AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
