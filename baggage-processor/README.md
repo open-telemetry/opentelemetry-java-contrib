@@ -4,7 +4,7 @@ The `BaggageSpanProcessor` and `BaggageLogRecordPRocessor` read entries stored i
 parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as
 attributes on start, respectively emit.
 
-Add this span and log processors to the tracer and logger providers.
+Add these span and log processors to the tracer and logger providers.
 
 Warning!
 
