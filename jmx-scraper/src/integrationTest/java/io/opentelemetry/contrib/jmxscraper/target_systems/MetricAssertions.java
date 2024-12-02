@@ -5,8 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static io.opentelemetry.contrib.jmxscraper.assertions.Assertions.assertThat;
 
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
@@ -25,11 +24,11 @@ class MetricAssertions {
 
   static void assertGauge(Metric metric, String name, String description, String unit) {
     assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithGauge(metric);
-    assertThat(metric.getGauge().getDataPointsList())
-        .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
+    assertThat(metric)
+        .hasDescription(description)
+        .hasUnit(unit)
+        .isGauge()
+        .hasDataPointsWithoutAttributes();
   }
 
   static void assertSum(Metric metric, String name, String description, String unit) {
@@ -39,29 +38,10 @@ class MetricAssertions {
   static void assertSum(
       Metric metric, String name, String description, String unit, boolean isMonotonic) {
     assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithSum(metric, isMonotonic);
-    assertThat(metric.getSum().getDataPointsList())
-        .satisfiesExactly(point -> assertThat(point.getAttributesList()).isEmpty());
-  }
+    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
 
-  static void assertTypedGauge(
-      Metric metric, String name, String description, String unit, List<String> types) {
-    assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithGauge(metric);
-    assertTypedPoints(metric.getGauge().getDataPointsList(), types);
-  }
-
-  static void assertTypedSum(
-      Metric metric, String name, String description, String unit, List<String> types) {
-    assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithSum(metric);
-    assertTypedPoints(metric.getSum().getDataPointsList(), types);
+    assertThat(metric).hasDescription(description).hasUnit(unit).hasDataPointsWithoutAttributes();
   }
 
   @SafeVarargs
@@ -83,10 +63,13 @@ class MetricAssertions {
       String unit,
       boolean isMonotonic,
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+
     assertThat(metric.getName()).isEqualTo(name);
     assertThat(metric.getDescription()).isEqualTo(description);
     assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithSum(metric, isMonotonic);
+
+    assertThat(metric.hasSum()).describedAs("sum expected").isTrue();
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
     assertAttributedPoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -98,10 +81,12 @@ class MetricAssertions {
       String unit,
       boolean isMonotonic,
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
+
     assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithSum(metric, isMonotonic);
+    assertThat(metric).hasDescription(description).hasUnit(unit);
+
+    assertThat(metric.hasSum()).isTrue();
+    assertThat(metric.getSum().getIsMonotonic()).isEqualTo(isMonotonic);
     assertAttributedMultiplePoints(metric.getSum().getDataPointsList(), attributeGroupAssertions);
   }
 
@@ -113,38 +98,10 @@ class MetricAssertions {
       String unit,
       Consumer<MapAssert<String, String>>... attributeGroupAssertions) {
     assertThat(metric.getName()).isEqualTo(name);
-    assertThat(metric.getDescription()).isEqualTo(description);
-    assertThat(metric.getUnit()).isEqualTo(unit);
-    assertMetricWithGauge(metric);
+
+    assertThat(metric).hasDescription(description).hasUnit(unit).isGauge();
+
     assertAttributedPoints(metric.getGauge().getDataPointsList(), attributeGroupAssertions);
-  }
-
-  private static void assertMetricWithGauge(Metric metric) {
-    assertThat(metric.hasGauge()).withFailMessage("Metric with gauge expected").isTrue();
-  }
-
-  private static void assertMetricWithSum(Metric metric) {
-    assertThat(metric.hasSum()).withFailMessage("Metric with sum expected").isTrue();
-  }
-
-  private static void assertMetricWithSum(Metric metric, boolean isMonotonic) {
-    assertMetricWithSum(metric);
-    assertThat(metric.getSum().getIsMonotonic())
-        .withFailMessage("Metric should " + (isMonotonic ? "" : "not ") + "be monotonic")
-        .isEqualTo(isMonotonic);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
-    Consumer<MapAssert<String, String>>[] assertions =
-        types.stream()
-            .map(
-                type ->
-                    (Consumer<MapAssert<String, String>>)
-                        attrs -> attrs.containsOnly(entry("name", type)))
-            .toArray(Consumer[]::new);
-
-    assertAttributedPoints(points, assertions);
   }
 
   @SuppressWarnings("unchecked")
@@ -157,7 +114,6 @@ class MetricAssertions {
             .toArray(Consumer[]::new);
 
     assertThat(points)
-        .withFailMessage("Invalid metric attributes. Actual: " + points)
         .extracting(
             numberDataPoint ->
                 numberDataPoint.getAttributesList().stream()

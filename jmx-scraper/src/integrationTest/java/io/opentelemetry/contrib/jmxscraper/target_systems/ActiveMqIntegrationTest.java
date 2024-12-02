@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -39,112 +37,114 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics() {
-    waitAndAssertMetrics(
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.consumer.count",
-                "The number of consumers currently reading from the broker.",
-                "{consumer}",
-                /* isMonotonic= */ false,
-                attrs ->
-                    attrs.containsOnly(
+  protected MetricsVerifier createMetricsVerifier() {
+    return MetricsVerifier.create()
+        .add(
+            "activemq.consumer.count",
+            metric ->
+                metric
+                    .hasDescription("The number of consumers currently reading from the broker.")
+                    .hasUnit("{consumer}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.producer.count",
-                "The number of producers currently attached to the broker.",
-                "{producer}",
-                /* isMonotonic= */ false,
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.producer.count",
+            metric ->
+                metric
+                    .hasDescription("The number of producers currently attached to the broker.")
+                    .hasUnit("{producer}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.connection.count",
-                "The total number of current connections.",
-                "{connection}",
-                /* isMonotonic= */ false,
-                attrs -> attrs.containsOnly(entry("broker", "localhost"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "activemq.memory.usage",
-                "The percentage of configured memory used.",
-                "%",
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.connection.count",
+            metric ->
+                metric
+                    .hasDescription("The total number of current connections.")
+                    .hasUnit("{connection}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
+            "activemq.memory.usage",
+            metric ->
+                metric
+                    .hasDescription("The percentage of configured memory used.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "activemq.disk.store_usage",
-                "The percentage of configured disk used for persistent messages.",
-                "%",
-                attrs -> attrs.containsOnly(entry("broker", "localhost"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "activemq.disk.temp_usage",
-                "The percentage of configured disk used for non-persistent messages.",
-                "%",
-                attrs -> attrs.containsOnly(entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.message.current",
-                "The current number of messages waiting to be consumed.",
-                "{message}",
-                /* isMonotonic= */ false,
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.disk.store_usage",
+            metric ->
+                metric
+                    .hasDescription(
+                        "The percentage of configured disk used for persistent messages.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
+            "activemq.disk.temp_usage",
+            metric ->
+                metric
+                    .hasDescription(
+                        "The percentage of configured disk used for non-persistent messages.")
+                    .hasUnit("%")
+                    .isGauge()
+                    .hasDataPointsAttributes(entry("broker", "localhost")))
+        .add(
+            "activemq.message.current",
+            metric ->
+                metric
+                    .hasDescription("The current number of messages waiting to be consumed.")
+                    .hasUnit("{message}")
+                    .isUpDownCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.message.expired",
-                "The total number of messages not delivered because they expired.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.message.expired",
+            metric ->
+                metric
+                    .hasDescription(
+                        "The total number of messages not delivered because they expired.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.message.enqueued",
-                "The total number of messages received by the broker.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.message.enqueued",
+            metric ->
+                metric
+                    .hasDescription("The total number of messages received by the broker.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "activemq.message.dequeued",
-                "The total number of messages delivered to consumers.",
-                "{message}",
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.message.dequeued",
+            metric ->
+                metric
+                    .hasDescription("The total number of messages delivered to consumers.")
+                    .hasUnit("{message}")
+                    .isCounter()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "activemq.message.wait_time.avg",
-                "The average time a message was held on a destination.",
-                "ms",
-                attrs ->
-                    attrs.containsOnly(
+                        entry("broker", "localhost")))
+        .add(
+            "activemq.message.wait_time.avg",
+            metric ->
+                metric
+                    .hasDescription("The average time a message was held on a destination.")
+                    .hasUnit("ms")
+                    .isGauge()
+                    .hasDataPointsAttributes(
                         entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost"))));
+                        entry("broker", "localhost")));
   }
 }
