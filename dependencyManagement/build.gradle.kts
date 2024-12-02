@@ -10,7 +10,7 @@ rootProject.extra["versions"] = dependencyVersions
 val otelInstrumentationVersion = "2.10.0-alpha"
 
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.18.1",
+  "com.fasterxml.jackson:jackson-bom:2.18.2",
   "com.google.guava:guava-bom:33.3.1-jre",
   "com.linecorp.armeria:armeria-bom:1.31.1",
   "org.junit:junit-bom:5.11.3",
