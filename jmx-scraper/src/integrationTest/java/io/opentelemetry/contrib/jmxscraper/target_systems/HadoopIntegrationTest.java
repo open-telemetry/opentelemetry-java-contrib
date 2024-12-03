@@ -26,6 +26,7 @@ public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
             "/hadoop/etc/hadoop/hadoop-env.sh")
         .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)))
         .withExposedPorts(HADOOP_PORT, jmxPort)
+        .withCreateContainerCmdModifier(cmd -> cmd.withHostName("test-host"))
         .waitingFor(Wait.forListeningPorts(HADOOP_PORT, jmxPort));
   }
 
