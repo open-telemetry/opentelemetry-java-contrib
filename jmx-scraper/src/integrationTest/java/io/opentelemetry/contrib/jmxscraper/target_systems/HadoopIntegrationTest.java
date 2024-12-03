@@ -16,16 +16,17 @@ import org.testcontainers.utility.MountableFile;
 
 public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
 
+  private static final int HADOOP_PORT = 50070;
+
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("bmedora/hadoop:2.9-base")
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("hadoop-env.sh", 0400),
             "/hadoop/etc/hadoop/hadoop-env.sh")
-        .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(200)))
-        .withExposedPorts(jmxPort)
-        .withCreateContainerCmdModifier(cmd -> cmd.withHostName("test-host"))
-        .waitingFor(Wait.forListeningPort());
+        .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)))
+        .withExposedPorts(HADOOP_PORT, jmxPort)
+        .waitingFor(Wait.forListeningPorts(HADOOP_PORT, jmxPort));
   }
 
   @Override
