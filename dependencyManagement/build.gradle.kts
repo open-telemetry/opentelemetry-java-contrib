@@ -10,11 +10,11 @@ rootProject.extra["versions"] = dependencyVersions
 val otelInstrumentationVersion = "2.10.0-alpha"
 
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.18.1",
+  "com.fasterxml.jackson:jackson-bom:2.18.2",
   "com.google.guava:guava-bom:33.3.1-jre",
-  "com.linecorp.armeria:armeria-bom:1.31.1",
+  "com.linecorp.armeria:armeria-bom:1.31.2",
   "org.junit:junit-bom:5.11.3",
-  "io.grpc:grpc-bom:1.68.1",
+  "io.grpc:grpc-bom:1.68.2",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
   "org.testcontainers:testcontainers-bom:1.20.4"
 )
