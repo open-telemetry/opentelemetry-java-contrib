@@ -245,10 +245,11 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   /**
-   * Verifies that every data point attributes set is matched exactly by one of the matcher sets provided.
-   * Also, each matcher set must match at least one data point attributes set.
-   * Data point attributes set is matched by matcher set if each attribute is matched by one matcher and
-   * each matcher matches one attribute.
+   * Verifies that every data point attributes set is matched exactly by one of the matcher sets
+   * provided. Also, each matcher set must match at least one data point attributes set. Data point
+   * attributes set is matched by matcher set if each attribute is matched by one matcher and each
+   * matcher matches one attribute. In other words: number of attributes is the same as number of
+   * matchers and there is 1:1 matching between them.
    *
    * @param attributeMatchers array of attribute matcher sets
    * @return this

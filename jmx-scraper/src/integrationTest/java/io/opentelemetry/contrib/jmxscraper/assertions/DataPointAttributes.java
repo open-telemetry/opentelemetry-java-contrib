@@ -17,11 +17,11 @@ public class DataPointAttributes {
   private DataPointAttributes() {}
 
   /**
-   * Create instance of matcher that will be used to check if data point attribute with given name
-   * has provided value.
+   * Create instance of matcher that should be used to check if data point attribute with given name
+   * has value identical to the one provided as a parameter (exact match).
    *
    * @param name name of the data point attribute to check
-   * @param value expected value of data point attribute
+   * @param value expected value of checked data point attribute
    * @return instance of matcher
    */
   public static AttributeMatcher attribute(String name, String value) {
@@ -29,8 +29,8 @@ public class DataPointAttributes {
   }
 
   /**
-   * Create instance of matcher that will be used to check if data point attribute with given name
-   * exists. Any value of the attribute is considered as matching.
+   * Create instance of matcher that should be used to check if data point attribute with given name
+   * exists. Any value of the attribute is considered as matching (any value match).
    *
    * @param name name of the data point attribute to check
    * @return instance of matcher
@@ -40,14 +40,14 @@ public class DataPointAttributes {
   }
 
   /**
-   * Create a set of attribute matchers that will be used to verify set of data point attributes.
+   * Create a set of attribute matchers that should be used to verify set of data point attributes.
    *
    * @param attributes list of matchers to create set. It must contain matchers with unique names.
    * @return set of unique attribute matchers
    * @throws IllegalArgumentException if provided list contains two or more matchers with the same
    *     name.
    * @see MetricAssert#hasDataPointsWithAttributes(Set[]) for detailed description of the algorithm
-   *     of matching
+   *     used for matching
    */
   public static Set<AttributeMatcher> attributeSet(AttributeMatcher... attributes) {
     Set<AttributeMatcher> matcherSet = Arrays.stream(attributes).collect(Collectors.toSet());
