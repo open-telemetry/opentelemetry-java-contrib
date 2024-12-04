@@ -5,10 +5,9 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGauge;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributesMultiplePoints;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeWithAnyValue;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.nio.file.Path;
@@ -55,51 +54,60 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics() {
-    waitAndAssertMetrics(
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "jetty.session.count",
-                "The number of sessions established in total.",
-                "{session}",
-                attrs -> attrs.containsKey("resource")),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "jetty.session.time.total",
-                "The total time sessions have been active.",
-                "s",
-                attrs -> attrs.containsKey("resource")),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "jetty.session.time.max",
-                "The maximum amount of time a session has been active.",
-                "s",
-                attrs -> attrs.containsKey("resource")),
-        metric ->
-            assertSumWithAttributesMultiplePoints(
-                metric,
-                "jetty.select.count",
-                "The number of select calls.",
-                "{operation}",
-                /* isMonotonic= */ true,
-                // minor divergence from jetty.groovy with extra metrics attributes
-                attrs -> attrs.containsKey("context").containsKey("id")),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "jetty.thread.count",
-                "The current number of threads.",
-                "{thread}",
-                attrs -> attrs.containsEntry("state", "busy"),
-                attrs -> attrs.containsEntry("state", "idle")),
-        metric ->
-            assertGauge(
-                metric,
-                "jetty.thread.queue.count",
-                "The current number of threads in the queue.",
-                "{thread}"));
+  protected MetricsVerifier createMetricsVerifier() {
+    return MetricsVerifier.create()
+        .add(
+            "jetty.session.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of sessions established in total.")
+                    .hasUnit("{session}")
+                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("resource")))
+        .add(
+            "jetty.session.time.total",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The total time sessions have been active.")
+                    .hasUnit("s")
+                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("resource")))
+        .add(
+            "jetty.session.time.max",
+            metric ->
+                metric
+                    .isGauge()
+                    .hasDescription("The maximum amount of time a session has been active.")
+                    .hasUnit("s")
+                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("resource")))
+        .add(
+            "jetty.select.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of select calls.")
+                    .hasUnit("{operation}")
+                    .hasDataPointsWithAttributes(
+                        attributeSet(
+                            attributeWithAnyValue("context"), attributeWithAnyValue("id"))))
+        .add(
+            "jetty.thread.count",
+            metric ->
+                metric
+                    .isGauge()
+                    .hasDescription("The current number of threads.")
+                    .hasUnit("{thread}")
+                    .hasDataPointsWithAttributes(
+                        attributeSet(attribute("state", "busy")),
+                        attributeSet(attribute("state", "idle"))))
+        .add(
+            "jetty.thread.queue.count",
+            metric ->
+                metric
+                    .isGauge()
+                    .hasDescription("The current number of threads in the queue.")
+                    .hasUnit("{thread}")
+                    .hasDataPointsWithoutAttributes() // Got rid of id (see jetty.yaml)
+            );
   }
 }

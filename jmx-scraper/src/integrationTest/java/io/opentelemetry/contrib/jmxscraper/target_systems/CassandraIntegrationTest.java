@@ -5,11 +5,14 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
+
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcher;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -158,10 +161,10 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("Number of requests by operation")
                     .hasUnit("1")
                     .isCounter()
-                    .hasDataPointsAttributes(
-                        requestCountAttributes("RangeSlice"),
-                        requestCountAttributes("Read"),
-                        requestCountAttributes("Write")))
+                    .hasDataPointsWithAttributes(
+                        attributeSet(attribute("operation", "RangeSlice")),
+                        attributeSet(attribute("operation", "Read")),
+                        attributeSet(attribute("operation", "Write"))))
         .add(
             "cassandra.client.request.error.count",
             metric ->
@@ -169,7 +172,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("Number of request errors by operation")
                     .hasUnit("1")
                     .isCounter()
-                    .hasDataPointsAttributes(
+                    .hasDataPointsWithAttributes(
                         errorCountAttributes("RangeSlice", "Timeout"),
                         errorCountAttributes("RangeSlice", "Failure"),
                         errorCountAttributes("RangeSlice", "Unavailable"),
@@ -181,16 +184,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
                         errorCountAttributes("Write", "Unavailable")));
   }
 
-  private static Map<String, String> errorCountAttributes(String operation, String status) {
-    Map<String, String> map = new HashMap<>();
-    map.put("operation", operation);
-    map.put("status", status);
-    return map;
-  }
-
-  private static Map<String, String> requestCountAttributes(String operation) {
-    Map<String, String> map = new HashMap<>();
-    map.put("operation", operation);
-    return map;
+  private static Set<AttributeMatcher> errorCountAttributes(String operation, String status) {
+    return attributeSet(attribute("operation", operation), attribute("status", status));
   }
 }

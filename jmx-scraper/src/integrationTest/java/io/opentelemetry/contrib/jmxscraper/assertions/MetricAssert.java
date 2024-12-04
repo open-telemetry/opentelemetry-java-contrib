@@ -5,23 +5,23 @@
 
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.internal.Integers;
 import org.assertj.core.internal.Iterables;
-import org.assertj.core.internal.Maps;
 import org.assertj.core.internal.Objects;
 
 public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
@@ -29,7 +29,6 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   private static final Objects objects = Objects.instance();
   private static final Iterables iterables = Iterables.instance();
   private static final Integers integers = Integers.instance();
-  private static final Maps maps = Maps.instance();
 
   private boolean strict;
 
@@ -59,7 +58,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     if (!strict) {
       return;
     }
-    String failMsgPrefix = expectedCheckStatus ? "duplicate" : "missing";
+    String failMsgPrefix = expectedCheckStatus ? "Missing" : "Duplicate";
     info.description(
         "%s assertion on %s for metric '%s'", failMsgPrefix, metricProperty, actual.getName());
     objects.assertEqual(info, actualCheckStatus, expectedCheckStatus);
@@ -122,8 +121,8 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     info.description("sum expected for metric '%s'", actual.getName());
     objects.assertEqual(info, actual.hasSum(), true);
 
-    String prefix = monotonic ? "monotonic" : "non-monotonic";
-    info.description(prefix + " sum expected for metric '%s'", actual.getName());
+    String sumType = monotonic ? "monotonic" : "non-monotonic";
+    info.description("sum for metric '%s' is expected to be %s", actual.getName(), sumType);
     objects.assertEqual(info, actual.getSum().getIsMonotonic(), monotonic);
     return this;
   }
@@ -156,6 +155,11 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     return this;
   }
 
+  /**
+   * Verifies that there is no attribute in any of data points.
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public MetricAssert hasDataPointsWithoutAttributes() {
     isNotNull();
@@ -195,6 +199,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
     return this;
   }
 
+  // TODO: To be removed and calls will be replaced with hasDataPointsWithAttributes()
   @CanIgnoreReturnValue
   public MetricAssert hasTypedDataPoints(Collection<String> types) {
     return checkDataPoints(
@@ -229,58 +234,40 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   /**
-   * Verifies that all data points have all the expected attributes
+   * Verifies that all data points have the same expected one attribute
    *
-   * @param attributes expected attributes
+   * @param expectedAttribute expected attribute
    * @return this
    */
-  @SafeVarargs
   @CanIgnoreReturnValue
-  public final MetricAssert hasDataPointsAttributes(Map.Entry<String, String>... attributes) {
-    return checkDataPoints(
-        dataPoints -> {
-          dataPointsCommonCheck(dataPoints);
-
-          Map<String, String> attributesMap = new HashMap<>();
-          for (Map.Entry<String, String> attributeEntry : attributes) {
-            attributesMap.put(attributeEntry.getKey(), attributeEntry.getValue());
-          }
-          for (NumberDataPoint dataPoint : dataPoints) {
-            Map<String, String> dataPointAttributes = toMap(dataPoint.getAttributesList());
-
-            // all attributes must match
-            info.description(
-                "missing/unexpected data points attributes for metric '%s'", actual.getName());
-            containsExactly(dataPointAttributes, attributes);
-            maps.assertContainsAllEntriesOf(info, dataPointAttributes, attributesMap);
-          }
-        });
+  public final MetricAssert hasDataPointsWithOneAttribute(AttributeMatcher expectedAttribute) {
+    return hasDataPointsWithAttributes(Collections.singleton(expectedAttribute));
   }
 
   /**
-   * Verifies that all data points have their attributes match one of the attributes set and that
-   * all provided attributes sets matched at least once.
+   * Verifies that every provided attribute matcher set matches attributes of at least one metric
+   * data point. Attribute matcher set is considered matching data point attributes if each matcher
+   * matches exactly one data point attribute
    *
-   * @param attributeSets sets of attributes as maps
+   * @param attributeSets array of attribute matcher sets
    * @return this
    */
   @SafeVarargs
   @CanIgnoreReturnValue
   @SuppressWarnings("varargs") // required to avoid warning
-  public final MetricAssert hasDataPointsAttributes(Map<String, String>... attributeSets) {
+  public final MetricAssert hasDataPointsWithAttributes(Set<AttributeMatcher>... attributeSets) {
     return checkDataPoints(
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);
 
           boolean[] matchedSets = new boolean[attributeSets.length];
 
-          // validate each datapoint attributes match exactly one of the provided attributes set
+          // validate each datapoint attributes match exactly one of the provided attributes sets
           for (NumberDataPoint dataPoint : dataPoints) {
-            Map<String, String> map = toMap(dataPoint.getAttributesList());
-
+            Set<AttributeMatcher> dataPointAttributes = toSet(dataPoint.getAttributesList());
             int matchCount = 0;
             for (int i = 0; i < attributeSets.length; i++) {
-              if (mapEquals(map, attributeSets[i])) {
+              if (attributeSets[i].equals(dataPointAttributes)) {
                 matchedSets[i] = true;
                 matchCount++;
               }
@@ -288,7 +275,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
             info.description(
                 "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'",
-                map, actual.getName(), Arrays.asList(attributeSets));
+                dataPointAttributes, actual.getName(), Arrays.asList(attributeSets));
             integers.assertEqual(info, matchCount, 1);
           }
 
@@ -302,29 +289,9 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
         });
   }
 
-  /**
-   * Map equality utility
-   *
-   * @param m1 first map
-   * @param m2 second map
-   * @return true if the maps have exactly the same keys and values
-   */
-  private static boolean mapEquals(Map<String, String> m1, Map<String, String> m2) {
-    if (m1.size() != m2.size()) {
-      return false;
-    }
-    return m1.entrySet().stream().allMatch(e -> e.getValue().equals(m2.get(e.getKey())));
-  }
-
-  @SafeVarargs
-  @SuppressWarnings("varargs") // required to avoid warning
-  private final void containsExactly(
-      Map<String, String> map, Map.Entry<String, String>... entries) {
-    maps.assertContainsExactly(info, map, entries);
-  }
-
-  private static Map<String, String> toMap(List<KeyValue> list) {
+  private static Set<AttributeMatcher> toSet(List<KeyValue> list) {
     return list.stream()
-        .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
+        .map(entry -> attribute(entry.getKey(), entry.getValue().getStringValue()))
+        .collect(Collectors.toSet());
   }
 }
