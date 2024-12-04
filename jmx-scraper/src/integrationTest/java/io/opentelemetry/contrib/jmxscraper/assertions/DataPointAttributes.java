@@ -16,15 +16,45 @@ import java.util.stream.Collectors;
 public class DataPointAttributes {
   private DataPointAttributes() {}
 
+  /**
+   * Create instance of matcher that will be used to check if data point attribute with given name
+   * has provided value.
+   *
+   * @param name name of the data point attribute to check
+   * @param value expected value of data point attribute
+   * @return instance of matcher
+   */
   public static AttributeMatcher attribute(String name, String value) {
     return new AttributeMatcher(name, value);
   }
 
+  /**
+   * Create instance of matcher that will be used to check if data point attribute with given name
+   * exists. Any value of the attribute is considered as matching.
+   *
+   * @param name name of the data point attribute to check
+   * @return instance of matcher
+   */
   public static AttributeMatcher attributeWithAnyValue(String name) {
     return new AttributeMatcher(name);
   }
 
+  /**
+   * Create a set of attribute matchers that will be used to verify set of data point attributes.
+   *
+   * @param attributes list of matchers to create set. It must contain matchers with unique names.
+   * @return set of unique attribute matchers
+   * @throws IllegalArgumentException if provided list contains two or more matchers with the same
+   *     name.
+   * @see MetricAssert#hasDataPointsWithAttributes(Set[]) for detailed description of the algorithm
+   *     of matching
+   */
   public static Set<AttributeMatcher> attributeSet(AttributeMatcher... attributes) {
-    return Arrays.stream(attributes).collect(Collectors.toSet());
+    Set<AttributeMatcher> matcherSet = Arrays.stream(attributes).collect(Collectors.toSet());
+    if (matcherSet.size() < attributes.length) {
+      throw new IllegalArgumentException(
+          "Duplicated matchers found in " + Arrays.toString(attributes));
+    }
+    return matcherSet;
   }
 }

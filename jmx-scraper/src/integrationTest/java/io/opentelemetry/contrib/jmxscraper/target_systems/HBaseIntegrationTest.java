@@ -36,7 +36,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected MetricsVerifier createMetricsVerifier() {
     return MetricsVerifier.create()
-        .disableStrictMode()
         .add(
             "hbase.master.region_server.count",
             metric ->

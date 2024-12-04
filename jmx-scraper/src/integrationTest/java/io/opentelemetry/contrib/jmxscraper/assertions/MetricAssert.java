@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
-import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
@@ -13,9 +13,9 @@ import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -234,40 +234,41 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   /**
-   * Verifies that all data points have the same expected one attribute
+   * Verifies that all metric data points have the same expected one attribute
    *
-   * @param expectedAttribute expected attribute
+   * @param expectedAttribute attribute matcher to validate data points attributes
    * @return this
    */
   @CanIgnoreReturnValue
   public final MetricAssert hasDataPointsWithOneAttribute(AttributeMatcher expectedAttribute) {
-    return hasDataPointsWithAttributes(Collections.singleton(expectedAttribute));
+    return hasDataPointsWithAttributes(attributeSet(expectedAttribute));
   }
 
   /**
-   * Verifies that every provided attribute matcher set matches attributes of at least one metric
-   * data point. Attribute matcher set is considered matching data point attributes if each matcher
-   * matches exactly one data point attribute
+   * Verifies that every data point attributes set is matched by one of matcher sets provided. Data
+   * point attributes set is matched by matcher set if each attribute is matched by one matcher and
+   * matcher count is equal to attribute count.
    *
-   * @param attributeSets array of attribute matcher sets
+   * @param attributeMatchers array of attribute matcher sets
    * @return this
    */
   @SafeVarargs
   @CanIgnoreReturnValue
   @SuppressWarnings("varargs") // required to avoid warning
-  public final MetricAssert hasDataPointsWithAttributes(Set<AttributeMatcher>... attributeSets) {
+  public final MetricAssert hasDataPointsWithAttributes(
+      Set<AttributeMatcher>... attributeMatchers) {
     return checkDataPoints(
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);
 
-          boolean[] matchedSets = new boolean[attributeSets.length];
+          boolean[] matchedSets = new boolean[attributeMatchers.length];
 
           // validate each datapoint attributes match exactly one of the provided attributes sets
           for (NumberDataPoint dataPoint : dataPoints) {
-            Set<AttributeMatcher> dataPointAttributes = toSet(dataPoint.getAttributesList());
+            Map<String, String> dataPointAttributes = toMap(dataPoint.getAttributesList());
             int matchCount = 0;
-            for (int i = 0; i < attributeSets.length; i++) {
-              if (attributeSets[i].equals(dataPointAttributes)) {
+            for (int i = 0; i < attributeMatchers.length; i++) {
+              if (matchAttributes(attributeMatchers[i], dataPointAttributes)) {
                 matchedSets[i] = true;
                 matchCount++;
               }
@@ -275,7 +276,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
             info.description(
                 "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'",
-                dataPointAttributes, actual.getName(), Arrays.asList(attributeSets));
+                dataPointAttributes, actual.getName(), Arrays.asList(attributeMatchers));
             integers.assertEqual(info, matchCount, 1);
           }
 
@@ -283,15 +284,28 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
           for (int i = 0; i < matchedSets.length; i++) {
             info.description(
                 "no data point matched attribute set '%s' for metric '%s'",
-                attributeSets[i], actual.getName());
+                attributeMatchers[i], actual.getName());
             objects.assertEqual(info, matchedSets[i], true);
           }
         });
   }
 
-  private static Set<AttributeMatcher> toSet(List<KeyValue> list) {
+  private static boolean matchAttributes(
+      Set<AttributeMatcher> attributeMatchers, Map<String, String> dataPointAttributes) {
+    if (attributeMatchers.size() != dataPointAttributes.size()) {
+      return false;
+    }
+    for (AttributeMatcher matcher : attributeMatchers) {
+      String attributeValue = dataPointAttributes.get(matcher.getAttributeName());
+      if (!matcher.matchesValue(attributeValue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static Map<String, String> toMap(List<KeyValue> list) {
     return list.stream()
-        .map(entry -> attribute(entry.getKey(), entry.getValue().getStringValue()))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
   }
 }

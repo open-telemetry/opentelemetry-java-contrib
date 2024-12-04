@@ -5,38 +5,41 @@
 
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
-import static io.opentelemetry.contrib.jmxscraper.assertions.AttributeValueMatcher.ANY_VALUE_MATCHER;
-
 import java.util.Objects;
 
 /** Implements functionality of matching data point attributes. */
 public class AttributeMatcher {
-  private final String name;
-  private final AttributeValueMatcher attributeValueMatcher;
+  private final String attributeName;
+  private final String attributeValue;
 
   /**
-   * Create instance used to match data point attribute with te same name and with any value.
+   * Create instance used to match data point attribute with any value.
    *
-   * @param name attribute name
+   * @param attributeName matched attribute name
    */
-  AttributeMatcher(String name) {
-    this.name = name;
-    this.attributeValueMatcher = ANY_VALUE_MATCHER;
+  AttributeMatcher(String attributeName) {
+    this.attributeName = attributeName;
+    this.attributeValue = null;
   }
 
   /**
    * Create instance used to match data point attribute with te same name and with the same value.
    *
-   * @param name attribute name
-   * @param value attribute value
+   * @param attributeName attribute name
+   * @param attributeValue attribute value
    */
-  AttributeMatcher(String name, String value) {
-    this.name = name;
-    this.attributeValueMatcher = new AttributeValueMatcher(value);
+  AttributeMatcher(String attributeName, String attributeValue) {
+    this.attributeName = attributeName;
+    this.attributeValue = attributeValue;
   }
 
-  public String getName() {
-    return name;
+  /**
+   * Return name of data point attribute that this AttributeMatcher is supposed to match value with.
+   *
+   * @return name of validated attribute
+   */
+  public String getAttributeName() {
+    return attributeName;
   }
 
   @Override
@@ -48,21 +51,33 @@ public class AttributeMatcher {
       return false;
     }
     AttributeMatcher other = (AttributeMatcher) o;
-    return Objects.equals(name, other.name)
-        && attributeValueMatcher.matchValue(other.attributeValueMatcher);
+    return Objects.equals(attributeName, other.attributeName);
   }
 
   @Override
   public int hashCode() {
     // Do not use value matcher here to support value wildcards
-    return Objects.hash(name);
+    return Objects.hash(attributeName);
   }
 
   @Override
   public String toString() {
-    return attributeValueMatcher.getValue() == null
-        ? '{' + name + '}'
-        : '{' + name + '=' + attributeValueMatcher.getValue() + '}';
+    return attributeValue == null
+        ? '{' + attributeName + '}'
+        : '{' + attributeName + '=' + attributeValue + '}';
   }
-  ;
+
+  /**
+   * Verify if this matcher is matching provided attribute value. If this matcher holds null value
+   * then it is matching any attribute value
+   *
+   * @param value a value to be matched
+   * @return true if this matcher is matching provided value, false otherwise.
+   */
+  boolean matchesValue(String value) {
+    if ((attributeValue == null) || (value == null)) {
+      return true;
+    }
+    return Objects.equals(attributeValue, value);
+  }
 }
