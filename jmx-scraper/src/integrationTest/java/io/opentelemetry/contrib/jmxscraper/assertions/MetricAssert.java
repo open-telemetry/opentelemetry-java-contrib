@@ -254,11 +254,9 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
    * @param attributeMatchers array of attribute matcher sets
    * @return this
    */
-  @SafeVarargs
   @CanIgnoreReturnValue
   @SuppressWarnings("varargs") // required to avoid warning
-  public final MetricAssert hasDataPointsWithAttributes(
-      Set<AttributeMatcher>... attributeMatchers) {
+  public final MetricAssert hasDataPointsWithAttributes(AttributeMatcherSet... attributeMatchers) {
     return checkDataPoints(
         dataPoints -> {
           dataPointsCommonCheck(dataPoints);
@@ -293,16 +291,37 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   }
 
   private static boolean matchAttributes(
-      Set<AttributeMatcher> attributeMatchers, Map<String, String> dataPointAttributes) {
-    if (attributeMatchers.size() != dataPointAttributes.size()) {
-      return false;
-    }
-    for (AttributeMatcher matcher : attributeMatchers) {
-      String attributeValue = dataPointAttributes.get(matcher.getAttributeName());
-      if (!matcher.matchesValue(attributeValue)) {
+      AttributeMatcherSet attributeMatcherSet, Map<String, String> dataPointAttributes) {
+
+    Map<String, AttributeMatcher> matchers = attributeMatcherSet.getMatchers();
+
+    Set<String> toMatch = new HashSet<>(dataPointAttributes.keySet());
+    Set<String> matched = new HashSet<>();
+    for (Map.Entry<String, String> entry : dataPointAttributes.entrySet()) {
+      AttributeMatcher matcher = matchers.get(entry.getKey());
+      if (matcher == null) {
+        // no matcher for this key: unexpected key
         return false;
       }
+
+      String value = entry.getValue();
+      if (!matcher.matchesValue(value)) {
+        // value does not match: unexpected value
+        return false;
+      }
+      toMatch.remove(entry.getKey());
+      matched.add(entry.getKey());
     }
+
+    if (!toMatch.isEmpty()) {
+      // unexpected entries in attributes
+      return false;
+    }
+    if (!matched.containsAll(matchers.keySet())) {
+      // some matchers were not match
+      return false;
+    }
+
     return true;
   }
 
