@@ -30,6 +30,33 @@ public class AttributeMatcherSet {
     return matchers;
   }
 
+  /**
+   * Checks if attributes match this attribute matcher set
+   *
+   * @param attributes attributes to check as map
+   * @return {@literal true} when the attributes match all attributes from this set
+   */
+  public boolean matches(Map<String, String> attributes) {
+    if(attributes.size() != matchers.size()) {
+      return false;
+    }
+
+    for (Map.Entry<String, String> entry : attributes.entrySet()) {
+      AttributeMatcher matcher = matchers.get(entry.getKey());
+      if (matcher == null) {
+        // no matcher for this key: unexpected key
+        return false;
+      }
+
+      if (!matcher.matchesValue(entry.getValue())) {
+        // value does not match: unexpected value
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   @Override
   public String toString() {
     return matchers.values().toString();

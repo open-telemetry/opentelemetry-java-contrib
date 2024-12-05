@@ -267,7 +267,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
             Map<String, String> dataPointAttributes = toMap(dataPoint.getAttributesList());
             int matchCount = 0;
             for (int i = 0; i < attributeMatchers.length; i++) {
-              if (matchAttributes(attributeMatchers[i], dataPointAttributes)) {
+              if (attributeMatchers[i].matches(dataPointAttributes)) {
                 matchedSets[i] = true;
                 matchCount++;
               }
@@ -287,41 +287,6 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
             objects.assertEqual(info, matchedSets[i], true);
           }
         });
-  }
-
-  private static boolean matchAttributes(
-      AttributeMatcherSet attributeMatcherSet, Map<String, String> dataPointAttributes) {
-
-    Map<String, AttributeMatcher> matchers = attributeMatcherSet.getMatchers();
-
-    Set<String> toMatch = new HashSet<>(dataPointAttributes.keySet());
-    Set<String> matched = new HashSet<>();
-    for (Map.Entry<String, String> entry : dataPointAttributes.entrySet()) {
-      AttributeMatcher matcher = matchers.get(entry.getKey());
-      if (matcher == null) {
-        // no matcher for this key: unexpected key
-        return false;
-      }
-
-      String value = entry.getValue();
-      if (!matcher.matchesValue(value)) {
-        // value does not match: unexpected value
-        return false;
-      }
-      toMatch.remove(entry.getKey());
-      matched.add(entry.getKey());
-    }
-
-    if (!toMatch.isEmpty()) {
-      // unexpected entries in attributes
-      return false;
-    }
-    if (!matched.containsAll(matchers.keySet())) {
-      // some matchers were not matched
-      return false;
-    }
-
-    return true;
   }
 
   private static Map<String, String> toMap(List<KeyValue> list) {
