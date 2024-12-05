@@ -255,7 +255,6 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
    * @return this
    */
   @CanIgnoreReturnValue
-  @SuppressWarnings("varargs") // required to avoid warning
   public final MetricAssert hasDataPointsWithAttributes(AttributeMatcherSet... attributeMatchers) {
     return checkDataPoints(
         dataPoints -> {
@@ -318,7 +317,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
       return false;
     }
     if (!matched.containsAll(matchers.keySet())) {
-      // some matchers were not match
+      // some matchers were not matched
       return false;
     }
 
