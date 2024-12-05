@@ -51,6 +51,8 @@ public class AttributeMatcher {
       return false;
     }
     AttributeMatcher other = (AttributeMatcher) o;
+    // Do not attributeValue into account so AttributeMatcher instances can be stored in collections
+    // with guarantee of uniqueness per attribute
     return Objects.equals(attributeName, other.attributeName);
   }
 
