@@ -6,12 +6,12 @@
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /** Implements functionality of matching data point attributes. */
 public class AttributeMatcher {
   private final String attributeName;
-  @Nullable
-  private final String attributeValue;
+  @Nullable private final String attributeValue;
 
   /**
    * Create instance used to match data point attribute with any value.
@@ -19,8 +19,7 @@ public class AttributeMatcher {
    * @param attributeName matched attribute name
    */
   AttributeMatcher(String attributeName) {
-    this.attributeName = attributeName;
-    this.attributeValue = null;
+    this(attributeName, null);
   }
 
   /**
@@ -29,7 +28,7 @@ public class AttributeMatcher {
    * @param attributeName attribute name
    * @param attributeValue attribute value
    */
-  AttributeMatcher(String attributeName, String attributeValue) {
+  AttributeMatcher(String attributeName, @Nullable String attributeValue) {
     this.attributeName = attributeName;
     this.attributeValue = attributeValue;
   }
@@ -76,7 +75,7 @@ public class AttributeMatcher {
    * @return true if this matcher is matching provided value, false otherwise.
    */
   boolean matchesValue(String value) {
-    if ((attributeValue == null) || (value == null)) {
+    if (attributeValue == null) {
       return true;
     }
     return Objects.equals(attributeValue, value);
