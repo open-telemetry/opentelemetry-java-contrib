@@ -26,10 +26,6 @@ public class AttributeMatcherSet {
         matchers.stream().collect(Collectors.toMap(AttributeMatcher::getAttributeName, m -> m));
   }
 
-  Map<String, AttributeMatcher> getMatchers() {
-    return matchers;
-  }
-
   /**
    * Checks if attributes match this attribute matcher set
    *
@@ -37,7 +33,7 @@ public class AttributeMatcherSet {
    * @return {@literal true} when the attributes match all attributes from this set
    */
   public boolean matches(Map<String, String> attributes) {
-    if(attributes.size() != matchers.size()) {
+    if (attributes.size() != matchers.size()) {
       return false;
     }
 

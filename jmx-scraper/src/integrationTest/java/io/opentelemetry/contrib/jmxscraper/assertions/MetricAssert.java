@@ -264,8 +264,10 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
 
           // validate each datapoint attributes match exactly one of the provided attributes sets
           for (NumberDataPoint dataPoint : dataPoints) {
-            Map<String, String> dataPointAttributes = dataPoint.getAttributesList().stream()
-                .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
+            Map<String, String> dataPointAttributes =
+                dataPoint.getAttributesList().stream()
+                    .collect(
+                        Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
             int matchCount = 0;
             for (int i = 0; i < attributeMatchers.length; i++) {
               if (attributeMatchers[i].matches(dataPointAttributes)) {
@@ -289,5 +291,4 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
           }
         });
   }
-
 }
