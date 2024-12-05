@@ -19,8 +19,7 @@ public class AttributeMatcher {
    * @param attributeName matched attribute name
    */
   AttributeMatcher(String attributeName) {
-    this.attributeName = attributeName;
-    this.attributeValue = null;
+    this(attributeName, null);
   }
 
   /**
@@ -52,7 +51,7 @@ public class AttributeMatcher {
 
   /**
    * Verify if this matcher is matching provided attribute value. If this matcher holds null value
-   * then it is matching any attribute value
+   * then it is matching any attribute value.
    *
    * @param value a value to be matched
    * @return true if this matcher is matching provided value, false otherwise.
