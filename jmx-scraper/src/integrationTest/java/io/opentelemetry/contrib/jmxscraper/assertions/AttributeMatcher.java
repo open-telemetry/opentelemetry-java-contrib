@@ -10,6 +10,7 @@ import java.util.Objects;
 /** Implements functionality of matching data point attributes. */
 public class AttributeMatcher {
   private final String attributeName;
+  @Nullable
   private final String attributeValue;
 
   /**
