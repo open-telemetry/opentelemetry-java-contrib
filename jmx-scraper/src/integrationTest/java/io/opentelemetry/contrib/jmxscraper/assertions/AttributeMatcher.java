@@ -56,7 +56,6 @@ public class AttributeMatcher {
 
   @Override
   public int hashCode() {
-    // Do not use value matcher here to support value wildcards
     return Objects.hash(attributeName);
   }
 
@@ -69,15 +68,12 @@ public class AttributeMatcher {
 
   /**
    * Verify if this matcher is matching provided attribute value. If this matcher holds null value
-   * then it is matching any attribute value
+   * then it is matching any attribute value.
    *
    * @param value a value to be matched
    * @return true if this matcher is matching provided value, false otherwise.
    */
   boolean matchesValue(String value) {
-    if (attributeValue == null) {
-      return true;
-    }
-    return Objects.equals(attributeValue, value);
+    return (attributeValue == null) || Objects.equals(attributeValue, value);
   }
 }
