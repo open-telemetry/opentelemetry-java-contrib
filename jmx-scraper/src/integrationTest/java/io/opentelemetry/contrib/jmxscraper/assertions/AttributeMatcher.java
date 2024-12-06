@@ -57,9 +57,6 @@ public class AttributeMatcher {
    * @return true if this matcher is matching provided value, false otherwise.
    */
   boolean matchesValue(String value) {
-    if (attributeValue == null) {
-      return true;
-    }
-    return Objects.equals(attributeValue, value);
+    return attributeValue == null || attributeValue.equals(value);
   }
 }
