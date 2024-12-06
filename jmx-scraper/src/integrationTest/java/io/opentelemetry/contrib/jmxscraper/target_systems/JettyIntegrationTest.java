@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
-import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeWithAnyValue;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -88,7 +88,7 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of select calls.")
                     .hasUnit("{operation}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attributeWithAnyValue("context"), attributeWithAnyValue("id"))))
         .add(
             "jetty.thread.count",
@@ -98,8 +98,8 @@ public class JettyIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The current number of threads.")
                     .hasUnit("{thread}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(attribute("state", "busy")),
-                        attributeSet(attribute("state", "idle"))))
+                        attributeGroup(attribute("state", "busy")),
+                        attributeGroup(attribute("state", "idle"))))
         .add(
             "jetty.thread.queue.count",
             metric ->

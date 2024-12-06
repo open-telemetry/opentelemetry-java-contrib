@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
-import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeWithAnyValue;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
@@ -44,8 +44,8 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of region servers.")
                     .hasUnit("{server}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(attribute("state", "dead")),
-                        attributeSet(attribute("state", "live"))))
+                        attributeGroup(attribute("state", "dead")),
+                        attributeGroup(attribute("state", "live"))))
         .add(
             "hbase.master.regions_in_transition.count",
             metric ->
@@ -128,9 +128,9 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of requests received.")
                     .hasUnit("{request}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "write"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "read"), attributeWithAnyValue("region_server"))))
         .add(
             "hbase.region_server.queue.length",
@@ -140,9 +140,9 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of RPC handlers actively servicing requests.")
                     .hasUnit("{handler}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "flush"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "compaction"),
                             attributeWithAnyValue("region_server"))))
         .add(
@@ -162,9 +162,9 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("Number of block cache hits/misses.")
                     .hasUnit("{operation}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "miss"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "hit"), attributeWithAnyValue("region_server"))))
         .add(
             "hbase.region_server.files.local",
@@ -436,17 +436,17 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("Number of operations that took over 1000ms to complete.")
                     .hasUnit("{operation}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("operation", "delete"),
                             attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("operation", "append"),
                             attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("operation", "get"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("operation", "put"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("operation", "increment"),
                             attributeWithAnyValue("region_server"))))
         .add(
@@ -473,12 +473,12 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of currently enqueued requests.")
                     .hasUnit("{request}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "replication"),
                             attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "user"), attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "priority"),
                             attributeWithAnyValue("region_server"))))
         .add(
@@ -490,10 +490,10 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
                         "Number of client connection authentication failures/successes.")
                     .hasUnit("{authentication request}")
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "successes"),
                             attributeWithAnyValue("region_server")),
-                        attributeSet(
+                        attributeGroup(
                             attribute("state", "failures"),
                             attributeWithAnyValue("region_server"))))
         .add(

@@ -6,8 +6,6 @@
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Utility class implementing convenience static methods to construct data point attribute matchers
@@ -40,21 +38,16 @@ public class DataPointAttributes {
   }
 
   /**
-   * Create a set of attribute matchers that should be used to verify set of data point attributes.
+   * Creates a group of attribute matchers that should be used to verify data point attributes.
    *
-   * @param attributes list of matchers to create set. It must contain matchers with unique names.
-   * @return set of unique attribute matchers
+   * @param attributes list of matchers to create group. It must contain matchers with unique names.
+   * @return group of attribute matchers
    * @throws IllegalArgumentException if provided list contains two or more matchers with the same
-   *     name.
-   * @see MetricAssert#hasDataPointsWithAttributes(Set[]) for detailed description of the algorithm
-   *     used for matching
+   *     attribute name
+   * @see MetricAssert#hasDataPointsWithAttributes(AttributeMatcherGroup...) for detailed
+   *     description off the algorithm used for matching
    */
-  public static Set<AttributeMatcher> attributeSet(AttributeMatcher... attributes) {
-    Set<AttributeMatcher> matcherSet = Arrays.stream(attributes).collect(Collectors.toSet());
-    if (matcherSet.size() < attributes.length) {
-      throw new IllegalArgumentException(
-          "Duplicated matchers found in " + Arrays.toString(attributes));
-    }
-    return matcherSet;
+  public static AttributeMatcherGroup attributeGroup(AttributeMatcher... attributes) {
+    return new AttributeMatcherGroup(Arrays.asList(attributes));
   }
 }
