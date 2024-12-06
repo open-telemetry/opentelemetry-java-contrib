@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,7 +27,7 @@ public class OpenTelemetrySdkServiceTest {
     System.clearProperty("otel.resource.attributes");
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
-      Resource resource = openTelemetrySdkService.getResource();
+      Resource resource = openTelemetrySdkService.resource;
       assertThat(resource.getAttribute(stringKey("service.name"))).isEqualTo("maven");
 
       ConfigProperties configProperties = openTelemetrySdkService.getConfigProperties();
@@ -45,7 +46,7 @@ public class OpenTelemetrySdkServiceTest {
 
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
 
-      Resource resource = openTelemetrySdkService.getResource();
+      Resource resource = openTelemetrySdkService.resource;
       assertThat(resource.getAttribute(stringKey("service.name"))).isEqualTo("my-maven");
       assertThat(resource.getAttribute(stringKey("key1"))).isEqualTo("val1");
       assertThat(resource.getAttribute(stringKey("key2"))).isEqualTo("val2");
@@ -121,5 +122,15 @@ public class OpenTelemetrySdkServiceTest {
       System.clearProperty("otel.exporter.otlp.traces.endpoint");
       System.clearProperty("otel.exporter.otlp.traces.protocol");
     }
+  }
+
+  @AfterAll
+  static void afterAll() {
+    System.clearProperty("otel.exporter.otlp.endpoint");
+    System.clearProperty("otel.exporter.otlp.traces.endpoint");
+    System.clearProperty("otel.exporter.otlp.traces.protocol");
+    System.clearProperty("otel.resource.attributes");
+    System.clearProperty("otel.service.name");
+    System.clearProperty("otel.traces.exporter");
   }
 }

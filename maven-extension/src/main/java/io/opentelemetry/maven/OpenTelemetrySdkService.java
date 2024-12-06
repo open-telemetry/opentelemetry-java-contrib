@@ -5,6 +5,7 @@
 
 package io.opentelemetry.maven;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
@@ -40,7 +41,7 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   private final OpenTelemetrySdk openTelemetrySdk;
 
-  private final Resource resource;
+  @VisibleForTesting final Resource resource;
 
   private final ConfigProperties configProperties;
 
@@ -67,10 +68,10 @@ public final class OpenTelemetrySdkService implements Closeable {
     this.configProperties =
         Optional.ofNullable(AutoConfigureUtil.getConfig(autoConfiguredOpenTelemetrySdk))
             .orElseGet(() -> DefaultConfigProperties.createFromMap(Collections.emptyMap()));
-    this.resource =
-        Optional.ofNullable(AutoConfigureUtil2.getResource(autoConfiguredOpenTelemetrySdk))
-            .orElseGet(Resource::getDefault);
 
+    this.resource = AutoConfigureUtil2.getResource(autoConfiguredOpenTelemetrySdk);
+    // Display resource attributes in debug logs for troubleshooting when traces are not found in
+    // the observability backend, helping understand `service.name`, `service.namespace`, etc.
     logger.debug("OpenTelemetry: OpenTelemetrySdkService initialized, resource:{}", resource);
 
     this.mojosInstrumentationEnabled =
@@ -139,10 +140,6 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   public Tracer getTracer() {
     return this.tracer;
-  }
-
-  public Resource getResource() {
-    return resource;
   }
 
   public ConfigProperties getConfigProperties() {
