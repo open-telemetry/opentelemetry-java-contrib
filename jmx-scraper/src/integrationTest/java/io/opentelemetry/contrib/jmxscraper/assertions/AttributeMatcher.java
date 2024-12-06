@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.jmxscraper.assertions;
 
-import java.util.Objects;
 import javax.annotation.Nullable;
 
 /** Implements functionality of matching data point attributes. */

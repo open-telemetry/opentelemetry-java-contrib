@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
-import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeSet;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.nio.file.Path;
@@ -48,7 +48,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{consumer}")
                     .isUpDownCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -59,7 +59,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{producer}")
                     .isUpDownCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -78,7 +78,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("%")
                     .isGauge()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -107,7 +107,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{message}")
                     .isUpDownCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -119,7 +119,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{message}")
                     .isCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -130,7 +130,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{message}")
                     .isCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -141,7 +141,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{message}")
                     .isCounter()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))))
         .add(
@@ -152,7 +152,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("ms")
                     .isGauge()
                     .hasDataPointsWithAttributes(
-                        attributeSet(
+                        attributeGroup(
                             attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
                             attribute("broker", "localhost"))));
   }
