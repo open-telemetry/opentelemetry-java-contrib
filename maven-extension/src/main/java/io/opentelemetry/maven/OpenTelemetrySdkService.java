@@ -5,19 +5,24 @@
 
 package io.opentelemetry.maven;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -36,6 +41,10 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   private final OpenTelemetrySdk openTelemetrySdk;
 
+  @VisibleForTesting final Resource resource;
+
+  private final ConfigProperties configProperties;
+
   private final Tracer tracer;
 
   private final boolean mojosInstrumentationEnabled;
@@ -47,30 +56,66 @@ public final class OpenTelemetrySdkService implements Closeable {
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
-    // Change default of "otel.[traces,metrics,logs].exporter" from "otlp" to "none"
-    // The impacts are
-    // * If no otel exporter settings are passed, then the Maven extension will not export
-    //   rather than exporting on OTLP GRPC to http://localhost:4317
-    // * If OTEL_EXPORTER_OTLP_ENDPOINT is defined but OTEL_[TRACES,METRICS,LOGS]_EXPORTER,
-    //   is not, then don't export
-    Map<String, String> properties = new HashMap<>();
-    properties.put("otel.traces.exporter", "none");
-    properties.put("otel.metrics.exporter", "none");
-    properties.put("otel.logs.exporter", "none");
-
     AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk =
         AutoConfiguredOpenTelemetrySdk.builder()
             .setServiceClassLoader(getClass().getClassLoader())
-            .addPropertiesSupplier(() -> properties)
+            .addPropertiesCustomizer(
+                OpenTelemetrySdkService::requireExplicitConfigOfTheOtlpExporter)
             .disableShutdownHook()
             .build();
 
     this.openTelemetrySdk = autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk();
+    this.configProperties =
+        Optional.ofNullable(AutoConfigureUtil.getConfig(autoConfiguredOpenTelemetrySdk))
+            .orElseGet(() -> DefaultConfigProperties.createFromMap(Collections.emptyMap()));
 
-    Boolean mojoSpansEnabled = getBooleanConfig("otel.instrumentation.maven.mojo.enabled");
-    this.mojosInstrumentationEnabled = mojoSpansEnabled == null || mojoSpansEnabled;
+    this.resource = AutoConfigureUtil2.getResource(autoConfiguredOpenTelemetrySdk);
+    // Display resource attributes in debug logs for troubleshooting when traces are not found in
+    // the observability backend, helping understand `service.name`, `service.namespace`, etc.
+    logger.debug("OpenTelemetry: OpenTelemetrySdkService initialized, resource:{}", resource);
+
+    this.mojosInstrumentationEnabled =
+        configProperties.getBoolean("otel.instrumentation.maven.mojo.enabled", true);
 
     this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
+  }
+
+  /**
+   * The OTel SDK by default sends data to the OTLP gRPC endpoint localhost:4317 if no exporter and
+   * no OTLP exporter endpoint are defined. This is not suited for a build tool for which we want
+   * the OTel SDK to be disabled by default.
+   *
+   * <p>Change the OTel SDL behavior: if none of the exporter and the OTLP exporter endpoint are
+   * defined, explicitly disable the exporter setting "{@code
+   * otel.[traces,metrics,logs].exporter=none}"
+   *
+   * @return The properties to be returned by {@link
+   *     io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder#addPropertiesCustomizer(java.util.function.Function)}
+   */
+  static Map<String, String> requireExplicitConfigOfTheOtlpExporter(
+      ConfigProperties configProperties) {
+
+    Map<String, String> properties = new HashMap<>();
+    if (configProperties.getString("otel.exporter.otlp.endpoint") != null) {
+      logger.debug("OpenTelemetry: OTLP exporter endpoint is explicitly configured");
+      return properties;
+    }
+    String[] signalTypes = {"traces", "metrics", "logs"};
+    for (String signalType : signalTypes) {
+      boolean isExporterImplicitlyConfiguredToOtlp =
+          configProperties.getString("otel." + signalType + ".exporter") == null;
+      boolean isOtlpExporterEndpointSpecified =
+          configProperties.getString("otel.exporter.otlp." + signalType + ".endpoint") != null;
+
+      if (isExporterImplicitlyConfiguredToOtlp && !isOtlpExporterEndpointSpecified) {
+        logger.debug(
+            "OpenTelemetry: Disabling default OTLP exporter endpoint for signal {} exporter",
+            signalType);
+        properties.put("otel." + signalType + ".exporter", "none");
+      }
+    }
+
+    return properties;
   }
 
   @PreDestroy
@@ -97,6 +142,10 @@ public final class OpenTelemetrySdkService implements Closeable {
     return this.tracer;
   }
 
+  public ConfigProperties getConfigProperties() {
+    return configProperties;
+  }
+
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
   public ContextPropagators getPropagators() {
     return this.openTelemetrySdk.getPropagators();
@@ -104,18 +153,5 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   public boolean isMojosInstrumentationEnabled() {
     return mojosInstrumentationEnabled;
-  }
-
-  @Nullable
-  private static Boolean getBooleanConfig(String name) {
-    String value = System.getProperty(name);
-    if (value != null) {
-      return Boolean.parseBoolean(value);
-    }
-    value = System.getenv(name.toUpperCase(Locale.ROOT).replace('.', '_'));
-    if (value != null) {
-      return Boolean.parseBoolean(value);
-    }
-    return null;
   }
 }
