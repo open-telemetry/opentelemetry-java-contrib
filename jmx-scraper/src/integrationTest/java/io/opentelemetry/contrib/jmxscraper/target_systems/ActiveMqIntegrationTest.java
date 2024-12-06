@@ -5,7 +5,8 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static org.assertj.core.api.Assertions.entry;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.nio.file.Path;
@@ -46,9 +47,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of consumers currently reading from the broker.")
                     .hasUnit("{consumer}")
                     .isUpDownCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.producer.count",
             metric ->
@@ -56,9 +58,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of producers currently attached to the broker.")
                     .hasUnit("{producer}")
                     .isUpDownCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.connection.count",
             metric ->
@@ -66,7 +69,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The total number of current connections.")
                     .hasUnit("{connection}")
                     .isUpDownCounter()
-                    .hasDataPointsAttributes(entry("broker", "localhost")))
+                    .hasDataPointsWithOneAttribute(attribute("broker", "localhost")))
         .add(
             "activemq.memory.usage",
             metric ->
@@ -74,9 +77,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The percentage of configured memory used.")
                     .hasUnit("%")
                     .isGauge()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.disk.store_usage",
             metric ->
@@ -85,7 +89,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                         "The percentage of configured disk used for persistent messages.")
                     .hasUnit("%")
                     .isGauge()
-                    .hasDataPointsAttributes(entry("broker", "localhost")))
+                    .hasDataPointsWithOneAttribute(attribute("broker", "localhost")))
         .add(
             "activemq.disk.temp_usage",
             metric ->
@@ -94,7 +98,7 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                         "The percentage of configured disk used for non-persistent messages.")
                     .hasUnit("%")
                     .isGauge()
-                    .hasDataPointsAttributes(entry("broker", "localhost")))
+                    .hasDataPointsWithOneAttribute(attribute("broker", "localhost")))
         .add(
             "activemq.message.current",
             metric ->
@@ -102,9 +106,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The current number of messages waiting to be consumed.")
                     .hasUnit("{message}")
                     .isUpDownCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.message.expired",
             metric ->
@@ -113,9 +118,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                         "The total number of messages not delivered because they expired.")
                     .hasUnit("{message}")
                     .isCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.message.enqueued",
             metric ->
@@ -123,9 +129,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The total number of messages received by the broker.")
                     .hasUnit("{message}")
                     .isCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.message.dequeued",
             metric ->
@@ -133,9 +140,10 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The total number of messages delivered to consumers.")
                     .hasUnit("{message}")
                     .isCounter()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")))
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))))
         .add(
             "activemq.message.wait_time.avg",
             metric ->
@@ -143,8 +151,9 @@ public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average time a message was held on a destination.")
                     .hasUnit("ms")
                     .isGauge()
-                    .hasDataPointsAttributes(
-                        entry("destination", "ActiveMQ.Advisory.MasterBroker"),
-                        entry("broker", "localhost")));
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("destination", "ActiveMQ.Advisory.MasterBroker"),
+                            attribute("broker", "localhost"))));
   }
 }
