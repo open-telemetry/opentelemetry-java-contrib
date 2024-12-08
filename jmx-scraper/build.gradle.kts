@@ -22,7 +22,7 @@ dependencies {
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-logging")
 
-  implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics:2.10.0-alpha")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")

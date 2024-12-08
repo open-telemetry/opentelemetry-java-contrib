@@ -11,15 +11,19 @@ val agent: Configuration by configurations.creating {
   isCanBeConsumed = false
 }
 
+// can't use bom since that will cause conflicts when updating to the latest SDK version
+// and before updating to the latest instrumentation version
+val otelInstrumentationVersion = "2.10.0"
+
 dependencies {
   implementation(project(":runtime-attach:runtime-attach-core"))
-  agent("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  agent("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelInstrumentationVersion")
 
   // Used by byte-buddy but not brought in as a transitive dependency.
   compileOnly("com.google.code.findbugs:annotations")
 
-  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent")
-  testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelInstrumentationVersion")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelInstrumentationVersion")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testImplementation("org.assertj:assertj-core")
 }
