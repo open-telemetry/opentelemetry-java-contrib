@@ -26,10 +26,6 @@
       "groupName": "micrometer packages"
     },
     {
-      "matchPackagePrefixes": ["com.gradle.enterprise"],
-      "groupName": "gradle enterprise packages"
-    },
-    {
       // prevent 3.0.1u2 -> 3.0.1
       "matchPackageNames": ["com.google.code.findbugs:annotations"],
       "allowedVersions": "!/^3\\.0\\.1$/"
