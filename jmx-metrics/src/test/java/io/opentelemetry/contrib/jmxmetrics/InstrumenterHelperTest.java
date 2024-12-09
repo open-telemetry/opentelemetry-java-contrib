@@ -96,7 +96,7 @@ class InstrumenterHelperTest {
     metricReader = InMemoryMetricReader.create();
     meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReader).build();
     metricEnvironment = new GroovyMetricEnvironment(meterProvider, "otel.test");
-    otel = new OtelHelper(jmxClient, metricEnvironment);
+    otel = new OtelHelper(jmxClient, metricEnvironment, false);
   }
 
   @AfterEach
@@ -429,7 +429,36 @@ class InstrumenterHelperTest {
     }
 
     @Test
-    void doubleValueCallbackMultipleMBeans() throws Exception {
+    void doubleValueCallbackMBeans() throws Exception {
+      String instrumentMethod = "doubleValueCallback";
+      String thingName = "multiple:type=" + instrumentMethod + ".Thing";
+      MBeanHelper mBeanHelper = registerThings(thingName);
+
+      String instrumentName = "multiple." + instrumentMethod + ".gauge";
+      String description = "multiple double gauge description";
+
+      updateWithHelper(
+          mBeanHelper,
+          instrumentMethod,
+          instrumentName,
+          description,
+          "Double",
+          new HashMap<>(),
+          /* aggregateAcrossMBeans= */ true);
+
+      assertThat(metricReader.collectAllMetrics())
+          .satisfiesExactly(
+              metric ->
+                  assertThat(metric)
+                      .hasName(instrumentName)
+                      .hasDescription(description)
+                      .hasUnit("1")
+                      .hasDoubleGaugeSatisfying(
+                          gauge -> gauge.hasPointsSatisfying(assertDoublePoint())));
+    }
+
+    @Test
+    void doubleValueCallbackListMBeans() throws Exception {
       String instrumentMethod = "doubleValueCallback";
       ArrayList<String> thingNames = new ArrayList<>();
       for (int i = 0; i < 4; i++) {
@@ -513,6 +542,12 @@ class InstrumenterHelperTest {
                       .hasUnit("1")
                       .hasLongGaugeSatisfying(
                           gauge -> gauge.hasPointsSatisfying(assertLongPoints())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Consumer<DoublePointAssert>[] assertDoublePoint() {
+      return Stream.<Consumer<DoublePointAssert>>of(point -> point.hasValue(123.456 * 4))
+          .toArray(Consumer[]::new);
     }
 
     @SuppressWarnings("unchecked")
@@ -679,11 +714,29 @@ class InstrumenterHelperTest {
       String instrumentName,
       String description,
       String attribute) {
-    Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
     Map<String, Closure<?>> labelFuncs = new HashMap<>();
     labelFuncs.put("labelOne", (Closure<?>) Eval.me("{ unused -> 'labelOneValue' }"));
     labelFuncs.put(
         "labelTwo", (Closure<?>) Eval.me("{ mbean -> mbean.name().getKeyProperty('thing') }"));
+    updateWithHelper(
+        mBeanHelper,
+        instrumentMethod,
+        instrumentName,
+        description,
+        attribute,
+        labelFuncs,
+        /* aggregateAcrossMBeans= */ false);
+  }
+
+  void updateWithHelper(
+      MBeanHelper mBeanHelper,
+      String instrumentMethod,
+      String instrumentName,
+      String description,
+      String attribute,
+      Map<String, Closure<?>> labelFuncs,
+      boolean aggregateAcrossMBeans) {
+    Closure<?> instrument = (Closure<?>) Eval.me("otel", otel, "otel.&" + instrumentMethod);
     InstrumentHelper instrumentHelper =
         new InstrumentHelper(
             mBeanHelper,
@@ -693,7 +746,8 @@ class InstrumenterHelperTest {
             labelFuncs,
             Collections.singletonMap(attribute, null),
             instrument,
-            metricEnvironment);
+            metricEnvironment,
+            aggregateAcrossMBeans);
     instrumentHelper.update();
   }
 
@@ -714,7 +768,8 @@ class InstrumenterHelperTest {
             labelFuncs,
             attributes,
             instrument,
-            metricEnvironment);
+            metricEnvironment,
+            false);
     instrumentHelper.update();
   }
 

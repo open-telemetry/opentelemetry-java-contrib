@@ -6,39 +6,24 @@ This module provides a `SpanProcessor` that captures the [`code.stacktrace`](htt
 Capturing the stack trace is an expensive operation and does not provide any value on short-lived spans.
 As a consequence it should only be used when the span duration is known, thus on span end.
 
-However, the current SDK API does not allow to modify span attributes on span end, so we have to
-introduce other components to make it work as expected.
+## Usage and configuration
 
-## Usage
+This extension supports autoconfiguration, so it will be automatically enabled by OpenTelemetry
+SDK when included in the application runtime dependencies.
 
-This extension does not support autoconfiguration because it needs to wrap the `SimpleSpanExporter`
-or `BatchingSpanProcessor` that invokes the `SpanExporter`.
+`otel.java.experimental.span-stacktrace.min.duration`
 
-As a consequence you have to use [Manual SDK setup](#manual-sdk-setup)
-section below to configure it.
+- allows to configure the minimal duration for which spans have a stacktrace captured
+- defaults to 5ms
+- a value of zero will include all spans
+- a negative value will disable the feature
 
-### Manual SDK setup
+`otel.java.experimental.span-stacktrace.filter`
 
-Here is an example registration of `StackTraceSpanProcessor` to capture stack trace for all
-the spans that have a duration >= 1000 ns. The spans that have an `ignorespan` string attribute
-will be ignored.
-
-```java
-InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
-SpanProcessor exportProcessor = SimpleSpanProcessor.create(spansExporter);
-
-Predicate<ReadableSpan> filterPredicate = readableSpan -> {
-  if(readableSpan.getAttribute(AttributeKey.stringKey("ignorespan")) != null){
-    return false;
-  }
-  return true;
-};
-SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-    .addSpanProcessor(new StackTraceSpanProcessor(exportProcessor, 1000, filterPredicate))
-    .build();
-
-OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build();
-```
+- allows to filter spans to be excluded from stacktrace capture
+- defaults to include all spans.
+- value is the class name of a class implementing `java.util.function.Predicate<ReadableSpan>`
+- filter class must be publicly accessible and provide a no-arg constructor
 
 ## Component owners
 

@@ -25,8 +25,8 @@ class IncubatingAttributes {
       AttributeKey.stringKey("cloud.provider");
   public static final AttributeKey<String> CLOUD_REGION = AttributeKey.stringKey("cloud.region");
 
-  public static final class CloudPlatformValues {
-    private CloudPlatformValues() {}
+  public static final class CloudPlatformIncubatingValues {
+    private CloudPlatformIncubatingValues() {}
 
     public static final String GCP_COMPUTE_ENGINE = "gcp_compute_engine";
     public static final String GCP_CLOUD_RUN = "gcp_cloud_run";
@@ -39,6 +39,11 @@ class IncubatingAttributes {
   public static final AttributeKey<String> FAAS_INSTANCE = AttributeKey.stringKey("faas.instance");
   public static final AttributeKey<String> FAAS_NAME = AttributeKey.stringKey("faas.name");
   public static final AttributeKey<String> FAAS_VERSION = AttributeKey.stringKey("faas.version");
+
+  public static final AttributeKey<String> GCP_CLOUD_RUN_JOB_EXECUTION =
+      AttributeKey.stringKey("gcp.cloud_run.job.execution");
+  public static final AttributeKey<Long> GCP_CLOUD_RUN_JOB_TASK_INDEX =
+      AttributeKey.longKey("gcp.cloud_run.job.task_index");
 
   public static final AttributeKey<String> GCP_GCE_INSTANCE_HOSTNAME =
       AttributeKey.stringKey("gcp.gce.instance.hostname");

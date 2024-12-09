@@ -6,14 +6,14 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
-        "io.opentelemetry.semconv:opentelemetry-semconv",
-        "io.opentelemetry.semconv:opentelemetry-semconv-incubating"
+        "io.opentelemetry:**",
+        "io.opentelemetry.instrumentation:**",
+        "io.opentelemetry.semconv:**",
+        "io.opentelemetry.proto:**"
       ],
       // Renovate's default behavior is only to update from unstable -> unstable if it's for the
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
-      // (but there's never any stable version of these artifacts so this logic doesn't apply)
       "ignoreUnstable": false
     },
     {
@@ -25,8 +25,9 @@
       "groupName": "micrometer packages"
     },
     {
-      "matchPackagePrefixes": ["com.gradle.enterprise"],
-      "groupName": "gradle enterprise packages"
+      // prevent 3.0.1u2 -> 3.0.1
+      "matchPackageNames": ["com.google.code.findbugs:annotations"],
+      "allowedVersions": "!/^3\\.0\\.1$/"
     },
     {
       // disruptor 4+ requires Java 11+
@@ -44,6 +45,12 @@
       // mockito 5+ requires Java 11+
       "matchPackagePrefixes": ["org.mockito:"],
       "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      // agrona 1.23+ requires Java 17+
+      "matchPackageNames": ["org.agrona:agrona"],
+      "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
     {
@@ -72,6 +79,13 @@
       // pinned version for compatibility with java 8 JFR parsing
       "matchPackagePrefixes": ["org.openjdk.jmc"],
       "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      // pinned version for compatibility
+      "matchFileNames": ["jmx-scraper/test-webapp/build.gradle.kts"],
+      "matchPackagePrefixes": ["jakarta.servlet:"],
+      "matchCurrentVersion": "5.0.0",
       "enabled": false
     }
   ]

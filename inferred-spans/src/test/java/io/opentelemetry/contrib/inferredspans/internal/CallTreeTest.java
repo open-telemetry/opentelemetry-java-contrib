@@ -869,7 +869,10 @@ class CallTreeTest {
     assertThat(actualResult).isEqualTo(expectedResult.toString());
 
     if (expectedSpans != null) {
-      root.spanify(nanoClock, profilerSetup.sdk.getTracer("dummy-inferred-spans-tracer"));
+      root.spanify(
+          nanoClock,
+          profilerSetup.sdk.getTracer("dummy-inferred-spans-tracer"),
+          CallTree.DEFAULT_PARENT_OVERRIDE);
       Map<String, SpanData> spans =
           profilerSetup.getSpans().stream()
               .collect(toMap(s -> s.getName().replaceAll(".*#", ""), Function.identity()));

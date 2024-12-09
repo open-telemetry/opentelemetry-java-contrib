@@ -24,8 +24,20 @@ public final class ToDiskExporterBuilder<T> {
 
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
+  private boolean debugEnabled = false;
 
   ToDiskExporterBuilder() {}
+
+  @CanIgnoreReturnValue
+  public ToDiskExporterBuilder<T> enableDebug() {
+    return setDebugEnabled(true);
+  }
+
+  @CanIgnoreReturnValue
+  public ToDiskExporterBuilder<T> setDebugEnabled(boolean debugEnabled) {
+    this.debugEnabled = debugEnabled;
+    return this;
+  }
 
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> setFolderName(String folderName) {
@@ -61,7 +73,7 @@ public final class ToDiskExporterBuilder<T> {
 
   public ToDiskExporter<T> build() throws IOException {
     Storage storage = storageBuilder.build();
-    return new ToDiskExporter<>(serializer, exportFunction, storage);
+    return new ToDiskExporter<>(serializer, exportFunction, storage, debugEnabled);
   }
 
   private static void validateConfiguration(StorageConfiguration configuration) {

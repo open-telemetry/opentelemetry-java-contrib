@@ -32,7 +32,7 @@ dependencies {
   implementation("org.slf4j:slf4j-api")
   runtimeOnly("org.slf4j:slf4j-simple")
 
-  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.10.0")
 
   bootstrapLibs(project(":static-instrumenter:bootstrap"))
   javaagentLibs(project(":static-instrumenter:agent-extension"))

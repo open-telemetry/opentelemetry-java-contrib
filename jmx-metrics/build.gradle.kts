@@ -1,4 +1,5 @@
 plugins {
+  id("otel.java-conventions")
   application
   id("com.github.johnrengelman.shadow")
 
@@ -21,7 +22,7 @@ repositories {
   }
 }
 
-val groovyVersion = "3.0.22"
+val groovyVersion = "3.0.23"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
@@ -57,7 +58,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:0.20.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
       }
     }

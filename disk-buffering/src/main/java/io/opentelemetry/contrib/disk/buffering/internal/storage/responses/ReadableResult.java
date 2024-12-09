@@ -8,5 +8,5 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.responses;
 public enum ReadableResult {
   SUCCEEDED,
   FAILED,
-  PROCESSING_FAILED
+  TRY_LATER
 }

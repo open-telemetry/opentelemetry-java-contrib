@@ -7,74 +7,26 @@ package io.opentelemetry.contrib.jfr.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import com.google.errorprone.annotations.Keep;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.util.stream.Stream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.MockedStatic;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 class FlightRecorderDiagnosticCommandConnectionTest {
 
-  @Keep
-  static Stream<Arguments> assertJdkHasUnlockCommercialFeatures() {
-    return Stream.of(
-        Arguments.of("Oracle Corporation", "1.8.0_401", true),
-        Arguments.of("AdoptOpenJDK", "1.8.0_282", false),
-        Arguments.of("Oracle Corporation", "10.0.2", true),
-        Arguments.of("Oracle Corporation", "9.0.4", true),
-        Arguments.of("Oracle Corporation", "11.0.22", false),
-        Arguments.of("Microsoft", "11.0.13", false),
-        Arguments.of("Microsoft", "17.0.3", false),
-        Arguments.of("Oracle Corporation", "21.0.3", false));
-  }
-
-  @ParameterizedTest
-  @MethodSource
-  void assertJdkHasUnlockCommercialFeatures(String vmVendor, String vmVersion, boolean expected)
-      throws Exception {
-
-    MBeanServerConnection mBeanServerConnection = mock(MBeanServerConnection.class);
-
-    try (MockedStatic<ManagementFactory> mockedStatic = mockStatic(ManagementFactory.class)) {
-      mockedStatic
-          .when(
-              () -> ManagementFactory.getPlatformMXBean(mBeanServerConnection, RuntimeMXBean.class))
-          .thenAnswer(
-              new Answer<RuntimeMXBean>() {
-                @Override
-                public RuntimeMXBean answer(InvocationOnMock invocation) {
-                  RuntimeMXBean mockedRuntimeMxBean = mock(RuntimeMXBean.class);
-                  when(mockedRuntimeMxBean.getVmVendor()).thenReturn(vmVendor);
-                  when(mockedRuntimeMxBean.getVmVersion()).thenReturn(vmVersion);
-                  return mockedRuntimeMxBean;
-                }
-              });
-
-      boolean actual =
-          FlightRecorderDiagnosticCommandConnection.jdkHasUnlockCommercialFeatures(
-              mBeanServerConnection);
-      assertEquals(expected, actual, "Expected " + expected + " for " + vmVendor + " " + vmVersion);
-    }
-  }
-
   @Test
   void assertCommercialFeaturesUnlocked() throws Exception {
-    ObjectName objectName = mock(ObjectName.class);
-    MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "unlocked");
+    MBeanServer mBeanServerConnection = ManagementFactory.getPlatformMBeanServer();
+    ObjectName objectName = new ObjectName("com.sun.management:type=DiagnosticCommand");
     FlightRecorderDiagnosticCommandConnection.assertCommercialFeaturesUnlocked(
         mBeanServerConnection, objectName);
   }
@@ -122,6 +74,36 @@ class FlightRecorderDiagnosticCommandConnectionTest {
         connection.startRecording(
             new RecordingOptions.Builder().build(), RecordingConfiguration.PROFILE_CONFIGURATION);
     assertEquals(id, 99);
+  }
+
+  @Test
+  void endToEndTest() throws Exception {
+
+    MBeanServerConnection mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    FlightRecorderConnection flightRecorderConnection =
+        FlightRecorderDiagnosticCommandConnection.connect(mBeanServer);
+    RecordingOptions recordingOptions =
+        new RecordingOptions.Builder().disk("true").duration("5s").build();
+    RecordingConfiguration recordingConfiguration = RecordingConfiguration.PROFILE_CONFIGURATION;
+    Path tempFile = Files.createTempFile("recording", ".jfr");
+
+    try (Recording recording =
+        flightRecorderConnection.newRecording(recordingOptions, recordingConfiguration)) {
+
+      recording.start();
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      recording.dump(tempFile.toString());
+      recording.stop();
+    } finally {
+      if (!Files.exists(tempFile)) {
+        fail("Recording file not found");
+      }
+      Files.deleteIfExists(tempFile);
+    }
   }
 
   MBeanServerConnection mockMbeanServer(

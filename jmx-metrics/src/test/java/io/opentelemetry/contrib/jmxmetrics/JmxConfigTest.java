@@ -52,6 +52,7 @@ class JmxConfigTest {
     assertThat(config.remoteProfile).isNull();
     assertThat(config.realm).isNull();
     assertThat(config.properties.getProperty("otel.metric.export.interval")).isEqualTo("10000");
+    assertThat(config.aggregateAcrossMBeans).isFalse();
   }
 
   @Test
@@ -87,6 +88,7 @@ class JmxConfigTest {
     assertThat(config.password).isEqualTo("myPassword");
     assertThat(config.remoteProfile).isEqualTo("myRemoteProfile");
     assertThat(config.realm).isEqualTo("myRealm");
+    assertThat(config.aggregateAcrossMBeans).isFalse();
   }
 
   @Test
@@ -109,6 +111,7 @@ class JmxConfigTest {
     assertThat(config.password).isEqualTo("myPassw\\ord");
     assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
     assertThat(config.realm).isEqualTo("myRealm");
+    assertThat(config.aggregateAcrossMBeans).isTrue();
 
     // These properties are set from the config file loading into JmxConfig
     assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");

@@ -1,0 +1,71 @@
+---
+rules:
+  - beans:
+      - org.apache.activemq:type=Broker,brokerName=*,destinationType=Queue,destinationName=*
+      - org.apache.activemq:type=Broker,brokerName=*,destinationType=Topic,destinationName=*
+    metricAttribute:
+      destination: param(destinationName)
+      broker: param(brokerName)
+    prefix: activemq.
+    mapping:
+      ProducerCount:
+        metric: producer.count
+        unit: "{producer}"
+        type: updowncounter
+        desc: The number of producers currently attached to the broker.
+      ConsumerCount:
+        metric: consumer.count
+        unit: "{consumer}"
+        type: updowncounter
+        desc: The number of consumers currently reading from the broker.
+      MemoryPercentUsage:
+        metric: memory.usage
+        unit: "%"
+        type: gauge
+        desc: The percentage of configured memory used.
+      QueueSize:
+        metric: message.current
+        unit: "{message}"
+        type: updowncounter
+        desc: The current number of messages waiting to be consumed.
+      ExpiredCount:
+        metric: message.expired
+        unit: "{message}"
+        type: counter
+        desc: The total number of messages not delivered because they expired.
+      EnqueueCount:
+        metric: message.enqueued
+        unit: "{message}"
+        type: counter
+        desc: The total number of messages received by the broker.
+      DequeueCount:
+        metric: message.dequeued
+        unit: "{message}"
+        type: counter
+        desc: The total number of messages delivered to consumers.
+      AverageEnqueueTime:
+        metric: message.wait_time.avg
+        unit: ms
+        type: gauge
+        desc: The average time a message was held on a destination.
+
+  - bean: org.apache.activemq:type=Broker,brokerName=*
+    metricAttribute:
+      # minor divergence from activemq.groovy to capture broker name, making it closer to
+      # the definition in JMX Insights
+      broker: param(brokerName)
+    prefix: activemq.
+    unit: "%"
+    type: gauge
+    mapping:
+      CurrentConnectionsCount:
+        metric: connection.count
+        type: updowncounter
+        unit: "{connection}"
+        desc: The total number of current connections.
+      StorePercentUsage:
+        metric: disk.store_usage
+        desc: The percentage of configured disk used for persistent messages.
+      TempPercentUsage:
+        metric: disk.temp_usage
+        desc: The percentage of configured disk used for non-persistent messages.

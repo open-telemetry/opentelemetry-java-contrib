@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.PROCESSING_FAILED;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.TRY_LATER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import java.io.IOException;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test;
 class StorageTest {
   private FolderManager folderManager;
   private Storage storage;
-  private Function<byte[], Boolean> processing;
+  private Function<byte[], ProcessResult> processing;
   private ReadableFile readableFile;
   private WritableFile writableFile;
 
@@ -39,7 +40,7 @@ class StorageTest {
     writableFile = createWritableFile();
     processing = mock();
     when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
-    storage = new Storage(folderManager);
+    storage = new Storage(folderManager, true);
   }
 
   @Test
@@ -52,11 +53,11 @@ class StorageTest {
   }
 
   @Test
-  void whenReadableFileProcessingFails_returnFailed() throws IOException {
+  void whenReadableFileProcessingFails_returnTryLater() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    when(readableFile.readAndProcess(processing)).thenReturn(PROCESSING_FAILED);
+    when(readableFile.readAndProcess(processing)).thenReturn(TRY_LATER);
 
-    assertEquals(PROCESSING_FAILED, storage.readAndProcess(processing));
+    assertEquals(TRY_LATER, storage.readAndProcess(processing));
 
     verify(readableFile).readAndProcess(processing);
   }

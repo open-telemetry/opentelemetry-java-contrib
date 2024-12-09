@@ -16,6 +16,8 @@ import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANC
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_ID;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_NAME;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_MACHINE_TYPE;
+import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_EXECUTION_KEY;
+import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_TASK_INDEX;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_NAME;
@@ -27,21 +29,23 @@ import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_NAME;
 import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
+import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_APP_ENGINE;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_CLOUD_FUNCTIONS;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_CLOUD_RUN;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_COMPUTE_ENGINE;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformValues.GCP_KUBERNETES_ENGINE;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderValues.GCP;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_APP_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_FUNCTIONS;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_RUN;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_COMPUTE_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_KUBERNETES_ENGINE;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudProviderIncubatingValues.GCP;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION;
 import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
@@ -128,6 +132,23 @@ class GCPResourceProviderTest {
                 SERVERLESS_COMPUTE_AVAILABILITY_ZONE, "us-central1-b"));
     DetectedPlatform mockServerlessPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockServerlessPlatform.getSupportedPlatform()).thenReturn(platform);
+    Mockito.when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
+    Mockito.when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    return mockServerlessPlatform;
+  }
+
+  private static DetectedPlatform generateMockGcrJobPlatform() {
+    Map<String, String> mockAttributes =
+        new HashMap<>(
+            ImmutableMap.of(
+                SERVERLESS_COMPUTE_NAME, "serverless-job",
+                SERVERLESS_COMPUTE_INSTANCE_ID, "serverless-instance-id",
+                SERVERLESS_COMPUTE_CLOUD_REGION, "us-central1",
+                GCR_JOB_TASK_INDEX, "1",
+                GCR_JOB_EXECUTION_KEY, "serverless-job-a1b2c3"));
+    DetectedPlatform mockServerlessPlatform = Mockito.mock(DetectedPlatform.class);
+    Mockito.when(mockServerlessPlatform.getSupportedPlatform())
+        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB);
     Mockito.when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
     Mockito.when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockServerlessPlatform;
@@ -274,7 +295,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGcrResourceAttributesMapping() {
+  public void testGcrServiceResourceAttributesMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN);
@@ -318,6 +339,31 @@ class GCPResourceProviderTest {
         .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
         .containsEntry(
             CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(SERVERLESS_COMPUTE_AVAILABILITY_ZONE))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+  }
+
+  @Test
+  public void testGcrJobResourceAttributesMapping() {
+    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    DetectedPlatform mockPlatform = generateMockGcrJobPlatform();
+    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    Map<String, String> detectedAttributes = mockPlatform.getAttributes();
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+    verify(mockPlatform, Mockito.times(1)).getProjectId();
+
+    assertThat(gotResource.getAttributes())
+        .hasSize(8)
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
+        .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
+        .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
+        .containsEntry(GCP_CLOUD_RUN_JOB_EXECUTION, detectedAttributes.get(GCR_JOB_EXECUTION_KEY))
+        .containsEntry(
+            GCP_CLOUD_RUN_JOB_TASK_INDEX,
+            Integer.parseInt(detectedAttributes.get(GCR_JOB_TASK_INDEX)))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
   }
 
