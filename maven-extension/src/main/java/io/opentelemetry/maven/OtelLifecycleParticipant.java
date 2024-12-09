@@ -60,7 +60,7 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
               new ChainedExecutionListener(this.otelExecutionListener, initialExecutionListener));
       logger.debug(
           "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: {}",
-              initialExecutionListener);
+          initialExecutionListener);
     }
   }
 
