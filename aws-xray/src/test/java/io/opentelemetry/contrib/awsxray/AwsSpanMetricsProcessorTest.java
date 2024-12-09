@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.awsxray;
 
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_STATUS_CODE;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_STATUS_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link AwsSpanMetricsProcessor}. */
+@SuppressWarnings("deprecation") // uses deprecated semantic conventions
 class AwsSpanMetricsProcessorTest {
   // Test constants
   private static final boolean CONTAINS_ATTRIBUTES = true;
