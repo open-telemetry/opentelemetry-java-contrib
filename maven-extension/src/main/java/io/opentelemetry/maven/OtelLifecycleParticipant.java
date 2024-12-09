@@ -59,16 +59,15 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
           .setExecutionListener(
               new ChainedExecutionListener(this.otelExecutionListener, initialExecutionListener));
       logger.debug(
-          "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: "
-              + initialExecutionListener);
+          "OpenTelemetry: OpenTelemetry extension registered as execution listener. InitialExecutionListener: {}",
+              initialExecutionListener);
     }
   }
 
   @Override
   public void afterSessionEnd(MavenSession session) {
-    // Waiting for https://issues.apache.org/jira/browse/MNG-7056 and
-    // https://github.com/open-telemetry/opentelemetry-java-contrib/issues/1391
-    // to be fixed, close OpenTelemetry SDK in `afterSessionEnd()`
+    // Workaround https://issues.apache.org/jira/browse/MNG-8217
+    // close OpenTelemetry SDK in `afterSessionEnd()`
     logger.debug("OpenTelemetry: After Maven session end, close OpenTelemetry SDK");
     openTelemetrySdkService.close();
   }
