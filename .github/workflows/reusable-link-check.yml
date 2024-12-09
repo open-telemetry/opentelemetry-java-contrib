@@ -1,0 +1,20 @@
+name: Reusable - Check links
+
+on:
+  workflow_call:
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          # TODO (trask) remove after the next release
+          lycheeVersion: nightly
+          args: >
+            --include-fragments
+            --max-retries 6
+            --exclude-path CHANGELOG.md
+            .
