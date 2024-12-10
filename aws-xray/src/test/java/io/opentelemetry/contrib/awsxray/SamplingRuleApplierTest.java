@@ -5,7 +5,14 @@
 
 package io.opentelemetry.contrib.awsxray;
 
-import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_URL;
+import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_HOST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -22,8 +29,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
@@ -35,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("JavaUtilDate")
+@SuppressWarnings({"JavaUtilDate", "deprecation"}) // uses deprecated semantic conventions
 class SamplingRuleApplierTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -52,18 +58,16 @@ class SamplingRuleApplierTest {
 
     private final Resource resource =
         Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME, "test-service-foo-bar")
-            .put(ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EKS)
-            .put(
-                ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                "arn:aws:xray:us-east-1:595986152929:my-service")
+            .put(SERVICE_NAME, "test-service-foo-bar")
+            .put(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EKS)
+            .put(AWS_ECS_CONTAINER_ARN, "arn:aws:xray:us-east-1:595986152929:my-service")
             .build();
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
-            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
+            .put(HTTP_METHOD, "GET")
+            .put(NET_HOST_NAME, "opentelemetry.io")
+            .put(HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -109,8 +113,8 @@ class SamplingRuleApplierTest {
       assertThat(
               applier.matches(
                   attributes.toBuilder()
-                      .remove(SemanticAttributes.HTTP_TARGET)
-                      .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-me")
+                      .remove(HTTP_TARGET)
+                      .put(HTTP_URL, "scheme://host:port/instrument-me")
                       .build(),
                   resource))
           .isTrue();
@@ -132,8 +136,7 @@ class SamplingRuleApplierTest {
 
     @Test
     void methodNotMatch() {
-      Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "POST").build();
+      Attributes attributes = this.attributes.toBuilder().put(HTTP_METHOD, "POST").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -142,29 +145,25 @@ class SamplingRuleApplierTest {
       // Replacing dot with character makes sure we're not accidentally treating dot as regex
       // wildcard.
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
-              .build();
+          this.attributes.toBuilder().put(NET_HOST_NAME, "opentelemetryfio").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
     @Test
     void pathNotMatch() {
       Attributes attributes =
+          this.attributes.toBuilder().put(HTTP_TARGET, "/instrument-you").build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
           this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_TARGET, "/instrument-you")
+              .remove(HTTP_TARGET)
+              .put(HTTP_URL, "scheme://host:port/instrument-you")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
           this.attributes.toBuilder()
-              .remove(SemanticAttributes.HTTP_TARGET)
-              .put(SemanticAttributes.HTTP_URL, "scheme://host:port/instrument-you")
-              .build();
-      assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes =
-          this.attributes.toBuilder()
-              .remove(SemanticAttributes.HTTP_TARGET)
-              .put(SemanticAttributes.HTTP_URL, "scheme://host:port")
+              .remove(HTTP_TARGET)
+              .put(HTTP_URL, "scheme://host:port")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
 
@@ -172,8 +171,8 @@ class SamplingRuleApplierTest {
       // present.
       attributes =
           this.attributes.toBuilder()
-              .remove(SemanticAttributes.HTTP_TARGET)
-              .put(SemanticAttributes.HTTP_URL, "host:port/instrument-me")
+              .remove(HTTP_TARGET)
+              .put(HTTP_URL, "host:port/instrument-me")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -195,13 +194,10 @@ class SamplingRuleApplierTest {
     void serviceTypeNotMatch() {
       Resource resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EC2)
+              .put(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2)
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      resource =
-          Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_PLATFORM));
+      resource = Resource.create(removeAttribute(this.resource.getAttributes(), CLOUD_PLATFORM));
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -209,9 +205,7 @@ class SamplingRuleApplierTest {
     void arnNotMatch() {
       Resource resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                  "arn:aws:xray:us-east-1:595986152929:my-service2")
+              .put(AWS_ECS_CONTAINER_ARN, "arn:aws:xray:us-east-1:595986152929:my-service2")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -227,18 +221,16 @@ class SamplingRuleApplierTest {
 
     private final Resource resource =
         Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME, "test-service-foo-bar")
-            .put(ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EKS)
-            .put(
-                ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                "arn:aws:xray:us-east-1:595986152929:my-service")
+            .put(SERVICE_NAME, "test-service-foo-bar")
+            .put(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EKS)
+            .put(AWS_ECS_CONTAINER_ARN, "arn:aws:xray:us-east-1:595986152929:my-service")
             .build();
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
-            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
+            .put(HTTP_METHOD, "GET")
+            .put(NET_HOST_NAME, "opentelemetry.io")
+            .put(HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -309,104 +301,70 @@ class SamplingRuleApplierTest {
 
     @Test
     void methodMatches() {
-      Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "BADGETGOOD").build();
+      Attributes attributes = this.attributes.toBuilder().put(HTTP_METHOD, "BADGETGOOD").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "BADGET").build();
+      attributes = this.attributes.toBuilder().put(HTTP_METHOD, "BADGET").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "GETGET").build();
+      attributes = this.attributes.toBuilder().put(HTTP_METHOD, "GETGET").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void methodNotMatch() {
-      Attributes attributes =
-          this.attributes.toBuilder().put(SemanticAttributes.HTTP_METHOD, "POST").build();
+      Attributes attributes = this.attributes.toBuilder().put(HTTP_METHOD, "POST").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_METHOD);
+      attributes = removeAttribute(this.attributes, HTTP_METHOD);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
     @Test
     void hostMatches() {
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "alpha.opentelemetry.io")
-              .build();
+          this.attributes.toBuilder().put(NET_HOST_NAME, "alpha.opentelemetry.io").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opfdnqtelemetry.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "opfdnqtelemetry.io").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentglemetry.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "opentglemetry.io").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentglemry.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "opentglemry.io").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentglemrz.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "opentglemrz.io").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void hostNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentelemetryfio")
-              .build();
+          this.attributes.toBuilder().put(NET_HOST_NAME, "opentelemetryfio").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "opentgalemetry.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "opentgalemetry.io").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.NET_HOST_NAME, "alpha.oentelemetry.io")
-              .build();
+      attributes = this.attributes.toBuilder().put(NET_HOST_NAME, "alpha.oentelemetry.io").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.NET_HOST_NAME);
+      attributes = removeAttribute(this.attributes, NET_HOST_NAME);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
     @Test
     void pathMatches() {
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_TARGET, "/instrument-me?foo=bar&cat=")
-              .build();
+          this.attributes.toBuilder().put(HTTP_TARGET, "/instrument-me?foo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       // Deceptive question mark, it's actually a wildcard :-)
       attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_TARGET, "/instrument-meafoo=bar&cat=")
-              .build();
+          this.attributes.toBuilder().put(HTTP_TARGET, "/instrument-meafoo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void pathNotMatch() {
       Attributes attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_TARGET, "/instrument-mea?foo=bar&cat=")
-              .build();
+          this.attributes.toBuilder().put(HTTP_TARGET, "/instrument-mea?foo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes =
-          this.attributes.toBuilder()
-              .put(SemanticAttributes.HTTP_TARGET, "foo/instrument-meafoo=bar&cat=")
-              .build();
+          this.attributes.toBuilder().put(HTTP_TARGET, "foo/instrument-meafoo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = removeAttribute(this.attributes, SemanticAttributes.HTTP_TARGET);
+      attributes = removeAttribute(this.attributes, HTTP_TARGET);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -441,13 +399,10 @@ class SamplingRuleApplierTest {
     void serviceTypeMatches() {
       Resource resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.CLOUD_PLATFORM, ResourceAttributes.CloudPlatformValues.AWS_EC2)
+              .put(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2)
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      resource =
-          Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_PLATFORM));
+      resource = Resource.create(removeAttribute(this.resource.getAttributes(), CLOUD_PLATFORM));
       // null matches for pattern '*'
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
@@ -456,9 +411,7 @@ class SamplingRuleApplierTest {
     void arnMatches() {
       Resource resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                  "arn:aws:opentelemetry:us-east-3:52929:my-service")
+              .put(AWS_ECS_CONTAINER_ARN, "arn:aws:opentelemetry:us-east-3:52929:my-service")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
@@ -467,22 +420,16 @@ class SamplingRuleApplierTest {
     void arnNotMatch() {
       Resource resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                  "arn:aws:xray:us-east-1:595986152929:my-service2")
+              .put(AWS_ECS_CONTAINER_ARN, "arn:aws:xray:us-east-1:595986152929:my-service2")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       resource =
           this.resource.toBuilder()
-              .put(
-                  ResourceAttributes.AWS_ECS_CONTAINER_ARN,
-                  "frn:aws:xray:us-east-1:595986152929:my-service")
+              .put(AWS_ECS_CONTAINER_ARN, "frn:aws:xray:us-east-1:595986152929:my-service")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       resource =
-          Resource.create(
-              removeAttribute(
-                  this.resource.getAttributes(), ResourceAttributes.AWS_ECS_CONTAINER_ARN));
+          Resource.create(removeAttribute(this.resource.getAttributes(), AWS_ECS_CONTAINER_ARN));
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
   }
@@ -497,19 +444,15 @@ class SamplingRuleApplierTest {
 
     private final Resource resource =
         Resource.builder()
-            .put(
-                ResourceAttributes.CLOUD_PLATFORM,
-                ResourceAttributes.CloudPlatformValues.AWS_LAMBDA)
-            .put(
-                ResourceAttributes.CLOUD_RESOURCE_ID,
-                "arn:aws:xray:us-east-1:595986152929:my-service")
+            .put(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_LAMBDA)
+            .put(CLOUD_RESOURCE_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
             .build();
 
     private final Attributes attributes =
         Attributes.builder()
-            .put(SemanticAttributes.HTTP_METHOD, "GET")
-            .put(SemanticAttributes.NET_HOST_NAME, "opentelemetry.io")
-            .put(SemanticAttributes.HTTP_TARGET, "/instrument-me")
+            .put(HTTP_METHOD, "GET")
+            .put(NET_HOST_NAME, "opentelemetry.io")
+            .put(HTTP_TARGET, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -522,13 +465,10 @@ class SamplingRuleApplierTest {
     @Test
     void spanFaasIdMatches() {
       Resource resource =
-          Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_RESOURCE_ID));
+          Resource.create(removeAttribute(this.resource.getAttributes(), CLOUD_RESOURCE_ID));
       Attributes attributes =
           this.attributes.toBuilder()
-              .put(
-                  ResourceAttributes.CLOUD_RESOURCE_ID,
-                  "arn:aws:xray:us-east-1:595986152929:my-service")
+              .put(CLOUD_RESOURCE_ID, "arn:aws:xray:us-east-1:595986152929:my-service")
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
@@ -538,13 +478,11 @@ class SamplingRuleApplierTest {
       Resource resource =
           this.resource.toBuilder()
               .put(
-                  ResourceAttributes.CLOUD_PLATFORM,
-                  ResourceAttributes.CloudPlatformValues.GCP_CLOUD_FUNCTIONS)
+                  CLOUD_PLATFORM,
+                  CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_FUNCTIONS)
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      resource =
-          Resource.create(
-              removeAttribute(this.resource.getAttributes(), ResourceAttributes.CLOUD_PLATFORM));
+      resource = Resource.create(removeAttribute(this.resource.getAttributes(), CLOUD_PLATFORM));
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
   }
