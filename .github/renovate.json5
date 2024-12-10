@@ -6,15 +6,14 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
-        "io.opentelemetry.semconv:opentelemetry-semconv",
-        "io.opentelemetry.semconv:opentelemetry-semconv-incubating",
-        "io.opentelemetry.proto:opentelemetry-proto"
+        "io.opentelemetry:**",
+        "io.opentelemetry.instrumentation:**",
+        "io.opentelemetry.semconv:**",
+        "io.opentelemetry.proto:**"
       ],
       // Renovate's default behavior is only to update from unstable -> unstable if it's for the
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
-      // (TODO remove once the artifacts above release stable versions)
       "ignoreUnstable": false
     },
     {
@@ -24,10 +23,6 @@
     {
       "matchPackagePrefixes": ["io.micrometer:"],
       "groupName": "micrometer packages"
-    },
-    {
-      "matchPackagePrefixes": ["com.gradle.enterprise"],
-      "groupName": "gradle enterprise packages"
     },
     {
       // prevent 3.0.1u2 -> 3.0.1
