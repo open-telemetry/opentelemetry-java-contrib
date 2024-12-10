@@ -85,9 +85,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             attribute("proto_handler", "\"http-nio-8080\"")),
                         attributeGroup(
                             attribute("direction", "received"),
-                            attribute("proto_handler", "\"http-nio-8080\""))
-
-                    ))
+                            attribute("proto_handler", "\"http-nio-8080\""))))
         .add(
             "tomcat.threads",
             metric ->
@@ -101,9 +99,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             attribute("proto_handler", "\"http-nio-8080\"")),
                         attributeGroup(
                             attribute("state", "busy"),
-                            attribute("proto_handler", "\"http-nio-8080\""))
-
-                    ))
+                            attribute("proto_handler", "\"http-nio-8080\""))))
         .add(
             "tomcat.max_time",
             metric ->
@@ -119,6 +115,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The total requests")
                     .hasUnit("requests") // TODO: not aligned with semconv. Should be "{request}"
                     .isCounter()
-                    .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")));
+                    .hasDataPointsWithOneAttribute(
+                        attribute("proto_handler", "\"http-nio-8080\"")));
   }
 }
