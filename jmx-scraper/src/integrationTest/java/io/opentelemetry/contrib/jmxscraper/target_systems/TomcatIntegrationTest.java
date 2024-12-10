@@ -77,7 +77,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The number of bytes transmitted and received")
-                    .hasUnit("by")
+                    .hasUnit("by") // TODO: not aligned with semconv. Should be "By"
                     .isCounter()
                     .hasDataPointsWithAttributes(
                         attributeGroup(
