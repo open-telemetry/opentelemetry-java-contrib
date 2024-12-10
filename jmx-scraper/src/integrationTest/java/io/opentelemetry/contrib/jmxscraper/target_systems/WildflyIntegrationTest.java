@@ -5,12 +5,13 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcher;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcherGroup;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,111 +91,122 @@ public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics() {
-    waitAndAssertMetrics(
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.session.count",
-                "The number of sessions created.",
-                "{session}",
-                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.session.active",
-                "The number of currently active sessions.",
-                "{session}",
-                /* isMonotonic= */ false,
-                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.session.expired",
-                "The number of sessions that have expired.",
-                "{session}",
-                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.session.rejected",
-                "The number of sessions that have been rejected.",
-                "{session}",
-                attrs -> attrs.containsOnly(entry("deployment", "testapp.war"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.request.count",
-                "The number of requests received.",
-                "{request}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.request.time",
-                "The total amount of time spent on requests.",
-                "ns",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.request.server_error",
-                "The number of requests that have resulted in a 5xx response.",
-                "{request}",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"), entry("listener", "default"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.network.io",
-                "The number of bytes transmitted.",
-                "By",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"),
-                        entry("listener", "default"),
-                        entry("state", "in")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("server", "default-server"),
-                        entry("listener", "default"),
-                        entry("state", "out"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.jdbc.connection.open",
-                "The number of open jdbc connections.",
-                "{connection}",
-                attrs ->
-                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "active")),
-                attrs ->
-                    attrs.containsOnly(entry("data_source", "ExampleDS"), entry("state", "idle"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.jdbc.request.wait",
-                "The number of jdbc connections that had to wait before opening.",
-                "{request}",
-                attrs -> attrs.containsOnly(entry("data_source", "ExampleDS"))),
-        metric ->
-            assertSum(
-                metric,
-                "wildfly.jdbc.transaction.count",
-                "The number of transactions created.",
-                "{transaction}"),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "wildfly.jdbc.rollback.count",
-                "The number of transactions rolled back.",
-                "{transaction}",
-                attrs -> attrs.containsOnly(entry("cause", "system")),
-                attrs -> attrs.containsOnly(entry("cause", "resource")),
-                attrs -> attrs.containsOnly(entry("cause", "application"))));
+  protected MetricsVerifier createMetricsVerifier() {
+
+    AttributeMatcherGroup serverListenerAttributes =
+        attributeGroup(attribute("server", "default-server"), attribute("listener", "default"));
+    AttributeMatcher deploymentAttribute = attribute("deployment", "testapp.war");
+    AttributeMatcher datasourceAttribute = attribute("data_source", "ExampleDS");
+    return MetricsVerifier.create()
+        .add(
+            "wildfly.session.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of sessions created.")
+                    .hasUnit("{session}")
+                    .hasDataPointsWithOneAttribute(deploymentAttribute))
+        .add(
+            "wildfly.session.active",
+            metric ->
+                metric
+                    .isUpDownCounter()
+                    .hasDescription("The number of currently active sessions.")
+                    .hasUnit("{session}")
+                    .hasDataPointsWithOneAttribute(deploymentAttribute))
+        .add(
+            "wildfly.session.expired",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of sessions that have expired.")
+                    .hasUnit("{session}")
+                    .hasDataPointsWithOneAttribute(deploymentAttribute))
+        .add(
+            "wildfly.session.rejected",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of sessions that have been rejected.")
+                    .hasUnit("{session}")
+                    .hasDataPointsWithOneAttribute(deploymentAttribute))
+        .add(
+            "wildfly.request.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of requests received.")
+                    .hasUnit("{request}")
+                    .hasDataPointsWithAttributes(serverListenerAttributes))
+        .add(
+            "wildfly.request.time",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The total amount of time spent on requests.")
+                    .hasUnit("ns")
+                    .hasDataPointsWithAttributes(serverListenerAttributes))
+        .add(
+            "wildfly.request.server_error",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of requests that have resulted in a 5xx response.")
+                    .hasUnit("{request}")
+                    .hasDataPointsWithAttributes(serverListenerAttributes))
+        .add(
+            "wildfly.network.io",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of bytes transmitted.")
+                    .hasUnit("By")
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("server", "default-server"),
+                            attribute("listener", "default"),
+                            attribute("state", "in")),
+                        attributeGroup(
+                            attribute("server", "default-server"),
+                            attribute("listener", "default"),
+                            attribute("state", "out"))))
+        .add(
+            "wildfly.jdbc.connection.open",
+            metric ->
+                metric
+                    .isUpDownCounter()
+                    .hasDescription("The number of open jdbc connections.")
+                    .hasUnit("{connection}")
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(datasourceAttribute, attribute("state", "active")),
+                        attributeGroup(datasourceAttribute, attribute("state", "idle"))))
+        .add(
+            "wildfly.jdbc.request.wait",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription(
+                        "The number of jdbc connections that had to wait before opening.")
+                    .hasUnit("{request}")
+                    .hasDataPointsWithOneAttribute(datasourceAttribute))
+        .add(
+            "wildfly.jdbc.transaction.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of transactions created.")
+                    .hasUnit("{transaction}")
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "wildfly.jdbc.rollback.count",
+            metric ->
+                metric
+                    .isCounter()
+                    .hasDescription("The number of transactions rolled back.")
+                    .hasUnit("{transaction}")
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(attribute("cause", "system")),
+                        attributeGroup(attribute("cause", "resource")),
+                        attributeGroup(attribute("cause", "application"))));
   }
 }

@@ -63,6 +63,9 @@ public class MetricsVerifier {
    */
   @CanIgnoreReturnValue
   public MetricsVerifier add(String metricName, Consumer<MetricAssert> assertion) {
+    if (assertions.containsKey(metricName)) {
+      throw new IllegalArgumentException("Duplicate assertion for metric " + metricName);
+    }
     assertions.put(
         metricName,
         metric -> {
