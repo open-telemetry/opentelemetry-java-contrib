@@ -51,22 +51,6 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .isUpDownCounter()
-                    .hasDescription("The number of region servers.")
-                    .hasUnit("{server}")
-                    .hasDataPointsWithoutAttributes())
-        .add(
-            "hbase.master.regions_in_transition.count",
-            metric ->
-                metric
-                    .isUpDownCounter()
-                    .hasDescription("The number of regions that are in transition.")
-                    .hasUnit("{region}")
-                    .hasDataPointsWithoutAttributes())
-        .add(
-            "hbase.master.regions_in_transition.count",
-            metric ->
-                metric
-                    .isUpDownCounter()
                     .hasDescription("The number of regions that are in transition.")
                     .hasUnit("{region}")
                     .hasDataPointsWithoutAttributes())
