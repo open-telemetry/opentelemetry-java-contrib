@@ -78,7 +78,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -86,7 +86,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -94,7 +94,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -102,7 +102,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -110,7 +110,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -118,7 +118,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -126,7 +126,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -134,7 +134,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -142,7 +142,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
         .add(
@@ -150,7 +150,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
         .add(
@@ -158,7 +158,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
         .add(
@@ -166,7 +166,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
         .add(
