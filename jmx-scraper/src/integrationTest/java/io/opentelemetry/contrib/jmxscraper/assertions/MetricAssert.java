@@ -12,11 +12,8 @@ import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractAssert;
@@ -197,31 +194,6 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
         "data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
     dataPointAttributesChecked = true;
     return this;
-  }
-
-  // TODO: To be removed and calls will be replaced with hasDataPointsWithAttributes()
-  @CanIgnoreReturnValue
-  public MetricAssert hasTypedDataPoints(Collection<String> types) {
-    return checkDataPoints(
-        dataPoints -> {
-          dataPointsCommonCheck(dataPoints);
-
-          Set<String> foundValues = new HashSet<>();
-          for (NumberDataPoint dataPoint : dataPoints) {
-            List<KeyValue> attributes = dataPoint.getAttributesList();
-
-            info.description(
-                "expected exactly one 'name' attribute for typed data point in metric '%s'",
-                actual.getName());
-            iterables.assertHasSize(info, attributes, 1);
-
-            objects.assertEqual(info, attributes.get(0).getKey(), "name");
-            foundValues.add(attributes.get(0).getValue().getStringValue());
-          }
-          info.description(
-              "missing or unexpected type attribute for metric '%s'", actual.getName());
-          iterables.assertContainsExactlyInAnyOrder(info, foundValues, types.toArray());
-        });
   }
 
   private void dataPointsCommonCheck(List<NumberDataPoint> dataPoints) {
