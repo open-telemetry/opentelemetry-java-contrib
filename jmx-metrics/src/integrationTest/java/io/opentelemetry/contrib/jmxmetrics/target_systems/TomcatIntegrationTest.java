@@ -53,13 +53,13 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
   void endToEnd() {
     waitAndAssertMetrics(
         metric ->
-            assertGauge(metric, "tomcat.sessions", "The number of active sessions.", "sessions"),
+            assertGauge(metric, "tomcat.sessions", "The number of active sessions.", "{session}"),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "tomcat.errors",
                 "The number of errors encountered.",
-                "errors",
+                "{error}",
                 attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
         metric ->
             assertSumWithAttributes(
@@ -73,7 +73,7 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "tomcat.traffic",
                 "The number of bytes transmitted and received.",
-                "by",
+                "By",
                 attrs ->
                     attrs.containsOnly(
                         entry("proto_handler", "\"http-nio-8080\""), entry("direction", "sent")),
@@ -86,7 +86,7 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "tomcat.threads",
                 "The number of threads",
-                "threads",
+                "{thread}",
                 attrs ->
                     attrs.containsOnly(
                         entry("proto_handler", "\"http-nio-8080\""), entry("state", "idle")),
@@ -105,7 +105,7 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "tomcat.request_count",
                 "The total requests.",
-                "requests",
+                "{request}",
                 attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))));
   }
 }
