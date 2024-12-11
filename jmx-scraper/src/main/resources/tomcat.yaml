@@ -15,7 +15,7 @@ rules:
       activeSessions:
         metric: tomcat.sessions
         type: gauge
-        unit: sessions
+        unit: "{session}"
         desc: The number of active sessions
 
   - beans:
@@ -28,12 +28,12 @@ rules:
       errorCount:
         metric: errors
         type: counter
-        unit: errors
+        unit: "{error}"
         desc: The number of errors encountered
       requestCount:
         metric: request_count
         type: counter
-        unit: requests
+        unit: "{request}"
         desc: The total requests
       maxTime:
         metric: max_time
@@ -48,14 +48,14 @@ rules:
       bytesSent:
         metric: traffic
         type: counter
-        unit: by
+        unit: By
         desc: The number of bytes transmitted and received
         metricAttribute:
           direction: const(sent)
       bytesReceived:
         metric: traffic
         type: counter
-        unit: by
+        unit: By
         desc: The number of bytes transmitted and received
         metricAttribute:
           direction: const(received)
@@ -71,13 +71,13 @@ rules:
         metric: threads
         desc: The number of threads
         type: gauge
-        unit: threads
+        unit: "{thread}"
         metricAttribute:
           state: const(idle)
       currentThreadsBusy:
         metric: threads
         desc: The number of threads
         type: gauge
-        unit: threads
+        unit: "{thread}"
         metricAttribute:
           state: const(busy)
