@@ -53,7 +53,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("number of loaded classes")
-                    .hasUnit("1")
+                    .hasUnit("{class}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -61,7 +61,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("total number of collections that have occurred")
-                    .hasUnit("1")
+                    .hasUnit("{collection}")
                     .isCounter()
                     .hasDataPointsWithAttributes(gcAlgorithmAttributes))
         .add(
@@ -174,7 +174,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("number of threads")
-                    .hasUnit("1")
+                    .hasUnit("{thread}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes());
   }
