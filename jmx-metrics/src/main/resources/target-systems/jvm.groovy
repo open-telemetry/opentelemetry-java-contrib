@@ -16,11 +16,11 @@
 
 def classLoading = otel.mbean("java.lang:type=ClassLoading")
 otel.instrument(classLoading, "jvm.classes.loaded", "number of loaded classes",
-        "1", "LoadedClassCount", otel.&longValueCallback)
+        "{class}", "LoadedClassCount", otel.&longValueCallback)
 
 def garbageCollector = otel.mbeans("java.lang:type=GarbageCollector,*")
 otel.instrument(garbageCollector, "jvm.gc.collections.count", "total number of collections that have occurred",
-        "1", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
+        "{collection}", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
         "CollectionCount", otel.&longCounterCallback)
 otel.instrument(garbageCollector, "jvm.gc.collections.elapsed",
         "the approximate accumulated collection elapsed time in milliseconds", "ms",
@@ -29,15 +29,15 @@ otel.instrument(garbageCollector, "jvm.gc.collections.elapsed",
 
 def memory = otel.mbean("java.lang:type=Memory")
 otel.instrument(memory, "jvm.memory.heap", "current heap usage",
-        "by", "HeapMemoryUsage", otel.&longValueCallback)
+        "By", "HeapMemoryUsage", otel.&longValueCallback)
 otel.instrument(memory, "jvm.memory.nonheap", "current non-heap usage",
-        "by", "NonHeapMemoryUsage", otel.&longValueCallback)
+        "By", "NonHeapMemoryUsage", otel.&longValueCallback)
 
 def memoryPool = otel.mbeans("java.lang:type=MemoryPool,*")
 otel.instrument(memoryPool, "jvm.memory.pool", "current memory pool usage",
-        "by", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
+        "By", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
         "Usage", otel.&longValueCallback)
 
 def threading = otel.mbean("java.lang:type=Threading")
 otel.instrument(threading, "jvm.threads.count", "number of threads",
-        "1", "ThreadCount", otel.&longValueCallback)
+        "{thread}", "ThreadCount", otel.&longValueCallback)

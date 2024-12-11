@@ -5,11 +5,13 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
+
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import io.opentelemetry.contrib.jmxscraper.TestAppContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcherGroup;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -34,15 +36,16 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected MetricsVerifier createMetricsVerifier() {
     // those values depend on the JVM GC configured
-    List<String> gcLabels =
-        Arrays.asList(
+    AttributeMatcherGroup[] memoryAttributes =
+        nameAttributeMatchers(
             "Code Cache",
             "PS Eden Space",
             "PS Old Gen",
             "Metaspace",
             "Compressed Class Space",
             "PS Survivor Space");
-    List<String> gcCollectionLabels = Arrays.asList("PS MarkSweep", "PS Scavenge");
+    AttributeMatcherGroup[] gcAlgorithmAttributes =
+        nameAttributeMatchers("PS MarkSweep", "PS Scavenge");
 
     return MetricsVerifier.create()
         .add(
@@ -50,7 +53,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("number of loaded classes")
-                    .hasUnit("1")
+                    .hasUnit("{class}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -58,9 +61,9 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("total number of collections that have occurred")
-                    .hasUnit("1")
+                    .hasUnit("{collection}")
                     .isCounter()
-                    .hasTypedDataPoints(gcCollectionLabels))
+                    .hasDataPointsWithAttributes(gcAlgorithmAttributes))
         .add(
             "jvm.gc.collections.elapsed",
             metric ->
@@ -69,13 +72,13 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
                         "the approximate accumulated collection elapsed time in milliseconds")
                     .hasUnit("ms")
                     .isCounter()
-                    .hasTypedDataPoints(gcCollectionLabels))
+                    .hasDataPointsWithAttributes(gcAlgorithmAttributes))
         .add(
             "jvm.memory.heap.committed",
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -83,7 +86,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -91,7 +94,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -99,7 +102,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -107,7 +110,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -115,7 +118,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -123,7 +126,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -131,7 +134,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current non-heap usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -139,40 +142,48 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
-                    .hasTypedDataPoints(gcLabels))
+                    .hasDataPointsWithAttributes(memoryAttributes))
         .add(
             "jvm.memory.pool.init",
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
-                    .hasTypedDataPoints(gcLabels))
+                    .hasDataPointsWithAttributes(memoryAttributes))
         .add(
             "jvm.memory.pool.max",
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
-                    .hasTypedDataPoints(gcLabels))
+                    .hasDataPointsWithAttributes(memoryAttributes))
         .add(
             "jvm.memory.pool.used",
             metric ->
                 metric
                     .hasDescription("current memory pool usage")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isGauge()
-                    .hasTypedDataPoints(gcLabels))
+                    .hasDataPointsWithAttributes(memoryAttributes))
         .add(
             "jvm.threads.count",
             metric ->
                 metric
                     .hasDescription("number of threads")
-                    .hasUnit("1")
+                    .hasUnit("{thread}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes());
+  }
+
+  private static AttributeMatcherGroup[] nameAttributeMatchers(String... values) {
+    AttributeMatcherGroup[] groups = new AttributeMatcherGroup[values.length];
+    for (int i = 0; i < values.length; i++) {
+      groups[i] = attributeGroup(attribute("name", values[i]));
+    }
+    return groups;
   }
 }

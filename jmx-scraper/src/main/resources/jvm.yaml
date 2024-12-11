@@ -7,7 +7,7 @@ rules:
       LoadedClassCount:
         metric: jvm.classes.loaded
         type: gauge
-        unit: '1'
+        unit: '{class}'
         desc: number of loaded classes
 
   - bean: java.lang:type=GarbageCollector,name=*
@@ -15,7 +15,7 @@ rules:
       CollectionCount:
         metric: jvm.gc.collections.count
         type: counter
-        unit: '1'
+        unit: '{collection}'
         desc: total number of collections that have occurred
         metricAttribute:
           name: param(name)
@@ -28,7 +28,7 @@ rules:
           name: param(name)
 
   - bean: java.lang:type=Memory
-    unit: by
+    unit: By
     prefix: jvm.memory.
     mapping:
       HeapMemoryUsage.committed:
@@ -66,7 +66,7 @@ rules:
 
   - bean: java.lang:type=MemoryPool,name=*
     type: gauge
-    unit: by
+    unit: By
     metricAttribute:
       name: param(name)
     mapping:
@@ -87,5 +87,5 @@ rules:
     mapping:
       ThreadCount:
         metric: jvm.threads.count
-        unit: '1'
+        unit: '{thread}'
         desc: number of threads
