@@ -53,7 +53,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The number of active sessions")
-                    .hasUnit("sessions") // TODO: not aligned with semconv. Should be "{session}"
+                    .hasUnit("{session}")
                     .isGauge()
                     .hasDataPointsWithOneAttribute(attributeWithAnyValue("context")))
         .add(
@@ -61,7 +61,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The number of errors encountered")
-                    .hasUnit("errors") // TODO: not aligned with semconv. Should be "{error}"
+                    .hasUnit("{error}")
                     .isCounter()
                     .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
         .add(
@@ -77,7 +77,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The number of bytes transmitted and received")
-                    .hasUnit("by") // TODO: not aligned with semconv. Should be "By"
+                    .hasUnit("By")
                     .isCounter()
                     .hasDataPointsWithAttributes(
                         attributeGroup(
@@ -91,7 +91,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The number of threads")
-                    .hasUnit("threads") // TODO: not aligned with semconv. Should be "{thread}"
+                    .hasUnit("{thread}")
                     .isGauge()
                     .hasDataPointsWithAttributes(
                         attributeGroup(
@@ -113,7 +113,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("The total requests")
-                    .hasUnit("requests") // TODO: not aligned with semconv. Should be "{request}"
+                    .hasUnit("{request}")
                     .isCounter()
                     .hasDataPointsWithOneAttribute(
                         attribute("proto_handler", "\"http-nio-8080\"")));
