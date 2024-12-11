@@ -72,19 +72,19 @@ def storage = "${cassandraMetrics}:type=Storage"
 def storageLoad = otel.mbean("${storage},name=Load")
 otel.instrument(storageLoad,
         "cassandra.storage.load.count",
-        "Size of the on disk data size this node manages", "by", "Count",
+        "Size of the on disk data size this node manages", "By", "Count",
         otel.&longUpDownCounterCallback)
 
 def storageTotalHints = otel.mbean("${storage},name=TotalHints")
 otel.instrument(storageTotalHints,
         "cassandra.storage.total_hints.count",
-        "Number of hint messages written to this node since [re]start", "1", "Count",
+        "Number of hint messages written to this node since [re]start", "{hint}", "Count",
         otel.&longCounterCallback)
 
 def storageTotalHintsInProgress = otel.mbean("${storage},name=TotalHintsInProgress")
 otel.instrument(storageTotalHintsInProgress,
         "cassandra.storage.total_hints.in_progress.count",
-        "Number of hints attempting to be sent currently", "1", "Count",
+        "Number of hints attempting to be sent currently", "{hint}", "Count",
         otel.&longUpDownCounterCallback)
 
 
@@ -92,13 +92,13 @@ def compaction = "${cassandraMetrics}:type=Compaction"
 def compactionPendingTasks = otel.mbean("${compaction},name=PendingTasks")
 otel.instrument(compactionPendingTasks,
         "cassandra.compaction.tasks.pending",
-        "Estimated number of compactions remaining to perform", "1", "Value",
+        "Estimated number of compactions remaining to perform", "{task}", "Value",
         otel.&longValueCallback)
 
 def compactionCompletedTasks = otel.mbean("${compaction},name=CompletedTasks")
 otel.instrument(compactionCompletedTasks,
         "cassandra.compaction.tasks.completed",
-        "Number of completed compactions since server [re]start", "1", "Value",
+        "Number of completed compactions since server [re]start", "{task}", "Value",
         otel.&longCounterCallback)
 
 
@@ -111,7 +111,7 @@ def clientRequests = otel.mbeans([
 otel.instrument(clientRequests,
   "cassandra.client.request.count",
   "Number of requests by operation",
-  "1",
+  "{request}",
   [
     "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
   ],
@@ -132,7 +132,7 @@ def clientRequestErrors = otel.mbeans([
 otel.instrument(clientRequestErrors,
   "cassandra.client.request.error.count",
   "Number of request errors by operation",
-  "1",
+  "{error}",
   [
     "operation" : { mbean -> mbean.name().getKeyProperty("scope") },
     "status" : {

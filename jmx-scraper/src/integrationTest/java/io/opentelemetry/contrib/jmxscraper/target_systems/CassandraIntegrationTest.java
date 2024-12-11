@@ -118,7 +118,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Number of completed compactions since server [re]start")
-                    .hasUnit("1")
+                    .hasUnit("{task}")
                     .isCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -126,7 +126,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Estimated number of compactions remaining to perform")
-                    .hasUnit("1")
+                    .hasUnit("{task}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -134,7 +134,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Size of the on disk data size this node manages")
-                    .hasUnit("by")
+                    .hasUnit("By")
                     .isUpDownCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -142,7 +142,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Number of hint messages written to this node since [re]start")
-                    .hasUnit("1")
+                    .hasUnit("{hint}")
                     .isCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -150,7 +150,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Number of hints attempting to be sent currently")
-                    .hasUnit("1")
+                    .hasUnit("{hint}")
                     .isUpDownCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
@@ -158,7 +158,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Number of requests by operation")
-                    .hasUnit("1")
+                    .hasUnit("{request}")
                     .isCounter()
                     .hasDataPointsWithAttributes(
                         attributeGroup(attribute("operation", "RangeSlice")),
@@ -169,7 +169,7 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
             metric ->
                 metric
                     .hasDescription("Number of request errors by operation")
-                    .hasUnit("1")
+                    .hasUnit("{error}")
                     .isCounter()
                     .hasDataPointsWithAttributes(
                         errorCountAttributes("RangeSlice", "Timeout"),
