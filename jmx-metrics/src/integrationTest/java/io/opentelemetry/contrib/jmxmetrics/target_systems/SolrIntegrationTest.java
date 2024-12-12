@@ -84,16 +84,10 @@ class SolrIntegrationTest extends AbstractIntegrationTest {
                 metric, "solr.cache.hit.count", "The number of hits for a cache.", "{hit}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric,
-                "solr.cache.insert.count",
-                "The number of inserts to a cache.",
-                "{insert}"),
+                metric, "solr.cache.insert.count", "The number of inserts to a cache.", "{insert}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric,
-                "solr.cache.lookup.count",
-                "The number of lookups to a cache.",
-                "{lookup}"),
+                metric, "solr.cache.lookup.count", "The number of lookups to a cache.", "{lookup}"),
         metric ->
             assertSolrCacheSumMetric(
                 metric, "solr.cache.size", "The size of the cache occupied in memory.", "By"));
