@@ -31,14 +31,15 @@ class AzureVmResourceProviderTest extends MetadataBasedResourceProviderTest {
 
   @Override
   protected String getPlatform() {
-    return CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM;
+    return CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_VM;
   }
 
   @Override
   protected void assertDefaultAttributes(AttributesAssert attributesAssert) {
     attributesAssert
         .containsEntry(CLOUD_PROVIDER, "azure")
-        .containsEntry(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM)
+        .containsEntry(
+            CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_VM)
         .containsEntry(CLOUD_REGION, "westus")
         .containsEntry(
             CLOUD_RESOURCE_ID,

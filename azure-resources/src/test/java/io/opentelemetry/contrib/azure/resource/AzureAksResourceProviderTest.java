@@ -33,14 +33,15 @@ class AzureAksResourceProviderTest extends MetadataBasedResourceProviderTest {
 
   @Override
   protected String getPlatform() {
-    return CloudIncubatingAttributes.CloudPlatformValues.AZURE_AKS;
+    return CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_AKS;
   }
 
   @Override
   protected void assertDefaultAttributes(AttributesAssert attributesAssert) {
     attributesAssert
         .containsEntry(CLOUD_PROVIDER, "azure")
-        .containsEntry(CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformValues.AZURE_AKS)
+        .containsEntry(
+            CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_AKS)
         .containsEntry(K8sIncubatingAttributes.K8S_CLUSTER_NAME, "macikgo-test-may-23");
   }
 

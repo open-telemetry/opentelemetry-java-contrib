@@ -5,17 +5,18 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_MAX_MEMORY;
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_FUNCTIONS;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_INSTANCE;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_MAX_MEMORY;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_NAME;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_VERSION;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,8 +28,7 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
   private static final Map<AttributeKey<String>, String> ENV_VAR_MAPPING = new HashMap<>();
 
   static {
-    ENV_VAR_MAPPING.put(
-        CloudIncubatingAttributes.CLOUD_REGION, AzureAppServiceResourceProvider.REGION_NAME);
+    ENV_VAR_MAPPING.put(CLOUD_REGION, AzureAppServiceResourceProvider.REGION_NAME);
     ENV_VAR_MAPPING.put(FAAS_NAME, AzureAppServiceResourceProvider.WEBSITE_SITE_NAME);
     ENV_VAR_MAPPING.put(FAAS_VERSION, FUNCTIONS_VERSION);
     ENV_VAR_MAPPING.put(FAAS_INSTANCE, AzureAppServiceResourceProvider.WEBSITE_INSTANCE_ID);
@@ -57,9 +57,7 @@ public class AzureFunctionsResourceProvider extends CloudResourceProvider {
       return Attributes.empty();
     }
 
-    AttributesBuilder builder =
-        AzureVmResourceProvider.azureAttributeBuilder(
-            CloudIncubatingAttributes.CloudPlatformValues.AZURE_FUNCTIONS);
+    AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_FUNCTIONS);
 
     String limit = env.get(FUNCTIONS_MEM_LIMIT);
     if (limit != null) {

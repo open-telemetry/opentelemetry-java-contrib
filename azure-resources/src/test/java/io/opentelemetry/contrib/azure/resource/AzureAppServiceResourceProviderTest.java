@@ -10,7 +10,7 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT;
+import static io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
 import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
 
@@ -53,7 +53,7 @@ class AzureAppServiceResourceProviderTest {
             CLOUD_RESOURCE_ID,
             "/subscriptions/TEST_WEBSITE_OWNER_NAME/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME")
         .containsEntry(CLOUD_REGION, TEST_REGION_NAME)
-        .containsEntry(DEPLOYMENT_ENVIRONMENT, TEST_WEBSITE_SLOT_NAME)
+        .containsEntry(DEPLOYMENT_ENVIRONMENT_NAME, TEST_WEBSITE_SLOT_NAME)
         .containsEntry(HOST_ID, TEST_WEBSITE_HOSTNAME)
         .containsEntry(SERVICE_INSTANCE_ID, TEST_WEBSITE_INSTANCE_ID)
         .containsEntry(

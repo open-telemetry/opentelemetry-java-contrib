@@ -5,10 +5,11 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_AKS;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.K8S_CLUSTER_NAME;
+
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.K8sIncubatingAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class AzureAksResourceProvider extends CloudResourceProvider {
     COMPUTE_MAPPING.put(
         "resourceGroupName",
         new AzureVmResourceProvider.Entry(
-            K8sIncubatingAttributes.K8S_CLUSTER_NAME, AzureAksResourceProvider::parseClusterName));
+            K8S_CLUSTER_NAME, AzureAksResourceProvider::parseClusterName));
   }
 
   // visible for testing
@@ -67,10 +68,7 @@ public class AzureAksResourceProvider extends CloudResourceProvider {
     }
     return client
         .get()
-        .map(
-            body ->
-                AzureVmResourceProvider.parseMetadata(
-                    body, COMPUTE_MAPPING, CloudIncubatingAttributes.CloudPlatformValues.AZURE_AKS))
+        .map(body -> AzureVmResourceProvider.parseMetadata(body, COMPUTE_MAPPING, AZURE_AKS))
         .orElse(Resource.empty());
   }
 }

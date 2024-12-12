@@ -5,15 +5,17 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
-import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
-import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
-import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_PLATFORM;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_RESOURCE_ID;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_VM;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudProviderIncubatingValues.AZURE;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.HOST_ID;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.HOST_TYPE;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.OS_TYPE;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.OS_VERSION;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -22,7 +24,6 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,10 +91,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   public Resource createResource(ConfigProperties config) {
     return client
         .get()
-        .map(
-            body ->
-                parseMetadata(
-                    body, COMPUTE_MAPPING, CloudIncubatingAttributes.CloudPlatformValues.AZURE_VM))
+        .map(body -> parseMetadata(body, COMPUTE_MAPPING, AZURE_VM))
         .orElse(Resource.empty());
   }
 
@@ -111,7 +109,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   @NotNull
   static AttributesBuilder azureAttributeBuilder(String platform) {
     AttributesBuilder builder = Attributes.builder();
-    builder.put(CLOUD_PROVIDER, CloudIncubatingAttributes.CloudProviderValues.AZURE);
+    builder.put(CLOUD_PROVIDER, AZURE);
     builder.put(CLOUD_PLATFORM, platform);
     return builder;
   }
