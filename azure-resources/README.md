@@ -29,6 +29,7 @@ The following OpenTelemetry semantic conventions will be detected:
 
 ## Component Owners
 
-TODO
+- [Trask Stalnaker](https://github.com/trask), Microsoft
+- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
