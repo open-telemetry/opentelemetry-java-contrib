@@ -15,18 +15,18 @@
  */
 
 def beanSolrCoreSearcherNumDocs = otel.mbeans("solr:dom1=core,dom2=*,category=SEARCHER,scope=searcher,name=numDocs")
-otel.instrument(beanSolrCoreSearcherNumDocs, "solr.document.count", "The total number of indexed documents.", "{documents}",
+otel.instrument(beanSolrCoreSearcherNumDocs, "solr.document.count", "The total number of indexed documents.", "{document}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") }],
   "Value", otel.&longUpDownCounterCallback)
 
 def beanSolrCoreIndexSize = otel.mbeans("solr:dom1=core,dom2=*,category=INDEX,name=sizeInBytes")
-otel.instrument(beanSolrCoreIndexSize, "solr.index.size", "The total index size.", "by",
+otel.instrument(beanSolrCoreIndexSize, "solr.index.size", "The total index size.", "By",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") }],
   "Value", otel.&longUpDownCounterCallback)
 
 def beanSolrCoreRequests = otel.mbeans(["solr:dom1=core,dom2=*,category=QUERY,scope=*,name=requests",
                                         "solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=requests"])
-otel.instrument(beanSolrCoreRequests, "solr.request.count", "The number of queries made.", "{queries}",
+otel.instrument(beanSolrCoreRequests, "solr.request.count", "The number of queries made.", "{query}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "type" : { mbean -> mbean.name().getKeyProperty("category") },
    "handler" : { mbean -> mbean.name().getKeyProperty("scope") }],
@@ -44,7 +44,7 @@ otel.instrument(beanSolrCoreRequestTimes, "solr.request.time.average",
 
 def beanSolrCoreErrors = otel.mbeans(["solr:dom1=core,dom2=*,category=QUERY,scope=*,name=errors",
                                             "solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=errors"])
-otel.instrument(beanSolrCoreErrors, "solr.request.error.count", "The number of queries resulting in an error.", "{queries}",
+otel.instrument(beanSolrCoreErrors, "solr.request.error.count", "The number of queries resulting in an error.", "{query}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "type" : { mbean -> mbean.name().getKeyProperty("category") },
    "handler" : { mbean -> mbean.name().getKeyProperty("scope") }],
@@ -52,30 +52,30 @@ otel.instrument(beanSolrCoreErrors, "solr.request.error.count", "The number of q
 
 def beanSolrCoreTimeouts = otel.mbeans(["solr:dom1=core,dom2=*,category=QUERY,scope=*,name=timeouts",
                                       "solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=timeouts"])
-otel.instrument(beanSolrCoreTimeouts, "solr.request.timeout.count", "The number of queries resulting in a timeout.", "{queries}",
+otel.instrument(beanSolrCoreTimeouts, "solr.request.timeout.count", "The number of queries resulting in a timeout.", "{query}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "type" : { mbean -> mbean.name().getKeyProperty("category") },
    "handler" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "Count", otel.&longCounterCallback)
 
 def beanSolrCoreQueryResultsCache = otel.mbeans("solr:dom1=core,dom2=*,category=CACHE,scope=*,name=queryResultCache")
-otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.eviction.count", "The number of evictions from a cache.", "{evictions}",
+otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.eviction.count", "The number of evictions from a cache.", "{eviction}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "cumulative_evictions", otel.&longCounterCallback)
-otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.hit.count", "The number of hits for a cache.", "{hits}",
+otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.hit.count", "The number of hits for a cache.", "{hit}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "cumulative_hits", otel.&longCounterCallback)
-otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.insert.count", "The number of inserts to a cache.", "{inserts}",
+otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.insert.count", "The number of inserts to a cache.", "{insert}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "cumulative_inserts", otel.&longCounterCallback)
-otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.lookup.count", "The number of lookups to a cache.", "{lookups}",
+otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.lookup.count", "The number of lookups to a cache.", "{lookup}",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "cumulative_lookups", otel.&longCounterCallback)
-otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.size", "The size of the cache occupied in memory.", "by",
+otel.instrument(beanSolrCoreQueryResultsCache, "solr.cache.size", "The size of the cache occupied in memory.", "By",
   ["core" : { mbean -> mbean.name().getKeyProperty("dom2") },
    "cache" : { mbean -> mbean.name().getKeyProperty("scope") }],
   "ramBytesUsed", otel.&longUpDownCounterCallback)
