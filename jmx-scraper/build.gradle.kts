@@ -4,8 +4,7 @@ plugins {
 
   id("otel.java-conventions")
 
-  // TODO publishing disabled until component is ready to be used
-  // id("otel.publish-conventions")
+  id("otel.publish-conventions")
 }
 
 description = "JMX metrics scraper"
