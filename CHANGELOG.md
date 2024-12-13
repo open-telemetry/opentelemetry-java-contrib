@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+### AWS X-Ray SDK support
+
+- Update semconv dependency version
+  ([#1585](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1585))
+
+### Baggage processor
+
+- [baggage-processor] Add BaggageLogRecordProcessor
+  ([#1576](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1576))
+
+### Disk buffering
+
+- Deserialization validation
+  ([#1571](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1571))
+
+### JMX metrics
+
+- Align HBase metric units to semconv
+  ([#1538](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1538))
+- Align Cassandra metric units to semconv
+  ([#1591](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1591))
+- Align Tomcat metric units to semconv
+  ([#1589](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1589))
+- Align JVM units to semconv
+  ([#1593](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1593))
+
+### JMX scraper - New 🌟
+
+The future of the [JMX metrics](./jmx-metrics/README.md) component,
+built on top of the
+[JMX metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/javaagent#jmx-metric-insight)
+component from the opentelemetry-java-instrumentation repository.
+
+### Maven extension
+
+- Load OTel SDK config from environment variables and system properties
+  ([#1434](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1434))
+- Workaround `NoClassDefFoundError` in `@PreDestroy` waiting for MNG-7056
+  ([#1431](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1431))
+
 ## Version 1.41.0 (2024-11-21)
 
 ### Inferred spans
@@ -107,7 +147,9 @@
 ### Inferred spans - New 🌟
 
 An OpenTelemetry extension for generating spans via profiling instead of instrumentation.
-This extension enhances traces by running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling mode
+This extension enhances traces by
+running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling
+mode
 whenever there is an active sampled OpenTelemetry span.
 
 The resulting profiling data is analyzed afterward and spans are "inferred".
@@ -171,7 +213,7 @@ This module provides a SpanProcessor that stamps baggage onto spans as attribute
 ### JMX metrics
 
 - Add support for newly named Tomcat MBean with Spring
-([#1269](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1269))
+  ([#1269](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1269))
 
 ### Span stack traces - New 🌟
 
@@ -239,7 +281,8 @@ This module provides GCP resource detectors for OpenTelemetry.
 
 ### Kafka exporter - New 🌟
 
-This module contains `KafkaSpanExporter`, which is an implementation of the `io.opentelemetry.sdk.trace.export.SpanExporter` interface.
+This module contains `KafkaSpanExporter`, which is an implementation of the
+`io.opentelemetry.sdk.trace.export.SpanExporter` interface.
 
 `KafkaSpanExporter` can be used for sending `SpanData` to a Kafka topic.
 
@@ -329,7 +372,7 @@ which can be sent later on demand.
 
 - Links based sampler
   ([#813](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/813),
-   [#903](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/903))
+  [#903](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/903))
 
 ## Version 1.26.0 (2023-05-17)
 
