@@ -43,7 +43,7 @@ rules:
       Mean:
         metric: solr.request.time.average
         type: gauge
-        unit: "ms"
+        unit: ms
         desc: "The average time of a query, based on Solr's histogram configuration."
         metricAttribute:
           core: param(dom2)
