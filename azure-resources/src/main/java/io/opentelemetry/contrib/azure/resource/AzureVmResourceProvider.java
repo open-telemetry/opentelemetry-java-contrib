@@ -76,7 +76,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   }
 
   // visible for testing
-  public AzureVmResourceProvider(Supplier<Optional<String>> client) {
+  AzureVmResourceProvider(Supplier<Optional<String>> client) {
     this.client = client;
   }
 

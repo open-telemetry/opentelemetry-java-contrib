@@ -48,8 +48,7 @@ public class AzureAksResourceProvider extends CloudResourceProvider {
   }
 
   // visible for testing
-  public AzureAksResourceProvider(
-      Supplier<Optional<String>> client, Map<String, String> environment) {
+  AzureAksResourceProvider(Supplier<Optional<String>> client, Map<String, String> environment) {
     this.client = client;
     this.environment = environment;
   }
