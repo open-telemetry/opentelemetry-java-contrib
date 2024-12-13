@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.42.0 (2024-12-13)
 
 ### AWS X-Ray SDK support
 
