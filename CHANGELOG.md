@@ -44,6 +44,13 @@ component from the opentelemetry-java-instrumentation repository.
 
 ## Version 1.41.0 (2024-11-21)
 
+### JMX metrics
+
+- Align ActiveMQ metric units to semconv
+  ([#1553](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1553))
+- Align Jetty metric units to semconv
+  ([#1517](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1517))
+
 ### Inferred spans
 
 - Allow customization of parent-override behavior
