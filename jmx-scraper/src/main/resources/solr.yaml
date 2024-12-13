@@ -7,7 +7,7 @@ rules:
       Value:
         metric: solr.document.count
         type: updowncounter
-        unit: '{document}'
+        unit: "{document}"
         desc: The total number of indexed documents.
         metricAttribute:
           core: param(dom2)
@@ -29,7 +29,7 @@ rules:
       Count:
         metric: solr.request.count
         type: counter
-        unit: '{query}'
+        unit: "{query}"
         desc: The number of queries made.
         metricAttribute:
           core: param(dom2)
@@ -43,7 +43,7 @@ rules:
       Mean:
         metric: solr.request.time.average
         type: gauge
-        unit: 'ms'
+        unit: "ms"
         desc: "The average time of a query, based on Solr's histogram configuration."
         metricAttribute:
           core: param(dom2)
@@ -57,7 +57,7 @@ rules:
       Count:
         metric: solr.request.error.count
         type: counter
-        unit: '{query}'
+        unit: "{query}"
         desc: The number of queries resulting in an error.
         metricAttribute:
           core: param(dom2)
@@ -71,7 +71,7 @@ rules:
       Count:
         metric: solr.request.timeout.count
         type: counter
-        unit: '{query}'
+        unit: "{query}"
         desc: The number of queries resulting in a timeout.
         metricAttribute:
           core: param(dom2)
@@ -87,24 +87,24 @@ rules:
     mapping:
       cumulative_evictions:
         metric: eviction.count
-        unit: '{eviction}'
+        unit: "{eviction}"
         desc: The number of evictions from a cache.
       cumulative_hits:
         metric: hit.count
-        unit: '{hit}'
+        unit: "{hit}"
         desc: The number of hits for a cache.
       cumulative_inserts:
         metric: insert.count
-        unit: '{insert}'
+        unit: "{insert}"
         desc: The number of inserts to a cache.
       cumulative_lookups:
         metric: lookup.count
-        unit: '{lookup}'
+        unit: "{lookup}"
         desc: The number of lookups to a cache.
       ramBytesUsed:
         type: updowncounter
         metric: size
-        unit: 'By'
+        unit: By
         desc: The size of the cache occupied in memory.
 
 
