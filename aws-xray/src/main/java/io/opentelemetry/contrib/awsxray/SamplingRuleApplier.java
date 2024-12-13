@@ -6,14 +6,6 @@
 package io.opentelemetry.contrib.awsxray;
 
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
-import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_HOST;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_METHOD;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_TARGET;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_URL;
-import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_HOST_NAME;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -27,7 +19,6 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -42,22 +33,37 @@ import javax.annotation.Nullable;
 
 final class SamplingRuleApplier {
 
+  // copied from AwsIncubatingAttributes
+  private static final AttributeKey<String> AWS_ECS_CONTAINER_ARN =
+      AttributeKey.stringKey("aws.ecs.container.arn");
+  // copied from CloudIncubatingAttributes
+  private static final AttributeKey<String> CLOUD_PLATFORM =
+      AttributeKey.stringKey("cloud.platform");
+  private static final AttributeKey<String> CLOUD_RESOURCE_ID =
+      AttributeKey.stringKey("cloud.resource_id");
+  // copied from CloudIncubatingAttributes.CloudPlatformIncubatingValues
+  public static final String AWS_EC2 = "aws_ec2";
+  public static final String AWS_ECS = "aws_ecs";
+  public static final String AWS_EKS = "aws_eks";
+  public static final String AWS_LAMBDA = "aws_lambda";
+  public static final String AWS_ELASTIC_BEANSTALK = "aws_elastic_beanstalk";
+  // copied from HttpIncubatingAttributes
+  private static final AttributeKey<String> HTTP_HOST = AttributeKey.stringKey("http.host");
+  private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
+  private static final AttributeKey<String> HTTP_TARGET = AttributeKey.stringKey("http.target");
+  private static final AttributeKey<String> HTTP_URL = AttributeKey.stringKey("http.url");
+  // copied from NetIncubatingAttributes
+  private static final AttributeKey<String> NET_HOST_NAME = AttributeKey.stringKey("net.host.name");
+
   private static final Map<String, String> XRAY_CLOUD_PLATFORM;
 
   static {
     Map<String, String> xrayCloudPlatform = new HashMap<>();
-    xrayCloudPlatform.put(
-        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2, "AWS::EC2::Instance");
-    xrayCloudPlatform.put(
-        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_ECS, "AWS::ECS::Container");
-    xrayCloudPlatform.put(
-        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EKS, "AWS::EKS::Container");
-    xrayCloudPlatform.put(
-        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_ELASTIC_BEANSTALK,
-        "AWS::ElasticBeanstalk::Environment");
-    xrayCloudPlatform.put(
-        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_LAMBDA,
-        "AWS::Lambda::Function");
+    xrayCloudPlatform.put(AWS_EC2, "AWS::EC2::Instance");
+    xrayCloudPlatform.put(AWS_ECS, "AWS::ECS::Container");
+    xrayCloudPlatform.put(AWS_EKS, "AWS::EKS::Container");
+    xrayCloudPlatform.put(AWS_ELASTIC_BEANSTALK, "AWS::ElasticBeanstalk::Environment");
+    xrayCloudPlatform.put(AWS_LAMBDA, "AWS::Lambda::Function");
     XRAY_CLOUD_PLATFORM = Collections.unmodifiableMap(xrayCloudPlatform);
   }
 
@@ -348,7 +354,7 @@ final class SamplingRuleApplier {
       return arn;
     }
     String cloudPlatform = resource.getAttributes().get(CLOUD_PLATFORM);
-    if (CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_LAMBDA.equals(cloudPlatform)) {
+    if (AWS_LAMBDA.equals(cloudPlatform)) {
       return getLambdaArn(attributes, resource);
     }
     return null;
