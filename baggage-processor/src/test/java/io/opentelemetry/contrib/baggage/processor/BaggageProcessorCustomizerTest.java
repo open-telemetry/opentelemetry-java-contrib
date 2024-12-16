@@ -78,7 +78,7 @@ class BaggageProcessorCustomizerTest {
     }
 
     await()
-        .atMost(Duration.ofSeconds(60))
+        .atMost(Duration.ofSeconds(10))
         .untilAsserted(
             () -> {
               assertThat(spanExporter.getFinishedSpanItems())
