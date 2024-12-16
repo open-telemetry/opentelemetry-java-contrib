@@ -120,6 +120,7 @@ public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
             "hbase.region_server.queue.length",
             metric ->
                 metric
+                    .logAttributes()
                     .isUpDownCounter()
                     .hasDescription("The number of RPC handlers actively servicing requests.")
                     .hasUnit("{handler}")

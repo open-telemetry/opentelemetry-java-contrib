@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.internal.Integers;
@@ -178,6 +179,17 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   private MetricAssert checkDataPoints(Consumer<List<NumberDataPoint>> listConsumer) {
     // in practice usually one set of data points is provided but the
     // protobuf does not enforce that, so we have to ensure checking at least one
+    int count = consumeNumberDataPoints(listConsumer);
+    info.description("at least one set of data points expected for metric '%s'", actual.getName());
+    integers.assertGreaterThan(info, count, 0);
+
+    strictCheck(
+        "data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
+    dataPointAttributesChecked = true;
+    return this;
+  }
+
+  private int consumeNumberDataPoints(Consumer<List<NumberDataPoint>> listConsumer) {
     int count = 0;
     if (actual.hasGauge()) {
       count++;
@@ -187,13 +199,7 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
       count++;
       listConsumer.accept(actual.getSum().getDataPointsList());
     }
-    info.description("at least one set of data points expected for metric '%s'", actual.getName());
-    integers.assertGreaterThan(info, count, 0);
-
-    strictCheck(
-        "data point attributes", /* expectedCheckStatus= */ false, dataPointAttributesChecked);
-    dataPointAttributesChecked = true;
-    return this;
+    return count;
   }
 
   private void dataPointsCommonCheck(List<NumberDataPoint> dataPoints) {
@@ -262,5 +268,36 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
             objects.assertEqual(info, matchedSets[i], true);
           }
         });
+  }
+
+  /**
+   * Call this to have the metric data points for this metric name get logged. Care should be used,
+   * because it might be verbose. Can be used for sporadic/occasional test failures.
+   *
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public MetricAssert logAttributes() {
+    Logger logger = Logger.getLogger(getClass().getName());
+    consumeNumberDataPoints(
+        points ->
+            points.forEach(
+                point -> {
+                  StringBuilder sb = new StringBuilder(actual.getName() + " -> attrs = [");
+                  List<String> attrStrings =
+                      point.getAttributesList().stream()
+                          .map(
+                              kv ->
+                                  ("{"
+                                      + kv.getKey()
+                                      + "=> "
+                                      + String.valueOf(kv.getValue()).trim()
+                                      + "}"))
+                          .collect(Collectors.toList());
+                  sb.append(String.join(",", attrStrings));
+                  sb.append("]");
+                  logger.info(sb.toString());
+                }));
+    return this;
   }
 }
