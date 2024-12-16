@@ -7,7 +7,7 @@ rules:
       LoadedClassCount:
         metric: jvm.classes.loaded
         type: gauge
-        unit: '{class}'
+        unit: "{class}"
         desc: number of loaded classes
 
   - bean: java.lang:type=GarbageCollector,name=*
@@ -15,7 +15,7 @@ rules:
       CollectionCount:
         metric: jvm.gc.collections.count
         type: counter
-        unit: '{collection}'
+        unit: "{collection}"
         desc: total number of collections that have occurred
         metricAttribute:
           name: param(name)
@@ -87,5 +87,5 @@ rules:
     mapping:
       ThreadCount:
         metric: jvm.threads.count
-        unit: '{thread}'
+        unit: "{thread}"
         desc: number of threads
