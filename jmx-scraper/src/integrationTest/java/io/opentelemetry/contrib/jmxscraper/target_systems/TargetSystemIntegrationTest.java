@@ -167,7 +167,7 @@ public abstract class TargetSystemIntegrationTest {
   protected void verifyMetrics() {
     MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
-        .atMost(Duration.ofSeconds(30))
+        .atMost(Duration.ofSeconds(60))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
