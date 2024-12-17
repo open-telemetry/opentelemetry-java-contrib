@@ -13,11 +13,11 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
 import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
@@ -44,10 +44,10 @@ public class EksResourceTest {
   void testEks(@TempDir File tempFolder) throws IOException {
     File mockK8sTokenFile = new File(tempFolder, "k8sToken");
     String token = "token123";
-    Files.write(token.getBytes(Charsets.UTF_8), mockK8sTokenFile);
+    Files.write(token.getBytes(UTF_8), mockK8sTokenFile);
     File mockK8sKeystoreFile = new File(tempFolder, "k8sCert");
     String truststore = "truststore123";
-    Files.write(truststore.getBytes(Charsets.UTF_8), mockK8sKeystoreFile);
+    Files.write(truststore.getBytes(UTF_8), mockK8sKeystoreFile);
 
     when(httpClient.fetchString(any(), Mockito.eq(K8S_SVC_URL + AUTH_CONFIGMAP_PATH), any(), any()))
         .thenReturn("not empty");
