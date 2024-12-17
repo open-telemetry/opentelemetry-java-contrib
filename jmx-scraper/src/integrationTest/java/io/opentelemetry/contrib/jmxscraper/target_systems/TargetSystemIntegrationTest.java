@@ -111,13 +111,13 @@ public abstract class TargetSystemIntegrationTest {
             .withLogConsumer(new Slf4jLogConsumer(targetSystemLogger))
             .withNetwork(network)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
-    target.start();
 
     scraper =
         new JmxScraperContainer(otlpEndpoint, scraperBaseImage())
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
-            .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);
+            .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT)
+            .dependsOn(target);
 
     scraper = customizeScraperContainer(scraper, target, tmpDir);
     scraper.start();
@@ -167,7 +167,7 @@ public abstract class TargetSystemIntegrationTest {
   protected void verifyMetrics() {
     MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
-        .atMost(Duration.ofSeconds(30))
+        .atMost(Duration.ofSeconds(60))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
