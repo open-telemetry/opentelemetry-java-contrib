@@ -8,12 +8,12 @@ rules:
       CapacityUsed:
         metric: capacity.usage
         type: updowncounter
-        unit: by
+        unit: By
         desc: The current used capacity across all data nodes reporting to the name node.
       CapacityTotal:
         metric: capacity.limit
         type: updowncounter
-        unit: by
+        unit: By
         desc: The total capacity allotted to data nodes reporting to the name node.
       BlocksTotal:
         metric: block.count

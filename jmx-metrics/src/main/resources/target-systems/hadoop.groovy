@@ -15,10 +15,10 @@
  */
 
 def beanHadoopNameNodeFS = otel.mbean("Hadoop:service=NameNode,name=FSNamesystem")
-otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.capacity.usage", "The current used capacity across all data nodes reporting to the name node.", "by",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.capacity.usage", "The current used capacity across all data nodes reporting to the name node.", "By",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "CapacityUsed", otel.&longUpDownCounterCallback)
-otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.capacity.limit", "The total capacity allotted to data nodes reporting to the name node.", "by",
+otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.capacity.limit", "The total capacity allotted to data nodes reporting to the name node.", "By",
   ["node_name" : { mbean -> mbean.getProperty("tag.Hostname") }],
   "CapacityTotal", otel.&longUpDownCounterCallback)
 otel.instrument(beanHadoopNameNodeFS, "hadoop.name_node.block.count", "The total number of blocks on the name node.", "{block}",
