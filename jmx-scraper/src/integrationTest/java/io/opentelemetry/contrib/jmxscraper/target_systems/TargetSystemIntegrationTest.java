@@ -21,13 +21,11 @@ import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -125,45 +123,6 @@ public abstract class TargetSystemIntegrationTest {
     verifyMetrics();
   }
 
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
-  // migrated to MetricsVerifier
-  protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
-    await()
-        .atMost(Duration.ofSeconds(30))
-        .untilAsserted(
-            () -> {
-              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
-              assertThat(receivedMetrics).describedAs("no metric received").isNotEmpty();
-
-              List<Metric> metrics =
-                  receivedMetrics.stream()
-                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                      .flatMap(Collection::stream)
-                      .filter(
-                          // TODO: disabling batch span exporter might help remove unwanted metrics
-                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
-                      .flatMap(sm -> sm.getMetricsList().stream())
-                      .collect(Collectors.toList());
-
-              assertThat(metrics)
-                  .describedAs("metrics reported but none from JMX scraper")
-                  .isNotEmpty();
-
-              for (Consumer<Metric> assertion : assertions) {
-                assertThat(metrics).anySatisfy(assertion);
-              }
-            });
-  }
-
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
-  // migrated to MetricsVerifier
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
-    waitAndAssertMetrics(Arrays.asList(assertions));
-  }
-
   protected void verifyMetrics() {
     MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
@@ -192,11 +151,7 @@ public abstract class TargetSystemIntegrationTest {
             });
   }
 
-  // TODO: This method is going to be abstract once all integration tests are migrated to
-  // MetricsVerifier
-  protected MetricsVerifier createMetricsVerifier() {
-    return MetricsVerifier.create();
-  }
+  protected abstract MetricsVerifier createMetricsVerifier();
 
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
