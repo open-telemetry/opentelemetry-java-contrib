@@ -185,7 +185,7 @@ public abstract class TargetSystemIntegrationTest {
                       .collect(Collectors.toList());
 
               assertThat(metrics)
-                  .describedAs("metrics reported but none from JMX scraper")
+                  .describedAs("Metrics received but not suitable for JMX scraper")
                   .isNotEmpty();
 
               metricsVerifier.verify(metrics);
