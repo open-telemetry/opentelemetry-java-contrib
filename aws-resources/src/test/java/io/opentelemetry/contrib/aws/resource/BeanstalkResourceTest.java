@@ -11,9 +11,9 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.entry;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
@@ -33,7 +33,7 @@ class BeanstalkResourceTest {
     String content =
         "{\"noise\": \"noise\", \"deployment_id\":4,\""
             + "version_label\":\"2\",\"environment_name\":\"HttpSubscriber-env\"}";
-    Files.write(content.getBytes(Charsets.UTF_8), file);
+    Files.write(content.getBytes(UTF_8), file);
     Resource resource = BeanstalkResource.buildResource(file.getPath());
     Attributes attributes = resource.getAttributes();
     assertThat(attributes)
@@ -59,7 +59,7 @@ class BeanstalkResourceTest {
     String content =
         "\"deployment_id\":4,\"version_label\":\"2\",\""
             + "environment_name\":\"HttpSubscriber-env\"}";
-    Files.write(content.getBytes(Charsets.UTF_8), file);
+    Files.write(content.getBytes(UTF_8), file);
     Attributes attributes = BeanstalkResource.buildResource(file.getPath()).getAttributes();
     assertThat(attributes).isEmpty();
   }
