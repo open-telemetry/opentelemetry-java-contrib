@@ -5,8 +5,7 @@
 
 package io.opentelemetry.contrib.awsxray;
 
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_STATUS_CODE;
-
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
@@ -39,8 +38,10 @@ import javax.annotation.concurrent.Immutable;
  * AlwaysRecordSampler}, which will result in 100% of spans being sent to the processor.
  */
 @Immutable
-@SuppressWarnings("deprecation") // uses deprecated semantic conventions
 public final class AwsSpanMetricsProcessor implements SpanProcessor {
+
+  private static final AttributeKey<Long> HTTP_STATUS_CODE =
+      AttributeKey.longKey("http.status_code");
 
   private static final double NANOS_TO_MILLIS = 1_000_000.0;
 
