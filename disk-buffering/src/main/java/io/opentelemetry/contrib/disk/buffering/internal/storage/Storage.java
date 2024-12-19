@@ -10,6 +10,7 @@ import static java.util.logging.Level.WARNING;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
@@ -77,12 +78,13 @@ public final class Storage implements Closeable {
    * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
    * @throws IOException If an unexpected error happens.
    */
-  public ReadableResult readAndProcess(Function<byte[], Boolean> processing) throws IOException {
+  public ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
+      throws IOException {
     return readAndProcess(processing, 1);
   }
 
-  private ReadableResult readAndProcess(Function<byte[], Boolean> processing, int attemptNumber)
-      throws IOException {
+  private ReadableResult readAndProcess(
+      Function<byte[], ProcessResult> processing, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to read from storage after being closed.");
       return ReadableResult.FAILED;
@@ -103,7 +105,7 @@ public final class Storage implements Closeable {
     ReadableResult result = readableFile.readAndProcess(processing);
     switch (result) {
       case SUCCEEDED:
-      case PROCESSING_FAILED:
+      case TRY_LATER:
         return result;
       default:
         // Retry with new file

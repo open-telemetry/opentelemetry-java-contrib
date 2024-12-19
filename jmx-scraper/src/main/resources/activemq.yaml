@@ -10,15 +10,11 @@ rules:
     mapping:
       ProducerCount:
         metric: producer.count
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{producer}"
         type: updowncounter
         desc: The number of producers currently attached to the broker.
       ConsumerCount:
         metric: consumer.count
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{consumer}"
         type: updowncounter
         desc: The number of consumers currently reading from the broker.
@@ -29,29 +25,21 @@ rules:
         desc: The percentage of configured memory used.
       QueueSize:
         metric: message.current
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{message}"
         type: updowncounter
         desc: The current number of messages waiting to be consumed.
       ExpiredCount:
         metric: message.expired
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{message}"
         type: counter
         desc: The total number of messages not delivered because they expired.
       EnqueueCount:
         metric: message.enqueued
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{message}"
         type: counter
         desc: The total number of messages received by the broker.
       DequeueCount:
         metric: message.dequeued
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{message}"
         type: counter
         desc: The total number of messages delivered to consumers.
@@ -73,8 +61,6 @@ rules:
       CurrentConnectionsCount:
         metric: connection.count
         type: updowncounter
-        # Unit name inherited from activemq.groovy file.
-        # Will be updated to {} semconv notation when we switch to use original files from JMX Insights
         unit: "{connection}"
         desc: The total number of current connections.
       StorePercentUsage:

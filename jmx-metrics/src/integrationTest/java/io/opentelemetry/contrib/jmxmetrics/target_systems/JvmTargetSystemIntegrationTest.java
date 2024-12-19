@@ -31,13 +31,13 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
             "Metaspace",
             "Par Survivor Space");
     waitAndAssertMetrics(
-        metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "1"),
+        metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "{class}"),
         metric ->
             assertTypedSum(
                 metric,
                 "jvm.gc.collections.count",
                 "total number of collections that have occurred",
-                "1",
+                "{collection}",
                 Arrays.asList("ConcurrentMarkSweep", "ParNew")),
         metric ->
             assertTypedSum(
@@ -46,27 +46,27 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
                 "the approximate accumulated collection elapsed time in milliseconds",
                 "ms",
                 Arrays.asList("ConcurrentMarkSweep", "ParNew")),
-        metric -> assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "by"),
+        metric -> assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "By"),
         metric ->
-            assertGauge(metric, "jvm.memory.nonheap.committed", "current non-heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "by"),
-        metric -> assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "by"),
-        metric ->
-            assertTypedGauge(
-                metric, "jvm.memory.pool.committed", "current memory pool usage", "by", gcLabels),
+            assertGauge(metric, "jvm.memory.nonheap.committed", "current non-heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "By"),
         metric ->
             assertTypedGauge(
-                metric, "jvm.memory.pool.init", "current memory pool usage", "by", gcLabels),
+                metric, "jvm.memory.pool.committed", "current memory pool usage", "By", gcLabels),
         metric ->
             assertTypedGauge(
-                metric, "jvm.memory.pool.max", "current memory pool usage", "by", gcLabels),
+                metric, "jvm.memory.pool.init", "current memory pool usage", "By", gcLabels),
         metric ->
             assertTypedGauge(
-                metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
-        metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1"));
+                metric, "jvm.memory.pool.max", "current memory pool usage", "By", gcLabels),
+        metric ->
+            assertTypedGauge(
+                metric, "jvm.memory.pool.used", "current memory pool usage", "By", gcLabels),
+        metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "{thread}"));
   }
 }

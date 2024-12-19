@@ -25,7 +25,7 @@ public interface SignalDeserializer<SDK_ITEM> {
   }
 
   /** Deserializes the given byte array into a list of telemetry items. */
-  List<SDK_ITEM> deserialize(byte[] source);
+  List<SDK_ITEM> deserialize(byte[] source) throws DeserializationException;
 
   /** Returns the name of the stored type of signal -- one of "metrics", "spans", or "logs". */
   default String signalType() {

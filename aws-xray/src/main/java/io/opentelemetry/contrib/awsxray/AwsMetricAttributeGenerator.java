@@ -15,24 +15,24 @@ import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_REMOTE_TARGE
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
-import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_OPERATION;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.DB_SYSTEM;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_INVOKED_NAME;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.FAAS_TRIGGER;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.GRAPHQL_OPERATION_TYPE;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_METHOD;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_TARGET;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_URL;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_OPERATION;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MESSAGING_SYSTEM;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_NAME;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_PEER_PORT;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_ADDR;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.NET_SOCK_PEER_PORT;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.PEER_SERVICE;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_METHOD;
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.RPC_SERVICE;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.incubating.DbIncubatingAttributes.DB_OPERATION;
+import static io.opentelemetry.semconv.incubating.DbIncubatingAttributes.DB_SYSTEM;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INVOKED_NAME;
+import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_TRIGGER;
+import static io.opentelemetry.semconv.incubating.GraphqlIncubatingAttributes.GRAPHQL_OPERATION_TYPE;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_METHOD;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_TARGET;
+import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_URL;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
+import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_PEER_NAME;
+import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_PEER_PORT;
+import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_SOCK_PEER_ADDR;
+import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_SOCK_PEER_PORT;
+import static io.opentelemetry.semconv.incubating.PeerIncubatingAttributes.PEER_SERVICE;
+import static io.opentelemetry.semconv.incubating.RpcIncubatingAttributes.RPC_METHOD;
+import static io.opentelemetry.semconv.incubating.RpcIncubatingAttributes.RPC_SERVICE;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -40,8 +40,8 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.incubating.GraphqlIncubatingAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -57,6 +57,7 @@ import java.util.logging.Logger;
  * represent "incoming" traffic, {@link SpanKind#CLIENT} and {@link SpanKind#PRODUCER} spans
  * represent "outgoing" traffic, and {@link SpanKind#INTERNAL} spans are ignored.
  */
+@SuppressWarnings("deprecation") // uses deprecated semantic conventions
 final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
 
   private static final Logger logger =
@@ -119,7 +120,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
     return Optional.empty();
   }
 
-  /** Service is always derived from {@link ResourceAttributes#SERVICE_NAME} */
+  /** Service is always derived from {@link ServiceAttributes#SERVICE_NAME} */
   private static void setService(Resource resource, SpanData span, AttributesBuilder builder) {
     String service = resource.getAttribute(SERVICE_NAME);
     if (service == null) {
@@ -195,8 +196,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    *   <li>DB
    *   <li>FAAS
    *   <li>Messaging
-   *   <li>GraphQL - Special case, if {@link SemanticAttributes#GRAPHQL_OPERATION_TYPE} is present,
-   *       we use it for RemoteOperation and set RemoteService to {@link #GRAPHQL}.
+   *   <li>GraphQL - Special case, if {@link GraphqlIncubatingAttributes#GRAPHQL_OPERATION_TYPE} is
+   *       present, we use it for RemoteOperation and set RemoteService to {@link #GRAPHQL}.
    * </ul>
    *
    * <p>In each case, these span attributes were selected from the OpenTelemetry trace semantic

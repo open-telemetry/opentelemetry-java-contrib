@@ -5,18 +5,13 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGauge;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSum;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
-import static org.assertj.core.api.Assertions.entry;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcherGroup;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import org.assertj.core.api.MapAssert;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -44,127 +39,151 @@ public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics() {
-    waitAndAssertMetrics(
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.range_slice.latency.50p",
-                "Token range read request latency - 50th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.range_slice.latency.99p",
-                "Token range read request latency - 99th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.range_slice.latency.max",
-                "Maximum token range read request latency",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.read.latency.50p",
-                "Standard read request latency - 50th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.read.latency.99p",
-                "Standard read request latency - 99th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.read.latency.max",
-                "Maximum standard read request latency",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.write.latency.50p",
-                "Regular write request latency - 50th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.write.latency.99p",
-                "Regular write request latency - 99th percentile",
-                "us"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.client.request.write.latency.max",
-                "Maximum regular write request latency",
-                "us"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.compaction.tasks.completed",
-                "Number of completed compactions since server [re]start",
-                "1"),
-        metric ->
-            assertGauge(
-                metric,
-                "cassandra.compaction.tasks.pending",
-                "Estimated number of compactions remaining to perform",
-                "1"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.storage.load.count",
-                "Size of the on disk data size this node manages",
-                "by",
-                /* isMonotonic= */ false),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.storage.total_hints.count",
-                "Number of hint messages written to this node since [re]start",
-                "1"),
-        metric ->
-            assertSum(
-                metric,
-                "cassandra.storage.total_hints.in_progress.count",
-                "Number of hints attempting to be sent currently",
-                "1",
-                /* isMonotonic= */ false),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "cassandra.client.request.count",
-                "Number of requests by operation",
-                "1",
-                attrs -> attrs.containsOnly(entry("operation", "RangeSlice")),
-                attrs -> attrs.containsOnly(entry("operation", "Read")),
-                attrs -> attrs.containsOnly(entry("operation", "Write"))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "cassandra.client.request.error.count",
-                "Number of request errors by operation",
-                "1",
-                getRequestErrorCountAttributes()));
+  protected MetricsVerifier createMetricsVerifier() {
+    return MetricsVerifier.create()
+        .add(
+            "cassandra.client.request.range_slice.latency.50p",
+            metric ->
+                metric
+                    .hasDescription("Token range read request latency - 50th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.range_slice.latency.99p",
+            metric ->
+                metric
+                    .hasDescription("Token range read request latency - 99th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.range_slice.latency.max",
+            metric ->
+                metric
+                    .hasDescription("Maximum token range read request latency")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.read.latency.50p",
+            metric ->
+                metric
+                    .hasDescription("Standard read request latency - 50th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.read.latency.99p",
+            metric ->
+                metric
+                    .hasDescription("Standard read request latency - 99th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.read.latency.max",
+            metric ->
+                metric
+                    .hasDescription("Maximum standard read request latency")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.write.latency.50p",
+            metric ->
+                metric
+                    .hasDescription("Regular write request latency - 50th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.write.latency.99p",
+            metric ->
+                metric
+                    .hasDescription("Regular write request latency - 99th percentile")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.write.latency.max",
+            metric ->
+                metric
+                    .hasDescription("Maximum regular write request latency")
+                    .hasUnit("us")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.compaction.tasks.completed",
+            metric ->
+                metric
+                    .hasDescription("Number of completed compactions since server [re]start")
+                    .hasUnit("{task}")
+                    .isCounter()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.compaction.tasks.pending",
+            metric ->
+                metric
+                    .hasDescription("Estimated number of compactions remaining to perform")
+                    .hasUnit("{task}")
+                    .isGauge()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.storage.load.count",
+            metric ->
+                metric
+                    .hasDescription("Size of the on disk data size this node manages")
+                    .hasUnit("By")
+                    .isUpDownCounter()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.storage.total_hints.count",
+            metric ->
+                metric
+                    .hasDescription("Number of hint messages written to this node since [re]start")
+                    .hasUnit("{hint}")
+                    .isCounter()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.storage.total_hints.in_progress.count",
+            metric ->
+                metric
+                    .hasDescription("Number of hints attempting to be sent currently")
+                    .hasUnit("{hint}")
+                    .isUpDownCounter()
+                    .hasDataPointsWithoutAttributes())
+        .add(
+            "cassandra.client.request.count",
+            metric ->
+                metric
+                    .hasDescription("Number of requests by operation")
+                    .hasUnit("{request}")
+                    .isCounter()
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(attribute("operation", "RangeSlice")),
+                        attributeGroup(attribute("operation", "Read")),
+                        attributeGroup(attribute("operation", "Write"))))
+        .add(
+            "cassandra.client.request.error.count",
+            metric ->
+                metric
+                    .hasDescription("Number of request errors by operation")
+                    .hasUnit("{error}")
+                    .isCounter()
+                    .hasDataPointsWithAttributes(
+                        errorCountAttributes("RangeSlice", "Timeout"),
+                        errorCountAttributes("RangeSlice", "Failure"),
+                        errorCountAttributes("RangeSlice", "Unavailable"),
+                        errorCountAttributes("Read", "Timeout"),
+                        errorCountAttributes("Read", "Failure"),
+                        errorCountAttributes("Read", "Unavailable"),
+                        errorCountAttributes("Write", "Timeout"),
+                        errorCountAttributes("Write", "Failure"),
+                        errorCountAttributes("Write", "Unavailable")));
   }
 
-  @SuppressWarnings("unchecked")
-  private static Consumer<MapAssert<String, String>>[] getRequestErrorCountAttributes() {
-    List<String> operations = Arrays.asList("RangeSlice", "Read", "Write");
-    List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
-
-    return operations.stream()
-        .flatMap(
-            op ->
-                statuses.stream()
-                    .map(
-                        st ->
-                            (Consumer<MapAssert<String, String>>)
-                                attrs ->
-                                    attrs.containsOnly(
-                                        entry("operation", op), entry("status", st))))
-        .toArray(Consumer[]::new);
+  private static AttributeMatcherGroup errorCountAttributes(String operation, String status) {
+    return attributeGroup(attribute("operation", operation), attribute("status", status));
   }
 }

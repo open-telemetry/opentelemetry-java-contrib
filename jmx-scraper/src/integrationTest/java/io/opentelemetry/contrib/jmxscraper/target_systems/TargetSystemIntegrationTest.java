@@ -21,13 +21,11 @@ import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -125,13 +123,14 @@ public abstract class TargetSystemIntegrationTest {
     verifyMetrics();
   }
 
-  protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
+  protected void verifyMetrics() {
+    MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
-        .atMost(Duration.ofSeconds(30))
+        .atMost(Duration.ofSeconds(60))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
-              assertThat(receivedMetrics).describedAs("no metric received").isNotEmpty();
+              assertThat(receivedMetrics).describedAs("No metric received").isNotEmpty();
 
               List<Metric> metrics =
                   receivedMetrics.stream()
@@ -145,22 +144,14 @@ public abstract class TargetSystemIntegrationTest {
                       .collect(Collectors.toList());
 
               assertThat(metrics)
-                  .describedAs("metrics reported but none from JMX scraper")
+                  .describedAs("Metrics received but not suitable for JMX scraper")
                   .isNotEmpty();
 
-              for (Consumer<Metric> assertion : assertions) {
-                assertThat(metrics).anySatisfy(assertion);
-              }
+              metricsVerifier.verify(metrics);
             });
   }
 
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
-    waitAndAssertMetrics(Arrays.asList(assertions));
-  }
-
-  protected abstract void verifyMetrics();
+  protected abstract MetricsVerifier createMetricsVerifier();
 
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
