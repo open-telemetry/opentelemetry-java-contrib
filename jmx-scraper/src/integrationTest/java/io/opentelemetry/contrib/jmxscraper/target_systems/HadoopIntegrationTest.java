@@ -3,43 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.jmxmetrics.target_systems;
+package io.opentelemetry.contrib.jmxscraper.target_systems;
 
+import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
 import static org.assertj.core.api.Assertions.entry;
 
-import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
+import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.time.Duration;
-import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.MountableFile;
 
-class HadoopIntegrationTest extends AbstractIntegrationTest {
+public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
 
-  HadoopIntegrationTest() {
-    super(/* configFromStdin= */ false, "target-systems/hadoop.properties");
+  private static final int HADOOP_PORT = 50070;
+
+  @Override
+  protected GenericContainer<?> createTargetContainer(int jmxPort) {
+    return new GenericContainer<>("bmedora/hadoop:2.9-base")
+        .withCopyFileToContainer(
+            MountableFile.forClasspathResource("hadoop-env.sh", 0400),
+            "/hadoop/etc/hadoop/hadoop-env.sh")
+        .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)))
+        .withExposedPorts(HADOOP_PORT, jmxPort)
+        .withCreateContainerCmdModifier(cmd -> cmd.withHostName("test-host"))
+        .waitingFor(Wait.forListeningPorts(HADOOP_PORT, jmxPort));
   }
 
-  @Container
-  GenericContainer<?> hadoop =
-      new GenericContainer<>("bmedora/hadoop:2.9-base")
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("hadoop/hadoop-env.sh", 0400),
-              "/hadoop/etc/hadoop/hadoop-env.sh")
-          .withCopyFileToContainer(
-              MountableFile.forClasspathResource("hadoop/yarn-site.xml", 0400),
-              "/hadoop/etc/hadoop/yarn-site.xml")
-          .withNetwork(Network.SHARED)
-          .withNetworkAliases("hadoop")
-          .withExposedPorts(8004)
-          .withStartupTimeout(Duration.ofMinutes(2))
-          .withCreateContainerCmdModifier(cmd -> cmd.withHostName("test-host"))
-          .waitingFor(Wait.forListeningPort());
+  @Override
+  protected JmxScraperContainer customizeScraperContainer(JmxScraperContainer scraper) {
+    return scraper.withTargetSystem("hadoop");
+  }
 
-  @Test
-  void endToEnd() {
+  @Override
+  protected void verifyMetrics() {
     waitAndAssertMetrics(
         metric ->
             assertSumWithAttributes(
@@ -47,6 +44,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.capacity.usage",
                 "The current used capacity across all data nodes reporting to the name node.",
                 "by",
+                /* isMonotonic= */ false,
                 attrs -> attrs.contains(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -54,6 +52,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.capacity.limit",
                 "The total capacity allotted to data nodes reporting to the name node.",
                 "by",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -61,6 +60,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.block.count",
                 "The total number of blocks on the name node.",
                 "{block}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -68,6 +68,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.block.missing",
                 "The number of blocks reported as missing to the name node.",
                 "{block}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -75,6 +76,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.block.corrupt",
                 "The number of blocks reported as corrupt to the name node.",
                 "{block}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -82,6 +84,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.volume.failed",
                 "The number of failed volumes reported to the name node.",
                 "{volume}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -89,6 +92,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.file.count",
                 "The total number of files being tracked by the name node.",
                 "{file}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -96,6 +100,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.file.load",
                 "The current number of concurrent file accesses.",
                 "{operation}",
+                /* isMonotonic= */ false,
                 attrs -> attrs.containsOnly(entry("node_name", "test-host"))),
         metric ->
             assertSumWithAttributes(
@@ -103,6 +108,7 @@ class HadoopIntegrationTest extends AbstractIntegrationTest {
                 "hadoop.name_node.data_node.count",
                 "The number of data nodes reporting to the name node.",
                 "{node}",
+                /* isMonotonic= */ false,
                 attrs ->
                     attrs.containsOnly(entry("node_name", "test-host"), entry("state", "live")),
                 attrs ->
