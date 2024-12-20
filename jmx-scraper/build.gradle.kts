@@ -70,6 +70,13 @@ tasks {
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
+
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      if (System.getenv().containsKey("CI")) {
+        maxRetries.set(5)
+      }
+    }
   }
 
   // Because we reconfigure publishing to only include the shadow jar, the Gradle metadata is not correct.
