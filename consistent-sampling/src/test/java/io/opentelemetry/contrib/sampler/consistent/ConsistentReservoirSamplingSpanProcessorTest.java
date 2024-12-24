@@ -243,9 +243,11 @@ class ConsistentReservoirSamplingSpanProcessorTest {
 
   @Test
   void ignoresNullSpans() {
+    SpanExporter mockSpanExporter = mock(SpanExporter.class);
+    when(mockSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     SpanProcessor processor =
         ConsistentReservoirSamplingSpanProcessor.create(
-            mock(SpanExporter.class), RESERVOIR_SIZE, EXPORT_PERIOD_100_MILLIS_AS_NANOS);
+            mockSpanExporter, RESERVOIR_SIZE, EXPORT_PERIOD_100_MILLIS_AS_NANOS);
     assertThatCode(
             () -> {
               processor.onStart(null, null);
