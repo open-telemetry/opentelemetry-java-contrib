@@ -1,6 +1,6 @@
-# OpenTelemetry Baggage Span Processor
+# OpenTelemetry Baggage Span and Log Record Processor
 
-The `BaggageSpanProcessor` and `BaggageLogRecordPRocessor` read entries stored in Baggage from the
+The `BaggageSpanProcessor` and `BaggageLogRecordProcessor` read entries stored in Baggage from the
 parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as
 attributes on start, respectively emit.
 
