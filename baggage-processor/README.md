@@ -15,6 +15,18 @@ Do not put sensitive information in Baggage.
 
 ## Usage
 
+### Usage with SDK auto-configuration
+
+If you are using the OpenTelemetry SDK auto-configuration, you can add the span and log baggage
+processors through configuration.
+
+| Property                                                           | Description                                                                                       |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
+| `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key2` or `*` to add all baggage items as keys.  |
+
+### Usage through programmatic activation
+
 Add the span and log processor when configuring the tracer and logger providers.
 
 To configure the span and log processors to copy all baggage entries during configuration:
@@ -48,16 +60,6 @@ Pattern pattern = Pattern.compile("^key.+");
 new BaggageSpanProcessor(baggageKey -> pattern.matcher(baggageKey).matches());
 new BaggageLogRecordProcessor(baggageKey -> pattern.matcher(baggageKey).matches());
 ```
-
-## Usage with SDK auto-configuration
-
-If you are using the OpenTelemetry SDK auto-configuration, you can add the span and log baggage
-processors through configuration.
-
-| Property                                                           | Description                                                                                       |
-|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
-| `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key2` or `*` to add all baggage items as keys.  |
 
 ## Component owners
 
