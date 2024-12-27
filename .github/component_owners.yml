@@ -19,7 +19,7 @@ components:
   aws-xray-propagator:
     - wangzlei
     - srprash
-  baggage-procesor:
+  baggage-processor:
     - mikegoldsmith
     - zeitlinger
   compressors:
