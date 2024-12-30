@@ -14,40 +14,36 @@ The following OpenTelemetry semantic conventions will be detected:
 | host.id                 | auto                                         | auto                                                   |                                          |                                                |                                                |
 | host.name               | auto                                         | auto                                                   |                                          |                                                |                                                |
 | host.type               | auto                                         | auto                                                   |                                          |                                                |                                                |
-| k8s.pod.name            |                                              | downward API or auto                                   |                                          |                                                |                                                |
-| k8s.namespace.name      |                                              | downward API                                           |                                          |                                                |                                                |
-| k8s.container.name      |                                              | hardcoded (manual)                                     |                                          |                                                |                                                |
+| k8s.pod.name            |                                              | environment variable                                   |                                          |                                                |                                                |
+| k8s.namespace.name      |                                              | environment variable                                   |                                          |                                                |                                                |
+| k8s.container.name      |                                              | environment variable                                   |                                          |                                                |                                                |
 | k8s.cluster.name        |                                              | auto                                                   |                                          |                                                |                                                |
 | faas.name               |                                              |                                                        | auto                                     | auto                                           | auto                                           |
 | faas.version            |                                              |                                                        | auto                                     | auto                                           | auto                                           |
 | faas.instance           |                                              |                                                        | auto                                     | auto                                           | auto                                           |
 
-## Downward API
+## Setting Kubernetes attributes
 
-For GKE applications, some values must be passed via the environment variable using k8s
-"downward API".  For example, the following spec will ensure `k8s.namespace.name` and
-`k8s.pod.name` are correctly discovered:
+This resource detector does not detect the following resource attributes
+`container.name`, `k8s.pod.name` and `k8s.namespace.name`.  When using this detector,
+you should use this in your Pod Spec to set these using
+[`OTEL_RESOURCE_ATTRIBUTES`](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.20.0/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable):
 
 ```yaml
-spec:
-  containers:
-    - name: my-application
-      image: gcr.io/my-project/my-image:latest
-      env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: CONTAINER_NAME
-          value: my-application
+env:
+- name: POD_NAME
+  valueFrom:
+    fieldRef:
+      fieldPath: metadata.name
+- name: NAMESPACE_NAME
+  valueFrom:
+    fieldRef:
+      fieldPath: metadata.namespace
+- name: CONTAINER_NAME
+  value: my-container-name
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: k8s.pod.name=$(POD_NAME),k8s.namespace.name=$(NAMESPACE_NAME),k8s.container.name=$(CONTAINER_NAME)
 ```
-
-Additionally, the container name will only be discovered via the environment variable `CONTAINER_NAME`
-which much be included in the environment.
 
 ## Usage with Manual Instrumentation
 
