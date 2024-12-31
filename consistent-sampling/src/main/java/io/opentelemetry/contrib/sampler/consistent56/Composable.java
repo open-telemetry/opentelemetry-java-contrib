@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
 
 /** An interface for components to be used by composite consistent probability samplers. */
-public interface ComposableSampler {
+public interface Composable {
 
   /**
    * Returns the SamplingIntent that is used for the sampling decision. The SamplingIntent includes

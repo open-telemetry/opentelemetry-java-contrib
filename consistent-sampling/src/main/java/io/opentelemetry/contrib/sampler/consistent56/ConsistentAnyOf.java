@@ -27,7 +27,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class ConsistentAnyOf extends ConsistentSampler {
 
-  private final ComposableSampler[] delegates;
+  private final Composable[] delegates;
 
   private final String description;
 
@@ -36,7 +36,7 @@ final class ConsistentAnyOf extends ConsistentSampler {
    *
    * @param delegates the delegate samplers
    */
-  ConsistentAnyOf(@Nullable ComposableSampler... delegates) {
+  ConsistentAnyOf(@Nullable Composable... delegates) {
     if (delegates == null || delegates.length == 0) {
       throw new IllegalArgumentException(
           "At least one delegate must be specified for ConsistentAnyOf");
@@ -59,28 +59,51 @@ final class ConsistentAnyOf extends ConsistentSampler {
       List<LinkData> parentLinks) {
 
     SamplingIntent[] intents = new SamplingIntent[delegates.length];
-    int k = 0;
+
+    // If any of the delegates provides a valid threshold, the resulting threshold is the minimum
+    // value T from the set of those valid threshold values, otherwise it is invalid threshold.
     long minimumThreshold = getInvalidThreshold();
-    for (ComposableSampler delegate : delegates) {
+
+    // If any of the delegates returning the threshold value equal to T returns true upon calling
+    // its IsAdjustedCountReliable() method, the resulting isAdjustedCountReliable is true,
+    // otherwise it is false.
+    boolean isAdjustedCountCorrect = false;
+
+    int k = 0;
+    for (Composable delegate : delegates) {
       SamplingIntent delegateIntent =
           delegate.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
       long delegateThreshold = delegateIntent.getThreshold();
       if (isValidThreshold(delegateThreshold)) {
         if (isValidThreshold(minimumThreshold)) {
-          minimumThreshold = Math.min(delegateThreshold, minimumThreshold);
+          if (delegateThreshold == minimumThreshold) {
+            if (delegateIntent.isAdjustedCountReliable()) {
+              isAdjustedCountCorrect = true;
+            }
+          } else if (delegateThreshold < minimumThreshold) {
+            minimumThreshold = delegateThreshold;
+            isAdjustedCountCorrect = delegateIntent.isAdjustedCountReliable();
+          }
         } else {
           minimumThreshold = delegateThreshold;
+          isAdjustedCountCorrect = delegateIntent.isAdjustedCountReliable();
         }
       }
       intents[k++] = delegateIntent;
     }
 
     long resultingThreshold = minimumThreshold;
+    boolean isResultingAdjustedCountCorrect = isAdjustedCountCorrect;
 
     return new SamplingIntent() {
       @Override
       public long getThreshold() {
         return resultingThreshold;
+      }
+
+      @Override
+      public boolean isAdjustedCountReliable() {
+        return isResultingAdjustedCountCorrect;
       }
 
       @Override

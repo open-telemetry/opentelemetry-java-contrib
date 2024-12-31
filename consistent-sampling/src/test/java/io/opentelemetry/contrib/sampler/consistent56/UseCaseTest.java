@@ -67,7 +67,7 @@ class UseCaseTest {
             (parentContext, name, spanKind, attributes, parentLinks) -> {
               return "/checkout".equals(attributes.get(httpTarget));
             });
-    ComposableSampler s1 =
+    Composable s1 =
         ConsistentSampler.parentBased(
             ConsistentSampler.ruleBased(
                 null,
@@ -79,8 +79,8 @@ class UseCaseTest {
           return "/foo".equals(attributes.get(httpUrl));
         };
 
-    ComposableSampler s2 = ConsistentSampler.ruleBased(SpanKind.CLIENT, onMatch(foo, alwaysOn()));
-    ComposableSampler s3 = ConsistentSampler.anyOf(s1, s2);
+    Composable s2 = ConsistentSampler.ruleBased(SpanKind.CLIENT, onMatch(foo, alwaysOn()));
+    Composable s3 = ConsistentSampler.anyOf(s1, s2);
     return ConsistentSampler.rateLimited(s3, 1000.0, 5, UseCaseTest::nanoTime);
   }
 

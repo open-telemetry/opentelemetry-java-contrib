@@ -200,6 +200,42 @@ class ConsistentSamplerTest {
   }
 
   @Test
+  void testParentBasedInConsistentMode() {
+
+    long parentRandomValue = 0x7f99aa40c02744L;
+
+    Input input = new Input();
+    input.setParentRandomValue(parentRandomValue);
+    input.setParentThreshold(parentRandomValue);
+    input.setParentSampled(false); // should be ignored
+
+    ConsistentSampler sampler = ConsistentSampler.parentBased(ConsistentSampler.alwaysOn());
+
+    Output output = sample(input, sampler);
+
+    assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+    assertThat(output.getThreshold()).hasValue(parentRandomValue);
+    assertThat(output.getRandomValue()).hasValue(parentRandomValue);
+    assertThat(output.getSampledFlag()).isTrue();
+  }
+
+  @Test
+  void testParentBasedInLegacyMode() {
+
+    // No parent threshold present
+    Input input = new Input();
+
+    ConsistentSampler sampler = ConsistentSampler.parentBased(ConsistentSampler.alwaysOn());
+
+    Output output = sample(input, sampler);
+
+    assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+    assertThat(output.getThreshold()).isNotPresent();
+    assertThat(output.getRandomValue()).isNotPresent();
+    assertThat(output.getSampledFlag()).isTrue();
+  }
+
+  @Test
   void testHalfThresholdNotSampled() {
 
     Input input = new Input();

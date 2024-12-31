@@ -39,6 +39,17 @@ public interface Predicate {
   }
 
   /*
+   * Return a Predicate that will only match Spans with local parent
+   */
+  static Predicate hasLocalParent() {
+    return (parentContext, name, spanKind, attributes, parentLinks) -> {
+      Span parentSpan = Span.fromContext(parentContext);
+      SpanContext parentSpanContext = parentSpan.getSpanContext();
+      return !parentSpanContext.isValid() || !parentSpanContext.isRemote();
+    };
+  }
+
+  /*
    * Return a Predicate that matches all Spans
    */
   static Predicate anySpan() {

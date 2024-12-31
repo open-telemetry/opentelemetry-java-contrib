@@ -122,7 +122,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private final double targetSpansPerNanosecondLimit;
   private final double probabilitySmoothingFactor;
   private final AtomicReference<State> state;
-  private final ComposableSampler delegate;
+  private final Composable delegate;
 
   /**
    * Constructor.
@@ -133,7 +133,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   ConsistentRateLimitingSampler(
-      ComposableSampler delegate,
+      Composable delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       LongSupplier nanoTimeSupplier) {
@@ -253,6 +253,11 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
       @Override
       public long getThreshold() {
         return suggestedThreshold;
+      }
+
+      @Override
+      public boolean isAdjustedCountReliable() {
+        return delegateIntent.isAdjustedCountReliable();
       }
 
       @Override

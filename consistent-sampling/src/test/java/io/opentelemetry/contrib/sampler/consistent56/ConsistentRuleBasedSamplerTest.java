@@ -16,7 +16,7 @@ class ConsistentRuleBasedSamplerTest {
 
   @Test
   void testEmptySet() {
-    ComposableSampler sampler = ConsistentSampler.ruleBased(SpanKind.SERVER);
+    Composable sampler = ConsistentSampler.ruleBased(SpanKind.SERVER);
     SamplingIntent intent =
         sampler.getSamplingIntent(null, "span_name", SpanKind.SERVER, null, null);
     assertThat(intent.getThreshold()).isEqualTo(getInvalidThreshold());
@@ -36,14 +36,14 @@ class ConsistentRuleBasedSamplerTest {
     AttributeKey<String> key2 = AttributeKey.stringKey("tag2");
     AttributeKey<String> key3 = AttributeKey.stringKey("tag3");
 
-    ComposableSampler delegate1 =
+    Composable delegate1 =
         new MarkingSampler(new ConsistentFixedThresholdSampler(0x80000000000000L), key1, "a");
-    ComposableSampler delegate2 =
+    Composable delegate2 =
         new MarkingSampler(new ConsistentFixedThresholdSampler(0x50000000000000L), key2, "b");
-    ComposableSampler delegate3 =
+    Composable delegate3 =
         new MarkingSampler(new ConsistentFixedThresholdSampler(0x30000000000000L), key3, "c");
 
-    ComposableSampler sampler =
+    Composable sampler =
         ConsistentSampler.ruleBased(
             null,
             PredicatedSampler.onMatch(matchSpanName("A"), delegate1),
@@ -79,7 +79,7 @@ class ConsistentRuleBasedSamplerTest {
 
   @Test
   void testSpanKindMatch() {
-    ComposableSampler sampler =
+    Composable sampler =
         ConsistentSampler.ruleBased(
             SpanKind.CLIENT,
             PredicatedSampler.onMatch(Predicate.anySpan(), ConsistentSampler.alwaysOn()));

@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 
 /** Abstract base class for consistent samplers. */
 @SuppressWarnings("InconsistentOverloads")
-public abstract class ConsistentSampler implements Sampler, ComposableSampler {
+public abstract class ConsistentSampler implements Sampler, Composable {
 
   /**
    * Returns a {@link ConsistentSampler} that samples all spans.
@@ -61,7 +61,7 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
    *
    * @param rootSampler the root sampler
    */
-  public static ConsistentSampler parentBased(ComposableSampler rootSampler) {
+  public static ConsistentSampler parentBased(Composable rootSampler) {
     return new ConsistentParentBasedSampler(rootSampler);
   }
 
@@ -103,7 +103,7 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
    *     exponential smoothing)
    */
   public static ConsistentSampler rateLimited(
-      ComposableSampler delegate, double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+      Composable delegate, double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
     return rateLimited(
         delegate, targetSpansPerSecondLimit, adaptationTimeSeconds, System::nanoTime);
   }
@@ -138,7 +138,7 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
    * @param nanoTimeSupplier a supplier for the current nano time
    */
   static ConsistentSampler rateLimited(
-      ComposableSampler delegate,
+      Composable delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
       LongSupplier nanoTimeSupplier) {
@@ -159,7 +159,7 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
    * @param delegates the delegate samplers, at least one delegate must be specified
    * @return the ConsistentAnyOf sampler
    */
-  public static ConsistentSampler anyOf(ComposableSampler... delegates) {
+  public static ConsistentSampler anyOf(Composable... delegates) {
     return new ConsistentAnyOf(delegates);
   }
 
@@ -184,19 +184,23 @@ public abstract class ConsistentSampler implements Sampler, ComposableSampler {
 
     // determine sampling decision
     boolean isSampled;
+    boolean isAdjustedCountCorrect;
     if (isValidThreshold(threshold)) {
       long randomness = getRandomness(otelTraceState, traceId);
       isSampled = threshold <= randomness;
+      isAdjustedCountCorrect = intent.isAdjustedCountReliable();
     } else { // DROP
       isSampled = false;
+      isAdjustedCountCorrect = false;
     }
 
-    SamplingDecision samplingDecision;
-    if (isSampled) {
-      samplingDecision = SamplingDecision.RECORD_AND_SAMPLE;
+    SamplingDecision samplingDecision =
+        isSampled ? SamplingDecision.RECORD_AND_SAMPLE : SamplingDecision.DROP;
+
+    // determine tracestate changes
+    if (isSampled && isAdjustedCountCorrect) {
       otelTraceState.setThreshold(threshold);
     } else {
-      samplingDecision = SamplingDecision.DROP;
       otelTraceState.invalidateThreshold();
     }
 

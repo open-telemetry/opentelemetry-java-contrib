@@ -19,8 +19,8 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * A consistent sampler that uses Span categorization and uses a different delegate sampler for each
- * category. Categorization of Spans is aided by Predicates, which can be combined with
- * ComposableSamplers into PredicatedSamplers.
+ * category. Categorization of Spans is aided by Predicates, which can be combined with Composables
+ * into PredicatedSamplers.
  */
 @Immutable
 final class ConsistentRuleBasedSampler extends ConsistentSampler {

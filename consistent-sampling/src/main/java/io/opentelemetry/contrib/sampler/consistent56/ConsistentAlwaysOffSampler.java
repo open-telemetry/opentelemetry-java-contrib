@@ -33,7 +33,17 @@ final class ConsistentAlwaysOffSampler extends ConsistentSampler {
       Attributes attributes,
       List<LinkData> parentLinks) {
 
-    return () -> getInvalidThreshold();
+    return new SamplingIntent() {
+      @Override
+      public long getThreshold() {
+        return getInvalidThreshold();
+      }
+
+      @Override
+      public boolean isAdjustedCountReliable() {
+        return false;
+      }
+    };
   }
 
   @Override

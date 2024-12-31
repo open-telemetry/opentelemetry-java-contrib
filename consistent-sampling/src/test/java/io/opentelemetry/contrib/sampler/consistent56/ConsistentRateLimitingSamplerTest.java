@@ -64,7 +64,7 @@ class ConsistentRateLimitingSamplerTest {
     double targetSpansPerSecondLimit = 1000;
     double adaptationTimeSeconds = 5;
 
-    ComposableSampler delegate =
+    Composable delegate =
         new CoinFlipSampler(ConsistentSampler.alwaysOff(), ConsistentSampler.probabilityBased(0.8));
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
@@ -105,7 +105,7 @@ class ConsistentRateLimitingSamplerTest {
     double targetSpansPerSecondLimit = 1000;
     double adaptationTimeSeconds = 5;
 
-    ComposableSampler delegate =
+    Composable delegate =
         new CoinFlipSampler(ConsistentSampler.alwaysOff(), ConsistentSampler.probabilityBased(0.8));
     ConsistentSampler sampler =
         ConsistentSampler.rateLimited(
@@ -305,7 +305,7 @@ class ConsistentRateLimitingSamplerTest {
     double adaptationTimeSeconds = 5;
     AttributeKey<String> key = AttributeKey.stringKey("category");
 
-    ComposableSampler delegate =
+    Composable delegate =
         new CoinFlipSampler(
             new MarkingSampler(ConsistentSampler.probabilityBased(0.6), key, "A"),
             new MarkingSampler(ConsistentSampler.probabilityBased(0.4), key, "B"));
