@@ -20,8 +20,19 @@ dependencies {
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
   implementation("com.google.auth:google-auth-library-oauth2-http:1.30.1")
 
-  testImplementation("org.junit.jupiter:junit-jupiter")
+  // Test dependencies
+  testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+
+  testImplementation("io.opentelemetry:opentelemetry-api")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+
+  testImplementation("org.awaitility:awaitility")
+  testImplementation("org.mockito:mockito-inline")
+  testImplementation("org.mockito:mockito-junit-jupiter")
 }
 
 tasks.test {
