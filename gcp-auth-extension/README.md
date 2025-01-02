@@ -10,7 +10,9 @@ The extension takes care of the necessary configuration required to authenticate
 ```shell
 gcloud auth application-default login
 ```
+
 Executing this command will save your application credentials to default path which will depend on the type of machine -
+
 - Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
 - Windows: `%APPDATA%\gcloud\application_default_credentials.json`
 
@@ -19,6 +21,7 @@ Executing this command will save your application credentials to default path wh
 Next, export the credentials to `GOOGLE_APPLICATION_CREDENTIALS` environment variable -
 
 For Linux & MacOS:
+
 ```shell
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json
 ```
@@ -66,3 +69,10 @@ application {
   '-Dotel.metrics.exporter=logging',
 }
 ```
+
+## Component Owners
+
+- [Josh Suereth](https://github.com/jsuereth), Google
+- [Pranav Sharma](https://github.com/psx95), Google
+
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
