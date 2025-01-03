@@ -40,6 +40,8 @@ Here is a list of configurable options for the extension:
 
 ## Usage
 
+### With OpenTelemetry Java agent
+
 The OpenTelemetry Java Agent Extension can be easily added to any Java application by modifying the startup command to the application.
 For more information on Extensions, see the [documentation here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/examples/extension/README.md).
 
@@ -53,8 +55,7 @@ def extensionPath = <Google Cloud Authentication Extension location>
 def googleCloudProjectId = <Your Google Cloud Project ID>
 def googleOtlpEndpoint = <Google Cloud OTLP endpoint>
 
-application {
-   ...
+val autoconf_config = listOf(
   "-javaagent:${otelAgentPath}",
   "-Dotel.javaagent.extensions=${extensionPath}",
   // Configure the GCP Auth extension using system properties.
@@ -66,7 +67,52 @@ application {
   // Optionally enable the built-in GCP resource detector
   '-Dotel.resource.providers.gcp.enabled=true'
   '-Dotel.traces.exporter=otlp',
-  '-Dotel.metrics.exporter=logging',
+  '-Dotel.metrics.exporter=logging'
+)
+
+application {
+  ...
+  applicationDefaultJvmArgs = autoconf_config
+  ...
+}
+```
+
+### Without OpenTelemetry Java agent
+
+This extension can be used without the OpenTelemetry Java agent by leveraging the [OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md) module.\
+When using the autoconfigured SDK, simply adding this extension as a dependency automatically configures authentication headers and resource attributes for spans, enabling export to Google Cloud.
+
+Below is a snippet showing how to use this extension as a dependency when the application is not instrumented using the OpenTelemetry Java agent.
+
+```gradle
+dependencies {
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+    // use the shaded variant of the dependency
+    implementation("io.opentelemetry.contrib:opentelemetry-gcp-auth-extension:<VERSION>:shaded")
+
+    // other dependencies
+    ...
+
+}
+
+val autoconf_config = listOf(
+  '-Dgoogle.cloud.project=your-gcp-project-id',
+  '-Dotel.exporter.otlp.endpoint=https://your.otlp.endpoint:1234',
+  '-Dotel.traces.exporter=otlp',
+  '-Dotel.java.global-autoconfigure.enabled=true'
+
+  // any additional args
+  ...
+)
+
+application {
+  applicationDefaultJvmArgs = autoconf_config
+
+  // additional configuration
+  ...
 }
 ```
 
