@@ -91,7 +91,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
     // use the shaded variant of the dependency
-    implementation("io.opentelemetry.contrib:opentelemetry-gcp-auth-extension:<VERSION>:shaded")
+    implementation("io.opentelemetry.contrib:opentelemetry-gcp-auth-extension")
 
     // other dependencies
     ...

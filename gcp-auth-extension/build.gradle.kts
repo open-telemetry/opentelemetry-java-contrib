@@ -56,7 +56,7 @@ tasks {
   }
 
   shadowJar {
-    archiveFileName.set("gcp-auth-extension.jar")
+    archiveClassifier.set("")
   }
 
   jar {
@@ -76,7 +76,7 @@ tasks {
 
 val builtLibsDir = layout.buildDirectory.dir("libs").get().asFile.absolutePath
 val javaAgentJarPath = "$builtLibsDir/otel-agent.jar"
-val authExtensionJarPath = "$builtLibsDir/gcp-auth-extension.jar"
+val authExtensionJarPath = "${tasks.shadowJar.get().archiveFile.get()}"
 
 tasks.register<Copy>("copyAgent") {
   into(layout.buildDirectory.dir("libs"))
