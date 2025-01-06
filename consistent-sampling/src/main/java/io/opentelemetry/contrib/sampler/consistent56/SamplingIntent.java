@@ -20,6 +20,13 @@ public interface SamplingIntent {
    */
   long getThreshold();
 
+  /*
+   * Return true if the adjusted count (calculated as reciprocal of the sampling probability) can be faithfully used to estimate span metrics.
+   */
+  default boolean isAdjustedCountReliable() {
+    return true;
+  }
+
   /**
    * Returns a set of Attributes to be added to the Span in case of positive sampling decision.
    *
