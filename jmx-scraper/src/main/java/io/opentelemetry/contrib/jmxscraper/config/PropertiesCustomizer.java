@@ -23,6 +23,7 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
     Map<String, String> result = new HashMap<>();
     if (config.getList(METRICS_EXPORTER).isEmpty()) {
       // default exporter to logging when not explicitly set
+      // TODO: log this
       result.put(METRICS_EXPORTER, "logging");
     }
 

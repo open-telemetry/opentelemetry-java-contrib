@@ -6,11 +6,14 @@
 package io.opentelemetry.contrib.jmxscraper;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
+import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
+import io.opentelemetry.contrib.jmxscraper.config.PropertiesSupplier;
 import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
 import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,8 +33,6 @@ import javax.management.remote.JMXConnector;
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
-
-  private static final String OTEL_AUTOCONFIGURE = "otel.java.global-autoconfigure.enabled";
 
   private final JmxConnectorBuilder client;
   private final JmxMetricInsight service;
@@ -46,38 +48,37 @@ public class JmxScraper {
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
 
-    // enable SDK auto-configure if not explicitly set by user
-    // TODO: refactor this to use AutoConfiguredOpenTelemetrySdk
-    if (System.getProperty(OTEL_AUTOCONFIGURE) == null) {
-      System.setProperty(OTEL_AUTOCONFIGURE, "true");
-    }
-
     try {
-      JmxScraperConfig config =
-          JmxScraperConfig.fromProperties(parseArgs(Arrays.asList(args)), System.getProperties());
-      // propagate effective user-provided configuration to JVM system properties
-      // this also enables SDK auto-configuration to use those properties
-      config.propagateSystemProperties();
+      Properties argsConfig = parseArgs(Arrays.asList(args));
+      propagateToSystemProperties(argsConfig);
+
+      // auto-configure and register SDK
+      PropertiesCustomizer configCustomizer = new PropertiesCustomizer();
+      AutoConfiguredOpenTelemetrySdk.builder()
+          .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
+          .addPropertiesCustomizer(configCustomizer)
+          .build();
+
+      JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
 
       JmxMetricInsight service =
           JmxMetricInsight.createService(
-              GlobalOpenTelemetry.get(), config.getIntervalMilliseconds());
-      JmxConnectorBuilder connectorBuilder = JmxConnectorBuilder.createNew(config.getServiceUrl());
+              GlobalOpenTelemetry.get(), scraperConfig.getSamplingInterval().toMillis());
+      JmxConnectorBuilder connectorBuilder =
+          JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
 
-      Optional.ofNullable(config.getUsername()).ifPresent(connectorBuilder::withUser);
-      Optional.ofNullable(config.getPassword()).ifPresent(connectorBuilder::withPassword);
+      Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
+      Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
 
-      JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, config);
+      JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
       jmxScraper.start();
-
+    } catch (ConfigurationException e) {
+      System.err.println("ERROR: invalid configuration " + e.getMessage());
+      System.exit(1);
     } catch (ArgumentsParsingException e) {
-      System.err.println("ERROR: " + e.getMessage());
       System.err.println(
           "Usage: java -jar <path_to_jmxscraper.jar> "
               + "-config <path_to_config.properties or - for stdin>");
-      System.exit(1);
-    } catch (ConfigurationException e) {
-      System.err.println(e.getMessage());
       System.exit(1);
     } catch (IOException e) {
       System.err.println("Unable to connect " + e.getMessage());
@@ -88,13 +89,25 @@ public class JmxScraper {
     }
   }
 
+  // package private for testing
+  static void propagateToSystemProperties(Properties properties) {
+    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+      String key = entry.getKey().toString();
+      String value = entry.getValue().toString();
+      if (key.startsWith("javax.net.ssl.keyStore") || key.startsWith("javax.net.ssl.trustStore")) {
+        if (System.getProperty(key) == null) {
+          System.setProperty(key, value);
+        }
+      }
+    }
+  }
+
   /**
    * Create {@link Properties} from command line options
    *
    * @param args application commandline arguments
    */
-  static Properties parseArgs(List<String> args)
-      throws ArgumentsParsingException, ConfigurationException {
+  static Properties parseArgs(List<String> args) throws ArgumentsParsingException {
 
     if (args.isEmpty()) {
       // empty properties from stdin or external file
@@ -116,23 +129,24 @@ public class JmxScraper {
     }
   }
 
-  private static Properties loadPropertiesFromStdin() throws ConfigurationException {
+  private static Properties loadPropertiesFromStdin() throws ArgumentsParsingException {
     Properties properties = new Properties();
     try (InputStream is = new DataInputStream(System.in)) {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new ConfigurationException("Failed to read config properties from stdin", e);
+      throw new ArgumentsParsingException("Failed to read config properties from stdin", e);
     }
   }
 
-  private static Properties loadPropertiesFromPath(String path) throws ConfigurationException {
+  private static Properties loadPropertiesFromPath(String path) throws ArgumentsParsingException {
     Properties properties = new Properties();
     try (InputStream is = Files.newInputStream(Paths.get(path))) {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new ConfigurationException("Failed to read config properties file: '" + path + "'", e);
+      throw new ArgumentsParsingException(
+          "Failed to read config properties file: '" + path + "'", e);
     }
   }
 
