@@ -6,8 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.config;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -15,22 +14,32 @@ import javax.annotation.Nullable;
 /** Customizer of default SDK configuration and provider of effective scraper config */
 public class PropertiesCustomizer implements Function<ConfigProperties, Map<String, String>> {
 
+  private static final String METRICS_EXPORTER = "otel.metrics.exporter";
+
   @Nullable private JmxScraperConfig scraperConfig;
 
   @Override
   public Map<String, String> apply(ConfigProperties config) {
-    return Collections.emptyMap();
+    Map<String, String> result = new HashMap<>();
+    if (config.getList(METRICS_EXPORTER).isEmpty()) {
+      // default exporter to logging when not explicitly set
+      result.put(METRICS_EXPORTER, "logging");
+    }
+
+    scraperConfig = JmxScraperConfig.fromConfig(config);
+    return result;
   }
 
   /**
+   * Get scraper configuration from the previous call to {@link #apply(ConfigProperties)}
+   *
    * @return JMX scraper configuration
-   * @throws ConfigurationException when config is invalid
    * @throws IllegalStateException when {@link #apply(ConfigProperties)} hasn't been called first
    */
-  public JmxScraperConfig getScraperConfig() throws ConfigurationException {
+  public JmxScraperConfig getScraperConfig() {
     if (scraperConfig == null) {
       throw new IllegalStateException("apply() must be called before getConfig()");
     }
-    return null;
+    return scraperConfig;
   }
 }
