@@ -46,7 +46,7 @@ class PropertiesCustomizerTest {
   }
 
   @Test
-  void getDefaultConfig() {
+  void getSomeConfiguration() {
     Map<String, String> map = new HashMap<>();
     map.put("otel.jmx.service.url", "dummy-url");
     map.put("otel.jmx.target.system", "jvm");
@@ -54,8 +54,12 @@ class PropertiesCustomizerTest {
     ConfigProperties config = DefaultConfigProperties.createFromMap(map);
 
     PropertiesCustomizer customizer = new PropertiesCustomizer();
-    assertThat(customizer.apply(config)).isEmpty();
+    assertThat(customizer.apply(config))
+        .describedAs("sdk configuration should not be overridden")
+        .isEmpty();
 
-    assertThat(customizer.getScraperConfig()).isNotNull();
+    JmxScraperConfig scraperConfig = customizer.getScraperConfig();
+    assertThat(scraperConfig).isNotNull();
+    assertThat(scraperConfig.getTargetSystems()).containsOnly("jvm");
   }
 }

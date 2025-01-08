@@ -112,7 +112,7 @@ public class JmxScraperConfig {
   /**
    * Builds JMX scraper configuration from auto-configuration
    *
-   * @param config autoconfiguration properties
+   * @param config auto-configuration properties
    * @return JMX scraper configuration
    */
   public static JmxScraperConfig fromConfig(ConfigProperties config) {

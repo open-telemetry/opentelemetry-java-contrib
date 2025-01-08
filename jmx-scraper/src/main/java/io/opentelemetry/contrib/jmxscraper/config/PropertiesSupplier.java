@@ -22,12 +22,7 @@ public class PropertiesSupplier implements Supplier<Map<String, String>> {
   @Override
   public Map<String, String> get() {
     Map<String, String> map = new HashMap<>();
-    properties.forEach(
-        (k, v) -> {
-          if (k instanceof String && v instanceof String) {
-            map.put((String) k, (String) v);
-          }
-        });
+    properties.forEach((k, v) -> map.put((String) k, (String) v));
     return map;
   }
 }
