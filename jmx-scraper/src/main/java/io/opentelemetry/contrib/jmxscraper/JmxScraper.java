@@ -57,6 +57,7 @@ public class JmxScraper {
       AutoConfiguredOpenTelemetrySdk.builder()
           .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
           .addPropertiesCustomizer(configCustomizer)
+          .setResultAsGlobal()
           .build();
 
       JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
