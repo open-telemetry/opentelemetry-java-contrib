@@ -1,6 +1,6 @@
-# Google Cloud Authentication Extension for OpenTelemetry Java Agent
+# Google Cloud Authentication Extension
 
-The Google Cloud Auth Extension allows the users to export telemetry from their applications auto-instrumented using the OpenTelemetry Java Agent to Google Cloud using the built-in OTLP exporters.
+The Google Cloud Auth Extension allows the users to export telemetry from their applications to Google Cloud using the built-in OTLP exporters.\
 The extension takes care of the necessary configuration required to authenticate to GCP to successfully export telemetry.
 
 ## Prerequisites
@@ -90,7 +90,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-sdk")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-    // use the shaded variant of the dependency
+    // include the auth extension dependency
     implementation("io.opentelemetry.contrib:opentelemetry-gcp-auth-extension")
 
     // other dependencies

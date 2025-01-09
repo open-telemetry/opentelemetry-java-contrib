@@ -5,7 +5,7 @@ plugins {
   id("org.springframework.boot") version "2.7.18"
 }
 
-description = "OpenTelemetry Java Agent Extension that enables authentication support for OTLP exporters"
+description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"
 otelJava.moduleName.set("io.opentelemetry.contrib.gcp.auth")
 
 val agent: Configuration by configurations.creating {
