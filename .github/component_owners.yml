@@ -33,6 +33,9 @@ components:
   gcp-resources:
     - jsuereth
     - psx95
+  gcp-auth-extension:
+    - jsuereth
+    - psx95
   jfr-connection:
     - breedx-splk
     - jeanbisutti
