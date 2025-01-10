@@ -2,7 +2,7 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("com.github.johnrengelman.shadow")
-  id("org.springframework.boot") version "2.7.18"
+  id("org.springframework.boot") version "3.4.1"
 }
 
 description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"
@@ -41,9 +41,9 @@ dependencies {
   testImplementation("org.mockito:mockito-junit-jupiter")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
-  testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
-  testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
-  testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
+  testImplementation("org.springframework.boot:spring-boot-starter-web:3.4.1")
+  testImplementation("org.springframework.boot:spring-boot-starter:3.4.1")
+  testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.1")
 
   agent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }
