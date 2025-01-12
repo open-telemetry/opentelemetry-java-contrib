@@ -14,7 +14,7 @@ dependencies {
   // When updating, update above in plugins too
   implementation("com.diffplug.spotless:spotless-plugin-gradle:7.0.1")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:4.1.0")
-  implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.1.0")
+  implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.2.0")
 }
 
 spotless {
