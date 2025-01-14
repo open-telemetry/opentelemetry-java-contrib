@@ -22,6 +22,6 @@ A description of `VCAP_APPLICATION` is available in the [CloudFoundry documentat
 
 ## Component owners
 
-- TBD
+- [Karsten Schnitter](https://github.com/KarstenSchnitter), SAP
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
