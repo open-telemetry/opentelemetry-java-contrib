@@ -19,6 +19,9 @@ components:
   aws-xray-propagator:
     - wangzlei
     - srprash
+  azure-resources:
+    - trask
+    - zeitlinger
   baggage-procesor:
     - mikegoldsmith
     - zeitlinger
