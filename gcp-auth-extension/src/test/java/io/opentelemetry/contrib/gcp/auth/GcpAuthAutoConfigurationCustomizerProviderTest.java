@@ -58,6 +58,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GcpAuthAutoConfigurationCustomizerProviderTest {
 
+  private static final String DUMMY_GCP_RESOURCE_PROJECT_ID = "my-gcp-resource-project-id";
+  private static final String DUMMY_GCP_QUOTA_PROJECT_ID = "my-gcp-quota-project-id";
+
   @Mock private GoogleCredentials mockedGoogleCredentials;
 
   @Captor private ArgumentCaptor<Supplier<Map<String, String>>> headerSupplierCaptor;
@@ -77,13 +80,17 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @SuppressWarnings("CannotMockMethod")
   public void setup() {
     MockitoAnnotations.openMocks(this);
-    Mockito.when(mockedGoogleCredentials.getQuotaProjectId()).thenReturn("test-project");
+    Mockito.when(mockedGoogleCredentials.getQuotaProjectId())
+        .thenReturn(DUMMY_GCP_QUOTA_PROJECT_ID);
     Mockito.when(mockedGoogleCredentials.getAccessToken())
         .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
   }
 
   @Test
   public void testCustomizerOtlpHttp() {
+    // Set resource project system property
+    System.setProperty("google.cloud.project", DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = Mockito.mock(OtlpHttpSpanExporter.class);
     OtlpHttpSpanExporterBuilder otlpSpanExporterBuilder = OtlpHttpSpanExporter.builder();
     OtlpHttpSpanExporterBuilder spyOtlpHttpSpanExporterBuilder =
@@ -116,7 +123,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       Mockito.verify(spyOtlpHttpSpanExporterBuilder, Mockito.times(1))
           .setHeaders(headerSupplierCaptor.capture());
       assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      assertThat(verifyAuthHeaders(headerSupplierCaptor.getValue().get())).isTrue();
+      assertThat(verifyAuthHeadersQuotaProjectPresent(headerSupplierCaptor.getValue().get()))
+          .isTrue();
 
       Mockito.verify(mockOtlpHttpSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -125,7 +133,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .allSatisfy(
               spanData -> {
                 assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), "test-project")
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
                     .containsEntry(AttributeKey.stringKey("foo"), "bar");
                 assertThat(spanData.getAttributes().asMap())
                     .containsKey(AttributeKey.longKey("work_loop"));
@@ -135,6 +145,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   @Test
   public void testCustomizerOtlpGrpc() {
+    // Set resource project system property
+    System.setProperty("google.cloud.project", DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
     OtlpGrpcSpanExporterBuilder otlpSpanExporterBuilder = OtlpGrpcSpanExporter.builder();
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
@@ -166,7 +179,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
           .setHeaders(headerSupplierCaptor.capture());
       assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      verifyAuthHeaders(headerSupplierCaptor.getValue().get());
+      verifyAuthHeadersQuotaProjectPresent(headerSupplierCaptor.getValue().get());
 
       Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -175,7 +188,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .allSatisfy(
               spanData -> {
                 assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), "test-project")
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
                     .containsEntry(AttributeKey.stringKey("foo"), "bar");
                 assertThat(spanData.getAttributes().asMap())
                     .containsKey(AttributeKey.longKey("work_loop"));
@@ -215,9 +230,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     return builder.build().getOpenTelemetrySdk();
   }
 
-  private static boolean verifyAuthHeaders(Map<String, String> headers) {
+  private static boolean verifyAuthHeadersQuotaProjectPresent(Map<String, String> headers) {
     Set<Entry<String, String>> headerEntrySet = headers.entrySet();
-    return headerEntrySet.contains(new SimpleEntry<>(QUOTA_USER_PROJECT_HEADER, "test-project"))
+    return headerEntrySet.contains(
+            new SimpleEntry<>(QUOTA_USER_PROJECT_HEADER, DUMMY_GCP_QUOTA_PROJECT_ID))
         && headerEntrySet.contains(new SimpleEntry<>("Authorization", "Bearer fake"));
   }
 

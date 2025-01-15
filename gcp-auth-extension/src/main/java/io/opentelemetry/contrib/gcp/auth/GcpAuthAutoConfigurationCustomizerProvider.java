@@ -59,15 +59,16 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
+    GoogleCredentials credentials;
     try {
-      GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-      autoConfiguration
-          .addSpanExporterCustomizer(
-              (exporter, configProperties) -> addAuthorizationHeaders(exporter, credentials))
-          .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
+      credentials = GoogleCredentials.getApplicationDefault();
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
     }
+    autoConfiguration
+        .addSpanExporterCustomizer(
+            (exporter, configProperties) -> addAuthorizationHeaders(exporter, credentials))
+        .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
   @Override
@@ -100,24 +101,19 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_REFRESH, e);
     }
-    gcpHeaders.put(QUOTA_USER_PROJECT_HEADER, credentials.getQuotaProjectId());
     gcpHeaders.put("Authorization", "Bearer " + credentials.getAccessToken().getTokenValue());
+    String configuredQuotaProjectId =
+        ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueWithFallback(
+            credentials::getQuotaProjectId);
+    if (configuredQuotaProjectId != null && !configuredQuotaProjectId.isEmpty()) {
+      gcpHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId);
+    }
     return gcpHeaders;
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValueWithFallback(
-            () -> {
-              try {
-                GoogleCredentials googleCredentials = GoogleCredentials.getApplicationDefault();
-                return googleCredentials.getQuotaProjectId();
-              } catch (IOException e) {
-                throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-              }
-            });
-
+    String gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue();
     Resource res =
         Resource.create(
             Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
