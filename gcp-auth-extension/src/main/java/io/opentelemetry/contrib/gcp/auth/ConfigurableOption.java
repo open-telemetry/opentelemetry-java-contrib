@@ -18,7 +18,18 @@ public enum ConfigurableOption {
    * Represents the Google Cloud Project ID option. Can be configured using the environment variable
    * `GOOGLE_CLOUD_PROJECT` or the system property `google.cloud.project`.
    */
-  GOOGLE_CLOUD_PROJECT("Google Cloud Project ID");
+  GOOGLE_CLOUD_PROJECT("Google Cloud Project ID"),
+
+  /**
+   * Represents the Google Cloud Quota Project ID option. Can be configured using the environment
+   * variable `GOOGLE_CLOUD_QUOTA_PROJECT` or the system property `google.cloud.quota.project`. The
+   * quota project is the project that is used for quota management and billing for the API usage.
+   *
+   * <p>The environment variable name is selected to be consistent with the <a
+   * href="https://cloud.google.com/docs/quotas/set-quota-project">official GCP client
+   * libraries</a>.
+   */
+  GOOGLE_CLOUD_QUOTA_PROJECT("Google Cloud Quota Project ID");
 
   private final String userReadableName;
   private final String environmentVariableName;
