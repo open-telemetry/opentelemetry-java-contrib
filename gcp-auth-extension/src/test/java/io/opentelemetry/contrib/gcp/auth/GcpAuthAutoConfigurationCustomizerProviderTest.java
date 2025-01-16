@@ -201,9 +201,16 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @Test
   public void testCustomizerFailWithMissingResourceProject() {
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
-    assertThrows(
-        ConfigurationException.class,
-        () -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter));
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      assertThrows(
+          ConfigurationException.class,
+          () -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter));
+    }
   }
 
   @SuppressWarnings("CannotMockMethod")
