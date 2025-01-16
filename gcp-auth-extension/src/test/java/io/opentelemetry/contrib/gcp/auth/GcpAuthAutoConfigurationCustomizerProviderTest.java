@@ -9,10 +9,12 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.QUOTA_USER_PROJECT_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
@@ -28,6 +30,7 @@ import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -44,9 +47,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -57,6 +65,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GcpAuthAutoConfigurationCustomizerProviderTest {
+
+  private static final String DUMMY_GCP_RESOURCE_PROJECT_ID = "my-gcp-resource-project-id";
+  private static final String DUMMY_GCP_QUOTA_PROJECT_ID = "my-gcp-quota-project-id";
 
   @Mock private GoogleCredentials mockedGoogleCredentials;
 
@@ -74,16 +85,17 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           "foo=bar");
 
   @BeforeEach
-  @SuppressWarnings("CannotMockMethod")
   public void setup() {
     MockitoAnnotations.openMocks(this);
-    Mockito.when(mockedGoogleCredentials.getQuotaProjectId()).thenReturn("test-project");
-    Mockito.when(mockedGoogleCredentials.getAccessToken())
-        .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
   }
 
   @Test
   public void testCustomizerOtlpHttp() {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
+    prepareMockBehaviorForGoogleCredentials();
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = Mockito.mock(OtlpHttpSpanExporter.class);
     OtlpHttpSpanExporterBuilder otlpSpanExporterBuilder = OtlpHttpSpanExporter.builder();
     OtlpHttpSpanExporterBuilder spyOtlpHttpSpanExporterBuilder =
@@ -116,7 +128,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       Mockito.verify(spyOtlpHttpSpanExporterBuilder, Mockito.times(1))
           .setHeaders(headerSupplierCaptor.capture());
       assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      assertThat(verifyAuthHeaders(headerSupplierCaptor.getValue().get())).isTrue();
+      assertThat(authHeadersQuotaProjectIsPresent(headerSupplierCaptor.getValue().get())).isTrue();
 
       Mockito.verify(mockOtlpHttpSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -125,7 +137,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .allSatisfy(
               spanData -> {
                 assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), "test-project")
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
                     .containsEntry(AttributeKey.stringKey("foo"), "bar");
                 assertThat(spanData.getAttributes().asMap())
                     .containsKey(AttributeKey.longKey("work_loop"));
@@ -135,20 +149,17 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   @Test
   public void testCustomizerOtlpGrpc() {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
+    prepareMockBehaviorForGoogleCredentials();
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
-    OtlpGrpcSpanExporterBuilder otlpSpanExporterBuilder = OtlpGrpcSpanExporter.builder();
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
-        Mockito.spy(otlpSpanExporterBuilder);
-    Mockito.when(spyOtlpGrpcSpanExporterBuilder.build()).thenReturn(mockOtlpGrpcSpanExporter);
-    Mockito.when(mockOtlpGrpcSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
     List<SpanData> exportedSpans = new ArrayList<>();
-    Mockito.when(mockOtlpGrpcSpanExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedSpans.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
-    Mockito.when(mockOtlpGrpcSpanExporter.toBuilder()).thenReturn(spyOtlpGrpcSpanExporterBuilder);
+    configureGrpcMockExporters(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
         Mockito.mockStatic(GoogleCredentials.class)) {
@@ -166,7 +177,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
           .setHeaders(headerSupplierCaptor.capture());
       assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      verifyAuthHeaders(headerSupplierCaptor.getValue().get());
+      assertThat(authHeadersQuotaProjectIsPresent(headerSupplierCaptor.getValue().get())).isTrue();
 
       Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -175,12 +186,217 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .allSatisfy(
               spanData -> {
                 assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), "test-project")
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
                     .containsEntry(AttributeKey.stringKey("foo"), "bar");
                 assertThat(spanData.getAttributes().asMap())
                     .containsKey(AttributeKey.longKey("work_loop"));
               });
     }
+  }
+
+  @Test
+  public void testCustomizerFailWithMissingResourceProject() {
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      assertThrows(
+          ConfigurationException.class,
+          () -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter));
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideQuotaBehaviorTestCases")
+  @SuppressWarnings("CannotMockMethod")
+  public void testQuotaProjectBehavior(QuotaProjectIdTestBehavior testCase) {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Configure mock credentials to return fake access token
+    Mockito.when(mockedGoogleCredentials.getAccessToken())
+        .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
+
+    // To prevent unncecessary stubbings, mock getQuotaProjectId only when necessary
+    if (testCase.getUserSpecifiedQuotaProjectId() == null
+        || testCase.getUserSpecifiedQuotaProjectId().isEmpty()) {
+      String quotaProjectFromCredential =
+          testCase.getIsQuotaProjectPresentInCredentials() ? DUMMY_GCP_QUOTA_PROJECT_ID : null;
+      Mockito.when(mockedGoogleCredentials.getQuotaProjectId())
+          .thenReturn(quotaProjectFromCredential);
+    }
+
+    // configure environment according to test case
+    String quotaProjectId = testCase.getUserSpecifiedQuotaProjectId(); // maybe empty string
+    if (testCase.getUserSpecifiedQuotaProjectId() != null) {
+      // user specified a quota project id
+      System.setProperty(
+          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getSystemProperty(), quotaProjectId);
+    }
+
+    // prepare mock exporter
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockExporters(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      // Export telemetry to capture headers in the export calls
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+      generateTestSpan(sdk);
+      CompletableResultCode code = sdk.shutdown();
+      CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+      assertTrue(joinResult.isSuccess());
+      Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
+          .setHeaders(headerSupplierCaptor.capture());
+
+      // assert that the Authorization bearer token header is present
+      Map<String, String> exportHeaders = headerSupplierCaptor.getValue().get();
+      assertThat(exportHeaders).containsEntry("Authorization", "Bearer fake");
+
+      if (testCase.getExpectedQuotaProjectInHeader() == null) {
+        // there should be no user quota project header
+        assertThat(exportHeaders).doesNotContainKey(QUOTA_USER_PROJECT_HEADER);
+      } else {
+        // there should be user quota project header with expected value
+        assertThat(exportHeaders)
+            .containsEntry(QUOTA_USER_PROJECT_HEADER, testCase.getExpectedQuotaProjectInHeader());
+      }
+    }
+  }
+
+  /**
+   * Test cases specifying expected value for the user quota project header given the user input and
+   * the current credentials state.
+   *
+   * <p>{@code null} for {@link QuotaProjectIdTestBehavior#getUserSpecifiedQuotaProjectId()}
+   * indicates the case of user not specifying the quota project ID.
+   *
+   * <p>{@code null} value for {@link QuotaProjectIdTestBehavior#getExpectedQuotaProjectInHeader()}
+   * indicates the expectation that the QUOTA_USER_PROJECT_HEADER should not be present in the
+   * export headers.
+   *
+   * <p>{@code true} for {@link QuotaProjectIdTestBehavior#getIsQuotaProjectPresentInCredentials()}
+   * indicates that the mocked credentials are configured to provide DUMMY_GCP_QUOTA_PROJECT_ID as
+   * the quota project ID.
+   */
+  private static Stream<Arguments> provideQuotaBehaviorTestCases() {
+    return Stream.of(
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .setIsQuotaProjectPresentInCredentials(true)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .setIsQuotaProjectPresentInCredentials(false)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId("my-custom-quota-project-id")
+                .setIsQuotaProjectPresentInCredentials(true)
+                .setExpectedQuotaProjectInHeader("my-custom-quota-project-id")
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId("my-custom-quota-project-id")
+                .setIsQuotaProjectPresentInCredentials(false)
+                .setExpectedQuotaProjectInHeader("my-custom-quota-project-id")
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId("") // user explicitly specifies empty
+                .setIsQuotaProjectPresentInCredentials(true)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(null) // user omits specifying quota project
+                .setIsQuotaProjectPresentInCredentials(true)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId("")
+                .setIsQuotaProjectPresentInCredentials(false)
+                .setExpectedQuotaProjectInHeader(null)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(null)
+                .setIsQuotaProjectPresentInCredentials(false)
+                .setExpectedQuotaProjectInHeader(null)
+                .build()));
+  }
+
+  // Configure necessary behavior on the Grpc mock exporters to work
+  // TODO: Potential improvement - make this work for Http exporter as well.
+  private static void configureGrpcMockExporters(
+      OtlpGrpcSpanExporter mockGrpcExporter,
+      OtlpGrpcSpanExporterBuilder spyGrpcExporterBuilder,
+      List<SpanData> exportedSpanContainer) {
+    Mockito.when(spyGrpcExporterBuilder.build()).thenReturn(mockGrpcExporter);
+    Mockito.when(mockGrpcExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
+    Mockito.when(mockGrpcExporter.toBuilder()).thenReturn(spyGrpcExporterBuilder);
+    Mockito.when(mockGrpcExporter.export(Mockito.anyCollection()))
+        .thenAnswer(
+            invocationOnMock -> {
+              exportedSpanContainer.addAll(invocationOnMock.getArgument(0));
+              return CompletableResultCode.ofSuccess();
+            });
+  }
+
+  @AutoValue
+  abstract static class QuotaProjectIdTestBehavior {
+    // A null user specified quota represents the use case where user omits specifying quota
+    @Nullable
+    abstract String getUserSpecifiedQuotaProjectId();
+
+    abstract boolean getIsQuotaProjectPresentInCredentials();
+
+    // If expected quota project in header is null, the header entry should not be present in export
+    @Nullable
+    abstract String getExpectedQuotaProjectInHeader();
+
+    static Builder builder() {
+      return new AutoValue_GcpAuthAutoConfigurationCustomizerProviderTest_QuotaProjectIdTestBehavior
+          .Builder();
+    }
+
+    @AutoValue.Builder
+    abstract static class Builder {
+      abstract Builder setUserSpecifiedQuotaProjectId(String quotaProjectId);
+
+      abstract Builder setIsQuotaProjectPresentInCredentials(
+          boolean quotaProjectPresentInCredentials);
+
+      abstract Builder setExpectedQuotaProjectInHeader(String expectedQuotaProjectInHeader);
+
+      abstract QuotaProjectIdTestBehavior build();
+    }
+  }
+
+  @SuppressWarnings("CannotMockMethod")
+  private void prepareMockBehaviorForGoogleCredentials() {
+    Mockito.when(mockedGoogleCredentials.getQuotaProjectId())
+        .thenReturn(DUMMY_GCP_QUOTA_PROJECT_ID);
+    Mockito.when(mockedGoogleCredentials.getAccessToken())
+        .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
   }
 
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter) {
@@ -215,9 +431,12 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     return builder.build().getOpenTelemetrySdk();
   }
 
-  private static boolean verifyAuthHeaders(Map<String, String> headers) {
+  private static boolean authHeadersQuotaProjectIsPresent(Map<String, String> headers) {
     Set<Entry<String, String>> headerEntrySet = headers.entrySet();
-    return headerEntrySet.contains(new SimpleEntry<>(QUOTA_USER_PROJECT_HEADER, "test-project"))
+    return headerEntrySet.contains(
+            new SimpleEntry<>(
+                QUOTA_USER_PROJECT_HEADER,
+                GcpAuthAutoConfigurationCustomizerProviderTest.DUMMY_GCP_QUOTA_PROJECT_ID))
         && headerEntrySet.contains(new SimpleEntry<>("Authorization", "Bearer fake"));
   }
 

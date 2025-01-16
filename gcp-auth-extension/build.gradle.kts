@@ -29,6 +29,7 @@ dependencies {
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testCompileOnly("org.junit.jupiter:junit-jupiter-params")
 
   testImplementation("io.opentelemetry:opentelemetry-api")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
@@ -44,6 +45,9 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
+
+  testAnnotationProcessor("com.google.auto.value:auto-value")
+  testCompileOnly("com.google.auto.value:auto-value-annotations")
 
   agent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }

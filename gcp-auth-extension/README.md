@@ -36,7 +36,10 @@ Here is a list of configurable options for the extension:
 
 - `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud Project ID to which the telemetry needs to be exported.
   - Can also be configured using `google.cloud.project` system property.
-  - If this option is not configured, the extension would infer GCP Project ID from the application default credentials. For more information on application default credentials, see [here](https://cloud.google.com/docs/authentication/application-default-credentials).
+  - This is a required option, the agent configuration will fail if this option is not set.
+- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see [here](https://cloud.google.com/docs/quotas/quota-project).
+  - Can also be configured using `google.cloud.quota.project` system property.
+  - If this option is not configured, the extension will use the Quota Project ID found in the Application Default Credentials (ADC), if available. For more information on application default credentials, see [here](https://cloud.google.com/docs/authentication/application-default-credentials).
 
 ## Usage
 
