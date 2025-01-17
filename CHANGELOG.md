@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### Azure resources - New 🌟
+
+Azure resource detectors.
+
+### Consistent sampling
+
+- Improve interop with legacy samplers
+  ([#1629](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1629))
+
+### GCP authentication extension - New 🌟
+
+Allows users to export telemetry from their applications to Google Cloud using the built-in OTLP exporters.
+The extension takes care of the necessary configuration required to authenticate to GCP to successfully export telemetry.
+
+### JMX scraper
+
+- Add support for Solr
+  ([#1595](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1595))
+
 ## Version 1.42.0 (2024-12-13)
 
 ### AWS X-Ray SDK support
