@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.jmxscraper.config;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +18,9 @@ import javax.annotation.Nullable;
 /** This class keeps application settings */
 public class JmxScraperConfig {
 
-  private static final String METRIC_EXPORT_INTERVAL = "otel.metric.export.interval";
+  // metric sdk configuration
+  static final String METRIC_EXPORT_INTERVAL = "otel.metric.export.interval";
 
-  static final String JMX_INTERVAL = "otel.jmx.interval";
   static final String JMX_INTERVAL_LEGACY = "otel.jmx.interval.milliseconds";
 
   static final String JMX_SERVICE_URL = "otel.jmx.service.url";
@@ -120,27 +121,15 @@ public class JmxScraperConfig {
 
     Duration exportInterval = config.getDuration(METRIC_EXPORT_INTERVAL);
     if (exportInterval == null || exportInterval.isNegative() || exportInterval.isZero()) {
-      // SDK metric export interval is usually expected with default as in specification
-      exportInterval = Duration.ofSeconds(10);
+      // if not explicitly set, use default value of 1 minute as defined in specification
+      scraperConfig.samplingInterval = Duration.ofMinutes(1);
+    } else {
+      scraperConfig.samplingInterval = exportInterval;
     }
-    Duration jmxInterval = config.getDuration(JMX_INTERVAL);
-    if (jmxInterval == null) {
-      Long intervalMillis = config.getLong(JMX_INTERVAL_LEGACY);
-      if (intervalMillis != null) {
-        jmxInterval = Duration.ofMillis(intervalMillis);
-      }
-    }
-    if (jmxInterval == null || jmxInterval.isNegative() || jmxInterval.isZero()) {
-      // default JMX sampling frequency aligned with export, so every minute by default
-      // TODO: log this
-      jmxInterval = exportInterval;
-    }
-    scraperConfig.samplingInterval = jmxInterval;
 
     String serviceUrl = config.getString(JMX_SERVICE_URL);
     if (serviceUrl == null) {
-      throw new io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException(
-          "missing mandatory " + JMX_SERVICE_URL);
+      throw new ConfigurationException("missing mandatory " + JMX_SERVICE_URL);
     }
     scraperConfig.serviceUrl = serviceUrl;
 
@@ -148,13 +137,12 @@ public class JmxScraperConfig {
     String customConfig = config.getString(JMX_CUSTOM_CONFIG);
     List<String> targetSystem = config.getList(JMX_TARGET_SYSTEM);
     if (targetSystem.isEmpty() && customConfig == null) {
-      throw new io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException(
-          "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
+      throw new ConfigurationException("at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
     }
     targetSystem.forEach(
         s -> {
           if (!AVAILABLE_TARGET_SYSTEMS.contains(s)) {
-            throw new io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException(
+            throw new ConfigurationException(
                 "unsupported target system: '" + s + "'");
           }
         });

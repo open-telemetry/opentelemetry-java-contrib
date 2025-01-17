@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.jmxscraper.config;
 
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_CUSTOM_CONFIG;
-import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_INTERVAL_LEGACY;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_PASSWORD;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REALM;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REGISTRY_SSL;
@@ -34,12 +33,13 @@ class JmxScraperConfigTest {
         JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
     validProperties.setProperty(JMX_CUSTOM_CONFIG, "/path/to/config.yaml");
     validProperties.setProperty(JMX_TARGET_SYSTEM, "tomcat, activemq");
-    validProperties.setProperty(JMX_INTERVAL_LEGACY, "1410");
     validProperties.setProperty(JMX_REGISTRY_SSL, "true");
     validProperties.setProperty(JMX_USERNAME, "some-user");
     validProperties.setProperty(JMX_PASSWORD, "some-password");
     validProperties.setProperty(JMX_REMOTE_PROFILE, "some-profile");
     validProperties.setProperty(JMX_REALM, "some-realm");
+    // otel sdk metric export interval
+    validProperties.setProperty("otel.metric.export.interval", "10s");
   }
 
   @Test
@@ -52,7 +52,7 @@ class JmxScraperConfigTest {
         .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
     assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("/path/to/config.yaml");
     assertThat(config.getTargetSystems()).containsExactlyInAnyOrder("tomcat", "activemq");
-    assertThat(config.getSamplingInterval()).isEqualTo(Duration.ofMillis(1410));
+    assertThat(config.getSamplingInterval()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getUsername()).isEqualTo("some-user");
     assertThat(config.getPassword()).isEqualTo("some-password");
     assertThat(config.getRemoteProfile()).isEqualTo("some-profile");
@@ -75,7 +75,9 @@ class JmxScraperConfigTest {
         .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
     assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("/file.properties");
     assertThat(config.getTargetSystems()).isEmpty();
-    assertThat(config.getSamplingInterval()).isEqualTo(Duration.ofSeconds(10));
+    assertThat(config.getSamplingInterval())
+        .describedAs("default sampling interval must align to default metric export interval")
+        .isEqualTo(Duration.ofMinutes(1));
     assertThat(config.getUsername()).isNull();
     assertThat(config.getPassword()).isNull();
     assertThat(config.getRemoteProfile()).isNull();
@@ -118,17 +120,6 @@ class JmxScraperConfigTest {
     assertThatThrownBy(() -> fromConfig(TestUtil.configProperties(properties)))
         .isInstanceOf(ConfigurationException.class)
         .hasMessageStartingWith("unsupported target system");
-  }
-
-  @Test
-  void shouldFailConfigCreation_invalidInterval() {
-    // Given
-    Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JMX_INTERVAL_LEGACY, "abc");
-
-    // When and Then
-    assertThatThrownBy(() -> fromConfig(TestUtil.configProperties(properties)))
-        .isInstanceOf(ConfigurationException.class);
   }
 
   // TODO: Tests below will be reimplemented
