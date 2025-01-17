@@ -87,6 +87,17 @@
       "matchPackagePrefixes": ["jakarta.servlet:"],
       "matchCurrentVersion": "5.0.0",
       "enabled": false
+    },
+    {
+      // intentionally using Spring Boot 2 in gcp-auth-extension in order to test with Java 8+
+      "matchFileNames": [
+        "gcp-auth-extension/build.gradle.kts"
+      ],
+      "matchPackagePrefixes": [
+        "org.springframework.boot"
+      ],
+      "matchUpdateTypes": ["major"],
+      "enabled": false,
     }
   ]
 }

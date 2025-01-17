@@ -14,7 +14,7 @@ val DEPENDENCY_BOMS = listOf(
   "com.google.guava:guava-bom:33.4.0-jre",
   "com.linecorp.armeria:armeria-bom:1.31.3",
   "org.junit:junit-bom:5.11.4",
-  "io.grpc:grpc-bom:1.69.0",
+  "io.grpc:grpc-bom:1.69.1",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
   "org.testcontainers:testcontainers-bom:1.20.4"
 )
@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
-  "io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha",
+  "io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha",
   // these two constraints can be removed once the opentelemetry-instrumentation-bom-alpha
   // is updated to contain the latest version of opentelemetry-semconv
   "io.opentelemetry.semconv:opentelemetry-semconv:${semConvVersion}",
