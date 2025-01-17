@@ -48,6 +48,9 @@ public class JmxScraper {
   @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
   public static void main(String[] args) {
 
+    // set log format
+    System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tFT%1$tT.%1$tL%1$tz | %4$s: %5$s%n");
+
     try {
       Properties argsConfig = parseArgs(Arrays.asList(args));
       propagateToSystemProperties(argsConfig);

@@ -5,17 +5,20 @@
 
 package io.opentelemetry.contrib.jmxscraper.config;
 
+import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_INTERVAL_LEGACY;
+import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.METRIC_EXPORT_INTERVAL;
+
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
-
-import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_INTERVAL_LEGACY;
-import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.METRIC_EXPORT_INTERVAL;
 
 /** Customizer of default SDK configuration and provider of effective scraper config */
 public class PropertiesCustomizer implements Function<ConfigProperties, Map<String, String>> {
+
+  private static final Logger logger = Logger.getLogger(PropertiesCustomizer.class.getName());
 
   private static final String METRICS_EXPORTER = "otel.metrics.exporter";
 
@@ -27,14 +30,15 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
 
     // set default exporter to logging when not explicitly set
     if (config.getList(METRICS_EXPORTER).isEmpty()) {
-      // TODO: log (info) this
+      logger.info(METRICS_EXPORTER + " is not set, default of 'logging' will be used");
       result.put(METRICS_EXPORTER, "logging");
     }
 
     // providing compatibility with the existing 'otel.jmx.interval.milliseconds' config option
     long intervalLegacy = config.getLong(JMX_INTERVAL_LEGACY, -1);
     if (config.getDuration(METRIC_EXPORT_INTERVAL) == null && intervalLegacy > 0) {
-      // TODO: log (warn) this
+      logger.warning(METRIC_EXPORT_INTERVAL + " deprecated option is used, replacing with '"
+          + METRIC_EXPORT_INTERVAL + "' metric sdk configuration is recommended");
       result.put(METRIC_EXPORT_INTERVAL, intervalLegacy + "ms");
     }
 
