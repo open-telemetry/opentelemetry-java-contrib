@@ -63,8 +63,7 @@ class JmxScraperConfigTest {
   void shouldCreateMinimalValidConfiguration() {
     // Given
     Properties properties = new Properties();
-    properties.setProperty(
-        JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    properties.setProperty(JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
     properties.setProperty(JMX_CUSTOM_CONFIG, "/file.properties");
 
     // When

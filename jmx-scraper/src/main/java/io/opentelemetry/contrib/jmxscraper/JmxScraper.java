@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -45,11 +46,11 @@ public class JmxScraper {
    *
    * @param args - must be of the form "-config {jmx_config_path,'-'}"
    */
-  @SuppressWarnings({"SystemOut", "SystemExitOutsideMain"})
+  @SuppressWarnings("SystemExitOutsideMain")
   public static void main(String[] args) {
 
     // set log format
-    System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tFT%1$tT.%1$tL%1$tz | %4$s: %5$s%n");
+    System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%n");
 
     try {
       Properties argsConfig = parseArgs(Arrays.asList(args));
@@ -77,18 +78,19 @@ public class JmxScraper {
       JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
       jmxScraper.start();
     } catch (ConfigurationException e) {
-      System.err.println("ERROR: invalid configuration " + e.getMessage());
+      logger.log(Level.SEVERE, "ERROR: invalid configuration ", e);
       System.exit(1);
     } catch (ArgumentsParsingException e) {
-      System.err.println(
+      logger.log(Level.SEVERE, "ERROR: invalid configuration provided through arguments", e);
+      logger.info(
           "Usage: java -jar <path_to_jmxscraper.jar> "
               + "-config <path_to_config.properties or - for stdin>");
       System.exit(1);
     } catch (IOException e) {
-      System.err.println("Unable to connect " + e.getMessage());
+      logger.log(Level.SEVERE, "Unable to connect ", e);
       System.exit(2);
     } catch (RuntimeException e) {
-      e.printStackTrace(System.err);
+      logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(3);
     }
   }

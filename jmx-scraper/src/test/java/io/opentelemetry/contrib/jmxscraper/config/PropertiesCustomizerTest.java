@@ -98,6 +98,5 @@ class PropertiesCustomizerTest {
     assertThat(customizer.getScraperConfig().getSamplingInterval())
         .describedAs("jmx export interval must be ignored")
         .isEqualTo(Duration.ofSeconds(15));
-
   }
 }

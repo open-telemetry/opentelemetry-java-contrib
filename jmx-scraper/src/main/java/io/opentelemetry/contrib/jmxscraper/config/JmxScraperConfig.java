@@ -137,13 +137,13 @@ public class JmxScraperConfig {
     String customConfig = config.getString(JMX_CUSTOM_CONFIG);
     List<String> targetSystem = config.getList(JMX_TARGET_SYSTEM);
     if (targetSystem.isEmpty() && customConfig == null) {
-      throw new ConfigurationException("at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
+      throw new ConfigurationException(
+          "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
     }
     targetSystem.forEach(
         s -> {
           if (!AVAILABLE_TARGET_SYSTEMS.contains(s)) {
-            throw new ConfigurationException(
-                "unsupported target system: '" + s + "'");
+            throw new ConfigurationException("unsupported target system: '" + s + "'");
           }
         });
     scraperConfig.customJmxScrapingConfigPath = customConfig;
@@ -157,5 +157,4 @@ public class JmxScraperConfig {
 
     return scraperConfig;
   }
-
 }
