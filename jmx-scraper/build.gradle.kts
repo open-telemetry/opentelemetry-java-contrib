@@ -4,8 +4,7 @@ plugins {
 
   id("otel.java-conventions")
 
-  // TODO publishing disabled until component is ready to be used
-  // id("otel.publish-conventions")
+  id("otel.publish-conventions")
 }
 
 description = "JMX metrics scraper"
@@ -37,7 +36,7 @@ testing {
         implementation("org.slf4j:slf4j-simple")
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
       }
     }
   }
@@ -71,6 +70,13 @@ tasks {
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
+
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      if (System.getenv().containsKey("CI")) {
+        maxRetries.set(5)
+      }
+    }
   }
 
   // Because we reconfigure publishing to only include the shadow jar, the Gradle metadata is not correct.

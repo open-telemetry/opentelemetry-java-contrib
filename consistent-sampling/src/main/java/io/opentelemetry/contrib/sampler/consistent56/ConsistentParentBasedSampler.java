@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
 import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.api.common.Attributes;
@@ -23,9 +24,9 @@ import javax.annotation.concurrent.Immutable;
  * sampling decision is delegated to the root sampler.
  */
 @Immutable
-final class ConsistentParentBasedSampler extends ConsistentSampler {
+public class ConsistentParentBasedSampler extends ConsistentSampler {
 
-  private final ComposableSampler rootSampler;
+  private final Composable rootSampler;
 
   private final String description;
 
@@ -35,14 +36,14 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
    *
    * @param rootSampler the root sampler
    */
-  ConsistentParentBasedSampler(ComposableSampler rootSampler) {
+  protected ConsistentParentBasedSampler(Composable rootSampler) {
     this.rootSampler = requireNonNull(rootSampler);
     this.description =
         "ConsistentParentBasedSampler{rootSampler=" + rootSampler.getDescription() + '}';
   }
 
   @Override
-  public SamplingIntent getSamplingIntent(
+  public final SamplingIntent getSamplingIntent(
       Context parentContext,
       String name,
       SpanKind spanKind,
@@ -62,13 +63,51 @@ final class ConsistentParentBasedSampler extends ConsistentSampler {
     OtelTraceState otelTraceState = OtelTraceState.parse(otelTraceStateString);
 
     long parentThreshold;
+    boolean isParentAdjustedCountCorrect;
     if (otelTraceState.hasValidThreshold()) {
       parentThreshold = otelTraceState.getThreshold();
+      isParentAdjustedCountCorrect = true;
     } else {
-      parentThreshold = getInvalidThreshold();
+      // If no threshold, look at the sampled flag
+      parentThreshold = parentSpanContext.isSampled() ? getMinThreshold() : getInvalidThreshold();
+      isParentAdjustedCountCorrect = false;
     }
 
-    return () -> parentThreshold;
+    return new SamplingIntent() {
+      @Override
+      public long getThreshold() {
+        return parentThreshold;
+      }
+
+      @Override
+      public boolean isAdjustedCountReliable() {
+        return isParentAdjustedCountCorrect;
+      }
+
+      @Override
+      public Attributes getAttributes() {
+        if (parentSpanContext.isRemote()) {
+          return getAttributesWhenParentRemote(name, spanKind, attributes, parentLinks);
+        } else {
+          return getAttributesWhenParentLocal(name, spanKind, attributes, parentLinks);
+        }
+      }
+
+      @Override
+      public TraceState updateTraceState(TraceState parentState) {
+        return parentState;
+      }
+    };
+  }
+
+  protected Attributes getAttributesWhenParentLocal(
+      String name, SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
+    return Attributes.empty();
+  }
+
+  protected Attributes getAttributesWhenParentRemote(
+      String name, SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
+    return Attributes.empty();
   }
 
   @Override

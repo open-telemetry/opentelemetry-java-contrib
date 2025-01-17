@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
@@ -17,8 +19,6 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -33,18 +33,37 @@ import javax.annotation.Nullable;
 
 final class SamplingRuleApplier {
 
+  // copied from AwsIncubatingAttributes
+  private static final AttributeKey<String> AWS_ECS_CONTAINER_ARN =
+      AttributeKey.stringKey("aws.ecs.container.arn");
+  // copied from CloudIncubatingAttributes
+  private static final AttributeKey<String> CLOUD_PLATFORM =
+      AttributeKey.stringKey("cloud.platform");
+  private static final AttributeKey<String> CLOUD_RESOURCE_ID =
+      AttributeKey.stringKey("cloud.resource_id");
+  // copied from CloudIncubatingAttributes.CloudPlatformIncubatingValues
+  public static final String AWS_EC2 = "aws_ec2";
+  public static final String AWS_ECS = "aws_ecs";
+  public static final String AWS_EKS = "aws_eks";
+  public static final String AWS_LAMBDA = "aws_lambda";
+  public static final String AWS_ELASTIC_BEANSTALK = "aws_elastic_beanstalk";
+  // copied from HttpIncubatingAttributes
+  private static final AttributeKey<String> HTTP_HOST = AttributeKey.stringKey("http.host");
+  private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
+  private static final AttributeKey<String> HTTP_TARGET = AttributeKey.stringKey("http.target");
+  private static final AttributeKey<String> HTTP_URL = AttributeKey.stringKey("http.url");
+  // copied from NetIncubatingAttributes
+  private static final AttributeKey<String> NET_HOST_NAME = AttributeKey.stringKey("net.host.name");
+
   private static final Map<String, String> XRAY_CLOUD_PLATFORM;
 
   static {
     Map<String, String> xrayCloudPlatform = new HashMap<>();
-    xrayCloudPlatform.put(ResourceAttributes.CloudPlatformValues.AWS_EC2, "AWS::EC2::Instance");
-    xrayCloudPlatform.put(ResourceAttributes.CloudPlatformValues.AWS_ECS, "AWS::ECS::Container");
-    xrayCloudPlatform.put(ResourceAttributes.CloudPlatformValues.AWS_EKS, "AWS::EKS::Container");
-    xrayCloudPlatform.put(
-        ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK,
-        "AWS::ElasticBeanstalk::Environment");
-    xrayCloudPlatform.put(
-        ResourceAttributes.CloudPlatformValues.AWS_LAMBDA, "AWS::Lambda::Function");
+    xrayCloudPlatform.put(AWS_EC2, "AWS::EC2::Instance");
+    xrayCloudPlatform.put(AWS_ECS, "AWS::ECS::Container");
+    xrayCloudPlatform.put(AWS_EKS, "AWS::EKS::Container");
+    xrayCloudPlatform.put(AWS_ELASTIC_BEANSTALK, "AWS::ElasticBeanstalk::Environment");
+    xrayCloudPlatform.put(AWS_LAMBDA, "AWS::Lambda::Function");
     XRAY_CLOUD_PLATFORM = Collections.unmodifiableMap(xrayCloudPlatform);
   }
 
@@ -162,15 +181,15 @@ final class SamplingRuleApplier {
     String host = null;
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(SemanticAttributes.HTTP_TARGET)) {
+      if (entry.getKey().equals(HTTP_TARGET)) {
         httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.HTTP_URL)) {
+      } else if (entry.getKey().equals(HTTP_URL)) {
         httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.HTTP_METHOD)) {
+      } else if (entry.getKey().equals(HTTP_METHOD)) {
         httpMethod = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.NET_HOST_NAME)) {
+      } else if (entry.getKey().equals(NET_HOST_NAME)) {
         host = (String) entry.getValue();
-      } else if (entry.getKey().equals(SemanticAttributes.HTTP_HOST)) {
+      } else if (entry.getKey().equals(HTTP_HOST)) {
         // TODO (trask) remove support for deprecated http.host attribute
         host = (String) entry.getValue();
       }
@@ -207,7 +226,7 @@ final class SamplingRuleApplier {
     }
 
     return urlPathMatcher.matches(httpTarget)
-        && serviceNameMatcher.matches(resource.getAttribute(ResourceAttributes.SERVICE_NAME))
+        && serviceNameMatcher.matches(resource.getAttribute(SERVICE_NAME))
         && httpMethodMatcher.matches(httpMethod)
         && hostMatcher.matches(host)
         && serviceTypeMatcher.matches(getServiceType(resource))
@@ -330,12 +349,12 @@ final class SamplingRuleApplier {
 
   @Nullable
   private static String getArn(Attributes attributes, Resource resource) {
-    String arn = resource.getAttributes().get(ResourceAttributes.AWS_ECS_CONTAINER_ARN);
+    String arn = resource.getAttributes().get(AWS_ECS_CONTAINER_ARN);
     if (arn != null) {
       return arn;
     }
-    String cloudPlatform = resource.getAttributes().get(ResourceAttributes.CLOUD_PLATFORM);
-    if (ResourceAttributes.CloudPlatformValues.AWS_LAMBDA.equals(cloudPlatform)) {
+    String cloudPlatform = resource.getAttributes().get(CLOUD_PLATFORM);
+    if (AWS_LAMBDA.equals(cloudPlatform)) {
       return getLambdaArn(attributes, resource);
     }
     return null;
@@ -343,16 +362,16 @@ final class SamplingRuleApplier {
 
   @Nullable
   private static String getLambdaArn(Attributes attributes, Resource resource) {
-    String arn = resource.getAttributes().get(ResourceAttributes.CLOUD_RESOURCE_ID);
+    String arn = resource.getAttributes().get(CLOUD_RESOURCE_ID);
     if (arn != null) {
       return arn;
     }
-    return attributes.get(ResourceAttributes.CLOUD_RESOURCE_ID);
+    return attributes.get(CLOUD_RESOURCE_ID);
   }
 
   @Nullable
   private static String getServiceType(Resource resource) {
-    String cloudPlatform = resource.getAttributes().get(ResourceAttributes.CLOUD_PLATFORM);
+    String cloudPlatform = resource.getAttributes().get(CLOUD_PLATFORM);
     if (cloudPlatform == null) {
       return null;
     }

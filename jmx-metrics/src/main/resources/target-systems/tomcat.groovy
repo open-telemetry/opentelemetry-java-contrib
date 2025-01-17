@@ -16,13 +16,13 @@
 
 
 def beantomcatmanager = otel.mbeans("Catalina:type=Manager,host=localhost,context=*")
-otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&longValueCallback)
+otel.instrument(beantomcatmanager, "tomcat.sessions", "The number of active sessions.", "{session}", "activeSessions", otel.&longValueCallback)
 
 def beantomcatrequestProcessor = otel.mbeans("Catalina:type=GlobalRequestProcessor,name=*")
-otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
+otel.instrument(beantomcatrequestProcessor, "tomcat.errors", "The number of errors encountered.", "{error}",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "errorCount", otel.&longCounterCallback)
-otel.instrument(beantomcatrequestProcessor, "tomcat.request_count", "The total requests.", "requests",
+otel.instrument(beantomcatrequestProcessor, "tomcat.request_count", "The total requests.", "{request}",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "requestCount", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.max_time", "Maximum time to process a request.", "ms",
@@ -32,24 +32,24 @@ otel.instrument(beantomcatrequestProcessor, "tomcat.processing_time", "The total
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   "processingTime", otel.&longCounterCallback)
 otel.instrument(beantomcatrequestProcessor, "tomcat.traffic",
-  "The number of bytes transmitted and received.", "by",
+  "The number of bytes transmitted and received.", "By",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name")}],
   ["bytesReceived":["direction" : {"received"}], "bytesSent": ["direction" : {"sent"}]],
   otel.&longCounterCallback)
 
 def beantomcatconnectors = otel.mbeans("Catalina:type=ThreadPool,name=*")
-otel.instrument(beantomcatconnectors, "tomcat.threads", "The number of threads", "threads",
+otel.instrument(beantomcatconnectors, "tomcat.threads", "The number of threads", "{thread}",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
   ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)
 
 def beantomcatnewmanager = otel.mbeans("Tomcat:type=Manager,host=localhost,context=*")
-otel.instrument(beantomcatnewmanager, "tomcat.sessions", "The number of active sessions.", "sessions", "activeSessions", otel.&longValueCallback)
+otel.instrument(beantomcatnewmanager, "tomcat.sessions", "The number of active sessions.", "{session}", "activeSessions", otel.&longValueCallback)
 
 def beantomcatnewrequestProcessor = otel.mbeans("Tomcat:type=GlobalRequestProcessor,name=*")
-otel.instrument(beantomcatnewrequestProcessor, "tomcat.errors", "The number of errors encountered.", "errors",
+otel.instrument(beantomcatnewrequestProcessor, "tomcat.errors", "The number of errors encountered.", "{error}",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     "errorCount", otel.&longCounterCallback)
-otel.instrument(beantomcatnewrequestProcessor, "tomcat.request_count", "The total requests.", "requests",
+otel.instrument(beantomcatnewrequestProcessor, "tomcat.request_count", "The total requests.", "{request}",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     "requestCount", otel.&longCounterCallback)
 otel.instrument(beantomcatnewrequestProcessor, "tomcat.max_time", "Maximum time to process a request.", "ms",
@@ -59,12 +59,12 @@ otel.instrument(beantomcatnewrequestProcessor, "tomcat.processing_time", "The to
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     "processingTime", otel.&longCounterCallback)
 otel.instrument(beantomcatnewrequestProcessor, "tomcat.traffic",
-    "The number of bytes transmitted and received.", "by",
+    "The number of bytes transmitted and received.", "By",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name")}],
     ["bytesReceived":["direction" : {"received"}], "bytesSent": ["direction" : {"sent"}]],
     otel.&longCounterCallback)
 
 def beantomcatnewconnectors = otel.mbeans("Tomcat:type=ThreadPool,name=*")
-otel.instrument(beantomcatnewconnectors, "tomcat.threads", "The number of threads", "threads",
+otel.instrument(beantomcatnewconnectors, "tomcat.threads", "The number of threads", "{thread}",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
     ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)

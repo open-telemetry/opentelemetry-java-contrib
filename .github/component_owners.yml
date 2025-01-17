@@ -22,7 +22,7 @@ components:
   azure-resources:
     - trask
     - zeitlinger
-  baggage-procesor:
+  baggage-processor:
     - mikegoldsmith
     - zeitlinger
   compressors:
@@ -34,6 +34,9 @@ components:
     - LikeTheSalad
     - zeitlinger
   gcp-resources:
+    - jsuereth
+    - psx95
+  gcp-auth-extension:
     - jsuereth
     - psx95
   jfr-connection:

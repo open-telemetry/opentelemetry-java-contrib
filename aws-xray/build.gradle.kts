@@ -13,7 +13,8 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
   implementation("com.squareup.okhttp3:okhttp")
-  implementation("io.opentelemetry:opentelemetry-semconv")
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   annotationProcessor("com.google.auto.service:auto-service")
   testImplementation("com.google.auto.service:auto-service")
@@ -43,12 +44,5 @@ testing {
         runtimeOnly("org.slf4j:slf4j-simple")
       }
     }
-  }
-}
-
-configurations.all {
-  resolutionStrategy {
-    // TODO this module still needs to be updated to the latest semconv
-    force("io.opentelemetry:opentelemetry-semconv:1.28.0-alpha")
   }
 }

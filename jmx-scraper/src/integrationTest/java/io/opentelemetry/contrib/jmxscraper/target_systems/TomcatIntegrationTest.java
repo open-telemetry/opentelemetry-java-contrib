@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.jmxscraper.target_systems;
 
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertGaugeWithAttributes;
-import static io.opentelemetry.contrib.jmxscraper.target_systems.MetricAssertions.assertSumWithAttributes;
-import static org.assertj.core.api.Assertions.entry;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attribute;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeGroup;
+import static io.opentelemetry.contrib.jmxscraper.assertions.DataPointAttributes.attributeWithAnyValue;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
 import java.nio.file.Path;
@@ -46,67 +46,76 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
   }
 
   @Override
-  protected void verifyMetrics() {
-    waitAndAssertMetrics(
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "tomcat.sessions",
-                "The number of active sessions",
-                "sessions",
-                attrs -> attrs.containsKey("context")),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "tomcat.errors",
-                "The number of errors encountered",
-                "errors",
-                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "tomcat.processing_time",
-                "The total processing time",
-                "ms",
-                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "tomcat.traffic",
-                "The number of bytes transmitted and received",
-                "by",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("proto_handler", "\"http-nio-8080\""), entry("direction", "sent")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("proto_handler", "\"http-nio-8080\""),
-                        entry("direction", "received"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "tomcat.threads",
-                "The number of threads",
-                "threads",
-                attrs ->
-                    attrs.containsOnly(
-                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "idle")),
-                attrs ->
-                    attrs.containsOnly(
-                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "busy"))),
-        metric ->
-            assertGaugeWithAttributes(
-                metric,
-                "tomcat.max_time",
-                "Maximum time to process a request",
-                "ms",
-                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))),
-        metric ->
-            assertSumWithAttributes(
-                metric,
-                "tomcat.request_count",
-                "The total requests",
-                "requests",
-                attrs -> attrs.containsOnly(entry("proto_handler", "\"http-nio-8080\""))));
+  protected MetricsVerifier createMetricsVerifier() {
+    return MetricsVerifier.create()
+        .add(
+            "tomcat.sessions",
+            metric ->
+                metric
+                    .hasDescription("The number of active sessions")
+                    .hasUnit("{session}")
+                    .isGauge()
+                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("context")))
+        .add(
+            "tomcat.errors",
+            metric ->
+                metric
+                    .hasDescription("The number of errors encountered")
+                    .hasUnit("{error}")
+                    .isCounter()
+                    .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
+        .add(
+            "tomcat.processing_time",
+            metric ->
+                metric
+                    .hasDescription("The total processing time")
+                    .hasUnit("ms")
+                    .isCounter()
+                    .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
+        .add(
+            "tomcat.traffic",
+            metric ->
+                metric
+                    .hasDescription("The number of bytes transmitted and received")
+                    .hasUnit("By")
+                    .isCounter()
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("direction", "sent"),
+                            attribute("proto_handler", "\"http-nio-8080\"")),
+                        attributeGroup(
+                            attribute("direction", "received"),
+                            attribute("proto_handler", "\"http-nio-8080\""))))
+        .add(
+            "tomcat.threads",
+            metric ->
+                metric
+                    .hasDescription("The number of threads")
+                    .hasUnit("{thread}")
+                    .isGauge()
+                    .hasDataPointsWithAttributes(
+                        attributeGroup(
+                            attribute("state", "idle"),
+                            attribute("proto_handler", "\"http-nio-8080\"")),
+                        attributeGroup(
+                            attribute("state", "busy"),
+                            attribute("proto_handler", "\"http-nio-8080\""))))
+        .add(
+            "tomcat.max_time",
+            metric ->
+                metric
+                    .hasDescription("Maximum time to process a request")
+                    .hasUnit("ms")
+                    .isGauge()
+                    .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
+        .add(
+            "tomcat.request_count",
+            metric ->
+                metric
+                    .hasDescription("The total requests")
+                    .hasUnit("{request}")
+                    .isCounter()
+                    .hasDataPointsWithOneAttribute(
+                        attribute("proto_handler", "\"http-nio-8080\"")));
   }
 }

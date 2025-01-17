@@ -59,22 +59,24 @@ rules:
   - bean: jboss.as:subsystem=datasources,data-source=*,statistics=pool
     metricAttribute:
       data_source: param(data-source)
-    type: counter
     prefix: wildfly.jdbc.
     mapping:
       ActiveCount:
         metric: &metric connection.open
+        type: updowncounter
         unit: &unit "{connection}"
         desc: &desc The number of open jdbc connections.
         metricAttribute:
           state: const(active)
       IdleCount:
         metric: *metric
+        type: updowncounter
         unit: *unit
         desc: *desc
         metricAttribute:
           state: const(idle)
       WaitCount:
+        type: counter
         metric: request.wait
         unit: "{request}"
         desc: The number of jdbc connections that had to wait before opening.

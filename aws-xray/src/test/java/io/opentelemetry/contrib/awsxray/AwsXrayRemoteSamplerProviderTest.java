@@ -5,11 +5,11 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class AwsXrayRemoteSamplerProviderTest {
               sampler -> {
                 assertThat(sampler.getClient().getSamplingRulesEndpoint())
                     .isEqualTo("http://localhost:2000/GetSamplingRules");
-                assertThat(sampler.getResource().getAttribute(ResourceAttributes.SERVICE_NAME))
+                assertThat(sampler.getResource().getAttribute(SERVICE_NAME))
                     .isEqualTo("cat-service");
               });
     }
@@ -74,7 +74,7 @@ class AwsXrayRemoteSamplerProviderTest {
               sampler -> {
                 assertThat(sampler.getClient().getSamplingRulesEndpoint())
                     .isEqualTo("http://localhost:3000/GetSamplingRules");
-                assertThat(sampler.getResource().getAttribute(ResourceAttributes.SERVICE_NAME))
+                assertThat(sampler.getResource().getAttribute(SERVICE_NAME))
                     .isEqualTo("cat-service");
               });
     }

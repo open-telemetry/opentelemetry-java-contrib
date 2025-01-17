@@ -5,8 +5,7 @@
 
 package io.opentelemetry.contrib.awsxray;
 
-import static io.opentelemetry.semconv.trace.attributes.SemanticAttributes.HTTP_STATUS_CODE;
-
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
@@ -40,6 +39,9 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class AwsSpanMetricsProcessor implements SpanProcessor {
+
+  private static final AttributeKey<Long> HTTP_STATUS_CODE =
+      AttributeKey.longKey("http.status_code");
 
   private static final double NANOS_TO_MILLIS = 1_000_000.0;
 

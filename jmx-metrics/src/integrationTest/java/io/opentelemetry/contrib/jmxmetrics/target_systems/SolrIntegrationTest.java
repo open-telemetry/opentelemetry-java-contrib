@@ -43,18 +43,18 @@ class SolrIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "solr.document.count",
                 "The total number of indexed documents.",
-                "{documents}",
+                "{document}",
                 attrs -> attrs.containsOnly(entry("core", "gettingstarted"))),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "solr.index.size",
                 "The total index size.",
-                "by",
+                "By",
                 attrs -> attrs.containsOnly(entry("core", "gettingstarted"))),
         metric ->
             assertSolrRequestSumMetric(
-                metric, "solr.request.count", "The number of queries made.", "{queries}"),
+                metric, "solr.request.count", "The number of queries made.", "{query}"),
         metric ->
             assertSolrRequestGaugeMetric(
                 metric,
@@ -66,37 +66,31 @@ class SolrIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "solr.request.error.count",
                 "The number of queries resulting in an error.",
-                "{queries}"),
+                "{query}"),
         metric ->
             assertSolrRequestSumMetric(
                 metric,
                 "solr.request.timeout.count",
                 "The number of queries resulting in a timeout.",
-                "{queries}"),
+                "{query}"),
         metric ->
             assertSolrCacheSumMetric(
                 metric,
                 "solr.cache.eviction.count",
                 "The number of evictions from a cache.",
-                "{evictions}"),
+                "{eviction}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric, "solr.cache.hit.count", "The number of hits for a cache.", "{hits}"),
+                metric, "solr.cache.hit.count", "The number of hits for a cache.", "{hit}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric,
-                "solr.cache.insert.count",
-                "The number of inserts to a cache.",
-                "{inserts}"),
+                metric, "solr.cache.insert.count", "The number of inserts to a cache.", "{insert}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric,
-                "solr.cache.lookup.count",
-                "The number of lookups to a cache.",
-                "{lookups}"),
+                metric, "solr.cache.lookup.count", "The number of lookups to a cache.", "{lookup}"),
         metric ->
             assertSolrCacheSumMetric(
-                metric, "solr.cache.size", "The size of the cache occupied in memory.", "by"));
+                metric, "solr.cache.size", "The size of the cache occupied in memory.", "By"));
   }
 
   private void assertSolrRequestSumMetric(

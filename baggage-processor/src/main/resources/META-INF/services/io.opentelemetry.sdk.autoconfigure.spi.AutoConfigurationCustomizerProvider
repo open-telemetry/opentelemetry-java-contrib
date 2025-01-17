@@ -1,1 +1,1 @@
-io.opentelemetry.contrib.baggage.processor.BaggageSpanProcessorCustomizer
+io.opentelemetry.contrib.baggage.processor.BaggageProcessorCustomizer

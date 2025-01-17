@@ -1,0 +1,110 @@
+---
+
+rules:
+
+  - bean: solr:dom1=core,dom2=*,category=SEARCHER,scope=searcher,name=numDocs
+    mapping:
+      Value:
+        metric: solr.document.count
+        type: updowncounter
+        unit: "{document}"
+        desc: The total number of indexed documents.
+        metricAttribute:
+          core: param(dom2)
+
+  - bean: solr:dom1=core,dom2=*,category=INDEX,name=sizeInBytes
+    mapping:
+      Value:
+        metric: solr.index.size
+        type: updowncounter
+        unit: By
+        desc: The total index size.
+        metricAttribute:
+          core: param(dom2)
+
+  - beans:
+      - solr:dom1=core,dom2=*,category=QUERY,scope=*,name=requests
+      - solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=requests
+    mapping:
+      Count:
+        metric: solr.request.count
+        type: counter
+        unit: "{query}"
+        desc: The number of queries made.
+        metricAttribute:
+          core: param(dom2)
+          type: param(category)
+          handler: param(scope)
+
+  - beans:
+      - solr:dom1=core,dom2=*,category=QUERY,scope=*,name=requestTimes
+      - solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=requestTimes
+    mapping:
+      Mean:
+        metric: solr.request.time.average
+        type: gauge
+        unit: ms
+        desc: "The average time of a query, based on Solr's histogram configuration."
+        metricAttribute:
+          core: param(dom2)
+          type: param(category)
+          handler: param(scope)
+
+  - beans:
+      - solr:dom1=core,dom2=*,category=QUERY,scope=*,name=errors
+      - solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=errors
+    mapping:
+      Count:
+        metric: solr.request.error.count
+        type: counter
+        unit: "{query}"
+        desc: The number of queries resulting in an error.
+        metricAttribute:
+          core: param(dom2)
+          type: param(category)
+          handler: param(scope)
+
+  - beans:
+      - solr:dom1=core,dom2=*,category=QUERY,scope=*,name=timeouts
+      - solr:dom1=core,dom2=*,category=UPDATE,scope=*,name=timeouts
+    mapping:
+      Count:
+        metric: solr.request.timeout.count
+        type: counter
+        unit: "{query}"
+        desc: The number of queries resulting in a timeout.
+        metricAttribute:
+          core: param(dom2)
+          type: param(category)
+          handler: param(scope)
+
+  - bean: solr:dom1=core,dom2=*,category=CACHE,scope=*,name=queryResultCache
+    prefix: solr.cache.
+    type: counter
+    metricAttribute:
+      core: param(dom2)
+      cache: param(scope)
+    mapping:
+      cumulative_evictions:
+        metric: eviction.count
+        unit: "{eviction}"
+        desc: The number of evictions from a cache.
+      cumulative_hits:
+        metric: hit.count
+        unit: "{hit}"
+        desc: The number of hits for a cache.
+      cumulative_inserts:
+        metric: insert.count
+        unit: "{insert}"
+        desc: The number of inserts to a cache.
+      cumulative_lookups:
+        metric: lookup.count
+        unit: "{lookup}"
+        desc: The number of lookups to a cache.
+      ramBytesUsed:
+        type: updowncounter
+        metric: size
+        unit: By
+        desc: The size of the cache occupied in memory.
+
+

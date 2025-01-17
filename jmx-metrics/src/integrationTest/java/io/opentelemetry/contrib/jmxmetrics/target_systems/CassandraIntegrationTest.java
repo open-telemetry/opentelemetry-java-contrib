@@ -86,39 +86,39 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.compaction.tasks.completed",
                 "Number of completed compactions since server [re]start",
-                "1"),
+                "{task}"),
         metric ->
             assertGauge(
                 metric,
                 "cassandra.compaction.tasks.pending",
                 "Estimated number of compactions remaining to perform",
-                "1"),
+                "{task}"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.storage.load.count",
                 "Size of the on disk data size this node manages",
-                "by",
+                "By",
                 /* isMonotonic= */ false),
         metric ->
             assertSum(
                 metric,
                 "cassandra.storage.total_hints.count",
                 "Number of hint messages written to this node since [re]start",
-                "1"),
+                "{hint}"),
         metric ->
             assertSum(
                 metric,
                 "cassandra.storage.total_hints.in_progress.count",
                 "Number of hints attempting to be sent currently",
-                "1",
+                "{hint}",
                 /* isMonotonic= */ false),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "cassandra.client.request.count",
                 "Number of requests by operation",
-                "1",
+                "{request}",
                 attrs -> attrs.containsOnly(entry("operation", "RangeSlice")),
                 attrs -> attrs.containsOnly(entry("operation", "Read")),
                 attrs -> attrs.containsOnly(entry("operation", "Write"))),
@@ -127,7 +127,7 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "cassandra.client.request.error.count",
                 "Number of request errors by operation",
-                "1",
+                "{error}",
                 getRequestErrorCountAttributes()));
   }
 

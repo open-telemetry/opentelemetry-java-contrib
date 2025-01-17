@@ -380,13 +380,14 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
       List<Consumer<Metric>> assertions = new ArrayList<>(kafkaBrokerAssertions());
       assertions.addAll(
           Arrays.asList(
-              metric -> assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "1"),
+              metric ->
+                  assertGauge(metric, "jvm.classes.loaded", "number of loaded classes", "{class}"),
               metric ->
                   assertTypedSum(
                       metric,
                       "jvm.gc.collections.count",
                       "total number of collections that have occurred",
-                      "1",
+                      "{collection}",
                       Arrays.asList("G1 Young Generation", "G1 Old Generation")),
               metric ->
                   assertTypedSum(
@@ -396,36 +397,36 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                       "ms",
                       Arrays.asList("G1 Young Generation", "G1 Old Generation")),
               metric ->
-                  assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "by"),
-              metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "by"),
-              metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "by"),
-              metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "by"),
+                  assertGauge(metric, "jvm.memory.heap.committed", "current heap usage", "By"),
+              metric -> assertGauge(metric, "jvm.memory.heap.init", "current heap usage", "By"),
+              metric -> assertGauge(metric, "jvm.memory.heap.max", "current heap usage", "By"),
+              metric -> assertGauge(metric, "jvm.memory.heap.used", "current heap usage", "By"),
               metric ->
                   assertGauge(
-                      metric, "jvm.memory.nonheap.committed", "current non-heap usage", "by"),
+                      metric, "jvm.memory.nonheap.committed", "current non-heap usage", "By"),
               metric ->
-                  assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "by"),
+                  assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "By"),
               metric ->
-                  assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "by"),
+                  assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "By"),
               metric ->
-                  assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "by"),
+                  assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "By"),
               metric ->
                   assertTypedGauge(
                       metric,
                       "jvm.memory.pool.committed",
                       "current memory pool usage",
-                      "by",
+                      "By",
                       gcLabels),
               metric ->
                   assertTypedGauge(
-                      metric, "jvm.memory.pool.init", "current memory pool usage", "by", gcLabels),
+                      metric, "jvm.memory.pool.init", "current memory pool usage", "By", gcLabels),
               metric ->
                   assertTypedGauge(
-                      metric, "jvm.memory.pool.max", "current memory pool usage", "by", gcLabels),
+                      metric, "jvm.memory.pool.max", "current memory pool usage", "By", gcLabels),
               metric ->
                   assertTypedGauge(
-                      metric, "jvm.memory.pool.used", "current memory pool usage", "by", gcLabels),
-              metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "1")));
+                      metric, "jvm.memory.pool.used", "current memory pool usage", "By", gcLabels),
+              metric -> assertGauge(metric, "jvm.threads.count", "number of threads", "{thread}")));
 
       waitAndAssertMetrics(assertions);
     }
