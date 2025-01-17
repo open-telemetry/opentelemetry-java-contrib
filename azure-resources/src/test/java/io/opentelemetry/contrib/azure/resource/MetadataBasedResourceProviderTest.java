@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.azure.resource;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.linecorp.armeria.common.HttpResponse;
 import com.linecorp.armeria.common.HttpStatus;
@@ -21,6 +20,7 @@ import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -72,7 +72,7 @@ public abstract class MetadataBasedResourceProviderTest {
                   AzureVmResourceProviderTest.class
                       .getClassLoader()
                       .getResourceAsStream("response.json")),
-              Charsets.UTF_8));
+              StandardCharsets.UTF_8));
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
