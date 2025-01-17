@@ -66,6 +66,9 @@ public class JmxScraper {
 
       JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
 
+      long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
+      logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
+
       JmxMetricInsight service =
           JmxMetricInsight.createService(
               GlobalOpenTelemetry.get(), scraperConfig.getSamplingInterval().toMillis());

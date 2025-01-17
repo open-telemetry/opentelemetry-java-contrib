@@ -24,7 +24,6 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private final String endpoint;
   private final Set<String> targetSystems;
   private String serviceUrl;
-  private int intervalMillis;
   private final Set<String> customYamlFiles;
   private String user;
   private String password;
@@ -44,19 +43,12 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     this.endpoint = otlpEndpoint;
     this.targetSystems = new HashSet<>();
     this.customYamlFiles = new HashSet<>();
-    this.intervalMillis = 1000;
     this.extraJars = new ArrayList<>();
   }
 
   @CanIgnoreReturnValue
   public JmxScraperContainer withTargetSystem(String targetSystem) {
     targetSystems.add(targetSystem);
-    return this;
-  }
-
-  @CanIgnoreReturnValue
-  public JmxScraperContainer withIntervalMillis(int intervalMillis) {
-    this.intervalMillis = intervalMillis;
     return this;
   }
 
@@ -132,7 +124,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       throw new IllegalStateException("Missing service URL");
     }
     arguments.add("-Dotel.jmx.service.url=" + serviceUrl);
-    arguments.add("-Dotel.jmx.interval.milliseconds=" + intervalMillis);
+    // always use a very short export interval for testing
+    arguments.add("-Dotel.metric.export.interval=1s");
 
     if (user != null) {
       arguments.add("-Dotel.jmx.username=" + user);
