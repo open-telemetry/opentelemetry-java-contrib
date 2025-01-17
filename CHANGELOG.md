@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.43.0 (2025-01-17)
+
 ### Azure resources - New 🌟
 
 Azure resource detectors.
