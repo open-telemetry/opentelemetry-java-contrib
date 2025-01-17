@@ -19,6 +19,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   implementation("com.fasterxml.jackson.core:jackson-core")
 
+  testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
