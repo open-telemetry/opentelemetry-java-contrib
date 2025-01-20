@@ -11,4 +11,8 @@ public class ArgumentsParsingException extends Exception {
   public ArgumentsParsingException(String msg) {
     super(msg);
   }
+
+  public ArgumentsParsingException(String msg, Throwable cause) {
+    super(msg, cause);
+  }
 }
