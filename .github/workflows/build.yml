@@ -151,16 +151,18 @@ jobs:
     if: github.event_name == 'pull_request' && always()
     needs:
       - build
+      - test
       - integration-test
       - markdown-lint-check
       - misspell-check
       - shell-script-check
     runs-on: ubuntu-latest
     steps:
-      # only the "build" and "integration-test" checks are required for release branch PRs in order
+      # only the build and test checks are required for release branch PRs in order
       # to avoid any unnecessary release branch maintenance (especially for patches)
       - if: |
           needs.build.result != 'success' ||
+          needs.test.result != 'success' ||
           needs.integration-test.result != 'success' ||
           (
             !startsWith(github.base_ref, 'release/') &&
