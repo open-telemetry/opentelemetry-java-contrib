@@ -21,6 +21,7 @@ public class JmxScraperConfig {
   // metric sdk configuration
   static final String METRIC_EXPORT_INTERVAL = "otel.metric.export.interval";
 
+  // not documented on purpose as using the SDK 'otel.metric.export.interval' is preferred
   static final String JMX_INTERVAL_LEGACY = "otel.jmx.interval.milliseconds";
 
   static final String JMX_SERVICE_URL = "otel.jmx.service.url";
@@ -30,6 +31,7 @@ public class JmxScraperConfig {
   static final String JMX_USERNAME = "otel.jmx.username";
   static final String JMX_PASSWORD = "otel.jmx.password";
 
+  // TODO: document those when they will be supported
   static final String JMX_REGISTRY_SSL = "otel.jmx.remote.registry.ssl";
   static final String JMX_REMOTE_PROFILE = "otel.jmx.remote.profile";
   static final String JMX_REALM = "otel.jmx.realm";
@@ -56,7 +58,7 @@ public class JmxScraperConfig {
 
   private Set<String> targetSystems = Collections.emptySet();
 
-  private Duration samplingInterval = Duration.ofSeconds(10);
+  private Duration samplingInterval = Duration.ofMinutes(1);
 
   @Nullable private String username;
 
