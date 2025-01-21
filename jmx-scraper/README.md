@@ -63,10 +63,10 @@ Supported values for `otel.jmx.target.system`:
 
 The following SDK configuration options are also relevant
 
-| config option                 | default value   | description                                                                                                                                                        |
-|-------------------------------|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `otel.metric.export.interval` | `1m` (1 minute) | metric export interval, also controls the JMX sampling interval                                                                                                    |
-| `otel.metrics.exporter`       | `otlp`          | comma-separated list of metrics exporters supported values are `otlp` and `logging`, additional values might be provided through extra librairies in the classpath |
+| config option                 | default value   | description                                                                                                                                                       |
+|-------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `otel.metric.export.interval` | `1m` (1 minute) | metric export interval, also controls the JMX sampling interval                                                                                                   |
+| `otel.metrics.exporter`       | `otlp`          | comma-separated list of metrics exporters supported values are `otlp` and `logging`, additional values might be provided through extra libraries in the classpath |
 
 In addition to OpenTelemetry configuration, the following Java system properties can be provided
 through the command-line arguments, properties file or stdin and will be propagated to the JVM system properties:
