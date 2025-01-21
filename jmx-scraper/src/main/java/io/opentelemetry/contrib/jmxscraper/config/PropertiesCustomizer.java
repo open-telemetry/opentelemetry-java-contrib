@@ -28,10 +28,9 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
   public Map<String, String> apply(ConfigProperties config) {
     Map<String, String> result = new HashMap<>();
 
-    // set default exporter to logging when not explicitly set
+    // set default exporter to 'otlp' to be consistent with SDK
     if (config.getList(METRICS_EXPORTER).isEmpty()) {
-      logger.info(METRICS_EXPORTER + " is not set, default of 'logging' will be used");
-      result.put(METRICS_EXPORTER, "logging");
+      result.put(METRICS_EXPORTER, "otlp");
     }
 
     // providing compatibility with the existing 'otel.jmx.interval.milliseconds' config option

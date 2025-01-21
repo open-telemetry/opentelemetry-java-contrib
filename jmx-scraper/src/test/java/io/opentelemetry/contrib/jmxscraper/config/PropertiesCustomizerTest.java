@@ -24,14 +24,14 @@ class PropertiesCustomizerTest {
   }
 
   @Test
-  void defaultLoggingExporter() {
+  void defaultOtlpExporter() {
     Map<String, String> map = new HashMap<>();
     map.put("otel.jmx.service.url", "dummy-url");
     map.put("otel.jmx.target.system", "jvm");
     ConfigProperties config = DefaultConfigProperties.createFromMap(map);
 
     PropertiesCustomizer customizer = new PropertiesCustomizer();
-    assertThat(customizer.apply(config)).containsEntry("otel.metrics.exporter", "logging");
+    assertThat(customizer.apply(config)).containsEntry("otel.metrics.exporter", "otlp");
   }
 
   @Test
