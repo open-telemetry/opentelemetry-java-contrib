@@ -25,6 +25,7 @@ public class JmxScraperConfig {
   static final String JMX_INTERVAL_LEGACY = "otel.jmx.interval.milliseconds";
 
   static final String JMX_SERVICE_URL = "otel.jmx.service.url";
+  // TODO: align with instrumentation 'otel.jmx.config' + support list of values
   static final String JMX_CUSTOM_CONFIG = "otel.jmx.custom.scraping.config";
   static final String JMX_TARGET_SYSTEM = "otel.jmx.target.system";
 
