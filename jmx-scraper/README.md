@@ -70,6 +70,7 @@ The following SDK configuration options are also relevant
 
 In addition to OpenTelemetry configuration, the following Java system properties can be provided
 through the command-line arguments, properties file or stdin and will be propagated to the JVM system properties:
+
 - `javax.net.ssl.keyStore`
 - `javax.net.ssl.keyStorePassword`
 - `javax.net.ssl.trustStore`
@@ -94,7 +95,7 @@ needs to be used to support `otel.jmx.service.url` = `service:jmx:remote+http://
 When doing so, the `java -jar` command can´t be used, we have to provide the classpath with
 `-cp`/`--class-path`/`-classpath` option and provide the main class file name:
 
-```
+```bash
 java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScraper <config>
 ```
 
