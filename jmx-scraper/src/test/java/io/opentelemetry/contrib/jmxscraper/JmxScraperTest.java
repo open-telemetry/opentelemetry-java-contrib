@@ -20,28 +20,33 @@ import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 
 class JmxScraperTest {
+
   @Test
   void shouldThrowExceptionWhenInvalidCommandLineArgsProvided() {
-    // Given
-    List<String> emptyArgs = Collections.singletonList("-nonExistentOption");
-
-    // When and Then
-    assertThatThrownBy(() -> JmxScraper.parseArgs(emptyArgs))
-        .isInstanceOf(ArgumentsParsingException.class);
+    testInvalidArguments("-nonExistentOption");
+    testInvalidArguments("-potato", "-config");
+    testInvalidArguments("-config", "path", "-nonExistentOption");
   }
 
   @Test
-  void shouldThrowExceptionWhenTooManyCommandLineArgsProvided() {
-    // Given
-    List<String> args = Arrays.asList("-config", "path", "-nonExistentOption");
-
-    // When and Then
-    assertThatThrownBy(() -> JmxScraper.parseArgs(args))
-        .isInstanceOf(ArgumentsParsingException.class);
+  void emptyArgumentsAllowed() throws InvalidArgumentException {
+    assertThat(JmxScraper.parseArgs(Collections.emptyList()))
+        .describedAs("empty arguments allowed to use JVM properties")
+        .isEmpty();
   }
 
   @Test
-  void shouldCreateConfig_propertiesLoadedFromFile() throws ArgumentsParsingException {
+  void shouldThrowExceptionWhenMissingProperties() {
+    testInvalidArguments("-config", "missing.properties");
+  }
+
+  private static void testInvalidArguments(String... args) {
+    assertThatThrownBy(() -> JmxScraper.parseArgs(Arrays.asList(args)))
+        .isInstanceOf(InvalidArgumentException.class);
+  }
+
+  @Test
+  void shouldCreateConfig_propertiesLoadedFromFile() throws InvalidArgumentException {
     // Given
     String filePath =
         ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
@@ -58,8 +63,7 @@ class JmxScraperTest {
   }
 
   @Test
-  void shouldCreateConfig_propertiesLoadedFromStdIn()
-      throws ArgumentsParsingException, IOException {
+  void shouldCreateConfig_propertiesLoadedFromStdIn() throws InvalidArgumentException, IOException {
     InputStream originalIn = System.in;
     try (InputStream stream =
         ClassLoader.getSystemClassLoader().getResourceAsStream("validConfig.properties")) {

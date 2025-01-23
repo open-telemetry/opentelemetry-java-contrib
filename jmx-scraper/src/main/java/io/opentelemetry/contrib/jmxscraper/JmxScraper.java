@@ -83,7 +83,7 @@ public class JmxScraper {
     } catch (ConfigurationException e) {
       logger.log(Level.SEVERE, "invalid configuration ", e);
       System.exit(1);
-    } catch (ArgumentsParsingException e) {
+    } catch (InvalidArgumentException e) {
       logger.log(Level.SEVERE, "invalid configuration provided through arguments", e);
       logger.info(
           "Usage: java -jar <path_to_jmxscraper.jar> "
@@ -116,7 +116,7 @@ public class JmxScraper {
    *
    * @param args application commandline arguments
    */
-  static Properties parseArgs(List<String> args) throws ArgumentsParsingException {
+  static Properties parseArgs(List<String> args) throws InvalidArgumentException {
 
     if (args.isEmpty()) {
       // empty properties from stdin or external file
@@ -124,10 +124,10 @@ public class JmxScraper {
       return new Properties();
     }
     if (args.size() != 2) {
-      throw new ArgumentsParsingException("Exactly two arguments expected, got " + args.size());
+      throw new InvalidArgumentException("Exactly two arguments expected, got " + args.size());
     }
     if (!args.get(0).equalsIgnoreCase(CONFIG_ARG)) {
-      throw new ArgumentsParsingException("Unexpected first argument must be '" + CONFIG_ARG + "'");
+      throw new InvalidArgumentException("Unexpected first argument must be '" + CONFIG_ARG + "'");
     }
 
     String path = args.get(1);
@@ -138,28 +138,30 @@ public class JmxScraper {
     }
   }
 
-  private static Properties loadPropertiesFromStdin() throws ArgumentsParsingException {
+  private static Properties loadPropertiesFromStdin() throws InvalidArgumentException {
     Properties properties = new Properties();
     try (InputStream is = new DataInputStream(System.in)) {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new ArgumentsParsingException("Failed to read config properties from stdin", e);
+      // an IO error is very unlikely here
+      throw new InvalidArgumentException("Failed to read config properties from stdin", e);
     }
   }
 
-  private static Properties loadPropertiesFromPath(String path) throws ArgumentsParsingException {
+  private static Properties loadPropertiesFromPath(String path) throws InvalidArgumentException {
     Properties properties = new Properties();
     try (InputStream is = Files.newInputStream(Paths.get(path))) {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new ArgumentsParsingException(
+      throw new InvalidArgumentException(
           "Failed to read config properties file: '" + path + "'", e);
     }
   }
 
-  JmxScraper(JmxConnectorBuilder client, JmxMetricInsight service, JmxScraperConfig config) {
+  private JmxScraper(
+      JmxConnectorBuilder client, JmxMetricInsight service, JmxScraperConfig config) {
     this.client = client;
     this.service = service;
     this.config = config;
