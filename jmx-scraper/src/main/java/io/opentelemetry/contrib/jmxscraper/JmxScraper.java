@@ -81,10 +81,10 @@ public class JmxScraper {
       JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
       jmxScraper.start();
     } catch (ConfigurationException e) {
-      logger.log(Level.SEVERE, "ERROR: invalid configuration ", e);
+      logger.log(Level.SEVERE, "invalid configuration ", e);
       System.exit(1);
     } catch (ArgumentsParsingException e) {
-      logger.log(Level.SEVERE, "ERROR: invalid configuration provided through arguments", e);
+      logger.log(Level.SEVERE, "invalid configuration provided through arguments", e);
       logger.info(
           "Usage: java -jar <path_to_jmxscraper.jar> "
               + "-config <path_to_config.properties or - for stdin>");

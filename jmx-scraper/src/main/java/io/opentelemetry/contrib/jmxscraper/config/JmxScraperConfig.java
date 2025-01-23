@@ -137,9 +137,9 @@ public class JmxScraperConfig {
     scraperConfig.serviceUrl = serviceUrl;
 
     // TODO: we could support multiple values
-    String customConfig = config.getString(JMX_CUSTOM_CONFIG);
+    String customConfig = config.getString(JMX_CUSTOM_CONFIG, "");
     List<String> targetSystem = config.getList(JMX_TARGET_SYSTEM);
-    if (targetSystem.isEmpty() && customConfig == null) {
+    if (targetSystem.isEmpty() && customConfig.isEmpty()) {
       throw new ConfigurationException(
           "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
     }

@@ -35,7 +35,7 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
 
     // providing compatibility with the existing 'otel.jmx.interval.milliseconds' config option
     long intervalLegacy = config.getLong(JMX_INTERVAL_LEGACY, -1);
-    if (config.getDuration(METRIC_EXPORT_INTERVAL) == null && intervalLegacy > 0) {
+    if (config.getDuration(METRIC_EXPORT_INTERVAL) == null && intervalLegacy >= 0) {
       logger.warning(
           METRIC_EXPORT_INTERVAL
               + " deprecated option is used, replacing with '"
