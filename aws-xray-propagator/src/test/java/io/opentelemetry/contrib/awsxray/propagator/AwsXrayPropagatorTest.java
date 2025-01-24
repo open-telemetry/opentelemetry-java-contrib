@@ -21,10 +21,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class AwsXrayPropagatorTest {
 
@@ -54,7 +56,7 @@ class AwsXrayPropagatorTest {
 
   @Test
   void fields_valid() {
-    assertThat(subject.fields()).containsOnly("X-Amzn-Trace-Id");
+    assertThat(subject.fields()).contains("X-Amzn-Trace-Id");
   }
 
   @Test
@@ -97,53 +99,33 @@ class AwsXrayPropagatorTest {
                 SpanContext.create(
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
                 Context.current())
-            .with(
-                Baggage.builder()
-                    .put("cat", "meow")
-                    .put("dog", "bark")
-                    .put("Root", "ignored")
-                    .put("Parent", "ignored")
-                    .put("Sampled", "ignored")
-                    .build()),
+            .with(Baggage.builder().put("cat", "ignored").put("dog", "ignored").build()),
         carrier,
         SETTER);
 
+    // all non-lineage baggage is dropped from trace header
     assertThat(carrier)
         .containsEntry(
             TRACE_HEADER_KEY,
-            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0;"
-                + "cat=meow;dog=bark");
+            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0");
   }
 
   @Test
-  void inject_WithBaggage_LimitTruncates() {
+  void inject_WithLineage() {
     Map<String, String> carrier = new LinkedHashMap<>();
-    // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
-    // 3 character key value pair.
-    String key1 = Stream.generate(() -> "a").limit(252).collect(Collectors.joining());
-    String value1 = "a"; // 252 + 1 (=) + 1 = 254
-
-    String key2 = "b";
-    String value2 = "b"; // 1 + 1 (=) + 1 = 3
-
-    Baggage baggage = Baggage.builder().put(key1, value1).put(key2, value2).build();
-
     subject.inject(
         withSpanContext(
                 SpanContext.create(
                     TRACE_ID, SPAN_ID, TraceFlags.getDefault(), TraceState.getDefault()),
                 Context.current())
-            .with(baggage),
+            .with(Baggage.builder().put("Lineage", "32767:e65a2c4d:255").build()),
         carrier,
         SETTER);
 
     assertThat(carrier)
         .containsEntry(
             TRACE_HEADER_KEY,
-            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0;"
-                + key1
-                + '='
-                + value1);
+            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=0;Lineage=32767:e65a2c4d:255");
   }
 
   @Test
@@ -233,49 +215,57 @@ class AwsXrayPropagatorTest {
   }
 
   @Test
-  void extract_AdditionalFields() {
+  void extract_WithLineage() {
     Map<String, String> carrier = new LinkedHashMap<>();
     carrier.put(
         TRACE_HEADER_KEY,
-        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
+        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=32767:e65a2c4d:255");
 
     Context context = subject.extract(Context.current(), carrier, GETTER);
     assertThat(getSpanContext(context))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
                 TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue("Foo")).isEqualTo("Bar");
+    assertThat(Baggage.fromContext(context).getEntryValue("Lineage"))
+        .isEqualTo("32767:e65a2c4d:255");
   }
 
   @Test
-  void extract_Baggage_LimitTruncates() {
-    // Limit is 256 characters for all baggage. We add a 254-character key/value pair and a
-    // 3 character key value pair.
-    String key1 = Stream.generate(() -> "a").limit(252).collect(Collectors.joining());
-    String value1 = "a"; // 252 + 1 (=) + 1 = 254
-
-    String key2 = "b";
-    String value2 = "b"; // 1 + 1 (=) + 1 = 3
-
-    Map<String, String> carrier = new LinkedHashMap<>();
-    carrier.put(
+  void extract_inject_ValidTraceHeader() {
+    Map<String, String> carrier1 = new LinkedHashMap<>();
+    carrier1.put(
         TRACE_HEADER_KEY,
-        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;"
-            + key1
-            + '='
-            + value1
-            + ';'
-            + key2
-            + '='
-            + value2);
+        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=32767:e65a2c4d:255");
 
-    Context context = subject.extract(Context.current(), carrier, GETTER);
-    assertThat(getSpanContext(context))
-        .isEqualTo(
-            SpanContext.createFromRemoteParent(
-                TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
-    assertThat(Baggage.fromContext(context).getEntryValue(key1)).isEqualTo(value1);
-    assertThat(Baggage.fromContext(context).getEntryValue(key2)).isNull();
+    Context context = subject.extract(Context.current(), carrier1, GETTER);
+
+    // inject extracted trace context into new trace header
+    Map<String, String> carrier2 = new LinkedHashMap<>();
+    subject.inject(context, carrier2, SETTER);
+
+    assertThat(carrier2)
+        .containsEntry(
+            TRACE_HEADER_KEY,
+            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=32767:e65a2c4d:255");
+  }
+
+  @Test
+  void extract_inject_InvalidLineage() {
+    Map<String, String> carrier1 = new LinkedHashMap<>();
+    carrier1.put(
+        TRACE_HEADER_KEY,
+        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=1:badc0de:13");
+
+    Context context = subject.extract(Context.current(), carrier1, GETTER);
+
+    // inject extracted trace context into new trace header
+    Map<String, String> carrier2 = new LinkedHashMap<>();
+    subject.inject(context, carrier2, SETTER);
+
+    assertThat(carrier2)
+        .containsEntry(
+            TRACE_HEADER_KEY,
+            "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1");
   }
 
   @Test
@@ -379,6 +369,33 @@ class AwsXrayPropagatorTest {
     Context result = subject.extract(input, invalidHeaders, GETTER);
     assertThat(result).isSameAs(input);
     assertThat(getSpanContext(result)).isSameAs(SpanContext.getInvalid());
+  }
+
+  @ParameterizedTest
+  @MethodSource("providesBadLineages")
+  void extract_invalidLineage(String lineage) {
+    Map<String, String> carrier = new LinkedHashMap<>();
+    carrier.put(
+        TRACE_HEADER_KEY,
+        String.format(
+            "Root=2-1a2a3a4a-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=%s",
+            lineage));
+    Context context = subject.extract(Context.current(), carrier, GETTER);
+    assertThat(Baggage.fromContext(context).getEntryValue("Lineage")).isNull();
+  }
+
+  static Stream<Arguments> providesBadLineages() {
+    return Stream.of(
+        Arguments.of("1::"),
+        Arguments.of("1"),
+        Arguments.of(""),
+        Arguments.of(":"),
+        Arguments.of("::"),
+        Arguments.of("1:badc0de:13"),
+        Arguments.of(":fbadc0de:13"),
+        Arguments.of("1:fbadc0de:"),
+        Arguments.of("1::1"),
+        Arguments.of("65535:fbadc0de:255"));
   }
 
   @Test
@@ -485,11 +502,11 @@ class AwsXrayPropagatorTest {
         .isSameAs(SpanContext.getInvalid());
   }
 
-  static Context withSpanContext(SpanContext spanContext, Context context) {
+  private static Context withSpanContext(SpanContext spanContext, Context context) {
     return context.with(Span.wrap(spanContext));
   }
 
-  static SpanContext getSpanContext(Context context) {
+  SpanContext getSpanContext(Context context) {
     return Span.fromContext(context).getSpanContext();
   }
 }
