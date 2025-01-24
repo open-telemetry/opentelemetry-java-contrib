@@ -41,8 +41,8 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 | `otel.jmx.service.url`            | mandatory JMX URL to connect to the remote JVM                                               |
 | `otel.jmx.target.system`          | comma-separated list of systems to monitor, mandatory unless a custom configuration is used  |
 | `otel.jmx.custom.scraping.config` | path to a custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set |
-| `otel.jmx.username`               | user name for JMX connection                                                                 |
-| `otel.jmx.password`               | password for JMX connection                                                                  |
+| `otel.jmx.username`               | user name for JMX connection, mandatory when JMX authentication is enabled on target JVM     |
+| `otel.jmx.password`               | password for JMX connection, mandatory when JMX authentication is enabled on target JVM      |
 
 Supported values for `otel.jmx.target.system`:
 
