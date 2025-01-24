@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -56,6 +57,7 @@ public abstract class TargetSystemIntegrationTest {
 
   private static Network network;
   private static OtlpGrpcServer otlpServer;
+  private Collection<GenericContainer<?>> prerequisiteContainers;
   private GenericContainer<?> target;
   private JmxScraperContainer scraper;
 
@@ -86,12 +88,23 @@ public abstract class TargetSystemIntegrationTest {
 
   @AfterEach
   void afterEach() {
-    if (target != null && target.isRunning()) {
-      target.stop();
-    }
     if (scraper != null && scraper.isRunning()) {
       scraper.stop();
     }
+
+    if (target != null && target.isRunning()) {
+      target.stop();
+    }
+
+    if (prerequisiteContainers != null) {
+      prerequisiteContainers.forEach(
+          container -> {
+            if (container.isRunning()) {
+              container.stop();
+            }
+          });
+    }
+
     if (otlpServer != null) {
       otlpServer.reset();
     }
@@ -103,14 +116,31 @@ public abstract class TargetSystemIntegrationTest {
 
   @Test
   void endToEndTest(@TempDir Path tmpDir) {
+    startContainers(tmpDir);
+    verifyMetrics();
+  }
+
+  protected void startContainers(Path tmpDir) {
+    prerequisiteContainers = createPrerequisiteContainers();
 
     target =
         createTargetContainer(JMX_PORT)
             .withLogConsumer(new Slf4jLogConsumer(targetSystemLogger))
             .withNetwork(network)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
+
+    // If there are any containers that must be started before target then initialize them.
+    // Then make target depending on them, so it is started after dependencies
+    for (GenericContainer<?> container : prerequisiteContainers) {
+      container.withNetwork(network);
+      target.dependsOn(container);
+    }
+
+    // Target container must be running before scraper container is customized.
+    // It is necessary to allow interactions with the container, like file copying etc.
     target.start();
 
+    // Create and initialize scraper container
     scraper =
         new JmxScraperContainer(otlpEndpoint, scraperBaseImage())
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
@@ -119,14 +149,13 @@ public abstract class TargetSystemIntegrationTest {
 
     scraper = customizeScraperContainer(scraper, target, tmpDir);
     scraper.start();
-
-    verifyMetrics();
   }
 
   protected void verifyMetrics() {
     MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
         .atMost(Duration.ofSeconds(60))
+        .pollInterval(Duration.ofSeconds(1))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
@@ -156,6 +185,10 @@ public abstract class TargetSystemIntegrationTest {
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper;
+  }
+
+  protected Collection<GenericContainer<?>> createPrerequisiteContainers() {
+    return Collections.emptyList();
   }
 
   private static class OtlpGrpcServer extends ServerExtension {

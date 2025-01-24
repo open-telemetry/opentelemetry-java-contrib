@@ -1,0 +1,44 @@
+---
+# Kafka Consumer metrics
+rules:
+
+  - bean: kafka.consumer:client-id=*,type=consumer-fetch-manager-metrics
+    metricAttribute:
+      client.id: param(client-id)
+    prefix: kafka.consumer.
+    type: gauge
+    mapping:
+      fetch-rate:
+        desc: The number of fetch requests for all topics per second
+        unit: '{request}'
+      records-lag-max:
+        desc: Number of messages the consumer lags behind the producer
+        unit: '{message}'
+      bytes-consumed-rate:
+        metric: total.bytes-consumed-rate
+        desc: The average number of bytes consumed for all topics per second
+        unit: 'By'
+      fetch-size-avg:
+        metric: total.fetch-size-avg
+        desc: The average number of bytes fetched per request for all topics
+        unit: 'By'
+      records-consumed-rate:
+        metric: total.records-consumed-rate
+        desc: The average number of records consumed for all topics per second
+        unit: '{record}'
+
+  - bean: kafka.consumer:client-id=*,topic=*,type=consumer-fetch-manager-metrics
+    metricAttribute:
+      client.id: param(client-id)
+      topic: param(topic)
+    prefix: kafka.consumer.
+    unit: By
+    type: gauge
+    mapping:
+      bytes-consumed-rate:
+        desc: The average number of bytes consumed per second
+      fetch-size-avg:
+        desc: The average number of bytes fetched per request
+      records-consumed-rate:
+        desc: The average number of records consumed per second
+        unit: '{record}'
