@@ -8,8 +8,8 @@ package io.opentelemetry.contrib.jmxscraper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.opentelemetry.contrib.jmxscraper.config.ConfigurationException;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
+import io.opentelemetry.contrib.jmxscraper.config.TestUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -17,47 +17,53 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 
 class JmxScraperTest {
+
   @Test
   void shouldThrowExceptionWhenInvalidCommandLineArgsProvided() {
-    // Given
-    List<String> emptyArgs = Collections.singletonList("-nonExistentOption");
-
-    // When and Then
-    assertThatThrownBy(() -> JmxScraper.parseArgs(emptyArgs))
-        .isInstanceOf(ArgumentsParsingException.class);
+    testInvalidArguments("-nonExistentOption");
+    testInvalidArguments("-potato", "-config");
+    testInvalidArguments("-config", "path", "-nonExistentOption");
   }
 
   @Test
-  void shouldThrowExceptionWhenTooManyCommandLineArgsProvided() {
-    // Given
-    List<String> args = Arrays.asList("-config", "path", "-nonExistentOption");
-
-    // When and Then
-    assertThatThrownBy(() -> JmxScraper.parseArgs(args))
-        .isInstanceOf(ArgumentsParsingException.class);
+  void emptyArgumentsAllowed() throws InvalidArgumentException {
+    assertThat(JmxScraper.parseArgs(Collections.emptyList()))
+        .describedAs("empty arguments allowed to use JVM properties")
+        .isEmpty();
   }
 
   @Test
-  void shouldCreateConfig_propertiesLoadedFromFile()
-      throws ConfigurationException, ArgumentsParsingException {
+  void shouldThrowExceptionWhenMissingProperties() {
+    testInvalidArguments("-config", "missing.properties");
+  }
+
+  private static void testInvalidArguments(String... args) {
+    assertThatThrownBy(() -> JmxScraper.parseArgs(Arrays.asList(args)))
+        .isInstanceOf(InvalidArgumentException.class);
+  }
+
+  @Test
+  void shouldCreateConfig_propertiesLoadedFromFile() throws InvalidArgumentException {
     // Given
     String filePath =
         ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
     List<String> args = Arrays.asList("-config", filePath);
 
     // When
-    JmxScraperConfig config =
-        JmxScraperConfig.fromProperties(JmxScraper.parseArgs(args), new Properties());
+    Properties parsedConfig = JmxScraper.parseArgs(args);
+    JmxScraperConfig config = JmxScraperConfig.fromConfig(TestUtil.configProperties(parsedConfig));
 
     // Then
     assertThat(config).isNotNull();
+    assertThat(config.getServiceUrl())
+        .isEqualTo("service:jmx:rmi:///jndi/rmi://myhost:12345/jmxrmi");
   }
 
   @Test
-  void shouldCreateConfig_propertiesLoadedFromStdIn()
-      throws ConfigurationException, ArgumentsParsingException, IOException {
+  void shouldCreateConfig_propertiesLoadedFromStdIn() throws InvalidArgumentException, IOException {
     InputStream originalIn = System.in;
     try (InputStream stream =
         ClassLoader.getSystemClassLoader().getResourceAsStream("validConfig.properties")) {
@@ -66,13 +72,58 @@ class JmxScraperTest {
       List<String> args = Arrays.asList("-config", "-");
 
       // When
+      Properties parsedConfig = JmxScraper.parseArgs(args);
       JmxScraperConfig config =
-          JmxScraperConfig.fromProperties(JmxScraper.parseArgs(args), new Properties());
+          JmxScraperConfig.fromConfig(TestUtil.configProperties(parsedConfig));
 
       // Then
       assertThat(config).isNotNull();
+      assertThat(config.getServiceUrl())
+          .isEqualTo("service:jmx:rmi:///jndi/rmi://myhost:12345/jmxrmi");
     } finally {
       System.setIn(originalIn);
     }
+  }
+
+  @Test
+  @ClearSystemProperty(key = "javax.net.ssl.keyStore")
+  @ClearSystemProperty(key = "javax.net.ssl.keyStorePassword")
+  @ClearSystemProperty(key = "javax.net.ssl.keyStoreType")
+  @ClearSystemProperty(key = "javax.net.ssl.trustStore")
+  @ClearSystemProperty(key = "javax.net.ssl.trustStorePassword")
+  @ClearSystemProperty(key = "javax.net.ssl.trustStoreType")
+  void systemPropertiesPropagation() {
+
+    assertThat(System.getProperty("javax.net.ssl.keyStore"))
+        .describedAs("keystore config should not be set")
+        .isNull();
+
+    Properties properties = new Properties();
+    properties.setProperty("javax.net.ssl.keyStore", "/my/key/store");
+    properties.setProperty("javax.net.ssl.keyStorePassword", "abc123");
+    properties.setProperty("javax.net.ssl.keyStoreType", "JKS");
+    properties.setProperty("javax.net.ssl.trustStore", "/my/trust/store");
+    properties.setProperty("javax.net.ssl.trustStorePassword", "def456");
+    properties.setProperty("javax.net.ssl.trustStoreType", "JKS");
+
+    properties.setProperty("must.be.ignored", "should not be propagated");
+
+    JmxScraper.propagateToSystemProperties(properties);
+
+    assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
+    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("abc123");
+    assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
+    assertThat(System.getProperty("javax.net.ssl.trustStore")).isEqualTo("/my/trust/store");
+    assertThat(System.getProperty("javax.net.ssl.trustStorePassword")).isEqualTo("def456");
+    assertThat(System.getProperty("javax.net.ssl.trustStoreType")).isEqualTo("JKS");
+
+    assertThat(System.getProperty("must.be.ignored")).isNull();
+
+    // when already set, current system properties have priority
+    properties.setProperty("javax.net.ssl.keyStore", "/another/key/store");
+    JmxScraper.propagateToSystemProperties(properties);
+    assertThat(System.getProperty("javax.net.ssl.keyStore"))
+        .describedAs("already set system properties must be preserved")
+        .isEqualTo("/my/key/store");
   }
 }
