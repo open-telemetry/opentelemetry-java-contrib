@@ -324,7 +324,7 @@ public class MicrometerDoubleCounterTest {
     callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
 
-    double expectedCount = 10.0;
+    double expectedCount = 20.0;
     for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
       expectedCount += value;
 
@@ -389,7 +389,7 @@ public class MicrometerDoubleCounterTest {
     callbackRegistrar.run();
     assertThat(counter.count()).isEqualTo(20.0);
 
-    double expectedCount = 10.0;
+    double expectedCount = 20.0;
     for (double value : RandomUtils.randomDoubles(10, 0.0, 500.0)) {
       expectedCount += value;
 

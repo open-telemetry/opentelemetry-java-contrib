@@ -24,8 +24,8 @@ final class CoinFlipSampler extends ConsistentSampler {
 
   private static final SplittableRandom random = new SplittableRandom(0x160a50a2073e17e6L);
 
-  private final ComposableSampler samplerA;
-  private final ComposableSampler samplerB;
+  private final Composable samplerA;
+  private final Composable samplerB;
   private final double probability;
   private final String description;
 
@@ -36,7 +36,7 @@ final class CoinFlipSampler extends ConsistentSampler {
    * @param samplerA the first delegate sampler
    * @param samplerB the second delegate sampler
    */
-  CoinFlipSampler(ComposableSampler samplerA, ComposableSampler samplerB) {
+  CoinFlipSampler(Composable samplerA, Composable samplerB) {
     this(samplerA, samplerB, 0.5);
   }
 
@@ -48,7 +48,7 @@ final class CoinFlipSampler extends ConsistentSampler {
    * @param samplerA the first delegate sampler
    * @param samplerB the second delegate sampler
    */
-  CoinFlipSampler(ComposableSampler samplerA, ComposableSampler samplerB, double probability) {
+  CoinFlipSampler(Composable samplerA, Composable samplerB, double probability) {
     this.samplerA = requireNonNull(samplerA);
     this.samplerB = requireNonNull(samplerB);
     this.probability = probability;
