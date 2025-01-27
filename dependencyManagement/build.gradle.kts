@@ -7,14 +7,14 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-val otelInstrumentationVersion = "2.11.0-alpha"
+val otelInstrumentationVersion = "2.12.0-alpha"
 
 val DEPENDENCY_BOMS = listOf(
   "com.fasterxml.jackson:jackson-bom:2.18.2",
   "com.google.guava:guava-bom:33.4.0-jre",
   "com.linecorp.armeria:armeria-bom:1.31.3",
   "org.junit:junit-bom:5.11.4",
-  "io.grpc:grpc-bom:1.69.0",
+  "io.grpc:grpc-bom:1.70.0",
   "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}",
   "org.testcontainers:testcontainers-bom:1.20.4"
 )
@@ -35,7 +35,7 @@ val CORE_DEPENDENCIES = listOf(
   "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
   "com.google.errorprone:error_prone_core:${errorProneVersion}",
   "io.github.netmikey.logunit:logunit-jul:2.0.0",
-  "io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha",
+  "io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha",
   // these two constraints can be removed once the opentelemetry-instrumentation-bom-alpha
   // is updated to contain the latest version of opentelemetry-semconv
   "io.opentelemetry.semconv:opentelemetry-semconv:${semConvVersion}",
@@ -58,7 +58,7 @@ val DEPENDENCIES = listOf(
   "com.google.code.findbugs:jsr305:3.0.2",
   "com.squareup.okhttp3:okhttp:4.12.0",
   "com.uber.nullaway:nullaway:0.12.3",
-  "org.assertj:assertj-core:3.27.2",
+  "org.assertj:assertj-core:3.27.3",
   "org.awaitility:awaitility:4.2.2",
   "org.bouncycastle:bcpkix-jdk15on:1.70",
   "org.junit-pioneer:junit-pioneer:1.9.1",

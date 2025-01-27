@@ -9,7 +9,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.kafka")
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
   api("io.opentelemetry:opentelemetry-sdk-common")
-  api("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+  api("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
   api("org.apache.kafka:kafka-clients")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

@@ -7,7 +7,7 @@ plugins {
   id("com.github.johnrengelman.shadow")
   id("me.champeau.jmh") version "0.7.2"
   id("ru.vyarus.animalsniffer") version "1.7.2"
-  id("com.squareup.wire") version "5.2.0"
+  id("com.squareup.wire") version "5.2.1"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -53,7 +53,7 @@ wire {
   java {}
 
   sourcePath {
-    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
   }
 
   root(

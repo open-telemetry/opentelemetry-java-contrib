@@ -67,9 +67,7 @@ tasks {
 
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
-      showExceptions = true
-      showCauses = true
-      showStackTraces = true
+      showStandardStreams = true
     }
   }
 

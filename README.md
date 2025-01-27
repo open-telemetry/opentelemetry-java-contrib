@@ -18,6 +18,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
+| alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
 | beta    | [GCP Resources](./gcp-resources/README.md)                        |
 | beta    | [Inferred Spans](./inferred-spans/README.md)                      |
 | alpha   | [JFR Connection](./jfr-connection/README.md)                      |

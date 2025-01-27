@@ -19,6 +19,9 @@ components:
   aws-xray-propagator:
     - wangzlei
     - srprash
+  azure-resources:
+    - trask
+    - zeitlinger
   baggage-processor:
     - mikegoldsmith
     - zeitlinger
@@ -31,6 +34,9 @@ components:
     - LikeTheSalad
     - zeitlinger
   gcp-resources:
+    - jsuereth
+    - psx95
+  gcp-auth-extension:
     - jsuereth
     - psx95
   jfr-connection:
