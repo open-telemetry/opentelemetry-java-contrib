@@ -78,7 +78,7 @@ public class InferredSpansProcessorBuilder {
 
   /**
    * By default, async profiler prints warning messages about missing JVM symbols to standard
-   * output. Set this option to {@code true} to suppress such messages
+   * output. Set this option to {@code false} to suppress such messages.
    */
   public InferredSpansProcessorBuilder profilerLoggingEnabled(boolean profilerLoggingEnabled) {
     this.profilerLoggingEnabled = profilerLoggingEnabled;
