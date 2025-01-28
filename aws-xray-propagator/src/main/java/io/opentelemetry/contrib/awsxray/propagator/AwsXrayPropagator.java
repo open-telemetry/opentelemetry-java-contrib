@@ -138,14 +138,14 @@ public final class AwsXrayPropagator implements TextMapPropagator {
         .append(samplingFlag);
 
     Baggage baggage = Baggage.fromContext(context);
-    String lineageV2Header = baggage.getEntryValue(LINEAGE_KEY);
+    String lineageHeader = baggage.getEntryValue(LINEAGE_KEY);
 
-    if (lineageV2Header != null) {
+    if (lineageHeader != null) {
       traceHeader
           .append(TRACE_HEADER_DELIMITER)
           .append(LINEAGE_KEY)
           .append(KV_DELIMITER)
-          .append(lineageV2Header);
+          .append(lineageHeader);
     }
 
     // add 256 character truncation
@@ -179,7 +179,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
 
     String traceId = TraceId.getInvalid();
     String spanId = SpanId.getInvalid();
-    String lineageV2Header;
+    String lineageHeader;
     Boolean isSampled = false;
 
     Baggage contextBaggage = Baggage.fromContext(context);
@@ -222,9 +222,9 @@ public final class AwsXrayPropagator implements TextMapPropagator {
       } else if (trimmedPart.startsWith(SAMPLED_FLAG_KEY)) {
         isSampled = parseTraceFlag(value);
       } else if (trimmedPart.startsWith(LINEAGE_KEY)) {
-        lineageV2Header = parseLineageV2Header(value);
-        if (isValidLineage(lineageV2Header)) {
-          baggageBuilder.put(LINEAGE_KEY, lineageV2Header);
+        lineageHeader = parseLineageHeader(value);
+        if (isValidLineage(lineageHeader)) {
+          baggageBuilder.put(LINEAGE_KEY, lineageHeader);
         }
       }
     }
@@ -326,7 +326,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     return xrayParentId;
   }
 
-  private static String parseLineageV2Header(String xrayLineageHeader) {
+  private static String parseLineageHeader(String xrayLineageHeader) {
     long numOfDelimiters = xrayLineageHeader.chars().filter(ch -> ch == LINEAGE_DELIMITER).count();
 
     if (xrayLineageHeader.length() < LINEAGE_MIN_LENGTH
