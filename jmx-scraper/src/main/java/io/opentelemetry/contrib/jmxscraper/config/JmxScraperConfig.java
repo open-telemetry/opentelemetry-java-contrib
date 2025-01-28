@@ -8,15 +8,19 @@ package io.opentelemetry.contrib.jmxscraper.config;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /** This class keeps application settings */
 public class JmxScraperConfig {
+
+  private static final Logger logger = Logger.getLogger(JmxScraperConfig.class.getName());
 
   // metric sdk configuration
   static final String METRIC_EXPORT_INTERVAL = "otel.metric.export.interval";
@@ -25,8 +29,13 @@ public class JmxScraperConfig {
   static final String JMX_INTERVAL_LEGACY = "otel.jmx.interval.milliseconds";
 
   static final String JMX_SERVICE_URL = "otel.jmx.service.url";
-  // TODO: align with instrumentation 'otel.jmx.config' + support list of values
-  static final String JMX_CUSTOM_CONFIG = "otel.jmx.custom.scraping.config";
+
+  // the same as config option defined in instrumentation
+  static final String JMX_CONFIG = "otel.jmx.config";
+
+  // not documented on purpose as it's deprecated
+  static final String JMX_CONFIG_LEGACY = "otel.jmx.custom.scraping.config";
+
   static final String JMX_TARGET_SYSTEM = "otel.jmx.target.system";
 
   static final String JMX_USERNAME = "otel.jmx.username";
@@ -55,7 +64,7 @@ public class JmxScraperConfig {
 
   private String serviceUrl = "";
 
-  @Nullable private String customJmxScrapingConfigPath;
+  private List<String> jmxConfig = Collections.emptyList();
 
   private Set<String> targetSystems = Collections.emptySet();
 
@@ -76,9 +85,8 @@ public class JmxScraperConfig {
     return serviceUrl;
   }
 
-  @Nullable
-  public String getCustomJmxScrapingConfigPath() {
-    return customJmxScrapingConfigPath;
+  public List<String> getJmxConfig() {
+    return jmxConfig;
   }
 
   public Set<String> getTargetSystems() {
@@ -136,12 +144,22 @@ public class JmxScraperConfig {
     }
     scraperConfig.serviceUrl = serviceUrl;
 
-    // TODO: we could support multiple values
-    String customConfig = config.getString(JMX_CUSTOM_CONFIG, "");
+    List<String> jmxConfig = config.getList(JMX_CONFIG);
     List<String> targetSystem = config.getList(JMX_TARGET_SYSTEM);
-    if (targetSystem.isEmpty() && customConfig.isEmpty()) {
+
+    // providing compatibility with the deprecated 'otel.jmx.custom.scraping.config' config option
+    String jmxConfigDeprecated = config.getString(JMX_CONFIG_LEGACY);
+    if (jmxConfigDeprecated != null) {
+      logger.warning(JMX_CONFIG_LEGACY + " deprecated option is used, replacing with '" + JMX_CONFIG
+          + "' is recommended");
+      List<String> list = new ArrayList<>(jmxConfig);
+      list.add(jmxConfigDeprecated);
+      jmxConfig = list;
+    }
+
+    if (targetSystem.isEmpty() && jmxConfig.isEmpty()) {
       throw new ConfigurationException(
-          "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CUSTOM_CONFIG + "' must be set");
+          "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CONFIG + "' must be set");
     }
     targetSystem.forEach(
         s -> {
@@ -149,7 +167,8 @@ public class JmxScraperConfig {
             throw new ConfigurationException("unsupported target system: '" + s + "'");
           }
         });
-    scraperConfig.customJmxScrapingConfigPath = customConfig;
+
+    scraperConfig.jmxConfig = jmxConfig;
     scraperConfig.targetSystems = new HashSet<>(targetSystem);
 
     scraperConfig.username = config.getString("otel.jmx.username");
