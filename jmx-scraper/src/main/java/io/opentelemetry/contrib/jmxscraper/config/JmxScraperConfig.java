@@ -150,8 +150,11 @@ public class JmxScraperConfig {
     // providing compatibility with the deprecated 'otel.jmx.custom.scraping.config' config option
     String jmxConfigDeprecated = config.getString(JMX_CONFIG_LEGACY);
     if (jmxConfigDeprecated != null) {
-      logger.warning(JMX_CONFIG_LEGACY + " deprecated option is used, replacing with '" + JMX_CONFIG
-          + "' is recommended");
+      logger.warning(
+          JMX_CONFIG_LEGACY
+              + " deprecated option is used, replacing with '"
+              + JMX_CONFIG
+              + "' is recommended");
       List<String> list = new ArrayList<>(jmxConfig);
       list.add(jmxConfigDeprecated);
       jmxConfig = list;

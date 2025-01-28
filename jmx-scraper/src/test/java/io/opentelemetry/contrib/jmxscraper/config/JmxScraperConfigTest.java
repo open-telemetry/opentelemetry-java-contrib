@@ -64,11 +64,11 @@ class JmxScraperConfigTest {
 
   @ParameterizedTest(name = "custom yaml = {arguments}")
   @ValueSource(booleans = {true, false})
-  public void shouldCreateMinimalValidConfiguration(boolean customYaml){
+  public void shouldCreateMinimalValidConfiguration(boolean customYaml) {
     // Given
     Properties properties = new Properties();
     properties.setProperty(JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    if(customYaml){
+    if (customYaml) {
       properties.setProperty(JMX_CONFIG, "/file.yaml");
     } else {
       properties.setProperty(JMX_TARGET_SYSTEM, "tomcat");
@@ -81,14 +81,13 @@ class JmxScraperConfigTest {
     assertThat(config.getServiceUrl())
         .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
 
-    if(customYaml){
+    if (customYaml) {
       assertThat(config.getJmxConfig()).containsExactly("/file.yaml");
       assertThat(config.getTargetSystems()).isEmpty();
     } else {
       assertThat(config.getJmxConfig()).isEmpty();
       assertThat(config.getTargetSystems()).containsExactly("tomcat");
     }
-
 
     assertThat(config.getSamplingInterval())
         .describedAs("default sampling interval must align to default metric export interval")
@@ -136,8 +135,7 @@ class JmxScraperConfigTest {
     // When and Then
     assertThatThrownBy(() -> fromConfig(TestUtil.configProperties(properties)))
         .isInstanceOf(ConfigurationException.class)
-        .hasMessage(
-            "at least one of 'otel.jmx.target.system' or 'otel.jmx.config' must be set");
+        .hasMessage("at least one of 'otel.jmx.target.system' or 'otel.jmx.config' must be set");
   }
 
   @Test
