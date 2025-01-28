@@ -77,6 +77,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static final int LINEAGE_MAX_LOOP_COUNTER = 32767;
   private static final int LINEAGE_MAX_REQUEST_COUNTER = 255;
   private static final int LINEAGE_MIN_COUNTER = 0;
+  private static final String INVALID_LINEAGE = "-1:11111111:0";
 
   private static final List<String> FIELDS = Collections.singletonList(TRACE_HEADER_KEY);
 
@@ -331,14 +332,14 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     if (xrayLineageHeader.length() < LINEAGE_MIN_LENGTH
         || xrayLineageHeader.length() > LINEAGE_MAX_LENGTH
         || numOfDelimiters != 2) {
-      return AwsXrayPropagator.getInvalidLineageV2Header();
+      return INVALID_LINEAGE;
     }
 
     return xrayLineageHeader;
   }
 
   private static boolean isValidLineage(String key) {
-    String[] split = key.split(":");
+    String[] split = key.split(String.valueOf(LINEAGE_DELIMITER));
     String hash = split[1];
     int loopCounter = parseIntOrReturnNegative(split[0]);
     int requestCounter = parseIntOrReturnNegative(split[2]);
@@ -350,10 +351,6 @@ public final class AwsXrayPropagator implements TextMapPropagator {
         loopCounter <= LINEAGE_MAX_LOOP_COUNTER && loopCounter >= LINEAGE_MIN_COUNTER;
 
     return isHashValid && isValidRequestCounter && isValidLoopCounter;
-  }
-
-  private static String getInvalidLineageV2Header() {
-    return "-1:11111111:0";
   }
 
   @Nullable

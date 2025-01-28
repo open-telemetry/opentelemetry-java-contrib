@@ -231,6 +231,32 @@ class AwsXrayPropagatorTest {
   }
 
   @Test
+  void extract_AddedLineagePreservesExistingBaggage() {
+    Baggage expectedBaggage =
+        Baggage.builder()
+            .put("cat", "meow")
+            .put("dog", "bark")
+            .put("Lineage", "32767:e65a2c4d:255")
+            .build();
+    Map<String, String> carrier = new LinkedHashMap<>();
+    carrier.put(
+        TRACE_HEADER_KEY,
+        "Root=1-8a3c60f7-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Lineage=32767:e65a2c4d:255");
+
+    Context context =
+        subject.extract(
+            Context.current().with(Baggage.builder().put("cat", "meow").put("dog", "bark").build()),
+            carrier,
+            GETTER);
+    assertThat(getSpanContext(context))
+        .isEqualTo(
+            SpanContext.createFromRemoteParent(
+                TRACE_ID, SPAN_ID, TraceFlags.getSampled(), TraceState.getDefault()));
+
+    assertThat(Baggage.fromContext(context).asMap()).isEqualTo(expectedBaggage.asMap());
+  }
+
+  @Test
   void extract_inject_ValidTraceHeader() {
     Map<String, String> carrier1 = new LinkedHashMap<>();
     carrier1.put(
@@ -395,7 +421,9 @@ class AwsXrayPropagatorTest {
         Arguments.of(":fbadc0de:13"),
         Arguments.of("1:fbadc0de:"),
         Arguments.of("1::1"),
-        Arguments.of("65535:fbadc0de:255"));
+        Arguments.of("65535:fbadc0de:255"),
+        Arguments.of("-213:e65a2c4d:255"),
+        Arguments.of("213:e65a2c4d:-22"));
   }
 
   @Test
