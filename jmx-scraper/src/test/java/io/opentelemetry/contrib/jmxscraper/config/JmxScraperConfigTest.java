@@ -5,7 +5,8 @@
 
 package io.opentelemetry.contrib.jmxscraper.config;
 
-import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_CUSTOM_CONFIG;
+import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_CONFIG;
+import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_CONFIG_LEGACY;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_PASSWORD;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REALM;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REGISTRY_SSL;
@@ -22,6 +23,8 @@ import java.time.Duration;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class JmxScraperConfigTest {
   private static Properties validProperties;
@@ -31,7 +34,7 @@ class JmxScraperConfigTest {
     validProperties = new Properties();
     validProperties.setProperty(
         JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    validProperties.setProperty(JMX_CUSTOM_CONFIG, "/path/to/config.yaml");
+    validProperties.setProperty(JMX_CONFIG, "/path/to/config.yaml");
     validProperties.setProperty(JMX_TARGET_SYSTEM, "tomcat, activemq");
     validProperties.setProperty(JMX_REGISTRY_SSL, "true");
     validProperties.setProperty(JMX_USERNAME, "some-user");
@@ -50,7 +53,7 @@ class JmxScraperConfigTest {
     // Then
     assertThat(config.getServiceUrl())
         .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("/path/to/config.yaml");
+    assertThat(config.getJmxConfig()).containsExactly("/path/to/config.yaml");
     assertThat(config.getTargetSystems()).containsExactlyInAnyOrder("tomcat", "activemq");
     assertThat(config.getSamplingInterval()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getUsername()).isEqualTo("some-user");
@@ -59,12 +62,17 @@ class JmxScraperConfigTest {
     assertThat(config.getRealm()).isEqualTo("some-realm");
   }
 
-  @Test
-  void shouldCreateMinimalValidConfiguration() {
+  @ParameterizedTest(name = "custom yaml = {arguments}")
+  @ValueSource(booleans = {true, false})
+  public void shouldCreateMinimalValidConfiguration(boolean customYaml) {
     // Given
     Properties properties = new Properties();
     properties.setProperty(JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    properties.setProperty(JMX_CUSTOM_CONFIG, "/file.properties");
+    if (customYaml) {
+      properties.setProperty(JMX_CONFIG, "/file.yaml");
+    } else {
+      properties.setProperty(JMX_TARGET_SYSTEM, "tomcat");
+    }
 
     // When
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
@@ -72,8 +80,15 @@ class JmxScraperConfigTest {
     // Then
     assertThat(config.getServiceUrl())
         .isEqualTo("jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
-    assertThat(config.getCustomJmxScrapingConfigPath()).isEqualTo("/file.properties");
-    assertThat(config.getTargetSystems()).isEmpty();
+
+    if (customYaml) {
+      assertThat(config.getJmxConfig()).containsExactly("/file.yaml");
+      assertThat(config.getTargetSystems()).isEmpty();
+    } else {
+      assertThat(config.getJmxConfig()).isEmpty();
+      assertThat(config.getTargetSystems()).containsExactly("tomcat");
+    }
+
     assertThat(config.getSamplingInterval())
         .describedAs("default sampling interval must align to default metric export interval")
         .isEqualTo(Duration.ofMinutes(1));
@@ -81,6 +96,21 @@ class JmxScraperConfigTest {
     assertThat(config.getPassword()).isNull();
     assertThat(config.getRemoteProfile()).isNull();
     assertThat(config.getRealm()).isNull();
+  }
+
+  @Test
+  void legacyCustomScrapingConfig() {
+    // Given
+    Properties properties = new Properties();
+    properties.setProperty(JMX_SERVICE_URL, "jservice:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+    properties.setProperty(JMX_CONFIG_LEGACY, "/file.yaml");
+    properties.setProperty(JMX_CONFIG, "/another.yaml");
+
+    // When
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    // Then
+    assertThat(config.getJmxConfig()).containsOnly("/file.yaml", "/another.yaml");
   }
 
   @Test
@@ -99,14 +129,13 @@ class JmxScraperConfigTest {
   void shouldFailValidation_missingConfigPathAndTargetSystem() {
     // Given
     Properties properties = (Properties) validProperties.clone();
-    properties.remove(JMX_CUSTOM_CONFIG);
+    properties.remove(JMX_CONFIG);
     properties.remove(JMX_TARGET_SYSTEM);
 
     // When and Then
     assertThatThrownBy(() -> fromConfig(TestUtil.configProperties(properties)))
         .isInstanceOf(ConfigurationException.class)
-        .hasMessage(
-            "at least one of 'otel.jmx.target.system' or 'otel.jmx.custom.scraping.config' must be set");
+        .hasMessage("at least one of 'otel.jmx.target.system' or 'otel.jmx.config' must be set");
   }
 
   @Test

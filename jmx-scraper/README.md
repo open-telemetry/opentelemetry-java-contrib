@@ -16,7 +16,7 @@ Minimal configuration required
 
 - `otel.jmx.service.url` for example `service:jmx:rmi:///jndi/rmi://server:9999/jmxrmi` for `server`
   host on port `9999` with RMI JMX connector.
-- `otel.jmx.target.system` or `otel.jmx.custom.scraping.config`
+- `otel.jmx.target.system` or `otel.jmx.config`
 
 Configuration can be provided through:
 
@@ -36,13 +36,13 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 
 ## Configuration reference
 
-| config option                     | description                                                                                  |
-|-----------------------------------|----------------------------------------------------------------------------------------------|
-| `otel.jmx.service.url`            | mandatory JMX URL to connect to the remote JVM                                               |
-| `otel.jmx.target.system`          | comma-separated list of systems to monitor, mandatory unless a custom configuration is used  |
-| `otel.jmx.custom.scraping.config` | path to a custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set |
-| `otel.jmx.username`               | user name for JMX connection, mandatory when JMX authentication is enabled on target JVM     |
-| `otel.jmx.password`               | password for JMX connection, mandatory when JMX authentication is enabled on target JVM      |
+| config option            | description                                                                                                         |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `otel.jmx.service.url`   | mandatory JMX URL to connect to the remote JVM                                                                      |
+| `otel.jmx.target.system` | comma-separated list of systems to monitor, mandatory unless a custom configuration is used                         |
+| `otel.jmx.config`        | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set |
+| `otel.jmx.username`      | user name for JMX connection, mandatory when JMX authentication is enabled on target JVM                            |
+| `otel.jmx.password`      | password for JMX connection, mandatory when JMX authentication is enabled on target JVM                             |
 
 Supported values for `otel.jmx.target.system`:
 
