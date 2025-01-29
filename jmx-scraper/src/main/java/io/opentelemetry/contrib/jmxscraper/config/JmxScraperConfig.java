@@ -171,8 +171,8 @@ public class JmxScraperConfig {
           }
         });
 
-    scraperConfig.jmxConfig = jmxConfig;
-    scraperConfig.targetSystems = new HashSet<>(targetSystem);
+    scraperConfig.jmxConfig = Collections.unmodifiableList(jmxConfig);
+    scraperConfig.targetSystems = Collections.unmodifiableSet(new HashSet<>(targetSystem));
 
     scraperConfig.username = config.getString("otel.jmx.username");
     scraperConfig.password = config.getString("otel.jmx.password");
