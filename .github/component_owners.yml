@@ -22,7 +22,7 @@ components:
   baggage-procesor:
     - mikegoldsmith
     - zeitlinger
-  cloudfoundry-resource:
+  cloudfoundry-resources:
     - KarstenSchnitter
   compressors:
     - jack-berg

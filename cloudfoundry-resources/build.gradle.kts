@@ -4,8 +4,8 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "OpenTelemetry CloudFoundry Resource"
-otelJava.moduleName.set("io.opentelemetry.contrib.cloudfoundry.resource")
+description = "OpenTelemetry CloudFoundry Resources"
+otelJava.moduleName.set("io.opentelemetry.contrib.cloudfoundry.resources")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
