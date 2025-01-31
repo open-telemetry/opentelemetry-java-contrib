@@ -10,7 +10,7 @@ Before submitting new features or changes to current functionality, it is recomm
 [open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new)
 and discuss your ideas or propose the changes you wish to make.
 
--Questions? Ask in the OpenTelemetry [java channel](https://cloud-native.slack.com/archives/C014L2KCTE3)
+Questions? Ask in the OpenTelemetry [java channel](https://cloud-native.slack.com/archives/C014L2KCTE3)
 
 Pull requests for bug fixes are always welcome!
 
@@ -18,15 +18,10 @@ Pull requests for bug fixes are always welcome!
 
 To work with this repository, ensure you have:
 
-Tools:
+### Tools:
 
--JDK 11+
+Java 17 or higher
 
--Java 17 or higher
-
--Gradle 7+
-
--Git
 
 ### Platform Notes:
 
@@ -87,7 +82,11 @@ Failure? Check logs for errors or mismatched dependencies.
 
 ## Contributing Rules
 
-Style Guide: Follow the Java Instrumentation Style Guide.
+Follow the Java Instrumentation [Style Guide](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/style-guideline.md) from the opentelemetry-java-instrumentation repository.
+
+Failure? Check logs for errors or mismatched dependencies.
+
+
 
 ### Gradle conventions
 
