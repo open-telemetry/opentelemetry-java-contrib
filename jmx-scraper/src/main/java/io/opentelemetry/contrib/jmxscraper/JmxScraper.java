@@ -83,7 +83,7 @@ public class JmxScraper {
       Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
       Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
 
-      if(testMode) {
+      if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
         JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
@@ -94,10 +94,10 @@ public class JmxScraper {
       System.exit(1);
     } catch (InvalidArgumentException e) {
       logger.log(Level.SEVERE, "invalid configuration provided through arguments", e);
-      logger.info(
-          "Usage: java -jar <path_to_jmxscraper.jar> [-test] [-config <conf>]");
+      logger.info("Usage: java -jar <path_to_jmxscraper.jar> [-test] [-config <conf>]");
       logger.info("  -test           test JMX connection with provided configuration and exit");
-      logger.info("  -config <conf>  provide configuration, where <conf> is - for stdin, or <path_to_config.properties>" );
+      logger.info(
+          "  -config <conf>  provide configuration, where <conf> is - for stdin, or <path_to_config.properties>");
       System.exit(1);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Unable to connect ", e);

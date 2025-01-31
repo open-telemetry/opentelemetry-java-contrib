@@ -36,10 +36,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     String scraperJarPath = System.getProperty("shadow.jar.path");
     assertThat(scraperJarPath).isNotNull();
 
-    this.withCopyFileToContainer(MountableFile.forHostPath(scraperJarPath), "/scraper.jar")
-        .waitingFor(
-            Wait.forLogMessage(".*JMX scraping started.*", 1)
-                .withStartupTimeout(Duration.ofSeconds(10)));
+    this.withCopyFileToContainer(MountableFile.forHostPath(scraperJarPath), "/scraper.jar");
 
     this.endpoint = otlpEndpoint;
     this.targetSystems = new HashSet<>();
@@ -159,8 +156,13 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       arguments.add("io.opentelemetry.contrib.jmxscraper.JmxScraper");
     }
 
-    if(testJmx) {
+    if (testJmx) {
       arguments.add("-test");
+      this.waitingFor(Wait.forLogMessage(".*JMX connection test.*", 1));
+    } else {
+      this.waitingFor(
+          Wait.forLogMessage(".*JMX scraping started.*", 1)
+              .withStartupTimeout(Duration.ofSeconds(10)));
     }
 
     this.withCommand(arguments.toArray(new String[0]));
