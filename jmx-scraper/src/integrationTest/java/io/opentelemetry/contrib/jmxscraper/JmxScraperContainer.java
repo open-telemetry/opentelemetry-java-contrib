@@ -28,6 +28,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String user;
   private String password;
   private final List<String> extraJars;
+  private boolean testJmx;
 
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
     super(baseImage);
@@ -108,6 +109,12 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withTestJmx() {
+    this.testJmx = true;
+    return this;
+  }
+
   @Override
   public void start() {
     // for now only configure through JVM args
@@ -150,6 +157,10 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       arguments.add("-cp");
       arguments.add("/scraper.jar:" + String.join(":", extraJars));
       arguments.add("io.opentelemetry.contrib.jmxscraper.JmxScraper");
+    }
+
+    if(testJmx) {
+      arguments.add("-test");
     }
 
     this.withCommand(arguments.toArray(new String[0]));
