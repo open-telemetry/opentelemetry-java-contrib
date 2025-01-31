@@ -6,7 +6,7 @@
 
 This repository focuses on providing tools and utilities for Java-based observability, such as remote JMX metric gathering and reporting. We’re excited to have you here! Whether you’re fixing a bug, adding a feature, or suggesting an idea, your contributions are invaluable.
 
--Before submitting new features or changes to current functionality, it is recommended to first
+Before submitting new features or changes to current functionality, it is recommended to first
 [open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new)
 and discuss your ideas or propose the changes you wish to make.
 
