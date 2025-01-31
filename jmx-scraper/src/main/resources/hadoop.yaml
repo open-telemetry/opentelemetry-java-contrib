@@ -2,59 +2,50 @@
 rules:
   - bean: Hadoop:service=NameNode,name=FSNamesystem
     prefix: hadoop.name_node.
+    type: updowncounter
     metricAttribute:
       node_name: beanattr(tag\.Hostname)
     mapping:
       CapacityUsed:
         metric: capacity.usage
-        type: updowncounter
         unit: By
         desc: The current used capacity across all data nodes reporting to the name node.
       CapacityTotal:
         metric: capacity.limit
-        type: updowncounter
         unit: By
         desc: The total capacity allotted to data nodes reporting to the name node.
       BlocksTotal:
         metric: block.count
-        type: updowncounter
         unit: "{block}"
         desc: The total number of blocks on the name node.
       MissingBlocks:
         metric: block.missing
-        type: updowncounter
         unit: "{block}"
         desc: The number of blocks reported as missing to the name node.
       CorruptBlocks:
         metric: block.corrupt
-        type: updowncounter
         unit: "{block}"
         desc: The number of blocks reported as corrupt to the name node.
       VolumeFailuresTotal:
         metric: volume.failed
-        type: updowncounter
         unit: "{volume}"
         desc: The number of failed volumes reported to the name node.
       FilesTotal:
         metric: file.count
-        type: updowncounter
         unit: "{file}"
         desc: The total number of files being tracked by the name node.
       TotalLoad:
         metric: file.load
-        type: updowncounter
         unit: "{operation}"
         desc: The current number of concurrent file accesses.
       NumLiveDataNodes:
         metric: &metric data_node.count
-        type: updowncounter
         unit: &unit "{node}"
         desc: &desc The number of data nodes reporting to the name node.
         metricAttribute:
           state: const(live)
       NumDeadDataNodes:
         metric: *metric
-        type: updowncounter
         unit: *unit
         desc: *desc
         metricAttribute:
