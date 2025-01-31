@@ -118,7 +118,9 @@ public class JmxConnectionTest {
     return new JmxScraperContainer(DUMMY_OTLP_ENDPOINT, SCRAPER_BASE_IMAGE)
         .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
         .withNetwork(network)
+        // mandatory to have a target system even if we don't collect metrics
         .withTargetSystem("jvm")
+        // we are only testing JMX connection here
         .withTestJmx();
   }
 
