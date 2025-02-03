@@ -74,8 +74,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static final int LINEAGE_MAX_LENGTH = 18;
   private static final int LINEAGE_MIN_LENGTH = 12;
   private static final int LINEAGE_HASH_LENGTH = 8;
-  private static final int LINEAGE_MAX_LOOP_COUNTER = 32767;
-  private static final int LINEAGE_MAX_REQUEST_COUNTER = 255;
+  private static final int LINEAGE_MAX_COUNTER1 = 32767;
+  private static final int LINEAGE_MAX_COUNTER2 = 255;
   private static final int LINEAGE_MIN_COUNTER = 0;
   private static final String INVALID_LINEAGE = "-1:11111111:0";
 
@@ -341,16 +341,16 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static boolean isValidLineage(String key) {
     String[] split = key.split(String.valueOf(LINEAGE_DELIMITER));
     String hash = split[1];
-    int loopCounter = parseIntOrReturnNegative(split[0]);
-    int requestCounter = parseIntOrReturnNegative(split[2]);
+    int counter1 = parseIntOrReturnNegative(split[0]);
+    int counter2 = parseIntOrReturnNegative(split[2]);
 
     boolean isHashValid = hash.length() == LINEAGE_HASH_LENGTH && isValidBase16String(hash);
-    boolean isValidRequestCounter =
-        requestCounter <= LINEAGE_MAX_REQUEST_COUNTER && requestCounter >= LINEAGE_MIN_COUNTER;
-    boolean isValidLoopCounter =
-        loopCounter <= LINEAGE_MAX_LOOP_COUNTER && loopCounter >= LINEAGE_MIN_COUNTER;
+    boolean isValidCounter2 =
+        counter2 <= LINEAGE_MAX_COUNTER2 && counter2 >= LINEAGE_MIN_COUNTER;
+    boolean isValidCounter1 =
+        counter1 <= LINEAGE_MAX_COUNTER1 && counter1 >= LINEAGE_MIN_COUNTER;
 
-    return isHashValid && isValidRequestCounter && isValidLoopCounter;
+    return isHashValid && isValidCounter2 && isValidCounter1;
   }
 
   @Nullable
