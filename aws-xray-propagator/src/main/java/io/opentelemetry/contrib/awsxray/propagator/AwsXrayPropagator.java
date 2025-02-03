@@ -345,10 +345,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     int counter2 = parseIntOrReturnNegative(split[2]);
 
     boolean isHashValid = hash.length() == LINEAGE_HASH_LENGTH && isValidBase16String(hash);
-    boolean isValidCounter2 =
-        counter2 <= LINEAGE_MAX_COUNTER2 && counter2 >= LINEAGE_MIN_COUNTER;
-    boolean isValidCounter1 =
-        counter1 <= LINEAGE_MAX_COUNTER1 && counter1 >= LINEAGE_MIN_COUNTER;
+    boolean isValidCounter2 = counter2 <= LINEAGE_MAX_COUNTER2 && counter2 >= LINEAGE_MIN_COUNTER;
+    boolean isValidCounter1 = counter1 <= LINEAGE_MAX_COUNTER1 && counter1 >= LINEAGE_MIN_COUNTER;
 
     return isHashValid && isValidCounter2 && isValidCounter1;
   }
