@@ -10,11 +10,11 @@ feature or via instrumentation, this project is hopefully for you.
 ## Provided Libraries
 
 | Status* | Library                                                           |
-| ------- | ----------------------------------------------------------------- |
+| ------- |-------------------------------------------------------------------|
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
 | stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
-| alpha   | [Baggage Span Processor](./baggage-processor/README.md)           |
+| alpha   | [Baggage to Attributes Processor](./baggage-processor/README.md) |
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
