@@ -60,12 +60,19 @@ tasks {
   }
 
   shadowJar {
-    archiveClassifier.set("")
+    archiveClassifier.set("shadow")
   }
 
   jar {
-    // Disable standard jar
-    enabled = false
+    /**
+     * We need to publish both - shaded and unshaded variants of the dependency
+     * Shaded dependency is required for use with the Java agent.
+     * Unshaded dependency can be used with OTel Autoconfigure module.
+     *
+     * Not overriding the classifier to empty results in an implicit classifier 'plain' being
+     * used with the standard JAR.
+     */
+    archiveClassifier.set("")
   }
 
   assemble {
