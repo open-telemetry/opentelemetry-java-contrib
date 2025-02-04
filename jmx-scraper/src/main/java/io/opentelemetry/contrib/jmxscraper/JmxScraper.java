@@ -58,7 +58,7 @@ public class JmxScraper {
     boolean testMode = effectiveArgs.remove(TEST_ARG);
 
     try {
-      Properties argsConfig = parseArgsConfig(effectiveArgs);
+      Properties argsConfig = argsToConfig(effectiveArgs);
       propagateToSystemProperties(argsConfig);
 
       // auto-configure and register SDK
@@ -144,7 +144,7 @@ public class JmxScraper {
    *
    * @param args application commandline arguments
    */
-  static Properties parseArgsConfig(List<String> args) throws InvalidArgumentException {
+  static Properties argsToConfig(List<String> args) throws InvalidArgumentException {
 
     if (args.isEmpty()) {
       // empty properties from stdin or external file
