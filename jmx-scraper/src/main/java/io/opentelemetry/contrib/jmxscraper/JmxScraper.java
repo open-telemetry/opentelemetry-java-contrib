@@ -93,7 +93,7 @@ public class JmxScraper {
       logger.log(Level.SEVERE, "invalid configuration ", e);
       System.exit(1);
     } catch (InvalidArgumentException e) {
-      logger.log(Level.SEVERE, "invalid configuration provided through arguments", e);
+      logger.log(Level.SEVERE, e.getMessage(), e);
       logger.info("Usage: java -jar <path_to_jmxscraper.jar> [-test] [-config <conf>]");
       logger.info("  -test           test JMX connection with provided configuration and exit");
       logger.info(
@@ -152,10 +152,10 @@ public class JmxScraper {
       return new Properties();
     }
     if (args.size() != 2) {
-      throw new InvalidArgumentException("Exactly two arguments expected, got " + args.size());
+      throw new InvalidArgumentException("Unexpected number of arguments");
     }
     if (!args.get(0).equalsIgnoreCase(CONFIG_ARG)) {
-      throw new InvalidArgumentException("Unexpected first argument must be '" + CONFIG_ARG + "'");
+      throw new InvalidArgumentException("Unexpected argument must be '" + CONFIG_ARG + "'");
     }
 
     String path = args.get(1);
@@ -183,8 +183,7 @@ public class JmxScraper {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new InvalidArgumentException(
-          "Failed to read config properties file: '" + path + "'", e);
+      throw new InvalidArgumentException("Failed to read config from file: '" + path + "'", e);
     }
   }
 
