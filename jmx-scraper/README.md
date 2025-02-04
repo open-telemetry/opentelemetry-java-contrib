@@ -16,25 +16,75 @@ Minimal configuration required
 
 - `otel.jmx.service.url` for example `service:jmx:rmi:///jndi/rmi://server:9999/jmxrmi` for `server`
   host on port `9999` with RMI JMX connector.
-- `otel.jmx.target.system` or `otel.jmx.custom.scraping.config`
+- `otel.jmx.target.system` or `otel.jmx.config`
 
 Configuration can be provided through:
 
 - command line arguments:
-  `java -jar scraper.jar --config otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi otel.jmx.target.system=tomcat`.
+  `java -jar scraper.jar -config otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi otel.jmx.target.system=tomcat`.
 - command line arguments JVM system properties:
   `java -Dotel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi -Dotel.jmx.target.system=tomcat -jar scraper.jar`.
 - java properties file: `java -jar scraper.jar -config config.properties`.
 - stdin: `java -jar scraper.jar -config -` where `otel.jmx.target.system=tomcat` and
   `otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi` is written to stdin.
+- environment variables: `OTEL_JMX_TARGET_SYSTEM=tomcat OTEL_JMX_SERVICE_URL=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi java -jar scraper.jar`
 
-TODO: update this once autoconfiguration is supported
+SDK auto-configuration is being used, so all the configuration options can be set using the java
+properties syntax or the corresponding environment variables.
 
-### Configuration reference
+For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERVICE_URL` environment variable.
 
-TODO
+## Configuration reference
 
-### Extra libraries in classpath
+| config option            | description                                                                                                         |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `otel.jmx.service.url`   | mandatory JMX URL to connect to the remote JVM                                                                      |
+| `otel.jmx.target.system` | comma-separated list of systems to monitor, mandatory unless a custom configuration is used                         |
+| `otel.jmx.config`        | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set |
+| `otel.jmx.username`      | user name for JMX connection, mandatory when JMX authentication is enabled on target JVM                            |
+| `otel.jmx.password`      | password for JMX connection, mandatory when JMX authentication is enabled on target JVM                             |
+
+Supported values for `otel.jmx.target.system`:
+
+| `otel.jmx.target.system` | description           |
+|--------------------------|-----------------------|
+| `activemq`               | Apache ActiveMQ       |
+| `cassandra`              | Apache Cassandra      |
+| `hbase`                  | Apache HBase          |
+| `hadoop`                 | Apache Hadoop         |
+| `jetty`                  | Eclipse Jetty         |
+| `jvm`                    | JVM runtime metrics   |
+| `kafka`                  | Apache Kafka          |
+| `kafka-consumer`         | Apache Kafka consumer |
+| `kafka-producer`         | Apache Kafka producer |
+| `solr`                   | Apache Solr           |
+| `tomcat`                 | Apache Tomcat         |
+| `wildfly`                | Wildfly               |
+
+The following SDK configuration options are also relevant
+
+| config option                 | default value   | description                                                                                                                                                       |
+|-------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `otel.metric.export.interval` | `1m` (1 minute) | metric export interval, also controls the JMX sampling interval                                                                                                   |
+| `otel.metrics.exporter`       | `otlp`          | comma-separated list of metrics exporters supported values are `otlp` and `logging`, additional values might be provided through extra libraries in the classpath |
+
+In addition to OpenTelemetry configuration, the following Java system properties can be provided
+through the command-line arguments, properties file or stdin and will be propagated to the JVM system properties:
+
+- `javax.net.ssl.keyStore`
+- `javax.net.ssl.keyStorePassword`
+- `javax.net.ssl.trustStore`
+- `javax.net.ssl.trustStorePassword`
+
+Those JVM system properties can't be set through individual environment variables, but they can still
+be set through the standard `JAVA_TOOL_OPTIONS` environment variable using the `-D` prefix.
+
+## Troubleshooting
+
+In order to investigate when and what metrics are being captured and sent, setting the `otel.metrics.exporter`
+configuration option to include `logging` exporter provides log messages when metrics are being exported.
+
+## Extra libraries in classpath
 
 By default, only the RMI JMX connector is provided by the JVM, so it might be required to add extra
 libraries in the classpath when connecting to remote JVMs that are not directly accessible with RMI.
@@ -45,7 +95,7 @@ needs to be used to support `otel.jmx.service.url` = `service:jmx:remote+http://
 When doing so, the `java -jar` command can´t be used, we have to provide the classpath with
 `-cp`/`--class-path`/`-classpath` option and provide the main class file name:
 
-```
+```bash
 java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScraper <config>
 ```
 

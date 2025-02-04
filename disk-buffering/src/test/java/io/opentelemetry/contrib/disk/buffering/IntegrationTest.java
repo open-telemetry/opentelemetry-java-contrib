@@ -85,9 +85,7 @@ public class IntegrationTest {
     memoryMetricExporter = InMemoryMetricExporter.create();
     ToDiskExporter<MetricData> toDiskMetricExporter =
         buildToDiskExporter(SignalSerializer.ofMetrics(), memoryMetricExporter::export);
-    metricToDiskExporter =
-        new MetricToDiskExporter(
-            toDiskMetricExporter, memoryMetricExporter::getAggregationTemporality);
+    metricToDiskExporter = new MetricToDiskExporter(toDiskMetricExporter, memoryMetricExporter);
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
