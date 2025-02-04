@@ -14,6 +14,7 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.kafka.KafkaCont
 import static io.opentelemetry.contrib.jmxscraper.target_systems.kafka.KafkaContainerFactory.createZookeeperContainer;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcher;
 import io.opentelemetry.contrib.jmxscraper.target_systems.MetricsVerifier;
 import io.opentelemetry.contrib.jmxscraper.target_systems.TargetSystemIntegrationTest;
 import java.nio.file.Path;
@@ -64,6 +65,10 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected MetricsVerifier createMetricsVerifier() {
+    // TODO: change to follow semconv
+    AttributeMatcher clientIdAttribute = attributeWithAnyValue("client-id");
+    AttributeMatcher topicAttribute = attribute("topic", "test-topic-1");
+
     return MetricsVerifier.create()
         .add(
             "kafka.consumer.fetch-rate",
@@ -72,16 +77,7 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The number of fetch requests for all topics per second")
                     .hasUnit("{request}")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(
-                        attributeWithAnyValue("client.id"))) // changed to follow semconv
-        .add(
-            "kafka.consumer.records-lag-max",
-            metric ->
-                metric
-                    .hasDescription("Number of messages the consumer lags behind the producer")
-                    .hasUnit("{message}")
-                    .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.consumer.total.bytes-consumed-rate",
             metric ->
@@ -90,7 +86,7 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average number of bytes consumed for all topics per second")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.consumer.total.fetch-size-avg",
             metric ->
@@ -99,7 +95,7 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average number of bytes fetched per request for all topics")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.consumer.total.records-consumed-rate",
             metric ->
@@ -108,7 +104,15 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average number of records consumed for all topics per second")
                     .hasUnit("{record}")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
+        .add(
+            "kafka.consumer.records-lag-max",
+            metric ->
+                metric
+                    .hasDescription("Number of messages the consumer lags behind the producer")
+                    .hasUnit("{record}")
+                    .isGauge()
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.consumer.bytes-consumed-rate",
             metric ->
@@ -116,10 +120,7 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average number of bytes consumed per second")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"),
-                            attribute("topic", "test-topic-1"))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.consumer.fetch-size-avg",
             metric ->
@@ -127,10 +128,7 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average number of bytes fetched per request")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"),
-                            attribute("topic", "test-topic-1"))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.consumer.records-consumed-rate",
             metric ->
@@ -139,8 +137,6 @@ public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{record}")
                     .isGauge()
                     .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"),
-                            attribute("topic", "test-topic-1"))));
+                        attributeGroup(clientIdAttribute, topicAttribute)));
   }
 }

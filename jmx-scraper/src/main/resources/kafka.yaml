@@ -10,48 +10,45 @@ rules:
         desc: The number of messages received by the broker
         unit: "{message}"
 
-  # TODO: optimize kafka.request.count - use refs
   - bean: kafka.server:type=BrokerTopicMetrics,name=TotalFetchRequestsPerSec
     metricAttribute:
-      # TODO: Should we convert all constant values to be PascalCase for consistency with values from bean params?
       type: const(fetch)
     mapping:
       Count:
-        metric: kafka.request.count
-        type: counter
-        desc: The number of requests received by the broker
-        unit: "{request}"
+        metric: &metric kafka.request.count
+        type: &type counter
+        desc: &desc The number of requests received by the broker
+        unit: &unit "{request}"
 
   - bean: kafka.server:type=BrokerTopicMetrics,name=TotalProduceRequestsPerSec
     metricAttribute:
       type: const(produce)
     mapping:
       Count:
-        metric: kafka.request.count
-        type: counter
-        desc: The number of requests received by the broker
-        unit: "{request}"
+        metric: *metric
+        type: *type
+        desc: *desc
+        unit: *unit
 
-  # TODO: optimize kafka.request.failed - use refs
   - bean: kafka.server:type=BrokerTopicMetrics,name=FailedFetchRequestsPerSec
     metricAttribute:
       type: const(fetch)
     mapping:
       Count:
-        metric: kafka.request.failed
-        type: counter
-        desc: The number of requests to the broker resulting in a failure
-        unit: "{request}"
+        metric: &metric kafka.request.failed
+        type: &type counter
+        desc: &desc The number of requests to the broker resulting in a failure
+        unit: &unit "{request}"
 
   - bean: kafka.server:type=BrokerTopicMetrics,name=FailedProduceRequestsPerSec
     metricAttribute:
       type: const(produce)
     mapping:
       Count:
-        metric: kafka.request.failed
-        type: counter
-        desc: The number of requests to the broker resulting in a failure
-        unit: "{request}"
+        metric: *metric
+        type: *type
+        desc: *desc
+        unit: *unit
 
   - beans:
       - kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Produce
@@ -87,26 +84,25 @@ rules:
         desc: Size of the request queue
         unit: "{request}"
 
-  # TODO: optimize kafka.network.io - use refs
   - bean: kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec
     metricAttribute:
       direction: const(in)
     mapping:
       Count:
-        metric: kafka.network.io
-        type: counter
-        desc: The bytes received or sent by the broker
-        unit: By
+        metric: &metric kafka.network.io
+        type: &type counter
+        desc: &desc The bytes received or sent by the broker
+        unit: &unit By
 
   - bean: kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec
     metricAttribute:
       direction: const(out)
     mapping:
       Count:
-        metric: kafka.network.io
-        type: counter
-        desc: The bytes received or sent by the broker
-        unit: By
+        metric: *metric
+        type: *type
+        desc: *desc
+        unit: *unit
 
   - beans:
       - kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Produce

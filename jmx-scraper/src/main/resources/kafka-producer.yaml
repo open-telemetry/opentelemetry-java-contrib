@@ -3,7 +3,7 @@
 rules:
   - bean: kafka.producer:client-id=*,type=producer-metrics
     metricAttribute:
-      client.id: param(client-id)
+      client-id: param(client-id)
     prefix: kafka.producer.
     type: gauge
     mapping:
@@ -26,10 +26,9 @@ rules:
   # per topic metrics
   - bean: kafka.producer:client-id=*,topic=*,type=producer-topic-metrics
     metricAttribute:
-      client.id: param(client-id)
+      client-id: param(client-id)
       topic: param(topic)
     prefix: kafka.producer.
-    unit: '{record}'
     type: gauge
     mapping:
       byte-rate:
@@ -40,7 +39,10 @@ rules:
         unit: '{ratio}'
       record-error-rate:
         desc: The average per-second number of record sends that resulted in errors for a topic
+        unit: '{record}'
       record-retry-rate:
         desc: The average per-second number of retried record sends for a topic
+        unit: '{record}'
       record-send-rate:
         desc: The average number of records sent per second for a topic
+        unit: '{record}'

@@ -46,9 +46,6 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected MetricsVerifier createMetricsVerifier() {
     AttributeMatcherGroup[] requestTypes = {
-      // attribute values are changed from lowercase to PascalCase
-      // because it is impossible to make them lowercase with YAML config
-      // TODO: What about const value attributes defined in YAML that are lowercase?
       attributeGroup(attribute("type", "Produce")),
       attributeGroup(attribute("type", "FetchFollower")),
       attributeGroup(attribute("type", "FetchConsumer"))

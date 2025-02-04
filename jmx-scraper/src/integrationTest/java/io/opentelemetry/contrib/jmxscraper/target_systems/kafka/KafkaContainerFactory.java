@@ -28,17 +28,12 @@ public class KafkaContainerFactory {
         .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes") // Removed in 3.5.1
         .withStartupTimeout(Duration.ofMinutes(2))
         .withExposedPorts(KAFKA_PORT)
-        //        .waitingFor(Wait.forListeningPorts(KAFKA_PORT));
         .waitingFor(
             Wait.forLogMessage(".*KafkaServer.*started \\(kafka.server.KafkaServer\\).*", 1));
   }
 
   public static GenericContainer<?> createKafkaProducerContainer() {
     return new GenericContainer<>(KAFKA_DOCKER_IMAGE)
-        //        .withCopyFileToContainer(
-        //            MountableFile.forClasspathResource("kafka-producer.sh"),
-        //            "/usr/bin/kafka-producer.sh")
-        //        .withCommand("/usr/bin/kafka-producer.sh")
         .withCommand(
             "sh",
             "-c",

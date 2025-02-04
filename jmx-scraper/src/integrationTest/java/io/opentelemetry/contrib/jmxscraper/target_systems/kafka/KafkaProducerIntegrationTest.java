@@ -13,6 +13,7 @@ import static io.opentelemetry.contrib.jmxscraper.target_systems.kafka.KafkaCont
 import static io.opentelemetry.contrib.jmxscraper.target_systems.kafka.KafkaContainerFactory.createZookeeperContainer;
 
 import io.opentelemetry.contrib.jmxscraper.JmxScraperContainer;
+import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcher;
 import io.opentelemetry.contrib.jmxscraper.target_systems.MetricsVerifier;
 import io.opentelemetry.contrib.jmxscraper.target_systems.TargetSystemIntegrationTest;
 import java.nio.file.Path;
@@ -47,8 +48,6 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
         .withEnv("JMX_PORT", Integer.toString(jmxPort))
         .withExposedPorts(jmxPort)
         .waitingFor(Wait.forListeningPorts(jmxPort));
-    //        .waitingFor(Wait.forLogMessage(".*Sending messages to test-topic-1.*", 1));
-    // Container is started and ready for serve JMX metrics once it begins sending messages.
   }
 
   @Override
@@ -59,7 +58,9 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected MetricsVerifier createMetricsVerifier() {
-    String topic = "test-topic-1";
+    // TODO: change to follow semconv
+    AttributeMatcher clientIdAttribute = attributeWithAnyValue("client-id");
+    AttributeMatcher topicAttribute = attribute("topic", "test-topic-1");
 
     return MetricsVerifier.create()
         .add(
@@ -70,7 +71,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average length of time the I/O thread spent waiting for a socket ready for reads or writes")
                     .hasUnit("ns")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.producer.outgoing-byte-rate",
             metric ->
@@ -79,7 +80,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average number of outgoing bytes sent per second to all servers")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.producer.request-latency-avg",
             metric ->
@@ -87,7 +88,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average request latency")
                     .hasUnit("ms")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.producer.request-rate",
             metric ->
@@ -95,7 +96,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average number of requests sent per second")
                     .hasUnit("{request}")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
         .add(
             "kafka.producer.response-rate",
             metric ->
@@ -103,7 +104,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("Responses received per second")
                     .hasUnit("{response}")
                     .isGauge()
-                    .hasDataPointsWithOneAttribute(attributeWithAnyValue("client.id")))
+                    .hasDataPointsWithOneAttribute(clientIdAttribute))
 
         // Per topic metrics
         .add(
@@ -113,9 +114,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasDescription("The average number of bytes sent per second for a topic")
                     .hasUnit("By")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"), attribute("topic", topic))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.producer.compression-rate",
             metric ->
@@ -124,9 +123,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average compression rate of record batches for a topic, defined as the average ratio of the compressed batch size divided by the uncompressed size")
                     .hasUnit("{ratio}")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"), attribute("topic", topic))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.producer.record-error-rate",
             metric ->
@@ -135,9 +132,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average per-second number of record sends that resulted in errors for a topic")
                     .hasUnit("{record}")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"), attribute("topic", topic))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.producer.record-retry-rate",
             metric ->
@@ -146,9 +141,7 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                         "The average per-second number of retried record sends for a topic")
                     .hasUnit("{record}")
                     .isGauge()
-                    .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"), attribute("topic", topic))))
+                    .hasDataPointsWithAttributes(attributeGroup(clientIdAttribute, topicAttribute)))
         .add(
             "kafka.producer.record-send-rate",
             metric ->
@@ -157,7 +150,6 @@ public class KafkaProducerIntegrationTest extends TargetSystemIntegrationTest {
                     .hasUnit("{record}")
                     .isGauge()
                     .hasDataPointsWithAttributes(
-                        attributeGroup(
-                            attributeWithAnyValue("client.id"), attribute("topic", topic))));
+                        attributeGroup(clientIdAttribute, topicAttribute)));
   }
 }
