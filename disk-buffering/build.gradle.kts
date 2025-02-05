@@ -5,7 +5,7 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("com.github.johnrengelman.shadow")
-  id("me.champeau.jmh") version "0.7.2"
+  id("me.champeau.jmh") version "0.7.3"
   id("ru.vyarus.animalsniffer") version "2.0.0"
   id("com.squareup.wire") version "5.2.1"
 }
