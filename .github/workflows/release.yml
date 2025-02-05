@@ -175,11 +175,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
-                            opentelemetry-jmx-metrics.jar
+                            opentelemetry-jmx-metrics.jar \
+                            opentelemetry-jmx-metrics.jar.asc
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
