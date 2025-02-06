@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <!-- this package is misidentified by OWASP as an Android app named "Wire" -->
+    <packageUrl regex="true">^pkg:maven/com\.squareup\.wire/wire-runtime-jvm@.*$</packageUrl>
+    <cpe>cpe:/a:wire:wire</cpe>
+  </suppress>
+</suppressions>

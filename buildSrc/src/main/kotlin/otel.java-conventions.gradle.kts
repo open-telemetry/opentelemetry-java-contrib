@@ -192,6 +192,7 @@ afterEvaluate {
 
 dependencyCheck {
   scanConfigurations = mutableListOf("runtimeClasspath")
+  suppressionFile = "buildscripts/dependency-check-suppressions.xml"
   failBuildOnCVSS = 7.0f // fail on high or critical CVE
   nvd.apiKey = System.getenv("NVD_API_KEY")
   nvd.delay = 3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
