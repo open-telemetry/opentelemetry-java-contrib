@@ -3,6 +3,9 @@ name: Reusable - Shell script check
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   shell-script-check:
     runs-on: ubuntu-latest

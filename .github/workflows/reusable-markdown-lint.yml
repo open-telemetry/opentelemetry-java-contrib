@@ -3,6 +3,9 @@ name: Reusable - Markdown lint check
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   markdown-lint-check:
     runs-on: ubuntu-latest
