@@ -5,4 +5,9 @@
     <packageUrl regex="true">^pkg:maven/com\.squareup\.wire/wire-runtime-jvm@.*$</packageUrl>
     <cpe>cpe:/a:wire:wire</cpe>
   </suppress>
+  <suppress>
+    <!-- this package is misidentified by OWASP as Prometheus server -->
+    <packageUrl regex="true">^pkg:maven/io\.opentelemetry/opentelemetry-exporter-prometheus@.*$</packageUrl>
+    <cpe>cpe:/a:prometheus:prometheus</cpe>
+  </suppress>
 </suppressions>
