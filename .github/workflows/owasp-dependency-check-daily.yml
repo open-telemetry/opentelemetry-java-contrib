@@ -40,6 +40,9 @@ jobs:
           path: "**/build/reports"
 
   workflow-notification:
+    permissions:
+      contents: read
+      issues: write
     needs:
       - analyze
     if: always()
