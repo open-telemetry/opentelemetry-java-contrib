@@ -12,6 +12,6 @@ jobs:
   assign-reviewers:
     runs-on: ubuntu-latest
     steps:
-      - uses: open-telemetry/assign-reviewers-action@main
+      - uses: open-telemetry/assign-reviewers-action@b101a9c17274e3d4fff0853898007e9e3a366675 # main
         with:
           config-file: .github/component_owners.yml
