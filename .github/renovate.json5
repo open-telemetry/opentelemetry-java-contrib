@@ -9,8 +9,7 @@
     {
       // this is to reduce the number of renovate PRs by consolidating them into a weekly batch
       "matchManagers": ["github-actions"],
-      // temporarily commenting out schedule in order to get an initial PR
-      // "extends": ["schedule:weekly"],
+      "extends": ["schedule:weekly"],
       "groupName": "github actions"
     },
     {
