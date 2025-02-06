@@ -58,3 +58,7 @@ afterEvaluate {
     }
   }
 }
+
+dependencyCheck {
+  skip = true
+}

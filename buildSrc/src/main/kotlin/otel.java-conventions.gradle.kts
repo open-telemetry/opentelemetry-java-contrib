@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("org.owasp.dependencycheck")
 }
 
 val otelJava = extensions.create<OtelJavaExtension>("otelJava")
@@ -187,4 +188,11 @@ afterEvaluate {
       }
     }
   }
+}
+
+dependencyCheck {
+  scanConfigurations = mutableListOf("runtimeClasspath")
+  failBuildOnCVSS = 7.0f // fail on high or critical CVE
+  nvd.apiKey = System.getenv("NVD_API_KEY")
+  nvd.delay = 3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
 }
