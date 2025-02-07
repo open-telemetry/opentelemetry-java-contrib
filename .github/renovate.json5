@@ -1,9 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests"
   ],
   "packageRules": [
+    {
+      // this is to reduce the number of renovate PRs by consolidating them into a weekly batch
+      "matchManagers": ["github-actions"],
+      "extends": ["schedule:weekly"],
+      "groupName": "github actions"
+    },
     {
       "matchPackageNames": [
         "io.opentelemetry:**",
@@ -15,14 +23,6 @@
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
       "ignoreUnstable": false
-    },
-    {
-      "matchPackagePrefixes": ["ch.qos.logback:"],
-      "groupName": "logback packages"
-    },
-    {
-      "matchPackagePrefixes": ["io.micrometer:"],
-      "groupName": "micrometer packages"
     },
     {
       // prevent 3.0.1u2 -> 3.0.1
@@ -98,6 +98,18 @@
       ],
       "matchUpdateTypes": ["major"],
       "enabled": false,
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "datasourceTemplate": "npm",
+      "fileMatch": [
+        "^.github/workflows/"
+      ],
+      "matchStrings": [
+        "npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)"
+      ]
     }
   ]
 }
