@@ -5,12 +5,17 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import static io.opentelemetry.contrib.jmxscraper.TestKeyStoreUtil.addTrustedCertificate;
+import static io.opentelemetry.contrib.jmxscraper.TestKeyStoreUtil.createKeyStore;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -68,6 +73,31 @@ public class JmxConnectionTest {
     connectionTest(
         app -> app.withJmxPort(JMX_PORT).withUserAuth(login, pwd),
         scraper -> scraper.withRmiServiceUrl(APP_HOST, JMX_PORT).withUser(login).withPassword(pwd));
+  }
+
+  @Test
+  void serverSsl(@TempDir Path tempDir) {
+    // two keystores:
+    // server keystore with public/private key pair
+    // client trust store with certificate from server
+
+    String clientPassword = "client";
+    String serverPassword = "server";
+
+    Path serverKeystore = tempDir.resolve("server.jks");
+    Path clientKeystore = tempDir.resolve("client.jks");
+
+    X509Certificate serverCertificate = createKeyStore(serverKeystore, serverPassword);
+
+    createKeyStore(clientKeystore, clientPassword);
+    addTrustedCertificate(clientKeystore, clientPassword, serverCertificate);
+
+    connectionTest(
+        app -> app.withJmxPort(JMX_PORT).withJmxSsl().withKeyStore(serverKeystore, serverPassword),
+        scraper ->
+            scraper
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                .withTrustStore(clientKeystore, clientPassword));
   }
 
   private static void connectionTest(
