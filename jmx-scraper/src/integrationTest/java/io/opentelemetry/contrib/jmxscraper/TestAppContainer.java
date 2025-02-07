@@ -27,6 +27,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private final Map<String, String> properties;
   private String login;
   private String pwd;
+  private boolean jmxSsl;
 
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
@@ -61,10 +62,15 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public TestAppContainer withJmxSsl() {
+    this.jmxSsl = true;
+    return this;
+  }
+
   @Override
   public void start() {
-    // TODO: add support for ssl
-    properties.put("com.sun.management.jmxremote.ssl", "false");
+    properties.put("com.sun.management.jmxremote.ssl", Boolean.toString(jmxSsl));
 
     if (pwd == null) {
       properties.put("com.sun.management.jmxremote.authenticate", "false");
