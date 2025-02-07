@@ -28,10 +28,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private String login;
   private String pwd;
   private boolean jmxSsl;
+  private boolean jmxSslRegistry;
   private Path keyStore;
   private String keyStorePassword;
   private Path trustStore;
   private String trustStorePassword;
+  private int jmxPort;
+  private int jmxRmiPort;
 
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
@@ -55,7 +58,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
    */
   @CanIgnoreReturnValue
   public TestAppContainer withJmxPort(int port) {
-    properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
+    this.jmxPort = port;
     return this;
   }
 
@@ -69,6 +72,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   @CanIgnoreReturnValue
   public TestAppContainer withJmxSsl() {
     this.jmxSsl = true;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public TestAppContainer withSslRmiRegistry(int registryPort) {
+    this.jmxSslRegistry = true;
+    this.jmxRmiPort = registryPort;
     return this;
   }
 
@@ -88,7 +98,19 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
   @Override
   public void start() {
+    properties.put("com.sun.management.jmxremote.port", Integer.toString(jmxPort));
+
     properties.put("com.sun.management.jmxremote.ssl", Boolean.toString(jmxSsl));
+    if (jmxSslRegistry) {
+      properties.put("com.sun.management.jmxremote.registry.ssl", "true");
+      properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(jmxRmiPort));
+      if (jmxRmiPort == jmxPort) {
+        // making it harder to attempt using the same port
+        throw new IllegalStateException(
+            "RMI with SSL registry requires a distinct port from JMX: " + jmxRmiPort);
+      }
+    }
+
 
     if (pwd == null) {
       properties.put("com.sun.management.jmxremote.authenticate", "false");
