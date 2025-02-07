@@ -77,6 +77,15 @@ public class JmxConnectionTest {
 
   @Test
   void serverSsl(@TempDir Path tempDir) {
+    testServerSsl(tempDir, /* sslRmiRegistry= */ false);
+  }
+
+  @Test
+  void serverSslWithSslRmiRegistry(@TempDir Path tempDir) {
+    testServerSsl(tempDir, /* sslRmiRegistry= */ true);
+  }
+
+  private static void testServerSsl(Path tempDir, boolean sslRmiRegistry) {
     // two keystores:
     // server keystore with public/private key pair
     // client trust store with certificate from server
@@ -93,11 +102,15 @@ public class JmxConnectionTest {
     addTrustedCertificate(clientKeystore, clientPassword, serverCertificate);
 
     connectionTest(
-        app -> app.withJmxPort(JMX_PORT).withJmxSsl().withKeyStore(serverKeystore, serverPassword),
+        app -> (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
+            .withJmxPort(JMX_PORT)
+            .withJmxSsl()
+            .withKeyStore(serverKeystore, serverPassword),
         scraper ->
-            scraper
+            (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withTrustStore(clientKeystore, clientPassword));
+                .withTrustStore(clientKeystore, clientPassword)
+    );
   }
 
   private static void connectionTest(
