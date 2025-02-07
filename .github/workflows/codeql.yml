@@ -5,14 +5,10 @@ on:
     branches:
       - main
       - release/*
-      - v0.*
-      - v1.*
   push:
     branches:
       - main
       - release/*
-      - v0.*
-      - v1.*
   schedule:
     - cron: "29 13 * * 2"  # weekly at 13:29 UTC on Tuesday
 
