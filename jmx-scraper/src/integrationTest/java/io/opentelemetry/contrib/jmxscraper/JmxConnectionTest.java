@@ -143,8 +143,7 @@ public class JmxConnectionTest {
 
     connectionTest(
         app ->
-            app
-                .withJmxPort(JMX_PORT)
+            app.withJmxPort(JMX_PORT)
                 .withJmxSsl()
                 .withClientSslCertificate()
                 .withKeyStore(serverKeystore, SERVER_PASSWORD)
@@ -153,8 +152,7 @@ public class JmxConnectionTest {
             scraper
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
                 .withKeyStore(clientKeystore, CLIENT_PASSWORD)
-                .withTrustStore(clientTrustStore, CLIENT_PASSWORD)
-    );
+                .withTrustStore(clientTrustStore, CLIENT_PASSWORD));
   }
 
   private static void connectionTest(
