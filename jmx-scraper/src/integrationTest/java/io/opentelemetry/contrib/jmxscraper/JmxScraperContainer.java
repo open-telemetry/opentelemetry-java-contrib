@@ -8,8 +8,11 @@ package io.opentelemetry.contrib.jmxscraper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +32,10 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String password;
   private final List<String> extraJars;
   private boolean testJmx;
+  private Path keyStore;
+  private String keyStorePassword;
+  private Path trustStore;
+  private String trustStorePassword;
 
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
     super(baseImage);
@@ -112,6 +119,20 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withKeyStore(Path keyStore, String password) {
+    this.keyStore = keyStore;
+    this.keyStorePassword = password;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withTrustStore(Path trustStore, String password) {
+    this.trustStore = trustStore;
+    this.trustStorePassword = password;
+    return this;
+  }
+
   @Override
   public void start() {
     // for now only configure through JVM args
@@ -137,6 +158,9 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     if (password != null) {
       arguments.add("-Dotel.jmx.password=" + password);
     }
+
+    arguments.addAll(addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true));
+    arguments.addAll(addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false));
 
     if (!customYamlFiles.isEmpty()) {
       for (String yaml : customYamlFiles) {
@@ -170,5 +194,16 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     logger().info("Starting scraper with command: " + String.join(" ", arguments));
 
     super.start();
+  }
+
+  private List<String> addKeyStore(Path path, String password, boolean keyStore) {
+    if (path == null) {
+      return Collections.emptyList();
+    }
+    String containerPath = "/" + path.getFileName().toString();
+    this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
+
+    String prefix = String.format("-Djavax.net.ssl.%sStore", keyStore ? "key" : "trust");
+    return Arrays.asList(prefix + "=" + containerPath, prefix + "Password=" + password);
   }
 }

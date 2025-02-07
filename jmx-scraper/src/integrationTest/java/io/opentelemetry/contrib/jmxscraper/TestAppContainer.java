@@ -28,6 +28,10 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private String login;
   private String pwd;
   private boolean jmxSsl;
+  private Path keyStore;
+  private String keyStorePassword;
+  private Path trustStore;
+  private String trustStorePassword;
 
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
@@ -68,6 +72,20 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public TestAppContainer withKeyStore(Path keyStore, String password) {
+    this.keyStore = keyStore;
+    this.keyStorePassword = password;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public TestAppContainer withTrustStore(Path trustStore, String password) {
+    this.trustStore = trustStore;
+    this.trustStorePassword = password;
+    return this;
+  }
+
   @Override
   public void start() {
     properties.put("com.sun.management.jmxremote.ssl", Boolean.toString(jmxSsl));
@@ -86,6 +104,9 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
       properties.put("com.sun.management.jmxremote.access.file", "/jmx.access");
     }
 
+    addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true, properties);
+    addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false, properties);
+
     String confArgs =
         properties.entrySet().stream()
             .map(
@@ -103,6 +124,19 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     logger().info("Test application JAVA_TOOL_OPTIONS = {}", confArgs);
 
     super.start();
+  }
+
+  private void addKeyStore(
+      Path path, String password, boolean keyStore, Map<String, String> properties) {
+    if (path == null) {
+      return;
+    }
+    String containerPath = "/" + path.getFileName().toString();
+    this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
+
+    String prefix = String.format("javax.net.ssl.%sStore", keyStore ? "key" : "trust");
+    properties.put(prefix, containerPath);
+    properties.put(prefix + "Password", password);
   }
 
   private static Path createPwdFile(String login, String pwd) {
