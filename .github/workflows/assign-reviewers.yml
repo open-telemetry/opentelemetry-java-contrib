@@ -8,8 +8,14 @@ on:
   # because repository write permission is needed to assign reviewers
   pull_request_target:
 
+permissions:
+  contents: read
+
 jobs:
   assign-reviewers:
+    permissions:
+      contents: read
+      pull-requests: write  # for assigning reviewers
     runs-on: ubuntu-latest
     steps:
       - uses: open-telemetry/assign-reviewers-action@b101a9c17274e3d4fff0853898007e9e3a366675 # main
