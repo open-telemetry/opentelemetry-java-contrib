@@ -36,6 +36,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String keyStorePassword;
   private Path trustStore;
   private String trustStorePassword;
+  private boolean sslRmiRegistry;
 
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
     super(baseImage);
@@ -133,6 +134,12 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withSslRmiRegistry() {
+    this.sslRmiRegistry = true;
+    return this;
+  }
+
   @Override
   public void start() {
     // for now only configure through JVM args
@@ -161,6 +168,10 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     arguments.addAll(addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true));
     arguments.addAll(addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false));
+
+    if (sslRmiRegistry) {
+      arguments.add("-Dotel.jmx.remote.registry.ssl=true");
+    }
 
     if (!customYamlFiles.isEmpty()) {
       for (String yaml : customYamlFiles) {
