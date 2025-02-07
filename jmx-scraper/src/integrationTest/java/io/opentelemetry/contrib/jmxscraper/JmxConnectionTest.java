@@ -102,15 +102,15 @@ public class JmxConnectionTest {
     addTrustedCertificate(clientKeystore, clientPassword, serverCertificate);
 
     connectionTest(
-        app -> (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
-            .withJmxPort(JMX_PORT)
-            .withJmxSsl()
-            .withKeyStore(serverKeystore, serverPassword),
+        app ->
+            (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
+                .withJmxPort(JMX_PORT)
+                .withJmxSsl()
+                .withKeyStore(serverKeystore, serverPassword),
         scraper ->
             (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withTrustStore(clientKeystore, clientPassword)
-    );
+                .withTrustStore(clientKeystore, clientPassword));
   }
 
   private static void connectionTest(

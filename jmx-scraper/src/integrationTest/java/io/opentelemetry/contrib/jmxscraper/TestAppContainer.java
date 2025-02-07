@@ -111,7 +111,6 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
       }
     }
 
-
     if (pwd == null) {
       properties.put("com.sun.management.jmxremote.authenticate", "false");
     } else {

@@ -165,8 +165,8 @@ public class JmxConnectorBuilder {
     int port;
 
     if (url.getURLPath().startsWith("/jndi/")) {
-       String[] components = url.getURLPath().split("/", 3);
-       URI uri = URI.create(components[2]);
+      String[] components = url.getURLPath().split("/", 3);
+      URI uri = URI.create(components[2]);
       hostName = uri.getHost();
       port = uri.getPort();
     } else {
@@ -181,7 +181,6 @@ public class JmxConnectorBuilder {
     } catch (IOException e) {
       throw new IllegalStateException("Unable to connect to " + url, e);
     }
-
   }
 
   private static JMXServiceURL buildUrl(String host, int port) {
