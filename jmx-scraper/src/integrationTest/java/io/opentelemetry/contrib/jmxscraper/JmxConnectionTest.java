@@ -36,6 +36,10 @@ public class JmxConnectionTest {
   private static final int JMX_PORT = 9999;
   private static final String APP_HOST = "app";
 
+  // key/trust stores passwords
+  private static final String CLIENT_PASSWORD = "client";
+  private static final String SERVER_PASSWORD = "server";
+
   private static final Logger jmxScraperLogger = LoggerFactory.getLogger("JmxScraperContainer");
   private static final Logger appLogger = LoggerFactory.getLogger("TestAppContainer");
 
@@ -90,27 +94,67 @@ public class JmxConnectionTest {
     // server keystore with public/private key pair
     // client trust store with certificate from server
 
-    String clientPassword = "client";
-    String serverPassword = "server";
-
     Path serverKeystore = tempDir.resolve("server.jks");
-    Path clientKeystore = tempDir.resolve("client.jks");
+    Path clientTrustStore = tempDir.resolve("client.jks");
 
-    X509Certificate serverCertificate = createKeyStore(serverKeystore, serverPassword);
+    X509Certificate serverCertificate = createKeyStore(serverKeystore, SERVER_PASSWORD);
 
-    createKeyStore(clientKeystore, clientPassword);
-    addTrustedCertificate(clientKeystore, clientPassword, serverCertificate);
+    createKeyStore(clientTrustStore, CLIENT_PASSWORD);
+    addTrustedCertificate(clientTrustStore, CLIENT_PASSWORD, serverCertificate);
 
     connectionTest(
         app ->
             (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
                 .withJmxPort(JMX_PORT)
                 .withJmxSsl()
-                .withKeyStore(serverKeystore, serverPassword),
+                .withKeyStore(serverKeystore, SERVER_PASSWORD),
         scraper ->
             (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withTrustStore(clientKeystore, clientPassword));
+                .withTrustStore(clientTrustStore, CLIENT_PASSWORD));
+  }
+
+  @Test
+  void serverSslClientSsl(@TempDir Path tempDir) {
+    // Note: this could have been made simpler by relying on the fact that keystore could be used
+    // as a trust store, but having clear split provides also some extra clarity
+    //
+    // 4 keystores:
+    // server keystore with public/private key pair
+    // server truststore with client certificate
+    // client key store with public/private key pair
+    // client trust store with certificate from server
+
+    Path serverKeystore = tempDir.resolve("server-keystore.jks");
+    Path serverTrustStore = tempDir.resolve("server-truststore.jks");
+
+    X509Certificate serverCertificate = createKeyStore(serverKeystore, SERVER_PASSWORD);
+    createKeyStore(serverTrustStore, SERVER_PASSWORD);
+
+    Path clientKeystore = tempDir.resolve("client-keystore.jks");
+    Path clientTrustStore = tempDir.resolve("client-truststore.jks");
+
+    X509Certificate clientCertificate = createKeyStore(clientKeystore, CLIENT_PASSWORD);
+    createKeyStore(clientTrustStore, CLIENT_PASSWORD);
+
+    // adding certificates in trust stores
+    addTrustedCertificate(serverTrustStore, SERVER_PASSWORD, clientCertificate);
+    addTrustedCertificate(clientTrustStore, CLIENT_PASSWORD, serverCertificate);
+
+    connectionTest(
+        app ->
+            app
+                .withJmxPort(JMX_PORT)
+                .withJmxSsl()
+                .withClientSslCertificate()
+                .withKeyStore(serverKeystore, SERVER_PASSWORD)
+                .withTrustStore(serverTrustStore, SERVER_PASSWORD),
+        scraper ->
+            scraper
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                .withKeyStore(clientKeystore, CLIENT_PASSWORD)
+                .withTrustStore(clientTrustStore, CLIENT_PASSWORD)
+    );
   }
 
   private static void connectionTest(

@@ -35,6 +35,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private String trustStorePassword;
   private int jmxPort;
   private int jmxRmiPort;
+  private boolean clientCertificate;
 
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
@@ -83,6 +84,12 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   }
 
   @CanIgnoreReturnValue
+  public TestAppContainer withClientSslCertificate() {
+    this.clientCertificate = true;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
   public TestAppContainer withKeyStore(Path keyStore, String password) {
     this.keyStore = keyStore;
     this.keyStorePassword = password;
@@ -109,6 +116,9 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
         throw new IllegalStateException(
             "RMI with SSL registry requires a distinct port from JMX: " + jmxRmiPort);
       }
+    }
+    if (jmxSsl && clientCertificate) {
+      properties.put("com.sun.management.jmxremote.ssl.need.client.auth", "true");
     }
 
     if (pwd == null) {
