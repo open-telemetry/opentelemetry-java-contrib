@@ -83,6 +83,10 @@ public class JmxScraper {
       Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
       Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
 
+      if (scraperConfig.isRegistrySsl()) {
+        connectorBuilder.withSslRegistry();
+      }
+
       if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
