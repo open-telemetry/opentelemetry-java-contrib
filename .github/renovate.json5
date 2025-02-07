@@ -5,6 +5,7 @@
     "docker:pinDigests",
     "helpers:pinGitHubActionDigests"
   ],
+  "ignorePresets": [":ignoreModulesAndTests"], // needed to keep maven-extension test pom files up-to-date
   "packageRules": [
     {
       // this is to reduce the number of renovate PRs by consolidating them into a weekly batch
