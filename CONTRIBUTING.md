@@ -98,13 +98,3 @@ Failure? Check logs for errors or mismatched dependencies.
 Join [#otel-java](https://cloud-native.slack.com/archives/C014L2KCTE3) on OpenTelemetry Slack
 
 
-## Troubleshooting Guide
-
-# Troubleshooting Guide
-
-| Error                 | Solution |
-|-----------------------|----------|
-| `JAVA_HOME` not set  | Set `JAVA_HOME` to your JDK 11+ installation path. |
-| `Gradle build fails` | Ensure plugin versions are specified in `settings.gradle.kts`. |
-| `Test failures`      | Check for missing dependencies or version conflicts. |
-
