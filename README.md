@@ -4,7 +4,6 @@
 [![FOSSA License Status](https://app.fossa.com/api/projects/custom%2B51454%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-java-contrib.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B51454%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-java-contrib?ref=badge_shield&issueType=license)
 [![FOSSA Security Status](https://app.fossa.com/api/projects/custom%2B51454%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-java-contrib.svg?type=shield&issueType=security)](https://app.fossa.com/projects/custom%2B51454%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-java-contrib?ref=badge_shield&issueType=security)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-telemetry/opentelemetry-java-contrib/badge)](https://scorecard.dev/viewer/?uri=github.com/open-telemetry/opentelemetry-java-contrib)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9992/badge)](https://www.bestpractices.dev/projects/9992)
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--java-blue.svg?logo=slack)](https://cloud-native.slack.com/archives/C014L2KCTE3)
 
 This project is intended to provide helpful libraries and standalone OpenTelemetry-based utilities that don't fit
