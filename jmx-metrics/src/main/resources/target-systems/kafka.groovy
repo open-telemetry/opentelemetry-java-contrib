@@ -167,29 +167,29 @@ otel.instrument(isrOperations,
 
 
 def maxLag = otel.mbean("kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica")
-otel.instrument(maxLag, "kafka.max.lag", "max lag in messages between follower and leader replicas",
+otel.instrument(maxLag, "kafka.max.lag", "Max lag in messages between follower and leader replicas",
         "{message}", "Value", otel.&longValueCallback)
 
 def activeControllerCount = otel.mbean("kafka.controller:type=KafkaController,name=ActiveControllerCount")
-otel.instrument(activeControllerCount, "kafka.controller.active.count", "controller is active on broker",
+otel.instrument(activeControllerCount, "kafka.controller.active.count", "For KRaft mode, the number of active controllers in the cluster. For ZooKeeper, indicates whether the broker is the controller broker.",
         "{controller}", "Value", otel.&longValueCallback)
 
 def leaderElectionRate = otel.mbean("kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs")
-otel.instrument(leaderElectionRate, "kafka.leader.election.rate", "leader election rate - increasing indicates broker failures",
+otel.instrument(leaderElectionRate, "kafka.leader.election.rate", "Leader election rate - increasing indicates broker failures",
         "{election}", "Count", otel.&longCounterCallback)
 
 def uncleanLeaderElections = otel.mbean("kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec")
-otel.instrument(uncleanLeaderElections, "kafka.unclean.election.rate", "unclean leader election rate - increasing indicates broker failures",
+otel.instrument(uncleanLeaderElections, "kafka.unclean.election.rate", "Unclean leader election rate - increasing indicates broker failures",
         "{election}", "Count", otel.&longCounterCallback)
 
 def requestQueueSize = otel.mbean("kafka.network:type=RequestChannel,name=RequestQueueSize")
-otel.instrument(requestQueueSize, "kafka.request.queue", "size of the request queue",
+otel.instrument(requestQueueSize, "kafka.request.queue", "Size of the request queue",
         "{request}", "Value", otel.&longValueCallback)
 
 def logFlushRate = otel.mbean("kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs")
-otel.instrument(logFlushRate, "kafka.logs.flush.time.count", "log flush count",
+otel.instrument(logFlushRate, "kafka.logs.flush.time.count", "Log flush count",
         "ms", "Count", otel.&longCounterCallback)
-otel.instrument(logFlushRate, "kafka.logs.flush.time.median", "log flush time - 50th percentile",
+otel.instrument(logFlushRate, "kafka.logs.flush.time.median", "Log flush time - 50th percentile",
         "ms", "50thPercentile", otel.&doubleValueCallback)
-otel.instrument(logFlushRate, "kafka.logs.flush.time.99p", "log flush time - 99th percentile",
+otel.instrument(logFlushRate, "kafka.logs.flush.time.99p", "Log flush time - 99th percentile",
         "ms", "99thPercentile", otel.&doubleValueCallback)

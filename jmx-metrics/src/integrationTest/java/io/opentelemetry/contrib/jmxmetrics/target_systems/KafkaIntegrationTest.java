@@ -165,25 +165,25 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
             assertGauge(
                 metric,
                 "kafka.controller.active.count",
-                "controller is active on broker",
+                "For KRaft mode, the number of active controllers in the cluster. For ZooKeeper, indicates whether the broker is the controller broker.",
                 "{controller}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.leader.election.rate",
-                "leader election rate - increasing indicates broker failures",
+                "Leader election rate - increasing indicates broker failures",
                 "{election}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.max.lag",
-                "max lag in messages between follower and leader replicas",
+                "Max lag in messages between follower and leader replicas",
                 "{message}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.unclean.election.rate",
-                "unclean leader election rate - increasing indicates broker failures",
+                "Unclean leader election rate - increasing indicates broker failures",
                 "{election}"));
   }
 

@@ -80,7 +80,7 @@ rules:
     mapping:
       Value:
         metric: kafka.request.queue
-        type: updowncounter
+        type: gauge
         desc: Size of the request queue
         unit: "{request}"
 
@@ -112,7 +112,7 @@ rules:
     mapping:
       Value:
         metric: kafka.purgatory.size
-        type: updowncounter
+        type: gauge
         desc: The number of requests waiting in purgatory
         unit: "{request}"
 
@@ -163,22 +163,24 @@ rules:
   - bean: kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica
     mapping:
       Value:
-        metric: kafka.lag.max
+        metric: kafka.max.lag
+        type: gauge
         desc: The max lag in messages between follower and leader replicas
         unit: "{message}"
+
 
   - bean: kafka.controller:type=KafkaController,name=ActiveControllerCount
     mapping:
       Value:
         metric: kafka.controller.active.count
-        type: updowncounter
-        desc: The number of controllers active on the broker
+        type: gauge
+        desc: For KRaft mode, the number of active controllers in the cluster. For ZooKeeper, indicates whether the broker is the controller broker.
         unit: "{controller}"
 
   - bean: kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs
     mapping:
       Count:
-        metric: kafka.leader.election.count
+        metric: kafka.leader.election.rate
         type: counter
         desc: The leader election count
         unit: "{election}"
@@ -186,7 +188,7 @@ rules:
   - bean: kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec
     mapping:
       Count:
-        metric: kafka.leader.election.unclean.count
+        metric: kafka.unclean.election.rate
         type: counter
         desc: Unclean leader election count - increasing indicates broker failures
         unit: "{election}"

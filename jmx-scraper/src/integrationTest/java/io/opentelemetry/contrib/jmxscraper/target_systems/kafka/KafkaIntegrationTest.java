@@ -96,7 +96,7 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
                 metric
                     .hasDescription("The number of requests waiting in purgatory")
                     .hasUnit("{request}")
-                    .isUpDownCounter()
+                    .isGauge()
                     .hasDataPointsWithAttributes(
                         attributeGroup(attribute("type", "Produce")),
                         attributeGroup(attribute("type", "Fetch"))))
@@ -140,7 +140,7 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
                 metric
                     .hasDescription("Size of the request queue")
                     .hasUnit("{request}")
-                    .isUpDownCounter()
+                    .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
             "kafka.partition.count",
@@ -180,12 +180,13 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
             "kafka.controller.active.count",
             metric ->
                 metric
-                    .hasDescription("The number of controllers active on the broker") // CHANGED
+                    .hasDescription(
+                        "For KRaft mode, the number of active controllers in the cluster. For ZooKeeper, indicates whether the broker is the controller broker.")
                     .hasUnit("{controller}")
-                    .isUpDownCounter() // CHANGED
+                    .isGauge()
                     .hasDataPointsWithoutAttributes())
         .add(
-            "kafka.leader.election.count", // CHANGED from "kafka.leader.election.rate"
+            "kafka.leader.election.rate",
             metric ->
                 metric
                     .hasDescription("The leader election count")
@@ -193,7 +194,7 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
                     .isCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
-            "kafka.leader.election.unclean.count", // CHANGED from "kafka.unclean.election.rate"
+            "kafka.unclean.election.rate",
             metric ->
                 metric
                     .hasDescription(
@@ -202,40 +203,13 @@ public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
                     .isCounter()
                     .hasDataPointsWithoutAttributes())
         .add(
-            "kafka.lag.max", // CHANGED from "kafka.max.lag"
+            "kafka.max.lag",
             metric ->
                 metric
                     .hasDescription(
                         "The max lag in messages between follower and leader replicas") // CHANGED
                     .hasUnit("{message}")
                     .isGauge()
-                    .hasDataPointsWithoutAttributes())
-
-    // TODO: Find out how to force Kafka to generate these metrics
-    //        .add(
-    //            "kafka.logs.flush.count",
-    //            metric ->
-    //                metric
-    //                    .hasDescription("Log flush count")
-    //                    .hasUnit("{flush}")
-    //                    .isCounter()
-    //                    .hasDataPointsWithoutAttributes())
-    //        .add(
-    //            "kafka.logs.flush.time.median",
-    //            metric ->
-    //                metric
-    //                    .hasDescription("Log flush time - 50th percentile")
-    //                    .hasUnit("ms")
-    //                    .isGauge()
-    //                    .hasDataPointsWithoutAttributes())
-    //        .add(
-    //            "kafka.logs.flush.time.99p",
-    //            metric ->
-    //                metric
-    //                    .hasDescription("Log flush time - 99th percentile")
-    //                    .hasUnit("ms")
-    //                    .isGauge()
-    //                    .hasDataPointsWithoutAttributes())
-    ;
+                    .hasDataPointsWithoutAttributes());
   }
 }
