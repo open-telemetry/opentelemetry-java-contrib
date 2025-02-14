@@ -30,8 +30,8 @@ class JmxScraperTest {
 
   @Test
   void emptyArgumentsAllowed() throws InvalidArgumentException {
-    assertThat(JmxScraper.parseArgs(Collections.emptyList()))
-        .describedAs("empty arguments allowed to use JVM properties")
+    assertThat(JmxScraper.argsToConfig(Collections.emptyList()))
+        .describedAs("empty config allowed to use JVM properties")
         .isEmpty();
   }
 
@@ -41,7 +41,7 @@ class JmxScraperTest {
   }
 
   private static void testInvalidArguments(String... args) {
-    assertThatThrownBy(() -> JmxScraper.parseArgs(Arrays.asList(args)))
+    assertThatThrownBy(() -> JmxScraper.argsToConfig(Arrays.asList(args)))
         .isInstanceOf(InvalidArgumentException.class);
   }
 
@@ -53,7 +53,7 @@ class JmxScraperTest {
     List<String> args = Arrays.asList("-config", filePath);
 
     // When
-    Properties parsedConfig = JmxScraper.parseArgs(args);
+    Properties parsedConfig = JmxScraper.argsToConfig(args);
     JmxScraperConfig config = JmxScraperConfig.fromConfig(TestUtil.configProperties(parsedConfig));
 
     // Then
@@ -72,7 +72,7 @@ class JmxScraperTest {
       List<String> args = Arrays.asList("-config", "-");
 
       // When
-      Properties parsedConfig = JmxScraper.parseArgs(args);
+      Properties parsedConfig = JmxScraper.argsToConfig(args);
       JmxScraperConfig config =
           JmxScraperConfig.fromConfig(TestUtil.configProperties(parsedConfig));
 
