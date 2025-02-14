@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.management.remote.JMXConnector;
 public class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
+  private static final String TEST_ARG = "-test";
 
   private final JmxConnectorBuilder client;
   private final JmxMetricInsight service;
@@ -52,8 +54,11 @@ public class JmxScraper {
     // set log format
     System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%n");
 
+    List<String> effectiveArgs = new ArrayList<>(Arrays.asList(args));
+    boolean testMode = effectiveArgs.remove(TEST_ARG);
+
     try {
-      Properties argsConfig = parseArgs(Arrays.asList(args));
+      Properties argsConfig = argsToConfig(effectiveArgs);
       propagateToSystemProperties(argsConfig);
 
       // auto-configure and register SDK
@@ -78,16 +83,21 @@ public class JmxScraper {
       Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
       Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
 
-      JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
-      jmxScraper.start();
+      if (testMode) {
+        System.exit(testConnection(connectorBuilder) ? 0 : 1);
+      } else {
+        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
+        jmxScraper.start();
+      }
     } catch (ConfigurationException e) {
       logger.log(Level.SEVERE, "invalid configuration ", e);
       System.exit(1);
     } catch (InvalidArgumentException e) {
-      logger.log(Level.SEVERE, "invalid configuration provided through arguments", e);
+      logger.log(Level.SEVERE, e.getMessage(), e);
+      logger.info("Usage: java -jar <path_to_jmxscraper.jar> [-test] [-config <conf>]");
+      logger.info("  -test           test JMX connection with provided configuration and exit");
       logger.info(
-          "Usage: java -jar <path_to_jmxscraper.jar> "
-              + "-config <path_to_config.properties or - for stdin>");
+          "  -config <conf>  provide configuration, where <conf> is - for stdin, or <path_to_config.properties>");
       System.exit(1);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Unable to connect ", e);
@@ -95,6 +105,24 @@ public class JmxScraper {
     } catch (RuntimeException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(3);
+    }
+  }
+
+  private static boolean testConnection(JmxConnectorBuilder connectorBuilder) {
+    try (JMXConnector connector = connectorBuilder.build()) {
+
+      MBeanServerConnection connection = connector.getMBeanServerConnection();
+      Integer mbeanCount = connection.getMBeanCount();
+      if (mbeanCount > 0) {
+        logger.log(Level.INFO, "JMX connection test OK");
+        return true;
+      } else {
+        logger.log(Level.SEVERE, "JMX connection test ERROR");
+        return false;
+      }
+    } catch (IOException e) {
+      logger.log(Level.SEVERE, "JMX connection test ERROR", e);
+      return false;
     }
   }
 
@@ -116,7 +144,7 @@ public class JmxScraper {
    *
    * @param args application commandline arguments
    */
-  static Properties parseArgs(List<String> args) throws InvalidArgumentException {
+  static Properties argsToConfig(List<String> args) throws InvalidArgumentException {
 
     if (args.isEmpty()) {
       // empty properties from stdin or external file
@@ -124,10 +152,10 @@ public class JmxScraper {
       return new Properties();
     }
     if (args.size() != 2) {
-      throw new InvalidArgumentException("Exactly two arguments expected, got " + args.size());
+      throw new InvalidArgumentException("Unexpected number of arguments");
     }
     if (!args.get(0).equalsIgnoreCase(CONFIG_ARG)) {
-      throw new InvalidArgumentException("Unexpected first argument must be '" + CONFIG_ARG + "'");
+      throw new InvalidArgumentException("Unexpected argument must be '" + CONFIG_ARG + "'");
     }
 
     String path = args.get(1);
@@ -155,8 +183,7 @@ public class JmxScraper {
       properties.load(is);
       return properties;
     } catch (IOException e) {
-      throw new InvalidArgumentException(
-          "Failed to read config properties file: '" + path + "'", e);
+      throw new InvalidArgumentException("Failed to read config from file: '" + path + "'", e);
     }
   }
 
