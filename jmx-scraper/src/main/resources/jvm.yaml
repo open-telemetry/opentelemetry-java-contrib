@@ -86,6 +86,6 @@ rules:
   - bean: java.lang:type=Threading
     mapping:
       ThreadCount:
-        metric: jvm.threads.count
+        metric: jvm.thread.count
         unit: "{thread}"
         desc: number of threads

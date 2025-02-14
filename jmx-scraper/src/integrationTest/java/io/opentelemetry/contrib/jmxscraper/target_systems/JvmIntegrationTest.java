@@ -170,7 +170,7 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
         .add(
-            "jvm.threads.count",
+            "jvm.thread.count",
             metric ->
                 metric
                     .hasDescription("number of threads")
