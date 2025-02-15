@@ -78,6 +78,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static final int LINEAGE_MAX_COUNTER2 = 255;
   private static final int LINEAGE_MIN_COUNTER = 0;
   private static final String INVALID_LINEAGE = "-1:11111111:0";
+  private static final int NUM_OF_LINEAGE_DELIMITERS = 2;
 
   private static final List<String> FIELDS = Collections.singletonList(TRACE_HEADER_KEY);
 
@@ -225,6 +226,8 @@ public final class AwsXrayPropagator implements TextMapPropagator {
         lineageHeader = parseLineageHeader(value);
         if (isValidLineage(lineageHeader)) {
           baggageBuilder.put(LINEAGE_KEY, lineageHeader);
+        } else {
+          logger.fine("Invalid Lineage header: " + value);
         }
       }
     }
@@ -331,7 +334,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
 
     if (xrayLineageHeader.length() < LINEAGE_MIN_LENGTH
         || xrayLineageHeader.length() > LINEAGE_MAX_LENGTH
-        || numOfDelimiters != 2) {
+        || numOfDelimiters != NUM_OF_LINEAGE_DELIMITERS) {
       return INVALID_LINEAGE;
     }
 
