@@ -81,8 +81,19 @@ be set through the standard `JAVA_TOOL_OPTIONS` environment variable using the `
 
 ## Troubleshooting
 
+### Exported metrics
+
 In order to investigate when and what metrics are being captured and sent, setting the `otel.metrics.exporter`
-configuration option to include `logging` exporter provides log messages when metrics are being exported.
+configuration option to include `logging` exporter provides log messages when metrics are being exported
+
+### JMX connection test
+
+Connection to the remote JVM through the JMX can be tested by adding the `-test` argument.
+When doing so, the JMX Scraper will only test the connection to the remote JVM with provided configuration
+and exit.
+
+- Connection OK: `JMX connection test OK` message is written to standard output and exit status = `0`
+- Connection ERROR: `JMX connection test ERROR` message is written to standard output and exit status = `1`
 
 ## Extra libraries in classpath
 

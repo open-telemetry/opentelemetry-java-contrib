@@ -1,4 +1,4 @@
-FROM rmohr/activemq:5.15.9
+FROM rmohr/activemq:5.15.9@sha256:b5669f141ac5c455b1010b90d348fe78289bba7e2db5659484d99736b696593c
 
 
 COPY --chown=activemq config/env /opt/activemq/bin/env
