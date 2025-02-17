@@ -150,6 +150,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
       properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(jmxRmiPort));
       if (jmxRmiPort == jmxPort) {
         // making it harder to attempt using the same port
+        // doing so results in a "port busy" error which can be confusing
         throw new IllegalStateException(
             "RMI with SSL registry requires a distinct port from JMX: " + jmxRmiPort);
       }
@@ -159,8 +160,10 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     }
 
     if (pwd == null) {
+      // no authentication
       properties.put("com.sun.management.jmxremote.authenticate", "false");
     } else {
+      // authentication enabled
       properties.put("com.sun.management.jmxremote.authenticate", "true");
 
       Path pwdFile = createPwdFile(login, pwd);
@@ -172,6 +175,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
       properties.put("com.sun.management.jmxremote.access.file", "/jmx.access");
     }
 
+    // add optional key and trust stores
     addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true, properties);
     addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false, properties);
 
