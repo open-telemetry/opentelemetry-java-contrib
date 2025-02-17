@@ -24,7 +24,9 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_NAME;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_TAGS;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_NAME;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.when;
 
@@ -52,8 +54,6 @@ class EcsResourceTest {
 
   @Mock private SimpleHttpClient mockHttpClient;
 
-  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
-  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV3() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();
@@ -78,7 +78,7 @@ class EcsResourceTest {
             entry(CONTAINER_NAME, "ecs-nginx-5-nginx-curl-ccccb9f49db0dfe0d901"),
             entry(CONTAINER_ID, "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946"),
             entry(CONTAINER_IMAGE_NAME, "nrdlngr/nginx-curl"),
-            entry(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
+            entry(CONTAINER_IMAGE_TAGS, singletonList("latest")),
             entry(AWS_ECS_CLUSTER_ARN, "arn:aws:ecs:us-east-2:012345678910:cluster/default"),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
@@ -90,8 +90,6 @@ class EcsResourceTest {
             entry(AWS_ECS_TASK_REVISION, "5"));
   }
 
-  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
-  @SuppressWarnings("deprecation")
   @Test
   void testCreateAttributesV4() throws IOException {
     Map<String, String> mockSysEnv = new HashMap<>();
@@ -119,7 +117,7 @@ class EcsResourceTest {
             entry(CONTAINER_NAME, "ecs-curltest-26-curl-cca48e8dcadd97805600"),
             entry(CONTAINER_ID, "ea32192c8553fbff06c9340478a2ff089b2bb5646fb718b4ee206641c9086d66"),
             entry(CONTAINER_IMAGE_NAME, "111122223333.dkr.ecr.us-west-2.amazonaws.com/curltest"),
-            entry(io.opentelemetry.semconv.ResourceAttributes.CONTAINER_IMAGE_TAG, "latest"),
+            entry(CONTAINER_IMAGE_TAGS, singletonList("latest")),
             entry(
                 AttributeKey.stringKey("aws.ecs.container.image.id"),
                 "sha256:d691691e9652791a60114e67b365688d20d19940dde7c4736ea30e660d8d3553"),
@@ -127,17 +125,14 @@ class EcsResourceTest {
             entry(
                 AWS_ECS_CONTAINER_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:container/0206b271-b33f-47ab-86c6-a0ba208a70a9"),
-            entry(AWS_LOG_GROUP_NAMES, Collections.singletonList("/ecs/metadata")),
+            entry(AWS_LOG_GROUP_NAMES, singletonList("/ecs/metadata")),
             entry(
                 AWS_LOG_GROUP_ARNS,
-                Collections.singletonList(
-                    "arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
-            entry(
-                AWS_LOG_STREAM_NAMES,
-                Collections.singletonList("ecs/curl/8f03e41243824aea923aca126495f665")),
+                singletonList("arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata")),
+            entry(AWS_LOG_STREAM_NAMES, singletonList("ecs/curl/8f03e41243824aea923aca126495f665")),
             entry(
                 AWS_LOG_STREAM_ARNS,
-                Collections.singletonList(
+                singletonList(
                     "arn:aws:logs:us-west-2:111122223333:log-group:/ecs/metadata:log-stream:ecs/curl/8f03e41243824aea923aca126495f665")),
             entry(
                 AWS_ECS_TASK_ARN,
