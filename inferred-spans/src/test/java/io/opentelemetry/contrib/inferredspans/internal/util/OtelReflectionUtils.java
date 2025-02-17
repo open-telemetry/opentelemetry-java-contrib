@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.inferredspans.internal.util;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -42,7 +41,6 @@ public class OtelReflectionUtils {
       OpenTelemetrySdk sdk = (OpenTelemetrySdk) readField(otel, "delegate");
       sdk.close();
       GlobalOpenTelemetry.resetForTest();
-      GlobalEventLoggerProvider.resetForTest();
     }
   }
 
