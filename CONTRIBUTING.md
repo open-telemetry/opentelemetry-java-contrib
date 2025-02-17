@@ -22,7 +22,6 @@ To work with this repository, ensure you have:
 
 Java 17 or higher
 
-
 ### Platform Notes:
 
 macOS/Linux: Ensure JAVA_HOME is set correctly.
@@ -34,7 +33,6 @@ Windows: Use WSL2 or ensure Gradle is installed and accessible.
 1. Fork the repository
 2. Clone locally
 3. Create a branch before working on an issue
-
 
 ## Local Run/Build
 
@@ -69,17 +67,6 @@ $ ./gradlew build
 $ ./gradlew integrationTest
 ```
 
-### Test Types:
-
-- Unit Tests: Isolated component tests.
-
-- Integration Tests: Validate interactions between modules.
-
-- CI Checks: PRs must pass all tests and linting.
-
-Failure? Check logs for errors or mismatched dependencies.
-
-
 ## Contributing Rules
 
 Follow the Java Instrumentation [Style Guide](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/style-guideline.md) from the opentelemetry-java-instrumentation repository.
@@ -95,6 +82,5 @@ Failure? Check logs for errors or mismatched dependencies.
 - All modules use `plugins { id("otel.java-conventions") }`
 
 ## Further Help
+
 Join [#otel-java](https://cloud-native.slack.com/archives/C014L2KCTE3) on OpenTelemetry Slack
-
-
