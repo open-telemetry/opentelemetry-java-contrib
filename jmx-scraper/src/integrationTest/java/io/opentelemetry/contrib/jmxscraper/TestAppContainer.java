@@ -63,6 +63,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Enables and configure JMX login/pwd authentication
+   *
+   * @param login user login
+   * @param pwd user password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withUserAuth(String login, String pwd) {
     this.login = login;
@@ -70,12 +77,23 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Enables SSL for JMX endpoint, will require JMX client to trust remote JVM certificate
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withJmxSsl() {
     this.jmxSsl = true;
     return this;
   }
 
+  /**
+   * Enables SSL-protected RMI registry, which requires a distinct port from JMX
+   *
+   * @param registryPort registry port
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withSslRmiRegistry(int registryPort) {
     this.jmxSslRegistry = true;
@@ -83,12 +101,24 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Enables client certificate verification by the remote JVM
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withClientSslCertificate() {
     this.clientCertificate = true;
     return this;
   }
 
+  /**
+   * Configure key store for the remote JVM
+   *
+   * @param keyStore path to key store
+   * @param password key store password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withKeyStore(Path keyStore, String password) {
     this.keyStore = keyStore;
@@ -96,6 +126,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Configure trust store for the remote JVM
+   *
+   * @param trustStore path to trust store
+   * @param password trust store password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withTrustStore(Path trustStore, String password) {
     this.trustStore = trustStore;

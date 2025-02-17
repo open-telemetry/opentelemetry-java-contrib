@@ -52,20 +52,38 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     this.extraJars = new ArrayList<>();
   }
 
+  /**
+   * Adds a target system
+   *
+   * @param targetSystem target system
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withTargetSystem(String targetSystem) {
     targetSystems.add(targetSystem);
     return this;
   }
 
+  /**
+   * Set connection to a standard JMX service URL
+   *
+   * @param host JMX host
+   * @param port JMX port
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withRmiServiceUrl(String host, int port) {
-    // TODO: adding a way to provide 'host:port' syntax would make this easier for end users
     return withServiceUrl(
         String.format(
             Locale.getDefault(), "service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port));
   }
 
+  /**
+   * Set connection to a JMX service URL
+   *
+   * @param serviceUrl service URL
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withServiceUrl(String serviceUrl) {
     this.serviceUrl = serviceUrl;
@@ -114,12 +132,24 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  /**
+   * Configure the scraper JVM to only test connection with the JMX endpoint
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withTestJmx() {
     this.testJmx = true;
     return this;
   }
 
+  /**
+   * Configure key store for the scraper JVM
+   *
+   * @param keyStore path to key store
+   * @param password key store password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withKeyStore(Path keyStore, String password) {
     this.keyStore = keyStore;
@@ -127,6 +157,13 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  /**
+   * Configure trust store for the scraper JVM
+   *
+   * @param trustStore path to trust store
+   * @param password trust store password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withTrustStore(Path trustStore, String password) {
     this.trustStore = trustStore;
@@ -134,6 +171,11 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  /**
+   * Enables connection to an SSL-protected RMI registry
+   *
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withSslRmiRegistry() {
     this.sslRmiRegistry = true;
