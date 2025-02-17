@@ -29,20 +29,21 @@ Configuration can be provided through:
   `otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi` is written to stdin.
 - environment variables: `OTEL_JMX_TARGET_SYSTEM=tomcat OTEL_JMX_SERVICE_URL=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi java -jar scraper.jar`
 
-SDK auto-configuration is being used, so all the configuration options can be set using the java
+SDK autoconfiguration is being used, so all the configuration options can be set using the java
 properties syntax or the corresponding environment variables.
 
 For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERVICE_URL` environment variable.
 
 ## Configuration reference
 
-| config option            | description                                                                                                         |
-|--------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `otel.jmx.service.url`   | mandatory JMX URL to connect to the remote JVM                                                                      |
-| `otel.jmx.target.system` | comma-separated list of systems to monitor, mandatory unless a custom configuration is used                         |
-| `otel.jmx.config`        | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set |
-| `otel.jmx.username`      | user name for JMX connection, mandatory when JMX authentication is enabled on target JVM                            |
-| `otel.jmx.password`      | password for JMX connection, mandatory when JMX authentication is enabled on target JVM                             |
+| config option                  | default value | description                                                                                                                               |
+|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `otel.jmx.service.url`         | -             | mandatory JMX URL to connect to the remote JVM                                                                                            |
+| `otel.jmx.target.system`       | -             | comma-separated list of systems to monitor, mandatory unless `otel.jmx.config` is set                                                     |
+| `otel.jmx.config`              | empty         | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set                       |
+| `otel.jmx.username`            | -             | user name for JMX connection, mandatory when JMX authentication is set on target JVM with`com.sun.management.jmxremote.authenticate=true` |
+| `otel.jmx.password`            | -             | password for JMX connection, mandatory when JMX authentication is set on target JVM with `com.sun.management.jmxremote.authenticate=true` |
+| `otel.jmx.remote.registry.ssl` | `false`       | connect to an SSL-protected registry when enabled on target JVM with `com.sun.management.jmxremote.registry.ssl=true`                     |
 
 Supported values for `otel.jmx.target.system`:
 
