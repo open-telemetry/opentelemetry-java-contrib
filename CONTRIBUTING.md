@@ -1,6 +1,6 @@
 # Contributing
 
-🎉 Welcome to the OpenTelemetry Java Contrib Repository! 🎉
+Welcome to the OpenTelemetry Java Contrib Repository!
 
 ## Introduction
 
@@ -25,8 +25,6 @@ Java 17 or higher
 ### Platform Notes:
 
 macOS/Linux: Ensure JAVA_HOME is set correctly.
-
-Windows: Use WSL2 or ensure Gradle is installed and accessible.
 
 ## Workflow
 
