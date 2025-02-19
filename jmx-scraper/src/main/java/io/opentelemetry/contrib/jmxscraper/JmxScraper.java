@@ -18,6 +18,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -225,7 +226,9 @@ public class JmxScraper {
     for (String system : scraperConfig.getTargetSystems()) {
       addRulesForSystem(system, config);
     }
-    // TODO : add ability for user to provide custom yaml configurations
+    for (String file : scraperConfig.getJmxConfig()) {
+      addRulesFromFile(file, config);
+    }
     return config;
   }
 
@@ -234,13 +237,25 @@ public class JmxScraper {
     try (InputStream inputStream =
         JmxScraper.class.getClassLoader().getResourceAsStream(yamlResource)) {
       if (inputStream != null) {
-        RuleParser parserInstance = RuleParser.get();
-        parserInstance.addMetricDefsTo(conf, inputStream, system);
+        RuleParser.get().addMetricDefsTo(conf, inputStream, system);
       } else {
         throw new IllegalArgumentException("No support for system " + system);
       }
     } catch (Exception e) {
       throw new IllegalStateException("Error while loading rules for system " + system, e);
+    }
+  }
+
+  private static void addRulesFromFile(String file, MetricConfiguration conf) {
+    Path path = Paths.get(file);
+    if (!Files.isReadable(path)) {
+      throw new IllegalArgumentException("Unable to read file: " + path);
+    }
+
+    try (InputStream inputStream = Files.newInputStream(path)) {
+      RuleParser.get().addMetricDefsTo(conf, inputStream, file);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Error while loading rules from file: " + file, e);
     }
   }
 }

@@ -100,6 +100,12 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  /**
+   * Adds custom metrics yaml from classpath resource
+   *
+   * @param yamlPath path to resource in classpath
+   * @return this
+   */
   @CanIgnoreReturnValue
   public JmxScraperContainer withCustomYaml(String yamlPath) {
     this.customYamlFiles.add(yamlPath);

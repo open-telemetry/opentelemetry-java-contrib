@@ -30,7 +30,10 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
-    return scraper.withTargetSystem("jvm");
+    return scraper
+        .withTargetSystem("jvm")
+        // also testing custom yaml
+        .withCustomYaml("custom-metrics.yaml");
   }
 
   @Override
@@ -48,6 +51,16 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
         nameAttributeMatchers("PS MarkSweep", "PS Scavenge");
 
     return MetricsVerifier.create()
+        // custom metric in custom-metrics.yaml
+        .add(
+            "custom.jvm.uptime",
+            metric ->
+                metric
+                    .hasDescription("JVM uptime in milliseconds")
+                    .hasUnit("ms")
+                    .isCounter()
+                    .hasDataPointsWithoutAttributes())
+        // metrics for 'jvm' target system
         .add(
             "jvm.classes.loaded",
             metric ->
