@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+### AWS X-Ray propagator
+
+- Make `xray-lambda` propagator available via SPI
+  ([#1669](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1669))
+- Support Lineage in XRay trace header and remove additional baggage from being added
+  ([#1671](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1671))
+
+### Disk buffering
+
+- Use delegate's temporality
+  ([#1672](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1672))
+
+### GCP authentication extension
+
+- Publish both shaded and unshaded variants
+  ([#1688](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1688))
+
+### JMX metrics
+
+- Updated Hadoop metric unit definitions to align with semantic conventions
+  ([#1675](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1675))
+- Updated Kafka metric unit definitions to align with semantic conventions
+  ([#1670](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1670))
+
+### JMX scraper
+
+- Use SDK autoconfigure module
+  ([#1651](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1651))
+- Rename `otel.jmx.custom.scraping.config` to `otel.jmx.config` in order to align
+  with `io.opentelemetry.instrumentation:opentelemetry-jmx-metrics`
+  ([#1678](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1678))
+- Hadoop metrics added
+  ([#1675](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1675))
+- Add a CLI option to test the connection
+  ([#1684](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1684))
+- Kafka server, producer, and consumer metrics added
+  ([#1670](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1670))
+- Add custom YAML support
+  ([#1741](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1741))
+- Add SSL support
+  ([#1710](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1710))
+
+### Maven extension
+
+- Support Maven 4.0
+  ([#1679](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1679))
+
 ## Version 1.43.0 (2025-01-17)
 
 ### Azure resources - New 🌟
