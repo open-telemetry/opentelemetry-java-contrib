@@ -15,11 +15,11 @@ feature or via instrumentation, this project is hopefully for you.
 ## Provided Libraries
 
 | Status* | Library                                                           |
-| ------- |-------------------------------------------------------------------|
+|---------|-------------------------------------------------------------------|
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
 | stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
-| alpha   | [Baggage Processors](./baggage-processor/README.md) |
+| alpha   | [Baggage Processors](./baggage-processor/README.md)               |
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
@@ -29,6 +29,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [JFR Connection](./jfr-connection/README.md)                      |
 | alpha   | [JFR Events](./jfr-events/README.md)                              |
 | alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
+| alpha   | [JMX Metric Scraper](./jmx-scraper/README.md)                     |
 | alpha   | [Kafka Support](./kafka-exporter/README.md)                       |
 | alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
 | alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
