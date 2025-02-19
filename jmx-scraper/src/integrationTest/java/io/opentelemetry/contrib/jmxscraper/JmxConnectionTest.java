@@ -92,12 +92,12 @@ public class JmxConnectionTest {
     // server keystore with public/private key pair
     // client trust store with certificate from server
 
-    TestKeyStore serverKeystore =
+    TestKeyStore serverKeyStore =
         TestKeyStore.newKeyStore(tempDir.resolve("server.jks"), SERVER_PASSWORD);
     TestKeyStore clientTrustStore =
         TestKeyStore.newKeyStore(tempDir.resolve("client.jks"), CLIENT_PASSWORD);
 
-    X509Certificate serverCertificate = serverKeystore.addKeyPair();
+    X509Certificate serverCertificate = serverKeyStore.addKeyPair();
     clientTrustStore.addTrustedCertificate(serverCertificate);
 
     connectionTest(
@@ -105,7 +105,7 @@ public class JmxConnectionTest {
             (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
                 .withJmxPort(JMX_PORT)
                 .withJmxSsl()
-                .withKeyStore(serverKeystore),
+                .withKeyStore(serverKeyStore),
         scraper ->
             (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
@@ -123,19 +123,19 @@ public class JmxConnectionTest {
     // client key store with public/private key pair
     // client trust store with certificate from server
 
-    TestKeyStore serverKeystore =
+    TestKeyStore serverKeyStore =
         TestKeyStore.newKeyStore(tempDir.resolve("server-keystore.jks"), SERVER_PASSWORD);
     TestKeyStore serverTrustStore =
         TestKeyStore.newKeyStore(tempDir.resolve("server-truststore.jks"), SERVER_PASSWORD);
 
-    X509Certificate serverCertificate = serverKeystore.addKeyPair();
+    X509Certificate serverCertificate = serverKeyStore.addKeyPair();
 
-    TestKeyStore clientKeystore =
+    TestKeyStore clientKeyStore =
         TestKeyStore.newKeyStore(tempDir.resolve("client-keystore.jks"), CLIENT_PASSWORD);
     TestKeyStore clientTrustStore =
         TestKeyStore.newKeyStore(tempDir.resolve("client-truststore.jks"), CLIENT_PASSWORD);
 
-    X509Certificate clientCertificate = clientKeystore.addKeyPair();
+    X509Certificate clientCertificate = clientKeyStore.addKeyPair();
 
     // adding certificates in trust stores
     clientTrustStore.addTrustedCertificate(serverCertificate);
@@ -146,12 +146,12 @@ public class JmxConnectionTest {
             app.withJmxPort(JMX_PORT)
                 .withJmxSsl()
                 .withClientSslCertificate()
-                .withKeyStore(serverKeystore)
+                .withKeyStore(serverKeyStore)
                 .withTrustStore(serverTrustStore),
         scraper ->
             scraper
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withKeyStore(clientKeystore)
+                .withKeyStore(clientKeyStore)
                 .withTrustStore(clientTrustStore));
   }
 
