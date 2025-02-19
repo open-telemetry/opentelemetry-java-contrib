@@ -32,10 +32,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private String password;
   private final List<String> extraJars;
   private boolean testJmx;
-  private Path keyStore;
-  private String keyStorePassword;
-  private Path trustStore;
-  private String trustStorePassword;
+  private TestKeyStore keyStore;
+  private TestKeyStore trustStore;
   private boolean sslRmiRegistry;
 
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
@@ -146,28 +144,24 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   /**
    * Configure key store for the scraper JVM
    *
-   * @param keyStore path to key store
-   * @param password key store password
+   * @param keyStore key store
    * @return this
    */
   @CanIgnoreReturnValue
-  public JmxScraperContainer withKeyStore(Path keyStore, String password) {
+  public JmxScraperContainer withKeyStore(TestKeyStore keyStore) {
     this.keyStore = keyStore;
-    this.keyStorePassword = password;
     return this;
   }
 
   /**
    * Configure trust store for the scraper JVM
    *
-   * @param trustStore path to trust store
-   * @param password trust store password
+   * @param trustStore trust store
    * @return this
    */
   @CanIgnoreReturnValue
-  public JmxScraperContainer withTrustStore(Path trustStore, String password) {
+  public JmxScraperContainer withTrustStore(TestKeyStore trustStore) {
     this.trustStore = trustStore;
-    this.trustStorePassword = password;
     return this;
   }
 
@@ -208,8 +202,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       arguments.add("-Dotel.jmx.password=" + password);
     }
 
-    arguments.addAll(addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true));
-    arguments.addAll(addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false));
+    arguments.addAll(addSecureStore(keyStore, /* isKeyStore= */ true));
+    arguments.addAll(addSecureStore(trustStore, /* isKeyStore= */ false));
 
     if (sslRmiRegistry) {
       arguments.add("-Dotel.jmx.remote.registry.ssl=true");
@@ -249,14 +243,16 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     super.start();
   }
 
-  private List<String> addKeyStore(Path path, String password, boolean keyStore) {
-    if (path == null) {
+  private List<String> addSecureStore(TestKeyStore keyStore, boolean isKeyStore) {
+    if (keyStore == null) {
       return Collections.emptyList();
     }
+    Path path = keyStore.getPath();
     String containerPath = "/" + path.getFileName().toString();
     this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
 
-    String prefix = String.format("-Djavax.net.ssl.%sStore", keyStore ? "key" : "trust");
-    return Arrays.asList(prefix + "=" + containerPath, prefix + "Password=" + password);
+    String prefix = String.format("-Djavax.net.ssl.%sStore", isKeyStore ? "key" : "trust");
+    return Arrays.asList(
+        prefix + "=" + containerPath, prefix + "Password=" + keyStore.getPassword());
   }
 }

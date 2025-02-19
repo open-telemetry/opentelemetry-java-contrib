@@ -29,10 +29,8 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private String pwd;
   private boolean jmxSsl;
   private boolean jmxSslRegistry;
-  private Path keyStore;
-  private String keyStorePassword;
-  private Path trustStore;
-  private String trustStorePassword;
+  private TestKeyStore keyStore;
+  private TestKeyStore trustStore;
   private int jmxPort;
   private int jmxRmiPort;
   private boolean clientCertificate;
@@ -115,28 +113,24 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   /**
    * Configure key store for the remote JVM
    *
-   * @param keyStore path to key store
-   * @param password key store password
+   * @param keyStore key store
    * @return this
    */
   @CanIgnoreReturnValue
-  public TestAppContainer withKeyStore(Path keyStore, String password) {
+  public TestAppContainer withKeyStore(TestKeyStore keyStore) {
     this.keyStore = keyStore;
-    this.keyStorePassword = password;
     return this;
   }
 
   /**
    * Configure trust store for the remote JVM
    *
-   * @param trustStore path to trust store
-   * @param password trust store password
+   * @param trustStore trust store
    * @return this
    */
   @CanIgnoreReturnValue
-  public TestAppContainer withTrustStore(Path trustStore, String password) {
+  public TestAppContainer withTrustStore(TestKeyStore trustStore) {
     this.trustStore = trustStore;
-    this.trustStorePassword = password;
     return this;
   }
 
@@ -176,8 +170,8 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     }
 
     // add optional key and trust stores
-    addKeyStore(keyStore, keyStorePassword, /* keyStore= */ true, properties);
-    addKeyStore(trustStore, trustStorePassword, /* keyStore= */ false, properties);
+    addSecureStore(keyStore, /* isKeyStore= */ true, properties);
+    addSecureStore(trustStore, /* isKeyStore= */ false, properties);
 
     String confArgs =
         properties.entrySet().stream()
@@ -198,17 +192,18 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     super.start();
   }
 
-  private void addKeyStore(
-      Path path, String password, boolean keyStore, Map<String, String> properties) {
-    if (path == null) {
+  private void addSecureStore(
+      TestKeyStore keyStore, boolean isKeyStore, Map<String, String> properties) {
+    if (keyStore == null) {
       return;
     }
+    Path path = keyStore.getPath();
     String containerPath = "/" + path.getFileName().toString();
     this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
 
-    String prefix = String.format("javax.net.ssl.%sStore", keyStore ? "key" : "trust");
+    String prefix = String.format("javax.net.ssl.%sStore", isKeyStore ? "key" : "trust");
     properties.put(prefix, containerPath);
-    properties.put(prefix + "Password", password);
+    properties.put(prefix + "Password", keyStore.getPassword());
   }
 
   private static Path createPwdFile(String login, String pwd) {

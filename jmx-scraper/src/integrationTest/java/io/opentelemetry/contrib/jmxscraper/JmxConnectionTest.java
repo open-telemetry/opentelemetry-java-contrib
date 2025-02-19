@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import static io.opentelemetry.contrib.jmxscraper.TestKeyStoreUtil.addTrustedCertificate;
-import static io.opentelemetry.contrib.jmxscraper.TestKeyStoreUtil.createKeyStore;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
@@ -94,24 +92,24 @@ public class JmxConnectionTest {
     // server keystore with public/private key pair
     // client trust store with certificate from server
 
-    Path serverKeystore = tempDir.resolve("server.jks");
-    Path clientTrustStore = tempDir.resolve("client.jks");
+    TestKeyStore serverKeystore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server.jks"), SERVER_PASSWORD);
+    TestKeyStore clientTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client.jks"), CLIENT_PASSWORD);
 
-    X509Certificate serverCertificate = createKeyStore(serverKeystore, SERVER_PASSWORD);
-
-    createKeyStore(clientTrustStore, CLIENT_PASSWORD);
-    addTrustedCertificate(clientTrustStore, CLIENT_PASSWORD, serverCertificate);
+    X509Certificate serverCertificate = serverKeystore.addKeyPair();
+    clientTrustStore.addTrustedCertificate(serverCertificate);
 
     connectionTest(
         app ->
             (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
                 .withJmxPort(JMX_PORT)
                 .withJmxSsl()
-                .withKeyStore(serverKeystore, SERVER_PASSWORD),
+                .withKeyStore(serverKeystore),
         scraper ->
             (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withTrustStore(clientTrustStore, CLIENT_PASSWORD));
+                .withTrustStore(clientTrustStore));
   }
 
   @Test
@@ -125,34 +123,36 @@ public class JmxConnectionTest {
     // client key store with public/private key pair
     // client trust store with certificate from server
 
-    Path serverKeystore = tempDir.resolve("server-keystore.jks");
-    Path serverTrustStore = tempDir.resolve("server-truststore.jks");
+    TestKeyStore serverKeystore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server-keystore.jks"), SERVER_PASSWORD);
+    TestKeyStore serverTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server-truststore.jks"), SERVER_PASSWORD);
 
-    X509Certificate serverCertificate = createKeyStore(serverKeystore, SERVER_PASSWORD);
-    createKeyStore(serverTrustStore, SERVER_PASSWORD);
+    X509Certificate serverCertificate = serverKeystore.addKeyPair();
 
-    Path clientKeystore = tempDir.resolve("client-keystore.jks");
-    Path clientTrustStore = tempDir.resolve("client-truststore.jks");
+    TestKeyStore clientKeystore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client-keystore.jks"), CLIENT_PASSWORD);
+    TestKeyStore clientTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client-truststore.jks"), CLIENT_PASSWORD);
 
-    X509Certificate clientCertificate = createKeyStore(clientKeystore, CLIENT_PASSWORD);
-    createKeyStore(clientTrustStore, CLIENT_PASSWORD);
+    X509Certificate clientCertificate = clientKeystore.addKeyPair();
 
     // adding certificates in trust stores
-    addTrustedCertificate(serverTrustStore, SERVER_PASSWORD, clientCertificate);
-    addTrustedCertificate(clientTrustStore, CLIENT_PASSWORD, serverCertificate);
+    clientTrustStore.addTrustedCertificate(serverCertificate);
+    serverTrustStore.addTrustedCertificate(clientCertificate);
 
     connectionTest(
         app ->
             app.withJmxPort(JMX_PORT)
                 .withJmxSsl()
                 .withClientSslCertificate()
-                .withKeyStore(serverKeystore, SERVER_PASSWORD)
-                .withTrustStore(serverTrustStore, SERVER_PASSWORD),
+                .withKeyStore(serverKeystore)
+                .withTrustStore(serverTrustStore),
         scraper ->
             scraper
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withKeyStore(clientKeystore, CLIENT_PASSWORD)
-                .withTrustStore(clientTrustStore, CLIENT_PASSWORD));
+                .withKeyStore(clientKeystore)
+                .withTrustStore(clientTrustStore));
   }
 
   private static void connectionTest(
