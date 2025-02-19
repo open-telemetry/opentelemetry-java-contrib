@@ -45,6 +45,14 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 | `otel.jmx.password`            | -             | password for JMX connection, mandatory when JMX authentication is set on target JVM with `com.sun.management.jmxremote.authenticate=true` |
 | `otel.jmx.remote.registry.ssl` | `false`       | connect to an SSL-protected registry when enabled on target JVM with `com.sun.management.jmxremote.registry.ssl=true`                     |
 
+When both `otel.jmx.target.system` and `otel.jmx.config` configuration options are used at the same time:
+
+- `otel.jmx.target.system` provides ready-to-use metrics and `otel.jmx.config` allows to add custom definitions.
+- The metrics definitions will be the aggregation of both.
+- There is no guarantee on the priority or any ability to override the definitions.
+
+If there is a need to override existing ready-to-use metrics or to keep control on the metrics definitions, using a custom YAML definition with `otel.jmx.config` is the recommended option.
+
 Supported values for `otel.jmx.target.system`:
 
 | `otel.jmx.target.system` | description           |
