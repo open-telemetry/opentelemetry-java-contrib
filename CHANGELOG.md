@@ -61,6 +61,11 @@
   field.
   ([#1736](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1736))
 
+### Static instrumenter
+
+- Module has been removed
+  ([#1755](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1755))
+
 ## Version 1.43.0 (2025-01-17)
 
 ### Azure resources - New 🌟
