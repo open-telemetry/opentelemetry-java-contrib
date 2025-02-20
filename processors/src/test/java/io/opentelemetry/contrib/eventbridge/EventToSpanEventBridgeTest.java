@@ -9,9 +9,11 @@ import static io.opentelemetry.api.common.AttributeKey.longKey;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.KeyValue;
 import io.opentelemetry.api.common.Value;
-import io.opentelemetry.api.incubator.events.EventLogger;
+import io.opentelemetry.api.incubator.logs.ExtendedLogger;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -22,7 +24,6 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
-import io.opentelemetry.sdk.logs.internal.SdkEventLoggerProvider;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.IdGenerator;
@@ -46,14 +47,13 @@ class EventToSpanEventBridgeTest {
           .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
           .build();
   private final TestClock testClock = TestClock.create();
-  private final SdkEventLoggerProvider eventLoggerProvider =
-      SdkEventLoggerProvider.create(
-          SdkLoggerProvider.builder()
-              .setClock(testClock)
-              .addLogRecordProcessor(EventToSpanEventBridge.create())
-              .build());
+  private final SdkLoggerProvider loggerProvider =
+      SdkLoggerProvider.builder()
+          .setClock(testClock)
+          .addLogRecordProcessor(EventToSpanEventBridge.create())
+          .build();
   private final Tracer tracer = tracerProvider.get("tracer");
-  private final EventLogger eventLogger = eventLoggerProvider.get("event-logger");
+  private final ExtendedLogger logger = (ExtendedLogger) loggerProvider.get("event-logger");
 
   private static Sampler onlyServerSpans() {
     return new Sampler() {
@@ -85,15 +85,18 @@ class EventToSpanEventBridgeTest {
     // others. We create a recording span by setting kind to SERVER.
     Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.SERVER).startSpan();
     try (Scope unused = span.makeCurrent()) {
-      eventLogger
-          .builder("my.event-name")
+      logger
+          .logRecordBuilder()
+          .setEventName("my.event-name")
           .setTimestamp(100, TimeUnit.NANOSECONDS)
           .setSeverity(Severity.DEBUG)
-          .put("foo", "bar")
-          .put("number", 1)
-          .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
-          .setAttributes(Attributes.builder().put("color", "red").build())
-          .setAttributes(Attributes.builder().put("shape", "square").build())
+          .setBody(
+              Value.of(
+                  KeyValue.of("number", Value.of(1)),
+                  KeyValue.of("foo", Value.of("bar")),
+                  KeyValue.of("map", Value.of(Collections.singletonMap("key", Value.of("value"))))))
+          .setAttribute(AttributeKey.stringKey("color"), "red")
+          .setAttribute(AttributeKey.stringKey("shape"), "square")
           .emit();
     } finally {
       span.end();
@@ -134,15 +137,18 @@ class EventToSpanEventBridgeTest {
     // others. We create a non-recording span by setting kind to INTERNAL.
     Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.INTERNAL).startSpan();
     try (Scope unused = span.makeCurrent()) {
-      eventLogger
-          .builder("my.event-name")
+      logger
+          .logRecordBuilder()
+          .setEventName("my.event-name")
           .setTimestamp(100, TimeUnit.NANOSECONDS)
           .setSeverity(Severity.DEBUG)
-          .put("foo", "bar")
-          .put("number", 1)
-          .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
-          .setAttributes(Attributes.builder().put("color", "red").build())
-          .setAttributes(Attributes.builder().put("shape", "square").build())
+          .setBody(
+              Value.of(
+                  KeyValue.of("number", Value.of(1)),
+                  KeyValue.of("foo", Value.of("bar")),
+                  KeyValue.of("map", Value.of(Collections.singletonMap("key", Value.of("value"))))))
+          .setAttribute(AttributeKey.stringKey("color"), "red")
+          .setAttribute(AttributeKey.stringKey("shape"), "square")
           .emit();
     } finally {
       span.end();
@@ -158,8 +164,9 @@ class EventToSpanEventBridgeTest {
     // others. We create a recording span by setting kind to SERVER.
     Span span = tracer.spanBuilder("span").setSpanKind(SpanKind.SERVER).startSpan();
     try (Scope unused = span.makeCurrent()) {
-      eventLogger
-          .builder("my.event-name")
+      logger
+          .logRecordBuilder()
+          .setEventName("my.event-name")
           // Manually override the context
           .setContext(
               Span.wrap(
@@ -171,11 +178,13 @@ class EventToSpanEventBridgeTest {
                   .storeInContext(Context.current()))
           .setTimestamp(100, TimeUnit.NANOSECONDS)
           .setSeverity(Severity.DEBUG)
-          .put("foo", "bar")
-          .put("number", 1)
-          .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
-          .setAttributes(Attributes.builder().put("color", "red").build())
-          .setAttributes(Attributes.builder().put("shape", "square").build())
+          .setBody(
+              Value.of(
+                  KeyValue.of("number", Value.of(1)),
+                  KeyValue.of("foo", Value.of("bar")),
+                  KeyValue.of("map", Value.of(Collections.singletonMap("key", Value.of("value"))))))
+          .setAttribute(AttributeKey.stringKey("color"), "red")
+          .setAttribute(AttributeKey.stringKey("shape"), "square")
           .emit();
     } finally {
       span.end();
@@ -187,15 +196,18 @@ class EventToSpanEventBridgeTest {
 
   @Test
   void noSpan_doesNotBridgeEvent() {
-    eventLogger
-        .builder("my.event-name")
+    logger
+        .logRecordBuilder()
+        .setEventName("my.event-name")
         .setTimestamp(100, TimeUnit.NANOSECONDS)
         .setSeverity(Severity.DEBUG)
-        .put("foo", "bar")
-        .put("number", 1)
-        .put("map", Value.of(Collections.singletonMap("key", Value.of("value"))))
-        .setAttributes(Attributes.builder().put("color", "red").build())
-        .setAttributes(Attributes.builder().put("shape", "square").build())
+        .setBody(
+            Value.of(
+                KeyValue.of("number", Value.of(1)),
+                KeyValue.of("foo", Value.of("bar")),
+                KeyValue.of("map", Value.of(Collections.singletonMap("key", Value.of("value"))))))
+        .setAttribute(AttributeKey.stringKey("color"), "red")
+        .setAttribute(AttributeKey.stringKey("shape"), "square")
         .emit();
 
     assertThat(spanExporter.getFinishedSpanItems()).isEmpty();

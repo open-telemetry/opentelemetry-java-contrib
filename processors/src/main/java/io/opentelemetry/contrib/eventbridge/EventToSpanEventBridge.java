@@ -17,6 +17,7 @@ import io.opentelemetry.exporter.internal.otlp.AnyValueMarshaler;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +57,6 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
 
   private static final Logger logger = Logger.getLogger(EventToSpanEventBridge.class.getName());
 
-  private static final AttributeKey<String> EVENT_NAME = AttributeKey.stringKey("event.name");
   private static final AttributeKey<Long> LOG_RECORD_OBSERVED_TIME_UNIX_NANO =
       AttributeKey.longKey("log.record.observed_time_unix_nano");
   private static final AttributeKey<Long> LOG_RECORD_SEVERITY_NUMBER =
@@ -76,7 +76,10 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
   @Override
   public void onEmit(Context context, ReadWriteLogRecord logRecord) {
     LogRecordData logRecordData = logRecord.toLogRecordData();
-    String eventName = logRecordData.getAttributes().get(EVENT_NAME);
+    if (!(logRecordData instanceof ExtendedLogRecordData)) {
+      return;
+    }
+    String eventName = ((ExtendedLogRecordData) logRecordData).getEventName();
     if (eventName == null) {
       return;
     }
@@ -99,8 +102,7 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
   }
 
   private static Attributes toSpanEventAttributes(LogRecordData logRecord) {
-    AttributesBuilder builder =
-        logRecord.getAttributes().toBuilder().removeIf(key -> key.equals(EVENT_NAME));
+    AttributesBuilder builder = logRecord.getAttributes().toBuilder();
 
     builder.put(LOG_RECORD_OBSERVED_TIME_UNIX_NANO, logRecord.getObservedTimestampEpochNanos());
 

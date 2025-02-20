@@ -26,6 +26,8 @@ class IncubatingAttributes {
   public static final AttributeKey<String> CLOUD_REGION = AttributeKey.stringKey("cloud.region");
   public static final AttributeKey<String> CLOUD_RESOURCE_ID =
       AttributeKey.stringKey("cloud.resource_id");
+  public static final AttributeKey<List<String>> CONTAINER_IMAGE_TAGS =
+      AttributeKey.stringArrayKey("container.image.tags");
 
   public static final class CloudPlatformIncubatingValues {
     public static final String AWS_EC2 = "aws_ec2";
