@@ -74,8 +74,6 @@ components:
   samplers:
     - trask
     - jack-berg
-  static-instrumenter:
-    - anosek-an
   kafka-exporter:
     - spockz
     - vincentfree

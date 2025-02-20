@@ -40,7 +40,6 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [Runtime Attach](./runtime-attach/README.md)                      |
 | alpha   | [Samplers](./samplers/README.md)                                  |
 | beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
-| alpha   | [Static Instrumenter](./static-instrumenter/README.md)            |
 
 \* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
 To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
