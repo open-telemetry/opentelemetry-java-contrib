@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
