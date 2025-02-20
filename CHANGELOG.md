@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Changed resource attribute `container.image.tag` to `container.image.tags`
+  ([#1736](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1736))
+
 ### AWS X-Ray propagator
 
 - Make `xray-lambda` propagator available via SPI
@@ -48,6 +53,13 @@
 
 - Support Maven 4.0
   ([#1679](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1679))
+
+### Processors
+
+- Changed `EventToSpanEventBridge` from reading `event.name` to reading the new LogRecord
+  [EventName](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md#field-eventname)
+  field.
+  ([#1736](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1736))
 
 ## Version 1.43.0 (2025-01-17)
 
