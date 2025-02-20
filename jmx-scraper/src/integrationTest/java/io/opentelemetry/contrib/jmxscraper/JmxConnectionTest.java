@@ -192,18 +192,17 @@ public class JmxConnectionTest {
   }
 
   private static void waitTerminated(GenericContainer<?> container) {
-    int retries = 10;
-    while (retries > 0 && container.isRunning()) {
-      retries--;
+    long retryUntil = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+    while (container.isRunning() && System.currentTimeMillis() < retryUntil) {
       try {
         TimeUnit.MILLISECONDS.sleep(100);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
     }
-    assertThat(retries)
+    assertThat(container.isRunning())
         .describedAs("container should stop when testing connection")
-        .isNotEqualTo(0);
+        .isFalse();
   }
 
   private static JmxScraperContainer scraperContainer() {
