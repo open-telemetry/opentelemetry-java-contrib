@@ -12,6 +12,7 @@ import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -31,6 +32,10 @@ public class JmxConnectionTest {
 
   private static final int JMX_PORT = 9999;
   private static final String APP_HOST = "app";
+
+  // key/trust stores passwords
+  private static final String CLIENT_PASSWORD = "client";
+  private static final String SERVER_PASSWORD = "server";
 
   private static final Logger jmxScraperLogger = LoggerFactory.getLogger("JmxScraperContainer");
   private static final Logger appLogger = LoggerFactory.getLogger("TestAppContainer");
@@ -71,6 +76,84 @@ public class JmxConnectionTest {
         scraper -> scraper.withRmiServiceUrl(APP_HOST, JMX_PORT).withUser(login).withPassword(pwd));
   }
 
+  @Test
+  void serverSsl(@TempDir Path tempDir) {
+    testServerSsl(tempDir, /* sslRmiRegistry= */ false);
+  }
+
+  @Test
+  void serverSslWithSslRmiRegistry(@TempDir Path tempDir) {
+    testServerSsl(tempDir, /* sslRmiRegistry= */ true);
+  }
+
+  private static void testServerSsl(Path tempDir, boolean sslRmiRegistry) {
+    // two keystores:
+    // server keystore with public/private key pair
+    // client trust store with certificate from server
+
+    TestKeyStore serverKeyStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server.jks"), SERVER_PASSWORD);
+    TestKeyStore clientTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client.jks"), CLIENT_PASSWORD);
+
+    X509Certificate serverCertificate = serverKeyStore.addKeyPair();
+    clientTrustStore.addTrustedCertificate(serverCertificate);
+
+    connectionTest(
+        app ->
+            (sslRmiRegistry ? app.withSslRmiRegistry(4242) : app)
+                .withJmxPort(JMX_PORT)
+                .withJmxSsl()
+                .withKeyStore(serverKeyStore),
+        scraper ->
+            (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                .withTrustStore(clientTrustStore));
+  }
+
+  @Test
+  void serverSslClientSsl(@TempDir Path tempDir) {
+    // Note: this could have been made simpler by relying on the fact that keystore could be used
+    // as a trust store, but having clear split provides also some extra clarity
+    //
+    // 4 keystores:
+    // server keystore with public/private key pair
+    // server truststore with client certificate
+    // client key store with public/private key pair
+    // client trust store with certificate from server
+
+    TestKeyStore serverKeyStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server-keystore.jks"), SERVER_PASSWORD);
+    TestKeyStore serverTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("server-truststore.jks"), SERVER_PASSWORD);
+
+    X509Certificate serverCertificate = serverKeyStore.addKeyPair();
+
+    TestKeyStore clientKeyStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client-keystore.jks"), CLIENT_PASSWORD);
+    TestKeyStore clientTrustStore =
+        TestKeyStore.newKeyStore(tempDir.resolve("client-truststore.jks"), CLIENT_PASSWORD);
+
+    X509Certificate clientCertificate = clientKeyStore.addKeyPair();
+
+    // adding certificates in trust stores
+    clientTrustStore.addTrustedCertificate(serverCertificate);
+    serverTrustStore.addTrustedCertificate(clientCertificate);
+
+    connectionTest(
+        app ->
+            app.withJmxPort(JMX_PORT)
+                .withJmxSsl()
+                .withClientSslCertificate()
+                .withKeyStore(serverKeyStore)
+                .withTrustStore(serverTrustStore),
+        scraper ->
+            scraper
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                .withKeyStore(clientKeyStore)
+                .withTrustStore(clientTrustStore));
+  }
+
   private static void connectionTest(
       Function<TestAppContainer, TestAppContainer> customizeApp,
       Function<JmxScraperContainer, JmxScraperContainer> customizeScraper) {
@@ -87,17 +170,23 @@ public class JmxConnectionTest {
   private static void checkConnectionLogs(JmxScraperContainer scraper, boolean expectedOk) {
 
     String[] logLines = scraper.getLogs().split("\n");
-    String lastLine = logLines[logLines.length - 1];
 
-    if (expectedOk) {
-      assertThat(lastLine)
-          .describedAs("should log connection success")
-          .endsWith("JMX connection test OK");
-    } else {
-      assertThat(lastLine)
-          .describedAs("should log connection failure")
-          .endsWith("JMX connection test ERROR");
-    }
+    // usually only the last line can be checked, however when it fails with an exception
+    // the stack trace is last in the output, so it's simpler to check all lines of log output
+
+    assertThat(logLines)
+        .anySatisfy(
+            line -> {
+              if (expectedOk) {
+                assertThat(line)
+                    .describedAs("should log connection success")
+                    .contains("JMX connection test OK");
+              } else {
+                assertThat(line)
+                    .describedAs("should log connection failure")
+                    .contains("JMX connection test ERROR");
+              }
+            });
   }
 
   private static void waitTerminated(GenericContainer<?> container) {
