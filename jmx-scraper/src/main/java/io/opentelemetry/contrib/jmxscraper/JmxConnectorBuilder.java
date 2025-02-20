@@ -8,6 +8,10 @@ package io.opentelemetry.contrib.jmxscraper;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.security.Provider;
 import java.security.Security;
 import java.util.HashMap;
@@ -19,6 +23,9 @@ import javax.annotation.Nullable;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnector;
+import javax.management.remote.rmi.RMIServer;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -36,6 +43,10 @@ public class JmxConnectorBuilder {
   @Nullable private String profile;
   @Nullable private String realm;
   private boolean sslRegistry;
+
+  // used only with ssl registry
+  private static final SslRMIClientSocketFactory sslRmiClientSocketFactory =
+      new SslRMIClientSocketFactory();
 
   private JmxConnectorBuilder(JMXServiceURL url) {
     this.url = url;
@@ -91,9 +102,9 @@ public class JmxConnectorBuilder {
     try {
       if (sslRegistry) {
         return doConnectSslRegistry(url, env);
+      } else {
+        return doConnect(url, env);
       }
-
-      return doConnect(url, env);
 
     } catch (IOException e) {
       throw new IOException("Unable to connect to " + url.getHost() + ":" + url.getPort(), e);
@@ -148,7 +159,28 @@ public class JmxConnectorBuilder {
   }
 
   public JMXConnector doConnectSslRegistry(JMXServiceURL url, Map<String, Object> env) {
-    throw new IllegalStateException("TODO");
+
+    logger.info("Connecting with SSL protected RMI registry to " + url);
+    String hostName;
+    int port;
+
+    if (url.getURLPath().startsWith("/jndi/")) {
+      String[] components = url.getURLPath().split("/", 3);
+      URI uri = URI.create(components[2]);
+      hostName = uri.getHost();
+      port = uri.getPort();
+    } else {
+      hostName = url.getHost();
+      port = url.getPort();
+    }
+
+    try {
+      JMXConnector jmxConn = new RMIConnector(getStub(hostName, port), null);
+      jmxConn.connect(env);
+      return jmxConn;
+    } catch (IOException e) {
+      throw new IllegalStateException("Unable to connect to " + url, e);
+    }
   }
 
   private static JMXServiceURL buildUrl(String host, int port) {
@@ -162,6 +194,15 @@ public class JmxConnectorBuilder {
       return new JMXServiceURL(url);
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException("invalid url", e);
+    }
+  }
+
+  private static RMIServer getStub(String hostName, int port) throws IOException {
+    try {
+      Registry registry = LocateRegistry.getRegistry(hostName, port, sslRmiClientSocketFactory);
+      return (RMIServer) registry.lookup("jmxrmi");
+    } catch (NotBoundException nbe) {
+      throw new IOException(nbe);
     }
   }
 }
