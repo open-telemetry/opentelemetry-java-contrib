@@ -54,10 +54,10 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                 metric
                     .hasDescription("The number of active sessions")
                     .hasUnit("{session}")
-                    .isGauge()
+                    .isUpDownCounter()
                     .hasDataPointsWithOneAttribute(attributeWithAnyValue("context")))
         .add(
-            "tomcat.errors",
+            "tomcat.request.errors",
             metric ->
                 metric
                     .hasDescription("The number of errors encountered")
@@ -65,7 +65,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                     .isCounter()
                     .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
         .add(
-            "tomcat.processing_time",
+            "tomcat.request.duration",
             metric ->
                 metric
                     .hasDescription("The total processing time")
@@ -73,7 +73,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                     .isCounter()
                     .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
         .add(
-            "tomcat.traffic",
+            "tomcat.network.io",
             metric ->
                 metric
                     .hasDescription("The number of bytes transmitted and received")
@@ -101,7 +101,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             attribute("state", "busy"),
                             attribute("proto_handler", "\"http-nio-8080\""))))
         .add(
-            "tomcat.max_time",
+            "tomcat.request.duration.max",
             metric ->
                 metric
                     .hasDescription("Maximum time to process a request")
@@ -109,7 +109,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                     .isGauge()
                     .hasDataPointsWithOneAttribute(attribute("proto_handler", "\"http-nio-8080\"")))
         .add(
-            "tomcat.request_count",
+            "tomcat.requests",
             metric ->
                 metric
                     .hasDescription("The total requests")

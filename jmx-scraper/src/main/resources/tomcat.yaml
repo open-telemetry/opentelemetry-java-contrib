@@ -14,7 +14,7 @@ rules:
     mapping:
       activeSessions:
         metric: tomcat.sessions
-        type: gauge
+        type: updowncounter
         unit: "{session}"
         desc: The number of active sessions
 
@@ -26,37 +26,37 @@ rules:
       proto_handler: param(name)
     mapping:
       errorCount:
-        metric: errors
+        metric: request.errors
         type: counter
         unit: "{error}"
         desc: The number of errors encountered
       requestCount:
-        metric: request_count
+        metric: requests
         type: counter
         unit: "{request}"
         desc: The total requests
       maxTime:
-        metric: max_time
+        metric: request.duration.max
         type: gauge
         unit: ms
         desc: Maximum time to process a request
       processingTime:
-        metric: processing_time
+        metric: request.duration
         type: counter
         unit: ms
         desc: The total processing time
       bytesSent:
-        metric: traffic
-        type: counter
-        unit: By
-        desc: The number of bytes transmitted and received
+        metric: &metric network.io
+        type: &type counter
+        unit: &unit By
+        desc: &desc The number of bytes transmitted and received
         metricAttribute:
           direction: const(sent)
       bytesReceived:
-        metric: traffic
-        type: counter
-        unit: By
-        desc: The number of bytes transmitted and received
+        metric: *metric
+        type: *type
+        unit: *unit
+        desc: *desc
         metricAttribute:
           direction: const(received)
 
@@ -68,16 +68,16 @@ rules:
       proto_handler: param(name)
     mapping:
       currentThreadCount:
-        metric: threads
-        desc: The number of threads
-        type: gauge
-        unit: "{thread}"
+        metric: &metric threads
+        desc: &desc The number of threads
+        type: &type gauge
+        unit: &unit "{thread}"
         metricAttribute:
           state: const(idle)
       currentThreadsBusy:
-        metric: threads
-        desc: The number of threads
-        type: gauge
-        unit: "{thread}"
+        metric: *metric
+        desc: *desc
+        type: *type
+        unit: *unit
         metricAttribute:
           state: const(busy)
