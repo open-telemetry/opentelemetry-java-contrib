@@ -12,8 +12,11 @@ import java.security.cert.X509Certificate;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -43,6 +46,9 @@ public class JmxConnectionTest {
 
   private static Network network;
 
+  // temporary folder for files that are copied to container
+  @TempDir private Path tempDir;
+
   @BeforeAll
   static void beforeAll() {
     network = Network.newNetwork();
@@ -51,6 +57,12 @@ public class JmxConnectionTest {
   @AfterAll
   static void afterAll() {
     network.close();
+  }
+
+  @BeforeEach
+  void beforeEach() {
+    // extra safety to ensure temp folder is empty before each test method
+    assertThat(tempDir).isEmptyDirectory();
   }
 
   @Test
@@ -62,32 +74,43 @@ public class JmxConnectionTest {
     }
   }
 
-  @Test
-  void connectNoAuth() {
+  @ParameterizedTest
+  @EnumSource
+  void connectNoAuth(JmxScraperContainer.ConfigSource configSource) {
     connectionTest(
-        app -> app.withJmxPort(JMX_PORT), scraper -> scraper.withRmiServiceUrl(APP_HOST, JMX_PORT));
+        app -> app.withJmxPort(JMX_PORT),
+        scraper -> scraper.withRmiServiceUrl(APP_HOST, JMX_PORT).withConfigSource(configSource));
   }
 
-  @Test
-  void userPassword() {
+  @ParameterizedTest
+  @EnumSource
+  void userPassword(JmxScraperContainer.ConfigSource configSource) {
     String login = "user";
     String pwd = "t0p!Secret";
     connectionTest(
         app -> app.withJmxPort(JMX_PORT).withUserAuth(login, pwd),
-        scraper -> scraper.withRmiServiceUrl(APP_HOST, JMX_PORT).withUser(login).withPassword(pwd));
+        scraper ->
+            scraper
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                .withUser(login)
+                .withPassword(pwd)
+                .withConfigSource(configSource));
   }
 
-  @Test
-  void serverSsl(@TempDir Path tempDir) {
-    testServerSsl(tempDir, /* sslRmiRegistry= */ false);
+  @ParameterizedTest
+  @EnumSource
+  void serverSsl(JmxScraperContainer.ConfigSource configSource) {
+    testServerSsl(/* sslRmiRegistry= */ false, configSource);
   }
 
-  @Test
-  void serverSslWithSslRmiRegistry(@TempDir Path tempDir) {
-    testServerSsl(tempDir, /* sslRmiRegistry= */ true);
+  @ParameterizedTest
+  @EnumSource
+  void serverSslWithSslRmiRegistry(JmxScraperContainer.ConfigSource configSource) {
+    testServerSsl(/* sslRmiRegistry= */ true, configSource);
   }
 
-  private static void testServerSsl(Path tempDir, boolean sslRmiRegistry) {
+  private void testServerSsl(
+      boolean sslRmiRegistry, JmxScraperContainer.ConfigSource configSource) {
     // two keystores:
     // server keystore with public/private key pair
     // client trust store with certificate from server
@@ -109,11 +132,13 @@ public class JmxConnectionTest {
         scraper ->
             (sslRmiRegistry ? scraper.withSslRmiRegistry() : scraper)
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                .withTrustStore(clientTrustStore));
+                .withTrustStore(clientTrustStore)
+                .withConfigSource(configSource));
   }
 
-  @Test
-  void serverSslClientSsl(@TempDir Path tempDir) {
+  @ParameterizedTest
+  @EnumSource(value = JmxScraperContainer.ConfigSource.class)
+  void serverSslClientSsl(JmxScraperContainer.ConfigSource configSource) {
     // Note: this could have been made simpler by relying on the fact that keystore could be used
     // as a trust store, but having clear split provides also some extra clarity
     //
@@ -152,7 +177,8 @@ public class JmxConnectionTest {
             scraper
                 .withRmiServiceUrl(APP_HOST, JMX_PORT)
                 .withKeyStore(clientKeyStore)
-                .withTrustStore(clientTrustStore));
+                .withTrustStore(clientTrustStore)
+                .withConfigSource(configSource));
   }
 
   private static void connectionTest(
