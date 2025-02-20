@@ -192,7 +192,7 @@ public class JmxConnectionTest {
   }
 
   private static void waitTerminated(GenericContainer<?> container) {
-    long retries = TimeUnit.SECONDS.toMillis(10);
+    int retries = 10;
     while (retries > 0 && container.isRunning()) {
       retries--;
       try {
