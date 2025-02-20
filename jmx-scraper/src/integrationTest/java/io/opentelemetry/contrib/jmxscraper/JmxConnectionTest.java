@@ -7,10 +7,10 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
  * JmxConnectionBuilder and relies on containers to minimize the JMX/RMI network complications which
  * are not NAT-friendly.
  */
-@Disabled // failing with "container should stop when testing connection"
 public class JmxConnectionTest {
 
   // OTLP endpoint is not used in test mode, but still has to be provided
@@ -102,11 +101,11 @@ public class JmxConnectionTest {
   }
 
   private static void waitTerminated(GenericContainer<?> container) {
-    int retries = 10;
+    long retries = TimeUnit.SECONDS.toMillis(10);
     while (retries > 0 && container.isRunning()) {
       retries--;
       try {
-        Thread.sleep(100);
+        TimeUnit.MILLISECONDS.sleep(100);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
