@@ -25,6 +25,8 @@ components:
   baggage-processor:
     - mikegoldsmith
     - zeitlinger
+  cloudfoundry-resources:
+    - KarstenSchnitter
   compressors:
     - jack-berg
   consistent-sampling:
