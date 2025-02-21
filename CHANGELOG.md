@@ -48,6 +48,8 @@
   ([#1741](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1741))
 - Add SSL support
   ([#1710](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1710))
+- Replicate JMXMP/SASL config from the JMX metrics module
+  ([#1749](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1749))
 
 ### Maven extension
 
