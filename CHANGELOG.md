@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.44.0 (2025-02-21)
 
 ### AWS resources
 
