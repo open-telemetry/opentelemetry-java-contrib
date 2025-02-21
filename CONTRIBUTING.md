@@ -71,8 +71,6 @@ Follow the Java Instrumentation [Style Guide](https://github.com/open-telemetry/
 
 Failure? Check logs for errors or mismatched dependencies.
 
-
-
 ## Gradle conventions
 
 - Use kotlin instead of groovy
