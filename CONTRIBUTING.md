@@ -53,9 +53,6 @@ $ java -version
 
 ```bash
 $ ./gradlew assemble
-
-# Build the complete project
-$ ./gradlew build
 ```
 
 ## Testing
