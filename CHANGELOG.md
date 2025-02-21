@@ -14,6 +14,10 @@
 - Support Lineage in XRay trace header and remove additional baggage from being added
   ([#1671](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1671))
 
+### CloudFoundry resources - New 🌟
+
+CloudFoundry resource detector.
+
 ### Disk buffering
 
 - Use delegate's temporality
