@@ -14,6 +14,13 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     mavenLocal()
+    // terracotta repository for jmxmp connector
+    maven {
+      setUrl("https://repo.terracotta.org/maven2")
+      content {
+        includeGroupByRegex("""org\.terracotta.*""")
+      }
+    }
   }
 }
 

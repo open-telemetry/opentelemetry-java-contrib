@@ -12,16 +12,6 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
-repositories {
-  mavenCentral()
-  maven {
-    setUrl("https://repo.terracotta.org/maven2")
-    content {
-      includeGroupByRegex("""org\.terracotta.*""")
-    }
-  }
-}
-
 val groovyVersion = "3.0.23"
 
 dependencies {
