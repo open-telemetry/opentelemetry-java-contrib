@@ -61,8 +61,10 @@ $ ./gradlew assemble
 # Run integration tests
 $ ./gradlew integrationTest
 ```
+$ ./gradlew test
 
-## Contributing Rules
+# Some modules have integration tests
+$ ./gradlew integrationTest
 
 Follow the Java Instrumentation [Style Guide](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/style-guideline.md) from the opentelemetry-java-instrumentation repository.
 
