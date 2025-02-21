@@ -73,7 +73,7 @@ Failure? Check logs for errors or mismatched dependencies.
 
 
 
-### Gradle conventions
+## Gradle conventions
 
 - Use kotlin instead of groovy
 - Plugin versions should be specified in `settings.gradle.kts`, not in individual modules
