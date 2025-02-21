@@ -16,15 +16,16 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
-  private static final int DEFAULT_MASTER_SERVICE_PORT = 16000;
-
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("dajobe/hbase")
         .withEnv("HBASE_MASTER_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
-        .withExposedPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT)
-        .waitingFor(Wait.forListeningPorts(jmxPort, DEFAULT_MASTER_SERVICE_PORT));
+        .withExposedPorts(jmxPort)
+        // HBase initialization process is finished a long time after all the ports are opened.
+        // Because of this it is necessary to wait for log message confirming that startup process
+        // is complete.
+        .waitingFor(Wait.forLogMessage(".+Master has completed initialization.+", 1));
   }
 
   @Override

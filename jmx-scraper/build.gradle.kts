@@ -21,6 +21,9 @@ dependencies {
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-logging")
 
+  // for jmxmp protocol support
+  runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
+
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
@@ -36,7 +39,9 @@ testing {
         implementation("org.slf4j:slf4j-simple")
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+        implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+        implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
       }
     }
   }
@@ -70,6 +75,13 @@ tasks {
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
+
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      if (System.getenv().containsKey("CI")) {
+        maxRetries.set(5)
+      }
+    }
   }
 
   // Because we reconfigure publishing to only include the shadow jar, the Gradle metadata is not correct.

@@ -14,7 +14,7 @@ dependencies {
 
   implementation("com.squareup.okhttp3:okhttp")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   annotationProcessor("com.google.auto.service:auto-service")
   testImplementation("com.google.auto.service:auto-service")

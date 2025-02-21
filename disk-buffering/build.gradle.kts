@@ -5,9 +5,9 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("com.github.johnrengelman.shadow")
-  id("me.champeau.jmh") version "0.7.2"
-  id("ru.vyarus.animalsniffer") version "1.7.2"
-  id("com.squareup.wire") version "5.1.0"
+  id("me.champeau.jmh") version "0.7.3"
+  id("ru.vyarus.animalsniffer") version "2.0.0"
+  id("com.squareup.wire") version "5.3.0"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -53,7 +53,7 @@ wire {
   java {}
 
   sourcePath {
-    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
   }
 
   root(

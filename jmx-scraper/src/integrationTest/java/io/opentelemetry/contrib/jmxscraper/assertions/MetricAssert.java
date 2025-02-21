@@ -249,8 +249,8 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
             }
 
             info.description(
-                "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'",
-                dataPointAttributes, actual.getName(), Arrays.asList(matcherGroups));
+                "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'.\nActual data points: %s",
+                dataPointAttributes, actual.getName(), Arrays.asList(matcherGroups), dataPoints);
             integers.assertEqual(info, matchCount, 1);
           }
 

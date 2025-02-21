@@ -16,23 +16,6 @@ import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.incubating.DbIncubatingAttributes.DB_OPERATION;
-import static io.opentelemetry.semconv.incubating.DbIncubatingAttributes.DB_SYSTEM;
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INVOKED_NAME;
-import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_TRIGGER;
-import static io.opentelemetry.semconv.incubating.GraphqlIncubatingAttributes.GRAPHQL_OPERATION_TYPE;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_METHOD;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_TARGET;
-import static io.opentelemetry.semconv.incubating.HttpIncubatingAttributes.HTTP_URL;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
-import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_PEER_NAME;
-import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_PEER_PORT;
-import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_SOCK_PEER_ADDR;
-import static io.opentelemetry.semconv.incubating.NetIncubatingAttributes.NET_SOCK_PEER_PORT;
-import static io.opentelemetry.semconv.incubating.PeerIncubatingAttributes.PEER_SERVICE;
-import static io.opentelemetry.semconv.incubating.RpcIncubatingAttributes.RPC_METHOD;
-import static io.opentelemetry.semconv.incubating.RpcIncubatingAttributes.RPC_SERVICE;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -41,7 +24,6 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.ServiceAttributes;
-import io.opentelemetry.semconv.incubating.GraphqlIncubatingAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -57,7 +39,6 @@ import java.util.logging.Logger;
  * represent "incoming" traffic, {@link SpanKind#CLIENT} and {@link SpanKind#PRODUCER} spans
  * represent "outgoing" traffic, and {@link SpanKind#INTERNAL} spans are ignored.
  */
-@SuppressWarnings("deprecation") // uses deprecated semantic conventions
 final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
 
   private static final Logger logger =
@@ -71,6 +52,38 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
   private static final String UNKNOWN_OPERATION = "UnknownOperation";
   private static final String UNKNOWN_REMOTE_SERVICE = "UnknownRemoteService";
   private static final String UNKNOWN_REMOTE_OPERATION = "UnknownRemoteOperation";
+
+  // copied from DbIncubatingAttributes
+  private static final AttributeKey<String> DB_OPERATION = AttributeKey.stringKey("db.operation");
+  private static final AttributeKey<String> DB_SYSTEM = AttributeKey.stringKey("db.system");
+  // copied from FaasIncubatingAttributes
+  private static final AttributeKey<String> FAAS_INVOKED_NAME =
+      AttributeKey.stringKey("faas.invoked_name");
+  private static final AttributeKey<String> FAAS_TRIGGER = AttributeKey.stringKey("faas.trigger");
+  // copied from GraphqlIncubatingAttributes
+  private static final AttributeKey<String> GRAPHQL_OPERATION_TYPE =
+      AttributeKey.stringKey("graphql.operation.type");
+  // copied from HttpIncubatingAttributes
+  private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
+  private static final AttributeKey<String> HTTP_TARGET = AttributeKey.stringKey("http.target");
+  private static final AttributeKey<String> HTTP_URL = AttributeKey.stringKey("http.url");
+  // copied from MessagingIncubatingAttributes
+  private static final AttributeKey<String> MESSAGING_OPERATION =
+      AttributeKey.stringKey("messaging.operation");
+  private static final AttributeKey<String> MESSAGING_SYSTEM =
+      AttributeKey.stringKey("messaging.system");
+  // copied from NetIncubatingAttributes
+  private static final AttributeKey<String> NET_PEER_NAME = AttributeKey.stringKey("net.peer.name");
+  private static final AttributeKey<Long> NET_PEER_PORT = AttributeKey.longKey("net.peer.port");
+  private static final AttributeKey<String> NET_SOCK_PEER_ADDR =
+      AttributeKey.stringKey("net.sock.peer.addr");
+  private static final AttributeKey<Long> NET_SOCK_PEER_PORT =
+      AttributeKey.longKey("net.sock.peer.port");
+  // copied from PeerIncubatingAttributes
+  private static final AttributeKey<String> PEER_SERVICE = AttributeKey.stringKey("peer.service");
+  // copied from RpcIncubatingAttributes
+  private static final AttributeKey<String> RPC_METHOD = AttributeKey.stringKey("rpc.method");
+  private static final AttributeKey<String> RPC_SERVICE = AttributeKey.stringKey("rpc.service");
 
   @Override
   public Attributes generateMetricAttributesFromSpan(SpanData span, Resource resource) {
@@ -196,8 +209,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    *   <li>DB
    *   <li>FAAS
    *   <li>Messaging
-   *   <li>GraphQL - Special case, if {@link GraphqlIncubatingAttributes#GRAPHQL_OPERATION_TYPE} is
-   *       present, we use it for RemoteOperation and set RemoteService to {@link #GRAPHQL}.
+   *   <li>GraphQL - Special case, if {@link #GRAPHQL_OPERATION_TYPE} is present, we use it for
+   *       RemoteOperation and set RemoteService to {@link #GRAPHQL}.
    * </ul>
    *
    * <p>In each case, these span attributes were selected from the OpenTelemetry trace semantic

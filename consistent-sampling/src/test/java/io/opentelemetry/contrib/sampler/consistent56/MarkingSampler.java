@@ -23,9 +23,9 @@ import javax.annotation.concurrent.Immutable;
  * could be also offered as a general utility.
  */
 @Immutable
-final class MarkingSampler implements ComposableSampler {
+final class MarkingSampler implements Composable {
 
-  private final ComposableSampler delegate;
+  private final Composable delegate;
   private final AttributeKey<String> attributeKey;
   private final String attributeValue;
 
@@ -38,8 +38,7 @@ final class MarkingSampler implements ComposableSampler {
    * @param attributeKey Span attribute key
    * @param attributeValue Span attribute value
    */
-  MarkingSampler(
-      ComposableSampler delegate, AttributeKey<String> attributeKey, String attributeValue) {
+  MarkingSampler(Composable delegate, AttributeKey<String> attributeKey, String attributeValue) {
     this.delegate = requireNonNull(delegate);
     this.attributeKey = requireNonNull(attributeKey);
     this.attributeValue = requireNonNull(attributeValue);

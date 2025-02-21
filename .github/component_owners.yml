@@ -19,7 +19,10 @@ components:
   aws-xray-propagator:
     - wangzlei
     - srprash
-  baggage-procesor:
+  azure-resources:
+    - trask
+    - zeitlinger
+  baggage-processor:
     - mikegoldsmith
     - zeitlinger
   cloudfoundry-resources:
@@ -33,6 +36,9 @@ components:
     - LikeTheSalad
     - zeitlinger
   gcp-resources:
+    - jsuereth
+    - psx95
+  gcp-auth-extension:
     - jsuereth
     - psx95
   jfr-connection:
@@ -70,8 +76,6 @@ components:
   samplers:
     - trask
     - jack-berg
-  static-instrumenter:
-    - anosek-an
   kafka-exporter:
     - spockz
     - vincentfree

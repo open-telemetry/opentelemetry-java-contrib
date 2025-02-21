@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("org.owasp.dependencycheck")
 }
 
 val otelJava = extensions.create<OtelJavaExtension>("otelJava")
@@ -67,9 +68,7 @@ tasks {
 
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
-      showExceptions = true
-      showCauses = true
-      showStackTraces = true
+      showStandardStreams = true
     }
   }
 
@@ -136,6 +135,11 @@ testing {
     dependencies {
       implementation(project(project.path))
 
+      implementation(enforcedPlatform("org.junit:junit-bom:5.11.4"))
+      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.5"))
+      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.0-jre"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.31.3"))
+
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
       compileOnly("com.google.code.findbugs:jsr305")
@@ -189,4 +193,12 @@ afterEvaluate {
       }
     }
   }
+}
+
+dependencyCheck {
+  scanConfigurations = mutableListOf("runtimeClasspath")
+  suppressionFile = "buildscripts/dependency-check-suppressions.xml"
+  failBuildOnCVSS = 7.0f // fail on high or critical CVE
+  nvd.apiKey = System.getenv("NVD_API_KEY")
+  nvd.delay = 3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
 }

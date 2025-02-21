@@ -12,22 +12,12 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
-repositories {
-  mavenCentral()
-  maven {
-    setUrl("https://repo.terracotta.org/maven2")
-    content {
-      includeGroupByRegex("""org\.terracotta.*""")
-    }
-  }
-}
-
 val groovyVersion = "3.0.23"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
-  implementation("io.grpc:grpc-netty-shaded")
+  implementation("io.grpc:grpc-netty-shaded:1.70.0")
   implementation("org.codehaus.groovy:groovy-jmx")
   implementation("org.codehaus.groovy:groovy")
   implementation("io.prometheus:simpleclient")
@@ -58,7 +48,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
       }
     }

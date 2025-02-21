@@ -21,13 +21,12 @@ import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -58,6 +57,7 @@ public abstract class TargetSystemIntegrationTest {
 
   private static Network network;
   private static OtlpGrpcServer otlpServer;
+  private Collection<GenericContainer<?>> prerequisiteContainers;
   private GenericContainer<?> target;
   private JmxScraperContainer scraper;
 
@@ -88,12 +88,23 @@ public abstract class TargetSystemIntegrationTest {
 
   @AfterEach
   void afterEach() {
-    if (target != null && target.isRunning()) {
-      target.stop();
-    }
     if (scraper != null && scraper.isRunning()) {
       scraper.stop();
     }
+
+    if (target != null && target.isRunning()) {
+      target.stop();
+    }
+
+    if (prerequisiteContainers != null) {
+      prerequisiteContainers.forEach(
+          container -> {
+            if (container.isRunning()) {
+              container.stop();
+            }
+          });
+    }
+
     if (otlpServer != null) {
       otlpServer.reset();
     }
@@ -105,14 +116,31 @@ public abstract class TargetSystemIntegrationTest {
 
   @Test
   void endToEndTest(@TempDir Path tmpDir) {
+    startContainers(tmpDir);
+    verifyMetrics();
+  }
+
+  protected void startContainers(Path tmpDir) {
+    prerequisiteContainers = createPrerequisiteContainers();
 
     target =
         createTargetContainer(JMX_PORT)
             .withLogConsumer(new Slf4jLogConsumer(targetSystemLogger))
             .withNetwork(network)
             .withNetworkAliases(TARGET_SYSTEM_NETWORK_ALIAS);
+
+    // If there are any containers that must be started before target then initialize them.
+    // Then make target depending on them, so it is started after dependencies
+    for (GenericContainer<?> container : prerequisiteContainers) {
+      container.withNetwork(network);
+      target.dependsOn(container);
+    }
+
+    // Target container must be running before scraper container is customized.
+    // It is necessary to allow interactions with the container, like file copying etc.
     target.start();
 
+    // Create and initialize scraper container
     scraper =
         new JmxScraperContainer(otlpEndpoint, scraperBaseImage())
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
@@ -121,53 +149,13 @@ public abstract class TargetSystemIntegrationTest {
 
     scraper = customizeScraperContainer(scraper, target, tmpDir);
     scraper.start();
-
-    verifyMetrics();
-  }
-
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
-  // migrated to MetricsVerifier
-  protected void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
-    await()
-        .atMost(Duration.ofSeconds(30))
-        .untilAsserted(
-            () -> {
-              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
-              assertThat(receivedMetrics).describedAs("no metric received").isNotEmpty();
-
-              List<Metric> metrics =
-                  receivedMetrics.stream()
-                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                      .flatMap(Collection::stream)
-                      .filter(
-                          // TODO: disabling batch span exporter might help remove unwanted metrics
-                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
-                      .flatMap(sm -> sm.getMetricsList().stream())
-                      .collect(Collectors.toList());
-
-              assertThat(metrics)
-                  .describedAs("metrics reported but none from JMX scraper")
-                  .isNotEmpty();
-
-              for (Consumer<Metric> assertion : assertions) {
-                assertThat(metrics).anySatisfy(assertion);
-              }
-            });
-  }
-
-  // TODO: This implementation is DEPRECATED and will be removed once all integration tests are
-  // migrated to MetricsVerifier
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  protected final void waitAndAssertMetrics(Consumer<Metric>... assertions) {
-    waitAndAssertMetrics(Arrays.asList(assertions));
   }
 
   protected void verifyMetrics() {
     MetricsVerifier metricsVerifier = createMetricsVerifier();
     await()
-        .atMost(Duration.ofSeconds(30))
+        .atMost(Duration.ofSeconds(60))
+        .pollInterval(Duration.ofSeconds(1))
         .untilAsserted(
             () -> {
               List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
@@ -185,22 +173,22 @@ public abstract class TargetSystemIntegrationTest {
                       .collect(Collectors.toList());
 
               assertThat(metrics)
-                  .describedAs("metrics reported but none from JMX scraper")
+                  .describedAs("Metrics received but not suitable for JMX scraper")
                   .isNotEmpty();
 
               metricsVerifier.verify(metrics);
             });
   }
 
-  // TODO: This method is going to be abstract once all integration tests are migrated to
-  // MetricsVerifier
-  protected MetricsVerifier createMetricsVerifier() {
-    return MetricsVerifier.create();
-  }
+  protected abstract MetricsVerifier createMetricsVerifier();
 
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper;
+  }
+
+  protected Collection<GenericContainer<?>> createPrerequisiteContainers() {
+    return Collections.emptyList();
   }
 
   private static class OtlpGrpcServer extends ServerExtension {

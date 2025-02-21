@@ -114,7 +114,11 @@ public class MetricsVerifier {
 
     assertionNames.removeAll(receivedMetricNames);
     if (!assertionNames.isEmpty()) {
-      fail("Metrics expected but not received: " + assertionNames);
+      fail(
+          "Metrics expected but not received: "
+              + assertionNames
+              + "\nReceived only: "
+              + receivedMetricNames);
     }
   }
 }
