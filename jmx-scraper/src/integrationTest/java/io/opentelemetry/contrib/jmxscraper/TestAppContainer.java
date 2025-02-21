@@ -27,6 +27,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private final Map<String, String> properties;
   private String login;
   private String pwd;
+  private boolean jmxSsl;
+  private boolean jmxSslRegistry;
+  private TestKeyStore keyStore;
+  private TestKeyStore trustStore;
+  private int jmxPort;
+  private int jmxRmiPort;
+  private boolean clientCertificate;
 
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
@@ -50,10 +57,17 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
    */
   @CanIgnoreReturnValue
   public TestAppContainer withJmxPort(int port) {
-    properties.put("com.sun.management.jmxremote.port", Integer.toString(port));
+    this.jmxPort = port;
     return this;
   }
 
+  /**
+   * Enables and configure JMX login/pwd authentication
+   *
+   * @param login user login
+   * @param pwd user password
+   * @return this
+   */
   @CanIgnoreReturnValue
   public TestAppContainer withUserAuth(String login, String pwd) {
     this.login = login;
@@ -61,14 +75,89 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     return this;
   }
 
+  /**
+   * Enables SSL for JMX endpoint, will require JMX client to trust remote JVM certificate
+   *
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withJmxSsl() {
+    this.jmxSsl = true;
+    return this;
+  }
+
+  /**
+   * Enables SSL-protected RMI registry, which requires a distinct port from JMX
+   *
+   * @param registryPort registry port
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withSslRmiRegistry(int registryPort) {
+    this.jmxSslRegistry = true;
+    this.jmxRmiPort = registryPort;
+    return this;
+  }
+
+  /**
+   * Enables client certificate verification by the remote JVM
+   *
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withClientSslCertificate() {
+    this.clientCertificate = true;
+    return this;
+  }
+
+  /**
+   * Configure key store for the remote JVM
+   *
+   * @param keyStore key store
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withKeyStore(TestKeyStore keyStore) {
+    this.keyStore = keyStore;
+    return this;
+  }
+
+  /**
+   * Configure trust store for the remote JVM
+   *
+   * @param trustStore trust store
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public TestAppContainer withTrustStore(TestKeyStore trustStore) {
+    this.trustStore = trustStore;
+    return this;
+  }
+
   @Override
   public void start() {
-    // TODO: add support for ssl
-    properties.put("com.sun.management.jmxremote.ssl", "false");
+    properties.put("com.sun.management.jmxremote.port", Integer.toString(jmxPort));
+
+    properties.put("com.sun.management.jmxremote.ssl", Boolean.toString(jmxSsl));
+    if (jmxSslRegistry) {
+      properties.put("com.sun.management.jmxremote.registry.ssl", "true");
+      properties.put("com.sun.management.jmxremote.rmi.port", Integer.toString(jmxRmiPort));
+      if (jmxRmiPort == jmxPort) {
+        // making it harder to attempt using the same port
+        // doing so results in a "port busy" error which can be confusing
+        throw new IllegalStateException(
+            "RMI with SSL registry requires a distinct port from JMX: " + jmxRmiPort);
+      }
+    }
+    if (jmxSsl && clientCertificate) {
+      properties.put("com.sun.management.jmxremote.ssl.need.client.auth", "true");
+    }
 
     if (pwd == null) {
+      // no authentication
       properties.put("com.sun.management.jmxremote.authenticate", "false");
     } else {
+      // authentication enabled
       properties.put("com.sun.management.jmxremote.authenticate", "true");
 
       Path pwdFile = createPwdFile(login, pwd);
@@ -79,6 +168,10 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
       this.withCopyFileToContainer(MountableFile.forHostPath(accessFile), "/jmx.access");
       properties.put("com.sun.management.jmxremote.access.file", "/jmx.access");
     }
+
+    // add optional key and trust stores
+    addSecureStore(keyStore, /* isKeyStore= */ true, properties);
+    addSecureStore(trustStore, /* isKeyStore= */ false, properties);
 
     String confArgs =
         properties.entrySet().stream()
@@ -97,6 +190,20 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
     logger().info("Test application JAVA_TOOL_OPTIONS = {}", confArgs);
 
     super.start();
+  }
+
+  private void addSecureStore(
+      TestKeyStore keyStore, boolean isKeyStore, Map<String, String> properties) {
+    if (keyStore == null) {
+      return;
+    }
+    Path path = keyStore.getPath();
+    String containerPath = "/" + path.getFileName().toString();
+    this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
+
+    String prefix = String.format("javax.net.ssl.%sStore", isKeyStore ? "key" : "trust");
+    properties.put(prefix, containerPath);
+    properties.put(prefix + "Password", keyStore.getPassword());
   }
 
   private static Path createPwdFile(String login, String pwd) {

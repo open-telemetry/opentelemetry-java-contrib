@@ -1,119 +1,163 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "docker:pinDigests",
-    "helpers:pinGitHubActionDigests"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    'docker:pinDigests',
+    'helpers:pinGitHubActionDigests',
   ],
-  "ignorePresets": [":ignoreModulesAndTests"], // needed to keep maven-extension test pom files up-to-date
-  "packageRules": [
+  ignorePresets: [
+    ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
+  ],
+  packageRules: [
     {
       // this is to reduce the number of renovate PRs
-      "matchManagers": [
-        "github-actions",
-        "dockerfile"
+      matchManagers: [
+        'github-actions',
+        'dockerfile',
       ],
-      "extends": ["schedule:weekly"],
-      "groupName": "weekly update"
+      extends: [
+        'schedule:weekly',
+      ],
+      groupName: 'weekly update',
     },
     {
-      "matchPackageNames": [
-        "io.opentelemetry:**",
-        "io.opentelemetry.instrumentation:**",
-        "io.opentelemetry.semconv:**",
-        "io.opentelemetry.proto:**"
+      matchPackageNames: [
+        'io.opentelemetry:**',
+        'io.opentelemetry.instrumentation:**',
+        'io.opentelemetry.semconv:**',
+        'io.opentelemetry.proto:**',
       ],
       // Renovate's default behavior is only to update from unstable -> unstable if it's for the
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
-      "ignoreUnstable": false
+      ignoreUnstable: false,
     },
     {
       // prevent 3.0.1u2 -> 3.0.1
-      "matchPackageNames": ["com.google.code.findbugs:annotations"],
-      "allowedVersions": "!/^3\\.0\\.1$/"
+      matchPackageNames: [
+        'com.google.code.findbugs:annotations',
+      ],
+      allowedVersions: '!/^3\\.0\\.1$/',
     },
     {
       // disruptor 4+ requires Java 11+
-      "matchPackageNames": ["com.lmax:disruptor"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      matchPackageNames: [
+        'com.lmax:disruptor',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
     },
     {
       // junit-pioneer 2+ requires Java 11+
-      "matchPackageNames": ["org.junit-pioneer:junit-pioneer"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      matchPackageNames: [
+        'org.junit-pioneer:junit-pioneer',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
     },
     {
       // mockito 5+ requires Java 11+
-      "matchPackagePrefixes": ["org.mockito:"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.mockito:{/,}**',
+      ],
     },
     {
       // agrona 1.23+ requires Java 17+
-      "matchPackageNames": ["org.agrona:agrona"],
-      "matchUpdateTypes": ["major", "minor"],
-      "enabled": false
+      matchPackageNames: [
+        'org.agrona:agrona',
+      ],
+      matchUpdateTypes: [
+        'major',
+        'minor',
+      ],
+      enabled: false,
     },
     {
       // system-stubs-jupiter 2.1+ requires Java 11+
-      "matchPackageNames": ["uk.org.webcompere:system-stubs-jupiter"],
-      "matchUpdateTypes": ["major", "minor"],
-      "enabled": false
+      matchPackageNames: [
+        'uk.org.webcompere:system-stubs-jupiter',
+      ],
+      matchUpdateTypes: [
+        'major',
+        'minor',
+      ],
+      enabled: false,
     },
     {
       // pinned version for compatibility
-      "matchPackageNames": ["io.micrometer:micrometer-core"],
-      "matchCurrentVersion": "1.5.0",
-      "enabled": false
+      matchPackageNames: [
+        'io.micrometer:micrometer-core',
+      ],
+      matchCurrentVersion: '1.5.0',
+      enabled: false,
     },
     {
       // pinned version for compatibility
-      "matchPackagePrefixes": ["org.apache.maven:"],
-      "matchCurrentVersion": "3.5.0",
-      "enabled": false
+      matchCurrentVersion: '3.5.0',
+      enabled: false,
+      matchPackageNames: [
+        'org.apache.maven:{/,}**',
+      ],
     },
     {
-      "matchPackagePrefixes": ["com.diffplug.spotless"],
-      "groupName": "spotless packages"
+      groupName: 'spotless packages',
+      matchPackageNames: [
+        'com.diffplug.spotless{/,}**',
+      ],
     },
     {
       // pinned version for compatibility with java 8 JFR parsing
-      "matchPackagePrefixes": ["org.openjdk.jmc"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.openjdk.jmc{/,}**',
+      ],
     },
     {
       // pinned version for compatibility
-      "matchFileNames": ["jmx-scraper/test-webapp/build.gradle.kts"],
-      "matchPackagePrefixes": ["jakarta.servlet:"],
-      "matchCurrentVersion": "5.0.0",
-      "enabled": false
+      matchFileNames: [
+        'jmx-scraper/test-webapp/build.gradle.kts',
+      ],
+      matchCurrentVersion: '5.0.0',
+      enabled: false,
+      matchPackageNames: [
+        'jakarta.servlet:{/,}**',
+      ],
     },
     {
       // intentionally using Spring Boot 2 in gcp-auth-extension in order to test with Java 8+
-      "matchFileNames": [
-        "gcp-auth-extension/build.gradle.kts"
+      matchFileNames: [
+        'gcp-auth-extension/build.gradle.kts',
       ],
-      "matchPackagePrefixes": [
-        "org.springframework.boot"
+      matchUpdateTypes: [
+        'major',
       ],
-      "matchUpdateTypes": ["major"],
-      "enabled": false,
-    }
+      enabled: false,
+      matchPackageNames: [
+        'org.springframework.boot{/,}**',
+      ],
+    },
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "datasourceTemplate": "npm",
-      "fileMatch": [
-        "^.github/workflows/"
+      customType: 'regex',
+      datasourceTemplate: 'npm',
+      fileMatch: [
+        '^.github/workflows/',
       ],
-      "matchStrings": [
-        "npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)"
-      ]
-    }
-  ]
+      matchStrings: [
+        'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
+      ],
+    },
+  ],
 }

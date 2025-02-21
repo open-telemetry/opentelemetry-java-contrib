@@ -2,7 +2,7 @@ pluginManagement {
   plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-    id("com.gradle.develocity") version "3.19.1"
+    id("com.gradle.develocity") version "3.19.2"
   }
 }
 
@@ -53,11 +53,6 @@ include(":resource-providers")
 include(":runtime-attach:runtime-attach")
 include(":runtime-attach:runtime-attach-core")
 include(":samplers")
-include(":static-instrumenter:agent-instrumenter")
-include(":static-instrumenter:maven-plugin")
-include(":static-instrumenter:agent-extension")
-include(":static-instrumenter:bootstrap")
-include(":static-instrumenter:test-app")
 include(":kafka-exporter")
 include(":gcp-resources")
 include(":span-stacktrace")

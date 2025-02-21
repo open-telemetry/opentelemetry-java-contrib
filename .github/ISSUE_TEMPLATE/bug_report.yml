@@ -28,7 +28,6 @@ body:
         - resource-providers
         - runtime-attach
         - samplers
-        - static-instrumenter
   - type: textarea
     attributes:
       label: What happened?

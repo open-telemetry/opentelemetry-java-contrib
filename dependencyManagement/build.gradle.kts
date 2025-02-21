@@ -2,8 +2,8 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.12.0-alpha"
-val semconvVersion = "1.30.0-rc.1"
+val otelInstrumentationVersion = "2.13.0-alpha"
+val semconvVersion = "1.30.0"
 
 javaPlatform {
   allowDependencies()
@@ -51,7 +51,7 @@ dependencies {
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:3.9.0")
-    api("org.testcontainers:kafka:1.20.4")
+    api("org.testcontainers:kafka:1.20.5")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:3.0")
