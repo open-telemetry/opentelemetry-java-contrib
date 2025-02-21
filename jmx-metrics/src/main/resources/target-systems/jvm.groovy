@@ -33,6 +33,15 @@ otel.instrument(memory, "jvm.memory.heap", "current heap usage",
 otel.instrument(memory, "jvm.memory.nonheap", "current non-heap usage",
         "By", "NonHeapMemoryUsage", otel.&longValueCallback)
 
+def runtime = otel.mbean("java.lang:type=Runtime")
+otel.instrument(runtime, "jvm.runtime.uptime", "uptime",
+        "ms", "Uptime", otel.&longValueCallback)
+
+def os = otel.mbean("java.lang:type=OperatingSystem")
+otel.instrument(os, "jvm.fd.open", "open file descriptors",
+        "1", "OpenFileDescriptorCount", otel.&longValueCallback)
+
+
 def memoryPool = otel.mbeans("java.lang:type=MemoryPool,*")
 otel.instrument(memoryPool, "jvm.memory.pool", "current memory pool usage",
         "By", ["name" : { mbean -> mbean.name().getKeyProperty("name") }],
