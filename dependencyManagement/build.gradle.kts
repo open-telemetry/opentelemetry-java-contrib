@@ -46,7 +46,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.uber.nullaway:nullaway:0.12.3")
     api("org.assertj:assertj-core:3.27.3")
-    api("org.awaitility:awaitility:4.2.2")
+    api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
