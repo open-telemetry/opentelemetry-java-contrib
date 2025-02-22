@@ -21,6 +21,9 @@ dependencies {
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-logging")
 
+  // for jmxmp protocol support
+  runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
+
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
