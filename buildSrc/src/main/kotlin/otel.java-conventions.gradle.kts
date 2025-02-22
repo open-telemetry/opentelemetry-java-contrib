@@ -153,6 +153,7 @@ testing {
       implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
+      runtimeOnly("org.junit.platform:junit-platform-launcher")
     }
   }
 }
