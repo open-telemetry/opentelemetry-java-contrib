@@ -48,6 +48,9 @@ Here is a list of configurable options for the extension:
 The OpenTelemetry Java Agent Extension can be easily added to any Java application by modifying the startup command to the application.
 For more information on Extensions, see the [documentation here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/examples/extension/README.md).
 
+> [!IMPORTANT]
+> Make sure to download the 'shaded' variant of the Authentication Extension for use with OpenTelemetry Java auto-instrumentation agent. The shaded version is available under the classifier name `shadow`.
+
 Below is a snippet showing how to add the extension to a Java application using the Gradle build system.
 
 ```gradle
