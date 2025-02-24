@@ -135,7 +135,7 @@ testing {
     dependencies {
       implementation(project(project.path))
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.11.4"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.12.0"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.5"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.0-jre"))
       implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.31.3"))
@@ -153,6 +153,7 @@ testing {
       implementation("io.github.netmikey.logunit:logunit-jul")
 
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
+      runtimeOnly("org.junit.platform:junit-platform-launcher")
     }
   }
 }

@@ -36,14 +36,16 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 
 ## Configuration reference
 
-| config option                  | default value | description                                                                                                                               |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `otel.jmx.service.url`         | -             | mandatory JMX URL to connect to the remote JVM                                                                                            |
-| `otel.jmx.target.system`       | -             | comma-separated list of systems to monitor, mandatory unless `otel.jmx.config` is set                                                     |
-| `otel.jmx.config`              | empty         | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set                       |
-| `otel.jmx.username`            | -             | user name for JMX connection, mandatory when JMX authentication is set on target JVM with`com.sun.management.jmxremote.authenticate=true` |
-| `otel.jmx.password`            | -             | password for JMX connection, mandatory when JMX authentication is set on target JVM with `com.sun.management.jmxremote.authenticate=true` |
-| `otel.jmx.remote.registry.ssl` | `false`       | connect to an SSL-protected registry when enabled on target JVM with `com.sun.management.jmxremote.registry.ssl=true`                     |
+| config option                  | default value | description                                                                                                                                                 |
+|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `otel.jmx.service.url`         | -             | mandatory JMX URL to connect to the remote JVM                                                                                                              |
+| `otel.jmx.target.system`       | -             | comma-separated list of systems to monitor, mandatory unless `otel.jmx.config` is set                                                                       |
+| `otel.jmx.config`              | empty         | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set                                         |
+| `otel.jmx.username`            | -             | user name for JMX connection, mandatory when JMX authentication is set on target JVM with`com.sun.management.jmxremote.authenticate=true`                   |
+| `otel.jmx.password`            | -             | password for JMX connection, mandatory when JMX authentication is set on target JVM with `com.sun.management.jmxremote.authenticate=true`                   |
+| `otel.jmx.remote.registry.ssl` | `false`       | connect to an SSL-protected registry when enabled on target JVM with `com.sun.management.jmxremote.registry.ssl=true`                                       |
+| `otel.jmx.remote.profile`      | -             | SASL remote profile, supported values are `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5` |
+| `otel.jmx.realm`               | -             | Realm required by profile `SASL/DIGEST-MD5` or `TLS SASL/DIGEST-MD5`                                                                                        |
 
 When both `otel.jmx.target.system` and `otel.jmx.config` configuration options are used at the same time:
 

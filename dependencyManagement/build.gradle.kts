@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.12.0-alpha"
+val otelInstrumentationVersion = "2.13.1-alpha"
 val semconvVersion = "1.30.0"
 
 javaPlatform {
@@ -46,12 +46,12 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.uber.nullaway:nullaway:0.12.3")
     api("org.assertj:assertj-core:3.27.3")
-    api("org.awaitility:awaitility:4.2.2")
+    api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:3.9.0")
-    api("org.testcontainers:kafka:1.20.4")
+    api("org.testcontainers:kafka:1.20.5")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:3.0")

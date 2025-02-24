@@ -33,7 +33,7 @@ public class AzureMetadataService {
 
   private AzureMetadataService() {}
 
-  private static final Duration TIMEOUT = Duration.ofSeconds(1);
+  private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
   private static final Logger logger = Logger.getLogger(AzureMetadataService.class.getName());
 

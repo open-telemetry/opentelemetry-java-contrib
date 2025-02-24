@@ -28,7 +28,6 @@ body:
         - resource-providers
         - runtime-attach
         - samplers
-        - static-instrumenter
   - type: textarea
     attributes:
       label: Is your feature request related to a problem? Please describe.

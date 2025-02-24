@@ -14,6 +14,13 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     mavenLocal()
+    // terracotta repository for jmxmp connector
+    maven {
+      setUrl("https://repo.terracotta.org/maven2")
+      content {
+        includeGroupByRegex("""org\.terracotta.*""")
+      }
+    }
   }
 }
 
@@ -34,6 +41,7 @@ include(":aws-xray-propagator")
 include(":azure-resources")
 include(":baggage-processor")
 include(":compressors:compressor-zstd")
+include(":cloudfoundry-resources")
 include(":consistent-sampling")
 include(":dependencyManagement")
 include(":disk-buffering")
@@ -53,11 +61,6 @@ include(":resource-providers")
 include(":runtime-attach:runtime-attach")
 include(":runtime-attach:runtime-attach-core")
 include(":samplers")
-include(":static-instrumenter:agent-instrumenter")
-include(":static-instrumenter:maven-plugin")
-include(":static-instrumenter:agent-extension")
-include(":static-instrumenter:bootstrap")
-include(":static-instrumenter:test-app")
 include(":kafka-exporter")
 include(":gcp-resources")
 include(":span-stacktrace")

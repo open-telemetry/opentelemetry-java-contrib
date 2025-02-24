@@ -25,6 +25,8 @@ components:
   baggage-processor:
     - mikegoldsmith
     - zeitlinger
+  cloudfoundry-resources:
+    - KarstenSchnitter
   compressors:
     - jack-berg
   consistent-sampling:
@@ -74,8 +76,6 @@ components:
   samplers:
     - trask
     - jack-berg
-  static-instrumenter:
-    - anosek-an
   kafka-exporter:
     - spockz
     - vincentfree
