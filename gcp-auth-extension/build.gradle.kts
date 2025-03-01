@@ -60,6 +60,13 @@ tasks {
   }
 
   shadowJar {
+    /**
+     * Shaded version of this extension is required when using it as a OpenTelemetry Java Agent
+     * extension. Shading bundles the dependencies required by this extension in the resulting JAR,
+     * ensuring their presence on the classpath at runtime.
+     *
+     * See http://gradleup.com/shadow/introduction/#introduction for reference.
+     */
     archiveClassifier.set("shadow")
   }
 
