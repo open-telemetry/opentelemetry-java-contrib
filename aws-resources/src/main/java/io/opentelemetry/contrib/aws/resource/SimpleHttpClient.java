@@ -5,21 +5,13 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -47,9 +39,8 @@ final class SimpleHttpClient {
             .readTimeout(TIMEOUT);
 
     if (urlStr.startsWith("https") && certPath != null) {
-      KeyStore keyStore = getKeystoreForTrustedCert(certPath);
-      X509TrustManager trustManager = buildTrustManager(keyStore);
-      SSLSocketFactory socketFactory = buildSslSocketFactory(trustManager);
+      X509TrustManager trustManager = SslSocketFactoryBuilder.createTrustManager(certPath);
+      SSLSocketFactory socketFactory = SslSocketFactoryBuilder.createSocketFactory(trustManager);
       if (socketFactory != null) {
         clientBuilder.sslSocketFactory(socketFactory, trustManager);
       }
@@ -88,58 +79,5 @@ final class SimpleHttpClient {
     }
 
     return "";
-  }
-
-  @Nullable
-  private static X509TrustManager buildTrustManager(@Nullable KeyStore keyStore) {
-    if (keyStore == null) {
-      return null;
-    }
-    try {
-      String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-      TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-      tmf.init(keyStore);
-      return (X509TrustManager) tmf.getTrustManagers()[0];
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
-      return null;
-    }
-  }
-
-  @Nullable
-  private static SSLSocketFactory buildSslSocketFactory(@Nullable TrustManager trustManager) {
-    if (trustManager == null) {
-      return null;
-    }
-    try {
-      SSLContext context = SSLContext.getInstance("TLS");
-      context.init(null, new TrustManager[] {trustManager}, null);
-      return context.getSocketFactory();
-
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
-    }
-    return null;
-  }
-
-  @Nullable
-  private static KeyStore getKeystoreForTrustedCert(String certPath) {
-    try (FileInputStream fis = new FileInputStream(certPath)) {
-      KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      trustStore.load(null, null);
-      CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-      Collection<? extends Certificate> certificates = certificateFactory.generateCertificates(fis);
-
-      int i = 0;
-      for (Certificate certificate : certificates) {
-        trustStore.setCertificateEntry("cert_" + i, certificate);
-        i++;
-      }
-      return trustStore;
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Cannot load KeyStore from " + certPath);
-      return null;
-    }
   }
 }
