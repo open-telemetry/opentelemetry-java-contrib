@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.baggage.processor;
 
 import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import java.util.regex.Pattern;
@@ -23,7 +22,7 @@ public class BaggageSpanProcessorTest {
   public void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor = BaggageSpanProcessor.allowAllBaggageKeys()) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
-        processor.onStart(Context.current(), span);
+        processor.onEnding(span);
         Mockito.verify(span).setAttribute("key", "value");
       }
     }
@@ -39,7 +38,7 @@ public class BaggageSpanProcessorTest {
               .put("other", "value")
               .build()
               .makeCurrent()) {
-        processor.onStart(Context.current(), span);
+        processor.onEnding(span);
         Mockito.verify(span).setAttribute("key", "value");
         Mockito.verify(span, Mockito.never()).setAttribute("other", "value");
       }
@@ -58,7 +57,7 @@ public class BaggageSpanProcessorTest {
               .put("other", "value")
               .build()
               .makeCurrent()) {
-        processor.onStart(Context.current(), span);
+        processor.onEnding(span);
         Mockito.verify(span).setAttribute("key", "value");
         Mockito.verify(span, Mockito.never()).setAttribute("other", "value");
       }
