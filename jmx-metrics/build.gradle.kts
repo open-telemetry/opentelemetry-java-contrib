@@ -12,12 +12,12 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
-val groovyVersion = "3.0.23"
+val groovyVersion = "3.0.24"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
-  implementation("io.grpc:grpc-netty-shaded:1.70.0")
+  implementation("io.grpc:grpc-netty-shaded:1.71.0")
   implementation("org.codehaus.groovy:groovy-jmx")
   implementation("org.codehaus.groovy:groovy")
   implementation("io.prometheus:simpleclient")

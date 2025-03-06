@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.13.1-alpha"
+val otelInstrumentationVersion = "2.13.3-alpha"
 val semconvVersion = "1.30.0"
 
 javaPlatform {
@@ -15,7 +15,7 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.2"))
+  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.3"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -35,23 +35,23 @@ dependencies {
     api("org.mockito:mockito-core:4.11.0")
     api("org.mockito:mockito-inline:4.11.0")
     api("org.mockito:mockito-junit-jupiter:4.11.0")
-    api("org.slf4j:slf4j-api:2.0.16")
-    api("org.slf4j:slf4j-simple:2.0.16")
-    api("org.slf4j:log4j-over-slf4j:2.0.16")
-    api("org.slf4j:jcl-over-slf4j:2.0.16")
-    api("org.slf4j:jul-to-slf4j:2.0.16")
+    api("org.slf4j:slf4j-api:2.0.17")
+    api("org.slf4j:slf4j-simple:2.0.17")
+    api("org.slf4j:log4j-over-slf4j:2.0.17")
+    api("org.slf4j:jcl-over-slf4j:2.0.17")
+    api("org.slf4j:jul-to-slf4j:2.0.17")
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
     api("com.squareup.okhttp3:okhttp:4.12.0")
-    api("com.uber.nullaway:nullaway:0.12.3")
+    api("com.uber.nullaway:nullaway:0.12.4")
     api("org.assertj:assertj-core:3.27.3")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:3.9.0")
-    api("org.testcontainers:kafka:1.20.5")
+    api("org.testcontainers:kafka:1.20.6")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:3.0")
