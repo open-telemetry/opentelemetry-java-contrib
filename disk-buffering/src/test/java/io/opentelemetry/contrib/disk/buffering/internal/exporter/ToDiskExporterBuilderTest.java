@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.configuration.StorageConfiguration;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.File;
 import org.junit.jupiter.api.Test;

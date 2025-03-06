@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 import static java.util.Collections.emptyList;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.configuration.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.configuration;
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;

@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
+import io.opentelemetry.contrib.disk.buffering.configuration.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
