@@ -40,6 +40,7 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 |--------------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `otel.jmx.service.url`         | -             | mandatory JMX URL to connect to the remote JVM                                                                                                              |
 | `otel.jmx.target.system`       | -             | comma-separated list of systems to monitor, mandatory unless `otel.jmx.config` is set                                                                       |
+| `otel.jmx.target.source`       | `auto`        | source of metrics definitions to use for `otel.jmx.target.system`, supported values are `auto`, `instrumentation` and `legacy`                              |
 | `otel.jmx.config`              | empty         | comma-separated list of paths to custom YAML metrics definition, mandatory when `otel.jmx.target.system` is not set                                         |
 | `otel.jmx.username`            | -             | user name for JMX connection, mandatory when JMX authentication is set on target JVM with`com.sun.management.jmxremote.authenticate=true`                   |
 | `otel.jmx.password`            | -             | password for JMX connection, mandatory when JMX authentication is set on target JVM with `com.sun.management.jmxremote.authenticate=true`                   |
@@ -55,22 +56,34 @@ When both `otel.jmx.target.system` and `otel.jmx.config` configuration options a
 
 If there is a need to override existing ready-to-use metrics or to keep control on the metrics definitions, using a custom YAML definition with `otel.jmx.config` is the recommended option.
 
-Supported values for `otel.jmx.target.system`:
+Supported values for `otel.jmx.target.system` and support for `otel.jmx.target.source` and links to the metrics definitions:
 
-| `otel.jmx.target.system` | description           |
-|--------------------------|-----------------------|
-| `activemq`               | Apache ActiveMQ       |
-| `cassandra`              | Apache Cassandra      |
-| `hbase`                  | Apache HBase          |
-| `hadoop`                 | Apache Hadoop         |
-| `jetty`                  | Eclipse Jetty         |
-| `jvm`                    | JVM runtime metrics   |
-| `kafka`                  | Apache Kafka          |
-| `kafka-consumer`         | Apache Kafka consumer |
-| `kafka-producer`         | Apache Kafka producer |
-| `solr`                   | Apache Solr           |
-| `tomcat`                 | Apache Tomcat         |
-| `wildfly`                | Wildfly               |
+| `otel.jmx.target.system` | description           | `legacy`                                                        | `instrumentation` |
+|--------------------------|-----------------------|-----------------------------------------------------------------|-------------------|
+| `activemq`               | Apache ActiveMQ       | [`activemq.yaml`](src/main/resources/activemq.yaml)             |                   |
+| `cassandra`              | Apache Cassandra      | [`cassandra.yaml`](src/main/resources/cassandra.yaml)           |                   |
+| `hbase`                  | Apache HBase          | [`hbase.yaml`](src/main/resources/hbase.yaml)                   |                   |
+| `hadoop`                 | Apache Hadoop         | [`hadoop.yaml`](src/main/resources/hadoop.yaml)                 |                   |
+| `jetty`                  | Eclipse Jetty         | [`jetty.yaml`](src/main/resources/jetty.yaml)                   |                   |
+| `jvm`                    | JVM runtime metrics   | [`jvm.yaml`](src/main/resources/jvm.yaml)                       |                   |
+| `kafka`                  | Apache Kafka          | [`kafka.yaml`](src/main/resources/kafka.yaml)                   |                   |
+| `kafka-consumer`         | Apache Kafka consumer | [`kafka-consumer.yaml`](src/main/resources/kafka-consumer.yaml) |                   |
+| `kafka-producer`         | Apache Kafka producer | [`kafka-producer.yaml`](src/main/resources/kafka-producer.yaml) |                   |
+| `solr`                   | Apache Solr           | [`solr.yaml`](src/main/resources/solr.yaml)                     |                   |
+| `tomcat`                 | Apache Tomcat         | [`tomcat.yaml`](src/main/resources/tomcat.yaml)                 |                   |
+| `wildfly`                | Wildfly               | [`wildfly.yaml`](src/main/resources/wildfly.yaml)               |                   |
+
+The source of metrics definitions is controlled by `otel.jmx.target.source`:
+
+- `auto` (default) : metrics definitions from `instrumentation` with fallback on `legacy` when not available.
+- `legacy` : metrics definitions embedded in jmx-scraper, almost equivalent to [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-metrics).
+- `instrumentation` : metrics definitions embedded in [instrumentation/jmx-metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library) library
+
+Setting the value of `otel.jmx.target.source` allows to fit the following use-cases:
+
+- `auto` will ensure that the latest metrics definitions in instrumentation (reference) is being used when available with a fallback on `legacy` otherwise. Metrics definitions will thus be updated whenever the dependency on instrumentation is updated.
+- `legacy` allows to keep using definitions that are very close to JMX Gatherer, this is the recommended option if preserving compatibility is required. Those definitions are in maintenance and are unlikely to evolve over time.
+- `instrumentation` forces using metrics definitions from instrumentation, hence only the reference. Metrics definitions and supported values of `otel.jmx.target.system` will be updated whenever the dependency on instrumentation is updated.
 
 The following SDK configuration options are also relevant
 

@@ -1,0 +1,11 @@
+---
+# test system 3 that is in the same location as instrumentation yaml files and is NOT defined in legacy
+rules:
+
+  - bean: java.lang:type=Runtime
+    mapping:
+      Uptime:
+        metric: custom.jvm.uptime
+        type: counter
+        unit: ms
+        desc: JVM uptime in milliseconds

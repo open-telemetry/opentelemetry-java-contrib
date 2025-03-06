@@ -228,26 +228,16 @@ public class JmxScraper {
   private static MetricConfiguration getMetricConfig(JmxScraperConfig scraperConfig) {
     MetricConfiguration config = new MetricConfiguration();
     for (String system : scraperConfig.getTargetSystems()) {
-      addRulesForSystem(system, config);
+      try (InputStream yaml = scraperConfig.getTargetSystemYaml(system)) {
+        RuleParser.get().addMetricDefsTo(config, yaml, system);
+      } catch (IOException e) {
+        throw new IllegalStateException("Error while loading rules for system " + system, e);
+      }
     }
     for (String file : scraperConfig.getJmxConfig()) {
       addRulesFromFile(file, config);
     }
     return config;
-  }
-
-  private static void addRulesForSystem(String system, MetricConfiguration conf) {
-    String yamlResource = system + ".yaml";
-    try (InputStream inputStream =
-        JmxScraper.class.getClassLoader().getResourceAsStream(yamlResource)) {
-      if (inputStream != null) {
-        RuleParser.get().addMetricDefsTo(conf, inputStream, system);
-      } else {
-        throw new IllegalArgumentException("No support for system " + system);
-      }
-    } catch (Exception e) {
-      throw new IllegalStateException("Error while loading rules for system " + system, e);
-    }
   }
 
   private static void addRulesFromFile(String file, MetricConfiguration conf) {
