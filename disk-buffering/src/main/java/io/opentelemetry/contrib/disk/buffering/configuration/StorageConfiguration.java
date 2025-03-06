@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.disk.buffering.configuration;
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
-import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
