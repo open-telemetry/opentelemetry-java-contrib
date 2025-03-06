@@ -7,12 +7,13 @@ package io.opentelemetry.contrib.jmxscraper.config;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -37,6 +38,7 @@ public class JmxScraperConfig {
   static final String JMX_CONFIG_LEGACY = "otel.jmx.custom.scraping.config";
 
   static final String JMX_TARGET_SYSTEM = "otel.jmx.target.system";
+  static final String JMX_TARGET_SOURCE = "otel.jmx.target.source";
 
   static final String JMX_USERNAME = "otel.jmx.username";
   static final String JMX_PASSWORD = "otel.jmx.password";
@@ -46,27 +48,13 @@ public class JmxScraperConfig {
   static final String JMX_REMOTE_PROFILE = "otel.jmx.remote.profile";
   static final String JMX_REALM = "otel.jmx.realm";
 
-  private static final List<String> AVAILABLE_TARGET_SYSTEMS =
-      Collections.unmodifiableList(
-          Arrays.asList(
-              "activemq",
-              "cassandra",
-              "hbase",
-              "hadoop",
-              "jetty",
-              "jvm",
-              "kafka",
-              "kafka-consumer",
-              "kafka-producer",
-              "solr",
-              "tomcat",
-              "wildfly"));
-
   private String serviceUrl = "";
 
   private List<String> jmxConfig = Collections.emptyList();
 
   private Set<String> targetSystems = Collections.emptySet();
+
+  private TargetSystemSource targetSystemSource = TargetSystemSource.AUTO;
 
   private Duration samplingInterval = Duration.ofMinutes(1);
 
@@ -78,6 +66,20 @@ public class JmxScraperConfig {
 
   @Nullable private String remoteProfile;
   private boolean registrySsl;
+
+  public enum TargetSystemSource {
+    AUTO,
+    INSTRUMENTATION,
+    LEGACY;
+
+    public static TargetSystemSource fromString(String source) {
+      try {
+        return TargetSystemSource.valueOf(source.toUpperCase(Locale.ROOT));
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException("Invalid target system source: " + source, e);
+      }
+    }
+  }
 
   private JmxScraperConfig() {}
 
@@ -91,6 +93,57 @@ public class JmxScraperConfig {
 
   public Set<String> getTargetSystems() {
     return targetSystems;
+  }
+
+  /**
+   * Resolves the target system yaml from configuration
+   *
+   * @param system target system
+   * @return input stream on target system yaml definitions
+   * @throws ConfigurationException when no yaml for system is available
+   */
+  public InputStream getTargetSystemYaml(String system) {
+    InputStream yaml;
+    switch (targetSystemSource) {
+      case LEGACY:
+        yaml = getTargetSystemYaml(system, TargetSystemSource.LEGACY);
+        break;
+      case INSTRUMENTATION:
+        yaml = getTargetSystemYaml(system, TargetSystemSource.INSTRUMENTATION);
+        break;
+      case AUTO:
+        yaml = getTargetSystemYaml(system, TargetSystemSource.INSTRUMENTATION);
+        if (yaml == null) {
+          yaml = getTargetSystemYaml(system, TargetSystemSource.LEGACY);
+        }
+        break;
+      default:
+        throw new IllegalStateException("unsupported target system source: " + targetSystemSource);
+    }
+
+    if (yaml == null) {
+      throw new ConfigurationException(
+          "unsupported target system: '" + system + "', source: " + targetSystemSource);
+    }
+    return yaml;
+  }
+
+  @Nullable
+  private static InputStream getTargetSystemYaml(String system, TargetSystemSource source) {
+    String path;
+    switch (source) {
+      case LEGACY:
+        path = String.format("%s.yaml", system);
+        break;
+      case INSTRUMENTATION:
+        path = String.format("jmx/rules/%s.yaml", system);
+        break;
+      case AUTO:
+      default:
+        throw new IllegalArgumentException("invalid source" + source);
+    }
+
+    return JmxScraperConfig.class.getClassLoader().getResourceAsStream(path);
   }
 
   public Duration getSamplingInterval() {
@@ -164,12 +217,6 @@ public class JmxScraperConfig {
       throw new ConfigurationException(
           "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CONFIG + "' must be set");
     }
-    targetSystem.forEach(
-        s -> {
-          if (!AVAILABLE_TARGET_SYSTEMS.contains(s)) {
-            throw new ConfigurationException("unsupported target system: '" + s + "'");
-          }
-        });
 
     scraperConfig.jmxConfig = Collections.unmodifiableList(jmxConfig);
     scraperConfig.targetSystems = Collections.unmodifiableSet(new HashSet<>(targetSystem));
@@ -179,6 +226,12 @@ public class JmxScraperConfig {
     scraperConfig.remoteProfile = config.getString("otel.jmx.remote.profile");
     scraperConfig.realm = config.getString("otel.jmx.realm");
     scraperConfig.registrySsl = config.getBoolean("otel.jmx.remote.registry.ssl", false);
+
+    // ensures support for target systems by resolving the yaml resource
+    scraperConfig.targetSystems.forEach(scraperConfig::getTargetSystemYaml);
+
+    String source = config.getString(JMX_TARGET_SOURCE, TargetSystemSource.AUTO.name());
+    scraperConfig.targetSystemSource = TargetSystemSource.fromString(source);
 
     return scraperConfig;
   }

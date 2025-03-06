@@ -76,7 +76,7 @@ Supported values for `otel.jmx.target.system` and support for `otel.jmx.target.s
 The source of metrics definitions is controlled by `otel.jmx.target.source`:
 
 - `auto` (default) : metrics definitions from `instrumentation` with fallback on `legacy` when not available.
-- `legacy` : metrics definitions embedded in jmx-scraper, almost equivalent to [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-metrics). 
+- `legacy` : metrics definitions embedded in jmx-scraper, almost equivalent to [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-metrics).
 - `instrumentation` : metrics definitions embedded in [instrumentation/jmx-metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library) library
 
 Setting the value of `otel.jmx.target.source` allows to fit the following use-cases:
