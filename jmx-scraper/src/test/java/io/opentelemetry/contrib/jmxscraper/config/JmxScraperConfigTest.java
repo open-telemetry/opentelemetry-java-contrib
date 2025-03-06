@@ -160,7 +160,8 @@ class JmxScraperConfigTest {
   @ValueSource(strings = {"auto", ""})
   void targetSystemSource_auto(String source) {
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    // we just need to provide a valid value for parsing
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system-both");
     if (!source.isEmpty()) {
       properties.setProperty(JMX_TARGET_SOURCE, source);
     }
@@ -168,45 +169,47 @@ class JmxScraperConfigTest {
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
     // should resolve to instrumentation when available in both
-    shouldResolveToInstrumentationYaml(config, "fake-test-system1");
+    shouldResolveToInstrumentationYaml(config, "fake-test-system-both");
 
     // should resolve to legacy yaml when not available in instrumentation
-    shouldResolveToLegacyYaml(config, "fake-test-system2");
+    shouldResolveToLegacyYaml(config, "fake-test-system-legacy-only");
 
     // should resolve to instrumentation when only defined there
-    shouldResolveToInstrumentationYaml(config, "fake-test-system3");
+    shouldResolveToInstrumentationYaml(config, "fake-test-system-instrumentation-only");
   }
 
   @Test
   void targetSystemSource_legacy() {
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    // we just need to provide a valid value for parsing
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system-both");
     properties.setProperty(JMX_TARGET_SOURCE, "legacy");
 
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-    shouldResolveToLegacyYaml(config, "fake-test-system1");
+    shouldResolveToLegacyYaml(config, "fake-test-system-both");
 
-    shouldResolveToLegacyYaml(config, "fake-test-system2");
+    shouldResolveToLegacyYaml(config, "fake-test-system-legacy-only");
 
     // should not support system only defined in instrumentation
-    shouldNotResolveYaml(config, "fake-test-system3");
+    shouldNotResolveYaml(config, "fake-test-system-instrumentation-only");
   }
 
   @Test
   void targetSystemSource_instrumentation() {
     Properties properties = (Properties) validProperties.clone();
-    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    // we just need to provide a valid value for parsing
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system-both");
     properties.setProperty(JMX_TARGET_SOURCE, "instrumentation");
 
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-    shouldResolveToInstrumentationYaml(config, "fake-test-system1");
+    shouldResolveToInstrumentationYaml(config, "fake-test-system-both");
 
     // should not support system only defined in legacy
-    shouldNotResolveYaml(config, "fake-test-system2");
+    shouldNotResolveYaml(config, "fake-test-system-legacy-only");
 
-    shouldResolveToInstrumentationYaml(config, "fake-test-system3");
+    shouldResolveToInstrumentationYaml(config, "fake-test-system-instrumentation-only");
   }
 
   private static InputStream getYaml(String path) {
