@@ -206,6 +206,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     if (!targetSystems.isEmpty()) {
       arguments.add("-Dotel.jmx.target.system=" + String.join(",", targetSystems));
+      arguments.add("-Dotel.jmx.target.source=" + targetSystemSource);
     }
 
     if (serviceUrl == null) {
