@@ -21,9 +21,7 @@ class EventToSpanBridgeComponentProviderTest {
         "file_format: 0.3\n"
             + "logger_provider:\n"
             + "  processors:\n"
-            // TODO(jack-berg): remove "{}" after releasing
-            // https://github.com/open-telemetry/opentelemetry-java/pull/6891/files
-            + "    - event_to_span_event_bridge: {}\n";
+            + "    - event_to_span_event_bridge:";
 
     OpenTelemetrySdk openTelemetrySdk =
         FileConfiguration.parseAndCreate(
