@@ -227,7 +227,8 @@ public class JmxScraperConfig {
     scraperConfig.realm = config.getString("otel.jmx.realm");
     scraperConfig.registrySsl = config.getBoolean("otel.jmx.remote.registry.ssl", false);
 
-    // ensures support for target systems by resolving the yaml resource
+    // checks target system is supported by resolving the yaml resource, throws exception on
+    // missing/error
     scraperConfig.targetSystems.forEach(scraperConfig::getTargetSystemYaml);
 
     String source = config.getString(JMX_TARGET_SOURCE, TargetSystemSource.AUTO.name());

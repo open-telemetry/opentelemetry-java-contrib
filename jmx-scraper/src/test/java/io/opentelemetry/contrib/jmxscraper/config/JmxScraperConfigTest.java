@@ -12,6 +12,7 @@ import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_RE
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REGISTRY_SSL;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_REMOTE_PROFILE;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_SERVICE_URL;
+import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_TARGET_SOURCE;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_TARGET_SYSTEM;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_USERNAME;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.fromConfig;
@@ -19,11 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import java.io.InputStream;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class JmxScraperConfigTest {
@@ -138,11 +142,13 @@ class JmxScraperConfigTest {
         .hasMessage("at least one of 'otel.jmx.target.system' or 'otel.jmx.config' must be set");
   }
 
-  @Test
-  void shouldFailValidation_invalidTargetSystem() {
+  @ParameterizedTest
+  @EnumSource(JmxScraperConfig.TargetSystemSource.class)
+  void shouldFailValidation_invalidTargetSystem(JmxScraperConfig.TargetSystemSource source) {
     // Given
     Properties properties = (Properties) validProperties.clone();
     properties.setProperty(JMX_TARGET_SYSTEM, "hal9000");
+    properties.setProperty(JMX_TARGET_SOURCE, source.name().toLowerCase(Locale.ROOT));
 
     // When and Then
     assertThatThrownBy(() -> fromConfig(TestUtil.configProperties(properties)))
@@ -150,62 +156,79 @@ class JmxScraperConfigTest {
         .hasMessageStartingWith("unsupported target system");
   }
 
-  // TODO: Tests below will be reimplemented
+  @ParameterizedTest
+  @ValueSource(strings = {"auto", ""})
+  void targetSystemSource_auto(String source) {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    if (!source.isEmpty()) {
+      properties.setProperty(JMX_TARGET_SOURCE, source);
+    }
 
-  //  @Test
-  //  @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
-  //  @SetSystemProperty(key = "javax.net.ssl.keyStorePassword", value = "truth")
-  //  void propertiesFileOverride() {
-  //    Properties props = new Properties();
-  //    JmxMetrics.loadPropertiesFromPath(
-  //        props, ClassLoader.getSystemClassLoader().getResource("all.properties").getPath());
-  //    JmxConfig config = new JmxConfig(props);
-  //
-  //    // This property should retain the system property value, not the config file value
-  //    assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
-  //    // These properties are set from the config file
-  //    assertThat(config.groovyScript).isEqualTo("/my/groovy/script");
-  //    assertThat(config.targetSystem).isEqualTo("jvm,cassandra");
-  //    assertThat(config.targetSystems).containsOnly("jvm", "cassandra");
-  //    assertThat(config.intervalMilliseconds).isEqualTo(20000);
-  //    assertThat(config.metricsExporterType).isEqualTo("otlp");
-  //    assertThat(config.otlpExporterEndpoint).isEqualTo("https://myotlpendpoint");
-  //    assertThat(config.prometheusExporterHost).isEqualTo("host123.domain.com");
-  //    assertThat(config.prometheusExporterPort).isEqualTo(67890);
-  //    assertThat(config.username).isEqualTo("myUser\nname");
-  //    assertThat(config.password).isEqualTo("myPassw\\ord");
-  //    assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
-  //    assertThat(config.realm).isEqualTo("myRealm");
-  //
-  //    // This property should retain the system property value, not the config file value
-  //    assertThat(System.getProperty("javax.net.ssl.keyStorePassword")).isEqualTo("truth");
-  //    // These properties are set from the config file loading into JmxConfig
-  //    assertThat(System.getProperty("javax.net.ssl.keyStore")).isEqualTo("/my/key/store");
-  //    assertThat(System.getProperty("javax.net.ssl.keyStoreType")).isEqualTo("JKS");
-  //    assertThat(System.getProperty("javax.net.ssl.trustStore")).isEqualTo("/my/trust/store");
-  //    assertThat(System.getProperty("javax.net.ssl.trustStorePassword")).isEqualTo("def456");
-  //    assertThat(System.getProperty("javax.net.ssl.trustStoreType")).isEqualTo("JKS");
-  //  }
-  //
-  //  @Test
-  //  @SetSystemProperty(key = "otel.jmx.service.url", value = "myServiceUrl")
-  //  @SetSystemProperty(key = "otel.jmx.groovy.script", value = "myGroovyScript")
-  //  @SetSystemProperty(key = "otel.jmx.target.system", value = "myTargetSystem")
-  //  void canSupportScriptAndTargetSystem() {
-  //    JmxConfig config = new JmxConfig();
-  //
-  //    assertThat(config.serviceUrl).isEqualTo("myServiceUrl");
-  //    assertThat(config.groovyScript).isEqualTo("myGroovyScript");
-  //    assertThat(config.targetSystem).isEqualTo("mytargetsystem");
-  //    assertThat(config.targetSystems).containsOnly("mytargetsystem");
-  //  }
-  //
-  //  @Test
-  //  @SetSystemProperty(key = "otel.metric.export.interval", value = "123")
-  //  void otelMetricExportIntervalRespected() {
-  //    JmxConfig config = new JmxConfig();
-  //    assertThat(config.intervalMilliseconds).isEqualTo(10000);
-  //    assertThat(config.properties.getProperty("otel.metric.export.interval")).isEqualTo("123");
-  //  }
-  //
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    // should resolve to instrumentation when available in both
+    shouldResolveToInstrumentationYaml(config, "fake-test-system1");
+
+    // should resolve to legacy yaml when not available in instrumentation
+    shouldResolveToLegacyYaml(config, "fake-test-system2");
+
+    // should resolve to instrumentation when only defined there
+    shouldResolveToInstrumentationYaml(config, "fake-test-system3");
+  }
+
+  @Test
+  void targetSystemSource_legacy() {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    properties.setProperty(JMX_TARGET_SOURCE, "legacy");
+
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    shouldResolveToLegacyYaml(config, "fake-test-system1");
+
+    shouldResolveToLegacyYaml(config, "fake-test-system2");
+
+    // should not support system only defined in instrumentation
+    shouldNotResolveYaml(config, "fake-test-system3");
+  }
+
+  @Test
+  void targetSystemSource_instrumentation() {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "fake-test-system1");
+    properties.setProperty(JMX_TARGET_SOURCE, "instrumentation");
+
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    shouldResolveToInstrumentationYaml(config, "fake-test-system1");
+
+    // should not support system only defined in legacy
+    shouldNotResolveYaml(config, "fake-test-system2");
+
+    shouldResolveToInstrumentationYaml(config, "fake-test-system3");
+  }
+
+  private static InputStream getYaml(String path) {
+    return JmxScraperConfigTest.class.getClassLoader().getResourceAsStream(path);
+  }
+
+  private static void shouldResolveToInstrumentationYaml(JmxScraperConfig config, String target) {
+    assertThat(config.getTargetSystemYaml(target))
+        .describedAs("should resolve to instrumentation yaml")
+        .hasSameContentAs(getYaml("jmx/rules/" + target + ".yaml"));
+  }
+
+  private static void shouldResolveToLegacyYaml(JmxScraperConfig config, String target) {
+    assertThat(config.getTargetSystemYaml(target))
+        .describedAs("should resolve to legacy yaml")
+        .hasSameContentAs(getYaml(target + ".yaml"));
+  }
+
+  private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
+    assertThatThrownBy(() -> config.getTargetSystemYaml(target))
+        .describedAs("should not support system")
+        .isInstanceOf(ConfigurationException.class)
+        .hasMessageStartingWith("unsupported target system");
+  }
 }
