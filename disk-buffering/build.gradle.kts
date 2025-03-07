@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import de.undercouch.gradle.tasks.download.Download
 import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
 
 plugins {
@@ -9,7 +8,6 @@ plugins {
   id("me.champeau.jmh") version "0.7.3"
   id("ru.vyarus.animalsniffer") version "2.0.0"
   id("com.squareup.wire") version "5.3.1"
-  id("de.undercouch.download")
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -20,6 +18,8 @@ java {
   targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+val protos by configurations.creating
+
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   compileOnly("com.google.auto.value:auto-value-annotations")
@@ -27,6 +27,8 @@ dependencies {
   signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha@jar")
 }
 
 animalsniffer {
@@ -51,14 +53,11 @@ jmh {
   timeUnit.set("ms")
 }
 
-val protoVersion = "1.5.0"
-val protoArchive = layout.buildDirectory.file("archives/opentelemetry-proto-$protoVersion.zip").get().asFile
-
 wire {
   java {}
 
   sourcePath {
-    srcDir(layout.buildDirectory.dir("protos/opentelemetry-proto-$protoVersion"))
+    srcDir(layout.buildDirectory.dir("protos"))
   }
 
   root(
@@ -70,20 +69,14 @@ wire {
 
 afterEvaluate {
   tasks {
-    val downloadProtoArchive by registering(Download::class) {
-      onlyIf { !protoArchive.exists() }
-      src("https://github.com/open-telemetry/opentelemetry-proto/archive/v$protoVersion.zip")
-      dest(protoArchive)
-    }
-
-    val unzipProtoArchive by registering(Copy::class) {
-      dependsOn(downloadProtoArchive)
-      from(zipTree(protoArchive))
+    val setupProtos by registering(Copy::class) {
+      inputs.files(protos)
+      from(zipTree(protos.singleFile))
       into(layout.buildDirectory.dir("protos"))
     }
 
     named("generateMainProtos") {
-      dependsOn(unzipProtoArchive)
+      dependsOn(setupProtos)
     }
   }
 }
