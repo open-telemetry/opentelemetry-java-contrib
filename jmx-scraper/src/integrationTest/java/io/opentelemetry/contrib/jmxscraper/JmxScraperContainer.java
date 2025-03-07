@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
@@ -214,43 +215,47 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   @Override
   public void start() {
 
-    Map<String, String> config = new HashMap<>();
-    config.put("otel.metrics.exporter", "otlp");
-    config.put("otel.exporter.otlp.endpoint", endpoint);
+    Map<String, String> config = initConfig();
 
-    if (!targetSystems.isEmpty()) {
-      config.put("otel.jmx.target.system", String.join(",", targetSystems));
+    List<String> cmd = createCommand(config);
+
+    if (configSource != ConfigSource.STDIN) {
+      this.withCommand(cmd.toArray(new String[0]));
+    } else {
+      Path script = generateShellScript(cmd, config);
+
+      this.withCopyFileToContainer(MountableFile.forHostPath(script, 500), "/scraper.sh");
+      this.withCommand("/scraper.sh");
     }
 
-    if (serviceUrl == null) {
-      throw new IllegalStateException("Missing service URL");
-    }
-    config.put("otel.jmx.service.url", serviceUrl);
+    logger().info("Starting scraper with command: " + String.join(" ", this.getCommandParts()));
+    super.start();
+  }
 
-    // always use a very short export interval for testing
-    config.put("otel.metric.export.interval", "1s");
+  private Path generateShellScript(List<String> cmd, Map<String, String> config) {
+    // generate shell script to feed standard input with config
+    List<String> lines = new ArrayList<>();
+    lines.add("#!/bin/bash");
+    lines.add(String.join(" ", cmd) + "<<EOF");
+    lines.addAll(toKeyValueString(config));
+    lines.add("EOF");
 
-    if (user != null) {
-      config.put("otel.jmx.username", user);
-    }
-    if (password != null) {
-      config.put("otel.jmx.password", password);
-    }
-
-    addSecureStore(keyStore, /* isKeyStore= */ true, config);
-    addSecureStore(trustStore, /* isKeyStore= */ false, config);
-
-    if (sslRmiRegistry) {
-      config.put("otel.jmx.remote.registry.ssl", "true");
+    Path script;
+    try {
+      script = Files.createTempFile("scraper", ".sh");
+      Files.write(script, lines);
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
 
-    if (!customYamlFiles.isEmpty()) {
-      for (String yaml : customYamlFiles) {
-        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
-      }
-      config.put("otel.jmx.config", String.join(",", customYamlFiles));
+    logger().info("Scraper executed with /scraper.sh shell script");
+    for (int i = 0; i < lines.size(); i++) {
+      logger().info("/scrapper.sh:{}  {}", i, lines.get(i));
     }
+    return script;
+  }
 
+  private List<String> createCommand(Map<String, String> config) {
     List<String> cmd = new ArrayList<>();
     cmd.add("java");
 
@@ -328,36 +333,47 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
           Wait.forLogMessage(".*JMX scraping started.*", 1)
               .withStartupTimeout(Duration.ofSeconds(10)));
     }
+    return cmd;
+  }
 
-    if (configSource != ConfigSource.STDIN) {
-      this.withCommand(cmd.toArray(new String[0]));
-    } else {
-      // generate shell script to feed standard input with config
-      List<String> lines = new ArrayList<>();
-      lines.add("#!/bin/bash");
-      lines.add(String.join(" ", cmd) + "<<EOF");
-      lines.addAll(toKeyValueString(config));
-      lines.add("EOF");
+  private @NotNull Map<String, String> initConfig() {
+    Map<String, String> config = new HashMap<>();
+    config.put("otel.metrics.exporter", "otlp");
+    config.put("otel.exporter.otlp.endpoint", endpoint);
 
-      Path script;
-      try {
-        script = Files.createTempFile("scraper", ".sh");
-        Files.write(script, lines);
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
-      }
-
-      logger().info("Scraper executed with /scraper.sh shell script");
-      for (int i = 0; i < lines.size(); i++) {
-        logger().info("/scrapper.sh:{}  {}", i, lines.get(i));
-      }
-
-      this.withCopyFileToContainer(MountableFile.forHostPath(script, 500), "/scraper.sh");
-      this.withCommand("/scraper.sh");
+    if (!targetSystems.isEmpty()) {
+      config.put("otel.jmx.target.system", String.join(",", targetSystems));
     }
 
-    logger().info("Starting scraper with command: " + String.join(" ", this.getCommandParts()));
-    super.start();
+    if (serviceUrl == null) {
+      throw new IllegalStateException("Missing service URL");
+    }
+    config.put("otel.jmx.service.url", serviceUrl);
+
+    // always use a very short export interval for testing
+    config.put("otel.metric.export.interval", "1s");
+
+    if (user != null) {
+      config.put("otel.jmx.username", user);
+    }
+    if (password != null) {
+      config.put("otel.jmx.password", password);
+    }
+
+    addSecureStore(keyStore, /* isKeyStore= */ true, config);
+    addSecureStore(trustStore, /* isKeyStore= */ false, config);
+
+    if (sslRmiRegistry) {
+      config.put("otel.jmx.remote.registry.ssl", "true");
+    }
+
+    if (!customYamlFiles.isEmpty()) {
+      for (String yaml : customYamlFiles) {
+        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
+      }
+      config.put("otel.jmx.config", String.join(",", customYamlFiles));
+    }
+    return config;
   }
 
   private void addSecureStore(

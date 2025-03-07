@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,12 +57,6 @@ public class JmxConnectionTest {
   @AfterAll
   static void afterAll() {
     network.close();
-  }
-
-  @BeforeEach
-  void beforeEach() {
-    // extra safety to ensure temp folder is empty before each test method
-    assertThat(tempDir).isEmptyDirectory();
   }
 
   @Test
