@@ -25,8 +25,7 @@ tracer_provider: ...
 
 logger_provider:
   processors:
-      # TODO(jack-berg): remove "{}" after releasing [opentelemetry-java#6891](https://github.com/open-telemetry/opentelemetry-java/pull/6891/files)
-      - event_to_span_event_bridge: {}
+      - event_to_span_event_bridge:
 ```
 
 ## Component owners

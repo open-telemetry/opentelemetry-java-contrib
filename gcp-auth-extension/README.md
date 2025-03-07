@@ -48,6 +48,10 @@ Here is a list of configurable options for the extension:
 The OpenTelemetry Java Agent Extension can be easily added to any Java application by modifying the startup command to the application.
 For more information on Extensions, see the [documentation here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/examples/extension/README.md).
 
+> [!IMPORTANT]
+> Make sure to download the 'shaded' variant of the Authentication Extension for use with OpenTelemetry Java auto-instrumentation agent. The shaded version is available under the classifier name `shadow`.\
+> See instructions for [Downloading Shaded JAR](#downloading-shaded-jar) below.
+
 Below is a snippet showing how to add the extension to a Java application using the Gradle build system.
 
 ```gradle
@@ -79,6 +83,21 @@ application {
   ...
 }
 ```
+
+#### Downloading Shaded JAR
+
+You can download the shaded JAR for Google Cloud Authentication Extension from the following link -
+
+```text
+https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-gcp-auth-extension/<VERSION>/opentelemetry-gcp-auth-extension-<VERSION>-shadow.jar
+```
+
+Replace `<VERSION>` with the version you wish to download. For instance, shaded
+variant for `v1.44.0-alpha`, will be found at -
+
+`https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-gcp-auth-extension/1.44.0-alpha/opentelemetry-gcp-auth-extension-1.44.0-alpha-shadow.jar`
+
+*Note: Typically, you would want to use the most recent version of the extension.*
 
 ### Without OpenTelemetry Java agent
 
