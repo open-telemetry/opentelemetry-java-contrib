@@ -53,11 +53,17 @@ jmh {
   timeUnit.set("ms")
 }
 
+val setupProtos by tasks.registering(Sync::class) {
+  inputs.files(protos)
+  from(zipTree(protos.singleFile))
+  into(layout.buildDirectory.dir("protos"))
+}
+
 wire {
   java {}
 
   sourcePath {
-    srcDir(layout.buildDirectory.dir("protos"))
+    srcDir(setupProtos)
   }
 
   root(
@@ -65,20 +71,6 @@ wire {
     "opentelemetry.proto.metrics.v1.MetricsData",
     "opentelemetry.proto.logs.v1.LogsData",
   )
-}
-
-afterEvaluate {
-  tasks {
-    val setupProtos by registering(Copy::class) {
-      inputs.files(protos)
-      from(zipTree(protos.singleFile))
-      into(layout.buildDirectory.dir("protos"))
-    }
-
-    named("generateMainProtos") {
-      dependsOn(setupProtos)
-    }
-  }
 }
 
 tasks.named<ShadowJar>("shadowJar") {
