@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.eventbridge.internal;
 
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.eventbridge.EventToSpanEventBridge;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.StructuredConfigProperties;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 
 /**
@@ -30,7 +30,7 @@ public class EventToSpanEventBridgeComponentProvider
   }
 
   @Override
-  public LogRecordProcessor create(StructuredConfigProperties config) {
+  public LogRecordProcessor create(DeclarativeConfigProperties config) {
     return EventToSpanEventBridge.create();
   }
 }

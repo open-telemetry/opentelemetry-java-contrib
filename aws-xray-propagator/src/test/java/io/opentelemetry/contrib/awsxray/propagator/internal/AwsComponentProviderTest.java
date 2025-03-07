@@ -11,7 +11,7 @@ import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.awsxray.propagator.AwsXrayLambdaPropagator;
 import io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.FileConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class AwsComponentProviderTest {
     String yaml = "file_format: 0.3\n" + "propagator:\n" + "  composite: [xray, xray-lambda]\n";
 
     OpenTelemetrySdk openTelemetrySdk =
-        FileConfiguration.parseAndCreate(
+        DeclarativeConfiguration.parseAndCreate(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
     TextMapPropagator expectedPropagator =
         TextMapPropagator.composite(
