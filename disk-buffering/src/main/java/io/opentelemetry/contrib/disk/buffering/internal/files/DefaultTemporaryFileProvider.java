@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.files;
 
+import io.opentelemetry.contrib.disk.buffering.configuration.TemporaryFileProvider;
 import java.io.File;
 import java.io.IOException;
 
