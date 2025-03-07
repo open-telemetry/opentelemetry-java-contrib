@@ -5,12 +5,14 @@
 
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
-import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
+
+import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 
 class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
 
@@ -55,6 +57,8 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
         metric -> assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "By"),
         metric -> assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "By"),
         metric -> assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "By"),
+        metric -> assertGauge(metric, "jvm.runtime.uptime", "uptime", "ms"),
+        metric -> assertGauge(metric, "jvm.fd.open", "open file descriptors", "1"),
         metric ->
             assertTypedGauge(
                 metric, "jvm.memory.pool.committed", "current memory pool usage", "By", gcLabels),
