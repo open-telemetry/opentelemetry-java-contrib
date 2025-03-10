@@ -10,14 +10,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigException;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.sampler.RuleBasedRoutingSampler;
 import io.opentelemetry.contrib.sampler.internal.RuleBasedRoutingSamplerComponentProvider;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.StructuredConfigProperties;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.FileConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -52,7 +52,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
             + "              pattern: /actuator.*\n"
             + "              action: DROP\n";
     OpenTelemetrySdk openTelemetrySdk =
-        FileConfiguration.parseAndCreate(
+        DeclarativeConfiguration.parseAndCreate(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
     Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
     assertThat(sampler.toString())
@@ -97,8 +97,8 @@ class RuleBasedRoutingSamplerComponentProviderTest {
   @ParameterizedTest
   @MethodSource("createValidArgs")
   void create_Valid(String yaml, RuleBasedRoutingSampler expectedSampler) {
-    StructuredConfigProperties configProperties =
-        FileConfiguration.toConfigProperties(
+    DeclarativeConfigProperties configProperties =
+        DeclarativeConfiguration.toConfigProperties(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
 
     Sampler sampler = PROVIDER.create(configProperties);
@@ -149,12 +149,12 @@ class RuleBasedRoutingSamplerComponentProviderTest {
   @ParameterizedTest
   @MethodSource("createInvalidArgs")
   void create_Invalid(String yaml, String expectedErrorMessage) {
-    StructuredConfigProperties configProperties =
-        FileConfiguration.toConfigProperties(
+    DeclarativeConfigProperties configProperties =
+        DeclarativeConfiguration.toConfigProperties(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
 
     assertThatThrownBy(() -> PROVIDER.create(configProperties))
-        .isInstanceOf(ConfigurationException.class)
+        .isInstanceOf(DeclarativeConfigException.class)
         .hasMessage(expectedErrorMessage);
   }
 

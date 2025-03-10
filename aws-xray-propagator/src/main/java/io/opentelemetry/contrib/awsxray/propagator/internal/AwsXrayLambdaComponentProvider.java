@@ -5,10 +5,10 @@
 
 package io.opentelemetry.contrib.awsxray.propagator.internal;
 
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.awsxray.propagator.AwsXrayLambdaPropagator;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.StructuredConfigProperties;
 
 public class AwsXrayLambdaComponentProvider implements ComponentProvider<TextMapPropagator> {
   @Override
@@ -22,7 +22,7 @@ public class AwsXrayLambdaComponentProvider implements ComponentProvider<TextMap
   }
 
   @Override
-  public TextMapPropagator create(StructuredConfigProperties config) {
+  public TextMapPropagator create(DeclarativeConfigProperties config) {
     return AwsXrayLambdaPropagator.getInstance();
   }
 }

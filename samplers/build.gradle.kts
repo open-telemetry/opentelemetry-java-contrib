@@ -7,12 +7,14 @@ description = "Sampler which makes its decision based on semantic attributes val
 otelJava.moduleName.set("io.opentelemetry.contrib.sampler")
 
 dependencies {
-  api("io.opentelemetry:opentelemetry-sdk")
+  // TODO: revert versions before merging
+  api("io.opentelemetry:opentelemetry-sdk:1.48.0-SNAPSHOT")
 
-  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:1.48.0-SNAPSHOT")
+  compileOnly("io.opentelemetry:opentelemetry-api-incubator:1.48.0-alpha-SNAPSHOT")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator:1.48.0-alpha-SNAPSHOT")
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:1.48.0-SNAPSHOT")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator:1.48.0-alpha-SNAPSHOT")
 }
