@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.configuration.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;

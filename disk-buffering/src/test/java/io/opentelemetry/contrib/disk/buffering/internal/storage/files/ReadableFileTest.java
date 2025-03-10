@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.contrib.disk.buffering.configuration.TemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;

@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
-import io.opentelemetry.contrib.disk.buffering.configuration.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
