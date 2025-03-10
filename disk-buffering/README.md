@@ -29,7 +29,7 @@ The configurable parameters are provided **per exporter**, the available ones ar
   considered stale and will be removed when new files are created. No more data will be read from a
   file past this time.
 * An instance
-  of [TemporaryFileProvider](src/main/java/io/opentelemetry/contrib/disk/buffering/internal/files/TemporaryFileProvider.java),
+  of [TemporaryFileProvider](src/main/java/io/opentelemetry/contrib/disk/buffering/config/TemporaryFileProvider.java),
   defaults to calling `File.createTempFile`. This provider will be used when reading from the disk
   in order create a temporary file from which each line (batch of signals) will be read and
   sequentially get removed from the original cache file right after the data has been successfully
@@ -55,7 +55,7 @@ Each wrapper will need the following when instantiating them:
 * A File instance of the root directory where all the data is going to be written. The same root dir
   can be used for all the wrappers, since each will create their own folder inside it.
 * An instance
-  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/StorageConfiguration.java)
+  of [StorageConfiguration](src/main/java/io/opentelemetry/contrib/disk/buffering/config/StorageConfiguration.java)
   with the desired parameters. You can create one with default values by
   calling `StorageConfiguration.getDefault()`.
 
