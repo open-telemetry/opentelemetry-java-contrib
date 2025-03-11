@@ -162,4 +162,27 @@ class EcsResourceTest {
   String readResourceJson(String resourceName) throws IOException {
     return Resources.toString(Resources.getResource(resourceName), StandardCharsets.UTF_8);
   }
+
+  @Test
+  void testImageWithSha256Digest() throws IOException {
+    // Create a minimal JSON with just the Image field containing a SHA256 digest
+    String json =
+        "{\"Image\": \"111122223333.dkr.ecr.us-east-1.amazonaws.com/myapp:a635776144e10255377fa15957781eb11f59daa7@sha256:ca8528f563912012ee19777fad134b9abbe305c5d7fcf62c4c351a4eb8656dd8\"}";
+
+    Map<String, String> mockSysEnv = new HashMap<>();
+    mockSysEnv.put(ECS_METADATA_KEY_V4, "ecs_metadata_uri");
+
+    when(mockHttpClient.fetchString("GET", "ecs_metadata_uri", Collections.emptyMap(), null))
+        .thenReturn(json);
+    when(mockHttpClient.fetchString("GET", "ecs_metadata_uri/task", Collections.emptyMap(), null))
+        .thenReturn("{}");
+
+    Resource resource = EcsResource.buildResource(mockSysEnv, mockHttpClient);
+    Attributes attributes = resource.getAttributes();
+
+    assertThat(attributes.get(CONTAINER_IMAGE_NAME))
+        .isEqualTo("111122223333.dkr.ecr.us-east-1.amazonaws.com/myapp");
+    assertThat(attributes.get(CONTAINER_IMAGE_TAGS))
+        .isEqualTo(singletonList("a635776144e10255377fa15957781eb11f59daa7"));
+  }
 }
