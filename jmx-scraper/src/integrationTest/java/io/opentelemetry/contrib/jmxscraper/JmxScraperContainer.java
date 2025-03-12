@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
@@ -336,7 +335,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return cmd;
   }
 
-  private @NotNull Map<String, String> initConfig() {
+  private Map<String, String> initConfig() {
     Map<String, String> config = new HashMap<>();
     config.put("otel.metrics.exporter", "otlp");
     config.put("otel.exporter.otlp.endpoint", endpoint);
