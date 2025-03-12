@@ -26,6 +26,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
   private final String endpoint;
   private final Set<String> targetSystems;
+  private String targetSystemSource;
   private String serviceUrl;
   private final Set<String> customYamlFiles;
   private String user;
@@ -46,6 +47,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     this.endpoint = otlpEndpoint;
     this.targetSystems = new HashSet<>();
+    this.targetSystemSource = "auto";
     this.customYamlFiles = new HashSet<>();
     this.extraJars = new ArrayList<>();
   }
@@ -59,6 +61,18 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   @CanIgnoreReturnValue
   public JmxScraperContainer withTargetSystem(String targetSystem) {
     targetSystems.add(targetSystem);
+    return this;
+  }
+
+  /**
+   * Sets the target system source
+   *
+   * @param source target system source, valid values are "auto", "instrumentation" and "legacy"
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withTargetSystemSource(String source) {
+    this.targetSystemSource = source;
     return this;
   }
 
@@ -192,6 +206,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     if (!targetSystems.isEmpty()) {
       arguments.add("-Dotel.jmx.target.system=" + String.join(",", targetSystems));
+      arguments.add("-Dotel.jmx.target.source=" + targetSystemSource);
     }
 
     if (serviceUrl == null) {
