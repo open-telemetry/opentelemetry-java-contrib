@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
-import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import java.io.File;
 
 public final class TestData {

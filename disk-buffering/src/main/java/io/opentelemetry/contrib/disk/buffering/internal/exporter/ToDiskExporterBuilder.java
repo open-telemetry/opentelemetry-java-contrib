@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;

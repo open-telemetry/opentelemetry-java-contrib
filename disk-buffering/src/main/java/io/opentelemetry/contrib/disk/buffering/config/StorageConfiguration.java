@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering;
+package io.opentelemetry.contrib.disk.buffering.config;
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
-import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
