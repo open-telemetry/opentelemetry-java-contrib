@@ -8,15 +8,19 @@ package io.opentelemetry.contrib.jmxscraper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
@@ -26,7 +30,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
   private final String endpoint;
   private final Set<String> targetSystems;
-  private String targetSystemSource;
+  @Nullable private String targetSystemSource;
   private String serviceUrl;
   private final Set<String> customYamlFiles;
   private String user;
@@ -36,6 +40,19 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   private TestKeyStore keyStore;
   private TestKeyStore trustStore;
   private boolean sslRmiRegistry;
+  private ConfigSource configSource;
+
+  /** Defines different strategies to provide scraper configuration */
+  public enum ConfigSource {
+    /** system properties with "-D" prefix in JVM command */
+    SYSTEM_PROPERTIES,
+    /** properties file */
+    PROPERTIES_FILE,
+    /** standard input */
+    STDIN,
+    /** environment variables with "OTEL_" prefix, non-otel options as system properties */
+    ENVIRONMENT_VARIABLES;
+  }
 
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
     super(baseImage);
@@ -47,9 +64,9 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     this.endpoint = otlpEndpoint;
     this.targetSystems = new HashSet<>();
-    this.targetSystemSource = "auto";
     this.customYamlFiles = new HashSet<>();
     this.extraJars = new ArrayList<>();
+    this.configSource = ConfigSource.SYSTEM_PROPERTIES;
   }
 
   /**
@@ -196,84 +213,205 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     return this;
   }
 
+  /**
+   * Sets how configuration is provided to scraper
+   *
+   * @param source configuration source
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withConfigSource(ConfigSource source) {
+    this.configSource = source;
+    return this;
+  }
+
   @Override
   public void start() {
-    // for now only configure through JVM args
-    List<String> arguments = new ArrayList<>();
-    arguments.add("java");
-    arguments.add("-Dotel.metrics.exporter=otlp");
-    arguments.add("-Dotel.exporter.otlp.endpoint=" + endpoint);
 
-    if (!targetSystems.isEmpty()) {
-      arguments.add("-Dotel.jmx.target.system=" + String.join(",", targetSystems));
-      arguments.add("-Dotel.jmx.target.source=" + targetSystemSource);
+    Map<String, String> config = initConfig();
+
+    List<String> cmd = createCommand(config);
+
+    if (configSource != ConfigSource.STDIN) {
+      this.withCommand(cmd.toArray(new String[0]));
+    } else {
+      Path script = generateShellScript(cmd, config);
+
+      this.withCopyFileToContainer(MountableFile.forHostPath(script, 500), "/scraper.sh");
+      this.withCommand("/scraper.sh");
     }
 
-    if (serviceUrl == null) {
-      throw new IllegalStateException("Missing service URL");
-    }
-    arguments.add("-Dotel.jmx.service.url=" + serviceUrl);
-    // always use a very short export interval for testing
-    arguments.add("-Dotel.metric.export.interval=1s");
+    logger().info("Starting scraper with command: " + String.join(" ", this.getCommandParts()));
+    super.start();
+  }
 
-    if (user != null) {
-      arguments.add("-Dotel.jmx.username=" + user);
-    }
-    if (password != null) {
-      arguments.add("-Dotel.jmx.password=" + password);
+  private Path generateShellScript(List<String> cmd, Map<String, String> config) {
+    // generate shell script to feed standard input with config
+    List<String> lines = new ArrayList<>();
+    lines.add("#!/bin/bash");
+    lines.add(String.join(" ", cmd) + "<<EOF");
+    lines.addAll(toKeyValueString(config));
+    lines.add("EOF");
+
+    Path script;
+    try {
+      script = Files.createTempFile("scraper", ".sh");
+      Files.write(script, lines);
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
 
-    arguments.addAll(addSecureStore(keyStore, /* isKeyStore= */ true));
-    arguments.addAll(addSecureStore(trustStore, /* isKeyStore= */ false));
-
-    if (sslRmiRegistry) {
-      arguments.add("-Dotel.jmx.remote.registry.ssl=true");
+    logger().info("Scraper executed with /scraper.sh shell script");
+    for (int i = 0; i < lines.size(); i++) {
+      logger().info("/scrapper.sh:{}  {}", i, lines.get(i));
     }
+    return script;
+  }
 
-    if (!customYamlFiles.isEmpty()) {
-      for (String yaml : customYamlFiles) {
-        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
-      }
-      arguments.add("-Dotel.jmx.config=" + String.join(",", customYamlFiles));
+  private List<String> createCommand(Map<String, String> config) {
+    List<String> cmd = new ArrayList<>();
+    cmd.add("java");
+
+    switch (configSource) {
+      case SYSTEM_PROPERTIES:
+        cmd.addAll(
+            toKeyValueString(config).stream().map(s -> "-D" + s).collect(Collectors.toList()));
+        break;
+      case PROPERTIES_FILE:
+        try {
+          Path configFile = Files.createTempFile("config", ".properties");
+          Files.write(configFile, toKeyValueString(config));
+          this.withCopyFileToContainer(MountableFile.forHostPath(configFile), "/config.properties");
+        } catch (IOException e) {
+          throw new IllegalStateException(e);
+        }
+        break;
+      case STDIN:
+        // nothing needed here
+        break;
+      case ENVIRONMENT_VARIABLES:
+        Map<String, String> env = new HashMap<>();
+        Map<String, String> other = new HashMap<>();
+        config.forEach(
+            (k, v) -> {
+              if (k.startsWith("otel.")) {
+                env.put(k.toUpperCase(Locale.ROOT).replace(".", "_"), v);
+              } else {
+                other.put(k, v);
+              }
+            });
+
+        if (!other.isEmpty()) {
+          env.put(
+              "JAVA_TOOL_OPTIONS",
+              toKeyValueString(other).stream().map(s -> "-D" + s).collect(Collectors.joining(" ")));
+        }
+        this.withEnv(env);
+        env.forEach((k, v) -> logger().info("Using environment variable {} = {} ", k, v));
+
+        break;
     }
 
     if (extraJars.isEmpty()) {
       // using "java -jar" to start
-      arguments.add("-jar");
-      arguments.add("/scraper.jar");
+      cmd.add("-jar");
+      cmd.add("/scraper.jar");
     } else {
       // using "java -cp" to start
-      arguments.add("-cp");
-      arguments.add("/scraper.jar:" + String.join(":", extraJars));
-      arguments.add("io.opentelemetry.contrib.jmxscraper.JmxScraper");
+      cmd.add("-cp");
+      cmd.add("/scraper.jar:" + String.join(":", extraJars));
+      cmd.add("io.opentelemetry.contrib.jmxscraper.JmxScraper");
+    }
+
+    switch (configSource) {
+      case SYSTEM_PROPERTIES:
+      case ENVIRONMENT_VARIABLES:
+        // no extra program argument needed
+        break;
+      case PROPERTIES_FILE:
+        cmd.add("-config");
+        cmd.add("/config.properties");
+        break;
+      case STDIN:
+        cmd.add("-config");
+        cmd.add("-");
+        break;
     }
 
     if (testJmx) {
-      arguments.add("-test");
+      cmd.add("-test");
       this.waitingFor(Wait.forLogMessage(".*JMX connection test.*", 1));
     } else {
       this.waitingFor(
           Wait.forLogMessage(".*JMX scraping started.*", 1)
               .withStartupTimeout(Duration.ofSeconds(10)));
     }
-
-    this.withCommand(arguments.toArray(new String[0]));
-
-    logger().info("Starting scraper with command: " + String.join(" ", arguments));
-
-    super.start();
+    return cmd;
   }
 
-  private List<String> addSecureStore(TestKeyStore keyStore, boolean isKeyStore) {
+  private Map<String, String> initConfig() {
+    Map<String, String> config = new HashMap<>();
+    config.put("otel.metrics.exporter", "otlp");
+    config.put("otel.exporter.otlp.endpoint", endpoint);
+
+    if (!targetSystems.isEmpty()) {
+      config.put("otel.jmx.target.system", String.join(",", targetSystems));
+
+      // rely on default when explicitly set
+      if (targetSystemSource != null) {
+        config.put("otel.jmx.target.source", targetSystemSource);
+      }
+    }
+
+    if (serviceUrl == null) {
+      throw new IllegalStateException("Missing service URL");
+    }
+    config.put("otel.jmx.service.url", serviceUrl);
+
+    // always use a very short export interval for testing
+    config.put("otel.metric.export.interval", "1s");
+
+    if (user != null) {
+      config.put("otel.jmx.username", user);
+    }
+    if (password != null) {
+      config.put("otel.jmx.password", password);
+    }
+
+    addSecureStore(keyStore, /* isKeyStore= */ true, config);
+    addSecureStore(trustStore, /* isKeyStore= */ false, config);
+
+    if (sslRmiRegistry) {
+      config.put("otel.jmx.remote.registry.ssl", "true");
+    }
+
+    if (!customYamlFiles.isEmpty()) {
+      for (String yaml : customYamlFiles) {
+        this.withCopyFileToContainer(MountableFile.forClasspathResource(yaml), yaml);
+      }
+      config.put("otel.jmx.config", String.join(",", customYamlFiles));
+    }
+    return config;
+  }
+
+  private void addSecureStore(
+      TestKeyStore keyStore, boolean isKeyStore, Map<String, String> config) {
     if (keyStore == null) {
-      return Collections.emptyList();
+      return;
     }
     Path path = keyStore.getPath();
     String containerPath = "/" + path.getFileName().toString();
     this.withCopyFileToContainer(MountableFile.forHostPath(path), containerPath);
 
-    String prefix = String.format("-Djavax.net.ssl.%sStore", isKeyStore ? "key" : "trust");
-    return Arrays.asList(
-        prefix + "=" + containerPath, prefix + "Password=" + keyStore.getPassword());
+    String prefix = String.format("javax.net.ssl.%sStore", isKeyStore ? "key" : "trust");
+
+    config.put(prefix, containerPath);
+    config.put(prefix + "Password", keyStore.getPassword());
+  }
+
+  private static List<String> toKeyValueString(Map<String, String> options) {
+    return options.entrySet().stream()
+        .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 }
