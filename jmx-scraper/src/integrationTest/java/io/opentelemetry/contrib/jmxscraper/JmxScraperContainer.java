@@ -20,18 +20,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
-import javax.annotation.Nullable;
 
 /** Test container that allows to execute {@link JmxScraper} in an isolated container */
 public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
   private final String endpoint;
   private final Set<String> targetSystems;
-  @Nullable
-  private String targetSystemSource;
+  @Nullable private String targetSystemSource;
   private String serviceUrl;
   private final Set<String> customYamlFiles;
   private String user;
@@ -359,7 +358,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       config.put("otel.jmx.target.system", String.join(",", targetSystems));
 
       // rely on default when explicitly set
-      if(targetSystemSource != null) {
+      if (targetSystemSource != null) {
         config.put("otel.jmx.target.source", targetSystemSource);
       }
     }
