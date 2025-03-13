@@ -23,12 +23,15 @@ import java.util.stream.Collectors;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
+import javax.annotation.Nullable;
 
 /** Test container that allows to execute {@link JmxScraper} in an isolated container */
 public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
   private final String endpoint;
   private final Set<String> targetSystems;
+  @Nullable
+  private String targetSystemSource;
   private String serviceUrl;
   private final Set<String> customYamlFiles;
   private String user;
@@ -76,6 +79,18 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
   @CanIgnoreReturnValue
   public JmxScraperContainer withTargetSystem(String targetSystem) {
     targetSystems.add(targetSystem);
+    return this;
+  }
+
+  /**
+   * Sets the target system source
+   *
+   * @param source target system source, valid values are "auto", "instrumentation" and "legacy"
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public JmxScraperContainer withTargetSystemSource(String source) {
+    this.targetSystemSource = source;
     return this;
   }
 
@@ -342,6 +357,11 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     if (!targetSystems.isEmpty()) {
       config.put("otel.jmx.target.system", String.join(",", targetSystems));
+
+      // rely on default when explicitly set
+      if(targetSystemSource != null) {
+        config.put("otel.jmx.target.source", targetSystemSource);
+      }
     }
 
     if (serviceUrl == null) {
