@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.45.0 (2025-03-14)
+
 ### Disk buffering
 
 - Make configuration package public
