@@ -8,6 +8,7 @@
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
   ],
+  prHourlyLimit: 5,
   packageRules: [
     {
       // this is to reduce the number of renovate PRs
