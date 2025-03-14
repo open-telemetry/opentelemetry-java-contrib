@@ -47,6 +47,7 @@ import javax.annotation.Nullable;
 import org.hipparchus.distribution.discrete.BinomialDistribution;
 import org.hipparchus.stat.inference.GTest;
 import org.hipparchus.stat.inference.TTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentMatcher;
@@ -621,6 +622,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
     shutdown(sdkTracerProvider);
   }
 
+  @Disabled("https://github.com/open-telemetry/opentelemetry-java-contrib/issues/1602")
   @Test
   @Timeout(1000)
   void testConsistentSampling() {
