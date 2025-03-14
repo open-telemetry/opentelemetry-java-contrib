@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Make configuration package public
+  ([#1781](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1781))
+
+### JMX scraper
+
+- Reuse instrumentation metrics by default
+  ([#1782](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1782))
+
 ## Version 1.44.0 (2025-02-21)
 
 ### AWS resources
