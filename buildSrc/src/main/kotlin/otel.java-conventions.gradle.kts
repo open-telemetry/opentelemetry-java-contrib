@@ -138,7 +138,7 @@ testing {
       implementation(enforcedPlatform("org.junit:junit-bom:5.12.0"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.6"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.0-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.0"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.2"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
