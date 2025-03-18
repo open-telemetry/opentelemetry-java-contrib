@@ -55,8 +55,7 @@ class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
         metric -> assertGauge(metric, "jvm.memory.nonheap.init", "current non-heap usage", "By"),
         metric -> assertGauge(metric, "jvm.memory.nonheap.max", "current non-heap usage", "By"),
         metric -> assertGauge(metric, "jvm.memory.nonheap.used", "current non-heap usage", "By"),
-        metric -> assertGauge(metric, "jvm.runtime.uptime", "uptime", "ms"),
-        metric -> assertGauge(metric, "jvm.fd.open", "open file descriptors", "1"),
+        metric -> assertGauge(metric, "jvm.file_descriptor.count", "open file descriptors", "1"),
         metric ->
             assertTypedGauge(
                 metric, "jvm.memory.pool.committed", "current memory pool usage", "By", gcLabels),
