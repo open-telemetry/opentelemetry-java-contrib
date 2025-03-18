@@ -5,9 +5,9 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("com.github.johnrengelman.shadow")
-  id("me.champeau.jmh") version "0.7.2"
-  id("ru.vyarus.animalsniffer") version "1.7.2"
-  id("com.squareup.wire") version "5.2.1"
+  id("me.champeau.jmh") version "0.7.3"
+  id("ru.vyarus.animalsniffer") version "2.0.0"
+  id("com.squareup.wire") version "5.3.1"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -18,6 +18,8 @@ java {
   targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+val protos by configurations.creating
+
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   compileOnly("com.google.auto.value:auto-value-annotations")
@@ -25,6 +27,8 @@ dependencies {
   signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha@jar")
 }
 
 animalsniffer {
@@ -49,11 +53,17 @@ jmh {
   timeUnit.set("ms")
 }
 
+val setupProtos by tasks.registering(Sync::class) {
+  inputs.files(protos)
+  from(zipTree(protos.singleFile))
+  into(layout.buildDirectory.dir("protos"))
+}
+
 wire {
   java {}
 
   sourcePath {
-    srcJar("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+    srcDir(setupProtos)
   }
 
   root(

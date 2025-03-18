@@ -1,0 +1,11 @@
+---
+
+rules:
+
+  - bean: java.lang:type=Runtime
+    mapping:
+      Uptime:
+        metric: custom.jvm.uptime
+        type: counter
+        unit: ms
+        desc: JVM uptime in milliseconds

@@ -19,6 +19,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;

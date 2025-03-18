@@ -21,6 +21,9 @@ dependencies {
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
   runtimeOnly("io.opentelemetry:opentelemetry-exporter-logging")
 
+  // for jmxmp protocol support
+  runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
+
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
@@ -37,6 +40,8 @@ testing {
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+        implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+        implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
       }
     }
   }

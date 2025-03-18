@@ -16,6 +16,7 @@ import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterBuilder;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
@@ -85,9 +86,7 @@ public class IntegrationTest {
     memoryMetricExporter = InMemoryMetricExporter.create();
     ToDiskExporter<MetricData> toDiskMetricExporter =
         buildToDiskExporter(SignalSerializer.ofMetrics(), memoryMetricExporter::export);
-    metricToDiskExporter =
-        new MetricToDiskExporter(
-            toDiskMetricExporter, memoryMetricExporter::getAggregationTemporality);
+    metricToDiskExporter = new MetricToDiskExporter(toDiskMetricExporter, memoryMetricExporter);
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 

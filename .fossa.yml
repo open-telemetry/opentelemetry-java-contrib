@@ -1,0 +1,11 @@
+version: 3
+
+targets:
+  only:
+    - type: gradle
+
+experimental:
+  gradle:
+    configurations-only:
+      # consumer will only be exposed to these dependencies
+      - runtimeClasspath

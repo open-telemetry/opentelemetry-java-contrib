@@ -8,10 +8,16 @@ on:
   # because repository write permission is needed to assign reviewers
   pull_request_target:
 
+permissions:
+  contents: read
+
 jobs:
   assign-reviewers:
+    permissions:
+      contents: read
+      pull-requests: write  # for assigning reviewers
     runs-on: ubuntu-latest
     steps:
-      - uses: open-telemetry/assign-reviewers-action@main
+      - uses: open-telemetry/assign-reviewers-action@41a631b3741852734aa35aa6068fbb546b7a62c3 # main
         with:
           config-file: .github/component_owners.yml

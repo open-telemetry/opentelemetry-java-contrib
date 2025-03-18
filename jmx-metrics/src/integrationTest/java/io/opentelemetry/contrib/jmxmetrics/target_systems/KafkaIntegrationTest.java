@@ -140,51 +140,51 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                 metric,
                 "kafka.partition.count",
                 "The number of partitions on the broker",
-                "{partitions}"),
+                "{partition}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.offline",
                 "The number of partitions offline",
-                "{partitions}"),
+                "{partition}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.partition.under_replicated",
                 "The number of under replicated partitions",
-                "{partitions}"),
+                "{partition}"),
         metric ->
             assertSumWithAttributes(
                 metric,
                 "kafka.isr.operation.count",
                 "The number of in-sync replica shrink and expand operations",
-                "{operations}",
+                "{operation}",
                 attrs -> attrs.containsOnly(entry("operation", "shrink")),
                 attrs -> attrs.containsOnly(entry("operation", "expand"))),
         metric ->
             assertGauge(
                 metric,
                 "kafka.controller.active.count",
-                "controller is active on broker",
-                "{controllers}"),
+                "For KRaft mode, the number of active controllers in the cluster. For ZooKeeper, indicates whether the broker is the controller broker.",
+                "{controller}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.leader.election.rate",
-                "leader election rate - increasing indicates broker failures",
-                "{elections}"),
+                "Leader election rate - increasing indicates broker failures",
+                "{election}"),
         metric ->
             assertGauge(
                 metric,
                 "kafka.max.lag",
-                "max lag in messages between follower and leader replicas",
-                "{messages}"),
+                "Max lag in messages between follower and leader replicas",
+                "{message}"),
         metric ->
             assertSum(
                 metric,
                 "kafka.unclean.election.rate",
-                "unclean leader election rate - increasing indicates broker failures",
-                "{elections}"));
+                "Unclean leader election rate - increasing indicates broker failures",
+                "{election}"));
   }
 
   static class KafkaBrokerTargetIntegrationTest extends KafkaIntegrationTest {
@@ -235,52 +235,52 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   metric,
                   "kafka.consumer.bytes-consumed-rate",
                   "The average number of bytes consumed per second",
-                  "by",
+                  "By",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.fetch-rate",
                   "The number of fetch requests for all topics per second",
-                  "1"),
+                  "{request}"),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.fetch-size-avg",
                   "The average number of bytes fetched per request",
-                  "by",
+                  "By",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.records-consumed-rate",
                   "The average number of records consumed per second",
-                  "1",
+                  "{record}",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.records-lag-max",
                   "Number of messages the consumer lags behind the producer",
-                  "1"),
+                  "{record}"),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.total.bytes-consumed-rate",
                   "The average number of bytes consumed for all topics per second",
-                  "by"),
+                  "By"),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.total.fetch-size-avg",
                   "The average number of bytes fetched per request for all topics",
-                  "by"),
+                  "By"),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.consumer.total.records-consumed-rate",
                   "The average number of records consumed for all topics per second",
-                  "1"));
+                  "{record}"));
     }
   }
 
@@ -300,14 +300,14 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   metric,
                   "kafka.producer.byte-rate",
                   "The average number of bytes sent per second for a topic",
-                  "by",
+                  "By",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.producer.compression-rate",
                   "The average compression rate of record batches for a topic",
-                  "1",
+                  "{ratio}",
                   topics),
           metric ->
               assertKafkaGauge(
@@ -320,27 +320,27 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   metric,
                   "kafka.producer.outgoing-byte-rate",
                   "The average number of outgoing bytes sent per second to all servers",
-                  "by"),
+                  "By"),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.producer.record-error-rate",
                   "The average per-second number of record sends that resulted in errors for a topic",
-                  "1",
+                  "{record}",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.producer.record-retry-rate",
                   "The average per-second number of retried record sends for a topic",
-                  "1",
+                  "{record}",
                   topics),
           metric ->
               assertKafkaGauge(
                   metric,
                   "kafka.producer.record-send-rate",
                   "The average number of records sent per second for a topic",
-                  "1",
+                  "{record}",
                   topics),
           metric ->
               assertKafkaGauge(
@@ -353,10 +353,13 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
                   metric,
                   "kafka.producer.request-rate",
                   "The average number of requests sent per second",
-                  "1"),
+                  "{request}"),
           metric ->
               assertKafkaGauge(
-                  metric, "kafka.producer.response-rate", "Responses received per second", "1"));
+                  metric,
+                  "kafka.producer.response-rate",
+                  "Responses received per second",
+                  "{response}"));
     }
   }
 

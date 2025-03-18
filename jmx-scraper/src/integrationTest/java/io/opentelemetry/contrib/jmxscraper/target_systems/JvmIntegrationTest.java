@@ -30,7 +30,16 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
-    return scraper.withTargetSystem("jvm");
+    return scraper
+        .withTargetSystem("jvm")
+        // TODO when JVM metrics will be added to instrumentation, the default "auto" source
+        // means that the definitions in instrumentation will be used, and thus this test will fail
+        // due to metrics differences, adding an explicit "legacy" source is required to continue
+        // testing the JVM metrics defined in this project.
+        // https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/13392
+        // .withTargetSystem("legacy")
+        // also testing custom yaml
+        .withCustomYaml("custom-metrics.yaml");
   }
 
   @Override
@@ -48,6 +57,16 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
         nameAttributeMatchers("PS MarkSweep", "PS Scavenge");
 
     return MetricsVerifier.create()
+        // custom metric in custom-metrics.yaml
+        .add(
+            "custom.jvm.uptime",
+            metric ->
+                metric
+                    .hasDescription("JVM uptime in milliseconds")
+                    .hasUnit("ms")
+                    .isCounter()
+                    .hasDataPointsWithoutAttributes())
+        // metrics for 'jvm' target system
         .add(
             "jvm.classes.loaded",
             metric ->
