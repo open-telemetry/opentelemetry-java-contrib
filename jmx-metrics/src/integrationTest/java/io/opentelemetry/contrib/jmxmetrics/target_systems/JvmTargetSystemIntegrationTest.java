@@ -5,14 +5,12 @@
 
 package io.opentelemetry.contrib.jmxmetrics.target_systems;
 
+import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
-
-import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 
 class JvmTargetSystemIntegrationTest extends AbstractIntegrationTest {
 

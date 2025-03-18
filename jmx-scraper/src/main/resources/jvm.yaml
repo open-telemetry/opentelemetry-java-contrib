@@ -83,6 +83,13 @@ rules:
         metric: jvm.memory.pool.used
         desc: current memory pool usage
 
+  - bean: java.lang:type=OperatingSystem
+    mapping:
+      OpenFileDescriptorCount:
+        metric: jvm.file_descriptor.count
+        unit: 1
+        desc: open file descriptors
+
   - bean: java.lang:type=Threading
     mapping:
       ThreadCount:
