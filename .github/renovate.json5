@@ -115,6 +115,18 @@
       ],
     },
     {
+      groupName: 'hipparchus packages',
+      matchPackageNames: [
+        'org.hipparchus{/,}**',
+      ],
+    },
+    {
+      groupName: 'errorprone packages',
+      matchPackageNames: [
+        'com.google.errorprone{/,}**',
+      ],
+    },
+    {
       // pinned version for compatibility with java 8 JFR parsing
       matchUpdateTypes: [
         'major',
