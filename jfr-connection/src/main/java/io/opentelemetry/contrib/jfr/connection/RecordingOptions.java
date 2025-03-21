@@ -66,7 +66,8 @@ public class RecordingOptions {
 
   /* If the arg is null or an empty String, return the Option's default. */
   private static String normalize(String arg, Option option) {
-    return arg == null || (arg = arg.trim()).isEmpty() ? option.defaultValue : arg;
+    arg = arg == null ? "" : arg.trim();
+    return arg.isEmpty() ? option.defaultValue : arg;
   }
 
   /**
