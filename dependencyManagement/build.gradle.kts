@@ -25,7 +25,7 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")
     api("com.google.auto.value:auto-value-annotations:1.11.0")
-    api("com.google.errorprone:error_prone_annotations:2.36.0")
+    api("com.google.errorprone:error_prone_annotations:2.37.0")
     api("com.google.errorprone:error_prone_core:2.36.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
