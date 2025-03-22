@@ -55,6 +55,8 @@ jobs:
   release:
     permissions:
       contents: write # for creating the release
+      attestations: write # for creating the attestation
+      id-token: write # for creating the attestation
     runs-on: ubuntu-latest
     needs:
       - build
@@ -174,20 +176,32 @@ jobs:
           .github/scripts/generate-release-contributors.sh v$PRIOR_VERSION >> /tmp/release-notes.txt
           fi
 
+      - name: Simplify jar path for attesting and attaching
+        run: |
+          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
+
+      - id: attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: opentelemetry-jmx-metrics.jar
+
+      - name: Rename attestation bundle file for attaching
+        run: |
+          cp ${{ steps.attest.outputs.bundle-path }} attestation.intoto.jsonl
+
       - id: create-github-release
         name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar \
-                            opentelemetry-jmx-metrics.jar.asc
+                            attestation.intoto.jsonl
 
+          # this is used as a job output
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   merge-change-log-to-main:
