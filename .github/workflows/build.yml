@@ -41,9 +41,29 @@ jobs:
       matrix:
         test-java-version:
           - 8
+          - 8
+          - 8
+          - 8
+          - 8
+          - 11
+          - 11
+          - 11
+          - 11
           - 11
           - 17
+          - 17
+          - 17
+          - 17
+          - 17
           - 21
+          - 21
+          - 21
+          - 21
+          - 21
+          - 23
+          - 23
+          - 23
+          - 23
           - 23
       fail-fast: false
     steps:
@@ -70,6 +90,7 @@ jobs:
       - name: Gradle test
         run: >
           ./gradlew test
+          --no-build-cache
           -PtestJavaVersion=${{ matrix.test-java-version }}
           -Porg.gradle.java.installations.paths=${{ steps.setup-test-java.outputs.path }}
           -Porg.gradle.java.installations.auto-download=false
