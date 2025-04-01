@@ -32,6 +32,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.assertj.core.api.MapAssert;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -134,28 +135,41 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected final void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
-    await()
-        .atMost(Duration.ofSeconds(30))
-        .untilAsserted(
-            () -> {
-              List<Metric> metrics =
-                  otlpServer.getMetrics().stream()
-                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                      .flatMap(Collection::stream)
-                      .filter(
-                          sm ->
-                              sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
-                                  && sm.getScope().getVersion().equals(expectedMeterVersion()))
-                      .flatMap(sm -> sm.getMetricsList().stream())
-                      .collect(Collectors.toList());
+    waitAndAssertMetrics(
+        () -> {
+          List<Metric> metrics =
+              otlpServer.getMetrics().stream()
+                  .map(ExportMetricsServiceRequest::getResourceMetricsList)
+                  .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+                  .flatMap(Collection::stream)
+                  .filter(
+                      sm ->
+                          sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
+                              && sm.getScope().getVersion().equals(expectedMeterVersion()))
+                  .flatMap(sm -> sm.getMetricsList().stream())
+                  .collect(Collectors.toList());
 
-              assertThat(metrics).isNotEmpty();
+          assertThat(metrics).isNotEmpty();
 
-              for (Consumer<Metric> assertion : assertions) {
-                assertThat(metrics).anySatisfy(assertion);
-              }
-            });
+          for (Consumer<Metric> assertion : assertions) {
+            assertThat(metrics).anySatisfy(assertion);
+          }
+        });
+  }
+
+  private static void waitAndAssertMetrics(Runnable assertion) {
+    try {
+      await().atMost(Duration.ofSeconds(30)).untilAsserted(assertion::run);
+    } catch (Throwable t) {
+      if (t instanceof ConditionTimeoutException) {
+        // Don't throw this failure since the stack is the awaitility thread, causing confusion.
+        // Instead, just assert one more time on the test thread, which will fail with a better
+        // stack trace - that is on the same thread as the test.
+        assertion.run();
+      } else {
+        throw t;
+      }
+    }
   }
 
   @SafeVarargs
