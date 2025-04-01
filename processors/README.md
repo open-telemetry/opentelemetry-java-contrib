@@ -27,6 +27,9 @@ logger_provider:
   processors:
       - event_to_span_event_bridge:
 ```
+## Filtering Log Processor
+`FilteringLogRecordProcessor` is a `LogRecordProcessor` which only keeps logs if they have an associated span which is sample
+
 
 ## Component owners
 
