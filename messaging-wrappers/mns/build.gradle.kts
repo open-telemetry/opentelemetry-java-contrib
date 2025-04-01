@@ -4,8 +4,8 @@ plugins {
   id("otel.publish-conventions")
 }
 
-description = "OpenTelemetry Messaging Wrappers"
-otelJava.moduleName.set("io.opentelemetry.contrib.messaging.wrappers")
+description = "OpenTelemetry Messaging Wrappers - mns-clients implementation"
+otelJava.moduleName.set("io.opentelemetry.contrib.messaging.wrappers.mns")
 
 repositories {
   // FIXME: publish mns-client to maven central repository

@@ -8,7 +8,7 @@ description = "OpenTelemetry Messaging Wrappers"
 otelJava.moduleName.set("io.opentelemetry.contrib.messaging.wrappers")
 
 dependencies {
-  api("io.opentelemetry:opentelemetry-api")
+  api("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")

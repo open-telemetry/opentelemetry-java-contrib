@@ -1,6 +1,8 @@
 package io.opentelemetry.contrib.messaging.wrappers;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
@@ -9,16 +11,12 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
-import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessResponse;
+import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest, RESPONSE extends MessagingProcessResponse<?>> {
-
-  private static final Logger LOG = Logger.getLogger(MessagingProcessWrapper.class.getName());
+public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
 
   private static final String INSTRUMENTATION_SCOPE = "messaging-process-wrapper";
 
@@ -32,70 +30,38 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest, RE
 
   private final TextMapGetter<REQUEST> textMapGetter;
 
-  private final List<MessagingSpanCustomizer<REQUEST, RESPONSE>> spanCustomizers;
+  // no attributes need to be extracted from responses in process operations
+  private final List<AttributesExtractor<REQUEST, Void>> attributesExtractors;
 
-  public Runnable wrap(REQUEST request, Runnable runnable) {
-    return () -> {
-      Span span = handleStart(request);
-      Scope scope = span.makeCurrent();
-
-      try {
-        runnable.run();
-      } catch (Throwable t) {
-        handleEnd(span, request, null, t);
-        scope.close();
-        throw t;
-      }
-
-      handleEnd(span, request, null, null);
-      scope.close();
-    };
+  public static <REQUEST extends MessagingProcessRequest> DefaultMessagingProcessWrapperBuilder<REQUEST> defaultBuilder() {
+    return new DefaultMessagingProcessWrapperBuilder<>();
   }
 
-  public <R> Callable<R> wrap(REQUEST request, Callable<R> callable) {
-    return () -> {
-      Span span = handleStart(request);
-      Scope scope = span.makeCurrent();
-      RESPONSE response = null;
-
-      R result = null;
-      try {
-        result = callable.call();
-        if (result instanceof MessagingProcessResponse) {
-          response = (RESPONSE) result;
-        }
-      } catch (Throwable t) {
-        handleEnd(span, request, response, t);
-        scope.close();
-        throw t;
-      }
-
-      handleEnd(span, request, response, null);
-      scope.close();
-      return result;
-    };
-  }
-
-  public <R> R doProcess(REQUEST request, Callable<R> process) throws Exception {
+  public <E extends Throwable> void doProcess(REQUEST request, ThrowingRunnable<E> runnable) throws E {
     Span span = handleStart(request);
-    Scope scope = span.makeCurrent();
-    RESPONSE response = null;
 
-    R result = null;
-    try {
-      result = process.call();
-      if (result instanceof MessagingProcessResponse) {
-        response = (RESPONSE) result;
-      }
+    try (Scope scope = span.makeCurrent()) {
+      runnable.run();
     } catch (Throwable t) {
-      handleEnd(span, request, response, t);
-      scope.close();
+      handleEnd(span, request, t);
       throw t;
     }
 
-    // noop response by default
-    handleEnd(span, request, response, null);
-    scope.close();
+    handleEnd(span, request, null);
+  }
+
+  public <R, E extends Throwable> R doProcess(REQUEST request, ThrowingSupplier<R, E> supplier) throws E {
+    Span span = handleStart(request);
+
+    R result = null;
+    try (Scope scope = span.makeCurrent()) {
+      result = supplier.get();
+    } catch (Throwable t) {
+      handleEnd(span, request, t);
+      throw t;
+    }
+
+    handleEnd(span, request, null);
     return result;
   }
 
@@ -103,23 +69,18 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest, RE
     Context context = this.textMapPropagator.extract(Context.current(), request, this.textMapGetter);
     SpanBuilder spanBuilder = this.tracer.spanBuilder(getDefaultSpanName(request.getDestination()));
     spanBuilder.setParent(context);
-    for (MessagingSpanCustomizer<REQUEST, RESPONSE> customizer : spanCustomizers) {
-      try {
-        context = customizer.onStart(spanBuilder, context, request);
-      } catch (Exception e) {
-        LOG.log(Level.WARNING, "Exception occurred while customizing span on start.", e);
-      }
+
+    AttributesBuilder builder = Attributes.builder();
+    for (AttributesExtractor<REQUEST, Void> extractor : this.attributesExtractors) {
+      extractor.onStart(builder, context, request);
     }
-    return spanBuilder.startSpan();
+    return spanBuilder.setAllAttributes(builder.build()).startSpan();
   }
 
-  protected void handleEnd(Span span, REQUEST request, RESPONSE response, Throwable t) {
-    for (MessagingSpanCustomizer<REQUEST, RESPONSE> customizer : spanCustomizers) {
-      try {
-        customizer.onEnd(span, Context.current(), request, response, t);
-      } catch (Exception e) {
-        LOG.log(Level.WARNING, "Exception occurred while customizing span on end.", e);
-      }
+  protected void handleEnd(Span span, REQUEST request, Throwable t) {
+    AttributesBuilder builder = Attributes.builder();
+    for (AttributesExtractor<REQUEST, Void> extractor : this.attributesExtractors) {
+      extractor.onEnd(builder, Context.current(), request, null, t);
     }
     span.end();
   }
@@ -132,11 +93,11 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest, RE
   }
 
   protected MessagingProcessWrapper(OpenTelemetry openTelemetry,
-                          TextMapGetter<REQUEST> textMapGetter,
-                          List<MessagingSpanCustomizer<REQUEST, RESPONSE>> spanCustomizers) {
+                          @Nullable TextMapGetter<REQUEST> textMapGetter,
+                          List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
     this.textMapPropagator = openTelemetry.getPropagators().getTextMapPropagator();
     this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE + "-" + INSTRUMENTATION_VERSION);
     this.textMapGetter = textMapGetter;
-    this.spanCustomizers = spanCustomizers;
+    this.attributesExtractors = attributesExtractors;
   }
 }

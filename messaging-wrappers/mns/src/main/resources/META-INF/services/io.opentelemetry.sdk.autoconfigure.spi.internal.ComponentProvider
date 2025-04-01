@@ -1,2 +1,0 @@
-internal.io.opentelemetry.contrib.messaging.wrappers.AwsXrayComponentProvider
-internal.io.opentelemetry.contrib.messaging.wrappers.AwsXrayLambdaComponentProvider

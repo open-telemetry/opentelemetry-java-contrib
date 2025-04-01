@@ -1,2 +1,0 @@
-internal.io.opentelemetry.contrib.messaging.wrappers.AwsConfigurablePropagator
-internal.io.opentelemetry.contrib.messaging.wrappers.AwsXrayLambdaConfigurablePropagator

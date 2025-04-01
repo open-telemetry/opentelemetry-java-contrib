@@ -7,10 +7,9 @@ import com.aliyun.mns.common.ClientException;
 import com.aliyun.mns.common.ServiceException;
 import com.aliyun.mns.model.Message;
 import com.aliyun.mns.model.MessageSystemPropertyValue;
-import io.opentelemetry.contrib.messaging.wrappers.mns.MNSProcessWrapper;
-import io.opentelemetry.contrib.messaging.wrappers.mns.MNSProcessWrapperBuilder;
+import io.opentelemetry.contrib.messaging.wrappers.MessagingProcessWrapper;
+import io.opentelemetry.contrib.messaging.wrappers.mns.MNSHelper;
 import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MNSProcessRequest;
-import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MNSProcessResponse;
 
 import static com.aliyun.mns.model.MessageSystemPropertyName.TRACE_PARENT;
 
@@ -18,7 +17,7 @@ public class MNSConsumer {
 
   public static void main(String[] args) {
     // 1. create wrapper by default
-    MNSProcessWrapper<MNSProcessRequest, MNSProcessResponse<?>> wrapper = MNSProcessWrapperBuilder.create().build();
+    MessagingProcessWrapper<MNSProcessRequest> wrapper = MNSHelper.processWrapperBuilder().build();
     CloudAccount account = new CloudAccount("my-ak", "my-sk", "endpoint");
     MNSClient client = account.getMNSClient();
 

@@ -4,10 +4,12 @@ import com.aliyun.mns.model.BaseMessage;
 import com.aliyun.mns.model.MessagePropertyValue;
 import com.aliyun.mns.model.MessageSystemPropertyName;
 import com.aliyun.mns.model.MessageSystemPropertyValue;
+import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MNSProcessRequest;
 
 public final class MNSHelper {
 
-  private MNSHelper() {
+  public static <REQUEST extends MNSProcessRequest> MNSProcessWrapperBuilder<REQUEST> processWrapperBuilder() {
+    return new MNSProcessWrapperBuilder<>();
   }
 
   public static String getMessageHeader(BaseMessage message, String name) {
@@ -39,5 +41,8 @@ public final class MNSHelper {
       return MessageSystemPropertyName.TRACE_STATE;
     }
     return null;
+  }
+
+  private MNSHelper() {
   }
 }

@@ -22,5 +22,6 @@ this tool aims to streamline the tracing and monitoring process.
 ## Component owners
 
 - [Minghui Zhang](https://github.com/Cirilla-zmh), Alibaba Cloud
+- [Steve Rao](https://github.com/steverao), Alibaba Cloud
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

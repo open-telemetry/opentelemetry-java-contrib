@@ -29,32 +29,15 @@ public interface MessagingProcessRequest {
 
   String getMessageId();
 
-  default String getOperationName() {
-      return "process";
-  }
-
-  default String getOperationType() {
-      return "process";
-  }
-
-  default String getConsumerGroupName() {
-      return null;
-  }
-
-  default String getDestinationSubscriptionName() {
-      return null;
-  }
-
   default String getClientId() {
-      return null;
+    return null;
   }
-
   default Long getBatchMessageCount() {
-      return null;
+    return null;
   }
 
   default String getDestinationPartitionId() {
-      return null;
+    return null;
   }
 
   /**
@@ -65,6 +48,6 @@ public interface MessagingProcessRequest {
    * returned instead.
    */
   default List<String> getMessageHeader(String name) {
-        return emptyList();
-    }
+    return emptyList();
+  }
 }
