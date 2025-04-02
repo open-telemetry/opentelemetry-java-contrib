@@ -50,6 +50,7 @@ testing {
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
+        implementation("org.slf4j:slf4j-simple")
       }
     }
   }

@@ -80,7 +80,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
       };
 
   protected GenericContainer<?> kafkaProducerContainer() {
-    return new GenericContainer<>("bitnami/kafka:latest")
+    return new GenericContainer<>("bitnami/kafka:2.8.1")
         .withNetwork(Network.SHARED)
         .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
         .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
@@ -207,7 +207,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
 
     @Container
     GenericContainer<?> consumer =
-        new GenericContainer<>("bitnami/kafka:latest")
+        new GenericContainer<>("bitnami/kafka:2.8.1")
             .withNetwork(Network.SHARED)
             .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
             .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
