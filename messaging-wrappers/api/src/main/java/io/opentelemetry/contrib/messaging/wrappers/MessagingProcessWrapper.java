@@ -77,7 +77,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
     return spanBuilder.setAllAttributes(builder.build()).startSpan();
   }
 
-  protected void handleEnd(Span span, REQUEST request, Throwable t) {
+  protected void handleEnd(Span span, REQUEST request, @Nullable Throwable t) {
     AttributesBuilder builder = Attributes.builder();
     for (AttributesExtractor<REQUEST, Void> extractor : this.attributesExtractors) {
       extractor.onEnd(builder, Context.current(), request, null, t);
@@ -85,7 +85,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
     span.end();
   }
 
-  protected String getDefaultSpanName(String destination) {
+  protected String getDefaultSpanName(@Nullable String destination) {
     if (destination == null) {
       destination = "unknown";
     }
@@ -93,7 +93,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
   }
 
   protected MessagingProcessWrapper(OpenTelemetry openTelemetry,
-                          @Nullable TextMapGetter<REQUEST> textMapGetter,
+                          TextMapGetter<REQUEST> textMapGetter,
                           List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
     this.textMapPropagator = openTelemetry.getPropagators().getTextMapPropagator();
     this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE + "-" + INSTRUMENTATION_VERSION);

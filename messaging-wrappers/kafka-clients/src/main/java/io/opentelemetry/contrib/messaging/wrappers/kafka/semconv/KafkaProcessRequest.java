@@ -5,7 +5,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -14,15 +13,18 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
 
   private final ConsumerRecord<?, ?> consumerRecord;
 
+  @Nullable
   private final String clientId;
 
+  @Nullable
   private final String consumerGroup;
 
   public static KafkaProcessRequest of(ConsumerRecord<?, ?> consumerRecord) {
     return of(consumerRecord, null, null);
   }
 
-  public static KafkaProcessRequest of(ConsumerRecord<?, ?> consumerRecord, String consumerGroup, String clientId) {
+  public static KafkaProcessRequest of(ConsumerRecord<?, ?> consumerRecord,
+      @Nullable String consumerGroup, @Nullable String clientId) {
     return new KafkaProcessRequest(consumerRecord, consumerGroup, clientId);
   }
 
@@ -31,11 +33,9 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
     return "kafka";
   }
 
+  @Nullable
   @Override
   public String getDestination() {
-    if (this.consumerRecord == null) {
-      return null;
-    }
     return this.consumerRecord.topic();
   }
 
@@ -64,9 +64,6 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
   @Nullable
   @Override
   public Long getMessageBodySize() {
-    if (this.consumerRecord == null) {
-      return null;
-    }
     long size = this.consumerRecord.serializedValueSize();
     return size >= 0 ? size : null;
   }
@@ -97,9 +94,6 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
 
   @Override
   public List<String> getMessageHeader(String name) {
-    if (this.consumerRecord == null) {
-      return Collections.emptyList();
-    }
     return StreamSupport.stream(this.consumerRecord.headers().headers(name).spliterator(), false)
         .map(header -> new String(header.value(), StandardCharsets.UTF_8))
         .collect(Collectors.toList());
@@ -114,7 +108,8 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
     return consumerRecord;
   }
 
-  private KafkaProcessRequest(ConsumerRecord<?, ?> consumerRecord, String consumerGroup, String clientId) {
+  private KafkaProcessRequest(ConsumerRecord<?, ?> consumerRecord,
+      @Nullable String consumerGroup, @Nullable String clientId) {
     this.consumerRecord = consumerRecord;
     this.consumerGroup = consumerGroup;
     this.clientId = clientId;

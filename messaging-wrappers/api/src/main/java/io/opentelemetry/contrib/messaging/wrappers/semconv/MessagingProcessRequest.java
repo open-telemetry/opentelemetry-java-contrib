@@ -1,5 +1,6 @@
 package io.opentelemetry.contrib.messaging.wrappers.semconv;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -13,29 +14,39 @@ public interface MessagingProcessRequest {
 
   String getSystem();
 
+  @Nullable
   String getDestination();
 
+  @Nullable
   String getDestinationTemplate();
 
   boolean isTemporaryDestination();
 
   boolean isAnonymousDestination();
 
+  @Nullable
   String getConversationId();
 
+  @Nullable
   Long getMessageBodySize();
 
+  @Nullable
   Long getMessageEnvelopeSize();
 
+  @Nullable
   String getMessageId();
 
+  @Nullable
   default String getClientId() {
     return null;
   }
+
+  @Nullable
   default Long getBatchMessageCount() {
     return null;
   }
 
+  @Nullable
   default String getDestinationPartitionId() {
     return null;
   }

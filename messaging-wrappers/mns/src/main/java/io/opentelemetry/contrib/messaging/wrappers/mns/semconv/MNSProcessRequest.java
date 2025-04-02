@@ -4,6 +4,7 @@ import com.aliyun.mns.model.Message;
 import io.opentelemetry.contrib.messaging.wrappers.mns.MNSHelper;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,13 +12,14 @@ public class MNSProcessRequest implements MessagingProcessRequest {
 
   private final Message message;
 
+  @Nullable
   private final String destination;
 
   public static MNSProcessRequest of(Message message) {
     return of(message, null);
   }
 
-  public static MNSProcessRequest of(Message message, String destination) {
+  public static MNSProcessRequest of(Message message, @Nullable String destination) {
     return new MNSProcessRequest(message, destination);
   }
 
@@ -26,11 +28,13 @@ public class MNSProcessRequest implements MessagingProcessRequest {
     return "mns";
   }
 
+  @Nullable
   @Override
   public String getDestination() {
     return this.destination;
   }
 
+  @Nullable
   @Override
   public String getDestinationTemplate() {
     return null;
@@ -46,37 +50,32 @@ public class MNSProcessRequest implements MessagingProcessRequest {
     return false;
   }
 
+  @Nullable
   @Override
   public String getConversationId() {
     return null;
   }
 
+  @Nullable
   @Override
   public Long getMessageBodySize() {
-    if (message == null) {
-      return null;
-    }
     return (long) message.getMessageBodyAsBytes().length;
   }
 
+  @Nullable
   @Override
   public Long getMessageEnvelopeSize() {
     return null;
   }
 
+  @Nullable
   @Override
   public String getMessageId() {
-    if (message == null) {
-      return null;
-    }
     return message.getMessageId();
   }
 
   @Override
   public List<String> getMessageHeader(String name) {
-    if (message == null) {
-      return Collections.emptyList();
-    }
     String header = MNSHelper.getMessageHeader(message, name);
     if (header == null) {
       return Collections.emptyList();
@@ -88,7 +87,7 @@ public class MNSProcessRequest implements MessagingProcessRequest {
     return message;
   }
 
-  private MNSProcessRequest(Message message, String destination) {
+  private MNSProcessRequest(Message message, @Nullable String destination) {
     this.message = message;
     this.destination = destination;
   }

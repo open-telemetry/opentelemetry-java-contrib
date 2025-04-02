@@ -16,10 +16,22 @@ dependencies {
 
   compileOnly("org.apache.kafka:kafka-clients:0.11.0.0")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("org.apache.kafka:kafka-clients:0.11.0.0")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-kafka-clients-2.6")
 
+  testAnnotationProcessor("com.google.auto.service:auto-service")
+  testCompileOnly("com.google.auto.service:auto-service-annotations")
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("org.junit.jupiter:junit-jupiter-params")
+  testImplementation("org.testcontainers:kafka")
+  testImplementation("org.testcontainers:junit-jupiter")
+
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.3")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
 }

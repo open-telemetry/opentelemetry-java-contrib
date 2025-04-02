@@ -9,9 +9,6 @@ otelJava.moduleName.set("io.opentelemetry.contrib.messaging.wrappers.mns")
 
 repositories {
   // FIXME: publish mns-client to maven central repository
-  maven {
-    url = uri("https://mvnrepo.alibaba-inc.com/mvn/repository")
-  }
 }
 
 dependencies {
