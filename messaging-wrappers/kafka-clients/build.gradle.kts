@@ -39,7 +39,10 @@ dependencies {
 tasks {
   withType<Test>().configureEach {
     jvmArgs("-Dotel.java.global-autoconfigure.enabled=true")
-    jvmArgs("-Dotel.instrumentation.messaging.experimental.receive-telemetry.enabled=true")
+    // TODO: According to https://opentelemetry.io/docs/specs/semconv/messaging/messaging-spans/#message-creation-context-as-parent-of-process-span,
+    //  process span should be the child of receive span. However, we couldn't access the trace context with receive span
+    //  in wrappers, unless we add a generic accessor for that.
+    jvmArgs("-Dotel.instrumentation.messaging.experimental.receive-telemetry.enabled=false")
     jvmArgs("-Dotel.traces.exporter=logging")
     jvmArgs("-Dotel.metrics.exporter=logging")
     jvmArgs("-Dotel.logs.exporter=logging")

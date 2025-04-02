@@ -56,6 +56,13 @@ public class DefaultMessagingProcessWrapperBuilder<REQUEST extends MessagingProc
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public DefaultMessagingProcessWrapperBuilder<REQUEST> addAttributesExtractors(
+      Collection<AttributesExtractor<REQUEST, Void>> attributesExtractor) {
+    this.attributesExtractors.addAll(attributesExtractor);
+    return this;
+  }
+
   public MessagingProcessWrapper<REQUEST> build() {
     return new MessagingProcessWrapper<>(
         this.openTelemetry == null ? GlobalOpenTelemetry.get() : this.openTelemetry,

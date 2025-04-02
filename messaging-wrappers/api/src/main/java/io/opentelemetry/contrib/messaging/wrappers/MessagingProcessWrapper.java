@@ -16,6 +16,8 @@ import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
+
 public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
 
   private static final String INSTRUMENTATION_SCOPE = "messaging-process-wrapper";
@@ -68,7 +70,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
   protected Span handleStart(REQUEST request) {
     Context context = this.textMapPropagator.extract(Context.current(), request, this.textMapGetter);
     SpanBuilder spanBuilder = this.tracer.spanBuilder(getDefaultSpanName(request.getDestination()));
-    spanBuilder.setParent(context);
+    spanBuilder.setSpanKind(CONSUMER).setParent(context);
 
     AttributesBuilder builder = Attributes.builder();
     for (AttributesExtractor<REQUEST, Void> extractor : this.attributesExtractors) {
@@ -96,7 +98,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
                           TextMapGetter<REQUEST> textMapGetter,
                           List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
     this.textMapPropagator = openTelemetry.getPropagators().getTextMapPropagator();
-    this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE + "-" + INSTRUMENTATION_VERSION);
+    this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE, INSTRUMENTATION_VERSION);
     this.textMapGetter = textMapGetter;
     this.attributesExtractors = attributesExtractors;
   }

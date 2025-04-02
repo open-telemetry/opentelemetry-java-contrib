@@ -18,12 +18,12 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
   // copied from MessagingIncubatingAttributes
   private static final AttributeKey<String> MESSAGING_DESTINATION_PARTITION_ID =
       AttributeKey.stringKey("messaging.destination.partition.id");
-  private static final AttributeKey<String> MESSAGING_KAFKA_CONSUMER_GROUP =
-      AttributeKey.stringKey("messaging.kafka.consumer.group");
+  private static final AttributeKey<String> MESSAGING_CONSUMER_GROUP_NAME =
+      AttributeKey.stringKey("messaging.consumer.group.name");
+  private static final AttributeKey<Long> MESSAGING_KAFKA_OFFSET =
+      AttributeKey.longKey("messaging.kafka.offset");
   private static final AttributeKey<String> MESSAGING_KAFKA_MESSAGE_KEY =
       AttributeKey.stringKey("messaging.kafka.message.key");
-  private static final AttributeKey<Long> MESSAGING_KAFKA_MESSAGE_OFFSET =
-      AttributeKey.longKey("messaging.kafka.message.offset");
   private static final AttributeKey<Boolean> MESSAGING_KAFKA_MESSAGE_TOMBSTONE =
       AttributeKey.booleanKey("messaging.kafka.message.tombstone");
 
@@ -38,7 +38,7 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
     ConsumerRecord<?, ?> record = request.getRecord();
 
     attributes.put(MESSAGING_DESTINATION_PARTITION_ID, String.valueOf(record.partition()));
-    attributes.put(MESSAGING_KAFKA_MESSAGE_OFFSET, record.offset());
+    attributes.put(MESSAGING_KAFKA_OFFSET, record.offset());
 
     Object key = record.key();
     if (key != null && canSerialize(key.getClass())) {
@@ -50,7 +50,7 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
 
     String consumerGroup = request.getConsumerGroup();
     if (consumerGroup != null) {
-      attributes.put(MESSAGING_KAFKA_CONSUMER_GROUP, consumerGroup);
+      attributes.put(MESSAGING_CONSUMER_GROUP_NAME, consumerGroup);
     }
   }
 
