@@ -35,3 +35,13 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
 }
+
+tasks {
+  withType<Test>().configureEach {
+    jvmArgs("-Dotel.java.global-autoconfigure.enabled=true")
+    jvmArgs("-Dotel.instrumentation.messaging.experimental.receive-telemetry.enabled=true")
+    jvmArgs("-Dotel.traces.exporter=logging")
+    jvmArgs("-Dotel.metrics.exporter=logging")
+    jvmArgs("-Dotel.logs.exporter=logging")
+  }
+}

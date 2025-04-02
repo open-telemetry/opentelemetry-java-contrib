@@ -51,22 +51,19 @@ public class KafkaClientTest extends KafkaClientBaseTest {
 
   @Test
   void testInterceptors() throws InterruptedException {
-    try (AutoConfigTestProperties props = new AutoConfigTestProperties()
-        .put("otel.instrumentation.messaging.experimental.receive-telemetry.enabled", "true")) {
-      OpenTelemetry otel = GlobalOpenTelemetry.get();
-      Tracer tracer = otel.getTracer("test");
-      MessagingProcessWrapper<KafkaProcessRequest> wrapper = KafkaHelper.processWrapperBuilder()
-          .openTelemetry(otel)
-          .build();
+    OpenTelemetry otel = GlobalOpenTelemetry.get();
+    Tracer tracer = otel.getTracer("test");
+    MessagingProcessWrapper<KafkaProcessRequest> wrapper = KafkaHelper.processWrapperBuilder()
+        .openTelemetry(otel)
+        .build();
 
-      sendWithParent(tracer);
+    sendWithParent(tracer);
 
-      awaitUntilConsumerIsReady();
+    awaitUntilConsumerIsReady();
 
-      consumeWithChild(tracer, wrapper);
+    consumeWithChild(tracer, wrapper);
 
-      assertTraces();
-    }
+    assertTraces();
   }
 
   @SuppressWarnings("FutureReturnValueIgnored")
