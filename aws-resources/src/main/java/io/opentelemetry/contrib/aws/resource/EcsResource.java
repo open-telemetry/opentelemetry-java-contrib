@@ -314,7 +314,7 @@ public final class EcsResource {
 
     private static final Pattern imagePattern =
         Pattern.compile(
-            "^(?<repository>([^/\\s]+/)?([^:\\s]+))(:(?<tag>[^@\\s]+))?(@sha256:(?<sha256>\\d+))?$");
+            "^(?<repository>([^/\\s]+/)?([^:\\s]+))(:(?<tag>[^@\\s]+))?(@sha256:(?<sha256>[\\da-fA-F]+))?$");
 
     final String repository;
     final String tag;

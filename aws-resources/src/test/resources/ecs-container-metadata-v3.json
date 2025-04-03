@@ -2,7 +2,7 @@
   "DockerId": "43481a6ce4842eec8fe72fc28500c6b52edcc0917f105b83379f88cac1ff3946",
   "Name": "nginx-curl",
   "DockerName": "ecs-nginx-5-nginx-curl-ccccb9f49db0dfe0d901",
-  "Image": "nrdlngr/nginx-curl",
+  "Image": "nrdlngr/nginx-curl:latest@sha256:8dc35e9386b5d280d285ae7a78d271a5d4a82106cb254fbed5fde4923faa8deb",
   "ImageID": "sha256:2e00ae64383cfc865ba0a2ba37f61b50a120d2d9378559dcd458dc0de47bc165",
   "Labels": {
     "com.amazonaws.ecs.cluster": "default",
