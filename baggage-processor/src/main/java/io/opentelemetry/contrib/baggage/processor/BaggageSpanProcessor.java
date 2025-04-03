@@ -9,14 +9,14 @@ import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor;
 import java.util.function.Predicate;
 
 /**
  * This span processor copies attributes stored in {@link Baggage} into each newly created {@link
  * io.opentelemetry.api.trace.Span}.
  */
-public class BaggageSpanProcessor implements SpanProcessor {
+public class BaggageSpanProcessor implements ExtendedSpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /** use {@link #allowAllBaggageKeys()} instead */
@@ -39,8 +39,24 @@ public class BaggageSpanProcessor implements SpanProcessor {
   }
 
   @Override
-  public void onStart(Context parentContext, ReadWriteSpan span) {
-    Baggage.fromContext(parentContext)
+  public void onStart(Context parentContext, ReadWriteSpan span) {}
+
+  @Override
+  public boolean isStartRequired() {
+    return false;
+  }
+
+  @Override
+  public void onEnd(ReadableSpan span) {}
+
+  @Override
+  public boolean isEndRequired() {
+    return false;
+  }
+
+  @Override
+  public void onEnding(ReadWriteSpan span) {
+    Baggage.current()
         .forEach(
             (s, baggageEntry) -> {
               if (baggageKeyPredicate.test(s)) {
@@ -50,15 +66,7 @@ public class BaggageSpanProcessor implements SpanProcessor {
   }
 
   @Override
-  public boolean isStartRequired() {
+  public boolean isOnEndingRequired() {
     return true;
-  }
-
-  @Override
-  public void onEnd(ReadableSpan span) {}
-
-  @Override
-  public boolean isEndRequired() {
-    return false;
   }
 }
