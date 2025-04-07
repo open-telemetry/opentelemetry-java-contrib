@@ -27,9 +27,10 @@ logger_provider:
   processors:
       - event_to_span_event_bridge:
 ```
-## Filtering Log Processor
-`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs  based on a predicate
 
+## Filtering Log Processor
+
+`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs  based on a predicate
 
 ## Component owners
 
