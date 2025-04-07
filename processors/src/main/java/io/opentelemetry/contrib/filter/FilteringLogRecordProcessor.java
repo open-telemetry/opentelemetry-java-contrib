@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.filter;
 
 import io.opentelemetry.context.Context;
@@ -11,7 +16,8 @@ public class FilteringLogRecordProcessor implements LogRecordProcessor {
   public final LogRecordProcessor delegate;
   public final Predicate<LogRecordData> predicate;
 
-  public FilteringLogRecordProcessor(LogRecordProcessor delegate, Predicate<LogRecordData> predicate) {
+  public FilteringLogRecordProcessor(
+      LogRecordProcessor delegate, Predicate<LogRecordData> predicate) {
     this.delegate = delegate;
     this.predicate = predicate;
   }
@@ -19,7 +25,7 @@ public class FilteringLogRecordProcessor implements LogRecordProcessor {
   @Override
   public void onEmit(Context context, ReadWriteLogRecord readWriteLogRecord) {
     if (predicate.test(readWriteLogRecord.toLogRecordData())) {
-        delegate.onEmit(context, readWriteLogRecord);
+      delegate.onEmit(context, readWriteLogRecord);
     }
   }
 }

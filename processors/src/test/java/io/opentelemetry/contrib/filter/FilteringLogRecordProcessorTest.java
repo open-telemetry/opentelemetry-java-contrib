@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.filter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,24 +33,29 @@ import org.junit.jupiter.api.Test;
 
 public class FilteringLogRecordProcessorTest {
 
-  private final InMemoryLogRecordExporter memoryLogRecordExporter = InMemoryLogRecordExporter.create();;
-  private final LogRecordProcessor logRecordProcessor =  SimpleLogRecordProcessor.create(memoryLogRecordExporter);;
+  private final InMemoryLogRecordExporter memoryLogRecordExporter =
+      InMemoryLogRecordExporter.create();
+  ;
+  private final LogRecordProcessor logRecordProcessor =
+      SimpleLogRecordProcessor.create(memoryLogRecordExporter);
+  ;
   private final InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
-  private AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder ;
+  private AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder;
   private Logger logger;
-
 
   @BeforeEach
   void setUp() {
     sdkBuilder = AutoConfiguredOpenTelemetrySdk.builder();
-    sdkBuilder.addPropertiesSupplier(()->{
-          Map<String, String> configMap = new HashMap<>();
-          configMap.put("otel.metrics.exporter", "none");
-          configMap.put("otel.traces.exporter", "logging");
-          configMap.put("otel.logs.exporter", "logging");
-          return configMap;
-        })
-        .addSpanExporterCustomizer((exporter,c)->spansExporter)
+    sdkBuilder
+        .addPropertiesSupplier(
+            () -> {
+              Map<String, String> configMap = new HashMap<>();
+              configMap.put("otel.metrics.exporter", "none");
+              configMap.put("otel.traces.exporter", "logging");
+              configMap.put("otel.logs.exporter", "logging");
+              return configMap;
+            })
+        .addSpanExporterCustomizer((exporter, c) -> spansExporter)
         .addLogRecordExporterCustomizer(
             (logRecordExporter, configProperties) -> memoryLogRecordExporter)
         .addLoggerProviderCustomizer(
@@ -54,18 +64,22 @@ public class FilteringLogRecordProcessorTest {
               public SdkLoggerProviderBuilder apply(
                   SdkLoggerProviderBuilder sdkLoggerProviderBuilder,
                   ConfigProperties configProperties) {
-                return sdkLoggerProviderBuilder.addLogRecordProcessor(new FilteringLogRecordProcessor(
-                    logRecordProcessor, logRecordData -> logRecordData.getSpanContext().isSampled()));
+                return sdkLoggerProviderBuilder.addLogRecordProcessor(
+                    new FilteringLogRecordProcessor(
+                        logRecordProcessor,
+                        logRecordData -> logRecordData.getSpanContext().isSampled()));
               }
             });
 
     logger =
         SdkLoggerProvider.builder()
-            .addLogRecordProcessor(new FilteringLogRecordProcessor(logRecordProcessor,
-                logRecordData -> {
-                  SpanContext spanContext =logRecordData.getSpanContext();
-                  return spanContext.isSampled();
-                }) {})
+            .addLogRecordProcessor(
+                new FilteringLogRecordProcessor(
+                    logRecordProcessor,
+                    logRecordData -> {
+                      SpanContext spanContext = logRecordData.getSpanContext();
+                      return spanContext.isSampled();
+                    }) {})
             .build()
             .get("TestScope");
   }
@@ -77,7 +91,8 @@ public class FilteringLogRecordProcessorTest {
       Tracer tracer = sdk.getTracer("test");
       Span span = tracer.spanBuilder("test").startSpan();
       sdk.getLogsBridge().get("test").logRecordBuilder().setBody("One Log").emit();
-      List<LogRecordData>  finishedLogRecordItems = memoryLogRecordExporter.getFinishedLogRecordItems();
+      List<LogRecordData> finishedLogRecordItems =
+          memoryLogRecordExporter.getFinishedLogRecordItems();
       assertEquals(1, finishedLogRecordItems.size());
       try (Scope scope = span.makeCurrent()) {
 
@@ -92,10 +107,8 @@ public class FilteringLogRecordProcessorTest {
   @Test
   void verifyFilteringNotExitSpanContext() {
     logger.logRecordBuilder().setBody("One Log").emit();
-    List<LogRecordData>  finishedLogRecordItems = memoryLogRecordExporter.getFinishedLogRecordItems();
-    assertEquals(0,finishedLogRecordItems.size());
-
+    List<LogRecordData> finishedLogRecordItems =
+        memoryLogRecordExporter.getFinishedLogRecordItems();
+    assertEquals(0, finishedLogRecordItems.size());
   }
-
-
 }
