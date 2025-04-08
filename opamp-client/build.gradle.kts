@@ -49,7 +49,7 @@ dependencies {
 val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
   group = "opamp"
   src("https://api.github.com/repos/open-telemetry/opamp-spec/releases/latest")
-  dest(project.layout.buildDirectory.file("$name/release.json"))
+  dest(project.layout.buildDirectory.file("opamp/release.json"))
 }
 
 tasks.register<DownloadOpampProtos>("opampProtoDownload", download).configure {
@@ -58,7 +58,7 @@ tasks.register<DownloadOpampProtos>("opampProtoDownload", download).configure {
   lastReleaseInfoJson.set {
     opampReleaseInfo.get().dest
   }
-  outputProtosDir.set(project.layout.buildDirectory.dir(name))
+  outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
   downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/$name/release.zip"))
 }
 
@@ -90,7 +90,7 @@ abstract class DownloadOpampProtos @Inject constructor(
       setIncludes(listOf("**/*.proto"))
     }
     fileOps.sync {
-      from(protos)
+      from(protos.files)
       into(outputProtosDir)
     }
   }
