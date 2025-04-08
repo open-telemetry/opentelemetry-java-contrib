@@ -6,7 +6,9 @@
 package io.opentelemetry.opamp.client.internal;
 
 import io.opentelemetry.opamp.client.internal.response.MessageData;
-import opamp.proto.Opamp;
+import opamp.proto.AgentDescription;
+import opamp.proto.RemoteConfigStatus;
+import opamp.proto.ServerErrorResponse;
 
 public interface OpampClient {
 
@@ -42,14 +44,14 @@ public interface OpampClient {
    *
    * @param agentDescription The new agent description.
    */
-  void setAgentDescription(Opamp.AgentDescription agentDescription);
+  void setAgentDescription(AgentDescription agentDescription);
 
   /**
    * Sets the current remote config status which will be sent in the next agent to server request.
    *
    * @param remoteConfigStatus The new remote config status.
    */
-  void setRemoteConfigStatus(Opamp.RemoteConfigStatus remoteConfigStatus);
+  void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus);
 
   interface Callbacks {
     /**
@@ -81,17 +83,16 @@ public interface OpampClient {
      * @param client The relevant {@link OpampClient} instance.
      * @param errorResponse The error returned by the Server.
      */
-    void onErrorResponse(OpampClient client, Opamp.ServerErrorResponse errorResponse);
+    void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse);
 
     /**
      * Called when the Agent receives a message that needs processing. See {@link MessageData}
      * definition for the data that may be available for processing. During onMessage execution the
      * {@link OpampClient} functions that change the status of the client may be called, e.g. if
-     * RemoteConfig is processed then {@link
-     * #setRemoteConfigStatus(opamp.proto.Opamp.RemoteConfigStatus)} should be called to reflect the
-     * processing result. These functions may also be called after onMessage returns. This is
-     * advisable if processing can take a long time. In that case returning quickly is preferable to
-     * avoid blocking the {@link OpampClient}.
+     * RemoteConfig is processed then {@link #setRemoteConfigStatus(opamp.proto.RemoteConfigStatus)}
+     * should be called to reflect the processing result. These functions may also be called after
+     * onMessage returns. This is advisable if processing can take a long time. In that case
+     * returning quickly is preferable to avoid blocking the {@link OpampClient}.
      *
      * @param client The relevant {@link OpampClient} instance.
      * @param messageData The server response data that needs processing.
