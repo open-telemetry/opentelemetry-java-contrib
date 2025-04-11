@@ -54,7 +54,7 @@ dependencies {
     api("org.testcontainers:kafka:1.20.6")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:3.0")
+    api("tools.profiler:async-profiler:4.0")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
   }
