@@ -1,14 +1,12 @@
 name: CodeQL
 
 on:
-  pull_request:
-    branches:
-      - main
-      - release/*
   push:
     branches:
       - main
       - release/*
+  pull_request:
+  merge_group:
   schedule:
     - cron: "29 13 * * 2"  # weekly at 13:29 UTC on Tuesday
 
