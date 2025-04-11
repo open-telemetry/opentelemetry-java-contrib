@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.46.0 (2025-04-11)
+
 ### Baggage processor
 
 - Remove the deprecated and unused bare Predicate
