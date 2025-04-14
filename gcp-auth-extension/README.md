@@ -32,14 +32,20 @@ These credentials are built-in running in a Google App Engine, Google Cloud Shel
 
 The extension can be configured either by environment variables or system properties.
 
-Here is a list of configurable options for the extension:
+Here is a list of required and optional configuration available for the extension:
+
+#### Required Config
 
 - `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud Project ID to which the telemetry needs to be exported.
+
   - Can also be configured using `google.cloud.project` system property.
   - This is a required option, the agent configuration will fail if this option is not set.
-- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see [here](https://cloud.google.com/docs/quotas/quota-project).
+
+#### Optional Config
+
+- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see [here](https://cloud.google.com/docs/quotas/quota-project). Additional details about configuring the *quota project* can be found [here](https://cloud.google.com/docs/quotas/set-quota-project).
+
   - Can also be configured using `google.cloud.quota.project` system property.
-  - If this option is not configured, the extension will use the Quota Project ID found in the Application Default Credentials (ADC), if available. For more information on application default credentials, see [here](https://cloud.google.com/docs/authentication/application-default-credentials).
 
 ## Usage
 
