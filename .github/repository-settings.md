@@ -6,6 +6,8 @@ except for
 
 - The rules for `gh-pages` and `cloudfoundry` branches are not relevant in this repository.
 
+and the enablement of merge queues below.
+
 ## Merge queue
 
 Needs to be enabled using classic branch protection (instead of rule set)
