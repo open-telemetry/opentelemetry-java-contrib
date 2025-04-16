@@ -16,10 +16,15 @@ dependencies {
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("com.google.guava:guava:33.4.8-jre")
+  testImplementation(project(":messaging-wrappers:testing"))
+}
 
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.3")
+tasks {
+  withType<Test>().configureEach {
+    jvmArgs("-Dotel.java.global-autoconfigure.enabled=true")
+    jvmArgs("-Dotel.traces.exporter=logging")
+    jvmArgs("-Dotel.metrics.exporter=logging")
+    jvmArgs("-Dotel.logs.exporter=logging")
+  }
 }

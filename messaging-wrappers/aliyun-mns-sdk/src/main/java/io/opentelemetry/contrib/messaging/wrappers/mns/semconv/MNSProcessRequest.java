@@ -25,7 +25,7 @@ public class MNSProcessRequest implements MessagingProcessRequest {
 
   @Override
   public String getSystem() {
-    return "mns";
+    return "smq";
   }
 
   @Nullable

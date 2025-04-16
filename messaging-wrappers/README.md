@@ -15,10 +15,10 @@ this tool aims to streamline the tracing and monitoring process.
 
 ## Predefined Implementations
 
-| Messaging system  | Version Scope       | Wrapper type |
-|-------------------|---------------------|--------------|
-| kafka-clients     | `[0.11.0.0,)`       | process      |
-| aliyun mns-client | `[1.3.0-SNAPSHOT,)` | process      |
+| Messaging system  | Version Scope | Wrapper type |
+|-------------------|---------------|--------------|
+| kafka-clients     | `[0.11.0.0,)` | process      |
+| aliyun mns-client | `[1.3.0,)`    | process      |
 
 ## Quickstart
 
