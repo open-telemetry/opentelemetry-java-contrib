@@ -135,10 +135,10 @@ testing {
     dependencies {
       implementation(project(project.path))
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.12.1"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.12.2"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.20.6"))
-      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.6-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.3"))
+      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.5"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

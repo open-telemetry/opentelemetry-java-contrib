@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## Version 1.46.0 (2025-04-11)
+
+### Baggage processor
+
+- Remove the deprecated and unused bare Predicate
+  ([#1828](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1828))
+
+### Telemetry processors
+
+- Add logs filtering
+  ([#1823](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1823))
+
 ## Version 1.45.0 (2025-03-14)
 
 ### Disk buffering
