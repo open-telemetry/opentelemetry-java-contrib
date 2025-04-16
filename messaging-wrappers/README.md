@@ -111,7 +111,7 @@ public class Demo {
 
 ## Component owners
 
-- [Minghui Zhang](https://github.com/Cirilla-zmh), Alibaba Cloud
-- [Steve Rao](https://github.com/steverao), Alibaba Cloud
+- [Minghui Zhang](https://github.com/Cirilla-zmh), Alibaba
+- [Steve Rao](https://github.com/steverao), Alibaba
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
