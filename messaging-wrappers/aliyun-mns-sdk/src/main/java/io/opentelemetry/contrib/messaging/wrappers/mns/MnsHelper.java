@@ -10,7 +10,6 @@ import com.aliyun.mns.model.MessagePropertyValue;
 import com.aliyun.mns.model.MessageSystemPropertyName;
 import com.aliyun.mns.model.MessageSystemPropertyValue;
 import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MnsProcessRequest;
-
 import javax.annotation.Nullable;
 
 public final class MnsHelper {

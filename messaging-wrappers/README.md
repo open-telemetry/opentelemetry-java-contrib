@@ -2,15 +2,15 @@
 
 This is a lightweight messaging wrappers API designed to help you quickly add instrumentation to any
 type of messaging system client. To further ease the burden of instrumentation, we will also provide
-predefined implementations for certain messaging systems, helping you seamlessly address the issue 
+predefined implementations for certain messaging systems, helping you seamlessly address the issue
 of broken traces.
 
 ## Overview
 
-The primary goal of this API is to simplify the process of adding instrumentation to your messaging 
-systems, thereby enhancing observability without introducing significant overhead. Inspired by 
-[#13340](https://github.com/open-telemetry/opentelemetry-java-instrumentation/issues/13340) and 
-[opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation-api-incubator/src/main/java/io/opentelemetry/instrumentation/api/incubator/semconv/messaging/MessagingAttributesExtractor.java), 
+The primary goal of this API is to simplify the process of adding instrumentation to your messaging
+systems, thereby enhancing observability without introducing significant overhead. Inspired by
+[#13340](https://github.com/open-telemetry/opentelemetry-java-instrumentation/issues/13340) and
+[opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation-api-incubator/src/main/java/io/opentelemetry/instrumentation/api/incubator/semconv/messaging/MessagingAttributesExtractor.java),
 this tool aims to streamline the tracing and monitoring process.
 
 ## Predefined Implementations
@@ -31,7 +31,7 @@ Gradle and Maven.
 
 ```kotlin
 dependencies {
-    implementation("io.opentelemetry.contrib:opentelemetry-messaging-wrappers-api")
+    implementation("io.opentelemetry.contrib:opentelemetry-messaging-wrappers-api:${latest_version}")
 }
 ```
 
@@ -41,6 +41,7 @@ dependencies {
 <dependency>
     <groupId>io.opentelemetry.contrib</groupId>
     <artifactId>opentelemetry-messaging-wrappers-api</artifactId>
+    <version>${latest_version}</version>
 </dependency>
 ```
 
@@ -81,7 +82,7 @@ an implementation based on the OpenTelemetry semantic convention by default.
 
 ```java
 public class KafkaDemo {
-  
+ 
   public static MessagingProcessWrapper<KafkaProcessRequest> createWrapper() {
     return KafkaHelper.processWrapperBuilder().build();
   }
@@ -98,9 +99,9 @@ If both are enabled, it might result in duplicate nested process spans. It is re
 
 ```java
 public class Demo {
-  
+ 
   private static final MessagingProcessWrapper<MyMessagingProcessRequest> WRAPPER = createWrapper();
-  
+ 
   public String consume(Message message) {
     WRAPPER.doProcess(new MyMessagingProcessRequest(message), () -> {
       // your processing logic
