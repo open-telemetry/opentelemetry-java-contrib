@@ -9,12 +9,11 @@ otelJava.moduleName.set("io.opentelemetry.contrib.messaging.wrappers")
 
 dependencies {
   api("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
+  api("io.opentelemetry.semconv:opentelemetry-semconv")
+  api("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")
-
-  implementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   testImplementation("com.google.guava:guava:33.4.8-jre")
   testImplementation(project(":messaging-wrappers:testing"))

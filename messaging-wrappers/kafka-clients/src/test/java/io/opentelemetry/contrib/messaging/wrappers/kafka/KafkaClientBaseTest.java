@@ -1,6 +1,5 @@
 package io.opentelemetry.contrib.messaging.wrappers.kafka;
 
-import io.opentelemetry.api.common.AttributeKey;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +9,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -37,13 +38,11 @@ import org.testcontainers.utility.DockerImageName;
  * */
 @SuppressWarnings("OtelInternalJavadoc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class KafkaClientBaseTest {
+public abstract class KafkaClientBaseTest extends AbstractBaseTest {
 
   private static final Logger logger = LoggerFactory.getLogger(KafkaClientBaseTest.class);
 
   protected static final String SHARED_TOPIC = "shared.topic";
-  protected static final AttributeKey<String> MESSAGING_CLIENT_ID =
-      AttributeKey.stringKey("messaging.client_id");
 
   private KafkaContainer kafka;
   protected Producer<Integer, String> producer;

@@ -2,43 +2,28 @@ package io.opentelemetry.contrib.messaging.wrappers.kafka;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.contrib.messaging.wrappers.MessagingProcessWrapper;
-import io.opentelemetry.contrib.messaging.wrappers.kafka.internal.AutoConfiguredDataCapture;
 import io.opentelemetry.contrib.messaging.wrappers.kafka.semconv.KafkaConsumerAttributesExtractor;
 import io.opentelemetry.contrib.messaging.wrappers.kafka.semconv.KafkaProcessRequest;
 import io.opentelemetry.instrumentation.kafkaclients.v2_6.TracingConsumerInterceptor;
 import io.opentelemetry.instrumentation.kafkaclients.v2_6.TracingProducerInterceptor;
-import io.opentelemetry.instrumentation.testing.util.TelemetryDataUtil;
-import io.opentelemetry.sdk.testing.assertj.TraceAssert;
-import io.opentelemetry.sdk.testing.assertj.TracesAssert;
-import io.opentelemetry.sdk.trace.data.SpanData;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.assertj.core.api.AbstractAssert;
-import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import static io.opentelemetry.instrumentation.testing.util.TelemetryDataUtil.orderByRootSpanName;
-import static io.opentelemetry.instrumentation.testing.util.TelemetryDataUtil.waitForTraces;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
@@ -49,7 +34,6 @@ import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
-import static org.awaitility.Awaitility.await;
 
 public class KafkaClientTest extends KafkaClientBaseTest {
 
@@ -130,7 +114,7 @@ public class KafkaClientTest extends KafkaClientBaseTest {
   @SuppressWarnings("deprecation") // using deprecated semconv
   public void assertTraces() {
     waitAndAssertTraces(
-        orderByRootSpanName("parent", "producer callback"),
+        sortByRootSpanName("parent", "producer callback"),
         trace ->
             trace.hasSpansSatisfyingExactly(
                 span -> span.hasName("parent").hasKind(SpanKind.INTERNAL).hasNoParent(),
@@ -152,9 +136,9 @@ public class KafkaClientTest extends KafkaClientBaseTest {
                             satisfies(
                                 MESSAGING_DESTINATION_PARTITION_ID,
                                 org.assertj.core.api.AbstractStringAssert::isNotEmpty),
-                            satisfies(
-                                MESSAGING_CLIENT_ID,
-                                stringAssert -> stringAssert.isEqualTo("test-consumer-1")),
+                            // FIXME: We do have "messaging.client_id" in instrumentation but "messaging.client.id" in
+                            //  semconv library right now. It should be replaced after semconv release.
+                            equalTo(AttributeKey.stringKey("messaging.client_id"), "test-consumer-1"),
                             satisfies(
                                 MESSAGING_KAFKA_OFFSET,
                                 AbstractAssert::isNotNull),
@@ -170,48 +154,5 @@ public class KafkaClientTest extends KafkaClientBaseTest {
             trace.hasSpansSatisfyingExactly(
                 span ->
                     span.hasName("producer callback").hasKind(SpanKind.INTERNAL).hasNoParent()));
-  }
-
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  private static void waitAndAssertTraces(
-      @Nullable Comparator<List<SpanData>> traceComparator,
-      Consumer<TraceAssert>... assertions) {
-    List<Consumer<TraceAssert>> assertionsList = new ArrayList<>(Arrays.asList(assertions));
-    try {
-      await()
-          .untilAsserted(() -> doAssertTraces(traceComparator, AutoConfiguredDataCapture::getSpans, assertionsList));
-    } catch (Throwable t) {
-      // awaitility is doing a jmx call that is not implemented in GraalVM:
-      // call:
-      // https://github.com/awaitility/awaitility/blob/fbe16add874b4260dd240108304d5c0be84eabc8/awaitility/src/main/java/org/awaitility/core/ConditionAwaiter.java#L157
-      // see https://github.com/oracle/graal/issues/6101 (spring boot graal native image)
-      if (t.getClass().getName().equals("com.oracle.svm.core.jdk.UnsupportedFeatureError")
-          || t instanceof ConditionTimeoutException) {
-        // Don't throw this failure since the stack is the awaitility thread, causing confusion.
-        // Instead, just assert one more time on the test thread, which will fail with a better
-        // stack trace.
-        // TODO(anuraaga): There is probably a better way to do this.
-        doAssertTraces(traceComparator, AutoConfiguredDataCapture::getSpans, assertionsList);
-      } else {
-        throw t;
-      }
-    }
-  }
-
-  private static void doAssertTraces(
-      @Nullable Comparator<List<SpanData>> traceComparator,
-      Supplier<List<SpanData>> supplier,
-      List<Consumer<TraceAssert>> assertionsList) {
-    try {
-      List<List<SpanData>> traces = waitForTraces(supplier, assertionsList.size());
-      TelemetryDataUtil.assertScopeVersion(traces);
-      if (traceComparator != null) {
-        traces.sort(traceComparator);
-      }
-      TracesAssert.assertThat(traces).hasTracesSatisfyingExactly(assertionsList);
-    } catch (InterruptedException | TimeoutException e) {
-      throw new AssertionError("Error waiting for " + assertionsList.size() + " traces", e);
-    }
   }
 }

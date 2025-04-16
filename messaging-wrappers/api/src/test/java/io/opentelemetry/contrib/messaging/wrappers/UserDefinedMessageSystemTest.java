@@ -3,6 +3,7 @@ package io.opentelemetry.contrib.messaging.wrappers;
 import com.google.common.eventbus.EventBus;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
@@ -26,7 +27,6 @@ import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.EVENTBUS
 import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_BODY;
 import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_ID;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_CLIENT_ID;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
@@ -102,7 +102,9 @@ public class UserDefinedMessageSystemTest extends AbstractBaseTest {
                             equalTo(
                                 MESSAGING_MESSAGE_BODY_SIZE,
                                 MESSAGE_BODY.getBytes(StandardCharsets.UTF_8).length),
-                            equalTo(MESSAGING_CLIENT_ID, CLIENT_ID),
+                            // FIXME: We do have "messaging.client_id" in instrumentation but "messaging.client.id" in
+                            //  semconv library right now. It should be replaced after semconv release.
+                            equalTo(AttributeKey.stringKey("messaging.client_id"), CLIENT_ID),
                             equalTo(MESSAGING_OPERATION, "process")),
                 span ->
                     span.hasName("process child")
