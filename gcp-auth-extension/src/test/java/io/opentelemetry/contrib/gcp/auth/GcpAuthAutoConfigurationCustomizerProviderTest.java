@@ -35,6 +35,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterPro
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
@@ -214,26 +215,33 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @ParameterizedTest
   @MethodSource("provideQuotaBehaviorTestCases")
   @SuppressWarnings("CannotMockMethod")
-  public void testQuotaProjectBehavior(QuotaProjectIdTestBehavior testCase) {
+  public void testQuotaProjectBehavior(QuotaProjectIdTestBehavior testCase) throws IOException {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
-    // Configure mock credentials to return fake access token
-    Mockito.when(mockedGoogleCredentials.getAccessToken())
-        .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
 
-    // To prevent unncecessary stubbings, mock getQuotaProjectId only when necessary
-    if (testCase.getUserSpecifiedQuotaProjectId() == null
-        || testCase.getUserSpecifiedQuotaProjectId().isEmpty()) {
-      String quotaProjectFromCredential =
-          testCase.getIsQuotaProjectPresentInCredentials() ? DUMMY_GCP_QUOTA_PROJECT_ID : null;
-      Mockito.when(mockedGoogleCredentials.getQuotaProjectId())
-          .thenReturn(quotaProjectFromCredential);
+    // Prepare request metadata
+    AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
+    ImmutableMap<String, List<String>> mockedRequestMetadata;
+    if (testCase.getIsQuotaProjectPresentInMetadata()) {
+      mockedRequestMetadata =
+          ImmutableMap.of(
+              "Authorization",
+              Collections.singletonList("Bearer " + fakeAccessToken.getTokenValue()),
+              QUOTA_USER_PROJECT_HEADER,
+              Collections.singletonList(DUMMY_GCP_QUOTA_PROJECT_ID));
+    } else {
+      mockedRequestMetadata =
+          ImmutableMap.of(
+              "Authorization",
+              Collections.singletonList("Bearer " + fakeAccessToken.getTokenValue()));
     }
+    // mock credentials to return the prepared request metadata
+    Mockito.when(mockedGoogleCredentials.getRequestMetadata()).thenReturn(mockedRequestMetadata);
 
     // configure environment according to test case
     String quotaProjectId = testCase.getUserSpecifiedQuotaProjectId(); // maybe empty string
-    if (testCase.getUserSpecifiedQuotaProjectId() != null) {
+    if (quotaProjectId != null) {
       // user specified a quota project id
       System.setProperty(
           ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getSystemProperty(), quotaProjectId);
@@ -288,58 +296,62 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
    * indicates the expectation that the QUOTA_USER_PROJECT_HEADER should not be present in the
    * export headers.
    *
-   * <p>{@code true} for {@link QuotaProjectIdTestBehavior#getIsQuotaProjectPresentInCredentials()}
+   * <p>{@code true} for {@link QuotaProjectIdTestBehavior#getIsQuotaProjectPresentInMetadata()}
    * indicates that the mocked credentials are configured to provide DUMMY_GCP_QUOTA_PROJECT_ID as
    * the quota project ID.
    */
   private static Stream<Arguments> provideQuotaBehaviorTestCases() {
     return Stream.of(
+        // If quota project present in metadata, it will be used
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId(DUMMY_GCP_QUOTA_PROJECT_ID)
-                .setIsQuotaProjectPresentInCredentials(true)
-                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
-                .build()),
-        Arguments.of(
-            QuotaProjectIdTestBehavior.builder()
-                .setUserSpecifiedQuotaProjectId(DUMMY_GCP_QUOTA_PROJECT_ID)
-                .setIsQuotaProjectPresentInCredentials(false)
+                .setIsQuotaProjectPresentInMetadata(true)
                 .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
                 .build()),
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId("my-custom-quota-project-id")
-                .setIsQuotaProjectPresentInCredentials(true)
-                .setExpectedQuotaProjectInHeader("my-custom-quota-project-id")
+                .setIsQuotaProjectPresentInMetadata(true)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        // If quota project not present in request metadata, then user specified project is used
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .setIsQuotaProjectPresentInMetadata(false)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
                 .build()),
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId("my-custom-quota-project-id")
-                .setIsQuotaProjectPresentInCredentials(false)
+                .setIsQuotaProjectPresentInMetadata(false)
                 .setExpectedQuotaProjectInHeader("my-custom-quota-project-id")
                 .build()),
+        // Testing for special edge case inputs
+        // user-specified quota project is empty
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId("") // user explicitly specifies empty
-                .setIsQuotaProjectPresentInCredentials(true)
-                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
-                .build()),
-        Arguments.of(
-            QuotaProjectIdTestBehavior.builder()
-                .setUserSpecifiedQuotaProjectId(null) // user omits specifying quota project
-                .setIsQuotaProjectPresentInCredentials(true)
+                .setIsQuotaProjectPresentInMetadata(true)
                 .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
                 .build()),
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId("")
-                .setIsQuotaProjectPresentInCredentials(false)
+                .setIsQuotaProjectPresentInMetadata(false)
                 .setExpectedQuotaProjectInHeader(null)
                 .build()),
         Arguments.of(
             QuotaProjectIdTestBehavior.builder()
+                .setUserSpecifiedQuotaProjectId(null) // user omits specifying quota project
+                .setIsQuotaProjectPresentInMetadata(true)
+                .setExpectedQuotaProjectInHeader(DUMMY_GCP_QUOTA_PROJECT_ID)
+                .build()),
+        Arguments.of(
+            QuotaProjectIdTestBehavior.builder()
                 .setUserSpecifiedQuotaProjectId(null)
-                .setIsQuotaProjectPresentInCredentials(false)
+                .setIsQuotaProjectPresentInMetadata(false)
                 .setExpectedQuotaProjectInHeader(null)
                 .build()));
   }
@@ -367,7 +379,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     @Nullable
     abstract String getUserSpecifiedQuotaProjectId();
 
-    abstract boolean getIsQuotaProjectPresentInCredentials();
+    abstract boolean getIsQuotaProjectPresentInMetadata();
 
     // If expected quota project in header is null, the header entry should not be present in export
     @Nullable
@@ -382,9 +394,15 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     abstract static class Builder {
       abstract Builder setUserSpecifiedQuotaProjectId(String quotaProjectId);
 
-      abstract Builder setIsQuotaProjectPresentInCredentials(
-          boolean quotaProjectPresentInCredentials);
+      abstract Builder setIsQuotaProjectPresentInMetadata(boolean quotaProjectPresentInMetadata);
 
+      /**
+       * Sets the expected quota project header value for the test case. A null value is allowed,
+       * and it indicates that the header should not be present in the export request.
+       *
+       * @param expectedQuotaProjectInHeader the expected header value to match in the export
+       *     headers.
+       */
       abstract Builder setExpectedQuotaProjectInHeader(String expectedQuotaProjectInHeader);
 
       abstract QuotaProjectIdTestBehavior build();
@@ -393,10 +411,18 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   @SuppressWarnings("CannotMockMethod")
   private void prepareMockBehaviorForGoogleCredentials() {
-    Mockito.when(mockedGoogleCredentials.getQuotaProjectId())
-        .thenReturn(DUMMY_GCP_QUOTA_PROJECT_ID);
-    Mockito.when(mockedGoogleCredentials.getAccessToken())
-        .thenReturn(new AccessToken("fake", Date.from(Instant.now())));
+    AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
+    try {
+      Mockito.when(mockedGoogleCredentials.getRequestMetadata())
+          .thenReturn(
+              ImmutableMap.of(
+                  "Authorization",
+                  Collections.singletonList("Bearer " + fakeAccessToken.getTokenValue()),
+                  QUOTA_USER_PROJECT_HEADER,
+                  Collections.singletonList(DUMMY_GCP_QUOTA_PROJECT_ID)));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter) {

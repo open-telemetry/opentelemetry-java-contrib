@@ -20,8 +20,11 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * An AutoConfigurationCustomizerProvider for Google Cloud Platform (GCP) OpenTelemetry (OTLP)
@@ -40,7 +43,7 @@ import java.util.Map;
 public class GcpAuthAutoConfigurationCustomizerProvider
     implements AutoConfigurationCustomizerProvider {
 
-  static final String QUOTA_USER_PROJECT_HEADER = "X-Goog-User-Project";
+  static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
 
   /**
@@ -95,20 +98,36 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static Map<String, String> getRequiredHeaderMap(GoogleCredentials credentials) {
-    Map<String, String> gcpHeaders = new HashMap<>();
+    Map<String, List<String>> gcpHeaders;
     try {
       credentials.refreshIfExpired();
+      gcpHeaders = credentials.getRequestMetadata();
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_REFRESH, e);
     }
-    gcpHeaders.put("Authorization", "Bearer " + credentials.getAccessToken().getTokenValue());
-    String configuredQuotaProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueWithFallback(
-            credentials::getQuotaProjectId);
-    if (configuredQuotaProjectId != null && !configuredQuotaProjectId.isEmpty()) {
-      gcpHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId);
+    // flatten list
+    Map<String, String> flattenedHeaders =
+        gcpHeaders.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry ->
+                        entry.getValue().stream()
+                            .filter(Objects::nonNull) // Filter nulls
+                            .filter(s -> !s.isEmpty()) // Filter empty strings
+                            .collect(Collectors.joining(",")),
+                    (v1, v2) -> v2 // Merge function - take the last seen value
+                    ));
+    // Add quota user project header if not detected by the auth library and user provided it via
+    // system properties.
+    if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
+      Optional<String> maybeConfiguredQuotaProjectId =
+          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional();
+      maybeConfiguredQuotaProjectId.ifPresent(
+          configuredQuotaProjectId ->
+              flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
     }
-    return gcpHeaders;
+    return flattenedHeaders;
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.

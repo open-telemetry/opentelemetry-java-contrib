@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -99,6 +100,22 @@ public enum ConfigurableOption {
       return this.getConfiguredValue();
     } catch (ConfigurationException e) {
       return fallback.get();
+    }
+  }
+
+  /**
+   * Retrieves the value for this option, prioritizing environment variables before system
+   * properties. If neither an environment variable nor a system property is set for this option,
+   * then an empty {@link Optional} is returned.
+   *
+   * @return The configured value for the option, if set, obtained from the environment variable,
+   *     system property, or empty {@link Optional}, in that order of precedence.
+   */
+  Optional<String> getConfiguredValueAsOptional() {
+    try {
+      return Optional.of(this.getConfiguredValue());
+    } catch (ConfigurationException e) {
+      return Optional.empty();
     }
   }
 }
