@@ -1,4 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers;
+
+import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
@@ -12,11 +19,8 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
-
-import javax.annotation.Nullable;
 import java.util.List;
-
-import static io.opentelemetry.api.trace.SpanKind.CONSUMER;
+import javax.annotation.Nullable;
 
 public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
 
@@ -35,11 +39,13 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
   // no attributes need to be extracted from responses in process operations
   private final List<AttributesExtractor<REQUEST, Void>> attributesExtractors;
 
-  public static <REQUEST extends MessagingProcessRequest> DefaultMessagingProcessWrapperBuilder<REQUEST> defaultBuilder() {
+  public static <REQUEST extends MessagingProcessRequest>
+      DefaultMessagingProcessWrapperBuilder<REQUEST> defaultBuilder() {
     return new DefaultMessagingProcessWrapperBuilder<>();
   }
 
-  public <E extends Throwable> void doProcess(REQUEST request, ThrowingRunnable<E> runnable) throws E {
+  public <E extends Throwable> void doProcess(REQUEST request, ThrowingRunnable<E> runnable)
+      throws E {
     Span span = handleStart(request);
 
     try (Scope scope = span.makeCurrent()) {
@@ -52,7 +58,8 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
     handleEnd(span, request, null);
   }
 
-  public <R, E extends Throwable> R doProcess(REQUEST request, ThrowingSupplier<R, E> supplier) throws E {
+  public <R, E extends Throwable> R doProcess(REQUEST request, ThrowingSupplier<R, E> supplier)
+      throws E {
     Span span = handleStart(request);
 
     R result = null;
@@ -68,7 +75,8 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
   }
 
   protected Span handleStart(REQUEST request) {
-    Context context = this.textMapPropagator.extract(Context.current(), request, this.textMapGetter);
+    Context context =
+        this.textMapPropagator.extract(Context.current(), request, this.textMapGetter);
     SpanBuilder spanBuilder = this.tracer.spanBuilder(getDefaultSpanName(request.getDestination()));
     spanBuilder.setSpanKind(CONSUMER).setParent(context);
 
@@ -94,9 +102,10 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
     return OPERATION_NAME + " " + destination;
   }
 
-  protected MessagingProcessWrapper(OpenTelemetry openTelemetry,
-                          TextMapGetter<REQUEST> textMapGetter,
-                          List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
+  protected MessagingProcessWrapper(
+      OpenTelemetry openTelemetry,
+      TextMapGetter<REQUEST> textMapGetter,
+      List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
     this.textMapPropagator = openTelemetry.getPropagators().getTextMapPropagator();
     this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE, INSTRUMENTATION_VERSION);
     this.textMapGetter = textMapGetter;

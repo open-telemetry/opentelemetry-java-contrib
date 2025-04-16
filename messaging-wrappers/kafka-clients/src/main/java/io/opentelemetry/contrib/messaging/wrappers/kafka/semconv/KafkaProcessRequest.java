@@ -1,30 +1,34 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.kafka.semconv;
 
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class KafkaProcessRequest implements MessagingProcessRequest {
 
   private final ConsumerRecord<?, ?> consumerRecord;
 
-  @Nullable
-  private final String clientId;
+  @Nullable private final String clientId;
 
-  @Nullable
-  private final String consumerGroup;
+  @Nullable private final String consumerGroup;
 
   public static KafkaProcessRequest of(ConsumerRecord<?, ?> consumerRecord) {
     return of(consumerRecord, null, null);
   }
 
-  public static KafkaProcessRequest of(ConsumerRecord<?, ?> consumerRecord,
-      @Nullable String consumerGroup, @Nullable String clientId) {
+  public static KafkaProcessRequest of(
+      ConsumerRecord<?, ?> consumerRecord,
+      @Nullable String consumerGroup,
+      @Nullable String clientId) {
     return new KafkaProcessRequest(consumerRecord, consumerGroup, clientId);
   }
 
@@ -108,8 +112,10 @@ public class KafkaProcessRequest implements MessagingProcessRequest {
     return consumerRecord;
   }
 
-  private KafkaProcessRequest(ConsumerRecord<?, ?> consumerRecord,
-      @Nullable String consumerGroup, @Nullable String clientId) {
+  private KafkaProcessRequest(
+      ConsumerRecord<?, ?> consumerRecord,
+      @Nullable String consumerGroup,
+      @Nullable String clientId) {
     this.consumerRecord = consumerRecord;
     this.consumerGroup = consumerGroup;
     this.clientId = clientId;

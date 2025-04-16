@@ -1,9 +1,14 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.kafka.internal;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
-import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;

@@ -1,14 +1,20 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.semconv;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
 import static java.util.Collections.emptyList;
+
+import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * An interface to expose messaging properties for the pre-defined process wrapper.
  *
- * <p>Inspired from <a href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation-api-incubator/src/main/java/io/opentelemetry/instrumentation/api/incubator/semconv/messaging/MessagingAttributesGetter.java>MessagingAttributesGetter</a>.
+ * <p>Inspired from <a
+ * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation-api-incubator/src/main/java/io/opentelemetry/instrumentation/api/incubator/semconv/messaging/MessagingAttributesGetter.java>MessagingAttributesGetter</a>.
  */
 public interface MessagingProcessRequest {
 

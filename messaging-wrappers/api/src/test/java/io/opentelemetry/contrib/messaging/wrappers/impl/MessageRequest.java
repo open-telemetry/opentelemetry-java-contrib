@@ -1,29 +1,31 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.impl;
 
 import io.opentelemetry.contrib.messaging.wrappers.model.Message;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
-
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class MessageRequest implements MessagingProcessRequest {
 
   private final Message message;
 
-  @Nullable
-  private final String clientId;
+  @Nullable private final String clientId;
 
-  @Nullable
-  private final String eventBusName;
+  @Nullable private final String eventBusName;
 
   public static MessageRequest of(Message message) {
     return of(message, null, null);
   }
 
-  public static MessageRequest of(Message message,
-                                  @Nullable String clientId, @Nullable String eventBusName) {
+  public static MessageRequest of(
+      Message message, @Nullable String clientId, @Nullable String eventBusName) {
     return new MessageRequest(message, clientId, eventBusName);
   }
 
@@ -93,7 +95,8 @@ public class MessageRequest implements MessagingProcessRequest {
     return message;
   }
 
-  private MessageRequest(Message message, @Nullable String clientId, @Nullable String eventBusName) {
+  private MessageRequest(
+      Message message, @Nullable String clientId, @Nullable String eventBusName) {
     this.message = message;
     this.clientId = clientId;
     this.eventBusName = eventBusName;

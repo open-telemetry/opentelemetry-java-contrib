@@ -1,5 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.kafka;
 
+import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,8 +15,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -34,8 +38,9 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * Copied from <a href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-0.11/testing/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaClientBaseTest.java>KafkaClientBaseTest</a>.
- * */
+ * Copied from <a
+ * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-0.11/testing/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaClientBaseTest.java>KafkaClientBaseTest</a>.
+ */
 @SuppressWarnings("OtelInternalJavadoc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class KafkaClientBaseTest extends AbstractBaseTest {

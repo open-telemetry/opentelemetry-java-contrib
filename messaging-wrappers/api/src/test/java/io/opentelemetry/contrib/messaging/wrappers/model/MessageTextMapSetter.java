@@ -1,7 +1,11 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.model;
 
 import io.opentelemetry.context.propagation.TextMapSetter;
-
 import javax.annotation.Nullable;
 
 public class MessageTextMapSetter implements TextMapSetter<Message> {

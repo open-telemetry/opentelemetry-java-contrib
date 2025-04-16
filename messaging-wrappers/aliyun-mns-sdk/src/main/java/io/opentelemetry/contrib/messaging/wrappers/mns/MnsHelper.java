@@ -1,17 +1,26 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.mns;
 
 import com.aliyun.mns.model.BaseMessage;
 import com.aliyun.mns.model.MessagePropertyValue;
 import com.aliyun.mns.model.MessageSystemPropertyName;
 import com.aliyun.mns.model.MessageSystemPropertyValue;
-import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MNSProcessRequest;
+import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MnsProcessRequest;
 
-public final class MNSHelper {
+import javax.annotation.Nullable;
 
-  public static <REQUEST extends MNSProcessRequest> MNSProcessWrapperBuilder<REQUEST> processWrapperBuilder() {
-    return new MNSProcessWrapperBuilder<>();
+public final class MnsHelper {
+
+  public static <REQUEST extends MnsProcessRequest>
+      MnsProcessWrapperBuilder<REQUEST> processWrapperBuilder() {
+    return new MnsProcessWrapperBuilder<>();
   }
 
+  @Nullable
   public static String getMessageHeader(BaseMessage message, String name) {
     MessageSystemPropertyName key = convert2SystemPropertyName(name);
     if (key != null) {
@@ -27,9 +36,8 @@ public final class MNSHelper {
     return null;
   }
 
-  /**
-   * see {@link MessageSystemPropertyName}
-   * */
+  /** see {@link MessageSystemPropertyName} */
+  @Nullable
   public static MessageSystemPropertyName convert2SystemPropertyName(String name) {
     if (name == null) {
       return null;
@@ -43,6 +51,5 @@ public final class MNSHelper {
     return null;
   }
 
-  private MNSHelper() {
-  }
+  private MnsHelper() {}
 }

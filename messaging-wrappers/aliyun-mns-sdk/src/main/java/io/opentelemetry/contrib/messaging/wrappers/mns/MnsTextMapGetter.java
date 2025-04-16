@@ -1,21 +1,28 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.mns;
 
 import static java.util.Collections.emptyList;
 
-import com.aliyun.mns.model.*;
+import com.aliyun.mns.model.Message;
+import com.aliyun.mns.model.MessagePropertyValue;
+import com.aliyun.mns.model.MessageSystemPropertyName;
+import com.aliyun.mns.model.MessageSystemPropertyValue;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MNSProcessRequest;
-
-import javax.annotation.Nullable;
+import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MnsProcessRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
-public class MNSTextMapGetter<REQUEST extends MNSProcessRequest> implements TextMapGetter<REQUEST> {
+public class MnsTextMapGetter<REQUEST extends MnsProcessRequest> implements TextMapGetter<REQUEST> {
 
-  public static <REQUEST extends MNSProcessRequest> TextMapGetter<REQUEST> create() {
-    return new MNSTextMapGetter<>();
+  public static <REQUEST extends MnsProcessRequest> TextMapGetter<REQUEST> create() {
+    return new MnsTextMapGetter<>();
   }
 
   @Override
@@ -39,6 +46,7 @@ public class MNSTextMapGetter<REQUEST extends MNSProcessRequest> implements Text
     return keys;
   }
 
+  @Nullable
   @Override
   public String get(@Nullable REQUEST carrier, String key) {
     if (carrier == null || carrier.getMessage() == null) {
@@ -47,7 +55,7 @@ public class MNSTextMapGetter<REQUEST extends MNSProcessRequest> implements Text
     Message message = carrier.getMessage();
 
     // the system property should always take precedence over the user property
-    MessageSystemPropertyName systemPropertyName = MNSHelper.convert2SystemPropertyName(key);
+    MessageSystemPropertyName systemPropertyName = MnsHelper.convert2SystemPropertyName(key);
     if (systemPropertyName != null) {
       MessageSystemPropertyValue value = message.getSystemProperty(systemPropertyName);
       if (value != null) {
@@ -66,6 +74,5 @@ public class MNSTextMapGetter<REQUEST extends MNSProcessRequest> implements Text
     return null;
   }
 
-  private MNSTextMapGetter() {
-  }
+  private MnsTextMapGetter() {}
 }

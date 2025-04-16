@@ -1,17 +1,22 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.kafka.semconv;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
+import java.nio.ByteBuffer;
+import javax.annotation.Nullable;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import javax.annotation.Nullable;
-import java.nio.ByteBuffer;
-
 /**
- * Copied from <a href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-common-0.11/library/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaConsumerAttributesExtractor.java>KafkaConsumerAttributesExtractor</a>.
- * */
+ * Copied from <a
+ * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-common-0.11/library/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaConsumerAttributesExtractor.java>KafkaConsumerAttributesExtractor</a>.
+ */
 public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcessRequest>
     implements AttributesExtractor<REQUEST, Void> {
 
@@ -32,8 +37,7 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
   }
 
   @Override
-  public void onStart(
-      AttributesBuilder attributes, Context parentContext, REQUEST request) {
+  public void onStart(AttributesBuilder attributes, Context parentContext, REQUEST request) {
 
     ConsumerRecord<?, ?> record = request.getRecord();
 

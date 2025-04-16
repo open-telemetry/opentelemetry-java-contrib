@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.testing.internal;
 
 import com.google.auto.service.AutoService;
@@ -7,7 +12,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvide
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-
 import java.util.List;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)

@@ -1,26 +1,29 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.mns.semconv;
 
 import com.aliyun.mns.model.Message;
-import io.opentelemetry.contrib.messaging.wrappers.mns.MNSHelper;
+import io.opentelemetry.contrib.messaging.wrappers.mns.MnsHelper;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
-
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 
-public class MNSProcessRequest implements MessagingProcessRequest {
+public class MnsProcessRequest implements MessagingProcessRequest {
 
   private final Message message;
 
-  @Nullable
-  private final String destination;
+  @Nullable private final String destination;
 
-  public static MNSProcessRequest of(Message message) {
+  public static MnsProcessRequest of(Message message) {
     return of(message, null);
   }
 
-  public static MNSProcessRequest of(Message message, @Nullable String destination) {
-    return new MNSProcessRequest(message, destination);
+  public static MnsProcessRequest of(Message message, @Nullable String destination) {
+    return new MnsProcessRequest(message, destination);
   }
 
   @Override
@@ -76,7 +79,7 @@ public class MNSProcessRequest implements MessagingProcessRequest {
 
   @Override
   public List<String> getMessageHeader(String name) {
-    String header = MNSHelper.getMessageHeader(message, name);
+    String header = MnsHelper.getMessageHeader(message, name);
     if (header == null) {
       return Collections.emptyList();
     }
@@ -87,7 +90,7 @@ public class MNSProcessRequest implements MessagingProcessRequest {
     return message;
   }
 
-  private MNSProcessRequest(Message message, @Nullable String destination) {
+  private MnsProcessRequest(Message message, @Nullable String destination) {
     this.message = message;
     this.destination = destination;
   }

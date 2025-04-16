@@ -1,9 +1,13 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers.impl;
 
 import io.opentelemetry.context.propagation.TextMapGetter;
-
-import javax.annotation.Nullable;
 import java.util.Collections;
+import javax.annotation.Nullable;
 
 public class MessageTextMapGetter implements TextMapGetter<MessageRequest> {
 

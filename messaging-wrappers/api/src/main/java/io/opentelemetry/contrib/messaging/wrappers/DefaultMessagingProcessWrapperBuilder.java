@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.messaging.wrappers;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -9,19 +14,16 @@ import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessReque
 import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessageOperation;
 import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessagingAttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class DefaultMessagingProcessWrapperBuilder<REQUEST extends MessagingProcessRequest> {
 
-  @Nullable
-  private OpenTelemetry openTelemetry;
+  @Nullable private OpenTelemetry openTelemetry;
 
-  @Nullable
-  protected TextMapGetter<REQUEST> textMapGetter;
+  @Nullable protected TextMapGetter<REQUEST> textMapGetter;
 
   @CanIgnoreReturnValue
   public DefaultMessagingProcessWrapperBuilder<REQUEST> openTelemetry(OpenTelemetry openTelemetry) {
@@ -32,15 +34,18 @@ public class DefaultMessagingProcessWrapperBuilder<REQUEST extends MessagingProc
   protected List<AttributesExtractor<REQUEST, Void>> attributesExtractors;
 
   @CanIgnoreReturnValue
-  public DefaultMessagingProcessWrapperBuilder<REQUEST> textMapGetter(TextMapGetter<REQUEST> textMapGetter) {
+  public DefaultMessagingProcessWrapperBuilder<REQUEST> textMapGetter(
+      TextMapGetter<REQUEST> textMapGetter) {
     this.textMapGetter = textMapGetter;
     return this;
   }
 
   /**
    * This method overrides the original items.
-   * <p>See {@link DefaultMessagingProcessWrapperBuilder#addAttributesExtractor} if you just want to append one.</p>
-   * */
+   *
+   * <p>See {@link DefaultMessagingProcessWrapperBuilder#addAttributesExtractor} if you just want to
+   * append one.
+   */
   @CanIgnoreReturnValue
   public DefaultMessagingProcessWrapperBuilder<REQUEST> attributesExtractors(
       Collection<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
@@ -73,7 +78,8 @@ public class DefaultMessagingProcessWrapperBuilder<REQUEST extends MessagingProc
   protected DefaultMessagingProcessWrapperBuilder() {
     // init attributes extractors by default
     this.attributesExtractors = new ArrayList<>();
-    this.attributesExtractors.add(MessagingAttributesExtractor.create(
+    this.attributesExtractors.add(
+        MessagingAttributesExtractor.create(
             DefaultMessagingAttributesGetter.create(), MessageOperation.PROCESS));
   }
 }
