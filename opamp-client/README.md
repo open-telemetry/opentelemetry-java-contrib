@@ -6,5 +6,6 @@ client [spec](https://github.com/open-telemetry/opamp-spec/blob/main/specificati
 ## Component owners
 
 - [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+- [Jack Shirazi](https://github.com/jackshirazi), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
