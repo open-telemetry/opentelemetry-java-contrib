@@ -103,7 +103,7 @@ tasks.register<Copy>("copyAgent") {
   })
 }
 
-tasks.register<Test>("IntegrationTest") {
+tasks.register<Test>("IntegrationTestUserCreds") {
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 
@@ -111,7 +111,35 @@ tasks.register<Test>("IntegrationTest") {
   // include only the integration test file
   include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
 
-  val fakeCredsFilePath = project.file("src/test/resources/fakecreds.json").absolutePath
+  val fakeCredsFilePath = project.file("src/test/resources/fake_user_creds.json").absolutePath
+
+  environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
+  environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
+  jvmArgs = listOf(
+    "-javaagent:$javaAgentJarPath",
+    "-Dotel.javaagent.extensions=$authExtensionJarPath",
+    "-Dgoogle.cloud.project=my-gcp-project",
+    "-Dotel.java.global-autoconfigure.enabled=true",
+    "-Dotel.exporter.otlp.endpoint=http://localhost:4318",
+    "-Dotel.resource.providers.gcp.enabled=true",
+    "-Dotel.traces.exporter=otlp",
+    "-Dotel.bsp.schedule.delay=2000",
+    "-Dotel.metrics.exporter=none",
+    "-Dotel.logs.exporter=none",
+    "-Dotel.exporter.otlp.protocol=http/protobuf",
+    "-Dmockserver.logLevel=off"
+  )
+}
+
+tasks.register<Test>("IntegrationTestServiceAccountCreds") {
+  dependsOn(tasks.shadowJar)
+  dependsOn(tasks.named("copyAgent"))
+
+  useJUnitPlatform()
+  // include only the integration test file
+  include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
+
+  val fakeCredsFilePath = project.file("src/test/resources/fake_service_account_creds.json").absolutePath
 
   environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
   environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
