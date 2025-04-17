@@ -100,7 +100,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   private static Map<String, String> getRequiredHeaderMap(GoogleCredentials credentials) {
     Map<String, List<String>> gcpHeaders;
     try {
-      credentials.refreshIfExpired();
+      // this also refreshes the credentials, if required
       gcpHeaders = credentials.getRequestMetadata();
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_REFRESH, e);
