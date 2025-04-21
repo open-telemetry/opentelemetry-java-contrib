@@ -49,7 +49,6 @@ tasks {
         disable("UnnecessarilyFullyQualified")
 
         // TODO (trask) use animal sniffer
-        disable("Java7ApiChecker")
         disable("Java8ApiChecker")
         disable("AndroidJdkLibsChecker")
 
@@ -79,8 +78,8 @@ tasks {
         // cognitive load is dubious.
         disable("YodaCondition")
 
-        // We get this warning in modules that compile for old java versions
-        disable("StringConcatToTextBlock")
+        // Requires adding compile dependency to JSpecify
+        disable("AddNullMarkedToPackageInfo")
 
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names
