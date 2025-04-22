@@ -115,9 +115,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
                         entry.getValue().stream()
                             .filter(Objects::nonNull) // Filter nulls
                             .filter(s -> !s.isEmpty()) // Filter empty strings
-                            .collect(Collectors.joining(",")),
-                    (v1, v2) -> v2 // Merge function - take the last seen value
-                    ));
+                            .collect(Collectors.joining(","))));
     // Add quota user project header if not detected by the auth library and user provided it via
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
