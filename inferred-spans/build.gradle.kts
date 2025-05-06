@@ -42,4 +42,8 @@ tasks {
       }
     }
   }
+
+  withType<Test>().configureEach {
+    jvmArgs("-Djava.util.logging.config.file=${project.projectDir.resolve("src/test/resources/logging.properties")}")
+  }
 }
