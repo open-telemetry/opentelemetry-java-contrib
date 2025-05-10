@@ -17,12 +17,9 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandler;
 import io.opentelemetry.maven.handler.MojoGoalExecutionHandlerConfiguration;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
@@ -337,20 +334,5 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   public void sessionEnded(ExecutionEvent event) {
     logger.debug("OpenTelemetry: Maven session ended, end root span");
     spanRegistry.removeRootSpan().end();
-  }
-
-  private static class ToUpperCaseTextMapGetter implements TextMapGetter<Map<String, String>> {
-    @Override
-    public Iterable<String> keys(Map<String, String> environmentVariables) {
-      return environmentVariables.keySet();
-    }
-
-    @Override
-    @Nullable
-    public String get(@Nullable Map<String, String> environmentVariables, @Nonnull String key) {
-      return environmentVariables == null
-          ? null
-          : environmentVariables.get(key.toUpperCase(Locale.ROOT));
-    }
   }
 }

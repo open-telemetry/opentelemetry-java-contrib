@@ -36,6 +36,7 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.build.repository.id");
   public static final AttributeKey<String> MAVEN_BUILD_REPOSITORY_URL =
       stringKey("maven.build.repository.url");
+
   public static final AttributeKey<String> MAVEN_EXECUTION_GOAL = stringKey("maven.execution.goal");
 
   public static final AttributeKey<String> MAVEN_EXECUTION_ID = stringKey("maven.execution.id");
@@ -52,6 +53,12 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.project.groupId");
   public static final AttributeKey<String> MAVEN_PROJECT_VERSION =
       stringKey("maven.project.version");
+  public static final AttributeKey<String> MAVEN_TRANSFER_URL =
+      AttributeKey.stringKey("maven.transfer.url");
+  public static final AttributeKey<String> MAVEN_TRANSFER_TYPE =
+      AttributeKey.stringKey("maven.transfer.type");
+  public static final AttributeKey<String> MAVEN_TRANSFER_SIZE =
+      AttributeKey.stringKey("maven.transfer.size");
 
   public static final String SERVICE_NAME_VALUE = "maven";
 
