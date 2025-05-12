@@ -41,7 +41,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
   private final OpenTelemetrySdkService openTelemetrySdkService;
 
-  private final Map<String, Optional<URI>> repositoryURIs = new ConcurrentHashMap<>();
+  private final Map<String, Optional<URI>> repositoryUriMapping = new ConcurrentHashMap<>();
 
   OtelTransferListener(SpanRegistry spanRegistry, OpenTelemetrySdkService openTelemetrySdkService) {
     this.spanRegistry = spanRegistry;
@@ -87,7 +87,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
             .setAttribute(
                 MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE, event.getRequestType().name());
 
-    repositoryURIs
+    repositoryUriMapping
         .computeIfAbsent(
             event.getResource().getRepositoryUrl(),
             str -> {
@@ -104,8 +104,8 @@ public final class OtelTransferListener extends AbstractTransferListener {
                 spanBuilder.setAttribute(ServerAttributes.SERVER_PORT, uri.getPort());
               }
               // prevent ever increasing size
-              if (repositoryURIs.size() > 128) {
-                repositoryURIs.clear();
+              if (repositoryUriMapping.size() > 128) {
+                repositoryUriMapping.clear();
               }
             });
     spanRegistry.putSpan(spanBuilder.startSpan(), event);
