@@ -54,7 +54,7 @@ public final class OpenTelemetrySdkService implements Closeable {
   private boolean disposed;
 
   public OpenTelemetrySdkService() {
-    logger.debug(
+    logger.info(
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
