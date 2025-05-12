@@ -48,7 +48,6 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
     // comment of afterProjectsRead()
     if (openTelemetrySdkService.isTransferInstrumentationEnabled()) {
       registerTransferListener(session);
-      otelTransferListener.startTransferRoot();
     }
   }
 
@@ -59,9 +58,6 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
    */
   @Override
   public void afterProjectsRead(MavenSession session) {
-    if (openTelemetrySdkService.isTransferInstrumentationEnabled()) {
-      otelTransferListener.endTransferRoot();
-    }
     registerExecutionListener(session);
   }
 

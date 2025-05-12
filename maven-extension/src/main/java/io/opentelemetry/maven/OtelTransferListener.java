@@ -9,15 +9,19 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
-import java.util.Locale;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.ServerAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
+import io.opentelemetry.semconv.incubating.HttpIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.UrlIncubatingAttributes;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.transfer.AbstractTransferListener;
 import org.eclipse.aether.transfer.TransferEvent;
-import org.eclipse.aether.transfer.TransferResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,62 +44,67 @@ public final class OtelTransferListener extends AbstractTransferListener {
     this.openTelemetrySdkService = openTelemetrySdkService;
   }
 
-  /**
-   * Starts a span to collect transfers that occur before regular execution spans can serve as
-   * parents.
-   */
-  public void startTransferRoot() {
-    io.opentelemetry.context.Context context =
-        openTelemetrySdkService
-            .getPropagators()
-            .getTextMapPropagator()
-            .extract(
-                io.opentelemetry.context.Context.current(),
-                System.getenv(),
-                new ToUpperCaseTextMapGetter());
-
-    // TODO question: is this the root span name we want?
-    String spanName = "Transfer: global";
-    logger.debug("OpenTelemetry: Start span: {}", spanName);
-    Span transferSpan =
-        this.openTelemetrySdkService
-            .getTracer()
-            .spanBuilder(spanName)
-            .setParent(context)
-            .setSpanKind(SpanKind.SERVER)
-            .startSpan();
-    spanRegistry.setRootSpan(transferSpan);
-  }
-
-  /** Ends the root span. */
-  public void endTransferRoot() {
-    spanRegistry.getRootSpanNotNull().end();
-  }
-
   @Override
   public void transferInitiated(TransferEvent event) {
-    ResourceInformation info = createResourceInformation(event);
+    logger.info("OpenTelemetry: OtelTransferListener#transferInitiated({})", event);
 
-    logger.debug("OpenTelemetry: Maven transfer initiated: span {}:{}", info.type, info.url);
+    String httpRequestMethod;
+    switch (event.getRequestType()) {
+      case PUT:
+        httpRequestMethod = "PUT";
+        break;
+      case GET:
+        httpRequestMethod = "GET";
+        break;
+      case GET_EXISTENCE:
+        httpRequestMethod = "HEAD";
+        break;
+      default:
+        logger.warn("OpenTelemetry: Unknown request type {}", event.getRequestType());
+        httpRequestMethod = event.getRequestType().name();
+    }
+
+    String urlTemplate = event.getResource().getRepositoryUrl()
+        + "$groupId/$version/$artifactId-$version.$classifier";
+
+    String spanName = httpRequestMethod + " " + urlTemplate;
 
     SpanBuilder spanBuilder =
         this.openTelemetrySdkService
             .getTracer()
-            .spanBuilder(info.type + ":" + info.url)
-            .setParent(
-                Context.current()
-                    .with(Span.wrap(spanRegistry.getRootSpanNotNull().getSpanContext())))
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_TRANSFER_URL, info.url)
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE, info.type);
+            .spanBuilder(spanName)
+            .setSpanKind(SpanKind.CLIENT)
+            .setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, httpRequestMethod)
+            .setAttribute(UrlAttributes.URL_PATH,
+                event.getResource().getRepositoryUrl() + event.getResource().getResourceName())
+            .setAttribute(UrlIncubatingAttributes.URL_TEMPLATE, urlTemplate)
+            .setAttribute(MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE,
+                event.getRequestType().name());
 
+    // TODO keep in cache the repositoryUrl parsing
+    Optional.ofNullable(event.getResource().getRepositoryUrl())
+        .filter(url -> !url.isEmpty())
+        .map(str -> {
+          try {
+            return new URI(str);
+          } catch (URISyntaxException e) {
+            return null;
+          }
+        })
+        .ifPresent(
+            uri -> {
+              spanBuilder
+                  .setAttribute(ServerAttributes.SERVER_ADDRESS, uri.getHost());
+              if (uri.getPort() != -1) {
+                spanBuilder.setAttribute(ServerAttributes.SERVER_PORT, uri.getPort());
+              }
+            });
     spanRegistry.putSpan(spanBuilder.startSpan(), event);
   }
 
   @Override
   public void transferSucceeded(TransferEvent event) {
-    ResourceInformation info = createResourceInformation(event);
-
-    logger.debug("OpenTelemetry: Maven transfer succeeded: span {}:{}", info.type, info.url);
+    logger.info("OpenTelemetry: OtelTransferListener#transferSucceeded({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event))
         .ifPresent(
@@ -107,26 +116,32 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
   @Override
   public void transferFailed(TransferEvent event) {
-    ResourceInformation info = createResourceInformation(event);
+    logger.info("OpenTelemetry: OtelTransferListener#transferFailed({})", event);
 
-    logger.debug("OpenTelemetry: Maven transfer failed: span {}:{}", info.type, info.url);
+    Optional.ofNullable(spanRegistry.removeSpan(event))
+        .ifPresent(span -> fail(span, event));
 
-    Optional.ofNullable(spanRegistry.removeSpan(event)).ifPresent(span -> fail(span, event));
   }
 
   @Override
   public void transferCorrupted(TransferEvent event) {
-    ResourceInformation info = createResourceInformation(event);
-
-    logger.debug("OpenTelemetry: Maven transfer corrupted: span {}:{}", info.type, info.url);
+    logger.info("OpenTelemetry: OtelTransferListener#transferCorrupted({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event)).ifPresent(span -> fail(span, event));
   }
 
   void finish(Span span, TransferEvent event) {
-    span.setAttribute(
-        MavenOtelSemanticAttributes.MAVEN_TRANSFER_SIZE,
-        Long.toString(event.getTransferredBytes()));
+    switch (event.getRequestType()) {
+      case PUT:
+        span.setAttribute(HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE,
+            event.getTransferredBytes());
+        break;
+      case GET:
+      case GET_EXISTENCE:
+        span.setAttribute(HttpIncubatingAttributes.HTTP_RESPONSE_BODY_SIZE,
+            event.getTransferredBytes());
+        break;
+    }
     span.end();
   }
 
@@ -137,20 +152,4 @@ public final class OtelTransferListener extends AbstractTransferListener {
     finish(span, event);
   }
 
-  ResourceInformation createResourceInformation(TransferEvent event) {
-    TransferResource resource = event.getResource();
-    return new ResourceInformation(
-        resource.getRepositoryUrl() + resource.getResourceName(),
-        event.getRequestType().toString().toLowerCase(Locale.ROOT));
-  }
-
-  private static class ResourceInformation {
-    protected final String url;
-    protected final String type;
-
-    ResourceInformation(String url, String type) {
-      this.url = url;
-      this.type = type;
-    }
-  }
 }
