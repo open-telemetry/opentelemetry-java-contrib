@@ -92,7 +92,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
             event.getResource().getRepositoryUrl(),
             str -> {
               try {
-                return str.isBlank() ? Optional.empty() : Optional.of(new URI(str));
+                return str.isEmpty() ? Optional.empty() : Optional.of(new URI(str));
               } catch (URISyntaxException e) {
                 return Optional.empty();
               }
