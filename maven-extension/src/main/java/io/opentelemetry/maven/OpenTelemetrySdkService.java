@@ -80,7 +80,7 @@ public final class OpenTelemetrySdkService implements Closeable {
         configProperties.getBoolean("otel.instrumentation.maven.mojo.enabled", true);
     // TODO maybe default would be false
     this.transferInstrumentationEnabled =
-        configProperties.getBoolean("otel.instrumentation.maven.transfer.enabled", true);
+        configProperties.getBoolean("otel.instrumentation.maven.transfer.enabled", false);
 
     this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
   }
