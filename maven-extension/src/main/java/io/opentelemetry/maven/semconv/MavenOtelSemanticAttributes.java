@@ -10,8 +10,8 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.maven.OpenTelemetrySdkService;
-import org.eclipse.aether.transfer.TransferEvent;
 import java.util.List;
+import org.eclipse.aether.transfer.TransferEvent;
 
 /**
  * Semantic attributes for Maven executions.
@@ -54,9 +54,8 @@ public class MavenOtelSemanticAttributes {
       stringKey("maven.project.groupId");
   public static final AttributeKey<String> MAVEN_PROJECT_VERSION =
       stringKey("maven.project.version");
-  /**
-   * See {@link TransferEvent.RequestType}.
-   */
+
+  /** See {@link TransferEvent.RequestType}. */
   public static final AttributeKey<String> MAVEN_TRANSFER_TYPE =
       AttributeKey.stringKey("maven.transfer.type");
 

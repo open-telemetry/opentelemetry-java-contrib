@@ -17,7 +17,9 @@ import io.opentelemetry.semconv.incubating.HttpIncubatingAttributes;
 import io.opentelemetry.semconv.incubating.UrlIncubatingAttributes;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.transfer.AbstractTransferListener;
@@ -38,6 +40,8 @@ public final class OtelTransferListener extends AbstractTransferListener {
   private final SpanRegistry spanRegistry;
 
   private final OpenTelemetrySdkService openTelemetrySdkService;
+
+  private final Map<String, Optional<URI>> repositoryURIs = new ConcurrentHashMap<>();
 
   OtelTransferListener(SpanRegistry spanRegistry, OpenTelemetrySdkService openTelemetrySdkService) {
     this.spanRegistry = spanRegistry;
@@ -64,8 +68,9 @@ public final class OtelTransferListener extends AbstractTransferListener {
         httpRequestMethod = event.getRequestType().name();
     }
 
-    String urlTemplate = event.getResource().getRepositoryUrl()
-        + "$groupId/$version/$artifactId-$version.$classifier";
+    String urlTemplate =
+        event.getResource().getRepositoryUrl()
+            + "$groupId/$artifactId/$version/$artifactId-$version.$classifier";
 
     String spanName = httpRequestMethod + " " + urlTemplate;
 
@@ -75,28 +80,32 @@ public final class OtelTransferListener extends AbstractTransferListener {
             .spanBuilder(spanName)
             .setSpanKind(SpanKind.CLIENT)
             .setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, httpRequestMethod)
-            .setAttribute(UrlAttributes.URL_PATH,
+            .setAttribute(
+                UrlAttributes.URL_PATH,
                 event.getResource().getRepositoryUrl() + event.getResource().getResourceName())
             .setAttribute(UrlIncubatingAttributes.URL_TEMPLATE, urlTemplate)
-            .setAttribute(MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE,
-                event.getRequestType().name());
+            .setAttribute(
+                MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE, event.getRequestType().name());
 
-    // TODO keep in cache the repositoryUrl parsing
-    Optional.ofNullable(event.getResource().getRepositoryUrl())
-        .filter(url -> !url.isEmpty())
-        .map(str -> {
-          try {
-            return new URI(str);
-          } catch (URISyntaxException e) {
-            return null;
-          }
-        })
+    repositoryURIs
+        .computeIfAbsent(
+            event.getResource().getRepositoryUrl(),
+            str -> {
+              try {
+                return str.isBlank() ? Optional.empty() : Optional.of(new URI(str));
+              } catch (URISyntaxException e) {
+                return Optional.empty();
+              }
+            })
         .ifPresent(
             uri -> {
-              spanBuilder
-                  .setAttribute(ServerAttributes.SERVER_ADDRESS, uri.getHost());
+              spanBuilder.setAttribute(ServerAttributes.SERVER_ADDRESS, uri.getHost());
               if (uri.getPort() != -1) {
                 spanBuilder.setAttribute(ServerAttributes.SERVER_PORT, uri.getPort());
+              }
+              // prevent ever increasing size
+              if (repositoryURIs.size() > 128) {
+                repositoryURIs.clear();
               }
             });
     spanRegistry.putSpan(spanBuilder.startSpan(), event);
@@ -118,9 +127,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
   public void transferFailed(TransferEvent event) {
     logger.info("OpenTelemetry: OtelTransferListener#transferFailed({})", event);
 
-    Optional.ofNullable(spanRegistry.removeSpan(event))
-        .ifPresent(span -> fail(span, event));
-
+    Optional.ofNullable(spanRegistry.removeSpan(event)).ifPresent(span -> fail(span, event));
   }
 
   @Override
@@ -133,13 +140,13 @@ public final class OtelTransferListener extends AbstractTransferListener {
   void finish(Span span, TransferEvent event) {
     switch (event.getRequestType()) {
       case PUT:
-        span.setAttribute(HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE,
-            event.getTransferredBytes());
+        span.setAttribute(
+            HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE, event.getTransferredBytes());
         break;
       case GET:
       case GET_EXISTENCE:
-        span.setAttribute(HttpIncubatingAttributes.HTTP_RESPONSE_BODY_SIZE,
-            event.getTransferredBytes());
+        span.setAttribute(
+            HttpIncubatingAttributes.HTTP_RESPONSE_BODY_SIZE, event.getTransferredBytes());
         break;
     }
     span.end();
@@ -151,5 +158,4 @@ public final class OtelTransferListener extends AbstractTransferListener {
         Optional.ofNullable(event.getException()).map(Exception::getMessage).orElse("n/a"));
     finish(span, event);
   }
-
 }
