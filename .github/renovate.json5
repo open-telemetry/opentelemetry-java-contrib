@@ -1,9 +1,8 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    'config:recommended',
-    'docker:pinDigests',
-    'helpers:pinGitHubActionDigests',
+    'config:best-practices',
+    'helpers:pinGitHubActionDigestsToSemver',
   ],
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
