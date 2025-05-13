@@ -164,8 +164,8 @@
     {
       customType: 'regex',
       datasourceTemplate: 'npm',
-      fileMatch: [
-        '^.github/workflows/',
+      managerFilePatterns: [
+        '/^.github/workflows//',
       ],
       matchStrings: [
         'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
