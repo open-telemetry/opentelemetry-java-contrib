@@ -58,6 +58,9 @@ public class MavenOtelSemanticAttributes {
   /** See {@link TransferEvent.RequestType}. */
   public static final AttributeKey<String> MAVEN_TRANSFER_TYPE =
       AttributeKey.stringKey("maven.transfer.type");
+  /** See {@link org.eclipse.aether.transfer.TransferResource}. */
+  public static final AttributeKey<String> MAVEN_RESOURCE_NAME =
+      AttributeKey.stringKey("maven.resource.name");
 
   public static final String SERVICE_NAME_VALUE = "maven";
 

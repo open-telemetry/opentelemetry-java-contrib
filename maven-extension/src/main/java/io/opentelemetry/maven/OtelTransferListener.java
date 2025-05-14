@@ -50,7 +50,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
   @Override
   public void transferInitiated(TransferEvent event) {
-    logger.info("OpenTelemetry: OtelTransferListener#transferInitiated({})", event);
+    logger.debug("OpenTelemetry: OtelTransferListener#transferInitiated({})", event);
 
     String httpRequestMethod;
     switch (event.getRequestType()) {
@@ -64,7 +64,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
         httpRequestMethod = "HEAD";
         break;
       default:
-        logger.warn("OpenTelemetry: Unknown request type {}", event.getRequestType());
+        logger.warn("OpenTelemetry: Unknown request type {} for event {}", event.getRequestType(), event);
         httpRequestMethod = event.getRequestType().name();
     }
 
@@ -74,6 +74,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
     String spanName = httpRequestMethod + " " + urlTemplate;
 
+    // Build an HTTP client span as the http call itself is not instrumented.
     SpanBuilder spanBuilder =
         this.openTelemetrySdkService
             .getTracer()
@@ -85,7 +86,8 @@ public final class OtelTransferListener extends AbstractTransferListener {
                 event.getResource().getRepositoryUrl() + event.getResource().getResourceName())
             .setAttribute(UrlIncubatingAttributes.URL_TEMPLATE, urlTemplate)
             .setAttribute(
-                MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE, event.getRequestType().name());
+                MavenOtelSemanticAttributes.MAVEN_TRANSFER_TYPE, event.getRequestType().name())
+            .setAttribute(MavenOtelSemanticAttributes.MAVEN_RESOURCE_NAME, event.getResource().getResourceName());
 
     repositoryUriMapping
         .computeIfAbsent(
@@ -113,7 +115,7 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
   @Override
   public void transferSucceeded(TransferEvent event) {
-    logger.info("OpenTelemetry: OtelTransferListener#transferSucceeded({})", event);
+    logger.debug("OpenTelemetry: OtelTransferListener#transferSucceeded({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event))
         .ifPresent(
@@ -125,14 +127,14 @@ public final class OtelTransferListener extends AbstractTransferListener {
 
   @Override
   public void transferFailed(TransferEvent event) {
-    logger.info("OpenTelemetry: OtelTransferListener#transferFailed({})", event);
+    logger.debug("OpenTelemetry: OtelTransferListener#transferFailed({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event)).ifPresent(span -> fail(span, event));
   }
 
   @Override
   public void transferCorrupted(TransferEvent event) {
-    logger.info("OpenTelemetry: OtelTransferListener#transferCorrupted({})", event);
+    logger.debug("OpenTelemetry: OtelTransferListener#transferCorrupted({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event)).ifPresent(span -> fail(span, event));
   }
