@@ -19,4 +19,5 @@ jobs:
             --include-fragments
             --exclude "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$"
             --max-retries 6
+            --max-concurrency 1
             .
