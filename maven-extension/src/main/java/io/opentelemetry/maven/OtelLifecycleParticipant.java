@@ -44,8 +44,6 @@ public final class OtelLifecycleParticipant extends AbstractMavenLifecyclePartic
 
   @Override
   public void afterSessionStart(MavenSession session) {
-    // TODO transfers happen before afterProjectsRead() - not sure I understand the issue in the
-    // comment of afterProjectsRead()
     if (openTelemetrySdkService.isTransferInstrumentationEnabled()) {
       registerTransferListener(session);
     }
