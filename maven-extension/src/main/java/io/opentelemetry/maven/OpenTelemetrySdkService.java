@@ -49,10 +49,12 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   private final boolean mojosInstrumentationEnabled;
 
+  private final boolean transferInstrumentationEnabled;
+
   private boolean disposed;
 
   public OpenTelemetrySdkService() {
-    logger.debug(
+    logger.info(
         "OpenTelemetry: Initialize OpenTelemetrySdkService v{}...",
         MavenOtelSemanticAttributes.TELEMETRY_DISTRO_VERSION_VALUE);
 
@@ -76,6 +78,8 @@ public final class OpenTelemetrySdkService implements Closeable {
 
     this.mojosInstrumentationEnabled =
         configProperties.getBoolean("otel.instrumentation.maven.mojo.enabled", true);
+    this.transferInstrumentationEnabled =
+        configProperties.getBoolean("otel.instrumentation.maven.transfer.enabled", false);
 
     this.tracer = openTelemetrySdk.getTracer("io.opentelemetry.contrib.maven", VERSION);
   }
@@ -153,5 +157,9 @@ public final class OpenTelemetrySdkService implements Closeable {
 
   public boolean isMojosInstrumentationEnabled() {
     return mojosInstrumentationEnabled;
+  }
+
+  public boolean isTransferInstrumentationEnabled() {
+    return transferInstrumentationEnabled;
   }
 }
