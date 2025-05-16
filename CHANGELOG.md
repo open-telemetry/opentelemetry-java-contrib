@@ -16,7 +16,7 @@
 ### Kafka exporter
 
 - Upgrade kafka-clients to 4.0 (and so now requires Java 11+)
-  ([#1872](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1872))
+  ([#1802](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1802))
 
 ### Maven extension
 
