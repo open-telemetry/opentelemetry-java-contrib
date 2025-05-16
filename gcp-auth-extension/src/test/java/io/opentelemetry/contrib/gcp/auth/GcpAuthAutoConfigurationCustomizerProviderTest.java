@@ -31,8 +31,10 @@ import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
@@ -428,10 +430,29 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter) {
+    return buildOpenTelemetrySdkWithExporter(spanExporter, null, otelProperties);
+  }
+
+  @SuppressWarnings("UnusedMethod")
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter, ImmutableMap<String, String> customOTelProperties) {
+    return buildOpenTelemetrySdkWithExporter(spanExporter, null, customOTelProperties);
+  }
+
+  @SuppressWarnings("UnusedMethod")
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(MetricExporter metricExporter) {
+    return buildOpenTelemetrySdkWithExporter(null, metricExporter, otelProperties);
+  }
+
+  @SuppressWarnings("UnusedMethod")
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(MetricExporter metricExporter, ImmutableMap<String, String> customOtelProperties) {
+    return buildOpenTelemetrySdkWithExporter(null, metricExporter, customOtelProperties);
+  }
+
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter, MetricExporter metricExporter, ImmutableMap<String, String> customOtelProperties) {
     SpiHelper spiHelper =
         SpiHelper.create(GcpAuthAutoConfigurationCustomizerProviderTest.class.getClassLoader());
     AutoConfiguredOpenTelemetrySdkBuilder builder =
-        AutoConfiguredOpenTelemetrySdk.builder().addPropertiesSupplier(() -> otelProperties);
+        AutoConfiguredOpenTelemetrySdk.builder().addPropertiesSupplier(() -> customOtelProperties);
     AutoConfigureUtil.setComponentLoader(
         builder,
         new ComponentLoader() {
@@ -445,6 +466,21 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                         @Override
                         public SpanExporter createExporter(ConfigProperties configProperties) {
                           return spanExporter;
+                        }
+
+                        @Override
+                        public String getName() {
+                          return "otlp";
+                        }
+                      });
+            }
+            if (spiClass == ConfigurableMetricExporterProvider.class) {
+              return Collections.singletonList(
+                  (T)
+                      new ConfigurableMetricExporterProvider() {
+                        @Override
+                        public MetricExporter createExporter(ConfigProperties configProperties) {
+                          return metricExporter;
                         }
 
                         @Override
