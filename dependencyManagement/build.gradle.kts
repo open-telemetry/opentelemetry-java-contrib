@@ -15,7 +15,7 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.18.3"))
+  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -44,7 +44,7 @@ dependencies {
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
     api("com.squareup.okhttp3:okhttp:4.12.0")
-    api("com.uber.nullaway:nullaway:0.12.6")
+    api("com.uber.nullaway:nullaway:0.12.7")
     api("org.assertj:assertj-core:3.27.3")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
@@ -54,7 +54,7 @@ dependencies {
     api("org.testcontainers:kafka:1.21.0")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:3.0")
+    api("tools.profiler:async-profiler:4.0")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
   }
