@@ -17,7 +17,7 @@ This variable contains a JSON structure, which is parsed to fill the following a
 | cloudfoundry.space.id        | space_id                 |
 | cloudfoundry.space.name      | space_name               |
 
-The resource attributes follow the [CloudFoundry semantic convention.](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/attributes-registry/cloudfoundry.md).
+The resource attributes follow the [CloudFoundry semantic convention.](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/cloudfoundry.md).
 A description of `VCAP_APPLICATION` is available in the [CloudFoundry documentation](https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-APPLICATION).
 
 ## Component owners
