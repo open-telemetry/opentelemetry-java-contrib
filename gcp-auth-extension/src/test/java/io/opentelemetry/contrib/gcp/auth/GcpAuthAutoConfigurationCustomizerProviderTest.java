@@ -76,6 +76,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   private static final ImmutableMap<String, String> otelProperties =
       ImmutableMap.of(
+          "otel.exporter.otlp.traces.endpoint",
+          "https://telemetry.googleapis.com/v1/traces",
           "otel.traces.exporter",
           "otlp",
           "otel.metrics.exporter",

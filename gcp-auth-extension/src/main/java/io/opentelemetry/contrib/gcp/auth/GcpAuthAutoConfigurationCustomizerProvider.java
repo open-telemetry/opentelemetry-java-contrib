@@ -10,13 +10,18 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
@@ -24,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /**
  * An AutoConfigurationCustomizerProvider for Google Cloud Platform (GCP) OpenTelemetry (OTLP)
@@ -46,13 +54,31 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
 
+  private static final String OTEL_EXPORTER_OTLP_ENDPOINT = "otel.exporter.otlp.endpoint";
+  private static final String OTEL_EXPORTER_OTLP_TRACES_ENDPOINT =
+      "otel.exporter.otlp.traces.endpoint";
+  private static final String OTEL_EXPORTER_OTLP_METRICS_ENDPOINT =
+      "otel.exporter.otlp.metrics.endpoint";
+
   /**
-   * Customizes the provided {@link AutoConfigurationCustomizer}.
+   * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
+   * GCP Telemetry API are possible from the configured OTLP exporter.
    *
    * <p>This method attempts to retrieve Google Application Default Credentials (ADC) and performs
-   * the following: - Adds authorization headers to the configured {@link SpanExporter} based on the
-   * retrieved credentials. - Adds default properties for OTLP endpoint and resource attributes for
-   * GCP integration.
+   * the following:
+   *
+   * <ul>
+   *   <li>Verifies whether the configured OTLP endpoint (base or signal specific) is a known GCP
+   *       endpoint.
+   *   <li>If the configured base OTLP endpoint is a known GCP Telemetry API endpoint, customizes
+   *       both the configured OTLP {@link SpanExporter} and {@link MetricExporter}.
+   *   <li>If the configured signal specific endpoint is a known GCP Telemetry API endpoint,
+   *       customizes only the signal specific exporter.
+   * </ul>
+   *
+   * The 'customization' performed includes customizing the exporters by adding required headers to
+   * the export calls made and customizing the resource by adding required resource attributes to
+   * enable GCP integration.
    *
    * @param autoConfiguration the AutoConfigurationCustomizer to customize.
    * @throws GoogleAuthException if there's an error retrieving Google Application Default
@@ -61,7 +87,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    *     not configured through environment variables or system properties.
    */
   @Override
-  public void customize(AutoConfigurationCustomizer autoConfiguration) {
+  public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
     GoogleCredentials credentials;
     try {
       credentials = GoogleCredentials.getApplicationDefault();
@@ -70,13 +96,69 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
     autoConfiguration
         .addSpanExporterCustomizer(
-            (exporter, configProperties) -> addAuthorizationHeaders(exporter, credentials))
+            (spanExporter, configProperties) ->
+                customizeSpanExporter(spanExporter, configProperties, credentials))
+        .addMetricExporterCustomizer(
+            (metricExporter, configProperties) ->
+                customizeMetricExporter(metricExporter, configProperties, credentials))
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
   @Override
   public int order() {
     return Integer.MAX_VALUE - 1;
+  }
+
+  // This method evaluates if the span exporter should be modified to enable export to GCP.
+  private static boolean shouldCustomizeSpanExporter(ConfigProperties configProperties) {
+    String baseEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_ENDPOINT);
+    if (baseEndpoint != null && isKnownGcpTelemetryEndpoint(baseEndpoint)) {
+      return true;
+    }
+    String tracesEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_TRACES_ENDPOINT);
+    return tracesEndpoint != null && isKnownGcpTelemetryEndpoint(tracesEndpoint);
+  }
+
+  // This method evaluates if the metric exporter should be modified to enable export to GCP.
+  private static boolean shouldCustomizeMetricExporter(ConfigProperties configProperties) {
+    String baseEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_ENDPOINT);
+    if (baseEndpoint != null && isKnownGcpTelemetryEndpoint(baseEndpoint)) {
+      return true;
+    }
+    String metricsEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_METRICS_ENDPOINT);
+    return metricsEndpoint != null && isKnownGcpTelemetryEndpoint(metricsEndpoint);
+  }
+
+  // This method evaluates if the endpoint provided by the user is a known GCP telemetry endpoint.
+  private static boolean isKnownGcpTelemetryEndpoint(String endpoint) {
+    String knownBaseEndpointRegex = "^https://telemetry\\.googleapis\\.com(?:[:/].*)?$";
+    String knownBaseSandboxEndpoint =
+        "^https://staging-telemetry\\.sandbox\\.googleapis\\.com(?:[:/].*)?$";
+    String knownRegionalizedEndpointRegex =
+        "^https://([a-z0-9]+(?:-[a-z0-9]+)*)\\.rep\\.googleapis\\.com(?:[:/].*)?$";
+    // create a combined regex that matches any of the above.
+    String knownGcpEndpointRegex =
+        String.join(
+            "|", knownBaseEndpointRegex, knownBaseSandboxEndpoint, knownRegionalizedEndpointRegex);
+    Pattern knownGcpEndpointPattern = Pattern.compile(knownGcpEndpointRegex);
+    Matcher gcpEndpointMatcher = knownGcpEndpointPattern.matcher(endpoint);
+    return gcpEndpointMatcher.matches();
+  }
+
+  private static SpanExporter customizeSpanExporter(
+      SpanExporter exporter, ConfigProperties configProperties, GoogleCredentials credentials) {
+    if (shouldCustomizeSpanExporter(configProperties)) {
+      return addAuthorizationHeaders(exporter, credentials);
+    }
+    return exporter;
+  }
+
+  private static MetricExporter customizeMetricExporter(
+      MetricExporter exporter, ConfigProperties configProperties, GoogleCredentials credentials) {
+    if (shouldCustomizeMetricExporter(configProperties)) {
+      return addAuthorizationHeaders(exporter, credentials);
+    }
+    return exporter;
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -91,6 +173,24 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     } else if (exporter instanceof OtlpGrpcSpanExporter) {
       OtlpGrpcSpanExporterBuilder builder =
           ((OtlpGrpcSpanExporter) exporter)
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+      return builder.build();
+    }
+    return exporter;
+  }
+
+  // Adds authorization headers to the calls made by the OtlpGrpcMetricExporter and
+  // OtlpHttpMetricExporter.
+  private static MetricExporter addAuthorizationHeaders(
+      MetricExporter exporter, GoogleCredentials credentials) {
+    if (exporter instanceof OtlpHttpMetricExporter) {
+      OtlpHttpMetricExporterBuilder builder =
+          ((OtlpHttpMetricExporter) exporter)
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+      return builder.build();
+    } else if (exporter instanceof OtlpGrpcMetricExporter) {
+      OtlpGrpcMetricExporterBuilder builder =
+          ((OtlpGrpcMetricExporter) exporter)
               .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
       return builder.build();
     }
