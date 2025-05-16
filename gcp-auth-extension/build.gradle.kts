@@ -23,7 +23,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.33.1")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.35.0")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -55,6 +55,9 @@ dependencies {
 tasks {
   test {
     useJUnitPlatform()
+    // Unset relevant environment variables to provide a clean state for the tests
+    environment("GOOGLE_CLOUD_PROJECT", "")
+    environment("GOOGLE_CLOUD_QUOTA_PROJECT", "")
     // exclude integration test
     exclude("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
   }
@@ -103,7 +106,7 @@ tasks.register<Copy>("copyAgent") {
   })
 }
 
-tasks.register<Test>("IntegrationTest") {
+tasks.register<Test>("IntegrationTestUserCreds") {
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 
@@ -111,7 +114,7 @@ tasks.register<Test>("IntegrationTest") {
   // include only the integration test file
   include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
 
-  val fakeCredsFilePath = project.file("src/test/resources/fakecreds.json").absolutePath
+  val fakeCredsFilePath = project.file("src/test/resources/fake_user_creds.json").absolutePath
 
   environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
   environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
@@ -127,6 +130,7 @@ tasks.register<Test>("IntegrationTest") {
     "-Dotel.metrics.exporter=none",
     "-Dotel.logs.exporter=none",
     "-Dotel.exporter.otlp.protocol=http/protobuf",
-    "-Dmockserver.logLevel=off"
+    "-Dotel.javaagent.debug=false",
+    "-Dmockserver.logLevel=trace"
   )
 }
