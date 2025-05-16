@@ -20,7 +20,12 @@ class AwsComponentProviderTest {
 
   @Test
   void endToEnd() {
-    String yaml = "file_format: 0.3\n" + "propagator:\n" + "  composite: [xray, xray-lambda]\n";
+    String yaml =
+        "file_format: 0.4\n"
+            + "propagator:\n"
+            + "  composite:\n"
+            + "    - xray:\n"
+            + "    - xray-lambda:\n";
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
