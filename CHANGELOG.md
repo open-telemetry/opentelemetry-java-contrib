@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### GCP authentication extension
+
+- Update the internal implementation such that the required headers are retrieved
+  from the Google Auth Library instead of manually constructing and passing them.
+  ([#1860](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1860))
+
+### Inferred spans
+
+- Upgrade async-profiler to 4.0
+  ([#1872](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1872))
+
+### Kafka exporter
+
+- Upgrade kafka-clients to 4.0 (and so now requires Java 11+)
+  ([#1802](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1802))
+
+### Maven extension
+
+- Add option to record transferred artifacts
+  ([#1875](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1875))
+
 ## Version 1.46.0 (2025-04-11)
 
 ### Baggage processor
