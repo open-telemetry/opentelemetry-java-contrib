@@ -25,12 +25,11 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
@@ -54,11 +53,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
 
-  private static final String OTEL_EXPORTER_OTLP_ENDPOINT = "otel.exporter.otlp.endpoint";
-  private static final String OTEL_EXPORTER_OTLP_TRACES_ENDPOINT =
-      "otel.exporter.otlp.traces.endpoint";
-  private static final String OTEL_EXPORTER_OTLP_METRICS_ENDPOINT =
-      "otel.exporter.otlp.metrics.endpoint";
+  private static final String SIGNAL_TYPE_TRACES = "traces";
+  private static final String SIGNAL_TYPE_METRICS = "metrics";
+  private static final String SIGNAL_TYPE_ALL = "all";
 
   /**
    * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
@@ -96,11 +93,10 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
     autoConfiguration
         .addSpanExporterCustomizer(
-            (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, configProperties, credentials))
+            (spanExporter, configProperties) -> customizeSpanExporter(spanExporter, credentials))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, configProperties, credentials))
+                customizeMetricExporter(metricExporter, credentials))
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
@@ -109,53 +105,34 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return Integer.MAX_VALUE - 1;
   }
 
-  // This method evaluates if the span exporter should be modified to enable export to GCP.
-  private static boolean shouldCustomizeSpanExporter(ConfigProperties configProperties) {
-    String baseEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_ENDPOINT);
-    if (baseEndpoint != null && isKnownGcpTelemetryEndpoint(baseEndpoint)) {
-      return true;
-    }
-    String tracesEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_TRACES_ENDPOINT);
-    return tracesEndpoint != null && isKnownGcpTelemetryEndpoint(tracesEndpoint);
-  }
-
-  // This method evaluates if the metric exporter should be modified to enable export to GCP.
-  private static boolean shouldCustomizeMetricExporter(ConfigProperties configProperties) {
-    String baseEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_ENDPOINT);
-    if (baseEndpoint != null && isKnownGcpTelemetryEndpoint(baseEndpoint)) {
-      return true;
-    }
-    String metricsEndpoint = configProperties.getString(OTEL_EXPORTER_OTLP_METRICS_ENDPOINT);
-    return metricsEndpoint != null && isKnownGcpTelemetryEndpoint(metricsEndpoint);
-  }
-
-  // This method evaluates if the endpoint provided by the user is a known GCP telemetry endpoint.
-  private static boolean isKnownGcpTelemetryEndpoint(String endpoint) {
-    String knownBaseEndpointRegex = "^https://telemetry\\.googleapis\\.com(?:[:/].*)?$";
-    String knownRegionalizedEndpointRegex =
-        "^https://([a-z0-9]+(?:-[a-z0-9]+)*)\\.rep\\.googleapis\\.com(?:[:/].*)?$";
-    // create a combined regex that matches any of the above.
-    String knownGcpEndpointRegex =
-        String.join("|", knownBaseEndpointRegex, knownRegionalizedEndpointRegex);
-    Pattern knownGcpEndpointPattern = Pattern.compile(knownGcpEndpointRegex);
-    Matcher gcpEndpointMatcher = knownGcpEndpointPattern.matcher(endpoint);
-    return gcpEndpointMatcher.matches();
-  }
-
   private static SpanExporter customizeSpanExporter(
-      SpanExporter exporter, ConfigProperties configProperties, GoogleCredentials credentials) {
-    if (shouldCustomizeSpanExporter(configProperties)) {
+      SpanExporter exporter, GoogleCredentials credentials) {
+    if (isSignalTargeted(SIGNAL_TYPE_TRACES)) {
       return addAuthorizationHeaders(exporter, credentials);
     }
     return exporter;
   }
 
   private static MetricExporter customizeMetricExporter(
-      MetricExporter exporter, ConfigProperties configProperties, GoogleCredentials credentials) {
-    if (shouldCustomizeMetricExporter(configProperties)) {
+      MetricExporter exporter, GoogleCredentials credentials) {
+    if (isSignalTargeted(SIGNAL_TYPE_METRICS)) {
       return addAuthorizationHeaders(exporter, credentials);
     }
     return exporter;
+  }
+
+  // Checks if the auth extension is configured to target the passed signal for authentication.
+  private static boolean isSignalTargeted(String signal) {
+    String targetedSignals =
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
+            () -> SIGNAL_TYPE_ALL);
+    return Arrays.stream(targetedSignals.split(","))
+        .map(String::trim)
+        .map(
+            targetedSignal ->
+                targetedSignal.equals(signal) || targetedSignal.equals(SIGNAL_TYPE_ALL))
+        .findFirst()
+        .isPresent();
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
