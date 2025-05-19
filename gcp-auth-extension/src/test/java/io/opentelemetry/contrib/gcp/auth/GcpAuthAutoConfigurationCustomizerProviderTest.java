@@ -25,6 +25,8 @@ import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -119,6 +121,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     MockitoAnnotations.openMocks(this);
   }
 
+  // TODO: Use parameterized test for testing traces customizer for http & grpc.
   @Test
   public void testTraceCustomizerOtlpHttp() {
     // Set resource project system property
@@ -180,6 +183,58 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
+  public void testTraceCustomizerOtlpGrpc() {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
+    prepareMockBehaviorForGoogleCredentials();
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    // begin assertions
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+      generateTestSpan(sdk);
+      CompletableResultCode code = sdk.shutdown();
+      CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+      assertTrue(joinResult.isSuccess());
+
+      Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.times(1)).toBuilder();
+      Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
+          .setHeaders(traceHeaderSupplierCaptor.capture());
+      assertEquals(2, traceHeaderSupplierCaptor.getValue().get().size());
+      assertThat(authHeadersQuotaProjectIsPresent(traceHeaderSupplierCaptor.getValue().get()))
+          .isTrue();
+
+      Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
+
+      assertThat(exportedSpans)
+          .hasSizeGreaterThan(0)
+          .allSatisfy(
+              spanData -> {
+                assertThat(spanData.getResource().getAttributes().asMap())
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
+                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
+                assertThat(spanData.getAttributes().asMap())
+                    .containsKey(AttributeKey.longKey("work_loop"));
+              });
+    }
+  }
+
+  // TODO: Use parameterized test for testing metrics customizer for http & grpc.
+  @Test
   public void testMetricCustomizerOtlpHttp() {
     // Set resource project system property
     System.setProperty(
@@ -238,18 +293,19 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  public void testTraceCustomizerOtlpGrpc() {
+  public void testMetricCustomizerOtlpGrpc() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
-    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
-    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
-        Mockito.spy(OtlpGrpcSpanExporter.builder());
-    List<SpanData> exportedSpans = new ArrayList<>();
-    configureGrpcMockSpanExporter(
-        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+    OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter = Mockito.mock(OtlpGrpcMetricExporter.class);
+    OtlpGrpcMetricExporterBuilder otlpMetricExporterBuilder = OtlpGrpcMetricExporter.builder();
+    OtlpGrpcMetricExporterBuilder spyOtlpGrpcMetricExporterBuilder =
+        Mockito.spy(otlpMetricExporterBuilder);
+    List<MetricData> exportedMetrics = new ArrayList<>();
+    configureGrpcMockMetricExporter(
+        mockOtlpGrpcMetricExporter, spyOtlpGrpcMetricExporterBuilder, exportedMetrics);
 
     // begin assertions
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
@@ -258,32 +314,38 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .when(GoogleCredentials::getApplicationDefault)
           .thenReturn(mockedGoogleCredentials);
 
-      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
-      generateTestSpan(sdk);
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpGrpcMetricExporter);
+      generateTestMetric(sdk);
       CompletableResultCode code = sdk.shutdown();
       CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
       assertTrue(joinResult.isSuccess());
 
-      Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.times(1)).toBuilder();
-      Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
-          .setHeaders(traceHeaderSupplierCaptor.capture());
-      assertEquals(2, traceHeaderSupplierCaptor.getValue().get().size());
-      assertThat(authHeadersQuotaProjectIsPresent(traceHeaderSupplierCaptor.getValue().get()))
+      Mockito.verify(mockOtlpGrpcMetricExporter, Mockito.times(1)).toBuilder();
+      Mockito.verify(spyOtlpGrpcMetricExporterBuilder, Mockito.times(1))
+          .setHeaders(metricHeaderSupplierCaptor.capture());
+      assertEquals(2, metricHeaderSupplierCaptor.getValue().get().size());
+      assertThat(authHeadersQuotaProjectIsPresent(metricHeaderSupplierCaptor.getValue().get()))
           .isTrue();
 
-      Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
+      Mockito.verify(mockOtlpGrpcMetricExporter, Mockito.atLeast(1))
+          .export(Mockito.anyCollection());
 
-      assertThat(exportedSpans)
+      assertThat(exportedMetrics)
           .hasSizeGreaterThan(0)
           .allSatisfy(
-              spanData -> {
-                assertThat(spanData.getResource().getAttributes().asMap())
+              metricData -> {
+                assertThat(metricData.getResource().getAttributes().asMap())
                     .containsEntry(
                         AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
                         DUMMY_GCP_RESOURCE_PROJECT_ID)
                     .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(spanData.getAttributes().asMap())
-                    .containsKey(AttributeKey.longKey("work_loop"));
+                assertThat(metricData.getLongSumData().getPoints())
+                    .hasSizeGreaterThan(0)
+                    .allSatisfy(
+                        longPointData -> {
+                          assertThat(longPointData.getAttributes().asMap())
+                              .containsKey(AttributeKey.longKey("work_loop"));
+                        });
               });
     }
   }
@@ -448,7 +510,6 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   // Configure necessary behavior on the gRPC mock span exporters to work.
-  // TODO: Potential improvement - make this work for Http exporter as well.
   private static void configureGrpcMockSpanExporter(
       OtlpGrpcSpanExporter mockGrpcExporter,
       OtlpGrpcSpanExporterBuilder spyGrpcExporterBuilder,
@@ -495,6 +556,40 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                 invocationOnMock -> {
                   InstrumentType instrumentType = invocationOnMock.getArgument(0);
                   return OtlpHttpMetricExporter.getDefault()
+                      .getAggregationTemporality(instrumentType);
+                });
+  }
+
+  private static void configureGrpcMockMetricExporter(
+      OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter,
+      OtlpGrpcMetricExporterBuilder spyOtlpGrpcMetricExporterBuilder,
+      List<MetricData> exportedMetricContainer) {
+    Mockito.when(spyOtlpGrpcMetricExporterBuilder.build()).thenReturn(mockOtlpGrpcMetricExporter);
+    Mockito.when(mockOtlpGrpcMetricExporter.shutdown())
+        .thenReturn(CompletableResultCode.ofSuccess());
+    Mockito.when(mockOtlpGrpcMetricExporter.toBuilder())
+        .thenReturn(spyOtlpGrpcMetricExporterBuilder);
+    Mockito.when(mockOtlpGrpcMetricExporter.export(Mockito.anyCollection()))
+        .thenAnswer(
+            invocationOnMock -> {
+              exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
+              return CompletableResultCode.ofSuccess();
+            });
+    // mock the get default aggregation and aggregation temporality - they're required for valid
+    // metric collection.
+    Mockito.when(mockOtlpGrpcMetricExporter.getDefaultAggregation(Mockito.any()))
+        .thenAnswer(
+            (Answer<Aggregation>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpGrpcMetricExporter.getDefault().getDefaultAggregation(instrumentType);
+                });
+    Mockito.when(mockOtlpGrpcMetricExporter.getAggregationTemporality(Mockito.any()))
+        .thenAnswer(
+            (Answer<AggregationTemporality>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpGrpcMetricExporter.getDefault()
                       .getAggregationTemporality(instrumentType);
                 });
   }
