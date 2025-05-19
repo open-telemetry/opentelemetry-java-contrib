@@ -11,6 +11,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+
 import java.util.List;
 
 /**
@@ -19,43 +20,44 @@ import java.util.List;
  * links, this Sampler will use the "root" sampler that it is built with.
  */
 public final class LinksBasedSampler implements Sampler {
-  private final Sampler root;
+    private final Sampler root;
 
-  private LinksBasedSampler(Sampler root) {
-    this.root = root;
-  }
-
-  public static LinksBasedSampler create(Sampler root) {
-    return new LinksBasedSampler(root);
-  }
-
-  @Override
-  public SamplingResult shouldSample(
-      Context parentContext,
-      String traceId,
-      String name,
-      SpanKind spanKind,
-      Attributes attributes,
-      List<LinkData> parentLinks) {
-    if (parentLinks.size() > 0) {
-      for (LinkData linkData : parentLinks) {
-        if (linkData.getSpanContext().isSampled()) {
-          return SamplingResult.recordAndSample();
-        }
-      }
-      return SamplingResult.drop();
+    private LinksBasedSampler(Sampler root) {
+        this.root = root;
     }
 
-    return this.root.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
-  }
+    public static LinksBasedSampler create(
+            Sampler root) {
+        return new LinksBasedSampler(root);
+    }
 
-  @Override
-  public String getDescription() {
-    return String.format("LinksBased{root:%s}", this.root.getDescription());
-  }
+    @Override
+    public SamplingResult shouldSample(
+            Context parentContext,
+            String traceId,
+            String name,
+            SpanKind spanKind,
+            Attributes attributes,
+            List<LinkData> parentLinks) {
+        if (parentLinks.size() > 0) {
+            for (LinkData linkData : parentLinks) {
+                if (linkData.getSpanContext().isSampled()) {
+                    return SamplingResult.recordAndSample();
+                }
+            }
+            return SamplingResult.drop();
+        }
 
-  @Override
-  public String toString() {
-    return getDescription();
-  }
+        return this.root.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format("LinksBased{root:%s}", this.root.getDescription());
+    }
+
+    @Override
+    public String toString() {
+        return getDescription();
+    }
 }
