@@ -11,11 +11,6 @@ plugins {
 description = "Client implementation of the OpAMP spec."
 otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
