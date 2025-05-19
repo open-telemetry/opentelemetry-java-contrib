@@ -132,14 +132,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // This method evaluates if the endpoint provided by the user is a known GCP telemetry endpoint.
   private static boolean isKnownGcpTelemetryEndpoint(String endpoint) {
     String knownBaseEndpointRegex = "^https://telemetry\\.googleapis\\.com(?:[:/].*)?$";
-    String knownBaseSandboxEndpoint =
-        "^https://staging-telemetry\\.sandbox\\.googleapis\\.com(?:[:/].*)?$";
     String knownRegionalizedEndpointRegex =
         "^https://([a-z0-9]+(?:-[a-z0-9]+)*)\\.rep\\.googleapis\\.com(?:[:/].*)?$";
     // create a combined regex that matches any of the above.
     String knownGcpEndpointRegex =
-        String.join(
-            "|", knownBaseEndpointRegex, knownBaseSandboxEndpoint, knownRegionalizedEndpointRegex);
+        String.join("|", knownBaseEndpointRegex, knownRegionalizedEndpointRegex);
     Pattern knownGcpEndpointPattern = Pattern.compile(knownGcpEndpointRegex);
     Matcher gcpEndpointMatcher = knownGcpEndpointPattern.matcher(endpoint);
     return gcpEndpointMatcher.matches();
