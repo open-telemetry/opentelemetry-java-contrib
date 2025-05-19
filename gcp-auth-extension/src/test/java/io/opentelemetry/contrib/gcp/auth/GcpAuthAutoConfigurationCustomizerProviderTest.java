@@ -142,6 +142,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
             });
     Mockito.when(mockOtlpHttpSpanExporter.toBuilder()).thenReturn(spyOtlpHttpSpanExporterBuilder);
 
+    // begin assertions
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
         Mockito.mockStatic(GoogleCredentials.class)) {
       googleCredentialsMockedStatic
@@ -189,37 +190,11 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     OtlpHttpMetricExporterBuilder otlpMetricExporterBuilder = OtlpHttpMetricExporter.builder();
     OtlpHttpMetricExporterBuilder spyOtlpHttpMetricExporterBuilder =
         Mockito.spy(otlpMetricExporterBuilder);
-    Mockito.when(spyOtlpHttpMetricExporterBuilder.build()).thenReturn(mockOtlpHttpMetricExporter);
-
-    Mockito.when(mockOtlpHttpMetricExporter.shutdown())
-        .thenReturn(CompletableResultCode.ofSuccess());
     List<MetricData> exportedMetrics = new ArrayList<>();
-    Mockito.when(mockOtlpHttpMetricExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedMetrics.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
-    Mockito.when(mockOtlpHttpMetricExporter.toBuilder())
-        .thenReturn(spyOtlpHttpMetricExporterBuilder);
-    // mock the get default aggregation and aggregation temporality - they're required for valid
-    // metric collection.
-    Mockito.when(mockOtlpHttpMetricExporter.getDefaultAggregation(Mockito.any()))
-        .thenAnswer(
-            (Answer<Aggregation>)
-                invocationOnMock -> {
-                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
-                  return OtlpHttpMetricExporter.getDefault().getDefaultAggregation(instrumentType);
-                });
-    Mockito.when(mockOtlpHttpMetricExporter.getAggregationTemporality(Mockito.any()))
-        .thenAnswer(
-            (Answer<AggregationTemporality>)
-                invocationOnMock -> {
-                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
-                  return OtlpHttpMetricExporter.getDefault()
-                      .getAggregationTemporality(instrumentType);
-                });
+    configureHttpMockMetricExporter(
+        mockOtlpHttpMetricExporter, spyOtlpHttpMetricExporterBuilder, exportedMetrics);
 
+    // begin assertions
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
         Mockito.mockStatic(GoogleCredentials.class)) {
       googleCredentialsMockedStatic
@@ -263,7 +238,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  public void testCustomizerOtlpGrpc() {
+  public void testTraceCustomizerOtlpGrpc() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -273,9 +248,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
         Mockito.spy(OtlpGrpcSpanExporter.builder());
     List<SpanData> exportedSpans = new ArrayList<>();
-    configureGrpcMockSpanExporters(
+    configureGrpcMockSpanExporter(
         mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
+    // begin assertions
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
         Mockito.mockStatic(GoogleCredentials.class)) {
       googleCredentialsMockedStatic
@@ -367,7 +343,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
         Mockito.spy(OtlpGrpcSpanExporter.builder());
     List<SpanData> exportedSpans = new ArrayList<>();
-    configureGrpcMockSpanExporters(
+    configureGrpcMockSpanExporter(
         mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
@@ -471,9 +447,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                 .build()));
   }
 
-  // Configure necessary behavior on the Grpc mock exporters to work
+  // Configure necessary behavior on the gRPC mock span exporters to work.
   // TODO: Potential improvement - make this work for Http exporter as well.
-  private static void configureGrpcMockSpanExporters(
+  private static void configureGrpcMockSpanExporter(
       OtlpGrpcSpanExporter mockGrpcExporter,
       OtlpGrpcSpanExporterBuilder spyGrpcExporterBuilder,
       List<SpanData> exportedSpanContainer) {
@@ -486,6 +462,41 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
               exportedSpanContainer.addAll(invocationOnMock.getArgument(0));
               return CompletableResultCode.ofSuccess();
             });
+  }
+
+  // Configure necessary behavior on the http mock metric exporters to work.
+  private static void configureHttpMockMetricExporter(
+      OtlpHttpMetricExporter mockOtlpHttpMetricExporter,
+      OtlpHttpMetricExporterBuilder spyOtlpHttpMetricExporterBuilder,
+      List<MetricData> exportedMetricContainer) {
+    Mockito.when(spyOtlpHttpMetricExporterBuilder.build()).thenReturn(mockOtlpHttpMetricExporter);
+    Mockito.when(mockOtlpHttpMetricExporter.shutdown())
+        .thenReturn(CompletableResultCode.ofSuccess());
+    Mockito.when(mockOtlpHttpMetricExporter.toBuilder())
+        .thenReturn(spyOtlpHttpMetricExporterBuilder);
+    Mockito.when(mockOtlpHttpMetricExporter.export(Mockito.anyCollection()))
+        .thenAnswer(
+            invocationOnMock -> {
+              exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
+              return CompletableResultCode.ofSuccess();
+            });
+    // mock the get default aggregation and aggregation temporality - they're required for valid
+    // metric collection.
+    Mockito.when(mockOtlpHttpMetricExporter.getDefaultAggregation(Mockito.any()))
+        .thenAnswer(
+            (Answer<Aggregation>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpHttpMetricExporter.getDefault().getDefaultAggregation(instrumentType);
+                });
+    Mockito.when(mockOtlpHttpMetricExporter.getAggregationTemporality(Mockito.any()))
+        .thenAnswer(
+            (Answer<AggregationTemporality>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpHttpMetricExporter.getDefault()
+                      .getAggregationTemporality(instrumentType);
+                });
   }
 
   @AutoValue
