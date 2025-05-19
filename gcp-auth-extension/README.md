@@ -47,6 +47,10 @@ Here is a list of required and optional configuration available for the extensio
 
   - Can also be configured using `google.cloud.quota.project` system property.
 
+- `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a comma-separated list of OpenTelemetry signals for which this authentication extension should be active. Valid values contain - `metrics`, `traces` or `all`. If left unspecified, `all` is assumed meaning the extension will attempt to apply authentication to exports for all signals.
+
+  - Can also be configured using `google.otel.auth.target.signals` system property.
+
 ## Usage
 
 ### With OpenTelemetry Java agent
