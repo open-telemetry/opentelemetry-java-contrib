@@ -17,8 +17,12 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
@@ -34,6 +38,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.metrics.Aggregation;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -47,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -65,18 +74,21 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 @ExtendWith(MockitoExtension.class)
 class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   private static final String DUMMY_GCP_RESOURCE_PROJECT_ID = "my-gcp-resource-project-id";
   private static final String DUMMY_GCP_QUOTA_PROJECT_ID = "my-gcp-quota-project-id";
+  private static final Random TEST_RANDOM = new Random();
 
   @Mock private GoogleCredentials mockedGoogleCredentials;
 
-  @Captor private ArgumentCaptor<Supplier<Map<String, String>>> headerSupplierCaptor;
+  @Captor private ArgumentCaptor<Supplier<Map<String, String>>> traceHeaderSupplierCaptor;
+  @Captor private ArgumentCaptor<Supplier<Map<String, String>>> metricHeaderSupplierCaptor;
 
-  private static final ImmutableMap<String, String> otelProperties =
+  private static final ImmutableMap<String, String> defaultOtelPropertiesSpanExporter =
       ImmutableMap.of(
           "otel.exporter.otlp.traces.endpoint",
           "https://telemetry.googleapis.com/v1/traces",
@@ -89,13 +101,26 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           "otel.resource.attributes",
           "foo=bar");
 
+  private static final ImmutableMap<String, String> defaultOtelPropertiesMetricExporter =
+      ImmutableMap.of(
+          "otel.exporter.otlp.metrics.endpoint",
+          "https://telemetry.googleapis.com/v1/metrics",
+          "otel.traces.exporter",
+          "none",
+          "otel.metrics.exporter",
+          "otlp",
+          "otel.logs.exporter",
+          "none",
+          "otel.resource.attributes",
+          "foo=bar");
+
   @BeforeEach
   public void setup() {
     MockitoAnnotations.openMocks(this);
   }
 
   @Test
-  public void testCustomizerOtlpHttp() {
+  public void testTraceCustomizerOtlpHttp() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -131,9 +156,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       Mockito.verify(mockOtlpHttpSpanExporter, Mockito.times(1)).toBuilder();
       Mockito.verify(spyOtlpHttpSpanExporterBuilder, Mockito.times(1))
-          .setHeaders(headerSupplierCaptor.capture());
-      assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      assertThat(authHeadersQuotaProjectIsPresent(headerSupplierCaptor.getValue().get())).isTrue();
+          .setHeaders(traceHeaderSupplierCaptor.capture());
+      assertEquals(2, traceHeaderSupplierCaptor.getValue().get().size());
+      assertThat(authHeadersQuotaProjectIsPresent(traceHeaderSupplierCaptor.getValue().get()))
+          .isTrue();
 
       Mockito.verify(mockOtlpHttpSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -153,6 +179,90 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
+  public void testMetricCustomizerOtlpHttp() {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
+    prepareMockBehaviorForGoogleCredentials();
+    OtlpHttpMetricExporter mockOtlpHttpMetricExporter = Mockito.mock(OtlpHttpMetricExporter.class);
+    OtlpHttpMetricExporterBuilder otlpMetricExporterBuilder = OtlpHttpMetricExporter.builder();
+    OtlpHttpMetricExporterBuilder spyOtlpHttpMetricExporterBuilder =
+        Mockito.spy(otlpMetricExporterBuilder);
+    Mockito.when(spyOtlpHttpMetricExporterBuilder.build()).thenReturn(mockOtlpHttpMetricExporter);
+
+    Mockito.when(mockOtlpHttpMetricExporter.shutdown())
+        .thenReturn(CompletableResultCode.ofSuccess());
+    List<MetricData> exportedMetrics = new ArrayList<>();
+    Mockito.when(mockOtlpHttpMetricExporter.export(Mockito.anyCollection()))
+        .thenAnswer(
+            invocationOnMock -> {
+              exportedMetrics.addAll(invocationOnMock.getArgument(0));
+              return CompletableResultCode.ofSuccess();
+            });
+    Mockito.when(mockOtlpHttpMetricExporter.toBuilder())
+        .thenReturn(spyOtlpHttpMetricExporterBuilder);
+    // mock the get default aggregation and aggregation temporality - they're required for valid
+    // metric collection.
+    Mockito.when(mockOtlpHttpMetricExporter.getDefaultAggregation(Mockito.any()))
+        .thenAnswer(
+            (Answer<Aggregation>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpHttpMetricExporter.getDefault().getDefaultAggregation(instrumentType);
+                });
+    Mockito.when(mockOtlpHttpMetricExporter.getAggregationTemporality(Mockito.any()))
+        .thenAnswer(
+            (Answer<AggregationTemporality>)
+                invocationOnMock -> {
+                  InstrumentType instrumentType = invocationOnMock.getArgument(0);
+                  return OtlpHttpMetricExporter.getDefault()
+                      .getAggregationTemporality(instrumentType);
+                });
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpHttpMetricExporter);
+      generateTestMetric(sdk);
+      CompletableResultCode code = sdk.shutdown();
+      CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+      assertTrue(joinResult.isSuccess());
+
+      Mockito.verify(mockOtlpHttpMetricExporter, Mockito.times(1)).toBuilder();
+      Mockito.verify(spyOtlpHttpMetricExporterBuilder, Mockito.times(1))
+          .setHeaders(metricHeaderSupplierCaptor.capture());
+      assertEquals(2, metricHeaderSupplierCaptor.getValue().get().size());
+      assertThat(authHeadersQuotaProjectIsPresent(metricHeaderSupplierCaptor.getValue().get()))
+          .isTrue();
+
+      Mockito.verify(mockOtlpHttpMetricExporter, Mockito.atLeast(1))
+          .export(Mockito.anyCollection());
+
+      assertThat(exportedMetrics)
+          .hasSizeGreaterThan(0)
+          .allSatisfy(
+              metricData -> {
+                assertThat(metricData.getResource().getAttributes().asMap())
+                    .containsEntry(
+                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                        DUMMY_GCP_RESOURCE_PROJECT_ID)
+                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
+                assertThat(metricData.getLongSumData().getPoints())
+                    .hasSizeGreaterThan(0)
+                    .allSatisfy(
+                        longPointData -> {
+                          assertThat(longPointData.getAttributes().asMap())
+                              .containsKey(AttributeKey.longKey("work_loop"));
+                        });
+              });
+    }
+  }
+
+  @Test
   public void testCustomizerOtlpGrpc() {
     // Set resource project system property
     System.setProperty(
@@ -163,7 +273,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
         Mockito.spy(OtlpGrpcSpanExporter.builder());
     List<SpanData> exportedSpans = new ArrayList<>();
-    configureGrpcMockExporters(
+    configureGrpcMockSpanExporters(
         mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
@@ -180,9 +290,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.times(1)).toBuilder();
       Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
-          .setHeaders(headerSupplierCaptor.capture());
-      assertEquals(2, headerSupplierCaptor.getValue().get().size());
-      assertThat(authHeadersQuotaProjectIsPresent(headerSupplierCaptor.getValue().get())).isTrue();
+          .setHeaders(traceHeaderSupplierCaptor.capture());
+      assertEquals(2, traceHeaderSupplierCaptor.getValue().get().size());
+      assertThat(authHeadersQuotaProjectIsPresent(traceHeaderSupplierCaptor.getValue().get()))
+          .isTrue();
 
       Mockito.verify(mockOtlpGrpcSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
 
@@ -256,7 +367,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
         Mockito.spy(OtlpGrpcSpanExporter.builder());
     List<SpanData> exportedSpans = new ArrayList<>();
-    configureGrpcMockExporters(
+    configureGrpcMockSpanExporters(
         mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
@@ -272,10 +383,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
       assertTrue(joinResult.isSuccess());
       Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
-          .setHeaders(headerSupplierCaptor.capture());
+          .setHeaders(traceHeaderSupplierCaptor.capture());
 
       // assert that the Authorization bearer token header is present
-      Map<String, String> exportHeaders = headerSupplierCaptor.getValue().get();
+      Map<String, String> exportHeaders = traceHeaderSupplierCaptor.getValue().get();
       assertThat(exportHeaders).containsEntry("Authorization", "Bearer fake");
 
       if (testCase.getExpectedQuotaProjectInHeader() == null) {
@@ -362,7 +473,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   // Configure necessary behavior on the Grpc mock exporters to work
   // TODO: Potential improvement - make this work for Http exporter as well.
-  private static void configureGrpcMockExporters(
+  private static void configureGrpcMockSpanExporters(
       OtlpGrpcSpanExporter mockGrpcExporter,
       OtlpGrpcSpanExporterBuilder spyGrpcExporterBuilder,
       List<SpanData> exportedSpanContainer) {
@@ -430,25 +541,34 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter) {
-    return buildOpenTelemetrySdkWithExporter(spanExporter, null, otelProperties);
+    return buildOpenTelemetrySdkWithExporter(
+        spanExporter, OtlpHttpMetricExporter.getDefault(), defaultOtelPropertiesSpanExporter);
   }
 
   @SuppressWarnings("UnusedMethod")
-  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter, ImmutableMap<String, String> customOTelProperties) {
-    return buildOpenTelemetrySdkWithExporter(spanExporter, null, customOTelProperties);
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(
+      SpanExporter spanExporter, ImmutableMap<String, String> customOTelProperties) {
+    return buildOpenTelemetrySdkWithExporter(
+        spanExporter, OtlpHttpMetricExporter.getDefault(), customOTelProperties);
   }
 
   @SuppressWarnings("UnusedMethod")
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(MetricExporter metricExporter) {
-    return buildOpenTelemetrySdkWithExporter(null, metricExporter, otelProperties);
+    return buildOpenTelemetrySdkWithExporter(
+        OtlpHttpSpanExporter.getDefault(), metricExporter, defaultOtelPropertiesMetricExporter);
   }
 
   @SuppressWarnings("UnusedMethod")
-  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(MetricExporter metricExporter, ImmutableMap<String, String> customOtelProperties) {
-    return buildOpenTelemetrySdkWithExporter(null, metricExporter, customOtelProperties);
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(
+      MetricExporter metricExporter, ImmutableMap<String, String> customOtelProperties) {
+    return buildOpenTelemetrySdkWithExporter(
+        OtlpHttpSpanExporter.getDefault(), metricExporter, customOtelProperties);
   }
 
-  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(SpanExporter spanExporter, MetricExporter metricExporter, ImmutableMap<String, String> customOtelProperties) {
+  private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(
+      SpanExporter spanExporter,
+      MetricExporter metricExporter,
+      ImmutableMap<String, String> customOtelProperties) {
     SpiHelper spiHelper =
         SpiHelper.create(GcpAuthAutoConfigurationCustomizerProviderTest.class.getClassLoader());
     AutoConfiguredOpenTelemetrySdkBuilder builder =
@@ -512,6 +632,19 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     } finally {
       span.end();
     }
+  }
+
+  private static void generateTestMetric(OpenTelemetrySdk openTelemetrySdk) {
+    LongCounter longCounter =
+        openTelemetrySdk
+            .getMeter("test")
+            .counterBuilder("sample")
+            .setDescription("sample counter")
+            .setUnit("1")
+            .build();
+    long workOutput = busyloop();
+    long randomValue = TEST_RANDOM.nextInt(1000);
+    longCounter.add(randomValue, Attributes.of(AttributeKey.longKey("work_loop"), workOutput));
   }
 
   // loop to simulate work done
