@@ -7,6 +7,9 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.GCP_USER_PROJECT_ID_KEY;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.QUOTA_USER_PROJECT_HEADER;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_ALL;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_METRICS;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_TRACES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,6 +43,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.common.export.MemoryMode;
 import io.opentelemetry.sdk.metrics.Aggregation;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -62,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,6 +132,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_TRACES);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = Mockito.mock(OtlpHttpSpanExporter.class);
@@ -187,6 +194,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_TRACES);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
@@ -239,6 +248,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_METRICS);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpHttpMetricExporter mockOtlpHttpMetricExporter = Mockito.mock(OtlpHttpMetricExporter.class);
@@ -297,6 +308,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_METRICS);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter = Mockito.mock(OtlpGrpcMetricExporter.class);
@@ -352,6 +365,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   @Test
   public void testCustomizerFailWithMissingResourceProject() {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
         Mockito.mockStatic(GoogleCredentials.class)) {
@@ -372,6 +387,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
 
     // Prepare request metadata
     AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
@@ -436,6 +453,215 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
             .containsEntry(QUOTA_USER_PROJECT_HEADER, testCase.getExpectedQuotaProjectInHeader());
       }
     }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideTargetSignalBehaviorTestCases")
+  public void testTargetSignalsBehavior(TargetSignalBehavior testCase) {
+    // Set resource project system property
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    // Prepare mocks
+    // Prepare mocked credential
+    prepareMockBehaviorForGoogleCredentials();
+
+    // Prepare mocked span exporter
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    // Prepare mocked metrics exporter
+    OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter = Mockito.mock(OtlpGrpcMetricExporter.class);
+    OtlpGrpcMetricExporterBuilder otlpMetricExporterBuilder = OtlpGrpcMetricExporter.builder();
+    OtlpGrpcMetricExporterBuilder spyOtlpGrpcMetricExporterBuilder =
+        Mockito.spy(otlpMetricExporterBuilder);
+    List<MetricData> exportedMetrics = new ArrayList<>();
+    configureGrpcMockMetricExporter(
+        mockOtlpGrpcMetricExporter, spyOtlpGrpcMetricExporterBuilder, exportedMetrics);
+
+    // configure environment according to test case
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(),
+        testCase.getConfiguredTargetSignals());
+
+    // Build Autoconfigured OpenTelemetry SDK using the mocks and send signals
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      OpenTelemetrySdk sdk =
+          buildOpenTelemetrySdkWithExporter(
+              mockOtlpGrpcSpanExporter,
+              mockOtlpGrpcMetricExporter,
+              testCase.getUserSpecifiedOtelProperties());
+      generateTestMetric(sdk);
+      generateTestSpan(sdk);
+      CompletableResultCode code = sdk.shutdown();
+      CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+      assertTrue(joinResult.isSuccess());
+
+      // Check Traces modification conditions
+      if (testCase.getExpectedIsTraceSignalModified()) {
+        // If traces signal is expected to be modified, auth headers must be present
+        Mockito.verify(spyOtlpGrpcSpanExporterBuilder, Mockito.times(1))
+            .setHeaders(traceHeaderSupplierCaptor.capture());
+        assertEquals(2, traceHeaderSupplierCaptor.getValue().get().size());
+        assertThat(authHeadersQuotaProjectIsPresent(traceHeaderSupplierCaptor.getValue().get()))
+            .isTrue();
+      } else {
+        // If traces signals is not expected to be modified then no interaction with the builder
+        // should be made
+        Mockito.verifyNoInteractions(spyOtlpGrpcSpanExporterBuilder);
+      }
+
+      // Check Metric modification conditions
+      if (testCase.getExpectedIsMetricsSignalModified()) {
+        // If metrics signal is expected to be modified, auth headers must be present
+        Mockito.verify(spyOtlpGrpcMetricExporterBuilder, Mockito.times(1))
+            .setHeaders(metricHeaderSupplierCaptor.capture());
+        assertEquals(2, metricHeaderSupplierCaptor.getValue().get().size());
+        assertThat(authHeadersQuotaProjectIsPresent(metricHeaderSupplierCaptor.getValue().get()))
+            .isTrue();
+      } else {
+        // If metrics signals is not expected to be modified then no interaction with the builder
+        // should be made
+        Mockito.verifyNoInteractions(spyOtlpGrpcMetricExporterBuilder);
+      }
+    }
+  }
+
+  /** Test cases specifying expected behavior for GOOGLE_OTEL_AUTH_TARGET_SIGNALS */
+  private static Stream<Arguments> provideTargetSignalBehaviorTestCases() {
+    return Stream.of(
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("traces")
+                .setUserSpecifiedOtelProperties(defaultOtelPropertiesSpanExporter)
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(true)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics")
+                .setUserSpecifiedOtelProperties(defaultOtelPropertiesMetricExporter)
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("all")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(true)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics, traces")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(true)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(true)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("all")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "none",
+                        "otel.metrics.exporter",
+                        "none",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metric, trace")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics, trace")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(false)
+                .build()));
   }
 
   /**
@@ -510,14 +736,19 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   // Configure necessary behavior on the gRPC mock span exporters to work.
+  // Mockito.lenient is used here because this method is used with parameterized tests where based
+  // on certain inputs, certain stubbings may not be required.
   private static void configureGrpcMockSpanExporter(
       OtlpGrpcSpanExporter mockGrpcExporter,
       OtlpGrpcSpanExporterBuilder spyGrpcExporterBuilder,
       List<SpanData> exportedSpanContainer) {
-    Mockito.when(spyGrpcExporterBuilder.build()).thenReturn(mockGrpcExporter);
-    Mockito.when(mockGrpcExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
-    Mockito.when(mockGrpcExporter.toBuilder()).thenReturn(spyGrpcExporterBuilder);
-    Mockito.when(mockGrpcExporter.export(Mockito.anyCollection()))
+    Mockito.lenient().when(spyGrpcExporterBuilder.build()).thenReturn(mockGrpcExporter);
+    Mockito.lenient()
+        .when(mockGrpcExporter.shutdown())
+        .thenReturn(CompletableResultCode.ofSuccess());
+    Mockito.lenient().when(mockGrpcExporter.toBuilder()).thenReturn(spyGrpcExporterBuilder);
+    Mockito.lenient()
+        .when(mockGrpcExporter.export(Mockito.anyCollection()))
         .thenAnswer(
             invocationOnMock -> {
               exportedSpanContainer.addAll(invocationOnMock.getArgument(0));
@@ -560,16 +791,24 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                 });
   }
 
+  // Configure necessary behavior on the gRPC mock metrics exporters to work.
+  // Mockito.lenient is used here because this method is used with parameterized tests where based
+  // on certain inputs, certain stubbings may not be required.
   private static void configureGrpcMockMetricExporter(
       OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter,
       OtlpGrpcMetricExporterBuilder spyOtlpGrpcMetricExporterBuilder,
       List<MetricData> exportedMetricContainer) {
-    Mockito.when(spyOtlpGrpcMetricExporterBuilder.build()).thenReturn(mockOtlpGrpcMetricExporter);
-    Mockito.when(mockOtlpGrpcMetricExporter.shutdown())
+    Mockito.lenient()
+        .when(spyOtlpGrpcMetricExporterBuilder.build())
+        .thenReturn(mockOtlpGrpcMetricExporter);
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.shutdown())
         .thenReturn(CompletableResultCode.ofSuccess());
-    Mockito.when(mockOtlpGrpcMetricExporter.toBuilder())
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.toBuilder())
         .thenReturn(spyOtlpGrpcMetricExporterBuilder);
-    Mockito.when(mockOtlpGrpcMetricExporter.export(Mockito.anyCollection()))
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.export(Mockito.anyCollection()))
         .thenAnswer(
             invocationOnMock -> {
               exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
@@ -577,14 +816,16 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
             });
     // mock the get default aggregation and aggregation temporality - they're required for valid
     // metric collection.
-    Mockito.when(mockOtlpGrpcMetricExporter.getDefaultAggregation(Mockito.any()))
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.getDefaultAggregation(Mockito.any()))
         .thenAnswer(
             (Answer<Aggregation>)
                 invocationOnMock -> {
                   InstrumentType instrumentType = invocationOnMock.getArgument(0);
                   return OtlpGrpcMetricExporter.getDefault().getDefaultAggregation(instrumentType);
                 });
-    Mockito.when(mockOtlpGrpcMetricExporter.getAggregationTemporality(Mockito.any()))
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.getAggregationTemporality(Mockito.any()))
         .thenAnswer(
             (Answer<AggregationTemporality>)
                 invocationOnMock -> {
@@ -592,6 +833,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                   return OtlpGrpcMetricExporter.getDefault()
                       .getAggregationTemporality(instrumentType);
                 });
+    Mockito.lenient()
+        .when(mockOtlpGrpcMetricExporter.getMemoryMode())
+        .thenReturn(MemoryMode.IMMUTABLE_DATA);
   }
 
   @AutoValue
@@ -630,11 +874,48 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     }
   }
 
+  @AutoValue
+  abstract static class TargetSignalBehavior {
+    @Nonnull
+    abstract String getConfiguredTargetSignals();
+
+    @Nonnull
+    abstract ImmutableMap<String, String> getUserSpecifiedOtelProperties();
+
+    abstract boolean getExpectedIsTraceSignalModified();
+
+    abstract boolean getExpectedIsMetricsSignalModified();
+
+    static Builder builder() {
+      return new AutoValue_GcpAuthAutoConfigurationCustomizerProviderTest_TargetSignalBehavior
+          .Builder();
+    }
+
+    @AutoValue.Builder
+    abstract static class Builder {
+      abstract Builder setConfiguredTargetSignals(String targetSignals);
+
+      abstract Builder setUserSpecifiedOtelProperties(Map<String, String> oTelProperties);
+
+      // Set whether the combination of specified OTel properties and configured target signals
+      // should lead to modification of the OTLP trace exporters.
+      abstract Builder setExpectedIsTraceSignalModified(boolean expectedModified);
+
+      // Set whether the combination of specified OTel properties and configured target signals
+      // should lead to modification of the OTLP metrics exporters.
+      abstract Builder setExpectedIsMetricsSignalModified(boolean expectedModified);
+
+      abstract TargetSignalBehavior build();
+    }
+  }
+
+  // Mockito.lenient is used here because this method is used with parameterized tests where based
   @SuppressWarnings("CannotMockMethod")
   private void prepareMockBehaviorForGoogleCredentials() {
     AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
     try {
-      Mockito.when(mockedGoogleCredentials.getRequestMetadata())
+      Mockito.lenient()
+          .when(mockedGoogleCredentials.getRequestMetadata())
           .thenReturn(
               ImmutableMap.of(
                   "Authorization",
