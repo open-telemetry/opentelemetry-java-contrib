@@ -53,9 +53,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
 
-  private static final String SIGNAL_TYPE_TRACES = "traces";
-  private static final String SIGNAL_TYPE_METRICS = "metrics";
-  private static final String SIGNAL_TYPE_ALL = "all";
+  static final String SIGNAL_TYPE_TRACES = "traces";
+  static final String SIGNAL_TYPE_METRICS = "metrics";
+  static final String SIGNAL_TYPE_ALL = "all";
 
   /**
    * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
@@ -122,17 +122,15 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
-  private static boolean isSignalTargeted(String signal) {
-    String targetedSignals =
+  private static boolean isSignalTargeted(String checkSignal) {
+    String userSpecifiedTargetedSignals =
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
             () -> SIGNAL_TYPE_ALL);
-    return Arrays.stream(targetedSignals.split(","))
+    return Arrays.stream(userSpecifiedTargetedSignals.split(","))
         .map(String::trim)
-        .map(
+        .anyMatch(
             targetedSignal ->
-                targetedSignal.equals(signal) || targetedSignal.equals(SIGNAL_TYPE_ALL))
-        .findFirst()
-        .isPresent();
+                targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
