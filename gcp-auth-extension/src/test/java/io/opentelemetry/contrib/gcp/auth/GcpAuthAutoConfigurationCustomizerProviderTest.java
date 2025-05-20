@@ -249,7 +249,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
     System.setProperty(
-        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_METRICS);
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(),
+        SIGNAL_TYPE_METRICS);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpHttpMetricExporter mockOtlpHttpMetricExporter = Mockito.mock(OtlpHttpMetricExporter.class);
@@ -309,7 +310,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
     System.setProperty(
-        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_METRICS);
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(),
+        SIGNAL_TYPE_METRICS);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
     OtlpGrpcMetricExporter mockOtlpGrpcMetricExporter = Mockito.mock(OtlpGrpcMetricExporter.class);
