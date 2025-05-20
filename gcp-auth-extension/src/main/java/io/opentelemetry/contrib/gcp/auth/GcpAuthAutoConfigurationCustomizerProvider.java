@@ -70,7 +70,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
     autoConfiguration
         .addSpanExporterCustomizer(
-            (exporter, configProperties) -> addAuthorizationHeaders(exporter, credentials))
+            (exporter, configProperties) ->
+                addAuthorizationHeaders(exporter, credentials, configProperties))
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
@@ -82,22 +83,23 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
   // OtlpHttpSpanExporter.
   private static SpanExporter addAuthorizationHeaders(
-      SpanExporter exporter, GoogleCredentials credentials) {
+      SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (exporter instanceof OtlpHttpSpanExporter) {
       OtlpHttpSpanExporterBuilder builder =
           ((OtlpHttpSpanExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     } else if (exporter instanceof OtlpGrpcSpanExporter) {
       OtlpGrpcSpanExporterBuilder builder =
           ((OtlpGrpcSpanExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     }
     return exporter;
   }
 
-  private static Map<String, String> getRequiredHeaderMap(GoogleCredentials credentials) {
+  private static Map<String, String> getRequiredHeaderMap(
+      GoogleCredentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
     try {
       // this also refreshes the credentials, if required
@@ -120,7 +122,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
       Optional<String> maybeConfiguredQuotaProjectId =
-          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional();
+          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
+              configProperties);
       maybeConfiguredQuotaProjectId.ifPresent(
           configuredQuotaProjectId ->
               flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
@@ -130,7 +133,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue();
+    String gcpProjectId =
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     Resource res =
         Resource.create(
             Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
