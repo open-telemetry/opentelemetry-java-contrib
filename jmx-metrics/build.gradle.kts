@@ -17,7 +17,6 @@ val groovyVersion = "3.0.24"
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
-  implementation("io.grpc:grpc-netty-shaded:1.72.0")
   implementation("org.codehaus.groovy:groovy-jmx")
   implementation("org.codehaus.groovy:groovy")
   implementation("io.prometheus:simpleclient")
