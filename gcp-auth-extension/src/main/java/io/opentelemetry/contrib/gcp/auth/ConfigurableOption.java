@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.util.Locale;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
  * An enum representing configurable options for a GCP Authentication Extension. Each option has a
  * user-readable name and can be configured using environment variables or system properties.
  */
-public enum ConfigurableOption {
+enum ConfigurableOption {
   /**
    * Represents the Google Cloud Project ID option. Can be configured using the environment variable
    * `GOOGLE_CLOUD_PROJECT` or the system property `google.cloud.project`.
@@ -40,7 +41,7 @@ public enum ConfigurableOption {
     this.userReadableName = userReadableName;
     this.environmentVariableName = this.name();
     this.systemPropertyName =
-        this.environmentVariableName.toLowerCase(Locale.ENGLISH).replace('_', '.');
+        this.environmentVariableName.toLowerCase(Locale.ROOT).replace('_', '.');
   }
 
   /**
@@ -69,14 +70,10 @@ public enum ConfigurableOption {
    * @throws ConfigurationException if neither the environment variable nor the system property is
    *     set.
    */
-  String getConfiguredValue() {
-    String envVar = System.getenv(this.getEnvironmentVariable());
-    String sysProp = System.getProperty(this.getSystemProperty());
-
-    if (envVar != null && !envVar.isEmpty()) {
-      return envVar;
-    } else if (sysProp != null && !sysProp.isEmpty()) {
-      return sysProp;
+  String getConfiguredValue(ConfigProperties configProperties) {
+    String configuredValue = configProperties.getString(this.getSystemProperty());
+    if (configuredValue != null && !configuredValue.isEmpty()) {
+      return configuredValue;
     } else {
       throw new ConfigurationException(
           String.format(
@@ -95,9 +92,10 @@ public enum ConfigurableOption {
    * @return The configured value for the option, obtained from the environment variable, system
    *     property, or the fallback function, in that order of precedence.
    */
-  String getConfiguredValueWithFallback(Supplier<String> fallback) {
+  String getConfiguredValueWithFallback(
+      ConfigProperties configProperties, Supplier<String> fallback) {
     try {
-      return this.getConfiguredValue();
+      return this.getConfiguredValue(configProperties);
     } catch (ConfigurationException e) {
       return fallback.get();
     }
@@ -111,9 +109,9 @@ public enum ConfigurableOption {
    * @return The configured value for the option, if set, obtained from the environment variable,
    *     system property, or empty {@link Optional}, in that order of precedence.
    */
-  Optional<String> getConfiguredValueAsOptional() {
+  Optional<String> getConfiguredValueAsOptional(ConfigProperties configProperties) {
     try {
-      return Optional.of(this.getConfiguredValue());
+      return Optional.of(this.getConfiguredValue(configProperties));
     } catch (ConfigurationException e) {
       return Optional.empty();
     }
