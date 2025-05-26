@@ -28,7 +28,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  protos("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha@jar")
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha@jar")
 }
 
 animalsniffer {
