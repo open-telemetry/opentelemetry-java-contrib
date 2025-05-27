@@ -22,6 +22,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFi
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
@@ -234,7 +235,8 @@ class StorageTest {
             .setRootDir(new File("."))
             .build();
 
-    assertThatThrownBy(() -> Storage.builder().setStorageConfiguration(invalidConfig))
+    assertThatThrownBy(
+            () -> Storage.builder(SignalTypes.logs).setStorageConfiguration(invalidConfig))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(
             "The configured max file age for writing must be lower than the configured min file age for reading");

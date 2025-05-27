@@ -65,15 +65,14 @@ public class IntegrationTest {
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final long NOW_NANOS = MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS);
   private StorageConfiguration storageConfig;
-  private Storage storage;
+  private Storage spanStorage;
 
   @BeforeEach
   void setUp() throws IOException {
     clock = mock();
     storageConfig = StorageConfiguration.getDefault(rootDir);
-    storage =
-        Storage.builder()
-            .setFolderName(SignalTypes.spans.name())
+    spanStorage =
+        Storage.builder(SignalTypes.spans)
             .setStorageConfiguration(storageConfig)
             .setStorageClock(clock)
             .build();
@@ -107,7 +106,7 @@ public class IntegrationTest {
   @NotNull
   private <T> ToDiskExporter<T> buildToDiskExporter(
       SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter) {
-    return ToDiskExporter.<T>builder(storage)
+    return ToDiskExporter.<T>builder(spanStorage)
         .setSerializer(serializer)
         .setExportFunction(exporter)
         .build();
@@ -128,7 +127,7 @@ public class IntegrationTest {
     span.end();
     FromDiskExporterImpl<SpanData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(storage),
+            FromDiskExporterImpl.builder(spanStorage),
             memorySpanExporter::export,
             SignalDeserializer.ofSpans());
     assertExporter(fromDiskExporter, () -> memorySpanExporter.getFinishedSpanItems().size());
@@ -141,7 +140,7 @@ public class IntegrationTest {
 
     FromDiskExporterImpl<MetricData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(storage),
+            FromDiskExporterImpl.builder(spanStorage),
             memoryMetricExporter::export,
             SignalDeserializer.ofMetrics());
     assertExporter(fromDiskExporter, () -> memoryMetricExporter.getFinishedMetricItems().size());
@@ -153,7 +152,7 @@ public class IntegrationTest {
 
     FromDiskExporterImpl<LogRecordData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(storage),
+            FromDiskExporterImpl.builder(spanStorage),
             memoryLogRecordExporter::export,
             SignalDeserializer.ofLogs());
     assertExporter(

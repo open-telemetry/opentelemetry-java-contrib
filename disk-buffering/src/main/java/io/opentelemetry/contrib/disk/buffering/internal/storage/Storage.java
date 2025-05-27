@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.Pro
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,8 +38,8 @@ public final class Storage implements Closeable {
     this.debugEnabled = debugEnabled;
   }
 
-  public static StorageBuilder builder() {
-    return new StorageBuilder();
+  public static StorageBuilder builder(SignalTypes types) {
+    return new StorageBuilder(types);
   }
 
   public boolean isDebugEnabled() {

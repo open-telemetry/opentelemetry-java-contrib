@@ -51,8 +51,7 @@ class SpanFromDiskExporterTest {
     long start = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
     when(clock.now()).thenReturn(start);
     Storage storage =
-        Storage.builder()
-            .setFolderName(SignalTypes.spans.name())
+        Storage.builder(SignalTypes.spans)
             .setStorageConfiguration(StorageConfiguration.builder().setRootDir(tempDir).build())
             .setStorageClock(clock)
             .build();
