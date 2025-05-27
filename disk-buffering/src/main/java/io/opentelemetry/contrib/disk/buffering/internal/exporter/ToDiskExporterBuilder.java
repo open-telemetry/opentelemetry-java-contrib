@@ -12,20 +12,18 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 public final class ToDiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer = ts -> new byte[0];
 
-  @Deprecated
-  private final StorageBuilder storageBuilder = Storage.builder();
+  @Deprecated private final StorageBuilder storageBuilder = Storage.builder();
 
-  @Nullable
-  private Storage storage = null;
+  @Nullable private Storage storage = null;
 
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();

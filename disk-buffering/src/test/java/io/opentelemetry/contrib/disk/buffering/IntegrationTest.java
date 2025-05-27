@@ -74,11 +74,12 @@ public class IntegrationTest {
   void setUp() throws IOException {
     clock = mock();
     storageConfig = StorageConfiguration.getDefault(rootDir);
-    storage = Storage.builder()
-        .setFolderName(SignalTypes.spans.name())
-        .setStorageConfiguration(storageConfig)
-        .setStorageClock(clock)
-        .build();
+    storage =
+        Storage.builder()
+            .setFolderName(SignalTypes.spans.name())
+            .setStorageConfiguration(storageConfig)
+            .setStorageClock(clock)
+            .build();
 
     when(clock.now()).thenReturn(NOW_NANOS);
 

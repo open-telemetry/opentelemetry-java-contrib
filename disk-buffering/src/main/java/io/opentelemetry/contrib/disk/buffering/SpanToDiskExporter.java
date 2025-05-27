@@ -52,8 +52,7 @@ public class SpanToDiskExporter implements SpanExporter {
    * @return A new SpanToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
-  public static SpanToDiskExporter create(SpanExporter delegate,
-      Storage storage)
+  public static SpanToDiskExporter create(SpanExporter delegate, Storage storage)
       throws IOException {
     ToDiskExporter<SpanData> toDisk =
         ToDiskExporter.<SpanData>builder(storage)
