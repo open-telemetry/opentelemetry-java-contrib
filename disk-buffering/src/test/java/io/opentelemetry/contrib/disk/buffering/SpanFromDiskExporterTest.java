@@ -18,6 +18,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
@@ -50,12 +51,15 @@ class SpanFromDiskExporterTest {
     long start = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
     when(clock.now()).thenReturn(start);
     Storage storage =
-        io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getDefaultStorage(
-            tempDir, SignalTypes.spans.name(), clock);
+        Storage.builder()
+            .setFolderName(SignalTypes.spans.name())
+            .setStorageConfiguration(StorageConfiguration.builder().setRootDir(tempDir).build())
+            .setStorageClock(clock)
+            .build();
 
     List<SpanData> spans = writeSomeSpans(storage);
 
-    when(clock.now()).thenReturn(start + TimeUnit.MILLISECONDS.toNanos(2000));
+    when(clock.now()).thenReturn(start + TimeUnit.SECONDS.toNanos(60));
 
     SpanExporter exporter = mock();
     ArgumentCaptor<Collection<SpanData>> capture = ArgumentCaptor.forClass(Collection.class);
