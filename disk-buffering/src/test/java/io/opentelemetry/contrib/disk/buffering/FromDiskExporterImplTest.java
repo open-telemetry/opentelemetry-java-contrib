@@ -49,12 +49,10 @@ class FromDiskExporterImplTest {
     setUpSerializer();
     wrapped = mock();
     exporter =
-        FromDiskExporterImpl.<SpanData>builder()
-            .setFolderName(STORAGE_FOLDER_NAME)
-            .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
+        FromDiskExporterImpl.<SpanData>builder(
+                TestData.getDefaultStorage(rootDir, STORAGE_FOLDER_NAME, clock))
             .setDeserializer(deserializer)
             .setExportFunction(wrapped::export)
-            .setStorageClock(clock)
             .build();
   }
 

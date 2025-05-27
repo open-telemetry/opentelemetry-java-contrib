@@ -32,17 +32,17 @@ public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter
   FromDiskExporterImpl(
       SignalDeserializer<EXPORT_DATA> deserializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      Storage storage,
-      boolean debugEnabled) {
+      Storage storage) {
     this.deserializer = deserializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
     this.logger =
-        DebugLogger.wrap(Logger.getLogger(FromDiskExporterImpl.class.getName()), debugEnabled);
+        DebugLogger.wrap(
+            Logger.getLogger(FromDiskExporterImpl.class.getName()), storage.isDebugEnabled());
   }
 
-  public static <T> FromDiskExporterBuilder<T> builder() {
-    return new FromDiskExporterBuilder<>();
+  public static <T> FromDiskExporterBuilder<T> builder(Storage storage) {
+    return new FromDiskExporterBuilder<>(storage);
   }
 
   /**

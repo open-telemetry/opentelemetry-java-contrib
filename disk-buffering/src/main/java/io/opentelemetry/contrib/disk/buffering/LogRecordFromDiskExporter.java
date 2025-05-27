@@ -5,11 +5,10 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.io.IOException;
@@ -19,15 +18,12 @@ public class LogRecordFromDiskExporter implements FromDiskExporter {
 
   private final FromDiskExporterImpl<LogRecordData> delegate;
 
-  public static LogRecordFromDiskExporter create(
-      LogRecordExporter exporter, StorageConfiguration config) throws IOException {
+  public static LogRecordFromDiskExporter create(LogRecordExporter exporter, Storage storage)
+      throws IOException {
     FromDiskExporterImpl<LogRecordData> delegate =
-        FromDiskExporterImpl.<LogRecordData>builder()
-            .setFolderName(SignalTypes.logs.name())
-            .setStorageConfiguration(config)
+        FromDiskExporterImpl.<LogRecordData>builder(storage)
             .setDeserializer(SignalDeserializer.ofLogs())
             .setExportFunction(exporter::export)
-            .setDebugEnabled(config.isDebugEnabled())
             .build();
     return new LogRecordFromDiskExporter(delegate);
   }

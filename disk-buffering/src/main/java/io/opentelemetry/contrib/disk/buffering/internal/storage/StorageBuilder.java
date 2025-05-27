@@ -31,6 +31,7 @@ public class StorageBuilder {
 
   @CanIgnoreReturnValue
   public StorageBuilder setStorageConfiguration(StorageConfiguration configuration) {
+    validateConfiguration(configuration);
     this.configuration = configuration;
     return this;
   }
@@ -56,5 +57,16 @@ public class StorageBuilder {
       return subdir;
     }
     throw new IOException("Could not create the subdir: '" + child + "' inside: " + rootDir);
+  }
+
+  private static void validateConfiguration(StorageConfiguration configuration) {
+    // ignore the check if debug is enabled - because it's needed for a test case
+    // todo remove this when the test case is fixed
+    if (!configuration.isDebugEnabled()
+        && configuration.getMinFileAgeForReadMillis()
+            <= configuration.getMaxFileAgeForWriteMillis()) {
+      throw new IllegalArgumentException(
+          "The configured max file age for writing must be lower than the configured min file age for reading");
+    }
   }
 }

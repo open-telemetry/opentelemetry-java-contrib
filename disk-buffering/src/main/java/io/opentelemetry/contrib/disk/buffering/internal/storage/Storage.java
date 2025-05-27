@@ -24,8 +24,8 @@ import javax.annotation.Nullable;
 public final class Storage implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final DebugLogger logger;
-
   private final FolderManager folderManager;
+  private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   @Nullable private WritableFile writableFile;
   @Nullable private ReadableFile readableFile;
@@ -34,10 +34,15 @@ public final class Storage implements Closeable {
     this.folderManager = folderManager;
     this.logger =
         DebugLogger.wrap(Logger.getLogger(FromDiskExporterImpl.class.getName()), debugEnabled);
+    this.debugEnabled = debugEnabled;
   }
 
   public static StorageBuilder builder() {
     return new StorageBuilder();
+  }
+
+  public boolean isDebugEnabled() {
+    return debugEnabled;
   }
 
   /**
