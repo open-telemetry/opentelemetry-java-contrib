@@ -67,14 +67,16 @@ public class IntegrationTest {
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final long NOW_NANOS = MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS);
+  private StorageConfiguration storageConfig;
   private Storage storage;
 
   @BeforeEach
   void setUp() throws IOException {
     clock = mock();
+    storageConfig = StorageConfiguration.getDefault(rootDir);
     storage = Storage.builder()
         .setFolderName(SignalTypes.spans.name())
-        .setStorageConfiguration(StorageConfiguration.getDefault(rootDir))
+        .setStorageConfiguration(storageConfig)
         .setStorageClock(clock)
         .build();
 

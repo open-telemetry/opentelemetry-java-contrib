@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class ToDiskExporterBuilderTest {
 
+  @SuppressWarnings("deprecation") // todo
   @Test
   void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
     StorageConfiguration invalidConfig =

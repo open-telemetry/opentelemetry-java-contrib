@@ -35,6 +35,7 @@ public class MetricToDiskExporter implements MetricExporter {
    * @return A new MetricToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
+  @SuppressWarnings("deprecation")
   public static MetricToDiskExporter create(MetricExporter delegate, StorageConfiguration config)
       throws IOException {
     ToDiskExporter<MetricData> toDisk =

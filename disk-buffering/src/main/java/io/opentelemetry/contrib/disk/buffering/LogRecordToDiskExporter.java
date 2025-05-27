@@ -30,6 +30,7 @@ public class LogRecordToDiskExporter implements LogRecordExporter {
    * @return A new LogRecordToDiskExporter instance.
    * @throws IOException if the delegate ToDiskExporter could not be created.
    */
+  @SuppressWarnings("deprecation")
   public static LogRecordToDiskExporter create(
       LogRecordExporter delegate, StorageConfiguration config) throws IOException {
     ToDiskExporter<LogRecordData> toDisk =
