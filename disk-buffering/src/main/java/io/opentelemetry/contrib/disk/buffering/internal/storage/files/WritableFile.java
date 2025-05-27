@@ -11,9 +11,9 @@ import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WritableFile implements FileOperations {
@@ -35,7 +35,7 @@ public final class WritableFile implements FileOperations {
     this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
     size = (int) file.length();
-    out = Files.newOutputStream(file.toPath());
+    out = new FileOutputStream(file);
   }
 
   /**
