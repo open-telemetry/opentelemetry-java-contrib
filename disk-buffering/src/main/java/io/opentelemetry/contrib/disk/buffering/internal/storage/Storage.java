@@ -77,6 +77,14 @@ public final class Storage implements Closeable {
     return true;
   }
 
+  public void flush() throws IOException {
+    if (writableFile != null) {
+      writableFile.flush();
+    } else {
+      logger.log("No writable file to flush.");
+    }
+  }
+
   /**
    * Attempts to read an item from a ready-to-read file.
    *

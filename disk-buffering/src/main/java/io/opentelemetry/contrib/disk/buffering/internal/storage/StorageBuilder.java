@@ -60,11 +60,7 @@ public class StorageBuilder {
   }
 
   private static void validateConfiguration(StorageConfiguration configuration) {
-    // ignore the check if debug is enabled - because it's needed for a test case
-    // todo remove this when the test case is fixed
-    if (!configuration.isDebugEnabled()
-        && configuration.getMinFileAgeForReadMillis()
-            <= configuration.getMaxFileAgeForWriteMillis()) {
+    if (configuration.getMinFileAgeForReadMillis() <= configuration.getMaxFileAgeForWriteMillis()) {
       throw new IllegalArgumentException(
           "The configured max file age for writing must be lower than the configured min file age for reading");
     }

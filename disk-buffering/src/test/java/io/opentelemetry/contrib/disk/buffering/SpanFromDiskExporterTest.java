@@ -18,13 +18,12 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -47,23 +46,16 @@ class SpanFromDiskExporterTest {
   @SuppressWarnings("unchecked")
   @Test
   void fromDisk() throws Exception {
-    StorageConfiguration config =
-        StorageConfiguration.builder()
-            .setRootDir(tempDir)
-            .setDebugEnabled(true)
-            .setMaxFileAgeForWriteMillis(TimeUnit.HOURS.toMillis(24))
-            .setMinFileAgeForReadMillis(0)
-            .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(24))
-            .setTemporaryFileProvider(DefaultTemporaryFileProvider.getInstance())
-            .build();
-
+    Clock clock = mock(Clock.class);
+    long start = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
+    when(clock.now()).thenReturn(start);
     Storage storage =
-        Storage.builder()
-            .setStorageConfiguration(config)
-            .setFolderName(SignalTypes.spans.name())
-            .build();
+        io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getDefaultStorage(
+            tempDir, SignalTypes.spans.name(), clock);
 
     List<SpanData> spans = writeSomeSpans(storage);
+
+    when(clock.now()).thenReturn(start + TimeUnit.MILLISECONDS.toNanos(2000));
 
     SpanExporter exporter = mock();
     ArgumentCaptor<Collection<SpanData>> capture = ArgumentCaptor.forClass(Collection.class);
@@ -92,6 +84,7 @@ class SpanFromDiskExporterTest {
     List<SpanData> spans = Arrays.asList(span1, span2);
 
     storage.write(SignalSerializer.ofSpans().serialize(spans));
+    storage.flush();
     return spans;
   }
 
