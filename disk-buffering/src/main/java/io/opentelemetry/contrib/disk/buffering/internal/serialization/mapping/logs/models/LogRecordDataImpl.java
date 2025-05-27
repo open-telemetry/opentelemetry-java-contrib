@@ -22,6 +22,14 @@ public abstract class LogRecordDataImpl implements LogRecordData {
     return new AutoValue_LogRecordDataImpl.Builder();
   }
 
+  @Deprecated
+  public io.opentelemetry.sdk.logs.data.Body getBody() {
+    Value<?> valueBody = getBodyValue();
+    return valueBody == null
+        ? io.opentelemetry.sdk.logs.data.Body.empty()
+        : io.opentelemetry.sdk.logs.data.Body.string(valueBody.asString());
+  }
+
   @Override
   @Nullable
   public abstract Value<?> getBodyValue();
