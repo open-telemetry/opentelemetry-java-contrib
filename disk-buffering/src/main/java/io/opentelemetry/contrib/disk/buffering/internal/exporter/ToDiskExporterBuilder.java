@@ -12,6 +12,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.StorageBuilder;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
@@ -20,13 +21,25 @@ public final class ToDiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer = ts -> new byte[0];
 
+  @Deprecated
   private final StorageBuilder storageBuilder = Storage.builder();
+
+  @Nullable
+  private Storage storage = null;
 
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
   private boolean debugEnabled = false;
 
+  @Deprecated
   ToDiskExporterBuilder() {}
+
+  ToDiskExporterBuilder(Storage storage) {
+    if (storage == null) {
+      throw new NullPointerException("Storage cannot be null");
+    }
+    this.storage = storage;
+  }
 
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> enableDebug() {
@@ -39,12 +52,14 @@ public final class ToDiskExporterBuilder<T> {
     return this;
   }
 
+  @Deprecated
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> setFolderName(String folderName) {
     storageBuilder.setFolderName(folderName);
     return this;
   }
 
+  @Deprecated
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> setStorageConfiguration(StorageConfiguration configuration) {
     validateConfiguration(configuration);
@@ -52,9 +67,16 @@ public final class ToDiskExporterBuilder<T> {
     return this;
   }
 
+  @Deprecated
   @CanIgnoreReturnValue
   public ToDiskExporterBuilder<T> setStorageClock(Clock clock) {
     storageBuilder.setStorageClock(clock);
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public ToDiskExporterBuilder<T> setStorage(Storage storage) {
+    this.storage = storage;
     return this;
   }
 
@@ -72,7 +94,7 @@ public final class ToDiskExporterBuilder<T> {
   }
 
   public ToDiskExporter<T> build() throws IOException {
-    Storage storage = storageBuilder.build();
+    Storage storage = this.storage != null ? this.storage : storageBuilder.build();
     return new ToDiskExporter<>(serializer, exportFunction, storage, debugEnabled);
   }
 

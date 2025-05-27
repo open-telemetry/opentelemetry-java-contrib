@@ -33,8 +33,13 @@ public class ToDiskExporter<EXPORT_DATA> {
     this.logger = DebugLogger.wrap(Logger.getLogger(ToDiskExporter.class.getName()), debugEnabled);
   }
 
+  @Deprecated
   public static <T> ToDiskExporterBuilder<T> builder() {
     return new ToDiskExporterBuilder<>();
+  }
+
+  public static <T> ToDiskExporterBuilder<T> builder(Storage storage) {
+    return new ToDiskExporterBuilder<>(storage);
   }
 
   public CompletableResultCode export(Collection<EXPORT_DATA> data) {

@@ -22,6 +22,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -66,12 +67,16 @@ public class IntegrationTest {
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final long NOW_NANOS = MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS);
-  private StorageConfiguration storageConfig;
+  private Storage storage;
 
   @BeforeEach
   void setUp() throws IOException {
-    storageConfig = StorageConfiguration.getDefault(rootDir);
     clock = mock();
+    storage = Storage.builder()
+        .setFolderName(SignalTypes.spans.name())
+        .setStorageConfiguration(StorageConfiguration.getDefault(rootDir))
+        .setStorageClock(clock)
+        .build();
 
     when(clock.now()).thenReturn(NOW_NANOS);
 
@@ -102,12 +107,9 @@ public class IntegrationTest {
   private <T> ToDiskExporter<T> buildToDiskExporter(
       SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter)
       throws IOException {
-    return ToDiskExporter.<T>builder()
-        .setFolderName(SignalTypes.spans.name())
-        .setStorageConfiguration(storageConfig)
+    return ToDiskExporter.<T>builder(storage)
         .setSerializer(serializer)
         .setExportFunction(exporter)
-        .setStorageClock(clock)
         .build();
   }
 
