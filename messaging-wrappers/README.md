@@ -47,7 +47,7 @@ detailed example, please check out [KafkaClientTest](./kafka-clients/src/test/ja
 To use OpenTelemetry in your project, you need to add the necessary dependencies. Below are the configurations for both
 Gradle and Maven.
 
-#### Gradle
+### [Given] Gradle
 
 ```kotlin
 dependencies {
@@ -55,7 +55,7 @@ dependencies {
 }
 ```
 
-#### Maven
+### [Given] Maven
 
 ```xml
 <dependency>
@@ -125,7 +125,7 @@ custom message protocol. For detailed example, please check out [UserDefinedMess
 
 ### [Manual] Step 1 Add dependencies
 
-#### Gradle
+#### [Manual] Gradle
 
 ```kotlin
 dependencies {
@@ -133,7 +133,7 @@ dependencies {
 }
 ```
 
-#### Maven
+#### [Manual] Maven
 
 ```xml
 <dependency>
@@ -209,4 +209,3 @@ public class Demo {
 - [Steve Rao](https://github.com/steverao), Alibaba
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
-

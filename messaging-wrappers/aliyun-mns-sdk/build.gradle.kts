@@ -31,3 +31,10 @@ tasks {
     jvmArgs("-Dotel.logs.exporter=logging")
   }
 }
+
+configurations.testRuntimeClasspath {
+  resolutionStrategy {
+    force("ch.qos.logback:logback-classic:1.2.12")
+    force("org.slf4j:slf4j-api:1.7.35")
+  }
+}

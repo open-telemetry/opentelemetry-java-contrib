@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.messaging.wrappers.mns;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ENVELOPE_SIZE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,7 @@ import io.opentelemetry.contrib.messaging.wrappers.mns.broker.SmqMockedBroker;
 import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MnsProcessRequest;
 import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -140,11 +142,15 @@ public class AliyunMnsSdkTest extends AbstractBaseTest {
                         .hasKind(SpanKind.CONSUMER)
                         .hasParent(trace.getSpan(0))
                         .hasAttributesSatisfyingExactly(
-                            equalTo(MESSAGING_SYSTEM, "guava-eventbus"),
+                            equalTo(MESSAGING_SYSTEM, "smq"),
                             equalTo(MESSAGING_DESTINATION_NAME, QUEUE),
                             equalTo(
                                 MESSAGING_MESSAGE_BODY_SIZE,
                                 MESSAGE_BODY.getBytes(StandardCharsets.UTF_8).length),
+                            equalTo(
+                                MESSAGING_MESSAGE_ENVELOPE_SIZE,
+                                Base64.encodeBase64(MESSAGE_BODY.getBytes(StandardCharsets.UTF_8))
+                                    .length),
                             equalTo(MESSAGING_OPERATION, "process")),
                 span ->
                     span.hasName("process child")

@@ -41,7 +41,11 @@ public final class SmqUtils {
   }
 
   public static String generateRandomRequestId() {
-    return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 24).toUpperCase(Locale.ROOT);
+    return UUID.randomUUID()
+        .toString()
+        .replaceAll("-", "")
+        .substring(0, 24)
+        .toUpperCase(Locale.ROOT);
   }
 
   public static ErrorMessage createErrorMessage(String requestId) {
@@ -68,6 +72,5 @@ public final class SmqUtils {
     return sb.toString();
   }
 
-  private SmqUtils() {
-  }
+  private SmqUtils() {}
 }

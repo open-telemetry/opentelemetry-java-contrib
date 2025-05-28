@@ -38,3 +38,9 @@ tasks {
     jvmArgs("-Dotel.logs.exporter=logging")
   }
 }
+
+configurations.all {
+  resolutionStrategy {
+    force("org.apache.kafka:kafka-clients:0.11.0.0")
+  }
+}

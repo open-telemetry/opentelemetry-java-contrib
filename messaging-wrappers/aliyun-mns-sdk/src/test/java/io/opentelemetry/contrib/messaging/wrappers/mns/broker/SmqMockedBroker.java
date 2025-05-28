@@ -49,18 +49,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @SpringBootApplication
-@SuppressWarnings({"JavaUtilDate", "LockNotBeforeTry", "SystemOut"})
+@SuppressWarnings({
+  "JavaUtilDate",
+  "LockNotBeforeTry",
+  "SystemOut",
+  "PrivateConstructorForUtilityClass"
+})
 public class SmqMockedBroker {
 
   public static void main(String[] args) {
-    System.out.println(System.getProperty("java.class.path"));
     SpringApplication.run(SmqMockedBroker.class, args);
   }
 
   @Controller
   @Scope("singleton")
   public static class BrokerController {
-    
+
     Lock queuesLock = new ReentrantLock();
 
     Map<String, Deque<Message>> queues = new HashMap<>();
@@ -224,8 +228,5 @@ public class SmqMockedBroker {
           .header(X_HEADER_MNS_REQUEST_ID, requestId)
           .build();
     }
-  }
-
-  private SmqMockedBroker() {
   }
 }

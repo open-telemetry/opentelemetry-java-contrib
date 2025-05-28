@@ -104,7 +104,7 @@ public class KafkaClientTest extends KafkaClientBaseTest {
   public void consumeWithChild(
       Tracer tracer, MessagingProcessWrapper<KafkaProcessRequest> wrapper) {
     // check that the message was received
-    ConsumerRecords<?, ?> records = consumer.poll(Duration.ofSeconds(5));
+    ConsumerRecords<?, ?> records = consumer.poll(Duration.ofSeconds(5).toMillis());
     assertThat(records.count()).isEqualTo(1);
     ConsumerRecord<?, ?> record = records.iterator().next();
     assertThat(record.value()).isEqualTo(greeting);

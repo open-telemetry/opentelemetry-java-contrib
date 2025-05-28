@@ -135,7 +135,7 @@ public abstract class KafkaClientBaseTest extends AbstractBaseTest {
       return;
     }
     for (int i = 0; i < 60; i++) {
-      consumer.poll(Duration.ZERO);
+      consumer.poll(0L);
       if (consumerReady.await(3, TimeUnit.SECONDS)) {
         break;
       }
