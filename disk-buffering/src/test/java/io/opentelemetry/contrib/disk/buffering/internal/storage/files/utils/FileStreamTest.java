@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class FileReaderTest {
+class FileStreamTest {
   @TempDir File dir;
 
   @Test
@@ -21,33 +21,33 @@ class FileReaderTest {
     File temporaryFile = new File(dir, "temporaryFile");
     writeString(temporaryFile, initialText);
 
-    FileReader reader = FileReader.create(temporaryFile);
+    FileStream stream = FileStream.create(temporaryFile);
 
-    assertThat((char) reader.read()).asString().isEqualTo("1");
+    assertThat((char) stream.read()).asString().isEqualTo("1");
     assertThat(readString(temporaryFile)).isEqualTo(initialText);
 
     // Truncate until current position
-    reader.truncateTop();
+    stream.truncateTop();
     assertThat(readString(temporaryFile)).isEqualTo(",2,3,4,5");
 
     // Truncate fixed size from the top
-    reader.truncateTop(3);
+    stream.truncateTop(3);
 
-    // Ensure that the changes are made before closing the reader.
+    // Ensure that the changes are made before closing the stream.
     assertThat(readString(temporaryFile)).isEqualTo("3,4,5");
 
     // Truncate again
     readBuffer = new byte[3];
-    reader.read(readBuffer);
+    stream.read(readBuffer);
     assertThat(readBuffer).asString().isEqualTo("3,4");
-    reader.truncateTop(2);
+    stream.truncateTop(2);
 
-    // Ensure that the changes are made before closing the reader.
+    // Ensure that the changes are made before closing the stream.
     assertThat(readString(temporaryFile)).isEqualTo("4,5");
 
-    reader.close();
+    stream.close();
 
-    // Ensure that the changes are kept after closing the reader.
+    // Ensure that the changes are kept after closing the stream.
     assertThat(readString(temporaryFile)).isEqualTo("4,5");
   }
 

@@ -1,33 +1,41 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import org.jetbrains.annotations.NotNull;
 
-public class FileReader implements Closeable {
+public class FileStream extends InputStream {
   private final RandomAccessFile file;
   private final FileChannel channel;
 
-  public static FileReader create(File file) throws IOException {
+  public static FileStream create(File file) throws IOException {
     RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rwd");
     FileChannel channel = randomAccessFile.getChannel();
     channel.force(false);
-    return new FileReader(randomAccessFile, channel);
+    return new FileStream(randomAccessFile, channel);
   }
 
-  private FileReader(RandomAccessFile file, FileChannel channel) {
+  private FileStream(RandomAccessFile file, FileChannel channel) {
     this.file = file;
     this.channel = channel;
   }
 
+  @Override
   public int read() throws IOException {
     return file.read();
   }
 
-  public int read(byte[] bytes) throws IOException {
+  @Override
+  public int read(@NotNull byte[] bytes) throws IOException {
     return file.read(bytes);
+  }
+
+  @Override
+  public int read(@NotNull byte[] b, int off, int len) throws IOException {
+    return file.read(b, off, len);
   }
 
   @Override
@@ -52,5 +60,9 @@ public class FileReader implements Closeable {
     file.seek(0);
     file.write(remainingBytes);
     file.seek(0);
+  }
+
+  public long getPosition() throws IOException {
+    return file.getFilePointer();
   }
 }
