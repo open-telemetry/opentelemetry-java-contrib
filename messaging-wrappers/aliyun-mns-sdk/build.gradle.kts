@@ -12,10 +12,12 @@ dependencies {
 
   compileOnly("com.aliyun.mns:aliyun-sdk-mns:1.3.0")
 
+  testImplementation(project(":messaging-wrappers:testing"))
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-  testImplementation("uk.org.webcompere:system-stubs-jupiter:2.0.3")
+
+  testImplementation("com.aliyun.mns:aliyun-sdk-mns:1.3.0")
+  testImplementation("org.springframework.boot:spring-boot-starter-web:3.0.0")
 }
