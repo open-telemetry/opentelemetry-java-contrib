@@ -9,15 +9,9 @@ import java.io.Closeable;
 import java.io.File;
 
 public interface FileOperations extends Closeable {
-  long getSize();
-
   boolean hasExpired();
 
   boolean isClosed();
 
   File getFile();
-
-  default String getFileName() {
-    return getFile().getName();
-  }
 }

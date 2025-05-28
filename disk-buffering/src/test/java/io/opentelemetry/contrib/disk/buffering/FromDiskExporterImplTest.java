@@ -51,7 +51,7 @@ class FromDiskExporterImplTest {
     exporter =
         FromDiskExporterImpl.<SpanData>builder()
             .setFolderName(STORAGE_FOLDER_NAME)
-            .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
+            .setStorageConfiguration(TestData.getConfiguration(rootDir))
             .setDeserializer(deserializer)
             .setExportFunction(wrapped::export)
             .setStorageClock(clock)

@@ -5,40 +5,39 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileStream;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.annotation.Nullable;
 
 public final class DelimitedProtoStreamReader implements StreamReader {
-  private final FileStream fileStream;
+  private final InputStream inputStream;
 
-  public DelimitedProtoStreamReader(FileStream fileStream) {
-    this.fileStream = fileStream;
+  public DelimitedProtoStreamReader(InputStream inputStream) {
+    this.inputStream = inputStream;
   }
 
   @Override
   @Nullable
-  public ReadResult read() throws IOException {
-    long startingPosition = fileStream.getPosition();
+  public ReadResult readNext() throws IOException {
     int itemSize = getNextItemSize();
     if (itemSize < 1) {
       return null;
     }
     byte[] bytes = new byte[itemSize];
-    if (fileStream.read(bytes) < 0) {
+    if (inputStream.read(bytes) < 0) {
       return null;
     }
-    return new ReadResult(bytes, fileStream.getPosition() - startingPosition);
+    return new ReadResult(bytes);
   }
 
   private int getNextItemSize() {
     try {
-      int firstByte = fileStream.read();
+      int firstByte = inputStream.read();
       if (firstByte == -1) {
         return 0;
       }
-      return ProtobufTools.readRawVarint32(firstByte, fileStream);
+      return ProtobufTools.readRawVarint32(firstByte, inputStream);
     } catch (IOException e) {
       return 0;
     }
@@ -46,7 +45,7 @@ public final class DelimitedProtoStreamReader implements StreamReader {
 
   @Override
   public void close() throws IOException {
-    fileStream.close();
+    inputStream.close();
   }
 
   public static class Factory implements StreamReader.Factory {
@@ -60,8 +59,8 @@ public final class DelimitedProtoStreamReader implements StreamReader {
     private Factory() {}
 
     @Override
-    public StreamReader create(FileStream fileStream) {
-      return new DelimitedProtoStreamReader(fileStream);
+    public StreamReader create(InputStream inputStream) {
+      return new DelimitedProtoStreamReader(inputStream);
     }
   }
 }

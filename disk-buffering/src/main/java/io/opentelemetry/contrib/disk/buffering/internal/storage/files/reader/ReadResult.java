@@ -9,14 +9,7 @@ public final class ReadResult {
   /** The consumable data. */
   public final byte[] content;
 
-  /**
-   * The total amount of data read from the stream. This number can be greater than the content
-   * length as it also takes into account any delimiters size.
-   */
-  public final long totalReadLength;
-
-  public ReadResult(byte[] content, long totalReadLength) {
+  public ReadResult(byte[] content) {
     this.content = content;
-    this.totalReadLength = totalReadLength;
   }
 }

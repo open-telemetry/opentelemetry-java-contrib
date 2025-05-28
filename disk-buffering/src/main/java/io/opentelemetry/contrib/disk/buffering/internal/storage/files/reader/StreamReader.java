@@ -5,16 +5,16 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.annotation.Nullable;
 
 public interface StreamReader extends Closeable {
   @Nullable
-  ReadResult read() throws IOException;
+  ReadResult readNext() throws IOException;
 
   interface Factory {
-    StreamReader create(FileStream stream);
+    StreamReader create(InputStream stream);
   }
 }

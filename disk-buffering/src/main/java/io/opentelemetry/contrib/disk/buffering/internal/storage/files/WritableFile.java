@@ -63,7 +63,6 @@ public final class WritableFile implements FileOperations {
     return WritableResult.SUCCEEDED;
   }
 
-  @Override
   public synchronized long getSize() {
     return size;
   }
