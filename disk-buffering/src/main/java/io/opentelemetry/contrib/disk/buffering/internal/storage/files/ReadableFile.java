@@ -84,7 +84,7 @@ public final class ReadableFile implements FileOperations {
     }
     ReadResult read = readNextItem();
     if (read == null) {
-      close();
+      cleanUp();
       return ReadableResult.FAILED;
     }
     switch (processing.apply(read.content)) {
@@ -92,14 +92,14 @@ public final class ReadableFile implements FileOperations {
         unconsumedResult = null;
         fileStream.truncateTop();
         if (fileStream.size() == 0) {
-          close();
+          cleanUp();
         }
         return ReadableResult.SUCCEEDED;
       case TRY_LATER:
         unconsumedResult = read;
         return ReadableResult.TRY_LATER;
       case CONTENT_INVALID:
-        close();
+        cleanUp();
         return ReadableResult.FAILED;
     }
     return ReadableResult.FAILED;
@@ -129,14 +129,18 @@ public final class ReadableFile implements FileOperations {
     return file;
   }
 
+  private void cleanUp() throws IOException {
+    close();
+    if (!file.delete()) {
+      throw new IOException("Could not delete file: " + file);
+    }
+  }
+
   @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       unconsumedResult = null;
       reader.close();
-      if (!file.delete()) {
-        throw new IOException("Could not delete file: " + file);
-      }
     }
   }
 

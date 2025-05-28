@@ -20,7 +20,6 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
@@ -54,7 +53,6 @@ class SpanFromDiskExporterTest {
             .setMaxFileAgeForWriteMillis(TimeUnit.HOURS.toMillis(24))
             .setMinFileAgeForReadMillis(0)
             .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(24))
-            .setTemporaryFileProvider(DefaultTemporaryFileProvider.getInstance())
             .build();
 
     List<SpanData> spans = writeSomeSpans(config);
