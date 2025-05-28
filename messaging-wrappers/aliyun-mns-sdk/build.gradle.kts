@@ -12,12 +12,22 @@ dependencies {
 
   compileOnly("com.aliyun.mns:aliyun-sdk-mns:1.3.0")
 
-  testImplementation(project(":messaging-wrappers:testing"))
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-trace")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-
   testImplementation("com.aliyun.mns:aliyun-sdk-mns:1.3.0")
-  testImplementation("org.springframework.boot:spring-boot-starter-web:3.0.0")
+  testImplementation(project(":messaging-wrappers:testing"))
+
+  testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
+  testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
+}
+
+tasks {
+  withType<Test>().configureEach {
+    jvmArgs("-Dotel.java.global-autoconfigure.enabled=true")
+    // TODO: According to https://opentelemetry.io/docs/specs/semconv/messaging/messaging-spans/#message-creation-context-as-parent-of-process-span,
+    //  process span should be the child of receive span. However, we couldn't access the trace context with receive span
+    //  in wrappers, unless we add a generic accessor for that.
+    jvmArgs("-Dotel.instrumentation.messaging.experimental.receive-telemetry.enabled=false")
+    jvmArgs("-Dotel.traces.exporter=logging")
+    jvmArgs("-Dotel.metrics.exporter=logging")
+    jvmArgs("-Dotel.logs.exporter=logging")
+  }
 }

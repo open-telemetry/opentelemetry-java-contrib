@@ -68,7 +68,7 @@ public class MnsProcessRequest implements MessagingProcessRequest {
   @Nullable
   @Override
   public Long getMessageEnvelopeSize() {
-    return null;
+    return (long) message.getMessageBodyAsRawBytes().length;
   }
 
   @Nullable
