@@ -38,6 +38,10 @@ public class FileStream extends InputStream {
     return file.read(b, off, len);
   }
 
+  public long size() throws IOException {
+    return channel.size();
+  }
+
   @Override
   public void close() throws IOException {
     channel.close();
