@@ -22,6 +22,7 @@ val protos by configurations.creating
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
+  implementation("io.opentelemetry:opentelemetry-api-incubator")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
   signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")

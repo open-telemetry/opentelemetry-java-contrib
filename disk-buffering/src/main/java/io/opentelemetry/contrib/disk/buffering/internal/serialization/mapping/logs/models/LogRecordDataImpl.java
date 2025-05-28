@@ -9,15 +9,17 @@ import com.google.auto.value.AutoValue;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.Value;
+import io.opentelemetry.api.incubator.common.ExtendedAttributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import javax.annotation.Nullable;
 
+@SuppressWarnings({"deprecation", "SuppressWarningsWithoutExplanation"})
 @AutoValue
-public abstract class LogRecordDataImpl implements LogRecordData {
+public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
 
   public static Builder builder() {
     return new AutoValue_LogRecordDataImpl.Builder();
@@ -30,6 +32,14 @@ public abstract class LogRecordDataImpl implements LogRecordData {
         ? io.opentelemetry.sdk.logs.data.Body.empty()
         : io.opentelemetry.sdk.logs.data.Body.string(valueBody.asString());
   }
+
+  @Override
+  public ExtendedAttributes getExtendedAttributes() {
+    return ExtendedAttributes.builder().putAll(getAttributes()).build();
+  }
+
+  @Override
+  public abstract Attributes getAttributes();
 
   @Override
   @Nullable
