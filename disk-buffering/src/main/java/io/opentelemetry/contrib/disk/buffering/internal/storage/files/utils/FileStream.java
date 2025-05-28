@@ -63,7 +63,7 @@ public class FileStream extends InputStream {
       byte[] remainingBytes = new byte[(int) remainingSize];
       file.read(remainingBytes);
       file.seek(0);
-      channel.truncate(position);
+      channel.truncate(remainingSize);
       file.write(remainingBytes);
       file.seek(0);
     } else {
