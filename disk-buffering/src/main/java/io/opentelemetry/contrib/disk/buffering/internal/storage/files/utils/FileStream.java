@@ -49,7 +49,7 @@ public class FileStream extends InputStream {
   }
 
   public void truncateTop(long size) throws IOException {
-    file.seek(size);
+    file.seek(Math.min(size(), size));
     truncateTop();
   }
 
