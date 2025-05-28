@@ -1,7 +1,7 @@
 # Casandra Metrics
 
 The JMX Metric Gatherer provides built in Cassandra metric gathering capabilities.
-These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each node: https://cassandra.apache.org/doc/latest/operating/metrics.html.
+These metrics are sourced from Cassandra's exposed Dropwizard Metrics for each node: https://cassandra.apache.org/doc/latest/cassandra/managing/operating/metrics.html.
 
 ## Metrics
 

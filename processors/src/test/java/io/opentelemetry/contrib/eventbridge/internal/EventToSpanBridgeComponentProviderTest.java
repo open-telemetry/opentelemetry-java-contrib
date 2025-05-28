@@ -18,7 +18,7 @@ class EventToSpanBridgeComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 0.3\n"
+        "file_format: 0.4\n"
             + "logger_provider:\n"
             + "  processors:\n"
             + "    - event_to_span_event_bridge:\n";

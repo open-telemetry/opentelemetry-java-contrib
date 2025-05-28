@@ -6,7 +6,7 @@ plugins {
 }
 
 // NOTE
-// `META-INF/sis/javax.inject.Named` is manually handled under src/main/resources because there is
+// `META-INF/sisu/javax.inject.Named` is manually handled under src/main/resources because there is
 // no Gradle equivalent to the Maven plugin `org.eclipse.sisu:sisu-maven-plugin`
 
 description = "Maven extension to observe Maven builds with distributed traces using OpenTelemetry SDK"
@@ -24,7 +24,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")

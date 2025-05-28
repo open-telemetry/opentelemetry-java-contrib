@@ -1,0 +1,7 @@
+{
+  "client_id": "....apps.googleusercontent.com",
+  "client_secret": "...",
+  "refresh_token": "1//...",
+  "quota_project_id": "your-configured-quota-project",
+  "type": "authorized_user"
+}

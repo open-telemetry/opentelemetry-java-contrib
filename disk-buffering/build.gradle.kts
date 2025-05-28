@@ -6,7 +6,7 @@ plugins {
   id("otel.publish-conventions")
   id("com.github.johnrengelman.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("ru.vyarus.animalsniffer") version "2.0.0"
+  id("ru.vyarus.animalsniffer") version "2.0.1"
   id("com.squareup.wire") version "5.3.1"
 }
 
@@ -28,7 +28,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  protos("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha@jar")
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha@jar")
 }
 
 animalsniffer {

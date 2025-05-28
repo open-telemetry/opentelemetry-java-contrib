@@ -89,10 +89,9 @@ public class GcpAuthExtensionEndToEndTest {
     // Set up mock OTLP backend server to which traces will be exported
     backendServer = ClientAndServer.startClientAndServer(EXPORTER_ENDPOINT_PORT);
     backendServer.when(request()).respond(response().withStatusCode(200));
-
-    // Set up the mock gcp metadata server to provide fake credentials
     String accessTokenResponse =
         "{\"access_token\": \"fake.access_token\",\"expires_in\": 3600, \"token_type\": \"Bearer\"}";
+
     mockGcpOAuth2Server = ClientAndServer.startClientAndServer(MOCK_GCP_OAUTH2_PORT);
 
     MockServerClient mockServerClient =

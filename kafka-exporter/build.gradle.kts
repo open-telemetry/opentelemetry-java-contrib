@@ -4,12 +4,17 @@ plugins {
 }
 
 description = "SpanExporter based on Kafka"
-otelJava.moduleName.set("io.opentelemetry.contrib.kafka")
+
+otelJava {
+  moduleName.set("io.opentelemetry.contrib.kafka")
+  // kafka 4 requires java 11
+  minJavaVersionSupported.set(JavaVersion.VERSION_11)
+}
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
   api("io.opentelemetry:opentelemetry-sdk-common")
-  api("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+  api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
   api("org.apache.kafka:kafka-clients")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

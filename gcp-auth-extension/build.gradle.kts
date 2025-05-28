@@ -23,7 +23,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.33.1")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.35.0")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -41,7 +41,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
   testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
@@ -55,6 +55,9 @@ dependencies {
 tasks {
   test {
     useJUnitPlatform()
+    // Unset relevant environment variables to provide a clean state for the tests
+    environment("GOOGLE_CLOUD_PROJECT", "")
+    environment("GOOGLE_CLOUD_QUOTA_PROJECT", "")
     // exclude integration test
     exclude("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
   }
@@ -103,7 +106,7 @@ tasks.register<Copy>("copyAgent") {
   })
 }
 
-tasks.register<Test>("IntegrationTest") {
+tasks.register<Test>("IntegrationTestUserCreds") {
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 
@@ -111,7 +114,7 @@ tasks.register<Test>("IntegrationTest") {
   // include only the integration test file
   include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
 
-  val fakeCredsFilePath = project.file("src/test/resources/fakecreds.json").absolutePath
+  val fakeCredsFilePath = project.file("src/test/resources/fake_user_creds.json").absolutePath
 
   environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
   environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
@@ -127,6 +130,7 @@ tasks.register<Test>("IntegrationTest") {
     "-Dotel.metrics.exporter=none",
     "-Dotel.logs.exporter=none",
     "-Dotel.exporter.otlp.protocol=http/protobuf",
-    "-Dmockserver.logLevel=off"
+    "-Dotel.javaagent.debug=false",
+    "-Dmockserver.logLevel=trace"
   )
 }

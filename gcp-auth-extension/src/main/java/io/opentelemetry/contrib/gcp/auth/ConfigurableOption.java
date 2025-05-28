@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -29,7 +30,27 @@ public enum ConfigurableOption {
    * href="https://cloud.google.com/docs/quotas/set-quota-project">official GCP client
    * libraries</a>.
    */
-  GOOGLE_CLOUD_QUOTA_PROJECT("Google Cloud Quota Project ID");
+  GOOGLE_CLOUD_QUOTA_PROJECT("Google Cloud Quota Project ID"),
+
+  /**
+   * Specifies a comma-separated list of OpenTelemetry signals for which this authentication
+   * extension should be active. The authentication mechanisms provided by this extension will only
+   * be applied to the listed signals. If not set, {@code all} is assumed to be set which means
+   * authentication is enabled for all supported signals.
+   *
+   * <p>Valid signal values are:
+   *
+   * <ul>
+   *   <li>{@code metrics} - Enables authentication for metric exports.
+   *   <li>{@code traces} - Enables authentication for trace exports.
+   *   <li>{@code all} - Enables authentication for all exports.
+   * </ul>
+   *
+   * <p>The values are case-sensitive. Whitespace around commas and values is ignored. Can be
+   * configured using the environment variable `GOOGLE_OTEL_AUTH_TARGET_SIGNALS` or the system
+   * property `google.otel.auth.target.signals`.
+   */
+  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Auth Extension");
 
   private final String userReadableName;
   private final String environmentVariableName;
@@ -99,6 +120,22 @@ public enum ConfigurableOption {
       return this.getConfiguredValue();
     } catch (ConfigurationException e) {
       return fallback.get();
+    }
+  }
+
+  /**
+   * Retrieves the value for this option, prioritizing environment variables before system
+   * properties. If neither an environment variable nor a system property is set for this option,
+   * then an empty {@link Optional} is returned.
+   *
+   * @return The configured value for the option, if set, obtained from the environment variable,
+   *     system property, or empty {@link Optional}, in that order of precedence.
+   */
+  Optional<String> getConfiguredValueAsOptional() {
+    try {
+      return Optional.of(this.getConfiguredValue());
+    } catch (ConfigurationException e) {
+      return Optional.empty();
     }
   }
 }

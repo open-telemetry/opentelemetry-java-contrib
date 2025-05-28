@@ -43,9 +43,13 @@ Here is a list of required and optional configuration available for the extensio
 
 #### Optional Config
 
-- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see [here](https://cloud.google.com/docs/quotas/quota-project). Additional details about configuring the *quota project* can be found [here](https://cloud.google.com/docs/quotas/set-quota-project).
+- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see the [Quota project overview](https://cloud.google.com/docs/quotas/quota-project) page. Additional details about configuring the *quota project* can be found on the [Set the quota project](https://cloud.google.com/docs/quotas/set-quota-project) page.
 
   - Can also be configured using `google.cloud.quota.project` system property.
+
+- `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a comma-separated list of OpenTelemetry signals for which this authentication extension should be active. Valid values contain - `metrics`, `traces` or `all`. If left unspecified, `all` is assumed meaning the extension will attempt to apply authentication to exports for all signals.
+
+  - Can also be configured using `google.otel.auth.target.signals` system property.
 
 ## Usage
 
