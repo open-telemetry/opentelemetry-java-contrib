@@ -31,7 +31,27 @@ enum ConfigurableOption {
    * href="https://cloud.google.com/docs/quotas/set-quota-project">official GCP client
    * libraries</a>.
    */
-  GOOGLE_CLOUD_QUOTA_PROJECT("Google Cloud Quota Project ID");
+  GOOGLE_CLOUD_QUOTA_PROJECT("Google Cloud Quota Project ID"),
+
+  /**
+   * Specifies a comma-separated list of OpenTelemetry signals for which this authentication
+   * extension should be active. The authentication mechanisms provided by this extension will only
+   * be applied to the listed signals. If not set, {@code all} is assumed to be set which means
+   * authentication is enabled for all supported signals.
+   *
+   * <p>Valid signal values are:
+   *
+   * <ul>
+   *   <li>{@code metrics} - Enables authentication for metric exports.
+   *   <li>{@code traces} - Enables authentication for trace exports.
+   *   <li>{@code all} - Enables authentication for all exports.
+   * </ul>
+   *
+   * <p>The values are case-sensitive. Whitespace around commas and values is ignored. Can be
+   * configured using the environment variable `GOOGLE_OTEL_AUTH_TARGET_SIGNALS` or the system
+   * property `google.otel.auth.target.signals`.
+   */
+  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Auth Extension");
 
   private final String userReadableName;
   private final String environmentVariableName;
