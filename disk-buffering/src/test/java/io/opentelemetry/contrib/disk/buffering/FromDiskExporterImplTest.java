@@ -18,6 +18,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -40,7 +41,7 @@ class FromDiskExporterImplTest {
   private FromDiskExporterImpl<SpanData> exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
-  private static final String STORAGE_FOLDER_NAME = "testName";
+  private static final String STORAGE_FOLDER_NAME = SignalTypes.spans.name();
 
   @BeforeEach
   void setUp() throws IOException {
@@ -49,12 +50,10 @@ class FromDiskExporterImplTest {
     setUpSerializer();
     wrapped = mock();
     exporter =
-        FromDiskExporterImpl.<SpanData>builder()
-            .setFolderName(STORAGE_FOLDER_NAME)
-            .setStorageConfiguration(TestData.getDefaultConfiguration(rootDir))
+        FromDiskExporterImpl.<SpanData>builder(
+                TestData.getDefaultStorage(rootDir, SignalTypes.spans, clock))
             .setDeserializer(deserializer)
             .setExportFunction(wrapped::export)
-            .setStorageClock(clock)
             .build();
   }
 

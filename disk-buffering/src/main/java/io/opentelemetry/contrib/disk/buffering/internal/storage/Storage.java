@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.Pro
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,8 +25,8 @@ import javax.annotation.Nullable;
 public final class Storage implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final DebugLogger logger;
-
   private final FolderManager folderManager;
+  private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   @Nullable private WritableFile writableFile;
   @Nullable private ReadableFile readableFile;
@@ -34,10 +35,15 @@ public final class Storage implements Closeable {
     this.folderManager = folderManager;
     this.logger =
         DebugLogger.wrap(Logger.getLogger(FromDiskExporterImpl.class.getName()), debugEnabled);
+    this.debugEnabled = debugEnabled;
   }
 
-  public static StorageBuilder builder() {
-    return new StorageBuilder();
+  public static StorageBuilder builder(SignalTypes types) {
+    return new StorageBuilder(types);
+  }
+
+  public boolean isDebugEnabled() {
+    return debugEnabled;
   }
 
   /**
@@ -70,6 +76,14 @@ public final class Storage implements Closeable {
       return write(item, ++attemptNumber);
     }
     return true;
+  }
+
+  public void flush() throws IOException {
+    if (writableFile != null) {
+      writableFile.flush();
+    } else {
+      logger.log("No writable file to flush.");
+    }
   }
 
   /**

@@ -94,4 +94,8 @@ public final class WritableFile implements FileOperations {
   public String toString() {
     return "WritableFile{" + "file=" + file + '}';
   }
+
+  public void flush() throws IOException {
+    out.flush();
+  }
 }

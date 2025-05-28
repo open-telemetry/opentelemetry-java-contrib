@@ -5,10 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -27,16 +26,12 @@ public class SpanToDiskExporter implements SpanExporter {
    * Creates a new SpanToDiskExporter that will buffer Span telemetry on disk storage.
    *
    * @param delegate - The SpanExporter to delegate to if disk writing fails.
-   * @param config - The StorageConfiguration that specifies how storage is managed.
+   * @param storage - The Storage instance that specifies how storage is managed.
    * @return A new SpanToDiskExporter instance.
-   * @throws IOException if the delegate ToDiskExporter could not be created.
    */
-  public static SpanToDiskExporter create(SpanExporter delegate, StorageConfiguration config)
-      throws IOException {
+  public static SpanToDiskExporter create(SpanExporter delegate, Storage storage) {
     ToDiskExporter<SpanData> toDisk =
-        ToDiskExporter.<SpanData>builder()
-            .setFolderName(SignalTypes.spans.name())
-            .setStorageConfiguration(config)
+        ToDiskExporter.<SpanData>builder(storage)
             .setSerializer(SignalSerializer.ofSpans())
             .setExportFunction(delegate::export)
             .build();

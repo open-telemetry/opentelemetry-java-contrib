@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.TRY_LATER;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,11 +16,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -220,6 +224,22 @@ class StorageTest {
 
     verify(writableFile).close();
     verify(readableFile).close();
+  }
+
+  @Test
+  void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
+    StorageConfiguration invalidConfig =
+        StorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(2)
+            .setMinFileAgeForReadMillis(1)
+            .setRootDir(new File("."))
+            .build();
+
+    assertThatThrownBy(
+            () -> Storage.builder(SignalTypes.logs).setStorageConfiguration(invalidConfig))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(
+            "The configured max file age for writing must be lower than the configured min file age for reading");
   }
 
   private static WritableFile createWritableFile() throws IOException {

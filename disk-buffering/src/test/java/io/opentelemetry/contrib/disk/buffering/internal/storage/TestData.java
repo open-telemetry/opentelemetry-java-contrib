@@ -8,7 +8,10 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
+import java.io.IOException;
 
 public final class TestData {
 
@@ -21,6 +24,15 @@ public final class TestData {
   public static StorageConfiguration getDefaultConfiguration(File rootDir) {
     TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
     return getConfiguration(fileProvider, rootDir);
+  }
+
+  public static Storage getDefaultStorage(File rootDir, SignalTypes types, Clock clock)
+      throws IOException {
+    TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
+    return Storage.builder(types)
+        .setStorageConfiguration(getConfiguration(fileProvider, rootDir))
+        .setStorageClock(clock)
+        .build();
   }
 
   public static StorageConfiguration getConfiguration(
