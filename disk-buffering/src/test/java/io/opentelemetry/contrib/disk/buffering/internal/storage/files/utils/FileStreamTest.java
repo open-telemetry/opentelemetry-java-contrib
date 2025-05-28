@@ -54,10 +54,15 @@ class FileStreamTest {
     assertThat(readString(temporaryFile)).isEqualTo("4,5");
     assertThat(stream.size()).isEqualTo(3);
 
+    // Truncate all available data
+    stream.truncateTop(3);
+    assertThat(stream.size()).isEqualTo(0);
+    assertThat(readString(temporaryFile)).isEqualTo("");
+
     stream.close();
 
     // Ensure that the changes are kept after closing the stream.
-    assertThat(readString(temporaryFile)).isEqualTo("4,5");
+    assertThat(readString(temporaryFile)).isEqualTo("");
   }
 
   private static void writeString(File file, String text) throws IOException {

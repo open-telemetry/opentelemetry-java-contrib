@@ -58,12 +58,17 @@ public class FileStream extends InputStream {
     if (position == 0) {
       return;
     }
-    byte[] remainingBytes = new byte[(int) (file.length() - position)];
-    file.read(remainingBytes);
-    channel.truncate(position);
-    file.seek(0);
-    file.write(remainingBytes);
-    file.seek(0);
+    long remainingSize = size() - position;
+    if (remainingSize > 0) {
+      byte[] remainingBytes = new byte[(int) remainingSize];
+      file.read(remainingBytes);
+      file.seek(0);
+      channel.truncate(position);
+      file.write(remainingBytes);
+      file.seek(0);
+    } else {
+      channel.truncate(0);
+    }
   }
 
   public long getPosition() throws IOException {
