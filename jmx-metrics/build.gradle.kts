@@ -12,7 +12,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.jmxmetrics")
 
 application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
-val groovyVersion = "3.0.24"
+val groovyVersion = "3.0.25"
 
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
@@ -47,7 +47,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.5.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
         implementation("org.slf4j:slf4j-simple")
       }

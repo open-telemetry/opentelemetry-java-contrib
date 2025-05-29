@@ -22,6 +22,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.ToDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -53,25 +54,28 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class IntegrationTest {
   private InMemorySpanExporter memorySpanExporter;
-  private SpanToDiskExporter spanToDiskExporter;
   private Tracer tracer;
   private InMemoryMetricExporter memoryMetricExporter;
-  private MetricToDiskExporter metricToDiskExporter;
   private SdkMeterProvider meterProvider;
   private Meter meter;
   private InMemoryLogRecordExporter memoryLogRecordExporter;
-  private LogRecordToDiskExporter logToDiskExporter;
   private Logger logger;
   private Clock clock;
   @TempDir File rootDir;
   private static final long INITIAL_TIME_IN_MILLIS = 1000;
   private static final long NOW_NANOS = MILLISECONDS.toNanos(INITIAL_TIME_IN_MILLIS);
   private StorageConfiguration storageConfig;
+  private Storage spanStorage;
 
   @BeforeEach
   void setUp() throws IOException {
-    storageConfig = StorageConfiguration.getDefault(rootDir);
     clock = mock();
+    storageConfig = StorageConfiguration.getDefault(rootDir);
+    spanStorage =
+        Storage.builder(SignalTypes.spans)
+            .setStorageConfiguration(storageConfig)
+            .setStorageClock(clock)
+            .build();
 
     when(clock.now()).thenReturn(NOW_NANOS);
 
@@ -79,14 +83,15 @@ public class IntegrationTest {
     memorySpanExporter = InMemorySpanExporter.create();
     ToDiskExporter<SpanData> toDiskSpanExporter =
         buildToDiskExporter(SignalSerializer.ofSpans(), memorySpanExporter::export);
-    spanToDiskExporter = new SpanToDiskExporter(toDiskSpanExporter);
+    SpanToDiskExporter spanToDiskExporter = new SpanToDiskExporter(toDiskSpanExporter);
     tracer = createTracerProvider(spanToDiskExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
     memoryMetricExporter = InMemoryMetricExporter.create();
     ToDiskExporter<MetricData> toDiskMetricExporter =
         buildToDiskExporter(SignalSerializer.ofMetrics(), memoryMetricExporter::export);
-    metricToDiskExporter = new MetricToDiskExporter(toDiskMetricExporter, memoryMetricExporter);
+    MetricToDiskExporter metricToDiskExporter =
+        new MetricToDiskExporter(toDiskMetricExporter, memoryMetricExporter);
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
@@ -94,36 +99,26 @@ public class IntegrationTest {
     memoryLogRecordExporter = InMemoryLogRecordExporter.create();
     ToDiskExporter<LogRecordData> toDiskLogExporter =
         buildToDiskExporter(SignalSerializer.ofLogs(), memoryLogRecordExporter::export);
-    logToDiskExporter = new LogRecordToDiskExporter(toDiskLogExporter);
+    LogRecordToDiskExporter logToDiskExporter = new LogRecordToDiskExporter(toDiskLogExporter);
     logger = createLoggerProvider(logToDiskExporter).get("LogInstrumentationScope");
   }
 
   @NotNull
   private <T> ToDiskExporter<T> buildToDiskExporter(
-      SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter)
-      throws IOException {
-    return ToDiskExporter.<T>builder()
-        .setFolderName(SignalTypes.spans.name())
-        .setStorageConfiguration(storageConfig)
+      SignalSerializer<T> serializer, Function<Collection<T>, CompletableResultCode> exporter) {
+    return ToDiskExporter.<T>builder(spanStorage)
         .setSerializer(serializer)
         .setExportFunction(exporter)
-        .setStorageClock(clock)
         .build();
   }
 
   @NotNull
-  private <T> FromDiskExporterImpl<T> buildFromDiskExporter(
+  private static <T> FromDiskExporterImpl<T> buildFromDiskExporter(
       FromDiskExporterBuilder<T> builder,
       Function<Collection<T>, CompletableResultCode> exportFunction,
       SignalDeserializer<T> deserializer)
       throws IOException {
-    return builder
-        .setExportFunction(exportFunction)
-        .setFolderName(SignalTypes.spans.name())
-        .setStorageConfiguration(storageConfig)
-        .setDeserializer(deserializer)
-        .setStorageClock(clock)
-        .build();
+    return builder.setExportFunction(exportFunction).setDeserializer(deserializer).build();
   }
 
   @Test
@@ -132,7 +127,7 @@ public class IntegrationTest {
     span.end();
     FromDiskExporterImpl<SpanData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(),
+            FromDiskExporterImpl.builder(spanStorage),
             memorySpanExporter::export,
             SignalDeserializer.ofSpans());
     assertExporter(fromDiskExporter, () -> memorySpanExporter.getFinishedSpanItems().size());
@@ -145,7 +140,7 @@ public class IntegrationTest {
 
     FromDiskExporterImpl<MetricData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(),
+            FromDiskExporterImpl.builder(spanStorage),
             memoryMetricExporter::export,
             SignalDeserializer.ofMetrics());
     assertExporter(fromDiskExporter, () -> memoryMetricExporter.getFinishedMetricItems().size());
@@ -157,7 +152,7 @@ public class IntegrationTest {
 
     FromDiskExporterImpl<LogRecordData> fromDiskExporter =
         buildFromDiskExporter(
-            FromDiskExporterImpl.builder(),
+            FromDiskExporterImpl.builder(spanStorage),
             memoryLogRecordExporter::export,
             SignalDeserializer.ofLogs());
     assertExporter(

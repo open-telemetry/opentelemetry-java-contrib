@@ -25,16 +25,17 @@ public class ToDiskExporter<EXPORT_DATA> {
   ToDiskExporter(
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      Storage storage,
-      boolean debugEnabled) {
+      Storage storage) {
     this.serializer = serializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
-    this.logger = DebugLogger.wrap(Logger.getLogger(ToDiskExporter.class.getName()), debugEnabled);
+    this.logger =
+        DebugLogger.wrap(
+            Logger.getLogger(ToDiskExporter.class.getName()), storage.isDebugEnabled());
   }
 
-  public static <T> ToDiskExporterBuilder<T> builder() {
-    return new ToDiskExporterBuilder<>();
+  public static <T> ToDiskExporterBuilder<T> builder(Storage storage) {
+    return new ToDiskExporterBuilder<>(storage);
   }
 
   public CompletableResultCode export(Collection<EXPORT_DATA> data) {

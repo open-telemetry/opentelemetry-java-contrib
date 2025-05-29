@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,6 +24,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -47,21 +47,24 @@ class SpanFromDiskExporterTest {
   @SuppressWarnings("unchecked")
   @Test
   void fromDisk() throws Exception {
-    StorageConfiguration config =
-        StorageConfiguration.builder()
-            .setRootDir(tempDir)
-            .setMaxFileAgeForWriteMillis(TimeUnit.HOURS.toMillis(24))
-            .setMinFileAgeForReadMillis(0)
-            .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(24))
+    Clock clock = mock(Clock.class);
+    long start = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
+    when(clock.now()).thenReturn(start);
+    Storage storage =
+        Storage.builder(SignalTypes.spans)
+            .setStorageConfiguration(StorageConfiguration.builder().setRootDir(tempDir).build())
+            .setStorageClock(clock)
             .build();
 
-    List<SpanData> spans = writeSomeSpans(config);
+    List<SpanData> spans = writeSomeSpans(storage);
+
+    when(clock.now()).thenReturn(start + TimeUnit.SECONDS.toNanos(60));
 
     SpanExporter exporter = mock();
     ArgumentCaptor<Collection<SpanData>> capture = ArgumentCaptor.forClass(Collection.class);
     when(exporter.export(capture.capture())).thenReturn(CompletableResultCode.ofSuccess());
 
-    SpanFromDiskExporter testClass = SpanFromDiskExporter.create(exporter, config);
+    SpanFromDiskExporter testClass = SpanFromDiskExporter.create(exporter, storage);
     boolean result = testClass.exportStoredBatch(30, TimeUnit.SECONDS);
     assertThat(result).isTrue();
     List<SpanData> exportedSpans = (List<SpanData>) capture.getValue();
@@ -77,23 +80,14 @@ class SpanFromDiskExporterTest {
     verify(exporter).export(eq(Arrays.asList(expected1, expected2)));
   }
 
-  private static List<SpanData> writeSomeSpans(StorageConfiguration config) throws Exception {
+  private static List<SpanData> writeSomeSpans(Storage storage) throws Exception {
     long now = System.currentTimeMillis() * 1_000_000;
     SpanData span1 = makeSpan1(TraceFlags.getDefault(), now);
     SpanData span2 = makeSpan2(TraceFlags.getSampled(), now);
     List<SpanData> spans = Arrays.asList(span1, span2);
 
-    SignalSerializer<SpanData> serializer = SignalSerializer.ofSpans();
-    File subdir = new File(config.getRootDir(), SignalTypes.spans.name());
-    assertTrue(subdir.mkdir());
-
-    Storage storage =
-        Storage.builder()
-            .setStorageConfiguration(config)
-            .setFolderName(SignalTypes.spans.name())
-            .build();
-    storage.write(serializer.serialize(spans));
-    storage.close();
+    storage.write(SignalSerializer.ofSpans().serialize(spans));
+    storage.flush();
     return spans;
   }
 

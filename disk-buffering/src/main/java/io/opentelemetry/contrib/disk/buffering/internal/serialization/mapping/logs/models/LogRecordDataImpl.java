@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models;
 
 import com.google.auto.value.AutoValue;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
@@ -50,17 +49,6 @@ public abstract class LogRecordDataImpl implements LogRecordData {
     public abstract Builder setSeverity(Severity value);
 
     public abstract Builder setSeverityText(String value);
-
-    @Deprecated
-    @CanIgnoreReturnValue
-    public Builder setBody(io.opentelemetry.sdk.logs.data.Body body) {
-      if (body.getType() == io.opentelemetry.sdk.logs.data.Body.Type.STRING) {
-        setBodyValue(Value.of(body.asString()));
-      } else if (body.getType() == io.opentelemetry.sdk.logs.data.Body.Type.EMPTY) {
-        setBodyValue(null);
-      }
-      return this;
-    }
 
     public abstract Builder setBodyValue(@Nullable Value<?> value);
 

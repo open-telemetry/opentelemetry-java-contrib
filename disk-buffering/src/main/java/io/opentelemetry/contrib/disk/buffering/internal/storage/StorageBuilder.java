@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
@@ -17,20 +18,17 @@ public class StorageBuilder {
 
   private static final Logger logger = Logger.getLogger(StorageBuilder.class.getName());
 
-  private String folderName = "data";
+  private final String folderName;
   private StorageConfiguration configuration = StorageConfiguration.getDefault(new File("."));
   private Clock clock = Clock.getDefault();
 
-  StorageBuilder() {}
-
-  @CanIgnoreReturnValue
-  public StorageBuilder setFolderName(String folderName) {
-    this.folderName = folderName;
-    return this;
+  StorageBuilder(SignalTypes types) {
+    folderName = types.name();
   }
 
   @CanIgnoreReturnValue
   public StorageBuilder setStorageConfiguration(StorageConfiguration configuration) {
+    validateConfiguration(configuration);
     this.configuration = configuration;
     return this;
   }
@@ -56,5 +54,12 @@ public class StorageBuilder {
       return subdir;
     }
     throw new IOException("Could not create the subdir: '" + child + "' inside: " + rootDir);
+  }
+
+  private static void validateConfiguration(StorageConfiguration configuration) {
+    if (configuration.getMinFileAgeForReadMillis() <= configuration.getMaxFileAgeForWriteMillis()) {
+      throw new IllegalArgumentException(
+          "The configured max file age for writing must be lower than the configured min file age for reading");
+    }
   }
 }
