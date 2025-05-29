@@ -6,8 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider;
-import io.opentelemetry.contrib.disk.buffering.internal.files.DefaultTemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
@@ -21,22 +19,15 @@ public final class TestData {
   public static final int MAX_FILE_SIZE = 100;
   public static final int MAX_FOLDER_SIZE = 300;
 
-  public static StorageConfiguration getDefaultConfiguration(File rootDir) {
-    TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
-    return getConfiguration(fileProvider, rootDir);
-  }
-
-  public static Storage getDefaultStorage(File rootDir, SignalTypes types, Clock clock)
+  public static Storage getStorage(File rootDir, SignalTypes types, Clock clock)
       throws IOException {
-    TemporaryFileProvider fileProvider = DefaultTemporaryFileProvider.getInstance();
     return Storage.builder(types)
-        .setStorageConfiguration(getConfiguration(fileProvider, rootDir))
+        .setStorageConfiguration(getConfiguration(rootDir))
         .setStorageClock(clock)
         .build();
   }
 
-  public static StorageConfiguration getConfiguration(
-      TemporaryFileProvider fileProvider, File rootDir) {
+  public static StorageConfiguration getConfiguration(File rootDir) {
     return StorageConfiguration.builder()
         .setRootDir(rootDir)
         .setMaxFileAgeForWriteMillis(MAX_FILE_AGE_FOR_WRITE_MILLIS)

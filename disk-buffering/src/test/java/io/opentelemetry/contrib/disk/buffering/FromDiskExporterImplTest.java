@@ -51,7 +51,7 @@ class FromDiskExporterImplTest {
     wrapped = mock();
     exporter =
         FromDiskExporterImpl.<SpanData>builder(
-                TestData.getConfiguration(rootDir, SignalTypes.spans, clock))
+                TestData.getStorage(rootDir, SignalTypes.spans, clock))
             .setDeserializer(deserializer)
             .setExportFunction(wrapped::export)
             .build();
