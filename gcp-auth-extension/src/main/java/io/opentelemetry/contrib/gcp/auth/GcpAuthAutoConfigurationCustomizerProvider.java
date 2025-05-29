@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
@@ -49,6 +51,18 @@ import javax.annotation.Nonnull;
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class GcpAuthAutoConfigurationCustomizerProvider
     implements AutoConfigurationCustomizerProvider {
+
+  private static final Logger logger =
+      Logger.getLogger(GcpAuthAutoConfigurationCustomizerProvider.class.getName());
+  private static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
+      String.format(
+          "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by exporting valid values to environment variable: %s or by setting valid values in system property: %s.",
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getEnvironmentVariable(),
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty());
+  private static final String SIGNAL_TARGET_WARNING_MSG =
+      "GCP Authentication Extension is not configured for signal type: %s. "
+          + SIGNAL_TARGET_WARNING_FIX_SUGGESTION;
 
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
@@ -110,6 +124,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      logger.log(Level.WARNING, String.format(SIGNAL_TARGET_WARNING_MSG, SIGNAL_TYPE_TRACES));
     }
     return exporter;
   }
@@ -118,6 +134,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      logger.log(Level.WARNING, String.format(SIGNAL_TARGET_WARNING_MSG, SIGNAL_TYPE_METRICS));
     }
     return exporter;
   }

@@ -51,7 +51,7 @@ enum ConfigurableOption {
    * configured using the environment variable `GOOGLE_OTEL_AUTH_TARGET_SIGNALS` or the system
    * property `google.otel.auth.target.signals`.
    */
-  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Auth Extension");
+  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Authentication Extension");
 
   private final String userReadableName;
   private final String environmentVariableName;
@@ -80,6 +80,15 @@ enum ConfigurableOption {
    */
   String getSystemProperty() {
     return this.systemPropertyName;
+  }
+
+  /**
+   * Returns the user readable name associated with this option.
+   *
+   * @return the user readable name (e.g., "Google Cloud Quota Project ID")
+   */
+  String getUserReadableName() {
+    return this.userReadableName;
   }
 
   /**
