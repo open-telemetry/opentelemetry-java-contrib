@@ -7,7 +7,7 @@ plugins {
 description = "OpenTelemetry Contrib All"
 
 dependencies {
-  rootProject.subprojects.forEach { subproject ->
+   rootProject.subprojects.forEach { subproject ->
     // Generate aggregate coverage report for published modules that enable jacoco.
     subproject.plugins.withId("jacoco") {
       subproject.plugins.withId("maven-publish") {
