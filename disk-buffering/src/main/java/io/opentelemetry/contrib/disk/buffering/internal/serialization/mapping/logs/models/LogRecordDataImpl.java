@@ -17,7 +17,6 @@ import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"deprecation", "SuppressWarningsWithoutExplanation"})
 @AutoValue
 public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
 
@@ -38,6 +37,9 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
     return ExtendedAttributes.builder().putAll(getAttributes()).build();
   }
 
+  // It's only deprecated in the incubating interface for extended attributes, which are not yet
+  // supported in this module.
+  @SuppressWarnings("deprecation")
   @Override
   public abstract Attributes getAttributes();
 
