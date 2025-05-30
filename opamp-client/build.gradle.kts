@@ -15,6 +15,7 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
+  testImplementation("org.mockito:mockito-inline")
 }
 
 val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
