@@ -12,7 +12,7 @@ import okio.BufferedSink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class OkHttpSender implements HttpSender {
+public final class OkHttpSender implements HttpSender {
   private final OkHttpClient client;
   private final String url;
 

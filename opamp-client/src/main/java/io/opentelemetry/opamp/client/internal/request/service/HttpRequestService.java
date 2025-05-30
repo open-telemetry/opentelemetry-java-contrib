@@ -26,12 +26,10 @@ public final class HttpRequestService implements RequestService, Runnable {
   private final PeriodicTaskExecutor executor;
   private final PeriodicDelay periodicRequestDelay;
   private final PeriodicDelay periodicRetryDelay;
-  private final Object runningLock = new Object();
   private final AtomicBoolean retryModeEnabled = new AtomicBoolean(false);
+  private final AtomicBoolean isRunning = new AtomicBoolean(false);
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
-  private boolean isRunning = false;
-  private boolean isStopped = false;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_REQUESTS =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
 
@@ -75,27 +73,18 @@ public final class HttpRequestService implements RequestService, Runnable {
 
   @Override
   public void start(Callback callback, Supplier<Request> requestSupplier) {
-    synchronized (runningLock) {
-      if (isStopped) {
-        throw new IllegalStateException("RequestDispatcher has been stopped");
-      }
-      if (isRunning) {
-        throw new IllegalStateException("RequestDispatcher is already running");
-      }
+    if (isRunning.compareAndSet(false, true)) {
       this.callback = callback;
       this.requestSupplier = requestSupplier;
       executor.start(this);
-      isRunning = true;
+    } else {
+      throw new IllegalStateException("RequestDispatcher is already running");
     }
   }
 
   @Override
   public void stop() {
-    synchronized (runningLock) {
-      if (!isRunning || isStopped) {
-        return;
-      }
-      isStopped = true;
+    if (isRunning.compareAndSet(true, false)) {
       executor.executeNow();
       executor.stop();
     }
@@ -165,7 +154,7 @@ public final class HttpRequestService implements RequestService, Runnable {
       String retryAfterHeader = response.getHeader("Retry-After");
       Duration retryAfter = null;
       if (retryAfterHeader != null) {
-        // retryAfter = TODO parse header to duration
+        retryAfter = Duration.ofSeconds(Long.parseLong(retryAfterHeader));
       }
       enableRetryMode(retryAfter);
     }
