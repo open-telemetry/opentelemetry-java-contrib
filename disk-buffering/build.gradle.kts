@@ -13,11 +13,6 @@ plugins {
 description = "Exporter implementations that store signals on disk"
 otelJava.moduleName.set("io.opentelemetry.contrib.exporters.disk")
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 val protos by configurations.creating
 
 dependencies {
@@ -75,7 +70,8 @@ wire {
 
 tasks.named<ShadowJar>("shadowJar") {
   archiveClassifier.set("")
-  configurations = emptyList() // To avoid embedding any dependencies as we only need to rename some local packages.
+  configurations =
+    emptyList() // To avoid embedding any dependencies as we only need to rename some local packages.
   relocate("io.opentelemetry.proto", "io.opentelemetry.diskbuffering.proto")
   mustRunAfter("jar")
 }

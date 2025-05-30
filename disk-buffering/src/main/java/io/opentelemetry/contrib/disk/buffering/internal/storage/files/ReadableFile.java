@@ -12,15 +12,11 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.Del
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ReadResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileTransferUtil;
+import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileStream;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -37,14 +33,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class ReadableFile implements FileOperations {
   @NotNull private final File file;
-  private final int originalFileSize;
+  private final FileStream fileStream;
   private final StreamReader reader;
-  private final FileTransferUtil fileTransferUtil;
-  private final File temporaryFile;
   private final Clock clock;
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
-  private int readBytes = 0;
   @Nullable private ReadResult unconsumedResult;
 
   public ReadableFile(
@@ -59,7 +52,7 @@ public final class ReadableFile implements FileOperations {
   }
 
   public ReadableFile(
-      File file,
+      @NotNull File file,
       long createdTimeMillis,
       Clock clock,
       StorageConfiguration configuration,
@@ -68,12 +61,8 @@ public final class ReadableFile implements FileOperations {
     this.file = file;
     this.clock = clock;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
-    originalFileSize = (int) file.length();
-    temporaryFile = configuration.getTemporaryFileProvider().createTemporaryFile(file.getName());
-    copyFile(file, temporaryFile);
-    FileInputStream tempInputStream = new FileInputStream(temporaryFile);
-    fileTransferUtil = new FileTransferUtil(tempInputStream, file);
-    reader = readerFactory.create(tempInputStream);
+    fileStream = FileStream.create(file);
+    reader = readerFactory.create(fileStream);
   }
 
   /**
@@ -101,11 +90,8 @@ public final class ReadableFile implements FileOperations {
     switch (processing.apply(read.content)) {
       case SUCCEEDED:
         unconsumedResult = null;
-        readBytes += read.totalReadLength;
-        int amountOfBytesToTransfer = originalFileSize - readBytes;
-        if (amountOfBytesToTransfer > 0) {
-          fileTransferUtil.transferBytes(readBytes, amountOfBytesToTransfer);
-        } else {
+        fileStream.truncateTop();
+        if (fileStream.size() == 0) {
           cleanUp();
         }
         return ReadableResult.SUCCEEDED;
@@ -124,17 +110,7 @@ public final class ReadableFile implements FileOperations {
     if (unconsumedResult != null) {
       return unconsumedResult;
     }
-    return reader.read();
-  }
-
-  private void cleanUp() throws IOException {
-    file.delete();
-    close();
-  }
-
-  @Override
-  public long getSize() {
-    return originalFileSize;
+    return reader.readNext();
   }
 
   @Override
@@ -153,29 +129,18 @@ public final class ReadableFile implements FileOperations {
     return file;
   }
 
+  private void cleanUp() throws IOException {
+    close();
+    if (!file.delete()) {
+      throw new IOException("Could not delete file: " + file);
+    }
+  }
+
   @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       unconsumedResult = null;
-      fileTransferUtil.close();
       reader.close();
-      temporaryFile.delete();
-    }
-  }
-
-  /**
-   * This is needed instead of using Files.copy in order to keep it compatible with Android api <
-   * 26.
-   */
-  private static void copyFile(File from, File to) throws IOException {
-    try (InputStream in = new FileInputStream(from);
-        OutputStream out = new FileOutputStream(to)) {
-
-      byte[] buffer = new byte[1024];
-      int lengthRead;
-      while ((lengthRead = in.read(buffer)) > 0) {
-        out.write(buffer, 0, lengthRead);
-      }
     }
   }
 

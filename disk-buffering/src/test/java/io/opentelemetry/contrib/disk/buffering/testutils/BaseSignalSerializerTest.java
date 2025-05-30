@@ -26,7 +26,7 @@ public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
   protected List<SIGNAL_SDK_ITEM> deserialize(byte[] source) {
     try (ByteArrayInputStream in = new ByteArrayInputStream(source)) {
       StreamReader streamReader = DelimitedProtoStreamReader.Factory.getInstance().create(in);
-      return getDeserializer().deserialize(Objects.requireNonNull(streamReader.read()).content);
+      return getDeserializer().deserialize(Objects.requireNonNull(streamReader.readNext()).content);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

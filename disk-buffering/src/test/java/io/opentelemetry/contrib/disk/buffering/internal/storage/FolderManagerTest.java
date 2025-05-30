@@ -37,7 +37,7 @@ class FolderManagerTest {
   @BeforeEach
   void setUp() {
     clock = mock();
-    folderManager = new FolderManager(rootDir, TestData.getDefaultConfiguration(rootDir), clock);
+    folderManager = new FolderManager(rootDir, TestData.getConfiguration(rootDir), clock);
   }
 
   @Test
@@ -45,7 +45,7 @@ class FolderManagerTest {
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L));
     WritableFile file = folderManager.createWritableFile();
 
-    assertEquals("1000", file.getFileName());
+    assertEquals("1000", file.getFile().getName());
   }
 
   @Test

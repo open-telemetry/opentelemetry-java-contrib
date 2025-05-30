@@ -12,13 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
@@ -42,10 +40,8 @@ class ReadableFileTest {
 
   @TempDir File dir;
   private File source;
-  private File temporaryFile;
   private ReadableFile readableFile;
   private Clock clock;
-  private TemporaryFileProvider temporaryFileProvider;
   private static final long CREATED_TIME_MILLIS = 1000L;
   private static final SignalSerializer<LogRecordData> SERIALIZER = SignalSerializer.ofLogs();
   private static final SignalDeserializer<LogRecordData> DESERIALIZER = SignalDeserializer.ofLogs();
@@ -94,14 +90,9 @@ class ReadableFileTest {
   @BeforeEach
   void setUp() throws IOException {
     source = new File(dir, "sourceFile");
-    temporaryFile = new File(dir, "temporaryFile");
     addFileContents(source);
-    temporaryFileProvider = mock();
-    when(temporaryFileProvider.createTemporaryFile(anyString())).thenReturn(temporaryFile);
     clock = mock();
-    readableFile =
-        new ReadableFile(
-            source, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider, dir));
+    readableFile = new ReadableFile(source, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
   }
 
   private static void addFileContents(File source) throws IOException {
@@ -145,17 +136,17 @@ class ReadableFileTest {
   }
 
   @Test
-  void deleteTemporaryFileWhenClosing() throws IOException {
-    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
-    readableFile.close();
-
-    assertFalse(temporaryFile.exists());
-  }
-
-  @Test
   void readMultipleLinesAndRemoveThem() throws IOException {
-    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
-    readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
+    readableFile.readAndProcess(
+        bytes -> {
+          assertDeserializedData(FIRST_LOG_RECORD, bytes);
+          return ProcessResult.SUCCEEDED;
+        });
+    readableFile.readAndProcess(
+        bytes -> {
+          assertDeserializedData(SECOND_LOG_RECORD, bytes);
+          return ProcessResult.SUCCEEDED;
+        });
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
@@ -198,8 +189,7 @@ class ReadableFileTest {
     }
 
     ReadableFile emptyReadableFile =
-        new ReadableFile(
-            emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(temporaryFileProvider, dir));
+        new ReadableFile(emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
 
     assertEquals(
         ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
@@ -229,6 +219,15 @@ class ReadableFileTest {
 
     assertEquals(
         ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
+  }
+
+  private static void assertDeserializedData(LogRecordData expected, byte[] bytes) {
+    try {
+      List<LogRecordData> deserialized = DESERIALIZER.deserialize(bytes);
+      assertEquals(expected, deserialized.get(0));
+    } catch (DeserializationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)
