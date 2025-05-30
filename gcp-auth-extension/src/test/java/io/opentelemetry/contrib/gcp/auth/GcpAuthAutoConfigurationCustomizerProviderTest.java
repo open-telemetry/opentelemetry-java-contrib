@@ -941,7 +941,6 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         spanExporter, OtlpHttpMetricExporter.getDefault(), customOTelProperties);
   }
 
-  @SuppressWarnings("UnusedMethod")
   private OpenTelemetrySdk buildOpenTelemetrySdkWithExporter(MetricExporter metricExporter) {
     return buildOpenTelemetrySdkWithExporter(
         OtlpHttpSpanExporter.getDefault(), metricExporter, defaultOtelPropertiesMetricExporter);
