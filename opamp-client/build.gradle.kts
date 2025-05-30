@@ -12,6 +12,7 @@ description = "Client implementation of the OpAMP spec."
 otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
 dependencies {
+  implementation("com.squareup.okhttp3:okhttp")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 }
