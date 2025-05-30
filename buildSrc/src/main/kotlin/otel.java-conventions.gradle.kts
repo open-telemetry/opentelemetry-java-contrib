@@ -136,7 +136,7 @@ testing {
       implementation(project(project.path))
 
       implementation(enforcedPlatform("org.junit:junit-bom:5.12.2"))
-      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.0"))
+      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.1"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
       implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.5"))
 
