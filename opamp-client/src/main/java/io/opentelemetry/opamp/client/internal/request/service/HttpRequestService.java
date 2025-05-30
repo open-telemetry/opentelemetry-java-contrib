@@ -2,6 +2,7 @@ package io.opentelemetry.opamp.client.internal.request.service;
 
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpErrorException;
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpSender;
+import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
@@ -28,6 +29,7 @@ public final class HttpRequestService implements RequestService, Runnable {
   private final PeriodicDelay periodicRetryDelay;
   private final AtomicBoolean retryModeEnabled = new AtomicBoolean(false);
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
+  private final RetryAfterParser retryAfterParser;
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_REQUESTS =
@@ -57,18 +59,21 @@ public final class HttpRequestService implements RequestService, Runnable {
         requestSender,
         PeriodicTaskExecutor.create(periodicRequestDelay),
         periodicRequestDelay,
-        periodicRetryDelay);
+        periodicRetryDelay,
+        RetryAfterParser.getInstance());
   }
 
   HttpRequestService(
       HttpSender requestSender,
       PeriodicTaskExecutor executor,
       PeriodicDelay periodicRequestDelay,
-      PeriodicDelay periodicRetryDelay) {
+      PeriodicDelay periodicRetryDelay,
+      RetryAfterParser retryAfterParser) {
     this.requestSender = requestSender;
     this.executor = executor;
     this.periodicRequestDelay = periodicRequestDelay;
     this.periodicRetryDelay = periodicRetryDelay;
+    this.retryAfterParser = retryAfterParser;
   }
 
   @Override
@@ -154,7 +159,7 @@ public final class HttpRequestService implements RequestService, Runnable {
       String retryAfterHeader = response.getHeader("Retry-After");
       Duration retryAfter = null;
       if (retryAfterHeader != null) {
-        retryAfter = Duration.ofSeconds(Long.parseLong(retryAfterHeader));
+        retryAfter = retryAfterParser.parse(retryAfterHeader);
       }
       enableRetryMode(retryAfter);
     }

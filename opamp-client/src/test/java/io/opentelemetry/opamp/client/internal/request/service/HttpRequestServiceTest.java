@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpErrorException;
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpSender;
+import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
@@ -53,7 +54,12 @@ class HttpRequestServiceTest {
   @BeforeEach
   void setUp() {
     httpRequestService =
-        new HttpRequestService(requestSender, executor, periodicRequestDelay, periodicRetryDelay);
+        new HttpRequestService(
+            requestSender,
+            executor,
+            periodicRequestDelay,
+            periodicRetryDelay,
+            RetryAfterParser.getInstance());
   }
 
   @Test
@@ -186,6 +192,23 @@ class HttpRequestServiceTest {
 
     verify(callback).onRequestFailed(new HttpErrorException(429, "Error message"));
     verify(executor).setPeriodicDelay(periodicRetryDelay);
+    verify(periodicRetryDelay, never()).suggestDelay(any());
+  }
+
+  @Test
+  void verifySendingRequest_whenThereIsATooManyRequestsError_withSuggestedDelay() {
+    HttpSender.Response response = mock();
+    when(response.statusCode()).thenReturn(429);
+    when(response.statusMessage()).thenReturn("Error message");
+    when(response.getHeader("Retry-After")).thenReturn("5");
+    prepareRequest();
+    enqueueResponse(response);
+
+    httpRequestService.run();
+
+    verify(callback).onRequestFailed(new HttpErrorException(429, "Error message"));
+    verify(executor).setPeriodicDelay(periodicRetryDelay);
+    verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(5));
   }
 
   @Test
@@ -241,6 +264,23 @@ class HttpRequestServiceTest {
 
     verify(callback).onRequestFailed(new HttpErrorException(503, "Error message"));
     verify(executor).setPeriodicDelay(periodicRetryDelay);
+    verify(periodicRetryDelay, never()).suggestDelay(any());
+  }
+
+  @Test
+  void verifySendingRequest_whenThereIsAServiceUnavailableError_withSuggestedDelay() {
+    HttpSender.Response response = mock();
+    when(response.getHeader("Retry-After")).thenReturn("2");
+    when(response.statusCode()).thenReturn(503);
+    when(response.statusMessage()).thenReturn("Error message");
+    prepareRequest();
+    enqueueResponse(response);
+
+    httpRequestService.run();
+
+    verify(callback).onRequestFailed(new HttpErrorException(503, "Error message"));
+    verify(executor).setPeriodicDelay(periodicRetryDelay);
+    verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(2));
   }
 
   @Test
