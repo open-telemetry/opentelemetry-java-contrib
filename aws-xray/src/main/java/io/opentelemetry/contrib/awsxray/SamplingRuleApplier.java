@@ -19,6 +19,8 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -181,11 +183,12 @@ final class SamplingRuleApplier {
     String host = null;
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(HTTP_TARGET)) {
+      if (entry.getKey().equals(HTTP_TARGET) || entry.getKey().equals(UrlAttributes.URL_PATH)) {
         httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_URL)) {
+      } else if (entry.getKey().equals(HTTP_URL) || entry.getKey().equals(UrlAttributes.URL_FULL)) {
         httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_METHOD)) {
+      } else if (entry.getKey().equals(HTTP_METHOD)
+          || entry.getKey().equals(HttpAttributes.HTTP_REQUEST_METHOD)) {
         httpMethod = (String) entry.getValue();
       } else if (entry.getKey().equals(NET_HOST_NAME)) {
         host = (String) entry.getValue();
