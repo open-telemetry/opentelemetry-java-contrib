@@ -60,9 +60,6 @@ public class GcpAuthAutoConfigurationCustomizerProvider
           ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
           ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getEnvironmentVariable(),
           ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty());
-  private static final String SIGNAL_TARGET_WARNING_MSG =
-      "GCP Authentication Extension is not configured for signal type: %s. "
-          + SIGNAL_TARGET_WARNING_FIX_SUGGESTION;
 
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
@@ -125,7 +122,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     } else {
-      logger.log(Level.WARNING, String.format(SIGNAL_TARGET_WARNING_MSG, SIGNAL_TYPE_TRACES));
+      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
@@ -135,7 +136,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     } else {
-      logger.log(Level.WARNING, String.format(SIGNAL_TARGET_WARNING_MSG, SIGNAL_TYPE_METRICS));
+      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
