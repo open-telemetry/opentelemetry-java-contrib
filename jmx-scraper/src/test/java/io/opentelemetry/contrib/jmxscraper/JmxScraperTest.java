@@ -49,7 +49,7 @@ class JmxScraperTest {
   void shouldCreateConfig_propertiesLoadedFromFile() throws InvalidArgumentException {
     // Given
     String filePath =
-        ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
+        ClassLoader.getSystemClassLoader().getResource("validConfig.properties").toExternalForm();
     List<String> args = Arrays.asList("-config", filePath);
 
     // When
