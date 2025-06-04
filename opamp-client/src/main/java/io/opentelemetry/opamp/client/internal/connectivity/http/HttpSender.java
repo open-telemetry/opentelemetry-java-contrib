@@ -6,14 +6,18 @@
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public interface HttpSender {
 
-  CompletableFuture<Response> send(Consumer<OutputStream> writer, int contentLength);
+  CompletableFuture<Response> send(BodyWriter writer, int contentLength);
+
+  interface BodyWriter {
+    void writeTo(OutputStream outputStream) throws IOException;
+  }
 
   interface Response extends Closeable {
     int statusCode();

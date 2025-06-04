@@ -7,9 +7,7 @@ package io.opentelemetry.opamp.client.internal.connectivity.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -40,7 +38,7 @@ public final class OkHttpSender implements HttpSender {
   }
 
   @Override
-  public CompletableFuture<Response> send(Consumer<OutputStream> writer, int contentLength) {
+  public CompletableFuture<Response> send(BodyWriter writer, int contentLength) {
     CompletableFuture<Response> future = new CompletableFuture<>();
     okhttp3.Request.Builder builder = new okhttp3.Request.Builder().url(url);
     builder.addHeader("Content-Type", CONTENT_TYPE);
@@ -108,12 +106,11 @@ public final class OkHttpSender implements HttpSender {
   }
 
   private static class RawRequestBody extends RequestBody {
-    private final Consumer<OutputStream> writer;
+    private final BodyWriter writer;
     private final int contentLength;
     private final MediaType contentType;
 
-    private RawRequestBody(
-        Consumer<OutputStream> writer, int contentLength, MediaType contentType) {
+    private RawRequestBody(BodyWriter writer, int contentLength, MediaType contentType) {
       this.writer = writer;
       this.contentLength = contentLength;
       this.contentType = contentType;
@@ -131,8 +128,8 @@ public final class OkHttpSender implements HttpSender {
     }
 
     @Override
-    public void writeTo(@NotNull BufferedSink bufferedSink) {
-      writer.accept(bufferedSink.outputStream());
+    public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException {
+      writer.writeTo(bufferedSink.outputStream());
     }
   }
 }

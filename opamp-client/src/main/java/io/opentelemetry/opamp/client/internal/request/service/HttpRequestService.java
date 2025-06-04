@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import opamp.proto.AgentToServer;
@@ -205,21 +204,16 @@ public final class HttpRequestService implements RequestService, Runnable {
     return Objects.requireNonNull(callback);
   }
 
-  private static class ByteArrayWriter implements Consumer<OutputStream> {
+  private static class ByteArrayWriter implements HttpSender.BodyWriter {
     private final byte[] data;
 
     private ByteArrayWriter(byte[] data) {
       this.data = data;
     }
 
-    @SuppressWarnings("ThrowSpecificExceptions")
     @Override
-    public void accept(OutputStream outputStream) {
-      try {
-        outputStream.write(data);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    public void writeTo(OutputStream outputStream) throws IOException {
+      outputStream.write(data);
     }
   }
 }
