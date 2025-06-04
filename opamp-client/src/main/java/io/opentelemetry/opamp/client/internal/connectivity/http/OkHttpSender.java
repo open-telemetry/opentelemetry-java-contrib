@@ -78,7 +78,7 @@ public final class OkHttpSender implements HttpSender {
 
     private OkHttpResponse(okhttp3.Response response) {
       if (response.body() == null) {
-        throw new IllegalStateException();
+        throw new IllegalStateException("null response body not expected");
       }
       this.response = response;
     }
