@@ -32,6 +32,8 @@ jobs:
         with:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
       - name: Gradle build and test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build -x test
 
   test:
@@ -171,6 +173,7 @@ jobs:
         if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
         run: ./gradlew assemble publishToSonatype
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
