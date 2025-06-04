@@ -19,7 +19,7 @@ dependencies {
 val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
   group = "opamp"
   src("https://api.github.com/repos/open-telemetry/opamp-spec/releases/latest")
-  header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN") ?: ""}")
+  header("Authorization", "Bearer ${System.getenv("GH_TOKEN") ?: ""}")
   header("X-GitHub-Api-Version", "2022-11-28")
   dest(project.layout.buildDirectory.file("opamp/release.json"))
 }
