@@ -10,9 +10,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okio.BufferedSink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,20 +49,27 @@ public final class OkHttpSender implements HttpSender {
     RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);
     builder.post(body);
 
-    try {
-      okhttp3.Response response = client.newCall(builder.build()).execute();
-      if (response.isSuccessful()) {
-        if (response.body() != null) {
-          future.complete(new OkHttpResponse(response));
-        }
-      } else {
-        future.completeExceptionally(new HttpErrorException(response.code(), response.message()));
-      }
-    } catch (IOException e) {
-      future.completeExceptionally(e);
-    }
+    client
+        .newCall(builder.build())
+        .enqueue(
+            new Callback() {
+              @Override
+              public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) {
+                if (response.isSuccessful()) {
+                  if (response.body() != null) {
+                    future.complete(new OkHttpResponse(response));
+                  }
+                } else {
+                  future.completeExceptionally(
+                      new HttpErrorException(response.code(), response.message()));
+                }
+              }
 
-    future.completeExceptionally(new IllegalStateException());
+              @Override
+              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(e);
+              }
+            });
 
     return future;
   }
