@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public final class RetryAfterParser {
   private final SystemTime systemTime;
-  public static final Pattern SECONDS_PATTERN = Pattern.compile("\\d+");
+  public static final Pattern SECONDS_PATTERN = Pattern.compile("^\\d+$");
   public static final Pattern DATE_PATTERN =
       Pattern.compile(
           "^([A-Za-z]{3}, [0-3][0-9] [A-Za-z]{3} [0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] GMT)$");
