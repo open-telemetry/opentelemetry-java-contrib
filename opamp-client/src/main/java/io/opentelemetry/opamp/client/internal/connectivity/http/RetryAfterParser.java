@@ -6,9 +6,9 @@
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
 import io.opentelemetry.opamp.client.internal.tools.SystemTime;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -18,8 +18,8 @@ public final class RetryAfterParser {
   public static final Pattern DATE_PATTERN =
       Pattern.compile(
           "^([A-Za-z]{3}, [0-3][0-9] [A-Za-z]{3} [0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] GMT)$");
-  private static final SimpleDateFormat dateFormat =
-      new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+  private static final DateTimeFormatter DATE_FORMAT =
+      DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
   public static RetryAfterParser getInstance() {
     return new RetryAfterParser(SystemTime.getInstance());
@@ -38,12 +38,7 @@ public final class RetryAfterParser {
     throw new IllegalArgumentException("Invalid Retry-After value: " + value);
   }
 
-  @SuppressWarnings({"JavaUtilDate", "ThrowSpecificExceptions"})
   private static long toMilliseconds(String value) {
-    try {
-      return dateFormat.parse(value).getTime();
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
+    return ZonedDateTime.parse(value, DATE_FORMAT).toInstant().toEpochMilli();
   }
 }
