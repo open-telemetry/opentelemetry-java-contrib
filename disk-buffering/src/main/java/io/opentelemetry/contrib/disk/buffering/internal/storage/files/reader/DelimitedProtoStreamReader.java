@@ -5,24 +5,21 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.CountingInputStream;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
 
-public final class DelimitedProtoStreamReader extends StreamReader {
-  private final CountingInputStream countingInputStream;
+public final class DelimitedProtoStreamReader implements StreamReader {
+  private final InputStream inputStream;
 
   public DelimitedProtoStreamReader(InputStream inputStream) {
-    super(new CountingInputStream(inputStream));
-    countingInputStream = (CountingInputStream) this.inputStream;
+    this.inputStream = inputStream;
   }
 
   @Override
   @Nullable
-  public ReadResult read() throws IOException {
-    int startingPosition = countingInputStream.getPosition();
+  public ReadResult readNext() throws IOException {
     int itemSize = getNextItemSize();
     if (itemSize < 1) {
       return null;
@@ -31,7 +28,7 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     if (inputStream.read(bytes) < 0) {
       return null;
     }
-    return new ReadResult(bytes, countingInputStream.getPosition() - startingPosition);
+    return new ReadResult(bytes);
   }
 
   private int getNextItemSize() {
@@ -46,6 +43,11 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     }
   }
 
+  @Override
+  public void close() throws IOException {
+    inputStream.close();
+  }
+
   public static class Factory implements StreamReader.Factory {
 
     private static final Factory INSTANCE = new DelimitedProtoStreamReader.Factory();
@@ -57,8 +59,8 @@ public final class DelimitedProtoStreamReader extends StreamReader {
     private Factory() {}
 
     @Override
-    public StreamReader create(InputStream stream) {
-      return new DelimitedProtoStreamReader(stream);
+    public StreamReader create(InputStream inputStream) {
+      return new DelimitedProtoStreamReader(inputStream);
     }
   }
 }
