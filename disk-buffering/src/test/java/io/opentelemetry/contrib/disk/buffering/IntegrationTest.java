@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -101,6 +102,11 @@ public class IntegrationTest {
         buildToDiskExporter(SignalSerializer.ofLogs(), memoryLogRecordExporter::export);
     LogRecordToDiskExporter logToDiskExporter = new LogRecordToDiskExporter(toDiskLogExporter);
     logger = createLoggerProvider(logToDiskExporter).get("LogInstrumentationScope");
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    spanStorage.close();
   }
 
   @NotNull

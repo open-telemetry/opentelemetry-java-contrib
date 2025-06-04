@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,6 +46,11 @@ class WritableFileTest {
             CREATED_TIME_MILLIS,
             TestData.getDefaultConfiguration(rootDir),
             clock);
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    writableFile.close();
   }
 
   @Test
