@@ -54,10 +54,8 @@ public final class OkHttpSender implements HttpSender {
             new Callback() {
               @Override
               public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) {
-                if (response.isSuccessful()) {
-                  if (response.body() != null) {
-                    future.complete(new OkHttpResponse(response));
-                  }
+                if (response.isSuccessful() && response.body() != null) {
+                  future.complete(new OkHttpResponse(response));
                 } else {
                   future.completeExceptionally(
                       new HttpErrorException(response.code(), response.message()));
