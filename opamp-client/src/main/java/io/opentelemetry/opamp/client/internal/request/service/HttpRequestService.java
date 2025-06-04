@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -164,7 +165,10 @@ public final class HttpRequestService implements RequestService, Runnable {
       String retryAfterHeader = response.getHeader("Retry-After");
       Duration retryAfter = null;
       if (retryAfterHeader != null) {
-        retryAfter = retryAfterParser.parse(retryAfterHeader);
+        Optional<Duration> duration = retryAfterParser.tryParse(retryAfterHeader);
+        if (duration.isPresent()) {
+          retryAfter = duration.get();
+        }
       }
       enableRetryMode(retryAfter);
     }

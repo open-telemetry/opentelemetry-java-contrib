@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class RetryAfterParser {
@@ -29,13 +30,17 @@ public final class RetryAfterParser {
     this.systemTime = systemTime;
   }
 
-  public Duration parse(String value) {
+  public Optional<Duration> tryParse(String value) {
+    Duration duration = null;
     if (SECONDS_PATTERN.matcher(value).matches()) {
-      return Duration.ofSeconds(Long.parseLong(value));
+      duration = Duration.ofSeconds(Long.parseLong(value));
     } else if (DATE_PATTERN.matcher(value).matches()) {
-      return Duration.ofMillis(toMilliseconds(value) - systemTime.getCurrentTimeMillis());
+      long difference = toMilliseconds(value) - systemTime.getCurrentTimeMillis();
+      if (difference > 0) {
+        duration = Duration.ofMillis(difference);
+      }
     }
-    throw new IllegalArgumentException("Invalid Retry-After value: " + value);
+    return Optional.ofNullable(duration);
   }
 
   private static long toMilliseconds(String value) {
