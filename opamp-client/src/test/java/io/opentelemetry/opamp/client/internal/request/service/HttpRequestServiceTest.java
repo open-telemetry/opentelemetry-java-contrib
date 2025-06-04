@@ -40,6 +40,7 @@ import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -181,7 +182,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(500, "Error message"));
+    verifyRequestFailedCallback(500);
     verifyNoInteractions(executor);
   }
 
@@ -195,7 +196,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(429, "Error message"));
+    verifyRequestFailedCallback(429);
     verify(executor).setPeriodicDelay(periodicRetryDelay);
     verify(periodicRetryDelay, never()).suggestDelay(any());
   }
@@ -211,7 +212,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(429, "Error message"));
+    verifyRequestFailedCallback(429);
     verify(executor).setPeriodicDelay(periodicRetryDelay);
     verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(5));
   }
@@ -267,7 +268,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(503, "Error message"));
+    verifyRequestFailedCallback(503);
     verify(executor).setPeriodicDelay(periodicRetryDelay);
     verify(periodicRetryDelay, never()).suggestDelay(any());
   }
@@ -283,9 +284,16 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(503, "Error message"));
+    verifyRequestFailedCallback(503);
     verify(executor).setPeriodicDelay(periodicRetryDelay);
     verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(2));
+  }
+
+  private void verifyRequestFailedCallback(int errorCode) {
+    ArgumentCaptor<HttpErrorException> captor = ArgumentCaptor.forClass(HttpErrorException.class);
+    verify(callback).onRequestFailed(captor.capture());
+    assertThat(captor.getValue().getErrorCode()).isEqualTo(errorCode);
+    assertThat(captor.getValue().getMessage()).isEqualTo("Error message");
   }
 
   @Test

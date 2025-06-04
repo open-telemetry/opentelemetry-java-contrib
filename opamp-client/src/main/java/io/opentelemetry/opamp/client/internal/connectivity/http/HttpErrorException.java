@@ -5,28 +5,13 @@
 
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
-import java.util.Objects;
-
 public class HttpErrorException extends Exception {
   private final int errorCode;
 
   private static final long serialVersionUID = 1L;
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof HttpErrorException)) {
-      return false;
-    }
-    HttpErrorException that = (HttpErrorException) o;
-    return errorCode == that.errorCode && Objects.equals(getMessage(), that.getMessage());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(errorCode, getMessage());
+  public int getErrorCode() {
+    return errorCode;
   }
 
   /**
