@@ -20,8 +20,9 @@ import java.util.function.Supplier;
 public interface RequestService {
 
   /**
-   * Starts the service. The actions done in this method depend on the implementation. For HTTP
-   * there's nothing to do here, whereas for WebSocket this is where the connectivity is started.
+   * Starts the service. The actions done in this method depend on the implementation. For HTTP this
+   * is where the periodic poll task should get started, whereas for WebSocket this is where the
+   * connectivity is started.
    *
    * @param callback This is the only way that the service can communicate back to the {@link
    *     OpampClient} implementation.
