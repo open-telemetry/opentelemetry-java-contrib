@@ -7,9 +7,10 @@ package io.opentelemetry.opamp.client.internal.connectivity.http;
 
 import java.util.Objects;
 
-@SuppressWarnings("serial")
 public class HttpErrorException extends Exception {
-  public final int errorCode;
+  private final int errorCode;
+
+  private static final long serialVersionUID = 1L;
 
   @Override
   public boolean equals(Object o) {
