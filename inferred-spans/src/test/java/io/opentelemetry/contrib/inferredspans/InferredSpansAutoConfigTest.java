@@ -36,7 +36,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.io.TempDir;
 
-@EnabledOnOs(LINUX)
+@EnabledOnOs(LINUX) // Uses async-profiler, which is only supported on Linux
 public class InferredSpansAutoConfigTest {
 
   @BeforeEach
