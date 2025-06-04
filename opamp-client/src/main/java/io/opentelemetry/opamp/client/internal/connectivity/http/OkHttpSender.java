@@ -15,7 +15,6 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okio.BufferedSink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +77,9 @@ public final class OkHttpSender implements HttpSender {
     private final okhttp3.Response response;
 
     private OkHttpResponse(okhttp3.Response response) {
+      if (response.body() == null) {
+        throw new IllegalStateException();
+      }
       this.response = response;
     }
 
@@ -93,10 +95,7 @@ public final class OkHttpSender implements HttpSender {
 
     @Override
     public InputStream bodyInputStream() {
-      if (response.body() != null) {
-        return response.body().byteStream();
-      }
-      throw new NullPointerException();
+      return response.body().byteStream();
     }
 
     @Override
