@@ -29,6 +29,9 @@ public final class OkHttpSender implements HttpSender {
     return new OkHttpSender(url, client);
   }
 
+  private static final String CONTENT_TYPE = "application/x-protobuf";
+  private static final MediaType MEDIA_TYPE = MediaType.parse(CONTENT_TYPE);
+
   private OkHttpSender(String url, OkHttpClient client) {
     this.url = url;
     this.client = client;
@@ -38,10 +41,9 @@ public final class OkHttpSender implements HttpSender {
   public CompletableFuture<Response> send(Consumer<OutputStream> writer, int contentLength) {
     CompletableFuture<Response> future = new CompletableFuture<>();
     okhttp3.Request.Builder builder = new okhttp3.Request.Builder().url(url);
-    String contentType = "application/x-protobuf";
-    builder.addHeader("Content-Type", contentType);
+    builder.addHeader("Content-Type", CONTENT_TYPE);
 
-    RequestBody body = new RawRequestBody(writer, contentLength, MediaType.parse(contentType));
+    RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);
     builder.post(body);
 
     try {
