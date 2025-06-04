@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -25,7 +26,8 @@ public final class PeriodicTaskExecutor {
 
   public static PeriodicTaskExecutor create(PeriodicDelay initialPeriodicDelay) {
     return new PeriodicTaskExecutor(
-        Executors.newSingleThreadScheduledExecutor(), initialPeriodicDelay);
+        Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory()),
+        initialPeriodicDelay);
   }
 
   PeriodicTaskExecutor(
@@ -77,6 +79,21 @@ public final class PeriodicTaskExecutor {
     public void run() {
       Objects.requireNonNull(periodicTask.get()).run();
       scheduleNext();
+    }
+  }
+
+  private static class DaemonThreadFactory implements ThreadFactory {
+    private final ThreadFactory delegate = Executors.defaultThreadFactory();
+
+    @Override
+    public Thread newThread(@Nonnull Runnable r) {
+      Thread t = delegate.newThread(r);
+      try {
+        t.setDaemon(true);
+      } catch (SecurityException e) {
+        // Well, we tried.
+      }
+      return t;
     }
   }
 }
