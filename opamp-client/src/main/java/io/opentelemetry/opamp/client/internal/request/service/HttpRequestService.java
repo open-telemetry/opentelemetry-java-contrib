@@ -36,6 +36,7 @@ public final class HttpRequestService implements RequestService, Runnable {
   private final PeriodicDelay periodicRetryDelay;
   private final AtomicBoolean retryModeEnabled = new AtomicBoolean(false);
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
+  private final AtomicBoolean hasStopped = new AtomicBoolean(false);
   private final RetryAfterParser retryAfterParser;
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
@@ -85,6 +86,9 @@ public final class HttpRequestService implements RequestService, Runnable {
 
   @Override
   public void start(Callback callback, Supplier<Request> requestSupplier) {
+    if (hasStopped.get()) {
+      throw new IllegalStateException("HttpRequestService cannot start after it has been stopped.");
+    }
     if (isRunning.compareAndSet(false, true)) {
       this.callback = callback;
       this.requestSupplier = requestSupplier;
@@ -97,6 +101,7 @@ public final class HttpRequestService implements RequestService, Runnable {
   @Override
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
+      hasStopped.set(true);
       executor.executeNow();
       executor.stop();
     }

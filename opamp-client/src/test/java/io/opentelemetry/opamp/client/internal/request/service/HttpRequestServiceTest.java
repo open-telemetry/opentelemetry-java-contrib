@@ -112,8 +112,9 @@ class HttpRequestServiceTest {
     httpRequestService.stop();
     try {
       httpRequestService.start(callback, requestSupplier);
+      fail();
     } catch (IllegalStateException e) {
-      assertThat(e).hasMessage("RequestDispatcher has been stopped");
+      assertThat(e).hasMessage("HttpRequestService cannot start after it has been stopped.");
     }
   }
 
