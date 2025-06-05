@@ -31,6 +31,8 @@ import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
@@ -144,12 +146,12 @@ class HttpRequestServiceTest {
 
   @Test
   void verifySendingRequest_whenThereIsAnExecutionError()
-      throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException, TimeoutException {
     prepareRequest();
     CompletableFuture<HttpSender.Response> future = mock();
     when(requestSender.send(any(), anyInt())).thenReturn(future);
     Exception myException = mock();
-    doThrow(new ExecutionException(myException)).when(future).get();
+    doThrow(new ExecutionException(myException)).when(future).get(30, TimeUnit.SECONDS);
 
     httpRequestService.run();
 
@@ -159,12 +161,12 @@ class HttpRequestServiceTest {
 
   @Test
   void verifySendingRequest_whenThereIsAnInterruptedException()
-      throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException, TimeoutException {
     prepareRequest();
     CompletableFuture<HttpSender.Response> future = mock();
     when(requestSender.send(any(), anyInt())).thenReturn(future);
     InterruptedException myException = mock();
-    doThrow(myException).when(future).get();
+    doThrow(myException).when(future).get(30, TimeUnit.SECONDS);
 
     httpRequestService.run();
 
