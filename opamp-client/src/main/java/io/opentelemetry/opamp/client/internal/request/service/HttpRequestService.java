@@ -141,6 +141,7 @@ public final class HttpRequestService implements RequestService, Runnable {
     CompletableFuture<HttpSender.Response> future =
         requestSender.send(outputStream -> outputStream.write(data), data.length);
     try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
+      getCallback().onConnectionSuccess();
       if (isSuccessful(response)) {
         handleSuccessResponse(
             Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
@@ -148,12 +149,12 @@ public final class HttpRequestService implements RequestService, Runnable {
         handleHttpError(response);
       }
     } catch (IOException | InterruptedException | TimeoutException e) {
-      getCallback().onRequestFailed(e);
+      getCallback().onConnectionFailed(e);
     } catch (ExecutionException e) {
       if (e.getCause() != null) {
-        getCallback().onRequestFailed(e.getCause());
+        getCallback().onConnectionFailed(e.getCause());
       } else {
-        getCallback().onRequestFailed(e);
+        getCallback().onConnectionFailed(e);
       }
     }
   }

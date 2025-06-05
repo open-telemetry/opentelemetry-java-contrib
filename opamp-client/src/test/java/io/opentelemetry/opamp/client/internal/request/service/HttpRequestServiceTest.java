@@ -142,7 +142,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(requestSize));
-    verify(callback).onRequestFailed(any());
+    verify(callback).onConnectionFailed(any());
   }
 
   @Test
@@ -157,7 +157,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(requestSize));
-    verify(callback).onRequestFailed(myException);
+    verify(callback).onConnectionFailed(myException);
   }
 
   @Test
@@ -172,7 +172,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(requestSize));
-    verify(callback).onRequestFailed(myException);
+    verify(callback).onConnectionFailed(myException);
   }
 
   @Test

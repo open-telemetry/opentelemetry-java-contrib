@@ -50,7 +50,7 @@ public interface RequestService {
 
     /**
      * For WebSocket implementations, this is called when the connection cannot be made or is lost.
-     * For HTTP implementations, this is called on every HTTP request that fails.
+     * For HTTP implementations, this is called on every HTTP request that cannot get a response.
      *
      * @param throwable The detailed error.
      */
