@@ -128,24 +128,18 @@ public final class HttpRequestService implements RequestService, Runnable {
   }
 
   private void doSendRequest() {
-    try {
-      AgentToServer agentToServer =
-          Objects.requireNonNull(requestSupplier).get().getAgentToServer();
+    AgentToServer agentToServer = Objects.requireNonNull(requestSupplier).get().getAgentToServer();
 
-      byte[] data = agentToServer.encodeByteString().toByteArray();
-      try (HttpSender.Response response =
-          requestSender.send(new ByteArrayWriter(data), data.length).get()) {
-        if (isSuccessful(response)) {
-          handleSuccessResponse(
-              Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
-        } else {
-          handleHttpError(response);
-        }
-      } catch (IOException e) {
-        getCallback().onRequestFailed(e);
+    byte[] data = agentToServer.encodeByteString().toByteArray();
+    try (HttpSender.Response response =
+        requestSender.send(new ByteArrayWriter(data), data.length).get()) {
+      if (isSuccessful(response)) {
+        handleSuccessResponse(
+            Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
+      } else {
+        handleHttpError(response);
       }
-
-    } catch (InterruptedException e) {
+    } catch (IOException | InterruptedException e) {
       getCallback().onRequestFailed(e);
     } catch (ExecutionException e) {
       if (e.getCause() != null) {
