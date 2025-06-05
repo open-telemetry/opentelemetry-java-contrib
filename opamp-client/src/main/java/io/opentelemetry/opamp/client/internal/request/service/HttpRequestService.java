@@ -18,7 +18,10 @@ import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -131,15 +134,16 @@ public final class HttpRequestService implements RequestService, Runnable {
     AgentToServer agentToServer = Objects.requireNonNull(requestSupplier).get().getAgentToServer();
 
     byte[] data = agentToServer.encodeByteString().toByteArray();
-    try (HttpSender.Response response =
-        requestSender.send(new ByteArrayWriter(data), data.length).get()) {
+    CompletableFuture<HttpSender.Response> future =
+        requestSender.send(new ByteArrayWriter(data), data.length);
+    try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
       if (isSuccessful(response)) {
         handleSuccessResponse(
             Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
       } else {
         handleHttpError(response);
       }
-    } catch (IOException | InterruptedException e) {
+    } catch (IOException | InterruptedException | TimeoutException e) {
       getCallback().onRequestFailed(e);
     } catch (ExecutionException e) {
       if (e.getCause() != null) {
