@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
@@ -49,6 +51,15 @@ import javax.annotation.Nonnull;
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class GcpAuthAutoConfigurationCustomizerProvider
     implements AutoConfigurationCustomizerProvider {
+
+  private static final Logger logger =
+      Logger.getLogger(GcpAuthAutoConfigurationCustomizerProvider.class.getName());
+  private static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
+      String.format(
+          "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by exporting valid values to environment variable: %s or by setting valid values in system property: %s.",
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getEnvironmentVariable(),
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty());
 
   static final String QUOTA_USER_PROJECT_HEADER = "x-goog-user-project";
   static final String GCP_USER_PROJECT_ID_KEY = "gcp.project_id";
@@ -93,10 +104,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
     autoConfiguration
         .addSpanExporterCustomizer(
-            (spanExporter, configProperties) -> customizeSpanExporter(spanExporter, credentials))
+            (spanExporter, configProperties) ->
+                customizeSpanExporter(spanExporter, credentials, configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, credentials))
+                customizeMetricExporter(metricExporter, credentials, configProperties))
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
@@ -106,26 +118,38 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static SpanExporter customizeSpanExporter(
-      SpanExporter exporter, GoogleCredentials credentials) {
-    if (isSignalTargeted(SIGNAL_TYPE_TRACES)) {
-      return addAuthorizationHeaders(exporter, credentials);
+      SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+    if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
+      return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
 
   private static MetricExporter customizeMetricExporter(
-      MetricExporter exporter, GoogleCredentials credentials) {
-    if (isSignalTargeted(SIGNAL_TYPE_METRICS)) {
-      return addAuthorizationHeaders(exporter, credentials);
+      MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+    if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+      return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
-  private static boolean isSignalTargeted(String checkSignal) {
+  private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
     String userSpecifiedTargetedSignals =
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
-            () -> SIGNAL_TYPE_ALL);
+            configProperties, () -> SIGNAL_TYPE_ALL);
     return Arrays.stream(userSpecifiedTargetedSignals.split(","))
         .map(String::trim)
         .anyMatch(
@@ -136,16 +160,16 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
   // OtlpHttpSpanExporter.
   private static SpanExporter addAuthorizationHeaders(
-      SpanExporter exporter, GoogleCredentials credentials) {
+      SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (exporter instanceof OtlpHttpSpanExporter) {
       OtlpHttpSpanExporterBuilder builder =
           ((OtlpHttpSpanExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     } else if (exporter instanceof OtlpGrpcSpanExporter) {
       OtlpGrpcSpanExporterBuilder builder =
           ((OtlpGrpcSpanExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     }
     return exporter;
@@ -154,22 +178,23 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Adds authorization headers to the calls made by the OtlpGrpcMetricExporter and
   // OtlpHttpMetricExporter.
   private static MetricExporter addAuthorizationHeaders(
-      MetricExporter exporter, GoogleCredentials credentials) {
+      MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (exporter instanceof OtlpHttpMetricExporter) {
       OtlpHttpMetricExporterBuilder builder =
           ((OtlpHttpMetricExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     } else if (exporter instanceof OtlpGrpcMetricExporter) {
       OtlpGrpcMetricExporterBuilder builder =
           ((OtlpGrpcMetricExporter) exporter)
-              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials));
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
       return builder.build();
     }
     return exporter;
   }
 
-  private static Map<String, String> getRequiredHeaderMap(GoogleCredentials credentials) {
+  private static Map<String, String> getRequiredHeaderMap(
+      GoogleCredentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
     try {
       // this also refreshes the credentials, if required
@@ -192,7 +217,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
       Optional<String> maybeConfiguredQuotaProjectId =
-          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional();
+          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
+              configProperties);
       maybeConfiguredQuotaProjectId.ifPresent(
           configuredQuotaProjectId ->
               flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
@@ -202,7 +228,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue();
+    String gcpProjectId =
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     Resource res =
         Resource.create(
             Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
