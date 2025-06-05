@@ -14,7 +14,6 @@ import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicTaskExecutor;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -135,7 +134,7 @@ public final class HttpRequestService implements RequestService, Runnable {
 
     byte[] data = agentToServer.encodeByteString().toByteArray();
     CompletableFuture<HttpSender.Response> future =
-        requestSender.send(new ByteArrayWriter(data), data.length);
+        requestSender.send(outputStream -> outputStream.write(data), data.length);
     try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
       if (isSuccessful(response)) {
         handleSuccessResponse(
@@ -200,18 +199,5 @@ public final class HttpRequestService implements RequestService, Runnable {
 
   private Callback getCallback() {
     return Objects.requireNonNull(callback);
-  }
-
-  private static class ByteArrayWriter implements HttpSender.BodyWriter {
-    private final byte[] data;
-
-    private ByteArrayWriter(byte[] data) {
-      this.data = data;
-    }
-
-    @Override
-    public void writeTo(OutputStream outputStream) throws IOException {
-      outputStream.write(data);
-    }
   }
 }
