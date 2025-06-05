@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.inferredspans;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.condition.OS.LINUX;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -33,10 +32,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.io.TempDir;
 
-@EnabledOnOs(LINUX) // Uses async-profiler, which is only supported on Linux
+@DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
 public class InferredSpansAutoConfigTest {
 
   @BeforeEach
@@ -110,7 +108,6 @@ public class InferredSpansAutoConfigTest {
   }
 
   @DisabledOnOpenJ9
-  @DisabledOnOs(WINDOWS)
   @Test
   public void checkProfilerWorking() {
     try (AutoConfigTestProperties props =

@@ -6,14 +6,15 @@ on:
       - main
       - release/*
   pull_request:
+  merge_group:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
   build:
