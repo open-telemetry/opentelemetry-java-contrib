@@ -102,13 +102,13 @@ public final class HttpRequestService implements RequestService, Runnable {
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
       hasStopped.set(true);
-      executor.executeNow();
       executor.stop();
     }
   }
 
   private void enableRetryMode(@Nullable Duration suggestedDelay) {
     if (retryModeEnabled.compareAndSet(false, true)) {
+      periodicRetryDelay.reset();
       if (suggestedDelay != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
         ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(suggestedDelay);
       }
@@ -118,6 +118,7 @@ public final class HttpRequestService implements RequestService, Runnable {
 
   private void disableRetryMode() {
     if (retryModeEnabled.compareAndSet(true, false)) {
+      periodicRequestDelay.reset();
       executor.setPeriodicDelay(periodicRequestDelay);
     }
   }

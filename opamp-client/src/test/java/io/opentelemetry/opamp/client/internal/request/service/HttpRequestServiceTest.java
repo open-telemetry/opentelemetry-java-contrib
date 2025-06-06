@@ -8,12 +8,16 @@ package io.opentelemetry.opamp.client.internal.request.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpErrorException;
@@ -25,20 +29,19 @@ import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicTaskExecutor;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
@@ -56,154 +59,122 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class HttpRequestServiceTest {
+
+  private static final Duration REGULAR_DELAY = Duration.ofSeconds(1);
+  private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
+
   @Mock private RequestService.Callback callback;
   @Mock private Supplier<Request> requestSupplier;
+  private final List<ScheduledTask> scheduledTasks = new ArrayList<>();
+  private ScheduledExecutorService executorService;
   private TestHttpSender requestSender;
-  private final PeriodicDelay periodicRequestDelay =
-      PeriodicDelay.ofFixedDuration(Duration.ofSeconds(1));
-  private TestPeriodicRetryDelay periodicRetryDelay;
+  private PeriodicDelay periodicRequestDelay;
+  private PeriodicDelayWithSuggestion periodicRetryDelay;
   private int requestSize = -1;
   private HttpRequestService httpRequestService;
 
   @BeforeEach
   void setUp() {
     requestSender = new TestHttpSender();
-    periodicRetryDelay = new TestPeriodicRetryDelay(Duration.ofSeconds(2));
+    periodicRequestDelay = createPeriodicDelay(REGULAR_DELAY);
+    periodicRetryDelay = createPeriodicDelayWithSuggestionSupport(RETRY_DELAY);
+    executorService = createTestScheduleExecutorService();
     httpRequestService =
         new HttpRequestService(
             requestSender,
-            PeriodicTaskExecutor.create(periodicRequestDelay),
+            new PeriodicTaskExecutor(executorService, periodicRequestDelay),
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
     httpRequestService.start(callback, requestSupplier);
+    prepareRequest();
   }
 
   @AfterEach
   void tearDown() {
-    requestSender.close();
     httpRequestService.stop();
-  }
-
-  @Test
-  void whenTryingToStartAfterStopHasBeenCalled_throwException() {
-    httpRequestService.start(callback, requestSupplier);
-    httpRequestService.stop();
-    try {
-      httpRequestService.start(callback, requestSupplier);
-      fail();
-    } catch (IllegalStateException e) {
-      assertThat(e).hasMessage("HttpRequestService cannot start after it has been stopped.");
-    }
+    scheduledTasks.clear();
+    verify(executorService).shutdown();
+    verifyNoMoreInteractions(executorService);
   }
 
   @Test
   void verifySendingRequest_happyPath() {
-    HttpSender.Response httpResponse = mock();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
-    attachServerToAgentMessage(serverToAgent.encodeByteString().toByteArray(), httpResponse);
-    prepareRequest();
-    enqueueResponse(httpResponse);
+    HttpSender.Response httpResponse = createSuccessfulResponse(serverToAgent);
+    requestSender.enqueueResponse(httpResponse);
 
     httpRequestService.sendRequest();
 
-    requestSender.awaitForRequest(Duration.ofMillis(500));
-    assertThat(requestSender.requests).hasSize(1);
-    assertThat(requestSender.requests.get(0).contentLength).isEqualTo(requestSize);
+    verifySingleRequestSent();
+    verifyRequestSuccessCallback(serverToAgent);
     verify(callback).onConnectionSuccess();
-    verify(callback).onRequestSuccess(Response.create(serverToAgent));
   }
 
   @Test
   void verifySendingRequest_whenTheresAParsingError() {
-    HttpSender.Response httpResponse = mock();
-    attachServerToAgentMessage(new byte[] {1, 2, 3}, httpResponse);
-    prepareRequest();
-    enqueueResponse(httpResponse);
+    HttpSender.Response httpResponse = createSuccessfulResponse(new byte[] {1, 2, 3});
+    requestSender.enqueueResponse(httpResponse);
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
 
-    verify(requestSender).send(any(), eq(requestSize));
+    verifySingleRequestSent();
     verify(callback).onConnectionFailed(any());
   }
 
   @Test
   void verifySendingRequest_whenThereIsAnExecutionError()
       throws ExecutionException, InterruptedException, TimeoutException {
-    prepareRequest();
     CompletableFuture<HttpSender.Response> future = mock();
-    when(requestSender.send(any(), anyInt())).thenReturn(future);
+    requestSender.enqueueResponseFuture(future);
     Exception myException = mock();
     doThrow(new ExecutionException(myException)).when(future).get(30, TimeUnit.SECONDS);
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
 
-    verify(requestSender).send(any(), eq(requestSize));
+    verifySingleRequestSent();
     verify(callback).onConnectionFailed(myException);
   }
 
   @Test
   void verifySendingRequest_whenThereIsAnInterruptedException()
       throws ExecutionException, InterruptedException, TimeoutException {
-    prepareRequest();
     CompletableFuture<HttpSender.Response> future = mock();
-    when(requestSender.send(any(), anyInt())).thenReturn(future);
+    requestSender.enqueueResponseFuture(future);
     InterruptedException myException = mock();
     doThrow(myException).when(future).get(30, TimeUnit.SECONDS);
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
 
-    verify(requestSender).send(any(), eq(requestSize));
+    verifySingleRequestSent();
     verify(callback).onConnectionFailed(myException);
   }
 
   @Test
   void verifySendingRequest_whenThereIsAGenericHttpError() {
-    HttpSender.Response response = mock();
-    when(response.statusCode()).thenReturn(500);
-    when(response.statusMessage()).thenReturn("Error message");
-    prepareRequest();
-    enqueueResponse(response);
+    requestSender.enqueueResponse(createFailedResponse(500));
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
 
+    verifySingleRequestSent();
     verifyRequestFailedCallback(500);
   }
 
   @Test
   void verifySendingRequest_whenThereIsATooManyRequestsError() {
-    HttpSender.Response response = mock();
-    when(response.statusCode()).thenReturn(429);
-    when(response.statusMessage()).thenReturn("Error message");
-    prepareRequest();
-    enqueueResponse(response);
-
-    httpRequestService.run();
-
-    verifyRequestFailedCallback(429);
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
-    verify(periodicRetryDelay, never()).suggestDelay(any());
+    verifyRetryDelayOnError(createFailedResponse(429), RETRY_DELAY);
   }
 
   @Test
   void verifySendingRequest_whenThereIsATooManyRequestsError_withSuggestedDelay() {
-    HttpSender.Response response = mock();
-    when(response.statusCode()).thenReturn(429);
-    when(response.statusMessage()).thenReturn("Error message");
+    HttpSender.Response response = createFailedResponse(429);
     when(response.getHeader("Retry-After")).thenReturn("5");
-    prepareRequest();
-    enqueueResponse(response);
 
-    httpRequestService.run();
-
-    verifyRequestFailedCallback(429);
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
-    verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(5));
+    verifyRetryDelayOnError(response, Duration.ofSeconds(5));
   }
 
   @Test
-  void verifySendingRequest_whenServerProvidesRetryInfo_usingTheProvidedInfo() {
-    HttpSender.Response response = mock();
+  void verifySendingRequest_whenServerProvidesRetryInfo() {
     long nanosecondsToWaitForRetry = 1000;
     ServerErrorResponse errorResponse =
         new ServerErrorResponse.Builder()
@@ -212,111 +183,103 @@ class HttpRequestServiceTest {
                 new RetryInfo.Builder().retry_after_nanoseconds(nanosecondsToWaitForRetry).build())
             .build();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().error_response(errorResponse).build();
-    attachServerToAgentMessage(serverToAgent.encodeByteString().toByteArray(), response);
-    prepareRequest();
-    enqueueResponse(response);
+    HttpSender.Response response = createSuccessfulResponse(serverToAgent);
 
-    httpRequestService.run();
-
-    verify(callback).onRequestSuccess(Response.create(serverToAgent));
-    verify(periodicRetryDelay).suggestDelay(Duration.ofNanos(nanosecondsToWaitForRetry));
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
+    verifyRetryDelayOnError(response, Duration.ofNanos(nanosecondsToWaitForRetry));
+    verify(callback).onRequestFailed(any());
+    verify(callback, never()).onRequestSuccess(any());
   }
 
   @Test
   void verifySendingRequest_whenServerIsUnavailable() {
-    HttpSender.Response response = mock();
     ServerErrorResponse errorResponse =
         new ServerErrorResponse.Builder()
             .type(ServerErrorResponseType.ServerErrorResponseType_Unavailable)
             .build();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().error_response(errorResponse).build();
-    attachServerToAgentMessage(serverToAgent.encodeByteString().toByteArray(), response);
-    prepareRequest();
-    enqueueResponse(response);
+    HttpSender.Response response = createSuccessfulResponse(serverToAgent);
 
-    httpRequestService.run();
-
-    verify(callback).onRequestSuccess(Response.create(serverToAgent));
-    verify(periodicRetryDelay, never()).suggestDelay(any());
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
+    verifyRetryDelayOnError(response, RETRY_DELAY);
+    verify(callback).onRequestFailed(any());
+    verify(callback, never()).onRequestSuccess(any());
   }
 
   @Test
   void verifySendingRequest_whenThereIsAServiceUnavailableError() {
-    HttpSender.Response response = mock();
-    when(response.statusCode()).thenReturn(503);
-    when(response.statusMessage()).thenReturn("Error message");
-    prepareRequest();
-    enqueueResponse(response);
-
-    httpRequestService.run();
-
-    verifyRequestFailedCallback(503);
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
-    verify(periodicRetryDelay, never()).suggestDelay(any());
+    verifyRetryDelayOnError(createFailedResponse(503), RETRY_DELAY);
   }
 
   @Test
   void verifySendingRequest_whenThereIsAServiceUnavailableError_withSuggestedDelay() {
-    HttpSender.Response response = mock();
+    HttpSender.Response response = createFailedResponse(503);
     when(response.getHeader("Retry-After")).thenReturn("2");
-    when(response.statusCode()).thenReturn(503);
-    when(response.statusMessage()).thenReturn("Error message");
-    prepareRequest();
-    enqueueResponse(response);
 
-    httpRequestService.run();
-
-    verifyRequestFailedCallback(503);
-    //    verify(executor).setPeriodicDelay(periodicRetryDelay); todo
-    verify(periodicRetryDelay).suggestDelay(Duration.ofSeconds(2));
-  }
-
-  private void verifyRequestFailedCallback(int errorCode) {
-    ArgumentCaptor<HttpErrorException> captor = ArgumentCaptor.forClass(HttpErrorException.class);
-    verify(callback).onRequestFailed(captor.capture());
-    assertThat(captor.getValue().getErrorCode()).isEqualTo(errorCode);
-    assertThat(captor.getValue().getMessage()).isEqualTo("Error message");
+    verifyRetryDelayOnError(response, Duration.ofSeconds(2));
   }
 
   @Test
   void verifySendingRequest_duringRegularMode() {
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+
     httpRequestService.sendRequest();
 
-    //    verify(executor).executeNow(); todo
+    verifySingleRequestSent();
   }
 
   @Test
   void verifySendingRequest_duringRetryMode() {
     enableRetryMode();
+    requestSender.requests.clear();
 
     httpRequestService.sendRequest();
 
-    //    verify(executor, never()).executeNow(); todo
+    assertThat(requestSender.requests).isEmpty();
   }
 
-  @Test
-  void verifySuccessfulSendingRequest_duringRetryMode() {
-    enableRetryMode();
-    HttpSender.Response response = mock();
-    attachServerToAgentMessage(
-        new ServerToAgent.Builder().build().encodeByteString().toByteArray(), response);
-    enqueueResponse(response);
+  private void verifyRetryDelayOnError(
+      HttpSender.Response errorResponse, Duration expectedRetryDelay) {
+    requestSender.enqueueResponse(errorResponse);
+    ScheduledTask previousTask = getCurrentScheduledTask();
+    scheduledTasks.clear();
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
 
-    //    verify(executor).setPeriodicDelay(periodicRequestDelay); todo
+    verifySingleRequestSent();
+    verify(previousTask.future).cancel(false);
+    verify(periodicRetryDelay).reset();
+    ScheduledTask retryTask = getCurrentScheduledTask();
+    assertThat(retryTask.delay).isEqualTo(expectedRetryDelay);
+
+    // Retry with another error
+    clearInvocations(callback);
+    scheduledTasks.clear();
+    requestSender.enqueueResponse(createFailedResponse(500));
+    retryTask.runnable.run();
+
+    verify(retryTask.future, never()).cancel(anyBoolean());
+    verifySingleRequestSent();
+    ScheduledTask retryTask2 = getCurrentScheduledTask();
+    assertThat(retryTask2.delay).isEqualTo(expectedRetryDelay);
+
+    // Retry with a success
+    clearInvocations(callback);
+    scheduledTasks.clear();
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    requestSender.enqueueResponse(createSuccessfulResponse(serverToAgent));
+    retryTask2.runnable.run();
+
+    verify(retryTask2.future).cancel(false);
+    verify(periodicRequestDelay).reset();
+    verifySingleRequestSent();
+    verifyRequestSuccessCallback(serverToAgent);
+    assertThat(getCurrentScheduledTask().delay).isEqualTo(REGULAR_DELAY);
   }
 
   private void enableRetryMode() {
-    HttpSender.Response response = mock();
-    when(response.statusCode()).thenReturn(503);
-    when(response.statusMessage()).thenReturn("Error message");
-    prepareRequest();
-    enqueueResponse(response);
+    HttpSender.Response response = createFailedResponse(503);
+    requestSender.enqueueResponse(response);
 
-    httpRequestService.run();
+    httpRequestService.sendRequest();
   }
 
   private void prepareRequest() {
@@ -326,83 +289,140 @@ class HttpRequestServiceTest {
     when(requestSupplier.get()).thenReturn(request);
   }
 
-  private void enqueueResponse(HttpSender.Response httpResponse) {
-    requestSender.enqueueResponse(httpResponse);
+  private ScheduledTask getCurrentScheduledTask() {
+    assertThat(scheduledTasks).hasSize(1);
+    return scheduledTasks.get(0);
   }
 
-  private static void attachServerToAgentMessage(
-      byte[] serverToAgent, HttpSender.Response httpResponse) {
+  private void verifySingleRequestSent() {
+    List<TestHttpSender.RequestParams> requests = requestSender.getRequests(1);
+    assertThat(requests.get(0).contentLength).isEqualTo(requestSize);
+  }
+
+  private void verifyRequestSuccessCallback(ServerToAgent serverToAgent) {
+    verify(callback).onRequestSuccess(Response.create(serverToAgent));
+  }
+
+  private void verifyRequestFailedCallback(int errorCode) {
+    ArgumentCaptor<HttpErrorException> captor = ArgumentCaptor.forClass(HttpErrorException.class);
+    verify(callback).onRequestFailed(captor.capture());
+    assertThat(captor.getValue().getErrorCode()).isEqualTo(errorCode);
+    assertThat(captor.getValue().getMessage()).isEqualTo("Error message");
+  }
+
+  private ScheduledExecutorService createTestScheduleExecutorService() {
+    ScheduledExecutorService service = mock();
+
+    doAnswer(
+            invocation -> {
+              Runnable runnable = invocation.getArgument(0);
+              runnable.run();
+              return null;
+            })
+        .when(service)
+        .execute(any());
+
+    when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
+        .thenAnswer(
+            invocation -> {
+              ScheduledFuture<?> future = mock();
+              scheduledTasks.add(
+                  ScheduledTask.create(
+                      future, invocation.getArgument(0), invocation.getArgument(1)));
+              return future;
+            });
+
+    return service;
+  }
+
+  private static HttpSender.Response createSuccessfulResponse(ServerToAgent serverToAgent) {
+    return createSuccessfulResponse(serverToAgent.encodeByteString().toByteArray());
+  }
+
+  private static HttpSender.Response createSuccessfulResponse(byte[] serverToAgent) {
+    HttpSender.Response response = mock();
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(serverToAgent);
-    when(httpResponse.statusCode()).thenReturn(200);
-    when(httpResponse.bodyInputStream()).thenReturn(byteArrayInputStream);
+    when(response.statusCode()).thenReturn(200);
+    when(response.bodyInputStream()).thenReturn(byteArrayInputStream);
+    return response;
   }
 
-  private static class TestPeriodicRetryDelay implements PeriodicDelay, AcceptsDelaySuggestion {
-    private final Duration delay;
+  private static HttpSender.Response createFailedResponse(int statusCode) {
+    HttpSender.Response response = mock();
+    when(response.statusCode()).thenReturn(statusCode);
+    when(response.statusMessage()).thenReturn("Error message");
+    return response;
+  }
 
-    private TestPeriodicRetryDelay(Duration delay) {
-      this.delay = delay;
+  private static PeriodicDelay createPeriodicDelay(Duration delay) {
+    PeriodicDelay mock = mock();
+    when(mock.getNextDelay()).thenReturn(delay);
+    return mock;
+  }
+
+  private static PeriodicDelayWithSuggestion createPeriodicDelayWithSuggestionSupport(
+      Duration delay) {
+    return spy(new PeriodicDelayWithSuggestion(delay));
+  }
+
+  private static class PeriodicDelayWithSuggestion
+      implements PeriodicDelay, AcceptsDelaySuggestion {
+    private final Duration initialDelay;
+    private Duration currentDelay;
+
+    private PeriodicDelayWithSuggestion(Duration initialDelay) {
+      this.initialDelay = initialDelay;
+      currentDelay = initialDelay;
     }
 
     @Override
-    public void suggestDelay(Duration delay) {}
+    public void suggestDelay(Duration delay) {
+      currentDelay = delay;
+    }
 
     @Override
     public Duration getNextDelay() {
-      return delay;
+      return currentDelay;
     }
 
     @Override
-    public void reset() {}
+    public void reset() {
+      currentDelay = initialDelay;
+    }
   }
 
-  private static class TestHttpSender implements HttpSender, Closeable {
-    private final List<RequestParams> requests = Collections.synchronizedList(new ArrayList<>());
-    private final Queue<HttpSender.Response> responses = new ConcurrentLinkedQueue<>();
-    private final AtomicInteger unexpectedRequests = new AtomicInteger(0);
-    private volatile CountDownLatch latch;
+  private static class TestHttpSender implements HttpSender {
+    private final List<RequestParams> requests = new ArrayList<>();
+
+    @SuppressWarnings("JdkObsolete")
+    private final Queue<CompletableFuture<HttpSender.Response>> responses = new LinkedList<>();
 
     @Override
     public CompletableFuture<HttpSender.Response> send(BodyWriter writer, int contentLength) {
       requests.add(new RequestParams(contentLength));
-      HttpSender.Response response = null;
+      CompletableFuture<HttpSender.Response> response = null;
       try {
         response = responses.remove();
-        if (latch != null) {
-          latch.countDown();
-        }
       } catch (NoSuchElementException e) {
-        unexpectedRequests.incrementAndGet();
+        fail("Unwanted triggered request");
       }
-      return CompletableFuture.completedFuture(response);
+      return response;
     }
 
     public void enqueueResponse(HttpSender.Response response) {
-      responses.add(response);
+      enqueueResponseFuture(CompletableFuture.completedFuture(response));
     }
 
-    public void awaitForRequest(Duration timeout) {
-      if (latch != null) {
-        throw new IllegalStateException();
-      }
-      latch = new CountDownLatch(1);
-      try {
-        if (!latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-          fail("No request received before timeout " + timeout);
-        }
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      } finally {
-        latch = null;
-      }
+    public void enqueueResponseFuture(CompletableFuture<HttpSender.Response> future) {
+      responses.add(future);
     }
 
-    @Override
-    public void close() {
-      int count = unexpectedRequests.get();
-      if (count > 0) {
-        fail("Unexpected requests count: " + count);
-      }
+    public List<RequestParams> getRequests(int size) {
+      assertThat(requests).hasSize(size);
+      List<RequestParams> immutableRequests =
+          Collections.unmodifiableList(new ArrayList<>(requests));
+      requests.clear();
+      return immutableRequests;
     }
 
     private static class RequestParams {
@@ -411,6 +431,24 @@ class HttpRequestServiceTest {
       private RequestParams(int contentLength) {
         this.contentLength = contentLength;
       }
+    }
+  }
+
+  @SuppressWarnings("UnusedVariable")
+  private static class ScheduledTask {
+    private final ScheduledFuture<?> future;
+    private final Runnable runnable;
+    private final Duration delay;
+
+    private static ScheduledTask create(
+        ScheduledFuture<?> future, Runnable runnable, long delayNanos) {
+      return new ScheduledTask(future, runnable, Duration.ofNanos(delayNanos));
+    }
+
+    private ScheduledTask(ScheduledFuture<?> future, Runnable runnable, Duration delay) {
+      this.future = future;
+      this.runnable = runnable;
+      this.delay = delay;
     }
   }
 }

@@ -30,7 +30,7 @@ public final class PeriodicTaskExecutor {
         initialPeriodicDelay);
   }
 
-  PeriodicTaskExecutor(
+  public PeriodicTaskExecutor(
       ScheduledExecutorService executorService, PeriodicDelay initialPeriodicDelay) {
     this.executorService = executorService;
     this.periodicDelay = initialPeriodicDelay;
@@ -52,7 +52,6 @@ public final class PeriodicTaskExecutor {
         scheduledFuture.cancel(false);
       }
       this.periodicDelay = periodicDelay;
-      periodicDelay.reset();
       scheduleNext();
     } finally {
       delaySetLock.unlock();
