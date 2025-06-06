@@ -94,7 +94,7 @@ public final class HttpRequestService implements RequestService, Runnable {
       this.requestSupplier = requestSupplier;
       executor.start(this);
     } else {
-      throw new IllegalStateException("RequestDispatcher is already running");
+      throw new IllegalStateException("HttpRequestService is already running");
     }
   }
 
