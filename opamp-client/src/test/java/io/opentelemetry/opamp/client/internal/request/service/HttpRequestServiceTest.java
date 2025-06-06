@@ -64,7 +64,6 @@ class HttpRequestServiceTest {
   private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
   @Mock private RequestService.Callback callback;
-  @Mock private Supplier<Request> requestSupplier;
   private final List<ScheduledTask> scheduledTasks = new ArrayList<>();
   private ScheduledExecutorService executorService;
   private TestHttpSender requestSender;
@@ -86,8 +85,7 @@ class HttpRequestServiceTest {
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
-    httpRequestService.start(callback, requestSupplier);
-    prepareRequest();
+    httpRequestService.start(callback, createRequestSupplier());
   }
 
   @AfterEach
@@ -96,6 +94,26 @@ class HttpRequestServiceTest {
     scheduledTasks.clear();
     verify(executorService).shutdown();
     verifyNoMoreInteractions(executorService);
+  }
+
+  @Test
+  void verifyStart_scheduledFirstTask() {
+    assertThat(scheduledTasks).hasSize(1);
+    ScheduledTask firstTask = scheduledTasks.get(0);
+    assertThat(firstTask.delay).isEqualTo(REGULAR_DELAY);
+
+    // Verify initial task creates next one
+    scheduledTasks.clear();
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+    firstTask.runnable.run();
+
+    assertThat(scheduledTasks).hasSize(1);
+
+    // Check on-demand requests don't create subsequent tasks
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+    httpRequestService.sendRequest();
+
+    assertThat(scheduledTasks).hasSize(1);
   }
 
   @Test
@@ -282,11 +300,11 @@ class HttpRequestServiceTest {
     httpRequestService.sendRequest();
   }
 
-  private void prepareRequest() {
+  private Supplier<Request> createRequestSupplier() {
     AgentToServer agentToServer = new AgentToServer.Builder().sequence_num(10).build();
     requestSize = agentToServer.encodeByteString().size();
     Request request = Request.create(agentToServer);
-    when(requestSupplier.get()).thenReturn(request);
+    return () -> request;
   }
 
   private ScheduledTask getCurrentScheduledTask() {
@@ -434,7 +452,6 @@ class HttpRequestServiceTest {
     }
   }
 
-  @SuppressWarnings("UnusedVariable")
   private static class ScheduledTask {
     private final ScheduledFuture<?> future;
     private final Runnable runnable;
