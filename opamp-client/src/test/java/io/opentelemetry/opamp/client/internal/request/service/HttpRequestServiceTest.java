@@ -11,13 +11,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpErrorException;
@@ -26,7 +25,6 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
-import io.opentelemetry.opamp.client.internal.request.delay.PeriodicTaskExecutor;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
@@ -81,7 +79,7 @@ class HttpRequestServiceTest {
     httpRequestService =
         new HttpRequestService(
             requestSender,
-            new PeriodicTaskExecutor(executorService, periodicRequestDelay),
+            executorService,
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
@@ -93,7 +91,6 @@ class HttpRequestServiceTest {
     httpRequestService.stop();
     scheduledTasks.clear();
     verify(executorService).shutdown();
-    verifyNoMoreInteractions(executorService);
   }
 
   @Test
@@ -204,8 +201,6 @@ class HttpRequestServiceTest {
     HttpSender.Response response = createSuccessfulResponse(serverToAgent);
 
     verifyRetryDelayOnError(response, Duration.ofNanos(nanosecondsToWaitForRetry));
-    verify(callback).onRequestFailed(any());
-    verify(callback, never()).onRequestSuccess(any());
   }
 
   @Test
@@ -218,8 +213,6 @@ class HttpRequestServiceTest {
     HttpSender.Response response = createSuccessfulResponse(serverToAgent);
 
     verifyRetryDelayOnError(response, RETRY_DELAY);
-    verify(callback).onRequestFailed(any());
-    verify(callback, never()).onRequestSuccess(any());
   }
 
   @Test
@@ -244,27 +237,18 @@ class HttpRequestServiceTest {
     verifySingleRequestSent();
   }
 
-  @Test
-  void verifySendingRequest_duringRetryMode() {
-    enableRetryMode();
-    requestSender.requests.clear();
-
-    httpRequestService.sendRequest();
-
-    assertThat(requestSender.requests).isEmpty();
-  }
-
   private void verifyRetryDelayOnError(
       HttpSender.Response errorResponse, Duration expectedRetryDelay) {
     requestSender.enqueueResponse(errorResponse);
     ScheduledTask previousTask = getCurrentScheduledTask();
     scheduledTasks.clear();
 
-    httpRequestService.sendRequest();
+    previousTask.runnable.run();
 
     verifySingleRequestSent();
     verify(previousTask.future).cancel(false);
     verify(periodicRetryDelay).reset();
+    verify(callback).onRequestFailed(any());
     ScheduledTask retryTask = getCurrentScheduledTask();
     assertThat(retryTask.delay).isEqualTo(expectedRetryDelay);
 
@@ -276,6 +260,7 @@ class HttpRequestServiceTest {
 
     verify(retryTask.future, never()).cancel(anyBoolean());
     verifySingleRequestSent();
+    verify(callback).onRequestFailed(any());
     ScheduledTask retryTask2 = getCurrentScheduledTask();
     assertThat(retryTask2.delay).isEqualTo(expectedRetryDelay);
 
@@ -291,13 +276,6 @@ class HttpRequestServiceTest {
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
     assertThat(getCurrentScheduledTask().delay).isEqualTo(REGULAR_DELAY);
-  }
-
-  private void enableRetryMode() {
-    HttpSender.Response response = createFailedResponse(503);
-    requestSender.enqueueResponse(response);
-
-    httpRequestService.sendRequest();
   }
 
   private Supplier<Request> createRequestSupplier() {
@@ -331,7 +309,8 @@ class HttpRequestServiceTest {
   private ScheduledExecutorService createTestScheduleExecutorService() {
     ScheduledExecutorService service = mock();
 
-    doAnswer(
+    lenient()
+        .doAnswer(
             invocation -> {
               Runnable runnable = invocation.getArgument(0);
               runnable.run();

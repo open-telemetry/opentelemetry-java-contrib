@@ -11,7 +11,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
-import io.opentelemetry.opamp.client.internal.request.delay.PeriodicTaskExecutor;
+import io.opentelemetry.opamp.client.internal.response.OpampServerResponseError;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.IOException;
 import java.time.Duration;
@@ -19,24 +19,31 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import opamp.proto.AgentToServer;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
-public final class HttpRequestService implements RequestService, Runnable {
+public final class HttpRequestService implements RequestService {
   private final HttpSender requestSender;
-  private final PeriodicTaskExecutor executor;
+  private final ScheduledExecutorService executorService;
   private final PeriodicDelay periodicRequestDelay;
   private final PeriodicDelay periodicRetryDelay;
-  private final AtomicBoolean retryModeEnabled = new AtomicBoolean(false);
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
+  private final AtomicReference<PeriodicDelay> currentDelay;
+  private final AtomicReference<ScheduledFuture<?>> currentTask = new AtomicReference<>();
   private final RetryAfterParser retryAfterParser;
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
@@ -65,7 +72,7 @@ public final class HttpRequestService implements RequestService, Runnable {
       PeriodicDelay periodicRetryDelay) {
     return new HttpRequestService(
         requestSender,
-        PeriodicTaskExecutor.create(periodicRequestDelay),
+        Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory()),
         periodicRequestDelay,
         periodicRetryDelay,
         RetryAfterParser.getInstance());
@@ -73,15 +80,16 @@ public final class HttpRequestService implements RequestService, Runnable {
 
   HttpRequestService(
       HttpSender requestSender,
-      PeriodicTaskExecutor executor,
+      ScheduledExecutorService executorService,
       PeriodicDelay periodicRequestDelay,
       PeriodicDelay periodicRetryDelay,
       RetryAfterParser retryAfterParser) {
     this.requestSender = requestSender;
-    this.executor = executor;
+    this.executorService = executorService;
     this.periodicRequestDelay = periodicRequestDelay;
     this.periodicRetryDelay = periodicRetryDelay;
     this.retryAfterParser = retryAfterParser;
+    currentDelay = new AtomicReference<>(periodicRequestDelay);
   }
 
   @Override
@@ -92,47 +100,45 @@ public final class HttpRequestService implements RequestService, Runnable {
     if (isRunning.compareAndSet(false, true)) {
       this.callback = callback;
       this.requestSupplier = requestSupplier;
-      executor.start(this);
+      currentTask.set(
+          executorService.schedule(
+              this::periodicSend, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
     } else {
       throw new IllegalStateException("HttpRequestService is already running");
     }
+  }
+
+  private void periodicSend() {
+    doSendRequest();
+    // schedule the next execution
+    currentTask.set(
+        executorService.schedule(
+            this::periodicSend, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
+  }
+
+  private void sendOnce() {
+    executorService.execute(this::doSendRequest);
+  }
+
+  private Duration getNextDelay() {
+    return Objects.requireNonNull(currentDelay.get()).getNextDelay();
   }
 
   @Override
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
       hasStopped.set(true);
-      executor.stop();
-    }
-  }
-
-  private void enableRetryMode(@Nullable Duration suggestedDelay) {
-    if (retryModeEnabled.compareAndSet(false, true)) {
-      periodicRetryDelay.reset();
-      if (suggestedDelay != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
-        ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(suggestedDelay);
-      }
-      executor.setPeriodicDelay(periodicRetryDelay);
-    }
-  }
-
-  private void disableRetryMode() {
-    if (retryModeEnabled.compareAndSet(true, false)) {
-      periodicRequestDelay.reset();
-      executor.setPeriodicDelay(periodicRequestDelay);
+      executorService.shutdown();
     }
   }
 
   @Override
   public void sendRequest() {
-    if (!retryModeEnabled.get()) {
-      executor.executeNow();
+    if (!isRunning.get()) {
+      throw new IllegalStateException("HttpRequestService is not running");
     }
-  }
 
-  @Override
-  public void run() {
-    doSendRequest();
+    sendOnce();
   }
 
   private void doSendRequest() {
@@ -173,7 +179,7 @@ public final class HttpRequestService implements RequestService, Runnable {
           retryAfter = duration.get();
         }
       }
-      enableRetryMode(retryAfter);
+      useRetryDelay(retryAfter);
     }
   }
 
@@ -182,16 +188,14 @@ public final class HttpRequestService implements RequestService, Runnable {
   }
 
   private void handleSuccessResponse(Response response) {
-    if (retryModeEnabled.get()) {
-      disableRetryMode();
-    }
+    useRegularDelay();
     ServerToAgent serverToAgent = response.getServerToAgent();
 
     if (serverToAgent.error_response != null) {
       handleErrorResponse(serverToAgent.error_response);
+    } else {
+      getCallback().onRequestSuccess(response);
     }
-
-    getCallback().onRequestSuccess(response);
   }
 
   private void handleErrorResponse(ServerErrorResponse errorResponse) {
@@ -200,11 +204,51 @@ public final class HttpRequestService implements RequestService, Runnable {
       if (errorResponse.retry_info != null) {
         retryAfter = Duration.ofNanos(errorResponse.retry_info.retry_after_nanoseconds);
       }
-      enableRetryMode(retryAfter);
+      useRetryDelay(retryAfter);
+    }
+    getCallback().onRequestFailed(new OpampServerResponseError(errorResponse.error_message));
+  }
+
+  private void useRegularDelay() {
+    if (currentDelay.compareAndSet(periodicRetryDelay, periodicRequestDelay)) {
+      cancelCurrentTask();
+      periodicRequestDelay.reset();
+    }
+  }
+
+  private void useRetryDelay(@Nullable Duration retryAfter) {
+    if (currentDelay.compareAndSet(periodicRequestDelay, periodicRetryDelay)) {
+      cancelCurrentTask();
+      periodicRetryDelay.reset();
+      if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
+        ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
+      }
+    }
+  }
+
+  private void cancelCurrentTask() {
+    ScheduledFuture<?> future = currentTask.get();
+    if (future != null) {
+      future.cancel(false);
     }
   }
 
   private Callback getCallback() {
     return Objects.requireNonNull(callback);
+  }
+
+  private static class DaemonThreadFactory implements ThreadFactory {
+    private final ThreadFactory delegate = Executors.defaultThreadFactory();
+
+    @Override
+    public Thread newThread(@Nonnull Runnable r) {
+      Thread t = delegate.newThread(r);
+      try {
+        t.setDaemon(true);
+      } catch (SecurityException e) {
+        // Well, we tried.
+      }
+      return t;
+    }
   }
 }
