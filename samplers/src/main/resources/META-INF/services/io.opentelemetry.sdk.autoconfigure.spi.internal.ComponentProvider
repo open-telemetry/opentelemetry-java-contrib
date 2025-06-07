@@ -1,1 +1,2 @@
 io.opentelemetry.contrib.sampler.internal.RuleBasedRoutingSamplerComponentProvider
+io.opentelemetry.contrib.sampler.internal.CelBasedSamplerComponentProvider
