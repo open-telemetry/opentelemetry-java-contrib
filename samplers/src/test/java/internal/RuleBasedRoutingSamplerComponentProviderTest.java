@@ -60,7 +60,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
             "ParentBased{"
                 + "root:RuleBasedRoutingSampler{"
                 + "rules=["
-                + "SamplingRule{attributeKey=url.path, delegate=AlwaysOffSampler, pattern=/actuator.*}"
+                + "RuleBasedRoutingSamplingRule{attributeKey=url.path, delegate=AlwaysOffSampler, pattern=/actuator.*}"
                 + "], "
                 + "kind=SERVER, "
                 + "fallback=AlwaysOnSampler"
@@ -165,7 +165,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
                 + "rules:\n"
                 + "  - attribute: url.path\n"
                 + "    pattern: path\n",
-            "rule_based_routing sampler .fallback is required but is null"),
+            "rule_based_routing sampler .fallback_sampler is required but is null"),
         Arguments.of(
             "fallback_sampler:\n"
                 + "  foo:\n"
@@ -173,7 +173,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
                 + "rules:\n"
                 + "  - attribute: url.path\n"
                 + "    pattern: path\n",
-            "rule_based_routing sampler failed to create .fallback sampler"),
+            "rule_based_routing sampler failed to create .fallback_sampler sampler"),
         Arguments.of(
             "fallback_sampler:\n"
                 + "  always_on:\n"

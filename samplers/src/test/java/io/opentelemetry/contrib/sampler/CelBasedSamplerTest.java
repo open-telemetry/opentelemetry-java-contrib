@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler;
 
+import static io.opentelemetry.semconv.HttpAttributes.HTTP_RESPONSE_HEADER;
 import static io.opentelemetry.semconv.UrlAttributes.URL_FULL;
 import static io.opentelemetry.semconv.UrlAttributes.URL_PATH;
 import static io.opentelemetry.semconv.incubating.ThreadIncubatingAttributes.THREAD_NAME;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import dev.cel.common.CelValidationException;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -29,6 +31,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RuleBasedRoutingSamplerTest {
+class CelBasedSamplerTest {
   private static final String SPAN_NAME = "MySpanName";
   private static final SpanKind SPAN_KIND = SpanKind.SERVER;
   private final IdGenerator idsGenerator = IdGenerator.random();
@@ -48,58 +51,57 @@ class RuleBasedRoutingSamplerTest {
       SpanContext.create(traceId, parentSpanId, TraceFlags.getSampled(), TraceState.getDefault());
   private final Context parentContext = Context.root().with(Span.wrap(sampledSpanContext));
 
-  private final List<RuleBasedRoutingSamplingRule> patterns = new ArrayList<>();
+  private final List<CelBasedSamplingExpression> expressions = new ArrayList<>();
 
   @Mock(strictness = Mock.Strictness.LENIENT)
   private Sampler delegate;
 
   @BeforeEach
-  public void setup() {
+  public void setup() throws CelValidationException {
     when(delegate.shouldSample(any(), any(), any(), any(), any(), any()))
         .thenReturn(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
 
-    patterns.add(new RuleBasedRoutingSamplingRule(URL_FULL, ".*/healthcheck", Sampler.alwaysOff()));
-    patterns.add(new RuleBasedRoutingSamplingRule(URL_PATH, "/actuator", Sampler.alwaysOff()));
+    expressions.add(
+        new CelBasedSamplingExpression(
+            CelBasedSampler.celCompiler
+                .compile(
+                    "spanKind == 'SERVER' && attribute[\""
+                        + URL_FULL
+                        + "\"].matches(\"/actuator\")")
+                .getAst(),
+            Sampler.alwaysOff()));
+    expressions.add(
+        new CelBasedSamplingExpression(
+            CelBasedSampler.celCompiler
+                .compile(
+                    "spanKind == 'SERVER' && attribute[\""
+                        + URL_FULL
+                        + "\"].matches(\".*/healthcheck\")")
+                .getAst(),
+            Sampler.alwaysOff()));
   }
 
   @Test
-  void testThatThrowsOnNullParameter() {
+  public void testThatThrowsOnNullParameter() {
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new RuleBasedRoutingSampler(patterns, SPAN_KIND, null));
+        .isThrownBy(() -> new CelBasedSampler(expressions, null));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new RuleBasedRoutingSampler(null, SPAN_KIND, delegate));
+        .isThrownBy(() -> new CelBasedSampler(null, delegate));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> new RuleBasedRoutingSampler(patterns, null, delegate));
+        .isThrownBy(() -> CelBasedSampler.builder(null));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> RuleBasedRoutingSampler.builder(SPAN_KIND, null));
+        .isThrownBy(() -> CelBasedSampler.builder(delegate).drop(null));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> RuleBasedRoutingSampler.builder(null, delegate));
-
-    assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(() -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(null, ""));
-
-    assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(
-            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(URL_FULL, null));
-
-    assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(
-            () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).recordAndSample(null, ""));
-
-    assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(
-            () ->
-                RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
-                    .recordAndSample(URL_FULL, null));
+        .isThrownBy(() -> CelBasedSampler.builder(delegate).recordAndSample(null));
   }
 
   @Test
-  void testThatDelegatesIfNoRulesGiven() {
-    RuleBasedRoutingSampler sampler = RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).build();
+  public void testThatDelegatesIfNoExpressionGiven() {
+    CelBasedSampler sampler = CelBasedSampler.builder(delegate).build();
 
     // no http.url attribute
     Attributes attributes = Attributes.empty();
@@ -117,35 +119,32 @@ class RuleBasedRoutingSamplerTest {
   }
 
   @Test
-  void testDropOnExactMatch() {
-    RuleBasedRoutingSampler sampler =
-        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
+  public void testDropOnExactMatch() throws CelValidationException {
+    CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
 
   @Test
-  void testDelegateOnDifferentKind() {
-    RuleBasedRoutingSampler sampler =
-        addRules(RuleBasedRoutingSampler.builder(SpanKind.CLIENT, delegate)).build();
+  public void testDelegateOnDifferentKind() throws CelValidationException {
+    CelBasedSampler sampler =
+        addRules(CelBasedSampler.builder(delegate), SpanKind.CLIENT.name()).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
   }
 
   @Test
-  void testDelegateOnNoMatch() {
-    RuleBasedRoutingSampler sampler =
-        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
+  public void testDelegateOnNoMatch() throws CelValidationException {
+    CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/customers").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
   }
 
   @Test
-  void testDelegateOnMalformedUrl() {
-    RuleBasedRoutingSampler sampler =
-        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
+  public void testDelegateOnMalformedUrl() throws CelValidationException {
+    CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "abracadabra").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     verify(delegate).shouldSample(any(), any(), any(), any(), any(), any());
@@ -158,9 +157,8 @@ class RuleBasedRoutingSamplerTest {
   }
 
   @Test
-  void testVerifiesAllGivenAttributes() {
-    RuleBasedRoutingSampler sampler =
-        addRules(RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)).build();
+  public void testVerifiesAllGivenAttributes() throws CelValidationException {
+    CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     Attributes attributes = Attributes.of(URL_PATH, "/actuator/info");
     assertThat(
             sampler
@@ -170,11 +168,12 @@ class RuleBasedRoutingSamplerTest {
   }
 
   @Test
-  void customSampler() {
+  void customSampler() throws CelValidationException {
     Attributes attributes = Attributes.of(URL_PATH, "/test");
-    RuleBasedRoutingSampler testSampler =
-        RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
-            .customize(URL_PATH, ".*test", new AlternatingSampler())
+    CelBasedSampler testSampler =
+        CelBasedSampler.builder(delegate)
+            .customize(
+                "attribute[\"" + URL_PATH + "\"].matches(\".*test\")", new AlternatingSampler())
             .build();
     assertThat(
             testSampler
@@ -189,10 +188,39 @@ class RuleBasedRoutingSamplerTest {
   }
 
   @Test
-  void testThreadNameSampler() {
-    patterns.add(new RuleBasedRoutingSamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
+  void testThreadNameSampler() throws CelValidationException {
+    expressions.add(
+        new CelBasedSamplingExpression(
+            CelBasedSampler.celCompiler
+                .compile(
+                    "spanKind == 'SERVER' && attribute[\""
+                        + THREAD_NAME
+                        + "\"].matches(\"Test.*\")")
+                .getAst(),
+            Sampler.alwaysOff()));
     Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
-    RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
+    CelBasedSampler sampler = new CelBasedSampler(expressions, delegate);
+    SamplingResult samplingResult =
+        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
+  }
+
+  @Test
+  void testComplexAttributeSampler() throws CelValidationException {
+    expressions.add(
+        new CelBasedSamplingExpression(
+            CelBasedSampler.celCompiler
+                .compile(
+                    "\"example.com\" in attribute[\""
+                        + HTTP_RESPONSE_HEADER.getAttributeKey("host")
+                        + "\"]")
+                .getAst(),
+            Sampler.alwaysOff()));
+    Attributes attributes =
+        Attributes.of(
+            HTTP_RESPONSE_HEADER.getAttributeKey("host"),
+            Arrays.asList("example.com", "example.org"));
+    CelBasedSampler sampler = new CelBasedSampler(expressions, delegate);
     SamplingResult samplingResult =
         sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
     assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
@@ -204,8 +232,22 @@ class RuleBasedRoutingSamplerTest {
         parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
   }
 
-  private static RuleBasedRoutingSamplerBuilder addRules(RuleBasedRoutingSamplerBuilder builder) {
-    return builder.drop(URL_FULL, ".*/healthcheck").drop(URL_PATH, "/actuator");
+  private static CelBasedSamplerBuilder addRules(CelBasedSamplerBuilder builder, String kind)
+      throws CelValidationException {
+    return builder
+        .drop(
+            "attribute[\""
+                + URL_FULL
+                + "\"].matches(\".*/healthcheck\") && spanKind == '"
+                + kind
+                + "'")
+        .drop(
+            "attribute[\"" + URL_PATH + "\"].matches(\"/actuator\") && spanKind == '" + kind + "'");
+  }
+
+  private static CelBasedSamplerBuilder addRules(CelBasedSamplerBuilder builder)
+      throws CelValidationException {
+    return addRules(builder, SPAN_KIND.name());
   }
 
   /** Silly sampler that alternates decisions for testing. */

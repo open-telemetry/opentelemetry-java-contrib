@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class RuleBasedRoutingSamplerBuilder {
-  private final List<SamplingRule> rules = new ArrayList<>();
+  private final List<RuleBasedRoutingSamplingRule> rules = new ArrayList<>();
   private final SpanKind kind;
   private final Sampler defaultDelegate;
 
@@ -41,7 +41,7 @@ public final class RuleBasedRoutingSamplerBuilder {
   public RuleBasedRoutingSamplerBuilder customize(
       AttributeKey<String> attributeKey, String pattern, Sampler sampler) {
     rules.add(
-        new SamplingRule(
+        new RuleBasedRoutingSamplingRule(
             requireNonNull(attributeKey, "attributeKey must not be null"),
             requireNonNull(pattern, "pattern must not be null"),
             requireNonNull(sampler, "sampler must not be null")));
