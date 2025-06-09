@@ -81,6 +81,21 @@ class ProtoLogsDataMapperTest {
           .setTotalAttributeCount(3)
           .build();
 
+  private static final LogRecordData LOG_RECORD_WITH_EVENT_NAME =
+      LogRecordDataImpl.builder()
+          .setResource(TestData.RESOURCE_FULL)
+          .setSpanContext(TestData.SPAN_CONTEXT)
+          .setInstrumentationScopeInfo(TestData.INSTRUMENTATION_SCOPE_INFO_FULL)
+          .setAttributes(TestData.ATTRIBUTES)
+          .setBodyValue(Value.of("Log body"))
+          .setSeverity(Severity.DEBUG)
+          .setSeverityText("Log severity text")
+          .setTimestampEpochNanos(100L)
+          .setObservedTimestampEpochNanos(200L)
+          .setTotalAttributeCount(3)
+          .setEventName("test.event.name")
+          .build();
+
   @Test
   void verifyConversionDataStructure() {
     List<LogRecordData> signals = Collections.singletonList(LOG_RECORD);
@@ -158,6 +173,19 @@ class ProtoLogsDataMapperTest {
     assertEquals(1, secondScopeLogs.size());
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
+  }
+
+  @Test
+  void verifyLogWithEventName() {
+    List<LogRecordData> signals = Collections.singletonList(LOG_RECORD_WITH_EVENT_NAME);
+
+    LogsData result = mapToProto(signals);
+
+    List<ResourceLogs> resourceLogsList = result.resource_logs;
+    LogRecord firstLog = resourceLogsList.get(0).scope_logs.get(0).log_records.get(0);
+
+    assertEquals("test.event.name", firstLog.event_name);
+    assertThat(mapFromProto(result)).containsExactlyInAnyOrderElementsOf(signals);
   }
 
   private static LogsData mapToProto(Collection<LogRecordData> signals) {

@@ -47,6 +47,9 @@ public final class LogRecordDataMapper {
     if (source.getBodyValue() != null) {
       logRecord.body(bodyToAnyValue(source.getBodyValue()));
     }
+    if (source.getEventName() != null) {
+      logRecord.event_name(source.getEventName());
+    }
 
     byte flags = source.getSpanContext().getTraceFlags().asByte();
     logRecord.flags(toUnsignedInt(flags));
@@ -76,6 +79,9 @@ public final class LogRecordDataMapper {
     logRecordData.setSeverityText(source.severity_text);
     if (source.body != null) {
       logRecordData.setBodyValue(anyValueToBody(source.body));
+    }
+    if (source.event_name != null) {
+      logRecordData.setEventName(source.event_name);
     }
 
     addExtrasToSdkItemBuilder(source, logRecordData, resource, scopeInfo);
