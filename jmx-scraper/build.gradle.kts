@@ -41,7 +41,7 @@ testing {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
         implementation("org.bouncycastle:bcprov-jdk18on:1.81")
-        implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
+        implementation("org.bouncycastle:bcpkix-jdk18on:1.81")
       }
     }
   }
