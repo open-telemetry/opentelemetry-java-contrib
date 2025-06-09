@@ -57,6 +57,7 @@ class ReadableFileTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   private static final LogRecordData SECOND_LOG_RECORD =
@@ -71,6 +72,7 @@ class ReadableFileTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("event")
           .build();
 
   private static final LogRecordData THIRD_LOG_RECORD =
@@ -85,6 +87,7 @@ class ReadableFileTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   @BeforeEach

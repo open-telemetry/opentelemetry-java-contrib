@@ -47,9 +47,6 @@ public final class LogRecordDataMapper {
     if (source.getBodyValue() != null) {
       logRecord.body(bodyToAnyValue(source.getBodyValue()));
     }
-    if (source.getEventName() != null) {
-      logRecord.event_name(source.getEventName());
-    }
 
     byte flags = source.getSpanContext().getTraceFlags().asByte();
     logRecord.flags(toUnsignedInt(flags));
@@ -67,6 +64,9 @@ public final class LogRecordDataMapper {
     target.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
     target.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
+    if (source.getEventName() != null) {
+      target.event_name(source.getEventName());
+    }
   }
 
   public LogRecordData mapToSdk(
@@ -79,9 +79,6 @@ public final class LogRecordDataMapper {
     logRecordData.setSeverityText(source.severity_text);
     if (source.body != null) {
       logRecordData.setBodyValue(anyValueToBody(source.body));
-    }
-    if (source.event_name != null) {
-      logRecordData.setEventName(source.event_name);
     }
 
     addExtrasToSdkItemBuilder(source, logRecordData, resource, scopeInfo);
@@ -105,6 +102,7 @@ public final class LogRecordDataMapper {
     target.setTotalAttributeCount(source.dropped_attributes_count + attributes.size());
     target.setResource(resource);
     target.setInstrumentationScopeInfo(scopeInfo);
+    target.setEventName(source.event_name);
   }
 
   private static AnyValue bodyToAnyValue(Value<?> body) {

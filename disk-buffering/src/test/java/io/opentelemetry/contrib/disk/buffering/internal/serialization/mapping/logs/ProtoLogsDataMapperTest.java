@@ -37,6 +37,7 @@ class ProtoLogsDataMapperTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   private static final LogRecordData OTHER_LOG_RECORD =
@@ -51,6 +52,7 @@ class ProtoLogsDataMapperTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   private static final LogRecordData LOG_RECORD_WITH_DIFFERENT_SCOPE_SAME_RESOURCE =
@@ -65,6 +67,7 @@ class ProtoLogsDataMapperTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   private static final LogRecordData LOG_RECORD_WITH_DIFFERENT_RESOURCE =
@@ -79,6 +82,7 @@ class ProtoLogsDataMapperTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   private static final LogRecordData LOG_RECORD_WITH_EVENT_NAME =
