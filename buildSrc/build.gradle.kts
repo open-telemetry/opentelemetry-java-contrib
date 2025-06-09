@@ -15,7 +15,7 @@ dependencies {
   implementation("com.diffplug.spotless:spotless-plugin-gradle:7.0.4")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:4.2.0")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.2.0")
-  implementation("org.owasp:dependency-check-gradle:12.1.1")
+  implementation("org.owasp:dependency-check-gradle:12.1.2")
 }
 
 spotless {
