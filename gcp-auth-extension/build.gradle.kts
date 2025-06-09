@@ -23,7 +23,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.36.0")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.37.0")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
