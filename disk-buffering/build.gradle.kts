@@ -7,7 +7,7 @@ plugins {
   id("com.github.johnrengelman.shadow")
   id("me.champeau.jmh") version "0.7.3"
   id("ru.vyarus.animalsniffer") version "2.0.1"
-  id("com.squareup.wire") version "5.3.2"
+  id("com.squareup.wire") version "5.3.3"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -20,7 +20,7 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-api-incubator")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
-  signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")
+  signature("com.toasttab.android:gummy-bears-api-21:0.12.0:coreLib@signature")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 

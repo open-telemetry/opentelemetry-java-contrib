@@ -46,6 +46,10 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
   @Nullable
   public abstract Value<?> getBodyValue();
 
+  @Override
+  @Nullable
+  public abstract String getEventName();
+
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setResource(Resource value);
@@ -67,6 +71,8 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
     public abstract Builder setAttributes(Attributes value);
 
     public abstract Builder setTotalAttributeCount(Integer value);
+
+    public abstract Builder setEventName(String value);
 
     public abstract LogRecordDataImpl build();
   }

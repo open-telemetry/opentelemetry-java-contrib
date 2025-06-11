@@ -64,6 +64,9 @@ public final class LogRecordDataMapper {
     target.trace_id(ByteStringMapper.getInstance().stringToProto(spanContext.getTraceId()));
     target.dropped_attributes_count(
         source.getTotalAttributeCount() - source.getAttributes().size());
+    if (source.getEventName() != null) {
+      target.event_name(source.getEventName());
+    }
   }
 
   public LogRecordData mapToSdk(
@@ -99,6 +102,7 @@ public final class LogRecordDataMapper {
     target.setTotalAttributeCount(source.dropped_attributes_count + attributes.size());
     target.setResource(resource);
     target.setInstrumentationScopeInfo(scopeInfo);
+    target.setEventName(source.event_name);
   }
 
   private static AnyValue bodyToAnyValue(Value<?> body) {

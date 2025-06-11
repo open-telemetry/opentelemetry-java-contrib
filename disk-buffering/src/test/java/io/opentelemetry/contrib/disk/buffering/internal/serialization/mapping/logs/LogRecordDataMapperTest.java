@@ -31,6 +31,7 @@ class LogRecordDataMapperTest {
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("my.event.name")
           .build();
 
   @Test

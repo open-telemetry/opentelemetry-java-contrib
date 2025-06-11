@@ -28,9 +28,10 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("event")
           .build();
 
-  private static final LogRecordData LOG_RECORD_WITHOUT_SEVERITY_TEXT =
+  private static final LogRecordData LOG_RECORD_WITHOUT_SEVERITY_OR_EVENT_NAME_TEXT =
       LogRecordDataImpl.builder()
           .setResource(TestData.RESOURCE_FULL)
           .setSpanContext(TestData.SPAN_CONTEXT)
@@ -42,11 +43,12 @@ class LogRecordDataSerializerTest extends BaseSignalSerializerTest<LogRecordData
           .setTimestampEpochNanos(100L)
           .setObservedTimestampEpochNanos(200L)
           .setTotalAttributeCount(3)
+          .setEventName("")
           .build();
 
   @Test
   void verifySerialization() {
-    assertSerialization(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_TEXT);
+    assertSerialization(LOG_RECORD, LOG_RECORD_WITHOUT_SEVERITY_OR_EVENT_NAME_TEXT);
   }
 
   @Override
