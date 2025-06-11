@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.messaging.wrappers.impl;
 import io.opentelemetry.contrib.messaging.wrappers.model.Message;
 import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -91,8 +92,9 @@ public class MessageRequest implements MessagingProcessRequest {
     return Collections.singletonList(message.getHeaders().get(name));
   }
 
-  public Message getMessage() {
-    return message;
+  @Override
+  public Collection<String> getAllMessageHeadersKey() {
+    return message.getHeaders().keySet();
   }
 
   private MessageRequest(

@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-public class MnsTextMapGetter<REQUEST extends MnsProcessRequest> implements TextMapGetter<REQUEST> {
+public class MnsTextMapGetter implements TextMapGetter<MnsProcessRequest> {
 
-  public static <REQUEST extends MnsProcessRequest> TextMapGetter<REQUEST> create() {
-    return new MnsTextMapGetter<>();
+  public static TextMapGetter<MnsProcessRequest> create() {
+    return new MnsTextMapGetter();
   }
 
   @Override
-  public Iterable<String> keys(@Nullable REQUEST carrier) {
+  public Iterable<String> keys(@Nullable MnsProcessRequest carrier) {
     if (carrier == null || carrier.getMessage() == null) {
       return emptyList();
     }
@@ -48,7 +48,7 @@ public class MnsTextMapGetter<REQUEST extends MnsProcessRequest> implements Text
 
   @Nullable
   @Override
-  public String get(@Nullable REQUEST carrier, String key) {
+  public String get(@Nullable MnsProcessRequest carrier, String key) {
     if (carrier == null || carrier.getMessage() == null) {
       return null;
     }

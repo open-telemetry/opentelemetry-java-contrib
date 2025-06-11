@@ -8,10 +8,12 @@ package io.opentelemetry.contrib.messaging.wrappers.kafka;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_CONSUMER_GROUP_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_PARTITION_ID;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_OFFSET;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_CONSUMER_GROUP;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_MESSAGE_KEY;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_MESSAGE_OFFSET;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_MESSAGE_TOMBSTONE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
@@ -24,7 +26,6 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.contrib.messaging.wrappers.MessagingProcessWrapper;
-import io.opentelemetry.contrib.messaging.wrappers.kafka.semconv.KafkaConsumerAttributesExtractor;
 import io.opentelemetry.contrib.messaging.wrappers.kafka.semconv.KafkaProcessRequest;
 import io.opentelemetry.instrumentation.kafkaclients.v2_6.TracingConsumerInterceptor;
 import io.opentelemetry.instrumentation.kafkaclients.v2_6.TracingProducerInterceptor;
@@ -70,10 +71,7 @@ public class KafkaClientTest extends KafkaClientBaseTest {
     OpenTelemetry otel = GlobalOpenTelemetry.get();
     Tracer tracer = otel.getTracer("test-tracer", "1.0.0");
     MessagingProcessWrapper<KafkaProcessRequest> wrapper =
-        KafkaHelper.processWrapperBuilder()
-            .openTelemetry(otel)
-            .addAttributesExtractor(KafkaConsumerAttributesExtractor.create())
-            .build();
+        KafkaHelper.processWrapperBuilder().openTelemetry(otel).build();
 
     sendWithParent(tracer);
 
@@ -135,7 +133,7 @@ public class KafkaClientTest extends KafkaClientBaseTest {
                         .hasKind(SpanKind.PRODUCER)
                         .hasParent(trace.getSpan(0)),
                 span ->
-                    span.hasName("process " + SHARED_TOPIC)
+                    span.hasName(SHARED_TOPIC + " process")
                         .hasKind(SpanKind.CONSUMER)
                         .hasParent(trace.getSpan(1))
                         .hasAttributesSatisfyingExactly(
@@ -153,9 +151,10 @@ public class KafkaClientTest extends KafkaClientBaseTest {
                             // release.
                             equalTo(
                                 AttributeKey.stringKey("messaging.client_id"), "test-consumer-1"),
-                            satisfies(MESSAGING_KAFKA_OFFSET, AbstractAssert::isNotNull),
-                            equalTo(MESSAGING_CONSUMER_GROUP_NAME, "test"),
-                            equalTo(MESSAGING_OPERATION, "process")),
+                            satisfies(MESSAGING_KAFKA_MESSAGE_OFFSET, AbstractAssert::isNotNull),
+                            equalTo(MESSAGING_KAFKA_CONSUMER_GROUP, "test"),
+                            equalTo(MESSAGING_OPERATION, "process"),
+                            equalTo(MESSAGING_KAFKA_MESSAGE_KEY, "42")),
                 span ->
                     span.hasName("process child")
                         .hasKind(SpanKind.INTERNAL)

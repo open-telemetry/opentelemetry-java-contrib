@@ -138,7 +138,7 @@ public class AliyunMnsSdkTest extends AbstractBaseTest {
                     // instrumentation library.
                     span.hasName("publish " + QUEUE).hasKind(SpanKind.PRODUCER).hasNoParent(),
                 span ->
-                    span.hasName("process " + QUEUE)
+                    span.hasName(QUEUE + " process")
                         .hasKind(SpanKind.CONSUMER)
                         .hasParent(trace.getSpan(0))
                         .hasAttributesSatisfyingExactly(

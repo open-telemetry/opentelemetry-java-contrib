@@ -18,15 +18,14 @@ import org.apache.kafka.common.header.Header;
  * Copied from <a
  * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-common-0.11/library/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaConsumerRecordGetter.java>KafkaConsumerRecordGetter</a>.
  */
-public class KafkaTextMapGetter<REQUEST extends KafkaProcessRequest>
-    implements TextMapGetter<REQUEST> {
+public class KafkaTextMapGetter implements TextMapGetter<KafkaProcessRequest> {
 
-  public static <REQUEST extends KafkaProcessRequest> TextMapGetter<REQUEST> create() {
-    return new KafkaTextMapGetter<>();
+  public static TextMapGetter<KafkaProcessRequest> create() {
+    return new KafkaTextMapGetter();
   }
 
   @Override
-  public Iterable<String> keys(@Nullable REQUEST carrier) {
+  public Iterable<String> keys(@Nullable KafkaProcessRequest carrier) {
     if (carrier == null || carrier.getRecord() == null) {
       return Collections.emptyList();
     }
@@ -37,7 +36,7 @@ public class KafkaTextMapGetter<REQUEST extends KafkaProcessRequest>
 
   @Nullable
   @Override
-  public String get(@Nullable REQUEST carrier, String key) {
+  public String get(@Nullable KafkaProcessRequest carrier, String key) {
     if (carrier == null || carrier.getRecord() == null) {
       return null;
     }

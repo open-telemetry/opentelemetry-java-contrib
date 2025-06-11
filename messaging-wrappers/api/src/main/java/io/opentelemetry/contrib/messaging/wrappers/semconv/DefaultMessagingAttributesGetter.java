@@ -9,86 +9,85 @@ import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.Messagin
 import java.util.List;
 import javax.annotation.Nullable;
 
-public class DefaultMessagingAttributesGetter<REQUEST extends MessagingProcessRequest>
-    implements MessagingAttributesGetter<REQUEST, Void> {
+public enum DefaultMessagingAttributesGetter
+    implements MessagingAttributesGetter<MessagingProcessRequest, Void> {
+  INSTANCE;
 
-  public static <REQUEST extends MessagingProcessRequest>
-      MessagingAttributesGetter<REQUEST, Void> create() {
-    return new DefaultMessagingAttributesGetter<>();
+  @Nullable
+  @Override
+  public String getDestinationPartitionId(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getDestinationPartitionId();
+  }
+
+  @Override
+  public List<String> getMessageHeader(
+      MessagingProcessRequest messagingProcessRequest, String name) {
+    return messagingProcessRequest.getMessageHeader(name);
   }
 
   @Nullable
   @Override
-  public String getDestinationPartitionId(REQUEST request) {
-    return request.getDestinationPartitionId();
-  }
-
-  @Override
-  public List<String> getMessageHeader(REQUEST request, String name) {
-    return request.getMessageHeader(name);
+  public String getSystem(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getSystem();
   }
 
   @Nullable
   @Override
-  public String getSystem(REQUEST request) {
-    return request.getSystem();
+  public String getDestination(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getDestination();
   }
 
   @Nullable
   @Override
-  public String getDestination(REQUEST request) {
-    return request.getDestination();
+  public String getDestinationTemplate(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getDestinationTemplate();
+  }
+
+  @Override
+  public boolean isTemporaryDestination(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.isTemporaryDestination();
+  }
+
+  @Override
+  public boolean isAnonymousDestination(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.isAnonymousDestination();
   }
 
   @Nullable
   @Override
-  public String getDestinationTemplate(REQUEST request) {
-    return request.getDestinationTemplate();
-  }
-
-  @Override
-  public boolean isTemporaryDestination(REQUEST request) {
-    return request.isTemporaryDestination();
-  }
-
-  @Override
-  public boolean isAnonymousDestination(REQUEST request) {
-    return request.isAnonymousDestination();
+  public String getConversationId(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getConversationId();
   }
 
   @Nullable
   @Override
-  public String getConversationId(REQUEST request) {
-    return request.getConversationId();
+  public Long getMessageBodySize(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getMessageBodySize();
   }
 
   @Nullable
   @Override
-  public Long getMessageBodySize(REQUEST request) {
-    return request.getMessageBodySize();
+  public Long getMessageEnvelopeSize(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getMessageEnvelopeSize();
   }
 
   @Nullable
   @Override
-  public Long getMessageEnvelopeSize(REQUEST request) {
-    return request.getMessageEnvelopeSize();
+  public String getMessageId(
+      MessagingProcessRequest messagingProcessRequest, @Nullable Void unused) {
+    return messagingProcessRequest.getMessageId();
   }
 
   @Nullable
   @Override
-  public String getMessageId(REQUEST request, @Nullable Void unused) {
-    return request.getMessageId();
+  public String getClientId(MessagingProcessRequest messagingProcessRequest) {
+    return messagingProcessRequest.getClientId();
   }
 
   @Nullable
   @Override
-  public String getClientId(REQUEST request) {
-    return request.getClientId();
-  }
-
-  @Nullable
-  @Override
-  public Long getBatchMessageCount(REQUEST request, @Nullable Void unused) {
-    return request.getBatchMessageCount();
+  public Long getBatchMessageCount(
+      MessagingProcessRequest messagingProcessRequest, @Nullable Void unused) {
+    return messagingProcessRequest.getBatchMessageCount();
   }
 }

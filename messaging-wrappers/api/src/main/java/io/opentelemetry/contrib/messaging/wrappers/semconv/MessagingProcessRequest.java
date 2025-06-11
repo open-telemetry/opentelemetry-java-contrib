@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.messaging.wrappers.semconv;
 
 import static java.util.Collections.emptyList;
 
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -65,6 +66,16 @@ public interface MessagingProcessRequest {
    * returned instead.
    */
   default List<String> getMessageHeader(String name) {
+    return emptyList();
+  }
+
+  /**
+   * Extracts all keys of headers from the request, or an empty list/set if there were none.
+   *
+   * <p>Implementations of this method <b>must not</b> return a null value; an empty list should be
+   * returned instead.
+   */
+  default Collection<String> getAllMessageHeadersKey() {
     return emptyList();
   }
 }

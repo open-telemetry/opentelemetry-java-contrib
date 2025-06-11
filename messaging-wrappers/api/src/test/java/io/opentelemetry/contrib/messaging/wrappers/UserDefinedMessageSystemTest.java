@@ -24,13 +24,18 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.contrib.messaging.wrappers.impl.MessageRequest;
-import io.opentelemetry.contrib.messaging.wrappers.impl.MessageTextMapGetter;
 import io.opentelemetry.contrib.messaging.wrappers.model.Message;
 import io.opentelemetry.contrib.messaging.wrappers.model.MessageListener;
 import io.opentelemetry.contrib.messaging.wrappers.model.MessageTextMapSetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.DefaultMessageTextMapGetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.DefaultMessagingAttributesGetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessageOperation;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessagingAttributesExtractor;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessagingSpanNameExtractor;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,10 +55,17 @@ public class UserDefinedMessageSystemTest extends AbstractBaseTest {
   void setupClass() {
     otel = GlobalOpenTelemetry.get();
     tracer = otel.getTracer("test-tracer", "1.0.0");
-    MessagingProcessWrapper<MessageRequest> wrapper =
-        MessagingProcessWrapper.<MessageRequest>defaultBuilder()
+    MessagingProcessWrapper<MessagingProcessRequest> wrapper =
+        MessagingProcessWrapper.<MessagingProcessRequest>defaultBuilder()
             .openTelemetry(otel)
-            .textMapGetter(MessageTextMapGetter.create())
+            .textMapGetter(DefaultMessageTextMapGetter.INSTANCE)
+            .spanNameExtractor(
+                MessagingSpanNameExtractor.create(
+                    DefaultMessagingAttributesGetter.INSTANCE, MessageOperation.PROCESS))
+            .attributesExtractors(
+                Collections.singletonList(
+                    MessagingAttributesExtractor.create(
+                        DefaultMessagingAttributesGetter.INSTANCE, MessageOperation.PROCESS)))
             .build();
 
     eventBus = new EventBus();
@@ -101,7 +113,7 @@ public class UserDefinedMessageSystemTest extends AbstractBaseTest {
                         .hasKind(SpanKind.PRODUCER)
                         .hasNoParent(),
                 span ->
-                    span.hasName("process " + EVENTBUS_NAME)
+                    span.hasName(EVENTBUS_NAME + " process")
                         .hasKind(SpanKind.CONSUMER)
                         .hasParent(trace.getSpan(0))
                         .hasAttributesSatisfyingExactly(

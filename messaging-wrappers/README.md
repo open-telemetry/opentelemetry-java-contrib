@@ -150,25 +150,33 @@ Below is an example of how to initialize a messaging wrapper.
 ```java
 public class Demo {
 
-  public static MessagingProcessWrapper<MyMessagingProcessRequest> createWrapper(
-      OpenTelemetry openTelemetry,
-      MyTextMapGetter textMapGetter,
-      List<AttributesExtractor<MyMessagingProcessRequest, Void>> additionalExtractor) {
+  public static MessagingProcessWrapper<MessagingProcessRequest> createWrapper(OpenTelemetry openTelemetry) {
 
-    return MessagingProcessWrapper.<MyMessagingProcessRequest>defaultBuilder()
+    return MessagingProcessWrapper.<MessagingProcessRequest>defaultBuilder()
         .openTelemetry(openTelemetry)
-        .textMapGetter(textMapGetter)
-        .addAttributesExtractors(additionalExtractor)
+        .textMapGetter(DefaultMessageTextMapGetter.create())
+        .attributesExtractors(
+            Collections.singletonList(
+                MessagingAttributesExtractor.create(
+                    DefaultMessagingAttributesGetter.create(), MessageOperation.PROCESS)))
         .build();
   }
 }
 
 public class MyMessagingProcessRequest implements MessagingProcessRequest {
   // your implementation here
-}
 
-public class MyTextMapGetter implements TextMapGetter<MyMessagingProcessRequest> {
-  // your implementation here
+  @Override
+  public List<String> getMessageHeader(String name) {
+    // impl: how to get specific header from your message
+    return Collections.singletonList(message.getHeaders().get(name));
+  }
+
+  @Override
+  public Collection<String> getAllMessageHeadersKey() {
+    // impl: how to get all headers key set from your message
+    return message.getHeaders().keySet();
+  }
 }
 ```
 

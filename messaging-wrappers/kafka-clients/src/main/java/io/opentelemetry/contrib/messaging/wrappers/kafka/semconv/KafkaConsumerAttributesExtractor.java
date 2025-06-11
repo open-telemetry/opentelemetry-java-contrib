@@ -17,32 +17,30 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
  * Copied from <a
  * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/kafka/kafka-clients/kafka-clients-common-0.11/library/src/main/java/io/opentelemetry/instrumentation/kafkaclients/common/v0_11/internal/KafkaConsumerAttributesExtractor.java>KafkaConsumerAttributesExtractor</a>.
  */
-public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcessRequest>
-    implements AttributesExtractor<REQUEST, Void> {
+public enum KafkaConsumerAttributesExtractor
+    implements AttributesExtractor<KafkaProcessRequest, Void> {
+  INSTANCE;
 
   // copied from MessagingIncubatingAttributes
   private static final AttributeKey<String> MESSAGING_DESTINATION_PARTITION_ID =
       AttributeKey.stringKey("messaging.destination.partition.id");
-  private static final AttributeKey<String> MESSAGING_CONSUMER_GROUP_NAME =
-      AttributeKey.stringKey("messaging.consumer.group.name");
-  private static final AttributeKey<Long> MESSAGING_KAFKA_OFFSET =
-      AttributeKey.longKey("messaging.kafka.offset");
+  private static final AttributeKey<String> MESSAGING_KAFKA_CONSUMER_GROUP =
+      AttributeKey.stringKey("messaging.kafka.consumer.group");
   private static final AttributeKey<String> MESSAGING_KAFKA_MESSAGE_KEY =
       AttributeKey.stringKey("messaging.kafka.message.key");
+  private static final AttributeKey<Long> MESSAGING_KAFKA_MESSAGE_OFFSET =
+      AttributeKey.longKey("messaging.kafka.message.offset");
   private static final AttributeKey<Boolean> MESSAGING_KAFKA_MESSAGE_TOMBSTONE =
       AttributeKey.booleanKey("messaging.kafka.message.tombstone");
 
-  public static <REQUEST extends KafkaProcessRequest> AttributesExtractor<REQUEST, Void> create() {
-    return new KafkaConsumerAttributesExtractor<>();
-  }
-
   @Override
-  public void onStart(AttributesBuilder attributes, Context parentContext, REQUEST request) {
+  public void onStart(
+      AttributesBuilder attributes, Context parentContext, KafkaProcessRequest request) {
 
     ConsumerRecord<?, ?> record = request.getRecord();
 
     attributes.put(MESSAGING_DESTINATION_PARTITION_ID, String.valueOf(record.partition()));
-    attributes.put(MESSAGING_KAFKA_OFFSET, record.offset());
+    attributes.put(MESSAGING_KAFKA_MESSAGE_OFFSET, record.offset());
 
     Object key = record.key();
     if (key != null && canSerialize(key.getClass())) {
@@ -54,7 +52,7 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
 
     String consumerGroup = request.getConsumerGroup();
     if (consumerGroup != null) {
-      attributes.put(MESSAGING_CONSUMER_GROUP_NAME, consumerGroup);
+      attributes.put(MESSAGING_KAFKA_CONSUMER_GROUP, consumerGroup);
     }
   }
 
@@ -68,9 +66,7 @@ public final class KafkaConsumerAttributesExtractor<REQUEST extends KafkaProcess
   public void onEnd(
       AttributesBuilder attributes,
       Context context,
-      REQUEST request,
+      KafkaProcessRequest request,
       @Nullable Void unused,
       @Nullable Throwable error) {}
-
-  private KafkaConsumerAttributesExtractor() {}
 }

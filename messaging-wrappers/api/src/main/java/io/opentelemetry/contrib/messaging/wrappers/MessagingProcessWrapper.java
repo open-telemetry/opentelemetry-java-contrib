@@ -17,18 +17,16 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
-import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
+import io.opentelemetry.instrumentation.api.instrumenter.SpanNameExtractor;
 import java.util.List;
 import javax.annotation.Nullable;
 
-public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
+public class MessagingProcessWrapper<REQUEST> {
 
   private static final String INSTRUMENTATION_SCOPE = "messaging-process-wrapper";
 
   private static final String INSTRUMENTATION_VERSION = "1.0.0";
-
-  private static final String OPERATION_NAME = "process";
 
   private final TextMapPropagator textMapPropagator;
 
@@ -36,12 +34,13 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
 
   private final TextMapGetter<REQUEST> textMapGetter;
 
+  private final SpanNameExtractor<REQUEST> spanNameExtractor;
+
   // no attributes need to be extracted from responses in process operations
   private final List<AttributesExtractor<REQUEST, Void>> attributesExtractors;
 
-  public static <REQUEST extends MessagingProcessRequest>
-      DefaultMessagingProcessWrapperBuilder<REQUEST> defaultBuilder() {
-    return new DefaultMessagingProcessWrapperBuilder<>();
+  public static <REQUEST> MessagingProcessWrapperBuilder<REQUEST> defaultBuilder() {
+    return new MessagingProcessWrapperBuilder<>();
   }
 
   public <E extends Throwable> void doProcess(REQUEST request, ThrowingRunnable<E> runnable)
@@ -77,7 +76,7 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
   protected Span handleStart(REQUEST request) {
     Context context =
         this.textMapPropagator.extract(Context.current(), request, this.textMapGetter);
-    SpanBuilder spanBuilder = this.tracer.spanBuilder(getDefaultSpanName(request.getDestination()));
+    SpanBuilder spanBuilder = this.tracer.spanBuilder(spanNameExtractor.extract(request));
     spanBuilder.setSpanKind(CONSUMER).setParent(context);
 
     AttributesBuilder builder = Attributes.builder();
@@ -95,20 +94,15 @@ public class MessagingProcessWrapper<REQUEST extends MessagingProcessRequest> {
     span.end();
   }
 
-  protected String getDefaultSpanName(@Nullable String destination) {
-    if (destination == null) {
-      destination = "unknown";
-    }
-    return OPERATION_NAME + " " + destination;
-  }
-
   protected MessagingProcessWrapper(
       OpenTelemetry openTelemetry,
       TextMapGetter<REQUEST> textMapGetter,
+      SpanNameExtractor<REQUEST> spanNameExtractor,
       List<AttributesExtractor<REQUEST, Void>> attributesExtractors) {
     this.textMapPropagator = openTelemetry.getPropagators().getTextMapPropagator();
     this.tracer = openTelemetry.getTracer(INSTRUMENTATION_SCOPE, INSTRUMENTATION_VERSION);
     this.textMapGetter = textMapGetter;
+    this.spanNameExtractor = spanNameExtractor;
     this.attributesExtractors = attributesExtractors;
   }
 }

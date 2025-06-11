@@ -13,6 +13,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.messaging.wrappers.MessagingProcessWrapper;
 import io.opentelemetry.contrib.messaging.wrappers.impl.MessageRequest;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +23,10 @@ public class MessageListener {
 
   private final Tracer tracer;
 
-  private final MessagingProcessWrapper<MessageRequest> wrapper;
+  private final MessagingProcessWrapper<MessagingProcessRequest> wrapper;
 
   public static MessageListener create(
-      Tracer tracer, MessagingProcessWrapper<MessageRequest> wrapper) {
+      Tracer tracer, MessagingProcessWrapper<MessagingProcessRequest> wrapper) {
     return new MessageListener(tracer, wrapper);
   }
 
@@ -40,7 +41,7 @@ public class MessageListener {
         });
   }
 
-  private MessageListener(Tracer tracer, MessagingProcessWrapper<MessageRequest> wrapper) {
+  private MessageListener(Tracer tracer, MessagingProcessWrapper<MessagingProcessRequest> wrapper) {
     this.tracer = tracer;
     this.wrapper = wrapper;
   }
