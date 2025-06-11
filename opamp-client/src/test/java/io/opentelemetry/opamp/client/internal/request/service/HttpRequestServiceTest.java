@@ -8,13 +8,11 @@ package io.opentelemetry.opamp.client.internal.request.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,17 +33,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +61,8 @@ class HttpRequestServiceTest {
   private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
   @Mock private RequestService.Callback callback;
-  private final List<ScheduledTask> scheduledTasks = new ArrayList<>();
+  private final List<ScheduledTask> scheduledTasks =
+      Collections.synchronizedList(new ArrayList<>());
   private ScheduledExecutorService executorService;
   private TestHttpSender requestSender;
   private PeriodicDelay periodicRequestDelay;
@@ -83,7 +83,7 @@ class HttpRequestServiceTest {
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
-    httpRequestService.start(callback, createRequestSupplier());
+    httpRequestService.start(callback, this::createRequestSupplier);
   }
 
   @AfterEach
@@ -102,7 +102,7 @@ class HttpRequestServiceTest {
     // Verify initial task creates next one
     scheduledTasks.clear();
     requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
-    firstTask.runnable.run();
+    firstTask.run();
 
     assertThat(scheduledTasks).hasSize(1);
 
@@ -241,12 +241,10 @@ class HttpRequestServiceTest {
       HttpSender.Response errorResponse, Duration expectedRetryDelay) {
     requestSender.enqueueResponse(errorResponse);
     ScheduledTask previousTask = getCurrentScheduledTask();
-    scheduledTasks.clear();
 
-    previousTask.runnable.run();
+    previousTask.run();
 
     verifySingleRequestSent();
-    verify(previousTask.future).cancel(false);
     verify(periodicRetryDelay).reset();
     verify(callback).onRequestFailed(any());
     ScheduledTask retryTask = getCurrentScheduledTask();
@@ -256,9 +254,8 @@ class HttpRequestServiceTest {
     clearInvocations(callback);
     scheduledTasks.clear();
     requestSender.enqueueResponse(createFailedResponse(500));
-    retryTask.runnable.run();
+    retryTask.run();
 
-    verify(retryTask.future, never()).cancel(anyBoolean());
     verifySingleRequestSent();
     verify(callback).onRequestFailed(any());
     ScheduledTask retryTask2 = getCurrentScheduledTask();
@@ -269,20 +266,18 @@ class HttpRequestServiceTest {
     scheduledTasks.clear();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
     requestSender.enqueueResponse(createSuccessfulResponse(serverToAgent));
-    retryTask2.runnable.run();
+    retryTask2.run();
 
-    verify(retryTask2.future).cancel(false);
     verify(periodicRequestDelay).reset();
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
     assertThat(getCurrentScheduledTask().delay).isEqualTo(REGULAR_DELAY);
   }
 
-  private Supplier<Request> createRequestSupplier() {
+  private Request createRequestSupplier() {
     AgentToServer agentToServer = new AgentToServer.Builder().sequence_num(10).build();
     requestSize = agentToServer.encodeByteString().size();
-    Request request = Request.create(agentToServer);
-    return () -> request;
+    return Request.create(agentToServer);
   }
 
   private ScheduledTask getCurrentScheduledTask() {
@@ -322,11 +317,12 @@ class HttpRequestServiceTest {
     when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
         .thenAnswer(
             invocation -> {
-              ScheduledFuture<?> future = mock();
-              scheduledTasks.add(
-                  ScheduledTask.create(
-                      future, invocation.getArgument(0), invocation.getArgument(1)));
-              return future;
+              ScheduledTask task =
+                  new ScheduledTask(invocation.getArgument(0), invocation.getArgument(1));
+
+              scheduledTasks.add(task);
+
+              return task;
             });
 
     return service;
@@ -431,20 +427,54 @@ class HttpRequestServiceTest {
     }
   }
 
-  private static class ScheduledTask {
-    private final ScheduledFuture<?> future;
+  private class ScheduledTask implements ScheduledFuture<Object> {
     private final Runnable runnable;
     private final Duration delay;
 
-    private static ScheduledTask create(
-        ScheduledFuture<?> future, Runnable runnable, long delayNanos) {
-      return new ScheduledTask(future, runnable, Duration.ofNanos(delayNanos));
+    public void run() {
+      get();
     }
 
-    private ScheduledTask(ScheduledFuture<?> future, Runnable runnable, Duration delay) {
-      this.future = future;
+    private ScheduledTask(Runnable runnable, long timeNanos) {
       this.runnable = runnable;
-      this.delay = delay;
+      this.delay = Duration.ofNanos(timeNanos);
+    }
+
+    @Override
+    public long getDelay(@NotNull TimeUnit unit) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+      return scheduledTasks.remove(this);
+    }
+
+    @Override
+    public boolean isCancelled() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isDone() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object get() {
+      scheduledTasks.remove(this);
+      runnable.run();
+      return null;
+    }
+
+    @Override
+    public Object get(long timeout, @NotNull TimeUnit unit) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int compareTo(@NotNull Delayed o) {
+      throw new UnsupportedOperationException();
     }
   }
 }
