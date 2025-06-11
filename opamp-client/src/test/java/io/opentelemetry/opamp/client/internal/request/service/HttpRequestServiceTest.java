@@ -61,8 +61,7 @@ class HttpRequestServiceTest {
   private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
   @Mock private RequestService.Callback callback;
-  private final List<ScheduledTask> scheduledTasks =
-      Collections.synchronizedList(new ArrayList<>());
+  private final List<ScheduledTask> scheduledTasks = new ArrayList<>();
   private ScheduledExecutorService executorService;
   private TestHttpSender requestSender;
   private PeriodicDelay periodicRequestDelay;
