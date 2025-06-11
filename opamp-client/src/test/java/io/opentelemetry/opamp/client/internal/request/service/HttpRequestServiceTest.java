@@ -127,6 +127,19 @@ class HttpRequestServiceTest {
   }
 
   @Test
+  void verifyWhenSendingOnDemandRequest_andDelayChanges() {
+    // Initial state
+    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(REGULAR_DELAY);
+
+    // Trigger delay strategy change
+    requestSender.enqueueResponse(createFailedResponse(503));
+    httpRequestService.sendRequest();
+
+    // Expected state
+    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(RETRY_DELAY);
+  }
+
+  @Test
   void verifySendingRequest_whenTheresAParsingError() {
     HttpSender.Response httpResponse = createSuccessfulResponse(new byte[] {1, 2, 3});
     requestSender.enqueueResponse(httpResponse);
@@ -240,14 +253,14 @@ class HttpRequestServiceTest {
   private void verifyRetryDelayOnError(
       HttpSender.Response errorResponse, Duration expectedRetryDelay) {
     requestSender.enqueueResponse(errorResponse);
-    ScheduledTask previousTask = getCurrentScheduledTask();
+    ScheduledTask previousTask = assertAndGetSingleCurrentTask();
 
     previousTask.run();
 
     verifySingleRequestSent();
     verify(periodicRetryDelay).reset();
     verify(callback).onRequestFailed(any());
-    ScheduledTask retryTask = getCurrentScheduledTask();
+    ScheduledTask retryTask = assertAndGetSingleCurrentTask();
     assertThat(retryTask.delay).isEqualTo(expectedRetryDelay);
 
     // Retry with another error
@@ -258,7 +271,7 @@ class HttpRequestServiceTest {
 
     verifySingleRequestSent();
     verify(callback).onRequestFailed(any());
-    ScheduledTask retryTask2 = getCurrentScheduledTask();
+    ScheduledTask retryTask2 = assertAndGetSingleCurrentTask();
     assertThat(retryTask2.delay).isEqualTo(expectedRetryDelay);
 
     // Retry with a success
@@ -271,7 +284,7 @@ class HttpRequestServiceTest {
     verify(periodicRequestDelay).reset();
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
-    assertThat(getCurrentScheduledTask().delay).isEqualTo(REGULAR_DELAY);
+    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(REGULAR_DELAY);
   }
 
   private Request createRequestSupplier() {
@@ -280,7 +293,7 @@ class HttpRequestServiceTest {
     return Request.create(agentToServer);
   }
 
-  private ScheduledTask getCurrentScheduledTask() {
+  private ScheduledTask assertAndGetSingleCurrentTask() {
     assertThat(scheduledTasks).hasSize(1);
     return scheduledTasks.get(0);
   }

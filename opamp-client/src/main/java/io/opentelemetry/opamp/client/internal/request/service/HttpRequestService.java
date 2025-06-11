@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,7 +45,8 @@ public final class HttpRequestService implements RequestService {
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
   private final AtomicReference<PeriodicDelay> currentDelay;
-  private final AtomicReference<ScheduledFuture<?>> currentTask = new AtomicReference<>();
+  private final AtomicReference<ScheduledFuture<?>> scheduledTask = new AtomicReference<>();
+  private final Lock sendLock = new ReentrantLock();
   private final RetryAfterParser retryAfterParser;
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
@@ -100,24 +103,10 @@ public final class HttpRequestService implements RequestService {
     if (isRunning.compareAndSet(false, true)) {
       this.callback = callback;
       this.requestSupplier = requestSupplier;
-      currentTask.set(
-          executorService.schedule(
-              this::periodicSend, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
+      scheduleNextExecution();
     } else {
       throw new IllegalStateException("HttpRequestService is already running");
     }
-  }
-
-  private void periodicSend() {
-    doSendRequest();
-    // schedule the next execution
-    currentTask.set(
-        executorService.schedule(
-            this::periodicSend, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
-  }
-
-  private void sendOnce() {
-    executorService.execute(this::doSendRequest);
   }
 
   private Duration getNextDelay() {
@@ -138,7 +127,43 @@ public final class HttpRequestService implements RequestService {
       throw new IllegalStateException("HttpRequestService is not running");
     }
 
-    sendOnce();
+    executorService.execute(this::requestOnDemand);
+  }
+
+  private void requestOnDemand() {
+    if (sendLock.tryLock()) {
+      try {
+        ScheduledFuture<?> scheduledFuture = scheduledTask.get();
+        if (scheduledFuture != null) {
+          // Cancel future task
+          scheduledFuture.cancel(false);
+        }
+        sendAndScheduleNext();
+      } finally {
+        sendLock.unlock();
+      }
+    }
+  }
+
+  private void periodicRequest() {
+    if (sendLock.tryLock()) {
+      try {
+        sendAndScheduleNext();
+      } finally {
+        sendLock.unlock();
+      }
+    }
+  }
+
+  private void sendAndScheduleNext() {
+    doSendRequest();
+    scheduleNextExecution();
+  }
+
+  private void scheduleNextExecution() {
+    scheduledTask.set(
+        executorService.schedule(
+            this::periodicRequest, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
   }
 
   private void doSendRequest() {
@@ -150,7 +175,7 @@ public final class HttpRequestService implements RequestService {
     try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
       getCallback().onConnectionSuccess();
       if (isSuccessful(response)) {
-        handleSuccessResponse(
+        handleHttpSuccess(
             Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
       } else {
         handleHttpError(response);
@@ -187,7 +212,7 @@ public final class HttpRequestService implements RequestService {
     return response.statusCode() >= 200 && response.statusCode() < 300;
   }
 
-  private void handleSuccessResponse(Response response) {
+  private void handleHttpSuccess(Response response) {
     useRegularDelay();
     ServerToAgent serverToAgent = response.getServerToAgent();
 
@@ -211,25 +236,16 @@ public final class HttpRequestService implements RequestService {
 
   private void useRegularDelay() {
     if (currentDelay.compareAndSet(periodicRetryDelay, periodicRequestDelay)) {
-      cancelCurrentTask();
       periodicRequestDelay.reset();
     }
   }
 
   private void useRetryDelay(@Nullable Duration retryAfter) {
     if (currentDelay.compareAndSet(periodicRequestDelay, periodicRetryDelay)) {
-      cancelCurrentTask();
       periodicRetryDelay.reset();
       if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
         ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
       }
-    }
-  }
-
-  private void cancelCurrentTask() {
-    ScheduledFuture<?> future = currentTask.get();
-    if (future != null) {
-      future.cancel(false);
     }
   }
 
