@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 
 class JmxScraperTest {
@@ -46,8 +48,10 @@ class JmxScraperTest {
   }
 
   @Test
+  @DisabledOnOs(OS.WINDOWS)
   void shouldCreateConfig_propertiesLoadedFromFile() throws InvalidArgumentException {
     // Given
+    // Windows returns /C:/path/to/file, which is not a valid path for Path.get() in Java.
     String filePath =
         ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
     List<String> args = Arrays.asList("-config", filePath);

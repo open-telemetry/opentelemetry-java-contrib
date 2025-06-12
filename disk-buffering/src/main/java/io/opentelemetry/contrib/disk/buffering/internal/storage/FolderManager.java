@@ -11,13 +11,14 @@ import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.sdk.common.Clock;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
-public final class FolderManager {
+public final class FolderManager implements Closeable {
   private final File folder;
   private final Clock clock;
   private final StorageConfiguration configuration;
@@ -28,6 +29,16 @@ public final class FolderManager {
     this.folder = folder;
     this.configuration = configuration;
     this.clock = clock;
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (currentReadableFile != null) {
+      currentReadableFile.close();
+    }
+    if (currentWritableFile != null) {
+      currentWritableFile.close();
+    }
   }
 
   @Nullable
