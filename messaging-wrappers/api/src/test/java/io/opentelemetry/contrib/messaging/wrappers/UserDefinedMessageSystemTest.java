@@ -10,8 +10,10 @@ import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.EVENTBUS
 import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_BODY;
 import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_ID;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ID;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
 
@@ -37,6 +39,8 @@ import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.Messagin
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.assertj.core.api.AbstractAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -127,7 +131,8 @@ public class UserDefinedMessageSystemTest extends AbstractBaseTest {
                             //  semconv library right now. It should be replaced after semconv
                             // release.
                             equalTo(AttributeKey.stringKey("messaging.client_id"), CLIENT_ID),
-                            equalTo(MESSAGING_OPERATION, "process")),
+                            equalTo(MESSAGING_OPERATION, "process"),
+                            satisfies(MESSAGING_MESSAGE_ID, AbstractAssert::isNotNull)),
                 span ->
                     span.hasName("process child")
                         .hasKind(SpanKind.INTERNAL)

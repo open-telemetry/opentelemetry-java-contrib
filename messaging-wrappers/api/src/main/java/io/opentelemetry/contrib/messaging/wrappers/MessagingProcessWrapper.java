@@ -46,30 +46,32 @@ public class MessagingProcessWrapper<REQUEST> {
   public <E extends Throwable> void doProcess(REQUEST request, ThrowingRunnable<E> runnable)
       throws E {
     Span span = handleStart(request);
+    Context context = span.storeInContext(Context.current());
 
-    try (Scope scope = span.makeCurrent()) {
+    try (Scope scope = context.makeCurrent()) {
       runnable.run();
     } catch (Throwable t) {
-      handleEnd(span, request, t);
+      handleEnd(span, context, request, t);
       throw t;
     }
 
-    handleEnd(span, request, null);
+    handleEnd(span, context, request, null);
   }
 
   public <R, E extends Throwable> R doProcess(REQUEST request, ThrowingSupplier<R, E> supplier)
       throws E {
     Span span = handleStart(request);
+    Context context = span.storeInContext(Context.current());
 
     R result = null;
-    try (Scope scope = span.makeCurrent()) {
+    try (Scope scope = context.makeCurrent()) {
       result = supplier.get();
     } catch (Throwable t) {
-      handleEnd(span, request, t);
+      handleEnd(span, context, request, t);
       throw t;
     }
 
-    handleEnd(span, request, null);
+    handleEnd(span, context, request, null);
     return result;
   }
 
@@ -86,11 +88,13 @@ public class MessagingProcessWrapper<REQUEST> {
     return spanBuilder.setAllAttributes(builder.build()).startSpan();
   }
 
-  protected void handleEnd(Span span, REQUEST request, @Nullable Throwable t) {
+  protected void handleEnd(Span span, Context context, REQUEST request, @Nullable Throwable t) {
     AttributesBuilder builder = Attributes.builder();
     for (AttributesExtractor<REQUEST, Void> extractor : this.attributesExtractors) {
-      extractor.onEnd(builder, Context.current(), request, null, t);
+      extractor.onEnd(builder, context, request, null, t);
     }
+
+    span.setAllAttributes(builder.build());
     span.end();
   }
 

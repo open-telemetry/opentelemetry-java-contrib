@@ -6,9 +6,11 @@
 package io.opentelemetry.contrib.messaging.wrappers.mns;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ENVELOPE_SIZE;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ID;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +34,7 @@ import io.opentelemetry.contrib.messaging.wrappers.mns.semconv.MnsProcessRequest
 import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
+import org.assertj.core.api.AbstractAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -151,7 +154,8 @@ public class AliyunMnsSdkTest extends AbstractBaseTest {
                                 MESSAGING_MESSAGE_ENVELOPE_SIZE,
                                 Base64.encodeBase64(MESSAGE_BODY.getBytes(StandardCharsets.UTF_8))
                                     .length),
-                            equalTo(MESSAGING_OPERATION, "process")),
+                            equalTo(MESSAGING_OPERATION, "process"),
+                            satisfies(MESSAGING_MESSAGE_ID, AbstractAssert::isNotNull)),
                 span ->
                     span.hasName("process child")
                         .hasKind(SpanKind.INTERNAL)

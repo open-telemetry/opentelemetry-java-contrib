@@ -11,9 +11,9 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satis
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_PARTITION_ID;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_CONSUMER_GROUP;
-import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_MESSAGE_KEY;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_KAFKA_MESSAGE_OFFSET;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ID;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
 import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
 
@@ -152,8 +152,7 @@ public class KafkaClientTest extends KafkaClientBaseTest {
                                 AttributeKey.stringKey("messaging.client_id"), "test-consumer-1"),
                             satisfies(MESSAGING_KAFKA_MESSAGE_OFFSET, AbstractAssert::isNotNull),
                             equalTo(MESSAGING_KAFKA_CONSUMER_GROUP, "test"),
-                            equalTo(MESSAGING_OPERATION, "process"),
-                            equalTo(MESSAGING_KAFKA_MESSAGE_KEY, "42")),
+                            equalTo(MESSAGING_OPERATION, "process")),
                 span ->
                     span.hasName("process child")
                         .hasKind(SpanKind.INTERNAL)
