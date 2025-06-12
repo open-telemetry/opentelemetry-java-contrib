@@ -48,7 +48,7 @@ class RuleBasedRoutingSamplerTest {
       SpanContext.create(traceId, parentSpanId, TraceFlags.getSampled(), TraceState.getDefault());
   private final Context parentContext = Context.root().with(Span.wrap(sampledSpanContext));
 
-  private final List<SamplingRule> patterns = new ArrayList<>();
+  private final List<RuleBasedRoutingSamplingRule> patterns = new ArrayList<>();
 
   @Mock(strictness = Mock.Strictness.LENIENT)
   private Sampler delegate;
@@ -58,8 +58,8 @@ class RuleBasedRoutingSamplerTest {
     when(delegate.shouldSample(any(), any(), any(), any(), any(), any()))
         .thenReturn(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
 
-    patterns.add(new SamplingRule(URL_FULL, ".*/healthcheck", Sampler.alwaysOff()));
-    patterns.add(new SamplingRule(URL_PATH, "/actuator", Sampler.alwaysOff()));
+    patterns.add(new RuleBasedRoutingSamplingRule(URL_FULL, ".*/healthcheck", Sampler.alwaysOff()));
+    patterns.add(new RuleBasedRoutingSamplingRule(URL_PATH, "/actuator", Sampler.alwaysOff()));
   }
 
   @Test
@@ -190,7 +190,7 @@ class RuleBasedRoutingSamplerTest {
 
   @Test
   void testThreadNameSampler() {
-    patterns.add(new SamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
+    patterns.add(new RuleBasedRoutingSamplingRule(THREAD_NAME, "Test.*", Sampler.alwaysOff()));
     Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
     RuleBasedRoutingSampler sampler = new RuleBasedRoutingSampler(patterns, SPAN_KIND, delegate);
     SamplingResult samplingResult =
