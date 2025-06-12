@@ -39,7 +39,6 @@ import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.Messagin
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
-
 import org.assertj.core.api.AbstractAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
