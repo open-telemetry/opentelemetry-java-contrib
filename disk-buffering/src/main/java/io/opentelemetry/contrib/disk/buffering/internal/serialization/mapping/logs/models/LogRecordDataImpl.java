@@ -8,15 +8,16 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.l
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.Value;
+import io.opentelemetry.api.incubator.common.ExtendedAttributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import javax.annotation.Nullable;
 
 @AutoValue
-public abstract class LogRecordDataImpl implements LogRecordData {
+public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
 
   public static Builder builder() {
     return new AutoValue_LogRecordDataImpl.Builder();
@@ -31,8 +32,23 @@ public abstract class LogRecordDataImpl implements LogRecordData {
   }
 
   @Override
+  public ExtendedAttributes getExtendedAttributes() {
+    return ExtendedAttributes.builder().putAll(getAttributes()).build();
+  }
+
+  // It's only deprecated in the incubating interface for extended attributes, which are not yet
+  // supported in this module.
+  @SuppressWarnings("deprecation")
+  @Override
+  public abstract Attributes getAttributes();
+
+  @Override
   @Nullable
   public abstract Value<?> getBodyValue();
+
+  @Override
+  @Nullable
+  public abstract String getEventName();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -55,6 +71,8 @@ public abstract class LogRecordDataImpl implements LogRecordData {
     public abstract Builder setAttributes(Attributes value);
 
     public abstract Builder setTotalAttributeCount(Integer value);
+
+    public abstract Builder setEventName(String value);
 
     public abstract LogRecordDataImpl build();
   }

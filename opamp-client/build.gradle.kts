@@ -5,7 +5,7 @@ import groovy.json.JsonSlurper
 plugins {
   id("otel.java-conventions")
   id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.1"
+  id("com.squareup.wire") version "5.3.3"
 }
 
 description = "Client implementation of the OpAMP spec."

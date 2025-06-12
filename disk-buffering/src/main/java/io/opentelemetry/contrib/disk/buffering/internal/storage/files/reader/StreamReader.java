@@ -10,22 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
 
-public abstract class StreamReader implements Closeable {
-  protected final InputStream inputStream;
-
-  protected StreamReader(InputStream inputStream) {
-    this.inputStream = inputStream;
-  }
-
+public interface StreamReader extends Closeable {
   @Nullable
-  public abstract ReadResult read() throws IOException;
+  ReadResult readNext() throws IOException;
 
-  @Override
-  public void close() throws IOException {
-    inputStream.close();
-  }
-
-  public interface Factory {
+  interface Factory {
     StreamReader create(InputStream stream);
   }
 }

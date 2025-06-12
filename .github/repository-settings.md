@@ -1,24 +1,12 @@
 # Repository settings
 
-Same
-as [opentelemetry-java-instrumentation repository settings](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/.github/repository-settings.md#repository-settings),
-except for
+This document describes any changes that have been made to the
+settings in this repository outside the settings tracked in the
+private admin repo.
 
-- The rules for `gh-pages` and `cloudfoundry` branches are not relevant in this repository.
+## Merge queue for `main`
 
-and the enablement of merge queues below.
-
-## Merge queue
-
-Needs to be enabled using classic branch protection (instead of rule set)
-because of our use of the classic branch protection "Restrict who can push to matching branches"
-which otherwise will block the merge queue from merging to main.
-
-### Restrict branch creation
-
-- Additional exclusion for `gh-readonly-queue/main/pr-*`
-
-### Classic branch protection for `main`
+[The admin repo doesn't currently support tracking merge queue settings.]
 
 - Require merge queue: CHECKED
   - Build concurrency: 5

@@ -12,7 +12,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
 
   // Provides GCP resource detection support
-  implementation("com.google.cloud.opentelemetry:detector-resources-support:0.34.0")
+  implementation("com.google.cloud.opentelemetry:detector-resources-support:0.35.0")
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 

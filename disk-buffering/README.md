@@ -28,12 +28,6 @@ The configurable parameters are provided **per exporter**, the available ones ar
 * Max age for file reading, defaults to 18 hours. After that time passes, the file will be
   considered stale and will be removed when new files are created. No more data will be read from a
   file past this time.
-* An instance
-  of [TemporaryFileProvider](src/main/java/io/opentelemetry/contrib/disk/buffering/config/TemporaryFileProvider.java),
-  defaults to calling `File.createTempFile`. This provider will be used when reading from the disk
-  in order create a temporary file from which each line (batch of signals) will be read and
-  sequentially get removed from the original cache file right after the data has been successfully
-  exported.
 
 ## Usage
 
