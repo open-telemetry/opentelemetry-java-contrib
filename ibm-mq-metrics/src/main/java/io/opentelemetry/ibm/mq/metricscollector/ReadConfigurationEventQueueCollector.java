@@ -20,7 +20,7 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.metrics.Metrics;
 import java.io.IOException;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

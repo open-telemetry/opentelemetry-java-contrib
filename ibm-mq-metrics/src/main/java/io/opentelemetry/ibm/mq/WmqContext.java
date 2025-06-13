@@ -8,6 +8,7 @@ package io.opentelemetry.ibm.mq;
 import com.ibm.mq.constants.CMQC;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import java.util.Hashtable;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class WmqContext {
 
   /** Note: This Hashtable type is needed for IBM client classes. */
   @SuppressWarnings("JdkObsolete")
-  public Hashtable<String, ?> getMQEnvironment() {
+  public Hashtable<String, ?> getMqEnvironment() {
     Hashtable<String, ?> env = new Hashtable<>();
     addEnvProperty(env, CMQC.HOST_NAME_PROPERTY, queueManager.getHost());
     addEnvProperty(env, CMQC.PORT_PROPERTY, queueManager.getPort());
@@ -56,7 +57,7 @@ public class WmqContext {
   }
 
   @SuppressWarnings({"unused", "unchecked", "rawtypes"})
-  private void addEnvProperty(Hashtable env, String propName, Object propVal) {
+  private static void addEnvProperty(Hashtable env, String propName, @Nullable Object propVal) {
     if (null != propVal) {
       if (propVal instanceof String) {
         String propString = (String) propVal;

@@ -14,9 +14,7 @@ final class Config {
 
   private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-  private Config(){
-
-  }
+  private Config() {}
 
   static void setUpSslConnection(Map<String, ?> config) {
     getConfigValueAndSetSystemProperty(config, "keyStorePath", "javax.net.ssl.keyStore");
