@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
  * authorization.<br>
  * It also validates the arguments passed for various scenarios.
  */
-public class WMQContext {
+public class WmqContext {
   private static final String TRANSPORT_TYPE_CLIENT = "Client";
   private static final String TRANSPORT_TYPE_BINDINGS = "Bindings";
 
-  public static final Logger logger = LoggerFactory.getLogger(WMQContext.class);
+  public static final Logger logger = LoggerFactory.getLogger(WmqContext.class);
   private final QueueManager queueManager;
 
-  public WMQContext(QueueManager queueManager) {
+  public WmqContext(QueueManager queueManager) {
     this.queueManager = queueManager;
     validateArgs();
   }

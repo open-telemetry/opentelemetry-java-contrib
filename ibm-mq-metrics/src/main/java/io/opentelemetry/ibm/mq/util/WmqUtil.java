@@ -9,17 +9,17 @@ import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.MQDataException;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.ibm.mq.WMQContext;
+import io.opentelemetry.ibm.mq.WmqContext;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import java.util.Hashtable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WMQUtil {
+public class WmqUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(WMQUtil.class);
+  private static final Logger logger = LoggerFactory.getLogger(WmqUtil.class);
 
-  private WMQUtil() {}
+  private WmqUtil() {}
 
   public static PCFMessageAgent initPCFMessageAgent(
       QueueManager queueManager, MQQueueManager ibmQueueManager) {
@@ -56,7 +56,7 @@ public class WMQUtil {
 
   @SuppressWarnings("rawtypes")
   public static MQQueueManager connectToQueueManager(QueueManager queueManager) {
-    WMQContext auth = new WMQContext(queueManager);
+    WmqContext auth = new WmqContext(queueManager);
     Hashtable env = auth.getMQEnvironment();
     try {
       MQQueueManager ibmQueueManager = new MQQueueManager(queueManager.getName(), env);
