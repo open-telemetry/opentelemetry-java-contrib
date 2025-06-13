@@ -5,8 +5,9 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,7 +58,7 @@ class QueueManagerMetricsCollectorTest {
         new QueueManagerMetricsCollector(
             otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq"));
     classUnderTest.accept(context);
-    List<String> metricsList = new ArrayList<>(List.of("mq.manager.status"));
+    List<String> metricsList = new ArrayList<>(singletonList("mq.manager.status"));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
@@ -100,7 +101,7 @@ class QueueManagerMetricsCollectorTest {
      MQCFST [type: 4, strucLength: 28, parameter: 3176 (null), codedCharSetId: 819, stringLength: 8, string: 08.32.08]
   */
 
-  private PCFMessage[] createPCFResponseForInquireQMgrStatusCmd() {
+  private static PCFMessage[] createPCFResponseForInquireQMgrStatusCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_Q_MGR_STATUS, 1, true);
     response1.addParameter(CMQC.MQCA_Q_MGR_NAME, "QM1");
     response1.addParameter(CMQCFC.MQIACF_Q_MGR_STATUS, 2);

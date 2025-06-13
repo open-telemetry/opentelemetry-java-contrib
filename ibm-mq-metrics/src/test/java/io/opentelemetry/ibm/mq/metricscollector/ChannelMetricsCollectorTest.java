@@ -10,7 +10,7 @@ import static com.ibm.mq.constants.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND;
 import static io.opentelemetry.ibm.mq.metricscollector.MetricAssert.assertThatMetric;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +25,7 @@ import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +70,7 @@ class ChannelMetricsCollectorTest {
 
     List<String> metricsList =
         new ArrayList<>(
-            List.of(
+            Arrays.asList(
                 "mq.message.count",
                 "mq.status",
                 "mq.byte.sent",
@@ -133,7 +134,7 @@ class ChannelMetricsCollectorTest {
      MQCFIN [type: 3, strucLength: 16, parameter: 1609 (MQIACH_CHANNEL_SUBSTATE), value: 300]
   */
 
-  private PCFMessage[] createPCFResponseForInquireChannelStatusCmd() {
+  private static PCFMessage[] createPCFResponseForInquireChannelStatusCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_CHANNEL_STATUS, 1, true);
     response1.addParameter(CMQCFC.MQCACH_CHANNEL_NAME, "DEV.ADMIN.SVRCONN");
     response1.addParameter(CMQCFC.MQIACH_CHANNEL_TYPE, 7);

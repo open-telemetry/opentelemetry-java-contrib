@@ -7,6 +7,7 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -29,14 +30,12 @@ class ConfigTest {
   @Test
   void testSSLConnection() {
     Config.setUpSslConnection(
-        new HashMap<String, Object>() {
-          {
-            put("keyStorePath", "foo");
-            put("trustStorePath", "bar");
-            put("keyStorePassword", "password");
-            put("trustStorePassword", "password1");
-          }
-        });
+        new HashMap<String, Object>(
+            ImmutableMap.of(
+                "keyStorePath", "foo",
+                "trustStorePath", "bar",
+                "keyStorePassword", "password",
+                "trustStorePassword", "password1")));
 
     assertThat(System.getProperties().get("javax.net.ssl.keyStore")).isEqualTo("foo");
     assertThat(System.getProperties().get("javax.net.ssl.trustStorePath")).isEqualTo("bar");
