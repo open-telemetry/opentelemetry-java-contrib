@@ -44,11 +44,12 @@ These jar files are typically found in ```/opt/mqm/java/lib``` on a UNIX server 
 found in an alternate location depending upon your environment.
 
 In case of **CLIENT** transport type, IBM MQ Client must be installed to get the MQ jars.
-To download IBM MQ Client jars, see [here](https://developer.ibm.com/messaging/mq-downloads/)
+[The IBM MQ Client jars can be downloaded here](https://developer.ibm.com/messaging/mq-downloads/).
 
 ### MQ monitoring configuration
 
 This software reads events from event queues associated with the queue manager:
+ 
 * `SYSTEM.ADMIN.PERFM.EVENT`: Performance events, such as low, high, and full queue depth events.
 * `SYSTEM.ADMIN.QMGR.EVENT`: Authority events
 * `SYSTEM.ADMIN.CONFIG.EVENT`: Configuration events
@@ -58,6 +59,7 @@ Please turn on those events to take advantage of this monitoring.
 ## Build
 
 Build the package with:
+
 ```shell
 ./gradlew shadowJar
 ```
@@ -82,6 +84,7 @@ java \
 ## Connection
 
 There are two transport modes in which this extension can be run:
+ 
 * **Binding** : Requires WMQ Extension to be deployed in machine agent on the same machine where
   WMQ server is installed.
 * **Client** : In this mode, the WMQ extension is installed on a different host than the IBM MQ
@@ -166,6 +169,7 @@ a temporary dynamic queue to be created. You can override the default here by us
 See [docs/metrics.md](docs/metrics.md).
 
 ## Troubleshooting
+
 1. Please follow the steps listed in this [troubleshooting-document](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) in order to troubleshoot your issue. These are a set of common issues that customers might have faced during the installation of the extension.
 2. Error `Completion Code '2', Reason '2495'`
    Normally this error occurs if the environment variables are not set up correctly for this extension to work MQ in Bindings Mode.
@@ -199,6 +203,7 @@ See [docs/metrics.md](docs/metrics.md).
    ```
     <classpath>ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.allclient.jar</classpath>
    ```
+
    OR
 
    ```
