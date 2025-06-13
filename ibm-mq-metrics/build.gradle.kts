@@ -39,28 +39,13 @@ dependencies {
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   api("org.slf4j:slf4j-api:2.0.7")
-//  api(libs.org.apache.logging.log4j.log4j.api)
-//  api(libs.org.apache.logging.log4j.log4j.core)
-//  api(libs.org.apache.logging.log4j.log4j.slf4j2.impl)
-//  api(libs.org.json.json)
-//  testImplementation(libs.org.junit.jupiter.junit.jupiter.api)
-//  testImplementation(libs.org.junit.jupiter.junit.jupiter.params)
-//  testImplementation(libs.org.mockito.mockito.core)
-//  testImplementation(libs.org.mockito.mockito.junit.jupiter)
-//  testImplementation(libs.org.assertj.assertj.core)
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.50.0")
-//  testImplementation(libs.com.ibm.mq.com.ibm.mq.jakarta.client)
-//  testImplementation(libs.jakarta.jms.jakarta.jms.api)
-//  testImplementation(libs.org.junit.jupiter.junit.jupiter.engine)
-//  testRuntimeOnly(libs.org.junit.platform.junit.platform.launcher)
-//  integrationTestImplementation(libs.org.assertj.assertj.core)
-//  integrationTestImplementation(libs.org.junit.jupiter.junit.jupiter.api)
-//  integrationTestImplementation(libs.io.opentelemetry.opentelemetry.sdk.testing)
-//  integrationTestImplementation(libs.com.ibm.mq.com.ibm.mq.jakarta.client)
-//  integrationTestImplementation(libs.jakarta.jms.jakarta.jms.api)
-//  integrationTestImplementation(libs.org.junit.jupiter.junit.jupiter.engine)
-//  integrationTestRuntimeOnly(libs.org.junit.platform.junit.platform.launcher)
+  integrationTestImplementation("org.assertj:assertj-core:3.27.3")
+  integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
+  integrationTestImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.50.0")
+  integrationTestImplementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.0")
+  integrationTestImplementation("jakarta.jms:jakarta.jms-api:3.1.0")
   ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.2.1") {
     artifact {
       name = "com.ibm.mq.allclient"
@@ -73,5 +58,20 @@ dependencies {
 tasks.shadowJar {
   dependencies {
     exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.2.1"))
+  }
+}
+
+val integrationTest = tasks.register<Test>("integrationTest") {
+  description = "Runs integration tests."
+  group = "verification"
+
+  testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+  classpath = sourceSets["integrationTest"].runtimeClasspath
+  shouldRunAfter("test")
+
+  useJUnitPlatform()
+
+  testLogging {
+    events("passed")
   }
 }
