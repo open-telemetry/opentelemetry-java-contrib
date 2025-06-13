@@ -90,3 +90,6 @@ components:
   opamp-client:
     - LikeTheSalad
     - jackshirazi
+  ibm-mq-metrics:
+    - breedx-splk
+    - atoulme
