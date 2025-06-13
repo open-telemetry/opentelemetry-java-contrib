@@ -3,7 +3,7 @@ WEAVER_CONTAINER_REPOSITORY=docker.io
 # Versioned, non-qualified references to containers used in this Makefile.
 # These are parsed from dependencies.Dockerfile so dependabot will autoupdate
 # the versions of docker files we use.
-VERSIONED_WEAVER_CONTAINER_NO_REPO=$(shell cat buildscripts/dependencies.Dockerfile | awk '$$4=="weaver" {print $$2}')
+VERSIONED_WEAVER_CONTAINER_NO_REPO=$(shell cat weaver.Dockerfile | awk '$$4=="weaver" {print $$2}')
 # Versioned, non-qualified references to containers used in this Makefile.
 WEAVER_CONTAINER=$(WEAVER_CONTAINER_REPOSITORY)/$(VERSIONED_WEAVER_CONTAINER_NO_REPO)
 
@@ -55,12 +55,12 @@ check:
 
 .PHONY: generate-java
 generate-java:
-	mkdir -p src/main/java/com/splunk/ibm/mq/metrics
+	mkdir -p src/main/java/io/opentelemetry/ibm/mq/metrics
 	$(DOCKER_RUN) --rm \
 		$(DOCKER_USER_IS_HOST_USER_ARG) \
 		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/model,readonly' \
 		--mount 'type=bind,source=$(PWD)/templates,target=/home/weaver/templates,readonly' \
-		--mount 'type=bind,source=$(PWD)/src/main/java/com/splunk/ibm/mq/metrics,target=/home/weaver/target' \
+		--mount 'type=bind,source=$(PWD)/src/main/java/io/opentelemetry/ibm/mq/metrics,target=/home/weaver/target' \
 		${WEAVER_CONTAINER} registry generate \
 		--registry=/home/weaver/model \
 		java \

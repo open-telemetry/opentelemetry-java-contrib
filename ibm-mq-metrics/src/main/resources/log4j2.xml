@@ -51,7 +51,7 @@
         </Root>
 
         <!-- Special configurations for specific packages -->
-        <Logger name="com.splunk" level="info" additivity="false">
+        <Logger name="io.opentelemetry" level="info" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="Async"/>
         </Logger>
