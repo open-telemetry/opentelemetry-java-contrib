@@ -57,7 +57,7 @@ final class InquireQCmdCollector implements Consumer<MetricsCollectorContext> {
       request.addParameter(CMQC.MQIA_Q_TYPE, CMQC.MQQT_ALL);
       request.addParameter(CMQCFC.MQIACF_Q_ATTRS, ATTRIBUTES);
 
-      queueBuddy.processPCFRequestAndPublishQMetrics(
+      queueBuddy.processPcfRequestAndPublishQMetrics(
           context, request, queueGenericName, ATTRIBUTES);
     }
     long exitTime = System.currentTimeMillis() - entryTime;

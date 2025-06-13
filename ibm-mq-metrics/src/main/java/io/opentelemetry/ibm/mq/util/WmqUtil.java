@@ -12,6 +12,7 @@ import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.ibm.mq.WmqContext;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import java.util.Hashtable;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class WmqUtil {
 
   private WmqUtil() {}
 
-  public static PCFMessageAgent initPCFMessageAgent(
+  public static PCFMessageAgent initPcfMessageAgent(
       QueueManager queueManager, MQQueueManager ibmQueueManager) {
     try {
       PCFMessageAgent agent;
@@ -50,7 +51,7 @@ public class WmqUtil {
       return agent;
     } catch (MQDataException mqe) {
       logger.error(mqe.getMessage(), mqe);
-      throw new RuntimeException(mqe);
+      throw new IllegalStateException(mqe);
     }
   }
 
@@ -67,11 +68,11 @@ public class WmqUtil {
       return ibmQueueManager;
     } catch (MQException mqe) {
       logger.error(mqe.getMessage(), mqe);
-      throw new RuntimeException(mqe.getMessage());
+      throw new IllegalStateException(mqe.getMessage());
     }
   }
 
-  private static boolean isNotNullOrEmpty(String str) {
+  private static boolean isNotNullOrEmpty(@Nullable String str) {
     return str != null && !str.isEmpty();
   }
 }

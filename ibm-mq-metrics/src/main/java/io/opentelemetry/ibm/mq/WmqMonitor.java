@@ -96,7 +96,7 @@ public class WmqMonitor {
     try {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
-      agent = WmqUtil.initPCFMessageAgent(queueManager, ibmQueueManager);
+      agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
       extractAndReportMetrics(ibmQueueManager, queueManager, agent);
     } catch (RuntimeException e) {
       logger.error(

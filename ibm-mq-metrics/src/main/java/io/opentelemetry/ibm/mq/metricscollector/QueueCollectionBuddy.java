@@ -5,7 +5,11 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
-import static com.ibm.mq.constants.CMQC.*;
+import static com.ibm.mq.constants.CMQC.MQQT_ALIAS;
+import static com.ibm.mq.constants.CMQC.MQQT_CLUSTER;
+import static com.ibm.mq.constants.CMQC.MQQT_LOCAL;
+import static com.ibm.mq.constants.CMQC.MQQT_MODEL;
+import static com.ibm.mq.constants.CMQC.MQQT_REMOTE;
 
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
@@ -35,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 final class QueueCollectionBuddy {
   private static final Logger logger = LoggerFactory.getLogger(QueueCollectionBuddy.class);
-  private Map<Integer, AllowedGauge> gauges;
+  private final Map<Integer, AllowedGauge> gauges = new HashMap<>();
 
   private final QueueCollectorSharedState sharedState;
   private final LongGauge onqtimeShort;
@@ -43,11 +47,10 @@ final class QueueCollectionBuddy {
 
   @FunctionalInterface
   private interface AllowedGauge {
-
     void set(MetricsCollectorContext context, Integer value, Attributes attributes);
   }
 
-  private AllowedGauge createAllowedGauge(
+  private static AllowedGauge createAllowedGauge(
       LongGauge gauge, Function<MetricsConfig, Boolean> allowed) {
     return (context, val, attributes) -> {
       if (allowed.apply(context.getMetricsConfig())) {
@@ -58,7 +61,6 @@ final class QueueCollectionBuddy {
 
   QueueCollectionBuddy(Meter meter, QueueCollectorSharedState sharedState) {
     this.sharedState = sharedState;
-    this.gauges = new HashMap<>();
     gauges.put(
         CMQC.MQIA_CURRENT_Q_DEPTH,
         createAllowedGauge(
@@ -118,17 +120,13 @@ final class QueueCollectionBuddy {
 
     this.onqtimeShort = Metrics.createMqOnqtime1(meter);
     this.onqtimeLong = Metrics.createMqOnqtime2(meter);
-
-    initialize(meter);
   }
-
-  private void initialize(Meter meter) {}
 
   /**
    * Sends a PCFMessage request, reads the response, and generates metrics from the response. It
    * handles all exceptions.
    */
-  void processPCFRequestAndPublishQMetrics(
+  void processPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, PCFMessage request, String queueGenericName, int[] fields) {
     try {
       doProcessPCFRequestAndPublishQMetrics(context, request, queueGenericName, fields);

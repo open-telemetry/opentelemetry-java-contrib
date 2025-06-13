@@ -44,7 +44,7 @@ final class ResetQStatsCmdCollector implements Consumer<MetricsCollectorContext>
       // https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.ref.adm.doc/q088310_.htm
       PCFMessage request = new PCFMessage(CMQCFC.MQCMD_RESET_Q_STATS);
       request.addParameter(CMQC.MQCA_Q_NAME, queueGenericName);
-      queueBuddy.processPCFRequestAndPublishQMetrics(
+      queueBuddy.processPcfRequestAndPublishQMetrics(
           context, request, queueGenericName, ATTRIBUTES);
     }
     long exitTime = System.currentTimeMillis() - entryTime;

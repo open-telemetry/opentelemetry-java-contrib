@@ -102,7 +102,7 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
       }
     } catch (Exception e) {
       logger.error(e.getMessage());
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } finally {
       long exitTime = System.currentTimeMillis() - entryTime;
       logger.debug("Time taken to publish metrics for queuemanager is {} milliseconds", exitTime);
