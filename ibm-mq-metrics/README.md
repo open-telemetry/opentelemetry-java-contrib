@@ -200,3 +200,9 @@ See [docs/metrics.md](docs/metrics.md).
    ```
     <classpath>ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.jar;com.ibm.mq.jmqi.jar;com.ibm.mq.commonservices.jar;com.ibm.mq.headers.jar;com.ibm.mq.pcf.jar;connector.jar;dhbcore.jar</classpath>
    ```
+## Component Owners
+
+- [Antoine Toulme Sharma](https://github.com/atoulme), Splunk
+- [Jason Plumb](https://github.com/breedx-splk), Splunk
+
+Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
