@@ -63,7 +63,7 @@ final class InquireQStatusCmdCollector implements Consumer<MetricsCollectorConte
       PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_Q_STATUS);
       request.addParameter(CMQC.MQCA_Q_NAME, queueGenericName);
       request.addParameter(CMQCFC.MQIACF_Q_STATUS_ATTRS, ATTRIBUTES);
-      queueBuddy.processPCFRequestAndPublishQMetrics(
+      queueBuddy.processPcfRequestAndPublishQMetrics(
           context, request, queueGenericName, ATTRIBUTES);
     }
     long exitTime = System.currentTimeMillis() - entryTime;

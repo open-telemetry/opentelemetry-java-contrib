@@ -67,7 +67,7 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
       }
     } catch (Exception e) {
       logger.error("Error collecting QueueManagerCmd metrics", e);
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     } finally {
       long exitTime = System.currentTimeMillis() - entryTime;
       logger.debug("Time taken to publish metrics for queuemanager is {} milliseconds", exitTime);
