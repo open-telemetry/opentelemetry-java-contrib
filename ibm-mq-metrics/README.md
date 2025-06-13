@@ -153,13 +153,13 @@ This software extracts metrics through [PCF framework](https://www.ibm.com/suppo
 [A complete list of PCF commands are listed here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q086870_.htm).
 Each queue manager has an administration queue with a standard queue name and
 the extension sends PCF command messages to that queue. On Windows and Unix platforms, the PCF
-commands are sent is always sent to the SYSTEM.ADMIN.COMMAND.QUEUE queue. More details about that
-is mentioned [here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm)
+commands are sent is always sent to the SYSTEM.ADMIN.COMMAND.QUEUE queue. 
+[More details mentioned here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm)
 
 By default, the PCF responses are sent to the SYSTEM.DEFAULT.MODEL.QUEUE. Using this queue causes
 a temporary dynamic queue to be created. You can override the default here by using the
 `modelQueueName` and `replyQueuePrefix` fields in the config.yml.
-More details mentioned [here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q083240_.htm)
+[More details mentioned here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q083240_.htm)
 
 ## Metrics
 
@@ -180,7 +180,7 @@ See [docs/metrics.md](docs/metrics.md).
 
    For more details, please check this [doc](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/zr00610_.htm)
 
-   This might occour due to various reasons ranging from incorrect installation to applying [ibm fix packs](http://www-01.ibm.com/support/docview.wss?uid=swg21410038) but most of the time it happens when you are trying to connect in `Bindings` mode and machine agent is not on the same machine on which WMQ server is running. If you want to connect to WMQ server from a remote machine then connect using `Client` mode.
+   This might occur due to various reasons ranging from incorrect installation to applying [ibm fix packs](http://www-01.ibm.com/support/docview.wss?uid=swg21410038) but most of the time it happens when you are trying to connect in `Bindings` mode and machine agent is not on the same machine on which WMQ server is running. If you want to connect to WMQ server from a remote machine then connect using `Client` mode.
 
    Another way to get around this issue is to avoid using the Bindings mode. Connect using CLIENT transport type from a remote box.
 
@@ -195,13 +195,16 @@ See [docs/metrics.md](docs/metrics.md).
    This could happen if unsupported cipherSuite is provided or JRE not having/enabled unlimited jurisdiction policy files. Please check SSL Support section.
 
 6. If you are seeing "NoClassDefFoundError" or "ClassNotFound" error for any of the MQ dependency even after providing correct path in monitor.xml, then you can also try copying all the required jars in WMQMonitor (MAHome/monitors/WMQMonitor) folder and provide classpath in monitor.xml like below
+
    ```
     <classpath>ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.allclient.jar</classpath>
    ```
    OR
+
    ```
     <classpath>ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.jar;com.ibm.mq.jmqi.jar;com.ibm.mq.commonservices.jar;com.ibm.mq.headers.jar;com.ibm.mq.pcf.jar;connector.jar;dhbcore.jar</classpath>
    ```
+
 ## Component Owners
 
 - [Antoine Toulme Sharma](https://github.com/atoulme), Splunk
