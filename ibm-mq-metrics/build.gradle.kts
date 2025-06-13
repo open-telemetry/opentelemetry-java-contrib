@@ -67,7 +67,6 @@ dependencies {
     }
     isTransitive = false
   }
-
 }
 
 tasks.shadowJar {
@@ -75,5 +74,3 @@ tasks.shadowJar {
     exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.2.1"))
   }
 }
-
-
