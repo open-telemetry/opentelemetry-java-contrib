@@ -15,11 +15,11 @@ import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A temporary bundle to contain the collaborators of the original MetricsCollector base class until
@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 @Immutable
 public final class MetricsCollectorContext {
-
-  private static final Logger logger = LoggerFactory.getLogger(MetricsCollectorContext.class);
 
   private final QueueManager queueManager;
   private final PCFMessageAgent agent;

@@ -14,7 +14,6 @@ import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
-import io.opentelemetry.ibm.mq.metricscollector.*;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
 import io.opentelemetry.ibm.mq.metricscollector.InquireChannelCmdCollector;
 import io.opentelemetry.ibm.mq.metricscollector.InquireQueueManagerCmdCollector;
@@ -27,7 +26,7 @@ import io.opentelemetry.ibm.mq.metricscollector.QueueMetricsCollector;
 import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueCollector;
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
-import io.opentelemetry.ibm.mq.util.WMQUtil;
+import io.opentelemetry.ibm.mq.util.WmqUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +34,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WMQMonitor {
+public class WmqMonitor {
 
-  private static final Logger logger = LoggerFactory.getLogger(WMQMonitor.class);
+  private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
 
   private final List<QueueManager> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
@@ -48,7 +48,7 @@ public class WMQMonitor {
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
 
-  public WMQMonitor(ConfigWrapper config, ExecutorService threadPool, Meter meter) {
+  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, Meter meter) {
     List<Map<String, ?>> queueManagers = getQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
@@ -86,16 +86,6 @@ public class WMQMonitor {
     }
   }
 
-  @NotNull
-  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
-    List<Map<String, ?>> queueManagers = config.getQueueManagers();
-    if (queueManagers.isEmpty()) {
-      throw new IllegalStateException(
-          "The 'queueManagers' section in config.yml is empty or otherwise incorrect.");
-    }
-    return queueManagers;
-  }
-
   public void run(QueueManager queueManager) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
@@ -104,11 +94,11 @@ public class WMQMonitor {
     PCFMessageAgent agent = null;
     int heartBeatMetricValue = 0;
     try {
-      ibmQueueManager = WMQUtil.connectToQueueManager(queueManager);
+      ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
-      agent = WMQUtil.initPCFMessageAgent(queueManager, ibmQueueManager);
+      agent = WmqUtil.initPCFMessageAgent(queueManager, ibmQueueManager);
       extractAndReportMetrics(ibmQueueManager, queueManager, agent);
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
           queueManagerName,
@@ -128,6 +118,16 @@ public class WMQMonitor {
           queueManagerName,
           endTime);
     }
+  }
+
+  @NotNull
+  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
+    List<Map<String, ?>> queueManagers = config.getQueueManagers();
+    if (queueManagers.isEmpty()) {
+      throw new IllegalStateException(
+          "The 'queueManagers' section in config.yml is empty or otherwise incorrect.");
+    }
+    return queueManagers;
   }
 
   private void extractAndReportMetrics(
@@ -154,9 +154,9 @@ public class WMQMonitor {
                     collector.getClass().getSimpleName(),
                     diffTime);
               }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
               logger.error(
-                  "Error while running task name = " + collector.getClass().getSimpleName(), e);
+                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
             }
             return null;
           });
@@ -170,7 +170,8 @@ public class WMQMonitor {
   }
 
   /** Destroy the agent and disconnect from queue manager */
-  private static void cleanUp(MQQueueManager ibmQueueManager, PCFMessageAgent agent) {
+  private static void cleanUp(
+      @Nullable MQQueueManager ibmQueueManager, @Nullable PCFMessageAgent agent) {
     // Disconnect the agent.
 
     if (agent != null) {

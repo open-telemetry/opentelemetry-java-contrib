@@ -6,25 +6,26 @@
 package io.opentelemetry.ibm.mq.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
+/** This is a jackson databind class used purely for config. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueueManager {
 
-  private String host;
+  @Nullable private String host;
   private int port = -1;
-  private String name;
-  private String channelName;
-  private String transportType;
-  private String username;
-  private String password;
-  private String sslKeyRepository;
+  private String name = "UNKNOWN";
+  @Nullable private String channelName;
+  @Nullable private String transportType;
+  @Nullable private String username;
+  @Nullable private String password;
+  @Nullable private String sslKeyRepository;
   private int ccsid = Integer.MIN_VALUE;
   private int encoding = Integer.MIN_VALUE;
-  private String cipherSuite;
-  private String cipherSpec;
-  private String replyQueuePrefix;
-  private String modelQueueName;
+  @Nullable private String cipherSuite;
+  @Nullable private String cipherSpec;
+  @Nullable private String replyQueuePrefix;
+  @Nullable private String modelQueueName;
   private String configurationQueueName = "SYSTEM.ADMIN.CONFIG.EVENT";
   private String performanceEventsQueueName = "SYSTEM.ADMIN.PERFM.EVENT";
   private String queueManagerEventsQueueName = "SYSTEM.ADMIN.QMGR.EVENT";
@@ -34,14 +35,12 @@ public class QueueManager {
   // https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=qmini-channels-stanza-file
   private int maxActiveChannels = 100;
 
-  private ResourceFilters queueFilters;
-  private ResourceFilters channelFilters;
-  private ResourceFilters listenerFilters;
-  private ResourceFilters topicFilters;
+  @Nullable private ResourceFilters queueFilters;
+  @Nullable private ResourceFilters channelFilters;
+  @Nullable private ResourceFilters listenerFilters;
+  @Nullable private ResourceFilters topicFilters;
 
-  List<String> writeStatsDirectory;
-
-  public String getHost() {
+  public @Nullable String getHost() {
     return host;
   }
 
@@ -65,35 +64,35 @@ public class QueueManager {
     this.name = name;
   }
 
-  public String getChannelName() {
+  public @Nullable String getChannelName() {
     return channelName;
   }
 
-  public void setChannelName(String channelName) {
+  public void setChannelName(@Nullable String channelName) {
     this.channelName = channelName;
   }
 
-  public String getTransportType() {
+  public @Nullable String getTransportType() {
     return transportType;
   }
 
-  public void setTransportType(String transportType) {
+  public void setTransportType(@Nullable String transportType) {
     this.transportType = transportType;
   }
 
-  public String getUsername() {
+  public @Nullable String getUsername() {
     return username;
   }
 
-  public void setUsername(String username) {
+  public void setUsername(@Nullable String username) {
     this.username = username;
   }
 
-  public String getPassword() {
+  public @Nullable String getPassword() {
     return password;
   }
 
-  public void setPassword(String password) {
+  public void setPassword(@Nullable String password) {
     this.password = password;
   }
 
@@ -104,19 +103,19 @@ public class QueueManager {
     return queueFilters;
   }
 
-  public void setQueueFilters(ResourceFilters queueFilters) {
+  public void setQueueFilters(@Nullable ResourceFilters queueFilters) {
     this.queueFilters = queueFilters;
   }
 
-  public String getSslKeyRepository() {
+  public @Nullable String getSslKeyRepository() {
     return sslKeyRepository;
   }
 
-  public void setSslKeyRepository(String sslKeyRepository) {
+  public void setSslKeyRepository(@Nullable String sslKeyRepository) {
     this.sslKeyRepository = sslKeyRepository;
   }
 
-  public String getCipherSuite() {
+  public @Nullable String getCipherSuite() {
     return cipherSuite;
   }
 
@@ -124,11 +123,11 @@ public class QueueManager {
     this.cipherSuite = cipherSuite;
   }
 
-  public String getCipherSpec() {
+  public @Nullable String getCipherSpec() {
     return cipherSpec;
   }
 
-  public void setCipherSpec(String cipherSpec) {
+  public void setCipherSpec(@Nullable String cipherSpec) {
     this.cipherSpec = cipherSpec;
   }
 
@@ -139,23 +138,23 @@ public class QueueManager {
     return channelFilters;
   }
 
-  public void setChannelFilters(ResourceFilters channelFilters) {
+  public void setChannelFilters(@Nullable ResourceFilters channelFilters) {
     this.channelFilters = channelFilters;
   }
 
-  public String getReplyQueuePrefix() {
+  public @Nullable String getReplyQueuePrefix() {
     return replyQueuePrefix;
   }
 
-  public void setReplyQueuePrefix(String replyQueuePrefix) {
+  public void setReplyQueuePrefix(@Nullable String replyQueuePrefix) {
     this.replyQueuePrefix = replyQueuePrefix;
   }
 
-  public String getModelQueueName() {
+  public @Nullable String getModelQueueName() {
     return modelQueueName;
   }
 
-  public void setModelQueueName(String modelQueueName) {
+  public void setModelQueueName(@Nullable String modelQueueName) {
     this.modelQueueName = modelQueueName;
   }
 
@@ -166,7 +165,7 @@ public class QueueManager {
     return listenerFilters;
   }
 
-  public void setListenerFilters(ResourceFilters listenerFilters) {
+  public void setListenerFilters(@Nullable ResourceFilters listenerFilters) {
     this.listenerFilters = listenerFilters;
   }
 
@@ -193,7 +192,7 @@ public class QueueManager {
     return topicFilters;
   }
 
-  public void setTopicFilters(ResourceFilters topicFilters) {
+  public void setTopicFilters(@Nullable ResourceFilters topicFilters) {
     this.topicFilters = topicFilters;
   }
 

@@ -7,7 +7,7 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.MeterProvider;
-import io.opentelemetry.ibm.mq.WMQMonitor;
+import io.opentelemetry.ibm.mq.WmqMonitor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
@@ -76,7 +76,7 @@ public class Main {
     MeterProvider meterProvider = otel.getMeterProvider();
 
     Runtime.getRuntime().addShutdownHook(new Thread(service::shutdown));
-    WMQMonitor monitor = new WMQMonitor(config, service, meterProvider.get("websphere/mq"));
+    WmqMonitor monitor = new WmqMonitor(config, service, meterProvider.get("websphere/mq"));
     service.scheduleAtFixedRate(
         monitor::run,
         config.getTaskInitialDelaySeconds(),
