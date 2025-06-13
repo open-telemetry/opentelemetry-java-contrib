@@ -17,7 +17,6 @@ public final class MetricsConfig {
   public MetricsConfig(ConfigWrapper config) {
       this.config = config.getMetrics();
   }
-
 {% for metric in ctx %}
   public boolean is{{ metric.metric_name.split('.')|map('capitalize')|join }}Enabled() {
     return isEnabled("{{ metric.metric_name }}");

@@ -12,6 +12,8 @@ import io.opentelemetry.api.metrics.Meter;
 
 /** Metric definitions generated from a Weaver model. Do not edit manually. */
 public final class Metrics {
+private Metrics(){
+}
 {% for metric in ctx %}
   public static {% if metric.instrument == "gauge" %}LongGauge{% elif metric.instrument == "counter" %}LongCounter{% endif %} create{{ metric.metric_name.split('.')|map('capitalize')|join }}(Meter meter) {
     return meter.{% if metric.instrument == "gauge" %}gauge{% elif metric.instrument == "counter" %}counter{% endif %}Builder("{{ metric.metric_name }}").{% if metric.instrument == "gauge" %}ofLongs().{% endif %}setUnit("{{ metric.unit }}").setDescription("{{ metric.brief }}").build();
