@@ -51,7 +51,7 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       request.addParameter(CMQC.MQCA_TOPIC_STRING, topicGenericName);
 
       try {
-        processPCFRequestAndPublishQMetrics(context, topicGenericName, request);
+        processPcfRequestAndPublishQMetrics(context, topicGenericName, request);
       } catch (PCFException pcfe) {
         logger.error(
             "PCFException caught while collecting metric for Queue: {} for command MQCMD_INQUIRE_TOPIC_STATUS",
@@ -73,7 +73,7 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
         exitTime);
   }
 
-  private void processPCFRequestAndPublishQMetrics(
+  private void processPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, String topicGenericName, PCFMessage request)
       throws IOException, MQDataException {
     logger.debug(

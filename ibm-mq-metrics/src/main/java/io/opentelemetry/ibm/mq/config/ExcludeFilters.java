@@ -11,9 +11,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * A jackson databind class used for config.
- */
+/** A jackson databind class used for config. */
 public class ExcludeFilters {
 
   private String type = "UNKNOWN";

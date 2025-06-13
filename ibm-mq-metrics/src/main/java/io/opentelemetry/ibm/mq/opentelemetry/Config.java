@@ -10,11 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Utilities reading configuration and create domain objects */
-class Config {
+final class Config {
 
   private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-  static void setUpSSLConnection(Map<String, ?> config) {
+  private Config(){
+
+  }
+
+  static void setUpSslConnection(Map<String, ?> config) {
     getConfigValueAndSetSystemProperty(config, "keyStorePath", "javax.net.ssl.keyStore");
     getConfigValueAndSetSystemProperty(
         config, "keyStorePassword", "javax.net.ssl.keyStorePassword");

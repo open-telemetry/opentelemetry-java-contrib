@@ -5,12 +5,15 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,15 +52,16 @@ class MessageFilter {
 
   static class MessageFilterBuilder {
 
-    private Collection<ExcludeFilters> filters;
-    private String kind;
+    private final String kind;
+    private Set<ExcludeFilters> filters = new HashSet<>();
 
     public MessageFilterBuilder(String kind) {
       this.kind = kind;
     }
 
-    public MessageFilterBuilder excluding(Collection<ExcludeFilters> filters) {
-      this.filters = filters;
+    @CanIgnoreReturnValue
+    public MessageFilterBuilder excluding(Set<ExcludeFilters> filters) {
+      this.filters = new HashSet<>(filters);
       return this;
     }
 
