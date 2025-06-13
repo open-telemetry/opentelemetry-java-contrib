@@ -4,11 +4,11 @@
 
 ## Use case
 
-IBM MQ, formerly known as WebSphere MQ (message queue) series, is an IBM software for 
+IBM MQ, formerly known as WebSphere MQ (message queue) series, is an IBM software for
 program-to-program messaging across multiple platforms.
 
-The IBM MQ metrics utility here can monitor multiple queues managers and their resources, 
-namely queues, topics, channels and listeners The metrics are extracted out using the 
+The IBM MQ metrics utility here can monitor multiple queues managers and their resources,
+namely queues, topics, channels and listeners The metrics are extracted out using the
 [PCF command messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm).
 
 The metrics for queue manager, queue, topic, channel and listener can be configured.
