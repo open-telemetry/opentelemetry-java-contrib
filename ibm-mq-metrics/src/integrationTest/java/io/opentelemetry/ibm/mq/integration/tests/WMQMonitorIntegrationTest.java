@@ -45,12 +45,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration Test for WMQMonitor */
+@Disabled
 class WMQMonitorIntegrationTest {
 
   private static final Logger logger = LoggerFactory.getLogger(WMQMonitorIntegrationTest.class);

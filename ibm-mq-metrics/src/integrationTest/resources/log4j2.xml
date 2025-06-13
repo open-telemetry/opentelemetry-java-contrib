@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <Appenders>
+        <!-- Console appender: nice for quick output during Maven run -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+
+        <!-- File appender: capture full logs for deeper analysis -->
+        <File name="IntegrationTestFile" fileName="target/integration-test.log" immediateFlush="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <!-- Root logger sends logs to both console and file -->
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="IntegrationTestFile"/>
+        </Root>
+
+        <Logger name="io.opentelemetry" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="IntegrationTestFile"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>
