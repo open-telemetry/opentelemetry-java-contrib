@@ -92,6 +92,7 @@ There are two transport modes in which this extension can be run:
   for this mode to get the necessary jars as mentioned previously.
 
 If this extension is configured for **CLIENT** transport type
+
 1. Please make sure the MQ's host and port is accessible.
 2. Credentials of user with correct access rights would be needed in config.yml
   [(Access Permissions section)](https://github.com/signalfx/opentelemetry-ibm-mq-monitoring-extension#access-permissions).
