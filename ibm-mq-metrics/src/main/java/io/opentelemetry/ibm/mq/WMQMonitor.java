@@ -1,23 +1,17 @@
 /*
- * Copyright Splunk Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package io.opentelemetry.ibm.mq;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongGauge;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.*;
@@ -34,10 +28,6 @@ import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueColle
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.util.WMQUtil;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +87,7 @@ public class WMQMonitor {
   }
 
   @NotNull
-  private List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
+  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
     List<Map<String, ?>> queueManagers = config.getQueueManagers();
     if (queueManagers.isEmpty()) {
       throw new IllegalStateException(
@@ -180,7 +170,7 @@ public class WMQMonitor {
   }
 
   /** Destroy the agent and disconnect from queue manager */
-  private void cleanUp(MQQueueManager ibmQueueManager, PCFMessageAgent agent) {
+  private static void cleanUp(MQQueueManager ibmQueueManager, PCFMessageAgent agent) {
     // Disconnect the agent.
 
     if (agent != null) {
