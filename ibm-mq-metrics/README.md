@@ -49,7 +49,7 @@ In case of **CLIENT** transport type, IBM MQ Client must be installed to get the
 ### MQ monitoring configuration
 
 This software reads events from event queues associated with the queue manager:
- 
+
 * `SYSTEM.ADMIN.PERFM.EVENT`: Performance events, such as low, high, and full queue depth events.
 * `SYSTEM.ADMIN.QMGR.EVENT`: Authority events
 * `SYSTEM.ADMIN.CONFIG.EVENT`: Configuration events
@@ -84,7 +84,7 @@ java \
 ## Connection
 
 There are two transport modes in which this extension can be run:
- 
+
 * **Binding** : Requires WMQ Extension to be deployed in machine agent on the same machine where
   WMQ server is installed.
 * **Client** : In this mode, the WMQ extension is installed on a different host than the IBM MQ
