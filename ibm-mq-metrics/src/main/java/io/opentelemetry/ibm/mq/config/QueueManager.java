@@ -6,7 +6,7 @@
 package io.opentelemetry.ibm.mq.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 /** This is a jackson databind class used purely for config. */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,7 +40,8 @@ public class QueueManager {
   @Nullable private ResourceFilters listenerFilters;
   @Nullable private ResourceFilters topicFilters;
 
-  public @Nullable String getHost() {
+  @Nullable
+  public String getHost() {
     return host;
   }
 
@@ -64,7 +65,8 @@ public class QueueManager {
     this.name = name;
   }
 
-  public @Nullable String getChannelName() {
+  @Nullable
+  public String getChannelName() {
     return channelName;
   }
 
@@ -72,7 +74,8 @@ public class QueueManager {
     this.channelName = channelName;
   }
 
-  public @Nullable String getTransportType() {
+  @Nullable
+  public String getTransportType() {
     return transportType;
   }
 
@@ -80,7 +83,8 @@ public class QueueManager {
     this.transportType = transportType;
   }
 
-  public @Nullable String getUsername() {
+  @Nullable
+  public String getUsername() {
     return username;
   }
 
@@ -88,7 +92,8 @@ public class QueueManager {
     this.username = username;
   }
 
-  public @Nullable String getPassword() {
+  @Nullable
+  public String getPassword() {
     return password;
   }
 
@@ -107,7 +112,8 @@ public class QueueManager {
     this.queueFilters = queueFilters;
   }
 
-  public @Nullable String getSslKeyRepository() {
+  @Nullable
+  public String getSslKeyRepository() {
     return sslKeyRepository;
   }
 
@@ -115,7 +121,8 @@ public class QueueManager {
     this.sslKeyRepository = sslKeyRepository;
   }
 
-  public @Nullable String getCipherSuite() {
+  @Nullable
+  public String getCipherSuite() {
     return cipherSuite;
   }
 
@@ -123,7 +130,8 @@ public class QueueManager {
     this.cipherSuite = cipherSuite;
   }
 
-  public @Nullable String getCipherSpec() {
+  @Nullable
+  public String getCipherSpec() {
     return cipherSpec;
   }
 
@@ -142,7 +150,8 @@ public class QueueManager {
     this.channelFilters = channelFilters;
   }
 
-  public @Nullable String getReplyQueuePrefix() {
+  @Nullable
+  public String getReplyQueuePrefix() {
     return replyQueuePrefix;
   }
 
@@ -150,7 +159,8 @@ public class QueueManager {
     this.replyQueuePrefix = replyQueuePrefix;
   }
 
-  public @Nullable String getModelQueueName() {
+  @Nullable
+  public String getModelQueueName() {
     return modelQueueName;
   }
 

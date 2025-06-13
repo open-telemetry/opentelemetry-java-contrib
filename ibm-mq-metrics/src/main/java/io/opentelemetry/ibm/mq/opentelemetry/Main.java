@@ -81,10 +81,11 @@ public final class Main {
 
     Runtime.getRuntime().addShutdownHook(new Thread(service::shutdown));
     WmqMonitor monitor = new WmqMonitor(config, service, meterProvider.get("websphere/mq"));
-    ScheduledFuture<?> unused = service.scheduleAtFixedRate(
-        monitor::run,
-        config.getTaskInitialDelaySeconds(),
-        config.getTaskDelaySeconds(),
-        TimeUnit.SECONDS);
+    ScheduledFuture<?> unused =
+        service.scheduleAtFixedRate(
+            monitor::run,
+            config.getTaskInitialDelaySeconds(),
+            config.getTaskDelaySeconds(),
+            TimeUnit.SECONDS);
   }
 }
