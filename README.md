@@ -26,6 +26,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
 | beta    | [GCP Resources](./gcp-resources/README.md)                        |
 | beta    | [Inferred Spans](./inferred-spans/README.md)                      |
+| alpha   | [IBM MQ Metrics](./ibm-mq-metrics/README.md)                      |
 | alpha   | [JFR Connection](./jfr-connection/README.md)                      |
 | alpha   | [JFR Events](./jfr-events/README.md)                              |
 | alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
