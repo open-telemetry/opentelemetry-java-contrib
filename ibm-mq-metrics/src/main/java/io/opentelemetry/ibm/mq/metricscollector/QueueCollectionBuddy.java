@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +130,7 @@ final class QueueCollectionBuddy {
   void processPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, PCFMessage request, String queueGenericName, int[] fields) {
     try {
-      doProcessPCFRequestAndPublishQMetrics(context, request, queueGenericName, fields);
+      doProcessPcfRequestAndPublishQMetrics(context, request, queueGenericName, fields);
     } catch (PCFException pcfe) {
       logger.error(
           "PCFException caught while collecting metric for Queue: {}", queueGenericName, pcfe);
@@ -150,7 +151,7 @@ final class QueueCollectionBuddy {
     }
   }
 
-  private void doProcessPCFRequestAndPublishQMetrics(
+  private void doProcessPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, PCFMessage request, String queueGenericName, int[] fields)
       throws IOException, MQDataException {
     logger.debug(
@@ -191,6 +192,7 @@ final class QueueCollectionBuddy {
     getMetrics(context, message, queueName, queueType, fields);
   }
 
+  @Nullable
   private String getQueueTypeFromName(PCFMessage message, String queueName) throws PCFException {
     if (message.getParameterValue(CMQC.MQIA_Q_TYPE) == null) {
       return sharedState.getType(queueName);
@@ -216,8 +218,9 @@ final class QueueCollectionBuddy {
         return baseQueueType + "-normal";
       case CMQC.MQUS_TRANSMISSION:
         return baseQueueType + "-transmission";
+      default:
+        return baseQueueType;
     }
-    return baseQueueType;
   }
 
   private static String getBaseQueueType(PCFMessage message) throws PCFException {
@@ -232,9 +235,10 @@ final class QueueCollectionBuddy {
         return "cluster";
       case MQQT_MODEL:
         return "model";
+      default:
+        logger.warn("Unknown type of queue {}", message.getIntParameterValue(CMQC.MQIA_Q_TYPE));
+        return "unknown";
     }
-    logger.warn("Unknown type of queue {}", message.getIntParameterValue(CMQC.MQIA_Q_TYPE));
-    return "unknown";
   }
 
   private void getMetrics(

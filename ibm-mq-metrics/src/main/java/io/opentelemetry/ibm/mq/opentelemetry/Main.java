@@ -13,14 +13,18 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Main {
+@SuppressWarnings("SystemOut")
+public final class Main {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+  private Main() {}
 
   public static void main(String[] args) throws Exception {
     if (args.length == 0) {
@@ -52,12 +56,12 @@ public class Main {
             });
 
     Config.configureSecurity(config);
-    Config.setUpSSLConnection(config.getSslConnection());
+    Config.setUpSslConnection(config.getSslConnection());
 
     run(config, service);
   }
 
-  public static void run(ConfigWrapper config, final ScheduledExecutorService service) {
+  public static void run(ConfigWrapper config, ScheduledExecutorService service) {
 
     AutoConfiguredOpenTelemetrySdk sdk =
         AutoConfiguredOpenTelemetrySdk.builder()
@@ -77,7 +81,7 @@ public class Main {
 
     Runtime.getRuntime().addShutdownHook(new Thread(service::shutdown));
     WmqMonitor monitor = new WmqMonitor(config, service, meterProvider.get("websphere/mq"));
-    service.scheduleAtFixedRate(
+    ScheduledFuture<?> unused = service.scheduleAtFixedRate(
         monitor::run,
         config.getTaskInitialDelaySeconds(),
         config.getTaskDelaySeconds(),
