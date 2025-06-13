@@ -1,0 +1,611 @@
+groups:
+  - id: mq.message.retry.count
+    type: metric
+    metric_name: mq.message.retry.count
+    stability: development
+    brief: "Number of message retries"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.status
+    type: metric
+    metric_name: mq.status
+    stability: development
+    brief: "Channel status"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.max.sharing.conversations
+    type: metric
+    metric_name: mq.max.sharing.conversations
+    stability: development
+    brief: "Maximum number of conversations permitted on this channel instance."
+    instrument: gauge
+    unit: "{conversations}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.current.sharing.conversations
+    type: metric
+    metric_name: mq.current.sharing.conversations
+    stability: development
+    unit: "{conversations}"
+    brief: "Current number of conversations permitted on this channel instance."
+    instrument: gauge
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.byte.received
+    type: metric
+    metric_name: mq.byte.received
+    stability: development
+    brief: "Number of bytes received"
+    instrument: gauge
+    unit: "{bytes}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.byte.sent
+    type: metric
+    metric_name: mq.byte.sent
+    stability: development
+    brief: "Number of bytes sent"
+    instrument: gauge
+    unit: "{bytes}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.buffers.received
+    type: metric
+    metric_name: mq.buffers.received
+    stability: development
+    brief: "Buffers received"
+    instrument: gauge
+    unit: "{buffers}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.buffers.sent
+    type: metric
+    metric_name: mq.buffers.sent
+    stability: development
+    brief: "Buffers sent"
+    unit: "{buffers}"
+    instrument: gauge
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.message.count
+    type: metric
+    metric_name: mq.message.count
+    stability: development
+    brief: "Message count"
+    unit: "{messages}"
+    instrument: gauge
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+      - ref: job.name
+        requirement_level: required
+      - ref: channel.start.time
+        requirement_level: required
+  - id: mq.open.input.count
+    type: metric
+    metric_name: mq.open.input.count
+    stability: development
+    brief: "Count of applications sending messages to the queue"
+    instrument: gauge
+    unit: "{applications}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.open.output.count
+    type: metric
+    metric_name: mq.open.output.count
+    stability: development
+    brief: "Count of applications consuming messages from the queue"
+    instrument: gauge
+    unit: "{applications}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.high.queue.depth
+    type: metric
+    metric_name: mq.high.queue.depth
+    stability: development
+    brief: "The current high queue depth"
+    instrument: gauge
+    unit: "{percent}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.service.interval
+    type: metric
+    metric_name: mq.service.interval
+    stability: development
+    brief: "The queue service interval"
+    instrument: gauge
+    unit: "{percent}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: "mq.queue.depth.full.event"
+    type: metric
+    metric_name: "mq.queue.depth.full.event"
+    stability: development
+    brief: "The number of full queue events"
+    instrument: counter
+    unit: "{events}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+  - id: "mq.queue.depth.high.event"
+    type: metric
+    metric_name: "mq.queue.depth.high.event"
+    stability: development
+    brief: "The number of high queue events"
+    instrument: counter
+    unit: "{events}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+  - id: "mq.queue.depth.low.event"
+    type: metric
+    metric_name: "mq.queue.depth.low.event"
+    stability: development
+    brief: "The number of low queue events"
+    instrument: counter
+    unit: "{events}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+  - id: mq.uncommitted.messages
+    type: metric
+    metric_name: mq.uncommitted.messages
+    stability: development
+    brief: "Number of uncommitted messages"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.oldest.msg.age
+    type: metric
+    metric_name: mq.oldest.msg.age
+    stability: development
+    brief: "Queue message oldest age"
+    instrument: gauge
+    unit: "microseconds"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.current.max.queue.filesize
+    type: metric
+    metric_name: mq.current.max.queue.filesize
+    stability: development
+    brief: "Current maximum queue file size"
+    instrument: gauge
+    unit: "mib"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.current.queue.filesize
+    type: metric
+    metric_name: mq.current.queue.filesize
+    stability: development
+    brief: "Current queue file size"
+    instrument: gauge
+    unit: "mib"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.instances.per.client
+    type: metric
+    metric_name: mq.instances.per.client
+    stability: development
+    brief: "Instances per client"
+    instrument: gauge
+    unit: "{instances}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.message.deq.count
+    type: metric
+    metric_name: mq.message.deq.count
+    stability: development
+    brief: "Message dequeue count"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.message.enq.count
+    type: metric
+    metric_name: mq.message.enq.count
+    stability: development
+    brief: "Message enqueue count"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.queue.depth
+    type: metric
+    metric_name: mq.queue.depth
+    stability: development
+    brief: "Current queue depth"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.service.interval.event
+    type: metric
+    metric_name: mq.service.interval.event
+    stability: development
+    brief: "Queue service interval event"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.reusable.log.size
+    type: metric
+    metric_name: mq.reusable.log.size
+    stability: development
+    brief: "The amount of space occupied, in megabytes, by log extents available to be reused."
+    instrument: gauge
+    unit: "mib"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.manager.active.channels
+    type: metric
+    metric_name: mq.manager.active.channels
+    stability: development
+    brief: "The queue manager active maximum channels limit"
+    instrument: gauge
+    unit: "{channels}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.restart.log.size
+    type: metric
+    metric_name: mq.restart.log.size
+    stability: development
+    brief: "Size of the log data required for restart recovery in megabytes."
+    instrument: gauge
+    unit: "mib"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.max.queue.depth
+    type: metric
+    metric_name: mq.max.queue.depth
+    stability: development
+    brief: "Maximum queue depth"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.onqtime.1
+    type: metric
+    metric_name: mq.onqtime.1
+    stability: development
+    brief: "Amount of time, in microseconds, that a message spent on the queue, over a short period"
+    instrument: gauge
+    unit: "microseconds"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.onqtime.2
+    type: metric
+    metric_name: mq.onqtime.2
+    stability: development
+    brief: "Amount of time, in microseconds, that a message spent on the queue, over a longer period"
+    instrument: gauge
+    unit: "microseconds"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: queue.name
+        requirement_level: required
+      - ref: queue.type
+        requirement_level: required
+  - id: mq.message.received.count
+    type: metric
+    metric_name: mq.message.received.count
+    stability: development
+    brief: "Number of messages received"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.message.sent.count
+    type: metric
+    metric_name: mq.message.sent.count
+    stability: development
+    brief: "Number of messages sent"
+    instrument: gauge
+    unit: "{messages}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.max.instances
+    type: metric
+    metric_name: mq.max.instances
+    stability: development
+    brief: "Max channel instances"
+    instrument: gauge
+    unit: "{instances}"
+    attributes:
+      - ref: channel.name
+        requirement_level: required
+      - ref: channel.type
+        requirement_level: required
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.connection.count
+    type: metric
+    metric_name: mq.connection.count
+    stability: development
+    brief: "Active connections count"
+    instrument: gauge
+    unit: "{connections}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.manager.status
+    type: metric
+    metric_name: mq.manager.status
+    stability: development
+    brief: "Queue manager status"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.heartbeat
+    type: metric
+    metric_name: mq.heartbeat
+    stability: development
+    brief: "Queue manager heartbeat"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.archive.log.size
+    type: metric
+    metric_name: mq.archive.log.size
+    stability: development
+    brief: "Queue manager archive log size"
+    instrument: gauge
+    unit: "mib"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.manager.max.active.channels
+    type: metric
+    metric_name: mq.manager.max.active.channels
+    stability: development
+    brief: "Queue manager max active channels"
+    instrument: gauge
+    unit: "{channels}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.manager.statistics.interval
+    type: metric
+    metric_name: mq.manager.statistics.interval
+    stability: development
+    brief: "Queue manager statistics interval"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+  - id: mq.publish.count
+    type: metric
+    metric_name: mq.publish.count
+    stability: development
+    brief: "Topic publication count"
+    instrument: gauge
+    unit: "{publications}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: topic.name
+        requirement_level: required
+  - id: mq.subscription.count
+    type: metric
+    metric_name: mq.subscription.count
+    stability: development
+    brief: "Topic subscription count"
+    instrument: gauge
+    unit: "{subscriptions}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: topic.name
+        requirement_level: required
+  - id: mq.listener.status
+    type: metric
+    metric_name: mq.listener.status
+    stability: development
+    brief: "Listener status"
+    instrument: gauge
+    unit: "1"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: listener.name
+        requirement_level: required
+  - id: mq.unauthorized.event
+    type: metric
+    metric_name: mq.unauthorized.event
+    stability: development
+    brief: "Number of authentication error events"
+    instrument: counter
+    unit: "{events}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required
+      - ref: user.name
+        requirement_level: required
+      - ref: application.name
+        requirement_level: required
+  - id: mq.manager.max.handles
+    type: metric
+    metric_name: mq.manager.max.handles
+    stability: development
+    brief: "Max open handles"
+    instrument: gauge
+    unit: "{events}"
+    attributes:
+      - ref: queue.manager
+        requirement_level: required

@@ -2,7 +2,6 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.opentelemetry.ibm.mq.metrics;
 
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -11,17 +10,17 @@ import java.util.Map;
 // This file is generated using weaver. Do not edit manually.
 
 /** Configuration of metrics as defined in config.yml. */
-public class MetricsConfig {
+public final class MetricsConfig {
 
   private final Map<String, ?> config;
 
   public MetricsConfig(ConfigWrapper config) {
-    this.config = config.getMetrics();
+      this.config = config.getMetrics();
   }
 
+
   public boolean isMqMessageRetryCountEnabled() {
-    String key = "mq.message.retry.count";
-    return isEnabled(key);
+    return isEnabled("mq.message.retry.count");
   }
 
   public boolean isMqStatusEnabled() {

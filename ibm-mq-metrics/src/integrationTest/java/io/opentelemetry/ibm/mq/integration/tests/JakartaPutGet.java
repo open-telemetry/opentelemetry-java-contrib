@@ -47,8 +47,7 @@ import jakarta.jms.TextMessage;
  */
 public final class JakartaPutGet {
 
-  private JakartaPutGet(){
-  }
+  private JakartaPutGet() {}
 
   public static void createQueue(QueueManager manager, String name, int maxDepth) {
     MQQueueManager ibmQueueManager = WmqUtil.connectToQueueManager(manager);
