@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
@@ -66,32 +67,24 @@ public class QueueCollectionBuddyTest {
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
     Map<String, Map<String, Long>> expectedValues =
-        new HashMap<String, Map<String, Long>>() {
-          {
-            put(
+        new HashMap<String, Map<String, Long>>(
+            ImmutableMap.of(
                 "DEV.DEAD.LETTER.QUEUE",
-                new HashMap<String, Long>() {
-                  {
-                    put("mq.oldest.msg.age", -1L);
-                    put("mq.uncommitted.messages", 0L);
-                    put("mq.onqtime.1", -1L);
-                    put("mq.onqtime.2", -1L);
-                    put("mq.queue.depth", 0L);
-                  }
-                });
-            put(
+                new HashMap<>(
+                    ImmutableMap.of(
+                        "mq.oldest.msg.age", -1L,
+                        "mq.uncommitted.messages", 0L,
+                        "mq.onqtime.1", -1L,
+                        "mq.onqtime.2", -1L,
+                        "mq.queue.depth", 0L)),
                 "DEV.QUEUE.1",
-                new HashMap<String, Long>() {
-                  {
-                    put("mq.oldest.msg.age", -1L);
-                    put("mq.uncommitted.messages", 10L);
-                    put("mq.onqtime.1", -1L);
-                    put("mq.onqtime.2", -1L);
-                    put("mq.queue.depth", 1L);
-                  }
-                });
-          }
-        };
+                new HashMap<String, Long>(
+                    ImmutableMap.of(
+                        "mq.oldest.msg.age", -1L,
+                        "mq.uncommitted.messages", 10L,
+                        "mq.onqtime.1", -1L,
+                        "mq.onqtime.2", -1L,
+                        "mq.queue.depth", 1L))));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
@@ -115,30 +108,22 @@ public class QueueCollectionBuddyTest {
         collectorContext, request, "*", InquireQCmdCollector.ATTRIBUTES);
 
     Map<String, Map<String, Long>> expectedValues =
-        new HashMap<String, Map<String, Long>>() {
-          {
-            put(
+        new HashMap<>(
+            ImmutableMap.of(
                 "DEV.DEAD.LETTER.QUEUE",
-                new HashMap<String, Long>() {
-                  {
-                    put("mq.queue.depth", 2L);
-                    put("mq.max.queue.depth", 5000L);
-                    put("mq.open.input.count", 2L);
-                    put("mq.open.output.count", 2L);
-                  }
-                });
-            put(
+                new HashMap<>(
+                    ImmutableMap.of(
+                        "mq.queue.depth", 2L,
+                        "mq.max.queue.depth", 5000L,
+                        "mq.open.input.count", 2L,
+                        "mq.open.output.count", 2L)),
                 "DEV.QUEUE.1",
-                new HashMap<String, Long>() {
-                  {
-                    put("mq.queue.depth", 3L);
-                    put("mq.max.queue.depth", 5000L);
-                    put("mq.open.input.count", 3L);
-                    put("mq.open.output.count", 3L);
-                  }
-                });
-          }
-        };
+                new HashMap<>(
+                    ImmutableMap.of(
+                        "mq.queue.depth", 3L,
+                        "mq.max.queue.depth", 5000L,
+                        "mq.open.input.count", 3L,
+                        "mq.open.output.count", 3L))));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
@@ -183,7 +168,7 @@ public class QueueCollectionBuddyTest {
       MQCFST [type: 4, strucLength: 24, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 0, stringLength: 1, string: *]
       MQCFIL [type: 5, strucLength: 32, parameter: 1026 (MQIACF_Q_STATUS_ATTRS), count: 4, values: {2016, 1226, 1227, 1027}]
   */
-  private PCFMessage createPCFRequestForInquireQStatusCmd() {
+  private static PCFMessage createPCFRequestForInquireQStatusCmd() {
     PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_Q_STATUS);
     request.addParameter(CMQC.MQCA_Q_NAME, "*");
     request.addParameter(CMQCFC.MQIACF_Q_STATUS_ATTRS, new int[] {2016, 1226, 1227, 1027});
@@ -218,7 +203,7 @@ public class QueueCollectionBuddyTest {
       MQCFIL [type: 5, strucLength: 24, parameter: 1226 (MQIACF_Q_TIME_INDICATOR), count: 2, values: {-1, -1}]
       MQCFIN [type: 3, strucLength: 16, parameter: 1027 (MQIACF_UNCOMMITTED_MSGS), value: 0]"
   */
-  private PCFMessage[] createPCFResponseForInquireQStatusCmd() {
+  private static PCFMessage[] createPCFResponseForInquireQStatusCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_Q_STATUS, 1, false);
     response1.addParameter(CMQC.MQCA_Q_NAME, "AMQ.5AF1608820C7D76E");
     response1.addParameter(CMQCFC.MQIACF_Q_STATUS_TYPE, 1105);
@@ -253,7 +238,7 @@ public class QueueCollectionBuddyTest {
      MQCFIN [type: 3, strucLength: 16, parameter: 20 (MQIA_Q_TYPE), value: 1001]
      MQCFIL [type: 5, strucLength: 36, parameter: 1002 (MQIACF_Q_ATTRS), count: 5, values: {2016, 15, 3, 17, 18}]
   */
-  private PCFMessage createPCFRequestForInquireQCmd() {
+  private static PCFMessage createPCFRequestForInquireQCmd() {
     PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_Q);
     request.addParameter(CMQC.MQCA_Q_NAME, "*");
     request.addParameter(CMQC.MQIA_Q_TYPE, CMQC.MQQT_ALL);
@@ -290,7 +275,7 @@ public class QueueCollectionBuddyTest {
      MQCFIN [type: 3, strucLength: 16, parameter: 18 (MQIA_OPEN_OUTPUT_COUNT), value: 0]"
   */
 
-  private PCFMessage[] createPCFResponseForInquireQCmd() {
+  private static PCFMessage[] createPCFResponseForInquireQCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_Q, 1, false);
     response1.addParameter(CMQC.MQCA_Q_NAME, "AMQ.5AF1608820C76D80");
     response1.addParameter(CMQC.MQIA_Q_TYPE, 1);
@@ -326,7 +311,7 @@ public class QueueCollectionBuddyTest {
      MQCFH [type: 1, strucLength: 36, version: 1, command: 17 (MQCMD_RESET_Q_STATS), msgSeqNumber: 1, control: 1, compCode: 0, reason: 0, parameterCount: 1]
      MQCFST [type: 4, strucLength: 24, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 0, stringLength: 1, string: *]
   */
-  private PCFMessage createPCFRequestForResetQStatsCmd() {
+  private static PCFMessage createPCFRequestForResetQStatsCmd() {
     PCFMessage request = new PCFMessage(CMQCFC.MQCMD_RESET_Q_STATS);
     request.addParameter(CMQC.MQCA_Q_NAME, "*");
     return request;
@@ -341,7 +326,7 @@ public class QueueCollectionBuddyTest {
      MQCFIN [type: 3, strucLength: 16, parameter: 36 (MQIA_HIGH_Q_DEPTH), value: 0]
      MQCFIN [type: 3, strucLength: 16, parameter: 35 (MQIA_TIME_SINCE_RESET), value: 65]"
   */
-  private PCFMessage[] createPCFResponseForResetQStatsCmd() {
+  private static PCFMessage[] createPCFResponseForResetQStatsCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_RESET_Q_STATS, 1, false);
     response1.addParameter(CMQC.MQCA_Q_NAME, "DEV.DEAD.LETTER.QUEUE");
     response1.addParameter(CMQC.MQIA_MSG_ENQ_COUNT, 3);

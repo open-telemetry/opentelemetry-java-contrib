@@ -21,6 +21,7 @@ import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,7 @@ class InquireChannelCmdCollectorTest {
     classUnderTest.accept(context);
     List<String> metricsList =
         new ArrayList<>(
-            List.of(
+            Arrays.asList(
                 "mq.message.retry.count", "mq.message.received.count", "mq.message.sent.count"));
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
@@ -81,7 +82,7 @@ class InquireChannelCmdCollectorTest {
     assertThat(metricsList).isEmpty();
   }
 
-  private PCFMessage[] createPCFResponseForInquireChannelCmd() {
+  private static PCFMessage[] createPCFResponseForInquireChannelCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_CHANNEL, 1, true);
     response1.addParameter(CMQCFC.MQCACH_CHANNEL_NAME, "my.channel");
     response1.addParameter(CMQCFC.MQIACH_CHANNEL_TYPE, CMQXC.MQCHT_SVRCONN);

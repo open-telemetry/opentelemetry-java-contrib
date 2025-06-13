@@ -6,7 +6,7 @@
 package io.opentelemetry.ibm.mq.metricscollector;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,7 +84,7 @@ class ListenerMetricsCollectorTest {
      MQCFIN [type: 3, strucLength: 16, parameter: 1599 (MQIACH_LISTENER_STATUS), value: 2]
   */
 
-  private PCFMessage[] createPCFResponseForInquireListenerStatusCmd() {
+  private static PCFMessage[] createPCFResponseForInquireListenerStatusCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_LISTENER_STATUS, 1, true);
     response1.addParameter(CMQCFC.MQCACH_LISTENER_NAME, "DEV.DEFAULT.LISTENER.TCP");
     response1.addParameter(CMQCFC.MQIACH_LISTENER_STATUS, 2);

@@ -6,7 +6,8 @@
 package io.opentelemetry.ibm.mq.metricscollector;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.constants.CMQC;
@@ -20,6 +21,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +63,7 @@ public class TopicMetricsCollectorTest {
     classUnderTest.accept(context);
 
     List<String> metricsList =
-        new ArrayList<>(List.of("mq.publish.count", "mq.subscription.count"));
+        new ArrayList<>(Arrays.asList("mq.publish.count", "mq.subscription.count"));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
@@ -90,7 +92,7 @@ public class TopicMetricsCollectorTest {
     assertThat(metricsList).isEmpty();
   }
 
-  private PCFMessage[] createPCFResponseForInquireTopicStatusCmd() {
+  private static PCFMessage[] createPCFResponseForInquireTopicStatusCmd() {
     PCFMessage response1 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_TOPIC_STATUS, 1, false);
     response1.addParameter(CMQC.MQCA_TOPIC_STRING, "test");
     response1.addParameter(CMQC.MQIA_PUB_COUNT, 2);
