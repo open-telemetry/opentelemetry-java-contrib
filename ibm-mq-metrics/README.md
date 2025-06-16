@@ -185,13 +185,20 @@ See [docs/metrics.md](docs/metrics.md).
 
    For more details, please check this [doc](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/zr00610_.htm)
 
-   This might occur due to various reasons ranging from incorrect installation to applying [ibm fix packs](http://www-01.ibm.com/support/docview.wss?uid=swg21410038) but most of the time it happens when you are trying to connect in `Bindings` mode and machine agent is not on the same machine on which WMQ server is running. If you want to connect to WMQ server from a remote machine then connect using `Client` mode.
+   This might occur due to various reasons ranging from incorrect installation to applying
+   IBM Fix Packs, but most of the time it happens when you are trying to connect in `Bindings`
+   mode and machine agent is not on the same machine on which WMQ server is running. If you want
+   to connect to WMQ server from a remote machine then connect using `Client` mode.
 
-   Another way to get around this issue is to avoid using the Bindings mode. Connect using CLIENT transport type from a remote box.
+   Another way to get around this issue is to avoid using the Bindings mode. Connect using CLIENT
+   transport type from a remote box.
 
 3. Error `Completion Code '2', Reason '2035'`
-   This could happen for various reasons but for most of the cases, for **Client** mode the user specified in config.yml is not authorized to access the queue manager. Also sometimes even if userid and password are correct, channel auth (CHLAUTH) for that queue manager blocks traffics from other ips, you need to contact admin to provide you access to the queue manager.
-   For Bindings mode, please make sure that the MA is owned by a mqm user. Please check [this doc](https://www-01.ibm.com/support/docview.wss?uid=swg21636093)
+   This could happen for various reasons but for most of the cases, for **Client** mode the
+   user specified in config.yml is not authorized to access the queue manager. Also sometimes
+   even if userid and password are correct, channel auth (CHLAUTH) for that queue manager blocks
+   traffics from other ips, you need to contact admin to provide you access to the queue manager.
+   For Bindings mode, please make sure that the MA is owned by a mqm user.
 
 4. `MQJE001: Completion Code '2', Reason '2195'`
    This could happen in **Client** mode. Please make sure that the IBM MQ dependency jars are correctly referenced in classpath of monitor.xml
