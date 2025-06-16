@@ -27,8 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,14 +37,13 @@ import opamp.proto.ServerToAgent;
 
 public final class HttpRequestService implements RequestService {
   private final HttpSender requestSender;
+  // must be a single threaded executor, the code in this class relies on requests being processed
+  // serially
   private final ScheduledExecutorService executorService;
-  private final PeriodicDelay periodicRequestDelay;
-  private final PeriodicDelay periodicRetryDelay;
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
-  private final AtomicReference<PeriodicDelay> currentDelay;
+  private final ConnectionStatus connectionStatus;
   private final AtomicReference<ScheduledFuture<?>> scheduledTask = new AtomicReference<>();
-  private final Lock sendLock = new ReentrantLock();
   private final RetryAfterParser retryAfterParser;
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
@@ -89,10 +86,8 @@ public final class HttpRequestService implements RequestService {
       RetryAfterParser retryAfterParser) {
     this.requestSender = requestSender;
     this.executorService = executorService;
-    this.periodicRequestDelay = periodicRequestDelay;
-    this.periodicRetryDelay = periodicRetryDelay;
     this.retryAfterParser = retryAfterParser;
-    currentDelay = new AtomicReference<>(periodicRequestDelay);
+    this.connectionStatus = new ConnectionStatus(periodicRequestDelay, periodicRetryDelay);
   }
 
   @Override
@@ -109,10 +104,6 @@ public final class HttpRequestService implements RequestService {
     }
   }
 
-  private Duration getNextDelay() {
-    return Objects.requireNonNull(currentDelay.get()).getNextDelay();
-  }
-
   @Override
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
@@ -127,32 +118,16 @@ public final class HttpRequestService implements RequestService {
       throw new IllegalStateException("HttpRequestService is not running");
     }
 
-    executorService.execute(this::requestOnDemand);
-  }
-
-  private void requestOnDemand() {
-    if (sendLock.tryLock()) {
-      try {
-        ScheduledFuture<?> scheduledFuture = scheduledTask.get();
-        if (scheduledFuture != null) {
-          // Cancel future task
-          scheduledFuture.cancel(false);
-        }
-        sendAndScheduleNext();
-      } finally {
-        sendLock.unlock();
-      }
-    }
-  }
-
-  private void periodicRequest() {
-    if (sendLock.tryLock()) {
-      try {
-        sendAndScheduleNext();
-      } finally {
-        sendLock.unlock();
-      }
-    }
+    executorService.execute(
+        () -> {
+          // cancel the already scheduled task, a new one is created after current request is
+          // processed
+          ScheduledFuture<?> scheduledFuture = scheduledTask.get();
+          if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+          }
+          sendAndScheduleNext();
+        });
   }
 
   private void sendAndScheduleNext() {
@@ -163,7 +138,9 @@ public final class HttpRequestService implements RequestService {
   private void scheduleNextExecution() {
     scheduledTask.set(
         executorService.schedule(
-            this::periodicRequest, getNextDelay().toNanos(), TimeUnit.NANOSECONDS));
+            this::sendAndScheduleNext,
+            connectionStatus.getNextDelay().toNanos(),
+            TimeUnit.NANOSECONDS));
   }
 
   private void doSendRequest() {
@@ -204,7 +181,7 @@ public final class HttpRequestService implements RequestService {
           retryAfter = duration.get();
         }
       }
-      useRetryDelay(retryAfter);
+      connectionStatus.retryAfter(retryAfter);
     }
   }
 
@@ -213,7 +190,7 @@ public final class HttpRequestService implements RequestService {
   }
 
   private void handleHttpSuccess(Response response) {
-    useRegularDelay();
+    connectionStatus.success();
     ServerToAgent serverToAgent = response.getServerToAgent();
 
     if (serverToAgent.error_response != null) {
@@ -229,28 +206,54 @@ public final class HttpRequestService implements RequestService {
       if (errorResponse.retry_info != null) {
         retryAfter = Duration.ofNanos(errorResponse.retry_info.retry_after_nanoseconds);
       }
-      useRetryDelay(retryAfter);
+      connectionStatus.retryAfter(retryAfter);
     }
     getCallback().onRequestFailed(new OpampServerResponseError(errorResponse.error_message));
   }
 
-  private void useRegularDelay() {
-    if (currentDelay.compareAndSet(periodicRetryDelay, periodicRequestDelay)) {
-      periodicRequestDelay.reset();
-    }
-  }
-
-  private void useRetryDelay(@Nullable Duration retryAfter) {
-    if (currentDelay.compareAndSet(periodicRequestDelay, periodicRetryDelay)) {
-      periodicRetryDelay.reset();
-      if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
-        ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
-      }
-    }
-  }
-
   private Callback getCallback() {
     return Objects.requireNonNull(callback);
+  }
+
+  // this class is only used from a single threaded ScheduledExecutorService, hence no
+  // synchronization is needed
+  private static class ConnectionStatus {
+    private final PeriodicDelay periodicRequestDelay;
+    private final PeriodicDelay periodicRetryDelay;
+
+    private boolean retrying;
+    private PeriodicDelay currentDelay;
+
+    ConnectionStatus(PeriodicDelay periodicRequestDelay, PeriodicDelay periodicRetryDelay) {
+      this.periodicRequestDelay = periodicRequestDelay;
+      this.periodicRetryDelay = periodicRetryDelay;
+      currentDelay = periodicRequestDelay;
+    }
+
+    void success() {
+      // after successful request transition from retry to regular delay
+      if (retrying) {
+        retrying = false;
+        periodicRequestDelay.reset();
+        currentDelay = periodicRequestDelay;
+      }
+    }
+
+    void retryAfter(@Nullable Duration retryAfter) {
+      // after failed request transition from regular to retry delay
+      if (!retrying) {
+        retrying = true;
+        periodicRetryDelay.reset();
+        currentDelay = periodicRetryDelay;
+        if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
+          ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
+        }
+      }
+    }
+
+    Duration getNextDelay() {
+      return currentDelay.getNextDelay();
+    }
   }
 
   private static class DaemonThreadFactory implements ThreadFactory {
