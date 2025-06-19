@@ -95,6 +95,7 @@ class OkHttpWebSocketTest {
     clearInvocations(client);
     callOnClosed();
     openAndCaptureArguments();
+    assertThat(requestCaptor.getValue().url().host()).isEqualTo("some.server");
   }
 
   @Test
