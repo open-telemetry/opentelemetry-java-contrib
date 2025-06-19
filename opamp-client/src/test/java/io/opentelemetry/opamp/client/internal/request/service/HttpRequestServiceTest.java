@@ -8,10 +8,8 @@ package io.opentelemetry.opamp.client.internal.request.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -33,10 +31,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import opamp.proto.AgentToServer;
@@ -44,7 +39,6 @@ import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +55,7 @@ class HttpRequestServiceTest {
   private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
   @Mock private RequestService.Callback callback;
-  private final List<ScheduledTask> scheduledTasks = new ArrayList<>();
-  private ScheduledExecutorService executorService;
+  private TestScheduler scheduler;
   private TestHttpSender requestSender;
   private PeriodicDelay periodicRequestDelay;
   private PeriodicDelayWithSuggestion periodicRetryDelay;
@@ -74,11 +67,11 @@ class HttpRequestServiceTest {
     requestSender = new TestHttpSender();
     periodicRequestDelay = createPeriodicDelay(REGULAR_DELAY);
     periodicRetryDelay = createPeriodicDelayWithSuggestionSupport(RETRY_DELAY);
-    executorService = createTestScheduleExecutorService();
+    scheduler = new TestScheduler();
     httpRequestService =
         new HttpRequestService(
             requestSender,
-            executorService,
+            scheduler.getMockService(),
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
@@ -88,28 +81,26 @@ class HttpRequestServiceTest {
   @AfterEach
   void tearDown() {
     httpRequestService.stop();
-    scheduledTasks.clear();
-    verify(executorService).shutdown();
+    verify(scheduler.getMockService()).shutdown();
   }
 
   @Test
   void verifyStart_scheduledFirstTask() {
-    assertThat(scheduledTasks).hasSize(1);
-    ScheduledTask firstTask = scheduledTasks.get(0);
-    assertThat(firstTask.delay).isEqualTo(REGULAR_DELAY);
+    TestScheduler.Task firstTask = assertAndGetSingleCurrentTask();
+    assertThat(firstTask.getDelay()).isEqualTo(REGULAR_DELAY);
 
     // Verify initial task creates next one
-    scheduledTasks.clear();
+    scheduler.clearTasks();
     requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
     firstTask.run();
 
-    assertThat(scheduledTasks).hasSize(1);
+    assertThat(scheduler.getScheduledTasks()).hasSize(1);
 
     // Check on-demand requests don't create subsequent tasks
     requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
     httpRequestService.sendRequest();
 
-    assertThat(scheduledTasks).hasSize(1);
+    assertThat(scheduler.getScheduledTasks()).hasSize(1);
   }
 
   @Test
@@ -128,14 +119,14 @@ class HttpRequestServiceTest {
   @Test
   void verifyWhenSendingOnDemandRequest_andDelayChanges() {
     // Initial state
-    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(REGULAR_DELAY);
+    assertThat(assertAndGetSingleCurrentTask().getDelay()).isEqualTo(REGULAR_DELAY);
 
     // Trigger delay strategy change
     requestSender.enqueueResponse(createFailedResponse(503));
     httpRequestService.sendRequest();
 
     // Expected state
-    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(RETRY_DELAY);
+    assertThat(assertAndGetSingleCurrentTask().getDelay()).isEqualTo(RETRY_DELAY);
   }
 
   @Test
@@ -252,30 +243,30 @@ class HttpRequestServiceTest {
   private void verifyRetryDelayOnError(
       HttpSender.Response errorResponse, Duration expectedRetryDelay) {
     requestSender.enqueueResponse(errorResponse);
-    ScheduledTask previousTask = assertAndGetSingleCurrentTask();
+    TestScheduler.Task previousTask = assertAndGetSingleCurrentTask();
 
     previousTask.run();
 
     verifySingleRequestSent();
     verify(periodicRetryDelay).reset();
     verify(callback).onRequestFailed(any());
-    ScheduledTask retryTask = assertAndGetSingleCurrentTask();
-    assertThat(retryTask.delay).isEqualTo(expectedRetryDelay);
+    TestScheduler.Task retryTask = assertAndGetSingleCurrentTask();
+    assertThat(retryTask.getDelay()).isEqualTo(expectedRetryDelay);
 
     // Retry with another error
     clearInvocations(callback);
-    scheduledTasks.clear();
+    scheduler.clearTasks();
     requestSender.enqueueResponse(createFailedResponse(500));
     retryTask.run();
 
     verifySingleRequestSent();
     verify(callback).onRequestFailed(any());
-    ScheduledTask retryTask2 = assertAndGetSingleCurrentTask();
-    assertThat(retryTask2.delay).isEqualTo(expectedRetryDelay);
+    TestScheduler.Task retryTask2 = assertAndGetSingleCurrentTask();
+    assertThat(retryTask2.getDelay()).isEqualTo(expectedRetryDelay);
 
     // Retry with a success
     clearInvocations(callback);
-    scheduledTasks.clear();
+    scheduler.clearTasks();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
     requestSender.enqueueResponse(createSuccessfulResponse(serverToAgent));
     retryTask2.run();
@@ -283,7 +274,7 @@ class HttpRequestServiceTest {
     verify(periodicRequestDelay).reset();
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
-    assertThat(assertAndGetSingleCurrentTask().delay).isEqualTo(REGULAR_DELAY);
+    assertThat(assertAndGetSingleCurrentTask().getDelay()).isEqualTo(REGULAR_DELAY);
   }
 
   private Request createRequestSupplier() {
@@ -292,7 +283,8 @@ class HttpRequestServiceTest {
     return Request.create(agentToServer);
   }
 
-  private ScheduledTask assertAndGetSingleCurrentTask() {
+  private TestScheduler.Task assertAndGetSingleCurrentTask() {
+    List<TestScheduler.Task> scheduledTasks = scheduler.getScheduledTasks();
     assertThat(scheduledTasks).hasSize(1);
     return scheduledTasks.get(0);
   }
@@ -311,33 +303,6 @@ class HttpRequestServiceTest {
     verify(callback).onRequestFailed(captor.capture());
     assertThat(captor.getValue().getErrorCode()).isEqualTo(errorCode);
     assertThat(captor.getValue().getMessage()).isEqualTo("Error message");
-  }
-
-  private ScheduledExecutorService createTestScheduleExecutorService() {
-    ScheduledExecutorService service = mock();
-
-    lenient()
-        .doAnswer(
-            invocation -> {
-              Runnable runnable = invocation.getArgument(0);
-              runnable.run();
-              return null;
-            })
-        .when(service)
-        .execute(any());
-
-    when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
-        .thenAnswer(
-            invocation -> {
-              ScheduledTask task =
-                  new ScheduledTask(invocation.getArgument(0), invocation.getArgument(1));
-
-              scheduledTasks.add(task);
-
-              return task;
-            });
-
-    return service;
   }
 
   private static HttpSender.Response createSuccessfulResponse(ServerToAgent serverToAgent) {
@@ -436,57 +401,6 @@ class HttpRequestServiceTest {
       private RequestParams(int contentLength) {
         this.contentLength = contentLength;
       }
-    }
-  }
-
-  private class ScheduledTask implements ScheduledFuture<Object> {
-    private final Runnable runnable;
-    private final Duration delay;
-
-    public void run() {
-      get();
-    }
-
-    private ScheduledTask(Runnable runnable, long timeNanos) {
-      this.runnable = runnable;
-      this.delay = Duration.ofNanos(timeNanos);
-    }
-
-    @Override
-    public long getDelay(@NotNull TimeUnit unit) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
-      return scheduledTasks.remove(this);
-    }
-
-    @Override
-    public boolean isCancelled() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isDone() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object get() {
-      scheduledTasks.remove(this);
-      runnable.run();
-      return null;
-    }
-
-    @Override
-    public Object get(long timeout, @NotNull TimeUnit unit) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int compareTo(@NotNull Delayed o) {
-      throw new UnsupportedOperationException();
     }
   }
 }
