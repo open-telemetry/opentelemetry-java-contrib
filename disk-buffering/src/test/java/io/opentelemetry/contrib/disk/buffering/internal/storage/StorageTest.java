@@ -26,6 +26,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,11 @@ class StorageTest {
     processing = mock();
     when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
     storage = new Storage(folderManager, true);
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    storage.close();
   }
 
   @Test

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -96,6 +97,11 @@ class ReadableFileTest {
     addFileContents(source);
     clock = mock();
     readableFile = new ReadableFile(source, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    readableFile.close();
   }
 
   private static void addFileContents(File source) throws IOException {
