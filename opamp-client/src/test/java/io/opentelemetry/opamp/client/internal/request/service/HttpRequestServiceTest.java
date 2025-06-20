@@ -19,7 +19,6 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.HttpErrorExcepti
 import io.opentelemetry.opamp.client.internal.connectivity.http.HttpSender;
 import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser;
 import io.opentelemetry.opamp.client.internal.request.Request;
-import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayInputStream;
@@ -75,7 +74,7 @@ class HttpRequestServiceTest {
             periodicRequestDelay,
             periodicRetryDelay,
             RetryAfterParser.getInstance());
-    httpRequestService.start(callback, this::createRequestSupplier);
+    httpRequestService.start(callback, this::createRequest);
   }
 
   @AfterEach
@@ -277,7 +276,7 @@ class HttpRequestServiceTest {
     assertThat(assertAndGetSingleCurrentTask().getDelay()).isEqualTo(REGULAR_DELAY);
   }
 
-  private Request createRequestSupplier() {
+  private Request createRequest() {
     AgentToServer agentToServer = new AgentToServer.Builder().sequence_num(10).build();
     requestSize = agentToServer.encodeByteString().size();
     return Request.create(agentToServer);
@@ -333,32 +332,6 @@ class HttpRequestServiceTest {
   private static PeriodicDelayWithSuggestion createPeriodicDelayWithSuggestionSupport(
       Duration delay) {
     return spy(new PeriodicDelayWithSuggestion(delay));
-  }
-
-  private static class PeriodicDelayWithSuggestion
-      implements PeriodicDelay, AcceptsDelaySuggestion {
-    private final Duration initialDelay;
-    private Duration currentDelay;
-
-    private PeriodicDelayWithSuggestion(Duration initialDelay) {
-      this.initialDelay = initialDelay;
-      currentDelay = initialDelay;
-    }
-
-    @Override
-    public void suggestDelay(Duration delay) {
-      currentDelay = delay;
-    }
-
-    @Override
-    public Duration getNextDelay() {
-      return currentDelay;
-    }
-
-    @Override
-    public void reset() {
-      currentDelay = initialDelay;
-    }
   }
 
   private static class TestHttpSender implements HttpSender {

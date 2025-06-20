@@ -1,7 +1,6 @@
 package io.opentelemetry.opamp.client.internal.request.service;
 
-import com.google.protobuf.CodedInputStream;
-import com.google.protobuf.CodedOutputStream;
+import com.squareup.wire.ProtoAdapter;
 import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
@@ -29,7 +28,8 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   private final AtomicBoolean retryingConnection = new AtomicBoolean(false);
   private final AtomicBoolean nextRetryScheduled = new AtomicBoolean(false);
   private final AtomicBoolean hasPendingRequest = new AtomicBoolean(false);
-  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private final AtomicBoolean isRunning = new AtomicBoolean(false);
+  private final AtomicBoolean hasStopped = new AtomicBoolean(false);
   private final ScheduledExecutorService executorService;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
@@ -68,12 +68,16 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void start(Callback callback, Supplier<Request> requestSupplier) {
-    if (closed.get()) {
-      throw new IllegalStateException("This service is already closed");
+    if (hasStopped.get()) {
+      throw new IllegalStateException("This service is already stopped");
     }
-    this.callback = callback;
-    this.requestSupplier = requestSupplier;
-    startConnection();
+    if (isRunning.compareAndSet(false, true)) {
+      this.callback = callback;
+      this.requestSupplier = requestSupplier;
+      startConnection();
+    } else {
+      throw new IllegalStateException("The service has already started");
+    }
   }
 
   private void startConnection() {
@@ -82,6 +86,17 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void sendRequest() {
+    if (!isRunning.get()) {
+      throw new IllegalStateException("The service is not running");
+    }
+    if (hasStopped.get()) {
+      throw new IllegalStateException("This service is already stopped");
+    }
+
+    doSendRequest();
+  }
+
+  private void doSendRequest() {
     try {
       if (!trySendRequest()) {
         hasPendingRequest.set(true);
@@ -93,11 +108,9 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   private boolean trySendRequest() throws IOException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      CodedOutputStream codedOutput = CodedOutputStream.newInstance(outputStream);
-      codedOutput.writeUInt64NoTag(0);
+      ProtoAdapter.UINT64.encode(outputStream, 0L);
       byte[] payload = getRequest().getAgentToServer().encode();
-      codedOutput.write(payload, 0, payload.length);
-      codedOutput.flush();
+      outputStream.write(payload);
       return webSocket.send(outputStream.toByteArray());
     }
   }
@@ -109,9 +122,10 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void stop() {
-    if (closed.compareAndSet(false, true)) {
-      sendRequest();
+    if (hasStopped.compareAndSet(false, true)) {
+      doSendRequest();
       webSocket.close(1000, null);
+      executorService.shutdown();
     }
   }
 
@@ -144,12 +158,11 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   }
 
   private static ServerToAgent readServerToAgent(byte[] data) throws IOException {
-    CodedInputStream codedInputStream = CodedInputStream.newInstance(data);
-    codedInputStream.readRawVarint64(); // It moves the read position to the end of the header.
-    int totalBytesRead = codedInputStream.getTotalBytesRead();
-    int payloadSize = data.length - totalBytesRead;
+    Long header = ProtoAdapter.UINT64.decode(data);
+    int headerSize = ProtoAdapter.UINT64.encodedSize(header);
+    int payloadSize = data.length - headerSize;
     byte[] payload = new byte[payloadSize];
-    System.arraycopy(data, totalBytesRead, payload, 0, payloadSize);
+    System.arraycopy(data, headerSize, payload, 0, payloadSize);
     return ServerToAgent.ADAPTER.decode(payload);
   }
 
@@ -172,6 +185,9 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @SuppressWarnings("FutureReturnValueIgnored")
   private void scheduleConnectionRetry(@Nullable Duration retryAfter) {
+    if (hasStopped.get()) {
+      return;
+    }
     if (retryingConnection.compareAndSet(false, true)) {
       periodicRetryDelay.reset();
       if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
@@ -191,10 +207,8 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void onClosed() {
-    if (!closed.get()) {
-      // The service isn't closed so we should retry connecting.
-      scheduleConnectionRetry(null);
-    }
+    // If this service isn't stopped, we should retry connecting.
+    scheduleConnectionRetry(null);
   }
 
   @Override

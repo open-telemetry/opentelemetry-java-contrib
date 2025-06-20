@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public final class TestScheduler {
         .when(service)
         .execute(any());
 
-    when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
+    lenient().when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
         .thenAnswer(
             invocation -> {
               Task task = new Task(invocation.getArgument(0), invocation.getArgument(1));
