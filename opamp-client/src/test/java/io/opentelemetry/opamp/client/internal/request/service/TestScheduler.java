@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.opamp.client.internal.request.service;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +49,8 @@ public final class TestScheduler {
         .when(service)
         .execute(any());
 
-    lenient().when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
+    lenient()
+        .when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
         .thenAnswer(
             invocation -> {
               Task task = new Task(invocation.getArgument(0), invocation.getArgument(1));
