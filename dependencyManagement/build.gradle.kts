@@ -57,5 +57,6 @@ dependencies {
     api("tools.profiler:async-profiler:4.0")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
+    api("com.google.protobuf:protobuf-java-util:4.29.1")
   }
 }
