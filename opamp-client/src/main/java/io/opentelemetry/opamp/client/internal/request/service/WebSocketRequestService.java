@@ -158,8 +158,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   }
 
   private static ServerToAgent readServerToAgent(byte[] data) throws IOException {
-    Long header = ProtoAdapter.UINT64.decode(data);
-    int headerSize = ProtoAdapter.UINT64.encodedSize(header);
+    int headerSize = ProtoAdapter.UINT64.encodedSize(ProtoAdapter.UINT64.decode(data));
     int payloadSize = data.length - headerSize;
     byte[] payload = new byte[payloadSize];
     System.arraycopy(data, headerSize, payload, 0, payloadSize);
