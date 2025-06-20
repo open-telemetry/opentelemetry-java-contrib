@@ -16,6 +16,7 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
   testImplementation("org.mockito:mockito-inline")
+  testImplementation("com.google.protobuf:protobuf-java-util")
 }
 
 val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
