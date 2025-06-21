@@ -1,0 +1,217 @@
+#This is the timeout on queue metrics and channel metrics threads.Default value is 20 seconds.
+#No need to change the default unless you know what you are doing.
+#queueMetricsCollectionTimeoutInSeconds: 40
+#channelMetricsCollectionTimeoutInSeconds: 40
+#topicMetricsCollectionTimeoutInSeconds: 40
+
+queueManagers:
+  - name: "QM1"
+    host: "localhost"
+    port: 1414
+
+    #The transport type for the queue manager connection, the default is "Bindings" for a binding type connection
+    #For bindings type, connection WMQ extension (i.e machine agent) need to be on the same machine on which WebbsphereMQ server is running
+    #For client type, connection change it to "Client".
+    transportType: "Client"
+
+    #Channel name of the queue manager, channel should be server-conn type.
+    #This field is not required in case of transportType: Bindings
+    channelName: "DEV.ADMIN.SVRCONN"
+
+    #for user access level, please check "Access Permissions" section on the extensions page
+    #comment out the username and password in case of transportType: Bindings.
+    username: "app"
+    password: "passw0rd"
+
+    #PCF requests are always sent to SYSTEM.ADMIN.COMMAND.QUEUE. The PCF responses to these requests are sent to the default reply-to queue called
+    #SYSTEM.DEFAULT.MODEL.QUEUE. However, you can override this behavior and send it to a temporary dynamic queue by changing the modelQueueName and replyQueuePrefix fields.
+    #For more details around this https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q083240_.htm & https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm
+    #modelQueueName: ""
+    #replyQueuePrefix: ""
+
+    # Name of the temporary dynamic queue holding the configuration events. This queue contains information regarding the configuration of the queue manager, notable MaxChannels and MaxActiveChannels.
+    # If unset, the default queue name `SYSTEM.ADMIN.CONFIG.EVENT` is applied.
+    # Configuration events need to be enabled explicitly in the queue manager configuration. See https://www.ibm.com/docs/en/ibm-mq/9.4.x?topic=monitoring-configuration-events for reference.
+    #configurationQueueName: "SYSTEM.ADMIN.CONFIG.EVENT"
+
+    # Interval in milliseconds at which the configuration events in the configuration queue can be consumed.
+    # By default, no events are consumed.
+    #consumeConfigurationEventInterval: 600000 # 10 minutes
+
+    # Enable running a queue manager refresh request to reload its configuration and create a configuration event.
+    # This action is only executed if no configuration events are found when reading the configuration queue.name:
+    # By default, this action is disabled.
+    #refreshQueueManagerConfigurationEnabled: false
+
+    #Sets the CCSID used in the message descriptor of request and response messages. The default value is MQC.MQCCSI_Q_MGR.
+    #To set this, please use the integer value.
+    #ccsid:
+
+    #Sets the encoding used in the message descriptor of request and response messages. The default value is MQC.MQENC_NATIVE.
+    #To set this, please use the integer value.
+    #encoding:
+
+    # IBM Cipher Suite e.g. "SSL_RSA_WITH_AES_128_CBC_SHA256"..
+    # For translation to IBM Cipher  http://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.dev.doc/q113210_.htm
+    # A cipher working for IBM Cloud MQ and Temurin JDK 8 is TLS_AES_128_GCM_SHA256
+    #cipherSuite: ""
+
+
+    queueFilters:
+        #Can provide complete queue name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+             #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+             #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM","AMQ"]
+
+
+    channelFilters:
+        #Can provide complete channel name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+           #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+           #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM", "TEST"]
+
+    listenerFilters:
+        #Can provide complete channel name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+           #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+           #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM"]
+
+    topicFilters:
+        # For topics, IBM MQ uses the topic wildcard characters ('#' and '+') and does not treat a trailing asterisk as a wildcard
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.pla.doc/q005020_.htm
+        include: ["#"]
+        exclude:
+             #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "EQUALS"
+             #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["system","$SYS"]
+
+metrics:
+  "mq.message.retry.count":  # Number of message retries
+    enabled: true
+  "mq.status":  # Channel status
+    enabled: true
+  "mq.max.sharing.conversations":  # Maximum number of conversations permitted on this channel instance.
+    enabled: true
+  "mq.current.sharing.conversations":  # Current number of conversations permitted on this channel instance.
+    enabled: true
+  "mq.byte.received":  # Number of bytes received
+    enabled: true
+  "mq.byte.sent":  # Number of bytes sent
+    enabled: true
+  "mq.buffers.received":  # Buffers received
+    enabled: true
+  "mq.buffers.sent":  # Buffers sent
+    enabled: true
+  "mq.message.count":  # Message count
+    enabled: true
+  "mq.open.input.count":  # Count of applications sending messages to the queue
+    enabled: true
+  "mq.open.output.count":  # Count of applications consuming messages from the queue
+    enabled: true
+  "mq.high.queue.depth":  # The current high queue depth
+    enabled: true
+  "mq.service.interval":  # The queue service interval
+    enabled: true
+  "mq.queue.depth.full.event":  # The number of full queue events
+    enabled: true
+  "mq.queue.depth.high.event":  # The number of high queue events
+    enabled: true
+  "mq.queue.depth.low.event":  # The number of low queue events
+    enabled: true
+  "mq.uncommitted.messages":  # Number of uncommitted messages
+    enabled: true
+  "mq.oldest.msg.age":  # Queue message oldest age
+    enabled: true
+  "mq.current.max.queue.filesize":  # Current maximum queue file size
+    enabled: true
+  "mq.current.queue.filesize":  # Current queue file size
+    enabled: true
+  "mq.instances.per.client":  # Instances per client
+    enabled: true
+  "mq.message.deq.count":  # Message dequeue count
+    enabled: true
+  "mq.message.enq.count":  # Message enqueue count
+    enabled: true
+  "mq.queue.depth":  # Current queue depth
+    enabled: true
+  "mq.service.interval.event":  # Queue service interval event
+    enabled: true
+  "mq.reusable.log.size":  # The amount of space occupied, in megabytes, by log extents available to be reused.
+    enabled: true
+  "mq.manager.active.channels":  # The queue manager active maximum channels limit
+    enabled: true
+  "mq.restart.log.size":  # Size of the log data required for restart recovery in megabytes.
+    enabled: true
+  "mq.max.queue.depth":  # Maximum queue depth
+    enabled: true
+  "mq.onqtime.1":  # Amount of time, in microseconds, that a message spent on the queue, over a short period
+    enabled: true
+  "mq.onqtime.2":  # Amount of time, in microseconds, that a message spent on the queue, over a longer period
+    enabled: true
+  "mq.message.received.count":  # Number of messages received
+    enabled: true
+  "mq.message.sent.count":  # Number of messages sent
+    enabled: true
+  "mq.max.instances":  # Max channel instances
+    enabled: true
+  "mq.connection.count":  # Active connections count
+    enabled: true
+  "mq.manager.status":  # Queue manager status
+    enabled: true
+  "mq.heartbeat":  # Queue manager heartbeat
+    enabled: true
+  "mq.archive.log.size":  # Queue manager archive log size
+    enabled: true
+  "mq.manager.max.active.channels":  # Queue manager max active channels
+    enabled: true
+  "mq.manager.statistics.interval":  # Queue manager statistics interval
+    enabled: true
+  "mq.publish.count":  # Topic publication count
+    enabled: true
+  "mq.subscription.count":  # Topic subscription count
+    enabled: true
+  "mq.listener.status":  # Listener status
+    enabled: true
+  "mq.unauthorized.event":  # Number of authentication error events
+    enabled: true
+  "mq.manager.max.handles":  # Max open handles
+    enabled: true
+
+#Run it as a scheduled task instead of running every minute.
+#If you want to run this every minute, comment this out
+taskSchedule:
+  numberOfThreads: 1
+  taskDelaySeconds: 27
+
+
+sslConnection:
+  trustStorePath: ""
+  trustStorePassword: ""
+
+  keyStorePath: ""
+  keyStorePassword: ""
+
+
+# Configure the OTLP exporter using system properties keys following the specification https://opentelemetry.io/docs/languages/java/configuration/
+otlpExporter:
+  otel.exporter.otlp.endpoint: https://localhost:4318
+  otel.exporter.otlp.protocol: http/protobuf
+  otel.metric.export.interval: 5s
+  otel.logs.exporter: none
+  otel.traces.exporter: none
