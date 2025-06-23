@@ -94,8 +94,7 @@ There are two transport modes in which this extension can be run:
 If this extension is configured for **CLIENT** transport type
 
 1. Please make sure the MQ's host and port is accessible.
-2. Credentials of user with correct access rights would be needed in config.yml
-  [(Access Permissions section)](https://github.com/signalfx/opentelemetry-ibm-mq-monitoring-extension#access-permissions).
+2. Credentials of user with correct access rights would be needed in config.yml.
 3. If the hosting OS for IBM MQ is Windows, Windows user credentials will be needed.
 
 If you are in **Bindings** mode, please make sure to start the MA process under a user which has
