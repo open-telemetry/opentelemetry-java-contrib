@@ -22,6 +22,13 @@ val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
   group = "opamp"
   src("https://api.github.com/repos/open-telemetry/opamp-spec/releases/latest")
   dest(project.layout.buildDirectory.file("opamp/release.json"))
+  val token = System.getenv("GH_TOKEN")
+  if (token.isNullOrBlank()) {
+    logger.warn("No GitHub token found in environment variable GH_TOKEN. Rate limits may apply.")
+  } else {
+    header("Authorization", "Bearer $token")
+    header("X-GitHub-Api-Version", "2022-11-28")
+  }
 }
 
 val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
