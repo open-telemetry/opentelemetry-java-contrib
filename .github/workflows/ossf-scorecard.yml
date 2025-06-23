@@ -23,18 +23,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
-        id: create-token
-        with:
-          # analyzing classic branch protections requires a token with admin read permissions
-          # see https://github.com/ossf/scorecard-action/blob/main/docs/authentication/fine-grained-auth-token.md
-          # and https://github.com/open-telemetry/community/issues/2769
-          app-id: ${{ vars.OSSF_SCORECARD_APP_ID }}
-          private-key: ${{ secrets.OSSF_SCORECARD_PRIVATE_KEY }}
-
       - uses: ossf/scorecard-action@05b42c624433fc40578a4040d5cf5e36ddca8cde # v2.4.2
         with:
-          repo_token:  ${{ steps.create-token.outputs.token }}
           results_file: results.sarif
           results_format: sarif
           publish_results: true
