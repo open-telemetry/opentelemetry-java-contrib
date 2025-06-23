@@ -59,6 +59,6 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
 
       - name: Gradle build and test
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build -x test
