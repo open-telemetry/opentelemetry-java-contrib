@@ -17,10 +17,10 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
 
 /**
- * This sampler accepts a list of {@link SamplingRule}s and tries to match every proposed span
- * against those rules. Every rule describes a span's attribute, a pattern against which to match
- * attribute's value, and a sampler that will make a decision about given span if match was
- * successful.
+ * This sampler accepts a list of {@link RuleBasedRoutingSamplingRule}s and tries to match every
+ * proposed span against those rules. Every rule describes a span's attribute, a pattern against
+ * which to match attribute's value, and a sampler that will make a decision about given span if
+ * match was successful.
  *
  * <p>Matching is performed by {@link java.util.regex.Pattern}.
  *
@@ -37,11 +37,12 @@ public final class RuleBasedRoutingSampler implements Sampler {
   // inlined incubating attribute to prevent direct dependency on incubating semconv
   private static final AttributeKey<String> THREAD_NAME = AttributeKey.stringKey("thread.name");
 
-  private final List<SamplingRule> rules;
+  private final List<RuleBasedRoutingSamplingRule> rules;
   private final SpanKind kind;
   private final Sampler fallback;
 
-  RuleBasedRoutingSampler(List<SamplingRule> rules, SpanKind kind, Sampler fallback) {
+  RuleBasedRoutingSampler(
+      List<RuleBasedRoutingSamplingRule> rules, SpanKind kind, Sampler fallback) {
     this.kind = requireNonNull(kind);
     this.fallback = requireNonNull(fallback);
     this.rules = requireNonNull(rules);
@@ -64,18 +65,18 @@ public final class RuleBasedRoutingSampler implements Sampler {
     if (kind != spanKind) {
       return fallback.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
-    for (SamplingRule samplingRule : rules) {
+    for (RuleBasedRoutingSamplingRule ruleBasedRoutingSamplingRule : rules) {
       String attributeValue;
-      if (samplingRule.attributeKey.getKey().equals(THREAD_NAME.getKey())) {
+      if (ruleBasedRoutingSamplingRule.attributeKey.getKey().equals(THREAD_NAME.getKey())) {
         attributeValue = Thread.currentThread().getName();
       } else {
-        attributeValue = attributes.get(samplingRule.attributeKey);
+        attributeValue = attributes.get(ruleBasedRoutingSamplingRule.attributeKey);
       }
       if (attributeValue == null) {
         continue;
       }
-      if (samplingRule.pattern.matcher(attributeValue).find()) {
-        return samplingRule.delegate.shouldSample(
+      if (ruleBasedRoutingSamplingRule.pattern.matcher(attributeValue).find()) {
+        return ruleBasedRoutingSamplingRule.delegate.shouldSample(
             parentContext, traceId, name, spanKind, attributes, parentLinks);
       }
     }
