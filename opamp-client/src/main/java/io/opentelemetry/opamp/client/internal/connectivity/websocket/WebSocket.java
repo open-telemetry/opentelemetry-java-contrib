@@ -40,8 +40,8 @@ public interface WebSocket {
   interface Listener {
 
     /**
-     * Called when the websocket connection is successfully established with the remote peer and may
-     * start sending messages.
+     * Called when the websocket connection is successfully established with the remote peer. The
+     * client may start sending messages after this method is called.
      */
     void onOpen();
 
