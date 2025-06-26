@@ -6,7 +6,6 @@
 package io.opentelemetry.opamp.client.internal.connectivity.websocket;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,9 +17,7 @@ import okio.ByteString;
 public class OkHttpWebSocket implements WebSocket {
   private final String url;
   private final OkHttpClient client;
-  private final AtomicBoolean starting = new AtomicBoolean(false);
-  private final AtomicBoolean closing = new AtomicBoolean(false);
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private final AtomicReference<Status> status = new AtomicReference<>(Status.NOT_RUNNING);
   private final AtomicReference<okhttp3.WebSocket> webSocket = new AtomicReference<>();
 
   public static OkHttpWebSocket create(String url) {
@@ -38,10 +35,7 @@ public class OkHttpWebSocket implements WebSocket {
 
   @Override
   public void open(Listener listener) {
-    if (running.get()) {
-      return;
-    }
-    if (starting.compareAndSet(false, true)) {
+    if (status.compareAndSet(Status.NOT_RUNNING, Status.STARTING)) {
       okhttp3.Request request = new okhttp3.Request.Builder().url(url).build();
       webSocket.set(client.newWebSocket(request, new ListenerAdapter(listener)));
     }
@@ -49,7 +43,7 @@ public class OkHttpWebSocket implements WebSocket {
 
   @Override
   public boolean send(byte[] request) {
-    if (!running.get()) {
+    if (status.get() != Status.RUNNING) {
       return false;
     }
     return getWebSocket().send(ByteString.of(request));
@@ -57,13 +51,9 @@ public class OkHttpWebSocket implements WebSocket {
 
   @Override
   public void close(int code, @Nullable String reason) {
-    if (!running.get()) {
-      return;
-    }
-    if (closing.compareAndSet(false, true)) {
+    if (status.compareAndSet(Status.RUNNING, Status.CLOSING)) {
       if (!getWebSocket().close(code, reason)) {
-        closing.set(false);
-        running.set(false);
+        status.set(Status.NOT_RUNNING);
       }
     }
   }
@@ -81,30 +71,25 @@ public class OkHttpWebSocket implements WebSocket {
 
     @Override
     public void onOpen(@Nonnull okhttp3.WebSocket webSocket, @Nonnull Response response) {
-      running.set(true);
-      starting.set(false);
+      status.set(Status.RUNNING);
       delegate.onOpen();
     }
 
     @Override
     public void onClosing(@Nonnull okhttp3.WebSocket webSocket, int code, @Nonnull String reason) {
-      running.set(false);
-      closing.set(true);
+      status.set(Status.CLOSING);
     }
 
     @Override
     public void onClosed(@Nonnull okhttp3.WebSocket webSocket, int code, @Nonnull String reason) {
-      running.set(false);
-      closing.set(false);
+      status.set(Status.NOT_RUNNING);
       delegate.onClosed();
     }
 
     @Override
     public void onFailure(
         @Nonnull okhttp3.WebSocket webSocket, @Nonnull Throwable t, @Nullable Response response) {
-      running.set(false);
-      starting.set(false);
-      closing.set(false);
+      status.set(Status.NOT_RUNNING);
       delegate.onFailure(t);
     }
 
@@ -112,5 +97,12 @@ public class OkHttpWebSocket implements WebSocket {
     public void onMessage(@Nonnull okhttp3.WebSocket webSocket, @Nonnull ByteString bytes) {
       delegate.onMessage(bytes.toByteArray());
     }
+  }
+
+  enum Status {
+    NOT_RUNNING,
+    STARTING,
+    CLOSING,
+    RUNNING
   }
 }
