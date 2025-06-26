@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
@@ -32,12 +33,16 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   private final PeriodicDelay periodicRetryDelay;
   private final AtomicBoolean retryingConnection = new AtomicBoolean(false);
   private final AtomicBoolean nextRetryScheduled = new AtomicBoolean(false);
-  private final AtomicBoolean hasPendingRequest = new AtomicBoolean(false);
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
   private final ScheduledExecutorService executorService;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
+
+  @GuardedBy("hasPendingRequestLock")
+  private boolean hasPendingRequest = false;
+
+  private final Object hasPendingRequestLock = new Object();
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
 
@@ -103,8 +108,10 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   private void doSendRequest() {
     try {
-      if (!trySendRequest()) {
-        hasPendingRequest.set(true);
+      synchronized (hasPendingRequestLock) {
+        if (!trySendRequest()) {
+          hasPendingRequest = true;
+        }
       }
     } catch (IOException e) {
       getCallback().onRequestFailed(e);
@@ -138,8 +145,11 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   public void onOpen() {
     retryingConnection.set(false);
     getCallback().onConnectionSuccess();
-    if (hasPendingRequest.compareAndSet(true, false)) {
-      sendRequest();
+    synchronized (hasPendingRequestLock) {
+      if (hasPendingRequest) {
+        hasPendingRequest = false;
+        sendRequest();
+      }
     }
   }
 
