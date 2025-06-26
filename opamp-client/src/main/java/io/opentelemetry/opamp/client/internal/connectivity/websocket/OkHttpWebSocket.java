@@ -52,8 +52,13 @@ public class OkHttpWebSocket implements WebSocket {
   @Override
   public void close(int code, @Nullable String reason) {
     if (status.compareAndSet(Status.RUNNING, Status.CLOSING)) {
-      if (!getWebSocket().close(code, reason)) {
-        status.set(Status.NOT_RUNNING);
+      try {
+        if (!getWebSocket().close(code, reason)) {
+          status.set(Status.NOT_RUNNING);
+        }
+      } catch (IllegalArgumentException e) {
+        status.set(Status.RUNNING);
+        throw e;
       }
     }
   }
