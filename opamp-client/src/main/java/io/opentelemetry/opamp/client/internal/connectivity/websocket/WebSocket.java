@@ -30,10 +30,10 @@ public interface WebSocket {
    * Sends a message via the websocket connection.
    *
    * @param request The message payload.
-   * @return {@link Boolean#FALSE} If the message can't be dispatched for any reason, whether the
-   *     websocket isn't running, or the connection isn't established, or it's terminated. {@link
-   *     Boolean#TRUE} if the message can get sent. Returning {@link Boolean#TRUE} doesn't guarantee
-   *     that the message will arrive at the remote peer.
+   * @return {@code false} If the message can't be dispatched for any reason, whether the websocket
+   *     isn't running, or the connection isn't established, or it's terminated. {@code true} if the
+   *     message can get sent. Returning {@code true} doesn't guarantee that the message will arrive
+   *     at the remote peer.
    */
   boolean send(byte[] request);
 
@@ -44,6 +44,12 @@ public interface WebSocket {
      * client may start sending messages after this method is called.
      */
     void onOpen();
+
+    /**
+     * Called when the closing handshake has started. No further messages will be sent after this
+     * method call.
+     */
+    void onClosing();
 
     /** Called when the connection is terminated and no further messages can be transmitted. */
     void onClosed();
