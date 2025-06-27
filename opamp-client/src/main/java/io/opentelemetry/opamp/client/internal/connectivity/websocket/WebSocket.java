@@ -30,7 +30,7 @@ public interface WebSocket {
    * Sends a message via the websocket connection.
    *
    * @param request The message payload.
-   * @return {@link Boolean#FALSE} If the message can't get dispatched for any reason, whether the
+   * @return {@link Boolean#FALSE} If the message can't be dispatched for any reason, whether the
    *     websocket isn't running, or the connection isn't established, or it's terminated. {@link
    *     Boolean#TRUE} if the message can get sent. Returning {@link Boolean#TRUE} doesn't guarantee
    *     that the message will arrive at the remote peer.
@@ -45,7 +45,7 @@ public interface WebSocket {
      */
     void onOpen();
 
-    /** Called when the connection is terminated and no further messages can get transmitted. */
+    /** Called when the connection is terminated and no further messages can be transmitted. */
     void onClosed();
 
     /**
@@ -57,7 +57,7 @@ public interface WebSocket {
 
     /**
      * Called when the connection is closed or cannot be established due to an error. No messages
-     * can get transmitted after this method is called.
+     * can be transmitted after this method is called.
      *
      * @param t The error.
      */
