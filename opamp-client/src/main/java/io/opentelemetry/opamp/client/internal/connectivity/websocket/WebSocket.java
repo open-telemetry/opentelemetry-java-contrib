@@ -45,7 +45,7 @@ public interface WebSocket {
      */
     void onOpen();
 
-    /** Called when the connection is terminated and no further messages can get transmitted. */
+    /** Called when the connection is terminated and no further messages can be transmitted. */
     void onClosed();
 
     /**
