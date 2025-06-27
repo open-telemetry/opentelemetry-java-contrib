@@ -14,7 +14,7 @@ jobs:
 
       - uses: lycheeverse/lychee-action@82202e5e9c2f4ef1a55a3d02563e1cb6041e5332 # v2.4.1
         with:
-          lycheeVersion: v0.19.1
+          lycheeVersion: lychee-v140f701167c942af9cc6a0463804f1be01830bf20
           # excluding links to pull requests and issues is done for performance
           args: >
             --include-fragments
