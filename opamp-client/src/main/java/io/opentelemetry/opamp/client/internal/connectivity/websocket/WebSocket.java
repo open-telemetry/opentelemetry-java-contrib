@@ -57,7 +57,7 @@ public interface WebSocket {
 
     /**
      * Called when the connection is closed or cannot be established due to an error. No messages
-     * can get transmitted after this method is called.
+     * can be transmitted after this method is called.
      *
      * @param t The error.
      */
