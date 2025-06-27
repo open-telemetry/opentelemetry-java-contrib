@@ -83,6 +83,7 @@ public class OkHttpWebSocket implements WebSocket {
     @Override
     public void onClosing(@Nonnull okhttp3.WebSocket webSocket, int code, @Nonnull String reason) {
       status.set(Status.CLOSING);
+      delegate.onClosing();
     }
 
     @Override

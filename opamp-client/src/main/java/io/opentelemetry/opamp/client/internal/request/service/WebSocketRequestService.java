@@ -220,6 +220,11 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   }
 
   @Override
+  public void onClosing() {
+    // Noop
+  }
+
+  @Override
   public void onClosed() {
     // If this service isn't stopped, we should retry connecting.
     scheduleConnectionRetry(null);

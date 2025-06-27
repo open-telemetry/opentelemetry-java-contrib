@@ -136,6 +136,7 @@ class OkHttpWebSocketTest {
 
   private void callOnClosing() {
     listenerCaptor.getValue().onClosing(mock(), 0, "");
+    verify(listener).onClosing();
   }
 
   private void callOnFailure() {
