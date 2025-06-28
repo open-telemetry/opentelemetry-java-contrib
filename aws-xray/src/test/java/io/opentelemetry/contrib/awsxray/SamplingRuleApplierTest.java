@@ -29,6 +29,8 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,6 +70,15 @@ class SamplingRuleApplierTest {
             .put(HTTP_METHOD, "GET")
             .put(NET_HOST_NAME, "opentelemetry.io")
             .put(HTTP_TARGET, "/instrument-me")
+            .put(AttributeKey.stringKey("animal"), "cat")
+            .put(AttributeKey.longKey("speed"), 10)
+            .build();
+
+    private final Attributes newSemCovAttributes =
+        Attributes.builder()
+            .put(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
+            .put(NET_HOST_NAME, "opentelemetry.io")
+            .put(UrlAttributes.URL_PATH, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -121,6 +132,21 @@ class SamplingRuleApplierTest {
     }
 
     @Test
+    void matchesURLFullNewSemCov() {
+      assertThat(applier.matches(newSemCovAttributes, resource)).isTrue();
+
+      // http.url works too
+      assertThat(
+              applier.matches(
+                  attributes.toBuilder()
+                      .remove(HTTP_TARGET)
+                      .put(UrlAttributes.URL_FULL, "scheme://host:port/instrument-me")
+                      .build(),
+                  resource))
+          .isTrue();
+    }
+
+    @Test
     void serviceNameNotMatch() {
       assertThat(
               applier.matches(
@@ -137,6 +163,15 @@ class SamplingRuleApplierTest {
     @Test
     void methodNotMatch() {
       Attributes attributes = this.attributes.toBuilder().put(HTTP_METHOD, "POST").build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void methodNewSemCovNotMatch() {
+      Attributes attributes =
+          this.newSemCovAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "POST")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -173,6 +208,36 @@ class SamplingRuleApplierTest {
           this.attributes.toBuilder()
               .remove(HTTP_TARGET)
               .put(HTTP_URL, "host:port/instrument-me")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void pathNewSemCovNotMatch() {
+      Attributes attributes =
+          this.newSemCovAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.newSemCovAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "scheme://host:port/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.newSemCovAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "scheme://host:port")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+
+      // Correct path, but we ignore anyways since the URL is malformed per spec, scheme is always
+      // present.
+      attributes =
+          this.newSemCovAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "host:port/instrument-me")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -231,6 +296,15 @@ class SamplingRuleApplierTest {
             .put(HTTP_METHOD, "GET")
             .put(NET_HOST_NAME, "opentelemetry.io")
             .put(HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
+            .put(AttributeKey.stringKey("animal"), "cat")
+            .put(AttributeKey.longKey("speed"), 10)
+            .build();
+
+    private final Attributes newSemCovAttributes =
+        Attributes.builder()
+            .put(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
+            .put(NET_HOST_NAME, "opentelemetry.io")
+            .put(UrlAttributes.URL_PATH, "/instrument-me?foo=bar&cat=meow")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -318,6 +392,30 @@ class SamplingRuleApplierTest {
     }
 
     @Test
+    void newSemCovMethodMatches() {
+      Attributes attributes =
+          this.newSemCovAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGETGOOD")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          newSemCovAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGET").build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          newSemCovAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "GETGET").build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+    }
+
+    @Test
+    void newSemCovMethodNotMatch() {
+      Attributes attributes =
+          newSemCovAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "POST").build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(newSemCovAttributes, HttpAttributes.HTTP_REQUEST_METHOD);
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
     void hostMatches() {
       Attributes attributes =
           this.attributes.toBuilder().put(NET_HOST_NAME, "alpha.opentelemetry.io").build();
@@ -365,6 +463,37 @@ class SamplingRuleApplierTest {
           this.attributes.toBuilder().put(HTTP_TARGET, "foo/instrument-meafoo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes = removeAttribute(this.attributes, HTTP_TARGET);
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void pathNewSemCovMatches() {
+      Attributes attributes =
+          newSemCovAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-me?foo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      // Deceptive question mark, it's actually a wildcard :-)
+      attributes =
+          newSemCovAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-meafoo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+    }
+
+    @Test
+    void pathNewSemCovNotMatch() {
+      Attributes attributes =
+          newSemCovAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-mea?foo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          newSemCovAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "foo/instrument-meafoo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(newSemCovAttributes, UrlAttributes.URL_PATH);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
