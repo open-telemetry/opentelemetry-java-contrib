@@ -128,7 +128,6 @@ jobs:
       - name: Build and publish artifacts
         run: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}

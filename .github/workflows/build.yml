@@ -86,8 +86,6 @@ jobs:
         with:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
       - name: Gradle test
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           ./gradlew test
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
