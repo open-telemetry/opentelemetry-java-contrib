@@ -1,4 +1,3 @@
-import de.undercouch.gradle.tasks.download.Download
 import de.undercouch.gradle.tasks.download.DownloadExtension
 import java.net.HttpURLConnection
 import java.net.URL
