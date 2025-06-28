@@ -53,12 +53,8 @@ abstract class DownloadOpampProtos @Inject constructor(
     val redirectLocation = connection.getHeaderField("Location")
     connection.disconnect()
 
-    val latestTag = if (redirectLocation != null && redirectLocation.contains("/releases/tag/")) {
-      // Extract tag from URL like: https://github.com/open-telemetry/opamp-spec/releases/tag/v0.12.0
-      redirectLocation.substringAfterLast("/")
-    } else {
-      throw RuntimeException("Could not determine latest release tag from redirect. Redirect location: $redirectLocation")
-    }
+    // Extract tag from URL like: https://github.com/open-telemetry/opamp-spec/releases/tag/v0.12.0
+    val latestTag = redirectLocation.substringAfterLast("/")
     // Download the source code for the latest release
     val zipUrl = "https://github.com/open-telemetry/opamp-spec/zipball/$latestTag"
 
