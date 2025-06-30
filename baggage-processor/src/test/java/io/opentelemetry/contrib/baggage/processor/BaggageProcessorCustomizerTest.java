@@ -160,7 +160,7 @@ class BaggageProcessorCustomizerTest {
     try (BaggageSpanProcessor processor =
         BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("*"))) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
-        processor.onStart(Context.current(), span);
+        processor.onEnding(span);
         verify(span).setAttribute("key", "value");
       }
     }
@@ -177,7 +177,7 @@ class BaggageProcessorCustomizerTest {
               .put("other", "value")
               .build()
               .makeCurrent()) {
-        processor.onStart(Context.current(), span);
+        processor.onEnding(span);
         verify(span).setAttribute("key", "value");
         verify(span, Mockito.never()).setAttribute("other", "value");
       }
