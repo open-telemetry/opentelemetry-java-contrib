@@ -51,7 +51,7 @@ dependencies {
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.0.0")
-    api("org.testcontainers:kafka:1.21.2")
+    api("org.testcontainers:kafka:1.21.3")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:4.0")
