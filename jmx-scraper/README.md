@@ -92,7 +92,7 @@ The following [SDK configuration options](https://opentelemetry.io/docs/language
 | `otel.metric.export.interval` | `1m` (1 minute) | metric export interval, also controls the JMX sampling interval                                                                                                   |
 | `otel.metrics.exporter`       | `otlp`          | comma-separated list of metrics exporters supported values are `otlp` and `logging`, additional values might be provided through extra libraries in the classpath |
 | `otel.service.name`           |                 | service name                                                                                                                                                      |
-| `otel.resource.attributes`    |                 | used to specify otel resource attributes, including service attributes. See [the sdk configuration[(https://opentelemetry.io/docs/languages/java/configuration/#properties-resource) and [service attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/service/)                           |
+| `otel.resource.attributes`    |                 | used to specify otel resource attributes, including service attributes. See [the sdk configuration](https://opentelemetry.io/docs/languages/java/configuration/#properties-resource) and [service attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/service/)                           |
 ```)
 
 In addition to OpenTelemetry configuration, the following Java system properties can be provided
