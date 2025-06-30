@@ -85,12 +85,14 @@ Setting the value of `otel.jmx.target.source` allows to fit the following use-ca
 - `legacy` allows to keep using definitions that are very close to JMX Gatherer, this is the recommended option if preserving compatibility is required. Those definitions are in maintenance and are unlikely to evolve over time.
 - `instrumentation` forces using metrics definitions from instrumentation, hence only the reference. Metrics definitions and supported values of `otel.jmx.target.system` will be updated whenever the dependency on instrumentation is updated.
 
-The following SDK configuration options are also relevant
+The following [SDK configuration options](https://opentelemetry.io/docs/languages/java/configuration/#environment-variables-and-system-properties) are also relevant
 
 | config option                 | default value   | description                                                                                                                                                       |
 |-------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `otel.metric.export.interval` | `1m` (1 minute) | metric export interval, also controls the JMX sampling interval                                                                                                   |
 | `otel.metrics.exporter`       | `otlp`          | comma-separated list of metrics exporters supported values are `otlp` and `logging`, additional values might be provided through extra libraries in the classpath |
+| `otel.service.name`           |                 | service name                                                                                                                                                      |
+| `otel.resource.attributes`    |                 | used to specify otel resource attributes, including service attributes. See [the sdk configuration](https://opentelemetry.io/docs/languages/java/configuration/#properties-resource) and [service attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/service/)                           |
 
 In addition to OpenTelemetry configuration, the following Java system properties can be provided
 through the command-line arguments, properties file or stdin and will be propagated to the JVM system properties:
