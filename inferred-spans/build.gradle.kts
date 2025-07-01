@@ -23,7 +23,6 @@ dependencies {
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")

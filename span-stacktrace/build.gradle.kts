@@ -19,8 +19,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
-
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
