@@ -58,6 +58,7 @@ public class OkHttpWebSocket implements WebSocket {
         }
       } catch (IllegalArgumentException e) {
         status.set(Status.RUNNING);
+        // Re-throwing as this error happens due to a caller error.
         throw e;
       }
     }
