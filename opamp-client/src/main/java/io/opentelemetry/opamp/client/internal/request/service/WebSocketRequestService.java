@@ -64,7 +64,9 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   public static WebSocketRequestService create(
       WebSocket webSocket, PeriodicDelay periodicRetryDelay) {
     return new WebSocketRequestService(
-        webSocket, periodicRetryDelay, Executors.newSingleThreadScheduledExecutor());
+        webSocket,
+        periodicRetryDelay,
+        Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory()));
   }
 
   WebSocketRequestService(

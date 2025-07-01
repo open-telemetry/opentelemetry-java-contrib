@@ -22,13 +22,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import opamp.proto.AgentToServer;
 import opamp.proto.ServerErrorResponse;
@@ -253,21 +251,6 @@ public final class HttpRequestService implements RequestService {
 
     Duration getNextDelay() {
       return currentDelay.getNextDelay();
-    }
-  }
-
-  private static class DaemonThreadFactory implements ThreadFactory {
-    private final ThreadFactory delegate = Executors.defaultThreadFactory();
-
-    @Override
-    public Thread newThread(@Nonnull Runnable r) {
-      Thread t = delegate.newThread(r);
-      try {
-        t.setDaemon(true);
-      } catch (SecurityException e) {
-        // Well, we tried.
-      }
-      return t;
     }
   }
 }
