@@ -13,6 +13,7 @@ dependencies {
   compileOnly("com.google.auto.service:auto-service-annotations")
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("com.lmax:disruptor")
   implementation("org.jctools:jctools-core")
   implementation("tools.profiler:async-profiler")
@@ -21,6 +22,7 @@ dependencies {
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
