@@ -118,8 +118,12 @@ jobs:
           name: integration-test-results
           path: jmx-metrics/build/reports/tests/integrationTest
 
-  markdown-link-check:
-    uses: ./.github/workflows/reusable-markdown-link-check.yml
+  link-check:
+    # release branches are excluded to avoid unnecessary maintenance if external links break
+    # (and also because the README.md might need update on release branches before the release
+    # download has been published)
+    if: "!startsWith(github.ref_name, 'release/')"
+    uses: ./.github/workflows/reusable-link-check.yml
 
   markdown-lint-check:
     uses: ./.github/workflows/reusable-markdown-lint.yml
@@ -142,7 +146,7 @@ jobs:
     # and so would not short-circuit if used in the second-last position
     name: publish-snapshots${{ (github.ref_name != 'main' || github.repository != 'open-telemetry/opentelemetry-java-contrib') && ' (skipped)' || '' }}
     needs:
-      # intentionally not blocking snapshot publishing on markdown-link-check or misspell-check
+      # intentionally not blocking snapshot publishing on link-check or misspell-check
       - build
       - integration-test
     runs-on: ubuntu-latest
