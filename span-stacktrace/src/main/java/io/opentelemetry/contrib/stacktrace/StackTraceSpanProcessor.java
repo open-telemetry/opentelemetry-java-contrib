@@ -5,20 +5,16 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor;
+import io.opentelemetry.semconv.CodeAttributes;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Predicate;
 
 public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
-
-  // inlined incubating attribute to prevent direct dependency on incubating semconv
-  private static final AttributeKey<String> SPAN_STACKTRACE =
-      AttributeKey.stringKey("code.stacktrace");
 
   private final long minSpanDurationNanos;
 
@@ -56,14 +52,14 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
     if (span.getLatencyNanos() < minSpanDurationNanos) {
       return;
     }
-    if (span.getAttribute(SPAN_STACKTRACE) != null) {
+    if (span.getAttribute(CodeAttributes.CODE_STACKTRACE) != null) {
       // Span already has a stacktrace, do not override
       return;
     }
     if (!filterPredicate.test(span)) {
       return;
     }
-    span.setAttribute(SPAN_STACKTRACE, generateSpanEndStacktrace());
+    span.setAttribute(CodeAttributes.CODE_STACKTRACE, generateSpanEndStacktrace());
   }
 
   @Override
