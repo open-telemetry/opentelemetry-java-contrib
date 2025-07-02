@@ -1,0 +1,71 @@
+groups:
+  - id: shared.attributes
+    type: attribute_group
+    brief: Attributes of metrics.
+    attributes:
+      - id: queue.manager
+        type: string
+        brief: >
+          The name of the queue manager
+        stability: development
+        examples: ["MQ1"]
+      - id: topic.name
+        type: string
+        brief: >
+          The name of the topic
+        stability: development
+        examples: [ "dev/" ]
+      - id: channel.name
+        type: string
+        brief: >
+          The name of the channel
+        stability: development
+        examples: [ "DEV.ADMIN.SVRCONN" ]
+      - id: channel.type
+        type: string
+        brief: >
+          The type of the channel
+        stability: development
+        examples: [ "server-connection", "cluster-receiver", "amqp" ]
+      - id: job.name
+        type: string
+        brief: >
+          The job name
+        stability: development
+        examples: [ "0000074900000003" ]
+      - id: channel.start.time
+        type: int
+        brief: >
+          The start time of the channel as seconds since Epoch.
+        stability: development
+        examples: [ 1748462702 ]
+      - id: queue.name
+        type: string
+        brief: >
+          The queue name
+        stability: development
+        examples: [ "DEV.DEAD.LETTER.QUEUE" ]
+      - id: queue.type
+        type: string
+        brief: >
+          The queue type
+        stability: development
+        examples: [ "local-normal" ]
+      - id: listener.name
+        type: string
+        brief: >
+          The listener name
+        stability: development
+        examples: [ "listener" ]
+      - id: user.name
+        type: string
+        brief: >
+          The user name
+        stability: development
+        examples: [ "foo", "root" ]
+      - id: application.name
+        type: string
+        brief: >
+          The application name
+        stability: development
+        examples: [ "Wordle", "JMSService" ]
