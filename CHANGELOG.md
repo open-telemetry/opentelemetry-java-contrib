@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.47.0 (2025-07-03)
 
 ### GCP authentication extension
 
