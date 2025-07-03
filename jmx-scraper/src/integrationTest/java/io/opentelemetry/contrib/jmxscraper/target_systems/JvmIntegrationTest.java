@@ -32,12 +32,6 @@ public class JvmIntegrationTest extends TargetSystemIntegrationTest {
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper
         .withTargetSystem("jvm")
-        // Since JVM metrics were be added to instrumentation, the default "auto" source
-        // means that the definitions in instrumentation will be used, and thus this test will fail
-        // due to metrics differences, adding an explicit "legacy" source is required to continue
-        // testing the JVM metrics defined in this project.
-        // https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/13392
-        .withTargetSystemSource("legacy")
         // also testing custom yaml
         .withCustomYaml("custom-metrics.yaml");
   }
