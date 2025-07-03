@@ -42,7 +42,7 @@ public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected JmxScraperContainer customizeScraperContainer(
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
-    return scraper.withTargetSystemSource("legacy").withTargetSystem("tomcat");
+    return scraper.withTargetSystem("tomcat");
   }
 
   @Override
