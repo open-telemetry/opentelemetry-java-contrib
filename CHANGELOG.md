@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.47.0 (2025-07-03)
+
 ### GCP authentication extension
 
 - Update the internal implementation such that the required headers are retrieved
