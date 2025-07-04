@@ -16,6 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.1"))
+  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.31.1"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
