@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## Version 1.47.0 (2025-07-03)
+
+### Disk buffering
+
+- Shared storage
+  ([#1912](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1912))
+- Implementing ExtendedLogRecordData
+  ([#1918](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1918))
+- Add missing EventName to disk-buffering LogRecordDataMapper
+  ([#1950](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1950))
 
 ### Disk buffering
 
