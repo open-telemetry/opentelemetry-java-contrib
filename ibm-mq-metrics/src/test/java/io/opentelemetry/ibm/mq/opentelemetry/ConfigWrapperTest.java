@@ -8,7 +8,6 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,34 +15,34 @@ import org.junit.jupiter.api.Test;
 
 class ConfigWrapperTest {
 
-  URL configFile;
+  String file;
 
   @BeforeEach
   void setUp() {
-    configFile = ConfigWrapperTest.class.getResource("/conf/config.yml");
+    file = ConfigWrapperTest.class.getResource("/conf/config.yml").getFile();
   }
 
   @Test
   void testQueueManagerNames() throws Exception {
-    ConfigWrapper config = ConfigWrapper.parse(configFile);
+    ConfigWrapper config = ConfigWrapper.parse(file);
     assertThat(config.getQueueManagerNames()).isEqualTo(singletonList("QM1"));
   }
 
   @Test
   void testNumberOfThreads() throws Exception {
-    ConfigWrapper config = ConfigWrapper.parse(configFile);
+    ConfigWrapper config = ConfigWrapper.parse(file);
     assertThat(config.getNumberOfThreads()).isEqualTo(20);
   }
 
   @Test
   void testTaskDelay() throws Exception {
-    ConfigWrapper config = ConfigWrapper.parse(configFile);
+    ConfigWrapper config = ConfigWrapper.parse(file);
     assertThat(config.getTaskDelay()).isEqualTo(Duration.of(27, ChronoUnit.SECONDS));
   }
 
   @Test
   void testTaskInitialDelay() throws Exception {
-    ConfigWrapper config = ConfigWrapper.parse(configFile);
+    ConfigWrapper config = ConfigWrapper.parse(file);
     assertThat(config.getTaskInitialDelaySeconds()).isEqualTo(0);
   }
 }
