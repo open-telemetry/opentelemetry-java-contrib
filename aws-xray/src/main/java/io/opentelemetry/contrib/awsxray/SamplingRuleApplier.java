@@ -199,9 +199,9 @@ final class SamplingRuleApplier {
         if (httpMethod.equals(_OTHER_REQUEST_METHOD)) {
           httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
         }
-      } else if (entry.getKey().equals(NET_HOST_NAME) || (entry.getKey().equals(ServerAttributes.SERVER_ADDRESS))) {
+      } else if (entry.getKey().equals(NET_HOST_NAME) || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
         host = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_HOST) || (entry.getKey().equals(ServerAttributes.SERVER_ADDRESS))) {
+      } else if (entry.getKey().equals(HTTP_HOST) || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
         // TODO (trask) remove support for deprecated http.host attribute
         host = (String) entry.getValue();
       }
