@@ -8,9 +8,8 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 import static java.util.Collections.emptyList;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.net.URL;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +36,15 @@ public final class ConfigWrapper {
   }
 
   public static ConfigWrapper parse(String configFile) throws IOException {
+    return parse(new URL("file://" + configFile));
+  }
+
+  public static ConfigWrapper parse(URL configFile) throws IOException {
     Yaml yaml = new Yaml();
-    Map<String, ?> config =
-        yaml.load(Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset()));
-    return new ConfigWrapper(config);
+    try (InputStream in = configFile.openStream()) {
+      Map<String, ?> config = yaml.load(in);
+      return new ConfigWrapper(config);
+    }
   }
 
   public int getNumberOfThreads() {
