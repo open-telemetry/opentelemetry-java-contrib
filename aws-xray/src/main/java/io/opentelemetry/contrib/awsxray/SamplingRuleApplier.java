@@ -60,7 +60,8 @@ final class SamplingRuleApplier {
 
   private static final Map<String, String> XRAY_CLOUD_PLATFORM;
 
-  // _OTHER request method: https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/http.md?plain=1#L96
+  // _OTHER request method:
+  // https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/http.md?plain=1#L96
   private static final String _OTHER_REQUEST_METHOD = "_OTHER";
 
   static {
@@ -194,14 +195,18 @@ final class SamplingRuleApplier {
       } else if (entry.getKey().equals(HTTP_METHOD)
           || entry.getKey().equals(HttpAttributes.HTTP_REQUEST_METHOD)) {
         httpMethod = (String) entry.getValue();
-        // according to semantic conventions, if the HTTP request method is not known to instrumentation
-        // it must be set to _OTHER and the HTTP_REQUEST_METHOD_ORIGINAL should contain the original method
+        // according to semantic conventions, if the HTTP request method is not known to
+        // instrumentation
+        // it must be set to _OTHER and the HTTP_REQUEST_METHOD_ORIGINAL should contain the original
+        // method
         if (httpMethod.equals(_OTHER_REQUEST_METHOD)) {
           httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
         }
-      } else if (entry.getKey().equals(NET_HOST_NAME) || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
+      } else if (entry.getKey().equals(NET_HOST_NAME)
+          || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
         host = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_HOST) || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
+      } else if (entry.getKey().equals(HTTP_HOST)
+          || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
         // TODO (trask) remove support for deprecated http.host attribute
         host = (String) entry.getValue();
       }
