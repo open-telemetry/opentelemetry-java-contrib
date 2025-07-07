@@ -196,9 +196,8 @@ final class SamplingRuleApplier {
           || entry.getKey().equals(HttpAttributes.HTTP_REQUEST_METHOD)) {
         httpMethod = (String) entry.getValue();
         // according to semantic conventions, if the HTTP request method is not known to
-        // instrumentation
-        // it must be set to _OTHER and the HTTP_REQUEST_METHOD_ORIGINAL should contain the original
-        // method
+        // instrumentation, it must be set to _OTHER and the
+        // HTTP_REQUEST_METHOD_ORIGINAL should contain the original method
         if (httpMethod.equals(_OTHER_REQUEST_METHOD)) {
           httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
         }
