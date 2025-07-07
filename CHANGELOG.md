@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## Version 1.47.0 (2025-07-04)
 
 ### Disk buffering
