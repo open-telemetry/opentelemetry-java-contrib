@@ -1,6 +1,6 @@
-import de.undercouch.gradle.tasks.download.Download
 import de.undercouch.gradle.tasks.download.DownloadExtension
-import groovy.json.JsonSlurper
+import java.net.HttpURLConnection
+import java.net.URL
 
 plugins {
   id("otel.java-conventions")
@@ -12,23 +12,15 @@ description = "Client implementation of the OpAMP spec."
 otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
 dependencies {
+  implementation("com.squareup.okhttp3:okhttp")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
-}
-
-val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
-  group = "opamp"
-  src("https://api.github.com/repos/open-telemetry/opamp-spec/releases/latest")
-  dest(project.layout.buildDirectory.file("opamp/release.json"))
+  testImplementation("org.mockito:mockito-inline")
 }
 
 val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
 opampProtos.configure {
   group = "opamp"
-  dependsOn(opampReleaseInfo)
-  lastReleaseInfoJson.set {
-    opampReleaseInfo.get().dest
-  }
   outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
   downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/$name/release.zip"))
 }
@@ -46,20 +38,28 @@ abstract class DownloadOpampProtos @Inject constructor(
   private val fileOps: FileSystemOperations,
 ) : DefaultTask() {
 
-  @get:InputFile
-  abstract val lastReleaseInfoJson: RegularFileProperty
-
   @get:OutputDirectory
   abstract val outputProtosDir: DirectoryProperty
 
   @get:Internal
   abstract val downloadedZipFile: RegularFileProperty
 
-  @Suppress("UNCHECKED_CAST")
   @TaskAction
   fun execute() {
-    val releaseInfo = JsonSlurper().parse(lastReleaseInfoJson.get().asFile) as Map<String, String>
-    val zipUrl = releaseInfo["zipball_url"]
+    // Get the latest release tag by following the redirect from GitHub's latest release URL
+    val latestReleaseUrl = "https://github.com/open-telemetry/opamp-spec/releases/latest"
+    val connection = URL(latestReleaseUrl).openConnection() as HttpURLConnection
+    connection.instanceFollowRedirects = false
+    connection.requestMethod = "HEAD"
+
+    val redirectLocation = connection.getHeaderField("Location")
+    connection.disconnect()
+
+    // Extract tag from URL like: https://github.com/open-telemetry/opamp-spec/releases/tag/v0.12.0
+    val latestTag = redirectLocation.substringAfterLast("/")
+    // Download the source code for the latest release
+    val zipUrl = "https://github.com/open-telemetry/opamp-spec/zipball/$latestTag"
+
     download.run {
       src(zipUrl)
       dest(downloadedZipFile)

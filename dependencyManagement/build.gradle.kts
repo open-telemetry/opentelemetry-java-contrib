@@ -2,8 +2,8 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.16.0-alpha"
-val semconvVersion = "1.32.0"
+val otelInstrumentationVersion = "2.17.0-alpha"
+val semconvVersion = "1.34.0"
 
 javaPlatform {
   allowDependencies()
@@ -15,7 +15,7 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.0"))
+  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.1"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -25,8 +25,8 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")
     api("com.google.auto.value:auto-value-annotations:1.11.0")
-    api("com.google.errorprone:error_prone_annotations:2.38.0")
-    api("com.google.errorprone:error_prone_core:2.38.0")
+    api("com.google.errorprone:error_prone_annotations:2.39.0")
+    api("com.google.errorprone:error_prone_core:2.39.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -51,7 +51,7 @@ dependencies {
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.0.0")
-    api("org.testcontainers:kafka:1.21.1")
+    api("org.testcontainers:kafka:1.21.3")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:4.0")

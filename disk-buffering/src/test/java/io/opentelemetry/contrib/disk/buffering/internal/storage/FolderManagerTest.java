@@ -24,6 +24,7 @@ import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -38,6 +39,11 @@ class FolderManagerTest {
   void setUp() {
     clock = mock();
     folderManager = new FolderManager(rootDir, TestData.getConfiguration(rootDir), clock);
+  }
+
+  @AfterEach
+  void tearDown() throws Exception {
+    folderManager.close();
   }
 
   @Test

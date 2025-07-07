@@ -2,13 +2,26 @@
 
 ## Unreleased
 
-## Version 1.47.0 (2025-05-19)
+## Version 1.47.0 (2025-07-04)
+
+### Disk buffering
+
+- Shared storage
+  ([#1912](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1912))
+- Implementing ExtendedLogRecordData
+  ([#1918](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1918))
+- Add missing EventName to disk-buffering LogRecordDataMapper
+  ([#1950](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1950))
 
 ### GCP authentication extension
 
 - Update the internal implementation such that the required headers are retrieved
   from the Google Auth Library instead of manually constructing and passing them.
   ([#1860](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1860))
+- Add metrics support to auth extension
+  ([#1891](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1891))
+- Update ConfigurableOptions to read from ConfigProperties
+  ([#1904](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1904))
 
 ### Inferred spans
 
