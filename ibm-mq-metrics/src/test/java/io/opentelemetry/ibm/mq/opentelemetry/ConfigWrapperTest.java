@@ -22,6 +22,10 @@ class ConfigWrapperTest {
     file = ConfigWrapperTest.class.getResource("/conf/config.yml").getFile();
     // Windows resources can contain a colon, which can't be mapped to a Path cleanly
     if (file.contains(":")) {
+      System.err.println("resource => " + ConfigWrapperTest.class.getResource("/conf/config.yml"));
+      System.err.println("config file => " + file);
+      String userDir = System.getProperty("user.dir");
+      System.err.println("user.dir => " + userDir);
       file = file.replaceFirst(":", "");
     }
   }
