@@ -120,7 +120,7 @@ public class OpenTelemetrySdkServiceTest {
     } finally {
       System.clearProperty("otel.exporter.otlp.endpoint");
       System.clearProperty("otel.exporter.otlp.traces.endpoint");
-      System.clearProperty("otel.exporter.otlp.traces.protocol");
+      System.clearProperty("otel.traces.exporter");
     }
   }
 
