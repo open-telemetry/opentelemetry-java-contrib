@@ -18,6 +18,7 @@ class ConfigWrapperTest {
   String file;
 
   @BeforeEach
+  @SuppressWarnings("SystemOut")
   void setUp() {
     file = ConfigWrapperTest.class.getResource("/conf/config.yml").getFile();
     // Windows resources can contain a colon, which can't be mapped to a Path cleanly
