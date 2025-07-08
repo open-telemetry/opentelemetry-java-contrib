@@ -122,10 +122,13 @@ jobs:
           path: jmx-metrics/build/reports/tests/integrationTest
 
   link-check:
+    # merge group and push events are excluded to avoid unnecessary CI failures
+    # (these failures will instead be captured by the daily scheduled run)
+    #
     # release branches are excluded to avoid unnecessary maintenance if external links break
     # (and also because the README.md might need update on release branches before the release
     # download has been published)
-    if: "!startsWith(github.ref_name, 'release/')"
+    if: github.event_name != 'merge_group' && github.event_name != 'push' && !startsWith(github.ref_name, 'release/')
     uses: ./.github/workflows/reusable-link-check.yml
 
   markdown-lint-check:
