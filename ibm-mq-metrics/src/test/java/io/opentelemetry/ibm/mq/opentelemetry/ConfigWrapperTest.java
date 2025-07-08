@@ -25,9 +25,11 @@ class ConfigWrapperTest {
     if (file.contains(":")) {
       System.err.println("resource => " + ConfigWrapperTest.class.getResource("/conf/config.yml"));
       System.err.println("config file => " + file);
+      String file2 = file.replaceFirst("^/([A-Z]:)/", "$1/");
+      System.err.println("file2 => " + file2);
       String userDir = System.getProperty("user.dir");
       System.err.println("user.dir => " + userDir);
-      file = file.replaceFirst(":", "");
+      file = file2;
     }
   }
 
