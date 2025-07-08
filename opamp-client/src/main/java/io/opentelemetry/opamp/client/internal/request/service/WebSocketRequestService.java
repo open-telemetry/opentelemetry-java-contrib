@@ -39,6 +39,9 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
 
+  /** Defined <a href="https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1">here</a>. */
+  private static final int WEBSOCKET_NORMAL_CLOSURE_CODE = 1000;
+
   @GuardedBy("hasPendingRequestLock")
   private boolean hasPendingRequest = false;
 
@@ -138,7 +141,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   public void stop() {
     if (hasStopped.compareAndSet(false, true)) {
       doSendRequest();
-      webSocket.close(1000, null);
+      webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
       executorService.shutdown();
     }
   }
@@ -190,7 +193,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
         retryAfter = Duration.ofNanos(errorResponse.retry_info.retry_after_nanoseconds);
       }
 
-      webSocket.close(1000, null);
+      webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
       scheduleConnectionRetry(retryAfter);
     }
   }
