@@ -18,19 +18,11 @@ class ConfigWrapperTest {
   String file;
 
   @BeforeEach
-  @SuppressWarnings("SystemOut")
   void setUp() {
     file = ConfigWrapperTest.class.getResource("/conf/config.yml").getFile();
     // Windows resources can contain a colon, which can't be mapped to a Path cleanly
-    if (file.contains(":")) {
-      System.err.println("resource => " + ConfigWrapperTest.class.getResource("/conf/config.yml"));
-      System.err.println("config file => " + file);
-      String file2 = file.replaceFirst("^/([A-Z]:)/", "$1/");
-      System.err.println("file2 => " + file2);
-      String userDir = System.getProperty("user.dir");
-      System.err.println("user.dir => " + userDir);
-      file = file2;
-    }
+    // They look like /D:/a/path/to/whatever
+    file = file.replaceFirst("^/([A-Z]:)/", "$1/");
   }
 
   @Test
