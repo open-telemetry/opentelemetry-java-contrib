@@ -29,15 +29,14 @@ import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
 public final class WebSocketRequestService implements RequestService, WebSocket.Listener {
+  private static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
+      PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
+
   private final WebSocket webSocket;
-  private final PeriodicDelay periodicRetryDelay;
-  private final AtomicBoolean retryingConnection = new AtomicBoolean(false);
-  private final AtomicBoolean nextRetryScheduled = new AtomicBoolean(false);
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
+  private final ConnectionStatus connectionStatus;
   private final ScheduledExecutorService executorService;
-  public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
-      PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
 
   /** Defined <a href="https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1">here</a>. */
   private static final int WEBSOCKET_NORMAL_CLOSURE_CODE = 1000;
@@ -77,8 +76,8 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
       PeriodicDelay periodicRetryDelay,
       ScheduledExecutorService executorService) {
     this.webSocket = webSocket;
-    this.periodicRetryDelay = periodicRetryDelay;
     this.executorService = executorService;
+    this.connectionStatus = new ConnectionStatus(periodicRetryDelay);
   }
 
   @Override
@@ -154,7 +153,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void onOpen() {
-    retryingConnection.set(false);
+    connectionStatus.success();
     getCallback().onConnectionSuccess();
     synchronized (hasPendingRequestLock) {
       if (hasPendingRequest) {
@@ -200,34 +199,12 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
       }
 
       webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
-      scheduleConnectionRetry(retryAfter);
+      connectionStatus.retryAfter(retryAfter);
     }
   }
 
   private static boolean serverIsUnavailable(ServerErrorResponse errorResponse) {
     return errorResponse.type.equals(ServerErrorResponseType.ServerErrorResponseType_Unavailable);
-  }
-
-  @SuppressWarnings("FutureReturnValueIgnored")
-  private void scheduleConnectionRetry(@Nullable Duration retryAfter) {
-    if (hasStopped.get()) {
-      return;
-    }
-    if (retryingConnection.compareAndSet(false, true)) {
-      periodicRetryDelay.reset();
-      if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
-        ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
-      }
-    }
-    if (nextRetryScheduled.compareAndSet(false, true)) {
-      executorService.schedule(
-          this::retryConnection, periodicRetryDelay.getNextDelay().toNanos(), TimeUnit.NANOSECONDS);
-    }
-  }
-
-  private void retryConnection() {
-    nextRetryScheduled.set(false);
-    startConnection();
   }
 
   @Override
@@ -238,17 +215,57 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   @Override
   public void onClosed() {
     // If this service isn't stopped, we should retry connecting.
-    scheduleConnectionRetry(null);
+    connectionStatus.retryAfter(null);
   }
 
   @Override
   public void onFailure(Throwable t) {
     getCallback().onConnectionFailed(t);
-    scheduleConnectionRetry(null);
+    connectionStatus.retryAfter(null);
   }
 
   @Nonnull
   private Callback getCallback() {
     return Objects.requireNonNull(callback);
+  }
+
+  private class ConnectionStatus {
+    private final PeriodicDelay periodicRetryDelay;
+    private final AtomicBoolean retryingConnection = new AtomicBoolean(false);
+    private final AtomicBoolean nextRetryScheduled = new AtomicBoolean(false);
+
+    ConnectionStatus(PeriodicDelay periodicRetryDelay) {
+      this.periodicRetryDelay = periodicRetryDelay;
+    }
+
+    void success() {
+      retryingConnection.set(false);
+    }
+
+    @SuppressWarnings("FutureReturnValueIgnored")
+    void retryAfter(@Nullable Duration retryAfter) {
+      if (hasStopped.get()) {
+        return;
+      }
+
+      if (retryingConnection.compareAndSet(false, true)) {
+        periodicRetryDelay.reset();
+        if (retryAfter != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
+          ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(retryAfter);
+        }
+      }
+
+      if (nextRetryScheduled.compareAndSet(false, true)) {
+        executorService.schedule(
+            this::retryConnection,
+            periodicRetryDelay.getNextDelay().toNanos(),
+            TimeUnit.NANOSECONDS);
+      }
+    }
+
+    private void retryConnection() {
+      nextRetryScheduled.set(false);
+      startConnection();
+    }
   }
 }
