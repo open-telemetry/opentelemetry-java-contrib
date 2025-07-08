@@ -140,6 +140,12 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   @Override
   public void stop() {
     if (hasStopped.compareAndSet(false, true)) {
+      /*
+       Sending last message as explained in the spec:
+       https://opentelemetry.io/docs/specs/opamp/#websocket-transport-opamp-client-initiated.
+       The client implementation must ensure that the "agent_disconnect" field will be provided in the
+       next supplied request body.
+      */
       doSendRequest();
       webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
       executorService.shutdown();
