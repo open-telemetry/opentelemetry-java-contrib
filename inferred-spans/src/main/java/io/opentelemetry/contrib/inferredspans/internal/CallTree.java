@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.inferredspans.internal;
 
-import static io.opentelemetry.contrib.inferredspans.internal.semconv.Attributes.CODE_STACKTRACE;
 import static io.opentelemetry.contrib.inferredspans.internal.semconv.Attributes.LINK_IS_CHILD;
 import static io.opentelemetry.contrib.inferredspans.internal.semconv.Attributes.SPAN_IS_INFERRED;
 import static java.util.logging.Level.FINE;
@@ -20,6 +19,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.inferredspans.internal.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.internal.pooling.Recyclable;
 import io.opentelemetry.contrib.inferredspans.internal.util.HexUtils;
+import io.opentelemetry.semconv.CodeAttributes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -515,7 +515,7 @@ public class CallTree implements Recyclable {
       assert this.parent != null;
       tempBuilder.setLength(0);
       this.parent.fillStackTrace(tempBuilder);
-      spanBuilder.setAttribute(CODE_STACKTRACE, tempBuilder.toString());
+      spanBuilder.setAttribute(CodeAttributes.CODE_STACKTRACE, tempBuilder.toString());
     }
 
     Span span = spanBuilder.startSpan();

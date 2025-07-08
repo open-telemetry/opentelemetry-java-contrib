@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.inferredspans.internal;
 
-import static io.opentelemetry.contrib.inferredspans.internal.semconv.Attributes.CODE_STACKTRACE;
 import static io.opentelemetry.contrib.inferredspans.internal.semconv.Attributes.LINK_IS_CHILD;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static java.util.stream.Collectors.toMap;
@@ -20,6 +19,7 @@ import io.opentelemetry.contrib.inferredspans.internal.pooling.ObjectPool;
 import io.opentelemetry.contrib.inferredspans.internal.util.DisabledOnOpenJ9;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.semconv.CodeAttributes;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -924,7 +924,7 @@ class CallTreeTest {
             .describedAs("Unexpected duration for span %s", span)
             .isEqualTo(durationMs * 1_000_000L);
 
-        String actualStacktrace = span.getAttributes().get(CODE_STACKTRACE);
+        String actualStacktrace = span.getAttributes().get(CodeAttributes.CODE_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {

@@ -143,6 +143,12 @@ public abstract class TargetSystemIntegrationTest {
     // Create and initialize scraper container
     scraper =
         new JmxScraperContainer(otlpEndpoint, scraperBaseImage())
+            // Since JVM metrics were be added to instrumentation, the default "auto" source
+            // means that the definitions in instrumentation will be used, and thus tests will fail
+            // due to metrics differences, adding an explicit "legacy" source is required to
+            // continue
+            // testing metrics defined in this project.
+            .withTargetSystemSource("legacy")
             .withLogConsumer(new Slf4jLogConsumer(jmxScraperLogger))
             .withNetwork(network)
             .withRmiServiceUrl(TARGET_SYSTEM_NETWORK_ALIAS, JMX_PORT);

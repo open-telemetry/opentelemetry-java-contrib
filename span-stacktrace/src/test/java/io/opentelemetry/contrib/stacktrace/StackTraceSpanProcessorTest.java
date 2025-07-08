@@ -19,7 +19,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
+import io.opentelemetry.semconv.CodeAttributes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ class StackTraceSpanProcessorTest {
         YesPredicate.class,
         "1ms",
         Duration.ofMillis(1).toNanos(),
-        sb -> sb.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, "hello"),
+        sb -> sb.setAttribute(CodeAttributes.CODE_STACKTRACE, "hello"),
         stacktrace -> assertThat(stacktrace).isEqualTo("hello"));
   }
 
@@ -169,8 +169,7 @@ class StackTraceSpanProcessorTest {
       List<SpanData> finishedSpans = spansExporter.getFinishedSpanItems();
       assertThat(finishedSpans).hasSize(1);
 
-      String stackTrace =
-          finishedSpans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
+      String stackTrace = finishedSpans.get(0).getAttributes().get(CodeAttributes.CODE_STACKTRACE);
 
       stackTraceCheck.accept(stackTrace);
     }

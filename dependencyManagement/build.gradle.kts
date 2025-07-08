@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.16.0-alpha"
+val otelInstrumentationVersion = "2.17.0-alpha"
 val semconvVersion = "1.34.0"
 
 javaPlatform {
@@ -44,7 +44,7 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.squareup.okhttp3:okhttp:4.12.0")
+    api("com.squareup.okhttp3:okhttp:5.0.0")
     api("com.uber.nullaway:nullaway:0.12.7")
     api("org.assertj:assertj-core:3.27.3")
     api("org.awaitility:awaitility:4.3.0")
