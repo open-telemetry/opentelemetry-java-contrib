@@ -56,7 +56,7 @@ public class AzureAksResourceProvider extends CloudResourceProvider {
   @Override
   public int order() {
     // run after the fast cloud resource providers that only check environment variables
-    // and before the AKS provider
+    // and before the VM provider
     return 100;
   }
 
