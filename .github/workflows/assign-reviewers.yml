@@ -18,6 +18,6 @@ jobs:
       pull-requests: write  # for assigning reviewers
     runs-on: ubuntu-latest
     steps:
-      - uses: open-telemetry/assign-reviewers-action@cb42e3ee14a59c01abccd401f126a0f4c3991cb3 # main
+      - uses: open-telemetry/assign-reviewers-action@fcd27c5381c10288b23d423ab85473710a33389e # main
         with:
           config-file: .github/component_owners.yml
