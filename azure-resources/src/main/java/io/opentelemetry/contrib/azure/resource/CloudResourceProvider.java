@@ -17,4 +17,12 @@ public abstract class CloudResourceProvider implements ConditionalResourceProvid
   public final boolean shouldApply(ConfigProperties config, Resource existing) {
     return existing.getAttribute(CLOUD_PROVIDER) == null;
   }
+
+  @Override
+  public final Resource createResource(ConfigProperties config) {
+    // not using config in any providers
+    return createResource();
+  }
+
+  abstract Resource createResource();
 }

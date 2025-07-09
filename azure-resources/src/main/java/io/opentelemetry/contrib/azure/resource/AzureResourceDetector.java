@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.azure.resource;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
@@ -39,16 +38,14 @@ public class AzureResourceDetector implements ComponentProvider<Resource> {
     ResourceBuilder builder = Resource.builder();
     int attributesCount = 0;
 
-    @SuppressWarnings("NullAway")
-    private void add(
-        ResourceProvider provider) {
-      Attributes attributes = provider.createResource(null).getAttributes();
+    private void add(CloudResourceProvider provider) {
+      Attributes attributes = provider.createResource().getAttributes();
       builder.putAll(attributes);
       attributesCount += attributes.size();
     }
 
     private void addIfEmpty(
-        ResourceProvider provider) {
+        CloudResourceProvider provider) {
       if (attributesCount == 0) {
         add(provider);
       }
