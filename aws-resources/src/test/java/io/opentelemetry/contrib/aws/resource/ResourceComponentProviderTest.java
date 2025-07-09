@@ -7,13 +7,13 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
-public class ComponentProviderTest {
+public class ResourceComponentProviderTest {
 
   @Test
   @SuppressWarnings("rawtypes")
   void providerIsLoaded() {
     List<ComponentProvider> providers = SpiHelper.create(
-            ComponentProviderTest.class.getClassLoader())
+            ResourceComponentProviderTest.class.getClassLoader())
         .load(ComponentProvider.class);
     assertThat(providers).extracting(ComponentProvider::getName)
         .containsExactly("aws");
