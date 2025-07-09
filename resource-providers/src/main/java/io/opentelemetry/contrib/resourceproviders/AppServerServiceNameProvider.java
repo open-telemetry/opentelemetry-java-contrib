@@ -38,6 +38,10 @@ public final class AppServerServiceNameProvider implements ConditionalResourcePr
 
   @Override
   public Resource createResource(ConfigProperties config) {
+    return create();
+  }
+
+  Resource create() {
     String serviceName = detectServiceName();
     if (serviceName == null) {
       logger.log(
