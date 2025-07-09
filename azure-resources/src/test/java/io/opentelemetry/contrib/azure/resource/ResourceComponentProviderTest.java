@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.azure.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,10 +17,9 @@ public class ResourceComponentProviderTest {
   @Test
   @SuppressWarnings("rawtypes")
   void providerIsLoaded() {
-    List<ComponentProvider> providers = SpiHelper.create(
-            ResourceComponentProviderTest.class.getClassLoader())
-        .load(ComponentProvider.class);
-    assertThat(providers).extracting(ComponentProvider::getName)
-        .containsExactly("azure");
+    List<ComponentProvider> providers =
+        SpiHelper.create(ResourceComponentProviderTest.class.getClassLoader())
+            .load(ComponentProvider.class);
+    assertThat(providers).extracting(ComponentProvider::getName).containsExactly("azure");
   }
 }

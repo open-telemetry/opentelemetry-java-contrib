@@ -18,7 +18,6 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.sdk.resources.Resource;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

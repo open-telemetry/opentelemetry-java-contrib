@@ -44,13 +44,10 @@ public class AzureResourceDetector implements ComponentProvider<Resource> {
       attributesCount += attributes.size();
     }
 
-    private void addIfEmpty(
-        CloudResourceProvider provider) {
+    private void addIfEmpty(CloudResourceProvider provider) {
       if (attributesCount == 0) {
         add(provider);
       }
     }
-
   }
-
 }
