@@ -6,21 +6,21 @@ export MSYS_NO_PATHCONV=1 # for Git Bash on Windows
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$SCRIPT_DIR/../.."
-DEPENDENCIES_DOCKERFILE="$SCRIPT_DIR/dependencies.dockerfile"
+DEPENDENCIES_DOCKERFILE="$SCRIPT_DIR/dependencies.Dockerfile"
 
 # Parse command line arguments
-RELATIVE_ONLY=false
-MODIFIED_FILES=""
+LOCAL_LINKS_ONLY=false
+TARGET=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --relative-only)
-            RELATIVE_ONLY=true
+        --local-links-only)
+            LOCAL_LINKS_ONLY=true
             shift
             ;;
         *)
             # Treat any other arguments as file paths
-            MODIFIED_FILES="$MODIFIED_FILES $1"
+            TARGET="$TARGET $1"
             shift
             ;;
     esac
@@ -29,24 +29,22 @@ done
 # Extract lychee version from dependencies.dockerfile
 LYCHEE_VERSION=$(grep "FROM lycheeverse/lychee:" "$DEPENDENCIES_DOCKERFILE" | sed 's/.*FROM lycheeverse\/lychee:\([^ ]*\).*/\1/')
 
-# Determine target files/directories and config file
-TARGET="."
-LYCHEE_CONFIG=".github/scripts/.lychee.toml"
-
-if [[ "$RELATIVE_ONLY" == "true" ]]; then
-    LYCHEE_CONFIG=".github/scripts/.lychee-relative.toml"
-fi
-
-if [[ -n "$MODIFIED_FILES" ]]; then
-    TARGET="$MODIFIED_FILES"
+if [[ -z "$TARGET" ]]; then
+    TARGET="."
 fi
 
 # Build the lychee command with optional GitHub token
-CMD="lycheeverse/lychee:$LYCHEE_VERSION --verbose --config $LYCHEE_CONFIG"
+CMD="lycheeverse/lychee:$LYCHEE_VERSION --verbose --root-dir /data"
 
 # Add GitHub token if available
 if [[ -n "$GITHUB_TOKEN" ]]; then
     CMD="$CMD --github-token $GITHUB_TOKEN"
+fi
+
+if [[ "$LOCAL_LINKS_ONLY" == "true" ]]; then
+    CMD="$CMD --scheme file --include-fragments"
+else
+    CMD="$CMD --config .github/scripts/lychee-config.toml"
 fi
 
 CMD="$CMD $TARGET"

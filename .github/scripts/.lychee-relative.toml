@@ -1,7 +1,0 @@
-# Check link anchors
-include_fragments = true
-
-# For relative links only, we exclude all external URLs
-exclude = [
-  "^https?://.*",
-]
