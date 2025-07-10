@@ -1,0 +1,140 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.messaging.wrappers;
+
+import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.CLIENT_ID;
+import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.EVENTBUS_NAME;
+import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_BODY;
+import static io.opentelemetry.contrib.messaging.wrappers.TestConstants.MESSAGE_ID;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_BODY_SIZE;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_MESSAGE_ID;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_OPERATION;
+import static io.opentelemetry.semconv.incubating.MessagingIncubatingAttributes.MESSAGING_SYSTEM;
+
+import com.google.common.eventbus.EventBus;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.messaging.wrappers.model.Message;
+import io.opentelemetry.contrib.messaging.wrappers.model.MessageListener;
+import io.opentelemetry.contrib.messaging.wrappers.model.MessageTextMapSetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.DefaultMessageTextMapGetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.DefaultMessagingAttributesGetter;
+import io.opentelemetry.contrib.messaging.wrappers.semconv.MessagingProcessRequest;
+import io.opentelemetry.contrib.messaging.wrappers.testing.AbstractBaseTest;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessageOperation;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessagingAttributesExtractor;
+import io.opentelemetry.instrumentation.api.incubator.semconv.messaging.MessagingSpanNameExtractor;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import org.assertj.core.api.AbstractAssert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+
+@SuppressWarnings("OtelInternalJavadoc")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class UserDefinedMessageSystemTest extends AbstractBaseTest {
+
+  private OpenTelemetry otel;
+
+  private Tracer tracer;
+
+  private EventBus eventBus;
+
+  @BeforeAll
+  void setupClass() {
+    otel = GlobalOpenTelemetry.get();
+    tracer = otel.getTracer("test-tracer", "1.0.0");
+    MessagingProcessWrapper<MessagingProcessRequest> wrapper =
+        MessagingProcessWrapper.<MessagingProcessRequest>defaultBuilder()
+            .openTelemetry(otel)
+            .textMapGetter(DefaultMessageTextMapGetter.INSTANCE)
+            .spanNameExtractor(
+                MessagingSpanNameExtractor.create(
+                    DefaultMessagingAttributesGetter.INSTANCE, MessageOperation.PROCESS))
+            .attributesExtractors(
+                Collections.singletonList(
+                    MessagingAttributesExtractor.create(
+                        DefaultMessagingAttributesGetter.INSTANCE, MessageOperation.PROCESS)))
+            .build();
+
+    eventBus = new EventBus();
+
+    eventBus.register(MessageListener.create(tracer, wrapper));
+  }
+
+  @Test
+  void testSendAndConsume() {
+    sendWithParent(tracer);
+
+    assertTraces();
+  }
+
+  public void sendWithParent(Tracer tracer) {
+    // mock a send span
+    Span parent =
+        tracer.spanBuilder("publish " + EVENTBUS_NAME).setSpanKind(SpanKind.PRODUCER).startSpan();
+
+    try (Scope scope = parent.makeCurrent()) {
+      Message message = Message.create(new HashMap<>(), MESSAGE_ID, MESSAGE_BODY);
+      otel.getPropagators()
+          .getTextMapPropagator()
+          .inject(Context.current(), message, MessageTextMapSetter.create());
+      eventBus.post(message);
+    }
+
+    parent.end();
+  }
+
+  /**
+   * Copied from <a
+   * href=https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/testing-common>testing-common</a>.
+   */
+  @SuppressWarnings("deprecation") // using deprecated semconv
+  public void assertTraces() {
+    waitAndAssertTraces(
+        sortByRootSpanName("parent", "producer callback"),
+        trace ->
+            trace.hasSpansSatisfyingExactly(
+                span ->
+                    // No need to verify the attribute here because it is generated by
+                    // instrumentation library.
+                    span.hasName("publish " + EVENTBUS_NAME)
+                        .hasKind(SpanKind.PRODUCER)
+                        .hasNoParent(),
+                span ->
+                    span.hasName(EVENTBUS_NAME + " process")
+                        .hasKind(SpanKind.CONSUMER)
+                        .hasParent(trace.getSpan(0))
+                        .hasAttributesSatisfyingExactly(
+                            equalTo(MESSAGING_SYSTEM, "guava-eventbus"),
+                            equalTo(MESSAGING_DESTINATION_NAME, EVENTBUS_NAME),
+                            equalTo(
+                                MESSAGING_MESSAGE_BODY_SIZE,
+                                MESSAGE_BODY.getBytes(StandardCharsets.UTF_8).length),
+                            // FIXME: We do have "messaging.client_id" in instrumentation but
+                            // "messaging.client.id" in
+                            //  semconv library right now. It should be replaced after semconv
+                            // release.
+                            equalTo(AttributeKey.stringKey("messaging.client_id"), CLIENT_ID),
+                            equalTo(MESSAGING_OPERATION, "process"),
+                            satisfies(MESSAGING_MESSAGE_ID, AbstractAssert::isNotNull)),
+                span ->
+                    span.hasName("process child")
+                        .hasKind(SpanKind.INTERNAL)
+                        .hasParent(trace.getSpan(1))));
+  }
+}
