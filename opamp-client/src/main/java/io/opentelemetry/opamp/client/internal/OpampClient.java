@@ -13,6 +13,10 @@ import opamp.proto.ServerErrorResponse;
 
 public interface OpampClient {
 
+  static OpampClientBuilder builder() {
+    return new OpampClientBuilder();
+  }
+
   /**
    * Starts the client and begin attempts to connect to the Server. Once connection is established
    * the client will attempt to maintain it by reconnecting if the connection is lost. All failed

@@ -1,6 +1,7 @@
 package io.opentelemetry.opamp.client.internal;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientImpl;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientState;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AnyValue;
@@ -26,12 +28,12 @@ import opamp.proto.RemoteConfigStatus;
  * <p>Builds an {@link OpampClient} instance.
  */
 public final class OpampClientBuilder {
-  private final Map<String, String> identifyingAttributes = new HashMap<>();
-  private final Map<String, String> nonIdentifyingAttributes = new HashMap<>();
-  private byte[] instanceUid;
+  private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
+  private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
   private long capabilities = 0;
-  private State.EffectiveConfig effectiveConfigState;
-  private RequestService service;
+  @Nullable private byte[] instanceUid;
+  @Nullable private State.EffectiveConfig effectiveConfigState;
+  @Nullable private RequestService service;
 
   OpampClientBuilder() {}
 
@@ -43,6 +45,7 @@ public final class OpampClientBuilder {
    * @param service The request service implementation.
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder setRequestService(RequestService service) {
     this.service = service;
     return this;
@@ -56,6 +59,7 @@ public final class OpampClientBuilder {
    * @param value The AgentToServer.instance_uid value.
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder setInstanceUid(byte[] value) {
     this.instanceUid = value;
     return this;
@@ -70,8 +74,9 @@ public final class OpampClientBuilder {
    * @param value The attribute value.
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder setIdentifyingAttribute(String key, String value) {
-    identifyingAttributes.put(key, value);
+    identifyingAttributes.put(key, createStringValue(value));
     return this;
   }
 
@@ -84,8 +89,9 @@ public final class OpampClientBuilder {
    * @param value The attribute value.
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder setNonIdentifyingAttribute(String key, String value) {
-    nonIdentifyingAttributes.put(key, value);
+    nonIdentifyingAttributes.put(key, createStringValue(value));
     return this;
   }
 
@@ -96,6 +102,7 @@ public final class OpampClientBuilder {
    *
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder enableRemoteConfig() {
     capabilities =
         capabilities
@@ -111,6 +118,7 @@ public final class OpampClientBuilder {
    *
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder enableEffectiveConfigReporting() {
     capabilities =
         capabilities | AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig.getValue();
@@ -125,6 +133,7 @@ public final class OpampClientBuilder {
    * @param effectiveConfigState The state implementation.
    * @return this
    */
+  @CanIgnoreReturnValue
   public OpampClientBuilder setEffectiveConfigState(State.EffectiveConfig effectiveConfigState) {
     this.effectiveConfigState = effectiveConfigState;
     return this;
@@ -163,8 +172,9 @@ public final class OpampClientBuilder {
     return OpampClientImpl.create(service, state);
   }
 
-  private State.EffectiveConfig createEffectiveConfigNoop() {
+  private static State.EffectiveConfig createEffectiveConfigNoop() {
     return new State.EffectiveConfig() {
+      @Nullable
       @Override
       public opamp.proto.EffectiveConfig get() {
         return null;
@@ -172,11 +182,12 @@ public final class OpampClientBuilder {
     };
   }
 
-  private KeyValue createKeyValue(String key, String value) {
-    return new KeyValue.Builder()
-        .key(key)
-        .value(new AnyValue.Builder().string_value(value).build())
-        .build();
+  private static AnyValue createStringValue(String value) {
+    return new AnyValue.Builder().string_value(value).build();
+  }
+
+  private static KeyValue createKeyValue(String key, AnyValue value) {
+    return new KeyValue.Builder().key(key).value(value).build();
   }
 
   public static byte[] createRandomInstanceUid() {
