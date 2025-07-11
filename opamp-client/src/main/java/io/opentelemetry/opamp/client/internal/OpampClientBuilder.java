@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.opamp.client.internal;
 
 import com.github.f4b6a3.uuid.UuidCreator;

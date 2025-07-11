@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.opamp.client.internal.impl.recipe;
 
 import io.opentelemetry.opamp.client.internal.request.Field;
