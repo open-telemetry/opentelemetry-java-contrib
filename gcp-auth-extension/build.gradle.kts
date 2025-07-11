@@ -20,6 +20,7 @@ dependencies {
   compileOnly("com.google.auto.service:auto-service-annotations")
   compileOnly("io.opentelemetry:opentelemetry-api")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
