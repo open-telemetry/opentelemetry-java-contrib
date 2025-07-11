@@ -376,7 +376,7 @@ public final class OpampClientBuilder {
 
   public OpampClient build() {
     if (service == null) {
-      throw new NullPointerException(
+      throw new IllegalStateException(
           "The request service is not set. You must provide it by calling setRequestService()");
     }
     List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
