@@ -96,12 +96,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    GoogleCredentials credentials;
-    try {
-      credentials = GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
+    GoogleCredentials credentials = getCredentials();
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
@@ -110,6 +105,16 @@ public class GcpAuthAutoConfigurationCustomizerProvider
             (metricExporter, configProperties) ->
                 customizeMetricExporter(metricExporter, credentials, configProperties))
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
+  }
+
+   static GoogleCredentials getCredentials() {
+    GoogleCredentials credentials;
+    try {
+      credentials = GoogleCredentials.getApplicationDefault();
+    } catch (IOException e) {
+      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+    }
+    return credentials;
   }
 
   @Override
@@ -193,7 +198,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return exporter;
   }
 
-  private static Map<String, String> getRequiredHeaderMap(
+  static Map<String, String> getRequiredHeaderMap(
       GoogleCredentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
     try {
