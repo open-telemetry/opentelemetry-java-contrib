@@ -107,7 +107,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
-   static GoogleCredentials getCredentials() {
+  static GoogleCredentials getCredentials() {
     GoogleCredentials credentials;
     try {
       credentials = GoogleCredentials.getApplicationDefault();
