@@ -6,6 +6,7 @@
 package io.opentelemetry.opamp.client.internal;
 
 import io.opentelemetry.opamp.client.internal.response.MessageData;
+import javax.annotation.Nonnull;
 import opamp.proto.AgentDescription;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
@@ -62,7 +63,7 @@ public interface OpampClient {
      *
      * @param client The relevant {@link OpampClient} instance.
      */
-    void onConnect(OpampClient client);
+    void onConnect(@Nonnull OpampClient client);
 
     /**
      * Called when the connection to the Server cannot be established. May be called after {@link
@@ -72,7 +73,7 @@ public interface OpampClient {
      * @param client The relevant {@link OpampClient} instance.
      * @param throwable The exception.
      */
-    void onConnectFailed(OpampClient client, Throwable throwable);
+    void onConnectFailed(@Nonnull OpampClient client, Throwable throwable);
 
     /**
      * Called when the Server reports an error in response to some previously sent request. Useful
@@ -83,7 +84,7 @@ public interface OpampClient {
      * @param client The relevant {@link OpampClient} instance.
      * @param errorResponse The error returned by the Server.
      */
-    void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse);
+    void onErrorResponse(@Nonnull OpampClient client, @Nonnull ServerErrorResponse errorResponse);
 
     /**
      * Called when the Agent receives a message that needs processing. See {@link MessageData}
@@ -97,6 +98,6 @@ public interface OpampClient {
      * @param client The relevant {@link OpampClient} instance.
      * @param messageData The server response data that needs processing.
      */
-    void onMessage(OpampClient client, MessageData messageData);
+    void onMessage(@Nonnull OpampClient client, @Nonnull MessageData messageData);
   }
 }
