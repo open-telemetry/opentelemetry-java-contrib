@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AnyValue;
+import opamp.proto.ArrayValue;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 
@@ -66,7 +67,7 @@ public final class OpampClientBuilder {
   }
 
   /**
-   * Sets a string attribute into the <a
+   * Puts a string attribute into the <a
    * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
    * field.
    *
@@ -75,13 +76,130 @@ public final class OpampClientBuilder {
    * @return this
    */
   @CanIgnoreReturnValue
-  public OpampClientBuilder setIdentifyingAttribute(String key, String value) {
+  public OpampClientBuilder putIdentifyingAttribute(String key, String value) {
     identifyingAttributes.put(key, createStringValue(value));
     return this;
   }
 
   /**
-   * Sets an attribute into the <a
+   * Puts a boolean attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, boolean value) {
+    identifyingAttributes.put(key, createBooleanValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a long (proto int64) attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, long value) {
+    identifyingAttributes.put(key, createLongValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a double attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, double value) {
+    identifyingAttributes.put(key, createDoubleValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a string array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, String... values) {
+    if (values == null) {
+      return this;
+    }
+    identifyingAttributes.put(key, createArrayValue(createStringValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a boolean array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, boolean... values) {
+    if (values == null) {
+      return this;
+    }
+    identifyingAttributes.put(key, createArrayValue(createBooleanValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a long (proto int64) array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, long... values) {
+    if (values == null) {
+      return this;
+    }
+    identifyingAttributes.put(key, createArrayValue(createLongValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a double array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key.
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putIdentifyingAttribute(String key, double... values) {
+    if (values == null) {
+      return this;
+    }
+    identifyingAttributes.put(key, createArrayValue(createDoubleValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a string attribute into the <a
    * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
    * field.
    *
@@ -90,8 +208,125 @@ public final class OpampClientBuilder {
    * @return this
    */
   @CanIgnoreReturnValue
-  public OpampClientBuilder setNonIdentifyingAttribute(String key, String value) {
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, String value) {
     nonIdentifyingAttributes.put(key, createStringValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a boolean attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, boolean value) {
+    nonIdentifyingAttributes.put(key, createBooleanValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a long (proto int64) attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, long value) {
+    nonIdentifyingAttributes.put(key, createLongValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a double attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param value The attribute value.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, double value) {
+    nonIdentifyingAttributes.put(key, createDoubleValue(value));
+    return this;
+  }
+
+  /**
+   * Puts a string array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, String... values) {
+    if (values == null) {
+      return this;
+    }
+    nonIdentifyingAttributes.put(key, createArrayValue(createStringValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a boolean array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, boolean... values) {
+    if (values == null) {
+      return this;
+    }
+    nonIdentifyingAttributes.put(key, createArrayValue(createBooleanValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a long (proto int64) array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, long... values) {
+    if (values == null) {
+      return this;
+    }
+    nonIdentifyingAttributes.put(key, createArrayValue(createLongValueList(values)));
+    return this;
+  }
+
+  /**
+   * Puts a double array attribute into the <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+   * field.
+   *
+   * @param key The attribute key
+   * @param values The attribute values.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder putNonIdentifyingAttribute(String key, double... values) {
+    if (values == null) {
+      return this;
+    }
+    nonIdentifyingAttributes.put(key, createArrayValue(createDoubleValueList(values)));
     return this;
   }
 
@@ -184,6 +419,56 @@ public final class OpampClientBuilder {
 
   private static AnyValue createStringValue(String value) {
     return new AnyValue.Builder().string_value(value).build();
+  }
+
+  private static AnyValue createBooleanValue(boolean value) {
+    return new AnyValue.Builder().bool_value(value).build();
+  }
+
+  private static AnyValue createLongValue(long value) {
+    return new AnyValue.Builder().int_value(value).build();
+  }
+
+  private static AnyValue createDoubleValue(double value) {
+    return new AnyValue.Builder().double_value(value).build();
+  }
+
+  private static List<AnyValue> createStringValueList(String[] values) {
+    List<AnyValue> anyValues = new ArrayList<>();
+    for (String value : values) {
+      anyValues.add(createStringValue(value));
+    }
+    return anyValues;
+  }
+
+  private static List<AnyValue> createBooleanValueList(boolean[] values) {
+    List<AnyValue> anyValues = new ArrayList<>();
+    for (boolean value : values) {
+      anyValues.add(createBooleanValue(value));
+    }
+    return anyValues;
+  }
+
+  private static List<AnyValue> createLongValueList(long[] values) {
+    List<AnyValue> anyValues = new ArrayList<>();
+    for (long value : values) {
+      anyValues.add(createLongValue(value));
+    }
+    return anyValues;
+  }
+
+  private static List<AnyValue> createDoubleValueList(double[] values) {
+    List<AnyValue> anyValues = new ArrayList<>();
+    for (double value : values) {
+      anyValues.add(createDoubleValue(value));
+    }
+    return anyValues;
+  }
+
+  private static AnyValue createArrayValue(List<AnyValue> values) {
+    return new AnyValue.Builder()
+        .array_value(new ArrayValue.Builder().values(values).build())
+        .build();
   }
 
   private static KeyValue createKeyValue(String key, AnyValue value) {
