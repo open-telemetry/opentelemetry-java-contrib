@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.gcp.auth;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -34,10 +39,11 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          GoogleCredentials credentials = GcpAuthAutoConfigurationCustomizerProvider.getCredentials();
+          GoogleCredentials credentials =
+              GcpAuthAutoConfigurationCustomizerProvider.getCredentials();
           // todo pass config bridge
-          Map<String, String> headerMap = GcpAuthAutoConfigurationCustomizerProvider.getRequiredHeaderMap(
-              credentials, null);
+          Map<String, String> headerMap =
+              GcpAuthAutoConfigurationCustomizerProvider.getRequiredHeaderMap(credentials, null);
           customizeMeter(model, headerMap);
           // todo are loggers supported now (not covered in old variant)?
           customizeLogger(model, headerMap);
@@ -47,8 +53,8 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
         });
   }
 
-  private void customizeMeter(OpenTelemetryConfigurationModel model,
-      Map<String, String> headerMap) {
+  private void customizeMeter(
+      OpenTelemetryConfigurationModel model, Map<String, String> headerMap) {
     MeterProviderModel meterProvider = model.getMeterProvider();
     if (meterProvider == null) {
       return;
@@ -56,14 +62,12 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
 
     for (MetricReaderModel reader : meterProvider.getReaders()) {
       if (reader.getPeriodic() != null) {
-        addAuth(meterModelHeaders(reader.getPeriodic().getExporter()),
-            headerMap);
+        addAuth(meterModelHeaders(reader.getPeriodic().getExporter()), headerMap);
       }
     }
   }
 
-  private List<List<NameStringValuePairModel>> meterModelHeaders(
-      PushMetricExporterModel exporter) {
+  private List<List<NameStringValuePairModel>> meterModelHeaders(PushMetricExporterModel exporter) {
     ArrayList<List<NameStringValuePairModel>> list = new ArrayList<>();
     if (exporter == null) {
       return list;
@@ -79,8 +83,8 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
     return list;
   }
 
-  private void customizeLogger(OpenTelemetryConfigurationModel model,
-      Map<String, String> headerMap) {
+  private void customizeLogger(
+      OpenTelemetryConfigurationModel model, Map<String, String> headerMap) {
     LoggerProviderModel loggerProvider = model.getLoggerProvider();
     if (loggerProvider == null) {
       return;
@@ -88,13 +92,11 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
     for (LogRecordProcessorModel processor : loggerProvider.getProcessors()) {
       BatchLogRecordProcessorModel batch = processor.getBatch();
       if (batch != null) {
-        addAuth(logRecordModelHeaders(batch.getExporter()),
-            headerMap);
+        addAuth(logRecordModelHeaders(batch.getExporter()), headerMap);
       }
       SimpleLogRecordProcessorModel simple = processor.getSimple();
       if (simple != null) {
-        addAuth(logRecordModelHeaders(simple.getExporter()),
-            headerMap);
+        addAuth(logRecordModelHeaders(simple.getExporter()), headerMap);
       }
     }
   }
@@ -117,8 +119,8 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
     return list;
   }
 
-  private void customizeTracer(OpenTelemetryConfigurationModel model,
-      Map<String, String> headerMap) {
+  private void customizeTracer(
+      OpenTelemetryConfigurationModel model, Map<String, String> headerMap) {
     TracerProviderModel tracerProvider = model.getTracerProvider();
     if (tracerProvider == null) {
       return;
@@ -126,28 +128,26 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
 
     // todo here we would want a simplified version of the declarative config bridge
     // https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/javaagent-extension-api/src/main/java/io/opentelemetry/javaagent/extension/DeclarativeConfigPropertiesBridge.java
-//    googleNode(model)
+    //    googleNode(model)
 
-//    if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      // todo
-//        String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
-//        logger.log(
-//            Level.WARNING,
-//            "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-//            params);
-//      return;
-//    }
+    //    if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
+    // todo
+    //        String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+    //        logger.log(
+    //            Level.WARNING,
+    //            "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+    //            params);
+    //      return;
+    //    }
 
     for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
       BatchSpanProcessorModel batch = processor.getBatch();
       if (batch != null) {
-        addAuth(spanExporterModelHeaders(batch.getExporter()),
-            headerMap);
+        addAuth(spanExporterModelHeaders(batch.getExporter()), headerMap);
       }
       SimpleSpanProcessorModel simple = processor.getSimple();
       if (simple != null) {
-        addAuth(spanExporterModelHeaders(simple.getExporter()),
-            headerMap);
+        addAuth(spanExporterModelHeaders(simple.getExporter()), headerMap);
       }
     }
   }
@@ -176,8 +176,7 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
 
   private void addAuth(
       List<List<NameStringValuePairModel>> headerConsumers, Map<String, String> headerMap) {
-    headerConsumers.forEach(
-        headers -> addHeaders(headers, headerMap));
+    headerConsumers.forEach(headers -> addHeaders(headers, headerMap));
   }
 
   private void addHeaders(List<NameStringValuePairModel> headers, Map<String, String> add) {
