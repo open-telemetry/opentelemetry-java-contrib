@@ -13,6 +13,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
 dependencies {
   implementation("com.squareup.okhttp3:okhttp")
+  implementation("com.github.f4b6a3:uuid-creator")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
   testImplementation("org.mockito:mockito-inline")
