@@ -1,5 +1,6 @@
 package io.opentelemetry.opamp.client.internal.state;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 
@@ -10,7 +11,7 @@ import javax.annotation.Nonnull;
 abstract class InMemoryState<T> implements State<T> {
   private final AtomicReference<T> state = new AtomicReference<>();
 
-  public InMemoryState(T initialValue) {
+  public InMemoryState(@Nonnull T initialValue) {
     state.set(initialValue);
   }
 
@@ -21,6 +22,6 @@ abstract class InMemoryState<T> implements State<T> {
   @Nonnull
   @Override
   public T get() {
-    return state.get();
+    return Objects.requireNonNull(state.get());
   }
 }

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import com.google.protobuf.CodedOutputStream;
 import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
-import io.opentelemetry.opamp.client.internal.response.OpampServerResponseError;
+import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -197,7 +197,7 @@ class WebSocketRequestServiceTest {
     requestService.onMessage(createServerToAgentPayload(serverToAgent));
     verify(callback).onRequestFailed(throwableCaptor.capture());
     verifyNoMoreInteractions(callback);
-    OpampServerResponseError error = (OpampServerResponseError) throwableCaptor.getValue();
+    OpampServerResponseException error = (OpampServerResponseException) throwableCaptor.getValue();
     assertThat(error.getMessage()).isEqualTo("A message");
     assertThat(scheduler.getScheduledTasks()).isEmpty();
 
@@ -214,8 +214,8 @@ class WebSocketRequestServiceTest {
     requestService.onMessage(createServerToAgentPayload(serverToAgent));
     verify(callback).onRequestFailed(throwableCaptor.capture());
     verifyNoMoreInteractions(callback);
-    OpampServerResponseError unavailableError =
-        (OpampServerResponseError) throwableCaptor.getValue();
+    OpampServerResponseException unavailableError =
+        (OpampServerResponseException) throwableCaptor.getValue();
     assertThat(unavailableError.getMessage()).isEqualTo("Try later");
     assertThat(scheduler.getScheduledTasks()).hasSize(1);
     verify(retryDelay, never()).suggestDelay(any());
@@ -241,8 +241,8 @@ class WebSocketRequestServiceTest {
     requestService.onMessage(createServerToAgentPayload(serverToAgent));
     verify(callback).onRequestFailed(throwableCaptor.capture());
     verifyNoMoreInteractions(callback);
-    OpampServerResponseError unavailableErrorWithSuggestedDelay =
-        (OpampServerResponseError) throwableCaptor.getValue();
+    OpampServerResponseException unavailableErrorWithSuggestedDelay =
+        (OpampServerResponseException) throwableCaptor.getValue();
     assertThat(unavailableErrorWithSuggestedDelay.getMessage()).isEmpty();
     assertThat(scheduler.getScheduledTasks()).hasSize(1);
     verify(retryDelay).suggestDelay(suggestedDelay);
