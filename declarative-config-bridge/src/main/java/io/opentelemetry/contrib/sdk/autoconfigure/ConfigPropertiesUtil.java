@@ -12,6 +12,8 @@ import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
+import java.util.Collections;
+import java.util.Map;
 
 public class ConfigPropertiesUtil {
   private ConfigPropertiesUtil() {}
@@ -33,7 +35,7 @@ public class ConfigPropertiesUtil {
         instrumentationConfig = DeclarativeConfigProperties.empty();
       }
 
-      return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
+      return new DeclarativeConfigPropertiesBridge(instrumentationConfig, Collections.emptyMap());
     }
     // Should never happen
     throw new IllegalStateException(
@@ -41,13 +43,17 @@ public class ConfigPropertiesUtil {
   }
 
   public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model) {
+    return resolveModel(model, Collections.emptyMap());
+  }
+
+  public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model, Map<String, String> translationMap) {
     SdkConfigProvider configProvider = SdkConfigProvider.create(model);
     DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
     if (instrumentationConfig == null) {
       instrumentationConfig = DeclarativeConfigProperties.empty();
     }
 
-    return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
+    return new DeclarativeConfigPropertiesBridge(instrumentationConfig, translationMap);
   }
 
   public static String propertyYamlPath(String propertyName) {

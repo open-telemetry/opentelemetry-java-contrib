@@ -9,10 +9,13 @@ description = "OpenTelemetry Java profiling based inferred spans module"
 otelJava.moduleName.set("io.opentelemetry.contrib.inferredspans")
 
 dependencies {
+  implementation(project(":declarative-config-bridge"))
+
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("com.lmax:disruptor")
   implementation("org.jctools:jctools-core")
@@ -25,6 +28,7 @@ dependencies {
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
