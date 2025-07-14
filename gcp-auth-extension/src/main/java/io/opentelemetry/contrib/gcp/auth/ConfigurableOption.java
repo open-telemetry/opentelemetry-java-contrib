@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -99,9 +100,16 @@ enum ConfigurableOption {
    * @throws ConfigurationException if neither the environment variable nor the system property is
    *     set.
    */
-  String getConfiguredValue(ConfigProperties configProperties) {
-    String configuredValue = configProperties.getString(this.getSystemProperty());
-    if (configuredValue != null && !configuredValue.isEmpty()) {
+  <T> T getConfiguredValue(ConfigProperties configProperties, BiFunction<ConfigProperties, String, T> extractor) {
+    T configuredValue = extractor.apply(configProperties, this.getSystemProperty());
+    if (configuredValue instanceof String) {
+      String value = (String) configuredValue;
+      if (value.isEmpty()) {
+        configuredValue = null; // Treat empty string as not configured
+      }
+    }
+
+    if (configuredValue != null) {
       return configuredValue;
     } else {
       throw new ConfigurationException(
@@ -121,10 +129,10 @@ enum ConfigurableOption {
    * @return The configured value for the option, obtained from the environment variable, system
    *     property, or the fallback function, in that order of precedence.
    */
-  String getConfiguredValueWithFallback(
-      ConfigProperties configProperties, Supplier<String> fallback) {
+  <T> T getConfiguredValueWithFallback(
+      ConfigProperties configProperties, Supplier<T> fallback, BiFunction<ConfigProperties, String, T> extractor) {
     try {
-      return this.getConfiguredValue(configProperties);
+      return this.getConfiguredValue(configProperties, extractor);
     } catch (ConfigurationException e) {
       return fallback.get();
     }
@@ -140,7 +148,7 @@ enum ConfigurableOption {
    */
   Optional<String> getConfiguredValueAsOptional(ConfigProperties configProperties) {
     try {
-      return Optional.of(this.getConfiguredValue(configProperties));
+      return Optional.of(this.getConfiguredValue(configProperties, ConfigProperties::getString));
     } catch (ConfigurationException e) {
       return Optional.empty();
     }
