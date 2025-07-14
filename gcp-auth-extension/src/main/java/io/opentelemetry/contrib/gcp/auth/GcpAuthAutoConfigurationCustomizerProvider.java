@@ -83,9 +83,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    *   <li>If the configured signal specific endpoint is a known GCP Telemetry API endpoint,
    *       customizes only the signal specific exporter.
    * </ul>
-   * <p>
-   * The 'customization' performed includes customizing the exporters by adding required headers to
-   * the export calls made and customizing the resource by adding required resource attributes to
+   *
+   * <p>The 'customization' performed includes customizing the exporters by adding required headers
+   * to the export calls made and customizing the resource by adding required resource attributes to
    * enable GCP integration.
    *
    * @param autoConfiguration the AutoConfigurationCustomizer to customize.
@@ -124,8 +124,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldConfigureExporter(SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
-        configProperties)) {
+    if (shouldConfigureExporter(
+        SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     }
     return exporter;
@@ -133,16 +133,15 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldConfigureExporter(SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
-        configProperties)) {
+    if (shouldConfigureExporter(
+        SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     }
     return exporter;
   }
 
-  static boolean shouldConfigureExporter(String signal,
-      String fixSuggestion,
-      ConfigProperties configProperties) {
+  static boolean shouldConfigureExporter(
+      String signal, String fixSuggestion, ConfigProperties configProperties) {
     if (isSignalTargeted(signal, configProperties)) {
       return true;
     } else {
@@ -156,17 +155,17 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
   private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
-    return
-        targetSignals(configProperties).stream().anyMatch(
+    return targetSignals(configProperties).stream()
+        .anyMatch(
             targetedSignal ->
                 targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
   }
 
   static List<String> targetSignals(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS
-        .getConfiguredValueWithFallback(
-            configProperties, () -> Collections.singletonList(SIGNAL_TYPE_ALL),
-            ConfigProperties::getList);
+    return ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
+        configProperties,
+        () -> Collections.singletonList(SIGNAL_TYPE_ALL),
+        ConfigProperties::getList);
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -228,9 +227,10 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // Add quota user project header if not detected by the auth library and user provided it via
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
-      getQuotaProjectId(configProperties).ifPresent(
-          configuredQuotaProjectId ->
-              flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
+      getQuotaProjectId(configProperties)
+          .ifPresent(
+              configuredQuotaProjectId ->
+                  flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
     }
     return flattenedHeaders;
   }
@@ -244,13 +244,13 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
     Resource res =
         Resource.create(
-            Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                getProjectId(configProperties)));
+            Attributes.of(
+                AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), getProjectId(configProperties)));
     return resource.merge(res);
   }
 
   static String getProjectId(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties,
-        ConfigProperties::getString);
+    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(
+        configProperties, ConfigProperties::getString);
   }
 }

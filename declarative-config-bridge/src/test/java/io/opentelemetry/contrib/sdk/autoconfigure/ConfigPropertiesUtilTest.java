@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.sdk.autoconfigure;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -89,6 +88,7 @@ class ConfigPropertiesUtilTest {
   @Test
   void propertyYamlPath() {
     assertThat(ConfigPropertiesUtil.propertyYamlPath("google.otel.auth.target.signals"))
-        .isEqualTo("'instrumentation/development' / 'java' / 'google' / 'otel' / 'auth' / 'target' / 'signals'");
+        .isEqualTo(
+            "'instrumentation/development' / 'java' / 'google' / 'otel' / 'auth' / 'target' / 'signals'");
   }
 }
