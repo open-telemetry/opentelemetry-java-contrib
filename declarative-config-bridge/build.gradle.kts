@@ -14,4 +14,5 @@ dependencies {
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("org.mockito:mockito-inline")
 }
