@@ -48,7 +48,9 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          customize(model, GcpAuthAutoConfigurationCustomizerProvider.getCredentials(),
+          customize(
+              model,
+              GcpAuthAutoConfigurationCustomizerProvider.getCredentials(),
               ConfigPropertiesUtil.resolveModel(model));
 
           return model;
