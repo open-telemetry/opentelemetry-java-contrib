@@ -14,6 +14,8 @@ val agent: Configuration by configurations.creating {
 }
 
 dependencies {
+  implementation(project(":declarative-config-bridge"))
+
   annotationProcessor("com.google.auto.service:auto-service")
   // We use `compileOnly` dependency because during runtime all necessary classes are provided by
   // javaagent itself.
@@ -36,6 +38,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
 
   testImplementation("org.awaitility:awaitility")
