@@ -54,7 +54,6 @@ public class ConfigPropertiesUtil {
     }
 
     public static String propertyYamlPath(String propertyName) {
-        // todo test if this is correct
         return DeclarativeConfigPropertiesBridge.yamlPath(propertyName);
     }
 }
