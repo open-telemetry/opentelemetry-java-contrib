@@ -4,9 +4,9 @@
  */
 
 package io.opentelemetry.contrib.sdk.autoconfigure; /*
-                                                     * Copyright The OpenTelemetry Authors
-                                                     * SPDX-License-Identifier: Apache-2.0
-                                                     */
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -57,13 +58,7 @@ class DeclarativeConfigPropertiesBridgeTest {
 
   @BeforeEach
   void setup() {
-    OpenTelemetryConfigurationModel model =
-        DeclarativeConfiguration.parse(
-            new ByteArrayInputStream(YAML.getBytes(StandardCharsets.UTF_8)));
-    SdkConfigProvider configProvider = SdkConfigProvider.create(model);
-    bridge =
-        new DeclarativeConfigPropertiesBridge(
-            Objects.requireNonNull(configProvider.getInstrumentationConfig()));
+    bridge = createBridge(Collections.emptyMap());
 
     OpenTelemetryConfigurationModel emptyModel =
         new OpenTelemetryConfigurationModel()
@@ -71,7 +66,18 @@ class DeclarativeConfigPropertiesBridgeTest {
     SdkConfigProvider emptyConfigProvider = SdkConfigProvider.create(emptyModel);
     emptyBridge =
         new DeclarativeConfigPropertiesBridge(
-            Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()));
+            Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()),
+            Collections.emptyMap());
+  }
+
+  private static DeclarativeConfigPropertiesBridge createBridge(
+      Map<String, String> translationMap) {
+    OpenTelemetryConfigurationModel model =
+        DeclarativeConfiguration.parse(
+            new ByteArrayInputStream(YAML.getBytes(StandardCharsets.UTF_8)));
+    return new DeclarativeConfigPropertiesBridge(
+        Objects.requireNonNull(SdkConfigProvider.create(model).getInstrumentationConfig()),
+        translationMap);
   }
 
   @Test
@@ -126,21 +132,31 @@ class DeclarativeConfigPropertiesBridgeTest {
     assertThat(bridge.getLong("otel.instrumentation.other-instrumentation.int_key", 1L))
         .isEqualTo(1L);
     assertThat(
-            bridge.getDuration(
-                "otel.instrumentation.other-instrumentation.int_key", Duration.ofMillis(1)))
+        bridge.getDuration(
+            "otel.instrumentation.other-instrumentation.int_key", Duration.ofMillis(1)))
         .isEqualTo(Duration.ofMillis(1));
     assertThat(bridge.getDouble("otel.instrumentation.other-instrumentation.double_key", 1.1))
         .isEqualTo(1.1);
     assertThat(
-            bridge.getList(
-                "otel.instrumentation.other-instrumentation.list_key",
-                Arrays.asList("value1", "value2")))
+        bridge.getList(
+            "otel.instrumentation.other-instrumentation.list_key",
+            Arrays.asList("value1", "value2")))
         .isEqualTo(Arrays.asList("value1", "value2"));
     assertThat(bridge.getMap("otel.instrumentation.other-instrumentation.map_key", expectedMap))
         .isEqualTo(expectedMap);
+  }
 
+  @Test
+  void vendor() {
     // verify vendor specific property names are preserved in unchanged form (prefix is not stripped
     // as for otel.instrumentation.*)
     assertThat(bridge.getBoolean("acme.full_name.preserved")).isTrue();
+  }
+
+  @Test
+  void translation() {
+    DeclarativeConfigPropertiesBridge propertiesBridge = createBridge(
+        Collections.singletonMap("acme", "acme.full_name"));
+    assertThat(propertiesBridge.getBoolean("acme.preserved")).isTrue();
   }
 }

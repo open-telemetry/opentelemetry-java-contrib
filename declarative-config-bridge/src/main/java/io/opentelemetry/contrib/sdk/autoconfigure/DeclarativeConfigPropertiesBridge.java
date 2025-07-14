@@ -52,9 +52,12 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
 
   // The node at .instrumentation.java
   private final DeclarativeConfigProperties instrumentationJavaNode;
+  private final Map<String, String> translationMap;
 
-  DeclarativeConfigPropertiesBridge(DeclarativeConfigProperties instrumentationNode) {
+  DeclarativeConfigPropertiesBridge(DeclarativeConfigProperties instrumentationNode,
+      Map<String, String> translationMap) {
     instrumentationJavaNode = instrumentationNode.getStructured("java", empty());
+    this.translationMap = translationMap;
   }
 
   @Nullable
@@ -134,7 +137,7 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
       return null;
     }
 
-    String[] segments = getSegments(property);
+    String[] segments = getSegments(translate(property));
     if (segments.length == 0) {
       return null;
     }
@@ -149,6 +152,15 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
     String lastPart = segments[segments.length - 1];
 
     return extractor.apply(target, lastPart);
+  }
+
+  private String translate(String property) {
+    for (Map.Entry<String, String> entry : translationMap.entrySet()) {
+      if (property.startsWith(entry.getKey())) {
+        return entry.getValue() + property.substring(entry.getKey().length());
+      }
+    }
+    return property;
   }
 
   private static String[] getSegments(String property) {
