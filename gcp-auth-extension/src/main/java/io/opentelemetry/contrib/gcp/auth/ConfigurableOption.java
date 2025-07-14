@@ -8,9 +8,8 @@ package io.opentelemetry.contrib.gcp.auth;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 /**
  * An enum representing configurable options for a GCP Authentication Extension. Each option has a
@@ -100,6 +99,26 @@ enum ConfigurableOption {
    * @throws ConfigurationException if neither the environment variable nor the system property is
    *     set.
    */
+  <T> T getRequiredConfiguredValue(
+      ConfigProperties configProperties, BiFunction<ConfigProperties, String, T> extractor) {
+    T configuredValue = getConfiguredValue(configProperties, extractor);
+    if (configuredValue == null) {
+      throw new ConfigurationException(
+          String.format(
+              "GCP Authentication Extension not configured properly: %s not configured. "
+                  + "Configure it by exporting environment variable %s or system property %s",
+              this.userReadableName, this.getEnvironmentVariable(), this.getSystemProperty()));
+    }
+    return configuredValue;
+  }
+
+  /**
+   * Retrieves the configured value for this option. This method checks the environment variable
+   * first and then the system property.
+   *
+   * @return The configured value as a string, or throws an exception if not configured.
+   */
+  @Nullable
   <T> T getConfiguredValue(
       ConfigProperties configProperties, BiFunction<ConfigProperties, String, T> extractor) {
     T configuredValue = extractor.apply(configProperties, this.getSystemProperty());
@@ -110,50 +129,6 @@ enum ConfigurableOption {
       }
     }
 
-    if (configuredValue != null) {
-      return configuredValue;
-    } else {
-      throw new ConfigurationException(
-          String.format(
-              "GCP Authentication Extension not configured properly: %s not configured. Configure it by exporting environment variable %s or system property %s",
-              this.userReadableName, this.getEnvironmentVariable(), this.getSystemProperty()));
-    }
-  }
-
-  /**
-   * Retrieves the value for this option, prioritizing environment variables and system properties.
-   * If neither an environment variable nor a system property is set for this option, the provided
-   * fallback function is used to determine the value.
-   *
-   * @param fallback A {@link Supplier} that provides the default value for the option when it is
-   *     not explicitly configured via an environment variable or system property.
-   * @return The configured value for the option, obtained from the environment variable, system
-   *     property, or the fallback function, in that order of precedence.
-   */
-  <T> T getConfiguredValueWithFallback(
-      ConfigProperties configProperties,
-      Supplier<T> fallback,
-      BiFunction<ConfigProperties, String, T> extractor) {
-    try {
-      return this.getConfiguredValue(configProperties, extractor);
-    } catch (ConfigurationException e) {
-      return fallback.get();
-    }
-  }
-
-  /**
-   * Retrieves the value for this option, prioritizing environment variables before system
-   * properties. If neither an environment variable nor a system property is set for this option,
-   * then an empty {@link Optional} is returned.
-   *
-   * @return The configured value for the option, if set, obtained from the environment variable,
-   *     system property, or empty {@link Optional}, in that order of precedence.
-   */
-  Optional<String> getConfiguredValueAsOptional(ConfigProperties configProperties) {
-    try {
-      return Optional.of(this.getConfiguredValue(configProperties, ConfigProperties::getString));
-    } catch (ConfigurationException e) {
-      return Optional.empty();
-    }
+    return configuredValue;
   }
 }
