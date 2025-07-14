@@ -49,110 +49,123 @@ import static io.opentelemetry.api.incubator.config.DeclarativeConfigProperties.
  */
 final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
 
-  private static final String OTEL_INSTRUMENTATION_PREFIX = "otel.instrumentation.";
+    private static final String OTEL_INSTRUMENTATION_PREFIX = "otel.instrumentation.";
 
-  // The node at .instrumentation.java
-  private final DeclarativeConfigProperties instrumentationJavaNode;
+    // The node at .instrumentation.java
+    private final DeclarativeConfigProperties instrumentationJavaNode;
 
-  DeclarativeConfigPropertiesBridge(DeclarativeConfigProperties instrumentationNode) {
-    instrumentationJavaNode = instrumentationNode.getStructured("java", empty());
-  }
-
-  @Nullable
-  @Override
-  public String getString(String propertyName) {
-    return getPropertyValue(propertyName, DeclarativeConfigProperties::getString);
-  }
-
-  @Nullable
-  @Override
-  public Boolean getBoolean(String propertyName) {
-    return getPropertyValue(propertyName, DeclarativeConfigProperties::getBoolean);
-  }
-
-  @Nullable
-  @Override
-  public Integer getInt(String propertyName) {
-    return getPropertyValue(propertyName, DeclarativeConfigProperties::getInt);
-  }
-
-  @Nullable
-  @Override
-  public Long getLong(String propertyName) {
-    return getPropertyValue(propertyName, DeclarativeConfigProperties::getLong);
-  }
-
-  @Nullable
-  @Override
-  public Double getDouble(String propertyName) {
-    return getPropertyValue(propertyName, DeclarativeConfigProperties::getDouble);
-  }
-
-  @Nullable
-  @Override
-  public Duration getDuration(String propertyName) {
-    Long millis = getPropertyValue(propertyName, DeclarativeConfigProperties::getLong);
-    if (millis == null) {
-      return null;
-    }
-    return Duration.ofMillis(millis);
-  }
-
-  @Override
-  public List<String> getList(String propertyName) {
-    List<String> propertyValue =
-        getPropertyValue(
-            propertyName,
-            (properties, lastPart) -> properties.getScalarList(lastPart, String.class));
-    return propertyValue == null ? Collections.emptyList() : propertyValue;
-  }
-
-  @Override
-  public Map<String, String> getMap(String propertyName) {
-    DeclarativeConfigProperties propertyValue =
-        getPropertyValue(propertyName, DeclarativeConfigProperties::getStructured);
-    if (propertyValue == null) {
-      return Collections.emptyMap();
-    }
-    Map<String, String> result = new HashMap<>();
-    propertyValue
-        .getPropertyKeys()
-        .forEach(
-            key -> {
-              String value = propertyValue.getString(key);
-              if (value == null) {
-                return;
-              }
-              result.put(key, value);
-            });
-    return Collections.unmodifiableMap(result);
-  }
-
-  @Nullable
-  private <T> T getPropertyValue(
-      String property, BiFunction<DeclarativeConfigProperties, String, T> extractor) {
-    if (instrumentationJavaNode == null) {
-      return null;
+    DeclarativeConfigPropertiesBridge(DeclarativeConfigProperties instrumentationNode) {
+        instrumentationJavaNode = instrumentationNode.getStructured("java", empty());
     }
 
-    if (property.startsWith(OTEL_INSTRUMENTATION_PREFIX)) {
-      property = property.substring(OTEL_INSTRUMENTATION_PREFIX.length());
-    }
-    // Split the remainder of the property on "."
-    String[] segments = property.split("\\.");
-    if (segments.length == 0) {
-      return null;
+    @Nullable
+    @Override
+    public String getString(String propertyName) {
+        return getPropertyValue(propertyName, DeclarativeConfigProperties::getString);
     }
 
-    // Extract the value by walking to the N-1 entry
-    DeclarativeConfigProperties target = instrumentationJavaNode;
-    if (segments.length > 1) {
-      for (int i = 0; i < segments.length - 1; i++) {
-        target = target.getStructured(segments[i], empty());
-      }
+    @Nullable
+    @Override
+    public Boolean getBoolean(String propertyName) {
+        return getPropertyValue(propertyName, DeclarativeConfigProperties::getBoolean);
     }
-    String lastPart = segments[segments.length - 1];
 
-    return extractor.apply(target, lastPart);
-  }
+    @Nullable
+    @Override
+    public Integer getInt(String propertyName) {
+        return getPropertyValue(propertyName, DeclarativeConfigProperties::getInt);
+    }
+
+    @Nullable
+    @Override
+    public Long getLong(String propertyName) {
+        return getPropertyValue(propertyName, DeclarativeConfigProperties::getLong);
+    }
+
+    @Nullable
+    @Override
+    public Double getDouble(String propertyName) {
+        return getPropertyValue(propertyName, DeclarativeConfigProperties::getDouble);
+    }
+
+    @Nullable
+    @Override
+    public Duration getDuration(String propertyName) {
+        Long millis = getPropertyValue(propertyName, DeclarativeConfigProperties::getLong);
+        if (millis == null) {
+            return null;
+        }
+        return Duration.ofMillis(millis);
+    }
+
+    @Override
+    public List<String> getList(String propertyName) {
+        List<String> propertyValue =
+                getPropertyValue(
+                        propertyName,
+                        (properties, lastPart) -> properties.getScalarList(lastPart, String.class));
+        return propertyValue == null ? Collections.emptyList() : propertyValue;
+    }
+
+    @Override
+    public Map<String, String> getMap(String propertyName) {
+        DeclarativeConfigProperties propertyValue =
+                getPropertyValue(propertyName, DeclarativeConfigProperties::getStructured);
+        if (propertyValue == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new HashMap<>();
+        propertyValue
+                .getPropertyKeys()
+                .forEach(
+                        key -> {
+                            String value = propertyValue.getString(key);
+                            if (value == null) {
+                                return;
+                            }
+                            result.put(key, value);
+                        });
+        return Collections.unmodifiableMap(result);
+    }
+
+    @Nullable
+    private <T> T getPropertyValue(
+            String property, BiFunction<DeclarativeConfigProperties, String, T> extractor) {
+        if (instrumentationJavaNode == null) {
+            return null;
+        }
+
+        String[] segments = getSegments(property);
+        if (segments.length == 0) {
+            return null;
+        }
+
+        // Extract the value by walking to the N-1 entry
+        DeclarativeConfigProperties target = instrumentationJavaNode;
+        if (segments.length > 1) {
+            for (int i = 0; i < segments.length - 1; i++) {
+                target = target.getStructured(segments[i], empty());
+            }
+        }
+        String lastPart = segments[segments.length - 1];
+
+        return extractor.apply(target, lastPart);
+    }
+
+    private static String[] getSegments(String property) {
+        if (property.startsWith(OTEL_INSTRUMENTATION_PREFIX)) {
+            property = property.substring(OTEL_INSTRUMENTATION_PREFIX.length());
+        }
+        // Split the remainder of the property on "."
+        return property.split("\\.");
+    }
+
+    static String yamlPath(String property) {
+        String[] segments = getSegments(property);
+        if (segments.length == 0) {
+            throw new IllegalArgumentException("Invalid property: " + property);
+        }
+
+        return "'instrumentation/development' / 'java' / '" + String.join("' / '", segments) + "'";
+    }
 }
