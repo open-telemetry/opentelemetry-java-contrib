@@ -189,7 +189,6 @@ public abstract class ConsistentSampler implements Sampler, Composable {
       isAdjustedCountCorrect = intent.isAdjustedCountReliable();
       // determine the randomness value to use
       long randomness;
-      randomness = getRandomness(otelTraceState, traceId);
       if (isAdjustedCountCorrect) {
         randomness = getRandomness(otelTraceState, traceId);
       } else {
