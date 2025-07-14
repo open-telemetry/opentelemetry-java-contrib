@@ -100,7 +100,8 @@ enum ConfigurableOption {
    * @throws ConfigurationException if neither the environment variable nor the system property is
    *     set.
    */
-  <T> T getConfiguredValue(ConfigProperties configProperties, BiFunction<ConfigProperties, String, T> extractor) {
+  <T> T getConfiguredValue(
+      ConfigProperties configProperties, BiFunction<ConfigProperties, String, T> extractor) {
     T configuredValue = extractor.apply(configProperties, this.getSystemProperty());
     if (configuredValue instanceof String) {
       String value = (String) configuredValue;
@@ -130,7 +131,9 @@ enum ConfigurableOption {
    *     property, or the fallback function, in that order of precedence.
    */
   <T> T getConfiguredValueWithFallback(
-      ConfigProperties configProperties, Supplier<T> fallback, BiFunction<ConfigProperties, String, T> extractor) {
+      ConfigProperties configProperties,
+      Supplier<T> fallback,
+      BiFunction<ConfigProperties, String, T> extractor) {
     try {
       return this.getConfiguredValue(configProperties, extractor);
     } catch (ConfigurationException e) {

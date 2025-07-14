@@ -44,7 +44,6 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
           ConfigPropertiesUtil.propertyYamlPath(
               ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty()));
 
-
   @Override
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
@@ -58,25 +57,28 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
         });
   }
 
-  static void customize(OpenTelemetryConfigurationModel model,
-      GoogleCredentials credentials, ConfigProperties configProperties) {
+  static void customize(
+      OpenTelemetryConfigurationModel model,
+      GoogleCredentials credentials,
+      ConfigProperties configProperties) {
     Map<String, String> headerMap =
-        GcpAuthAutoConfigurationCustomizerProvider.getRequiredHeaderMap(credentials,
-            configProperties);
+        GcpAuthAutoConfigurationCustomizerProvider.getRequiredHeaderMap(
+            credentials, configProperties);
     customizeMeter(model, headerMap, configProperties);
     customizeTracer(model, headerMap, configProperties);
   }
 
   private static void customizeMeter(
-      OpenTelemetryConfigurationModel model, Map<String, String> headerMap,
+      OpenTelemetryConfigurationModel model,
+      Map<String, String> headerMap,
       ConfigProperties configProperties) {
     MeterProviderModel meterProvider = model.getMeterProvider();
     if (meterProvider == null) {
       return;
     }
 
-    if (shouldConfigureExporter(SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
-        configProperties)) {
+    if (shouldConfigureExporter(
+        SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       for (MetricReaderModel reader : meterProvider.getReaders()) {
         if (reader.getPeriodic() != null) {
           addAuth(meterModelHeaders(reader.getPeriodic().getExporter()), headerMap);
@@ -103,15 +105,16 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
   }
 
   private static void customizeTracer(
-      OpenTelemetryConfigurationModel model, Map<String, String> headerMap,
+      OpenTelemetryConfigurationModel model,
+      Map<String, String> headerMap,
       ConfigProperties configProperties) {
     TracerProviderModel tracerProvider = model.getTracerProvider();
     if (tracerProvider == null) {
       return;
     }
 
-    if (shouldConfigureExporter(SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
-            configProperties)) {
+    if (shouldConfigureExporter(
+        SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
         BatchSpanProcessorModel batch = processor.getBatch();
         if (batch != null) {
@@ -123,7 +126,6 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
         }
       }
     }
-
   }
 
   private static List<List<NameStringValuePairModel>> spanExporterModelHeaders(
