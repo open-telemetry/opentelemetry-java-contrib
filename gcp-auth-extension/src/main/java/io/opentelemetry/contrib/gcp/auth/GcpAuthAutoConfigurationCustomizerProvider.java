@@ -25,7 +25,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -83,7 +83,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    *   <li>If the configured signal specific endpoint is a known GCP Telemetry API endpoint,
    *       customizes only the signal specific exporter.
    * </ul>
-   *
+   * <p>
    * The 'customization' performed includes customizing the exporters by adding required headers to
    * the export calls made and customizing the resource by adding required resource attributes to
    * enable GCP integration.
@@ -151,15 +151,18 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
-  private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
-    String userSpecifiedTargetedSignals =
-        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
-            configProperties, () -> SIGNAL_TYPE_ALL);
-    return Arrays.stream(userSpecifiedTargetedSignals.split(","))
-        .map(String::trim)
-        .anyMatch(
+  static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
+    return
+        targetSignals(configProperties).stream().anyMatch(
             targetedSignal ->
                 targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
+  }
+
+  static List<String> targetSignals(ConfigProperties configProperties) {
+    return ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS
+        .getConfiguredValueWithFallback(
+            configProperties, () -> Collections.singletonList(SIGNAL_TYPE_ALL),
+            ConfigProperties::getList);
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -221,23 +224,29 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // Add quota user project header if not detected by the auth library and user provided it via
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
-      Optional<String> maybeConfiguredQuotaProjectId =
-          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
-              configProperties);
-      maybeConfiguredQuotaProjectId.ifPresent(
+      getQuotaProjectId(configProperties).ifPresent(
           configuredQuotaProjectId ->
               flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
     }
     return flattenedHeaders;
   }
 
+  static Optional<String> getQuotaProjectId(ConfigProperties configProperties) {
+    return ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
+        configProperties);
+  }
+
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     Resource res =
         Resource.create(
-            Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
+            Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                getProjectId(configProperties)));
     return resource.merge(res);
+  }
+
+  static String getProjectId(ConfigProperties configProperties) {
+    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties,
+        ConfigProperties::getString);
   }
 }
