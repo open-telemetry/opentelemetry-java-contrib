@@ -52,4 +52,9 @@ public class ConfigPropertiesUtil {
 
         return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
     }
+
+    public static String propertyYamlPath(String propertyName) {
+        // todo test if this is correct
+        return DeclarativeConfigPropertiesBridge.yamlPath(propertyName);
+    }
 }

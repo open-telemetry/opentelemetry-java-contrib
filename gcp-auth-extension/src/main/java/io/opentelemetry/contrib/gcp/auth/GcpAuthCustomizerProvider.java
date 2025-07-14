@@ -5,8 +5,9 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_METRICS;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_TRACES;
-import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.isSignalTargeted;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.shouldConfigureExporter;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
@@ -36,13 +37,12 @@ import javax.annotation.Nullable;
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
 public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustomizerProvider {
 
-//  private static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
-//      String.format(
-//          "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by exporting valid values to environment variable: %s or by setting valid values in system property: %s.",
-//          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
-//          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getEnvironmentVariable(),
-//          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty());
-
+  static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
+      String.format(
+          "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by setting %s in the configuration file.",
+          ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
+          ConfigPropertiesUtil.propertyYamlPath(
+              ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty()));
 
 
   @Override
@@ -75,19 +75,12 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
       return;
     }
 
-    if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      // todo
-      //        String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
-      //        logger.log(
-      //            Level.WARNING,
-      //            "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-      //            params);
-      return;
-    }
-
-    for (MetricReaderModel reader : meterProvider.getReaders()) {
-      if (reader.getPeriodic() != null) {
-        addAuth(meterModelHeaders(reader.getPeriodic().getExporter()), headerMap);
+    if (shouldConfigureExporter(SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
+        configProperties)) {
+      for (MetricReaderModel reader : meterProvider.getReaders()) {
+        if (reader.getPeriodic() != null) {
+          addAuth(meterModelHeaders(reader.getPeriodic().getExporter()), headerMap);
+        }
       }
     }
   }
@@ -117,26 +110,20 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
       return;
     }
 
-    if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      // todo
-      //        String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
-      //        logger.log(
-      //            Level.WARNING,
-      //            "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-      //            params);
-      return;
+    if (shouldConfigureExporter(SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
+            configProperties)) {
+      for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
+        BatchSpanProcessorModel batch = processor.getBatch();
+        if (batch != null) {
+          addAuth(spanExporterModelHeaders(batch.getExporter()), headerMap);
+        }
+        SimpleSpanProcessorModel simple = processor.getSimple();
+        if (simple != null) {
+          addAuth(spanExporterModelHeaders(simple.getExporter()), headerMap);
+        }
+      }
     }
 
-    for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
-      BatchSpanProcessorModel batch = processor.getBatch();
-      if (batch != null) {
-        addAuth(spanExporterModelHeaders(batch.getExporter()), headerMap);
-      }
-      SimpleSpanProcessorModel simple = processor.getSimple();
-      if (simple != null) {
-        addAuth(spanExporterModelHeaders(simple.getExporter()), headerMap);
-      }
-    }
   }
 
   private static List<List<NameStringValuePairModel>> spanExporterModelHeaders(
