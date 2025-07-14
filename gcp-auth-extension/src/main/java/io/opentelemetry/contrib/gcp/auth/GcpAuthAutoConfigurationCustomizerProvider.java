@@ -162,10 +162,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   static List<String> targetSignals(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
-        configProperties,
-        () -> Collections.singletonList(SIGNAL_TYPE_ALL),
-        ConfigProperties::getList);
+    return Objects.requireNonNull(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValue(
+            configProperties,
+            (properties, name) ->
+                properties.getList(name, Collections.singletonList(SIGNAL_TYPE_ALL))));
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -236,8 +237,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   static Optional<String> getQuotaProjectId(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
-        configProperties);
+    return Optional.ofNullable(
+        ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValue(
+            configProperties, ConfigProperties::getString));
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
@@ -250,7 +252,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   static String getProjectId(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(
+    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getRequiredConfiguredValue(
         configProperties, ConfigProperties::getString);
   }
 }
