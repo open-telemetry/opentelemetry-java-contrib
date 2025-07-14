@@ -46,7 +46,8 @@ public class ConfigPropertiesUtil {
     return resolveModel(model, Collections.emptyMap());
   }
 
-  public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model, Map<String, String> translationMap) {
+  public static ConfigProperties resolveModel(
+      OpenTelemetryConfigurationModel model, Map<String, String> translationMap) {
     SdkConfigProvider configProvider = SdkConfigProvider.create(model);
     DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
     if (instrumentationConfig == null) {

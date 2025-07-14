@@ -19,11 +19,11 @@ public class InferredSpansCustomizerProvider implements DeclarativeConfiguration
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          ConfigProperties configProperties = ConfigPropertiesUtil.resolveModel(model,
-              Collections.singletonMap("otel.inferred.spans", "inferred_spans"));
+          ConfigProperties configProperties =
+              ConfigPropertiesUtil.resolveModel(
+                  model, Collections.singletonMap("otel.inferred.spans", "inferred_spans"));
 
           return model;
         });
   }
-
 }
