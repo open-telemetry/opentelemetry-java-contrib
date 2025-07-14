@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
-import static io.opentelemetry.contrib.gcp.auth.GcpAuthCustomizerProvider.SIGNAL_TARGET_WARNING_FIX_SUGGESTION;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthCustomizerProvider.SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,7 +75,7 @@ class GcpAuthCustomizerProviderTest {
 
   @Test
   void fixSuggestion() {
-    assertThat(SIGNAL_TARGET_WARNING_FIX_SUGGESTION)
+    assertThat(SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION)
         .isEqualTo(
             "You may safely ignore this warning if it is intentional, "
                 + "otherwise please configure the 'Target Signals for Google Authentication Extension' "
