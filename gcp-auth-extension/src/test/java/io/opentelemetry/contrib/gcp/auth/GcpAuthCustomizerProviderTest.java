@@ -1,5 +1,6 @@
 package io.opentelemetry.contrib.gcp.auth;
 
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthCustomizerProvider.SIGNAL_TARGET_WARNING_FIX_SUGGESTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -66,5 +67,15 @@ class GcpAuthCustomizerProviderTest {
     String header = "headers=\\[io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.NameStringValuePairModel@.*\\[name=x-goog-user-project,value=qp]";
     // both metrics and traces should have the header
     assertThat(model.toString()).matches(String.format(".*%s.*%s.*", header, header));
+  }
+
+  @Test
+  void fixSuggestion() {
+    assertThat(SIGNAL_TARGET_WARNING_FIX_SUGGESTION)
+        .isEqualTo("You may safely ignore this warning if it is intentional, "
+            + "otherwise please configure the 'Target Signals for Google Authentication Extension' "
+            + "by setting "
+            + "'instrumentation/development' / 'java' / 'google' / 'otel' / 'auth' / 'target' / "
+            + "'signals' in the configuration file.");
   }
 }

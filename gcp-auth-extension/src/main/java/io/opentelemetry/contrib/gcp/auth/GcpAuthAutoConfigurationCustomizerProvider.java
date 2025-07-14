@@ -124,34 +124,38 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
+    if (shouldConfigureExporter(SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
+        configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
-    } else {
-      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
-      logger.log(
-          Level.WARNING,
-          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-          params);
     }
     return exporter;
   }
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+    if (shouldConfigureExporter(SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION,
+        configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
-    } else {
-      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
-      logger.log(
-          Level.WARNING,
-          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-          params);
     }
     return exporter;
   }
 
+  static boolean shouldConfigureExporter(String signal,
+      String fixSuggestion,
+      ConfigProperties configProperties) {
+    if (isSignalTargeted(signal, configProperties)) {
+      return true;
+    } else {
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          new String[] {signal, fixSuggestion});
+      return false;
+    }
+  }
+
   // Checks if the auth extension is configured to target the passed signal for authentication.
-  static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
+  private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
     return
         targetSignals(configProperties).stream().anyMatch(
             targetedSignal ->
