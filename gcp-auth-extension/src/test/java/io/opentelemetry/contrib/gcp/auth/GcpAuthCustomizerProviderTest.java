@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthCustomizerProvider.SIGNAL_TARGET_WARNING_FIX_SUGGESTION;
@@ -44,18 +49,16 @@ class GcpAuthCustomizerProviderTest {
             + "          target:\n"
             + "            signals: [metrics, traces]\n";
 
-    OpenTelemetryConfigurationModel model = DeclarativeConfiguration.parse(
-        new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+    OpenTelemetryConfigurationModel model =
+        DeclarativeConfiguration.parse(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
     ConfigProperties properties = ConfigPropertiesUtil.resolveModel(model);
 
-    assertThat(
-        GcpAuthAutoConfigurationCustomizerProvider.targetSignals(properties)).containsExactly(
-        "metrics", "traces"
-    );
-    assertThat(GcpAuthAutoConfigurationCustomizerProvider.getProjectId(properties)).isEqualTo(
-        "p");
-    assertThat(GcpAuthAutoConfigurationCustomizerProvider.getQuotaProjectId(properties)).contains(
-        "qp");
+    assertThat(GcpAuthAutoConfigurationCustomizerProvider.targetSignals(properties))
+        .containsExactly("metrics", "traces");
+    assertThat(GcpAuthAutoConfigurationCustomizerProvider.getProjectId(properties)).isEqualTo("p");
+    assertThat(GcpAuthAutoConfigurationCustomizerProvider.getQuotaProjectId(properties))
+        .contains("qp");
 
     GoogleCredentials credentials = mock(GoogleCredentials.class);
     when(credentials.getRequestMetadata())
@@ -64,7 +67,8 @@ class GcpAuthCustomizerProviderTest {
 
     GcpAuthCustomizerProvider.customize(model, credentials, properties);
 
-    String header = "headers=\\[io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.NameStringValuePairModel@.*\\[name=x-goog-user-project,value=qp]";
+    String header =
+        "headers=\\[io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.NameStringValuePairModel@.*\\[name=x-goog-user-project,value=qp]";
     // both metrics and traces should have the header
     assertThat(model.toString()).matches(String.format(".*%s.*%s.*", header, header));
   }
@@ -72,10 +76,11 @@ class GcpAuthCustomizerProviderTest {
   @Test
   void fixSuggestion() {
     assertThat(SIGNAL_TARGET_WARNING_FIX_SUGGESTION)
-        .isEqualTo("You may safely ignore this warning if it is intentional, "
-            + "otherwise please configure the 'Target Signals for Google Authentication Extension' "
-            + "by setting "
-            + "'instrumentation/development' / 'java' / 'google' / 'otel' / 'auth' / 'target' / "
-            + "'signals' in the configuration file.");
+        .isEqualTo(
+            "You may safely ignore this warning if it is intentional, "
+                + "otherwise please configure the 'Target Signals for Google Authentication Extension' "
+                + "by setting "
+                + "'instrumentation/development' / 'java' / 'google' / 'otel' / 'auth' / 'target' / "
+                + "'signals' in the configuration file.");
   }
 }

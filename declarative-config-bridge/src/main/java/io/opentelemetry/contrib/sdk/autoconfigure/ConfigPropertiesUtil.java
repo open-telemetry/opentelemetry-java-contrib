@@ -14,46 +14,43 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 
 public class ConfigPropertiesUtil {
-    private ConfigPropertiesUtil() {
+  private ConfigPropertiesUtil() {}
+
+  /** Resolve {@link ConfigProperties} from the {@code autoConfiguredOpenTelemetrySdk}. */
+  public static ConfigProperties resolveConfigProperties(
+      AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
+    ConfigProperties sdkConfigProperties =
+        AutoConfigureUtil.getConfig(autoConfiguredOpenTelemetrySdk);
+    if (sdkConfigProperties != null) {
+      return sdkConfigProperties;
+    }
+    ConfigProvider configProvider =
+        AutoConfigureUtil.getConfigProvider(autoConfiguredOpenTelemetrySdk);
+    if (configProvider != null) {
+      DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
+
+      if (instrumentationConfig == null) {
+        instrumentationConfig = DeclarativeConfigProperties.empty();
+      }
+
+      return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
+    }
+    // Should never happen
+    throw new IllegalStateException(
+        "AutoConfiguredOpenTelemetrySdk does not have ConfigProperties or DeclarativeConfigProperties. This is likely a programming error in opentelemetry-java");
+  }
+
+  public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model) {
+    SdkConfigProvider configProvider = SdkConfigProvider.create(model);
+    DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
+    if (instrumentationConfig == null) {
+      instrumentationConfig = DeclarativeConfigProperties.empty();
     }
 
-    /**
-     * Resolve {@link ConfigProperties} from the {@code autoConfiguredOpenTelemetrySdk}.
-     */
-    public static ConfigProperties resolveConfigProperties(
-            AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
-        ConfigProperties sdkConfigProperties =
-                AutoConfigureUtil.getConfig(autoConfiguredOpenTelemetrySdk);
-        if (sdkConfigProperties != null) {
-            return sdkConfigProperties;
-        }
-        ConfigProvider configProvider =
-                AutoConfigureUtil.getConfigProvider(autoConfiguredOpenTelemetrySdk);
-        if (configProvider != null) {
-            DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
+    return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
+  }
 
-            if (instrumentationConfig == null) {
-                instrumentationConfig = DeclarativeConfigProperties.empty();
-            }
-
-            return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
-        }
-        // Should never happen
-        throw new IllegalStateException(
-                "AutoConfiguredOpenTelemetrySdk does not have ConfigProperties or DeclarativeConfigProperties. This is likely a programming error in opentelemetry-java");
-    }
-
-    public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model) {
-        SdkConfigProvider configProvider = SdkConfigProvider.create(model);
-        DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
-        if (instrumentationConfig == null) {
-            instrumentationConfig = DeclarativeConfigProperties.empty();
-        }
-
-        return new DeclarativeConfigPropertiesBridge(instrumentationConfig);
-    }
-
-    public static String propertyYamlPath(String propertyName) {
-        return DeclarativeConfigPropertiesBridge.yamlPath(propertyName);
-    }
+  public static String propertyYamlPath(String propertyName) {
+    return DeclarativeConfigPropertiesBridge.yamlPath(propertyName);
+  }
 }
