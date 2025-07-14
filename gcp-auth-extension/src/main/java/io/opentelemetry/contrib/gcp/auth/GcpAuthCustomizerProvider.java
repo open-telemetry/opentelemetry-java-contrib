@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
 public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustomizerProvider {
 
-  static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
+  static final String SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION =
       String.format(
           "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by setting %s in the configuration file.",
           ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getUserReadableName(),
@@ -48,10 +48,8 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          ConfigProperties configProperties = ConfigPropertiesUtil.resolveModel(model);
-          GoogleCredentials credentials =
-              GcpAuthAutoConfigurationCustomizerProvider.getCredentials();
-          customize(model, credentials, configProperties);
+          customize(model, GcpAuthAutoConfigurationCustomizerProvider.getCredentials(),
+              ConfigPropertiesUtil.resolveModel(model));
 
           return model;
         });
@@ -78,7 +76,7 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
     }
 
     if (shouldConfigureExporter(
-        SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
+        SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION, configProperties)) {
       for (MetricReaderModel reader : meterProvider.getReaders()) {
         if (reader.getPeriodic() != null) {
           addAuth(meterModelHeaders(reader.getPeriodic().getExporter()), headerMap);
@@ -114,7 +112,7 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
     }
 
     if (shouldConfigureExporter(
-        SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
+        SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION, configProperties)) {
       for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
         BatchSpanProcessorModel batch = processor.getBatch();
         if (batch != null) {
