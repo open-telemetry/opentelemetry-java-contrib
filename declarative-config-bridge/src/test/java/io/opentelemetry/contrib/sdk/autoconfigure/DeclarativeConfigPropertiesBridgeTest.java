@@ -3,7 +3,11 @@ package io.opentelemetry.contrib.sdk.autoconfigure;/*
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.InstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import java.io.ByteArrayInputStream;
@@ -53,7 +57,7 @@ class DeclarativeConfigPropertiesBridgeTest {
             new ByteArrayInputStream(YAML.getBytes(StandardCharsets.UTF_8)));
     SdkConfigProvider configProvider = SdkConfigProvider.create(model);
     bridge =
-        new ConfigPropertiesUtil.DeclarativeConfigPropertiesBridge(
+        new DeclarativeConfigPropertiesBridge(
             Objects.requireNonNull(configProvider.getInstrumentationConfig()));
 
     OpenTelemetryConfigurationModel emptyModel =
@@ -61,7 +65,7 @@ class DeclarativeConfigPropertiesBridgeTest {
             .withAdditionalProperty("instrumentation/development", new InstrumentationModel());
     SdkConfigProvider emptyConfigProvider = SdkConfigProvider.create(emptyModel);
     emptyBridge =
-        new ConfigPropertiesUtil.DeclarativeConfigPropertiesBridge(
+        new DeclarativeConfigPropertiesBridge(
             Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()));
   }
 
