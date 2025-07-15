@@ -25,8 +25,7 @@ public class InferredSpansComponentProvider implements ComponentProvider<SpanPro
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return InferredSpansAutoConfig.create(
         ConfigPropertiesUtil.resolveConfig(
-            config, Collections.singletonMap("otel.inferred.spans.", "")),
-        /* enableByDefault= */ true);
+            config, Collections.singletonMap("otel.inferred.spans.", "")));
   }
 
   @Override
