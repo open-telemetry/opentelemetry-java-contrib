@@ -4,9 +4,9 @@
  */
 
 package io.opentelemetry.contrib.sdk.autoconfigure; /*
- * Copyright The OpenTelemetry Authors
- * SPDX-License-Identifier: Apache-2.0
- */
+                                                     * Copyright The OpenTelemetry Authors
+                                                     * SPDX-License-Identifier: Apache-2.0
+                                                     */
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -132,15 +132,15 @@ class DeclarativeConfigPropertiesBridgeTest {
     assertThat(bridge.getLong("otel.instrumentation.other-instrumentation.int_key", 1L))
         .isEqualTo(1L);
     assertThat(
-        bridge.getDuration(
-            "otel.instrumentation.other-instrumentation.int_key", Duration.ofMillis(1)))
+            bridge.getDuration(
+                "otel.instrumentation.other-instrumentation.int_key", Duration.ofMillis(1)))
         .isEqualTo(Duration.ofMillis(1));
     assertThat(bridge.getDouble("otel.instrumentation.other-instrumentation.double_key", 1.1))
         .isEqualTo(1.1);
     assertThat(
-        bridge.getList(
-            "otel.instrumentation.other-instrumentation.list_key",
-            Arrays.asList("value1", "value2")))
+            bridge.getList(
+                "otel.instrumentation.other-instrumentation.list_key",
+                Arrays.asList("value1", "value2")))
         .isEqualTo(Arrays.asList("value1", "value2"));
     assertThat(bridge.getMap("otel.instrumentation.other-instrumentation.map_key", expectedMap))
         .isEqualTo(expectedMap);
@@ -155,8 +155,8 @@ class DeclarativeConfigPropertiesBridgeTest {
 
   @Test
   void translation() {
-    DeclarativeConfigPropertiesBridge propertiesBridge = createBridge(
-        Collections.singletonMap("acme", "acme.full_name"));
+    DeclarativeConfigPropertiesBridge propertiesBridge =
+        createBridge(Collections.singletonMap("acme", "acme.full_name"));
     assertThat(propertiesBridge.getBoolean("acme.preserved")).isTrue();
   }
 }

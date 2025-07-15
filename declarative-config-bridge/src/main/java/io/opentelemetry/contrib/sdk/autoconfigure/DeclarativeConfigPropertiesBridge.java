@@ -54,8 +54,8 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
   private final DeclarativeConfigProperties instrumentationJavaNode;
   private final Map<String, String> translationMap;
 
-  DeclarativeConfigPropertiesBridge(DeclarativeConfigProperties instrumentationNode,
-      Map<String, String> translationMap) {
+  DeclarativeConfigPropertiesBridge(
+      DeclarativeConfigProperties instrumentationNode, Map<String, String> translationMap) {
     instrumentationJavaNode = instrumentationNode.getStructured("java", empty());
     this.translationMap = translationMap;
   }

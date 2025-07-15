@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import java.util.Collections;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class ConfigPropertiesUtil {
   private ConfigPropertiesUtil() {}
@@ -29,13 +30,8 @@ public class ConfigPropertiesUtil {
     ConfigProvider configProvider =
         AutoConfigureUtil.getConfigProvider(autoConfiguredOpenTelemetrySdk);
     if (configProvider != null) {
-      DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
-
-      if (instrumentationConfig == null) {
-        instrumentationConfig = DeclarativeConfigProperties.empty();
-      }
-
-      return new DeclarativeConfigPropertiesBridge(instrumentationConfig, Collections.emptyMap());
+      return resolveInstrumentationConfig(
+          configProvider.getInstrumentationConfig(), Collections.emptyMap());
     }
     // Should never happen
     throw new IllegalStateException(
@@ -46,9 +42,20 @@ public class ConfigPropertiesUtil {
     return resolveModel(model, Collections.emptyMap());
   }
 
-  public static ConfigProperties resolveModel(OpenTelemetryConfigurationModel model, Map<String, String> translationMap) {
-    SdkConfigProvider configProvider = SdkConfigProvider.create(model);
-    DeclarativeConfigProperties instrumentationConfig = configProvider.getInstrumentationConfig();
+  public static ConfigProperties resolveModel(
+      OpenTelemetryConfigurationModel model, Map<String, String> translationMap) {
+    return resolveInstrumentationConfig(
+        SdkConfigProvider.create(model).getInstrumentationConfig(), translationMap);
+  }
+
+  public static ConfigProperties resolveInstrumentationConfig(
+      @Nullable DeclarativeConfigProperties instrumentationConfig) {
+    return resolveInstrumentationConfig(instrumentationConfig, Collections.emptyMap());
+  }
+
+  public static ConfigProperties resolveInstrumentationConfig(
+      @Nullable DeclarativeConfigProperties instrumentationConfig,
+      Map<String, String> translationMap) {
     if (instrumentationConfig == null) {
       instrumentationConfig = DeclarativeConfigProperties.empty();
     }
