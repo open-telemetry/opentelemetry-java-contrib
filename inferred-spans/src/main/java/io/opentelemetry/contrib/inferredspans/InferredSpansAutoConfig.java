@@ -16,7 +16,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -47,20 +46,17 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          providerBuilder.addSpanProcessor(create(properties, /* enableByDefault= */ false));
+          if (properties.getBoolean(ENABLED_OPTION, false)) {
+            providerBuilder.addSpanProcessor(create(properties));
+          } else {
+            log.finest(
+                "Not enabling inferred spans processor because " + ENABLED_OPTION + " is not set");
+          }
           return providerBuilder;
         });
   }
 
-  static SpanProcessor create(ConfigProperties properties, boolean enableByDefault) {
-    if (!properties.getBoolean(ENABLED_OPTION, enableByDefault)) {
-      log.finest(
-          "Not creating inferred spans processor because "
-              + ENABLED_OPTION
-              + " is not set to true");
-      return SpanProcessor.composite(Collections.emptyList());
-    }
-
+  static SpanProcessor create(ConfigProperties properties) {
     InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
 
     PropertiesApplier applier = new PropertiesApplier(properties);

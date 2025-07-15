@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import org.junit.jupiter.api.Test;
 
@@ -15,30 +16,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InferredSpansCustomizerProviderTest {
 
-  private static final String FQDN =
-      "spanProcessor=io.opentelemetry.contrib.inferredspans.InferredSpansProcessor";
-
   @Test
-  void enabled() {
-    assertThat(create("")).contains(FQDN);
-  }
-
-  @Test
-  void disabled() {
-    assertThat(create("enabled: false")).doesNotContain(FQDN);
-  }
-
-  private static String create(String enabled) {
+  void declarativeConfig() {
     String yaml =
         "file_format: 0.4\n"
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - inferred_spans:\n"
-            + "        "
-            + enabled
-            + "\n";
-    return DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
-        .toString();
+            + "        backup:\n"
+            + "          diagnostic:\n"
+            + "            files: true\n";
+
+    OpenTelemetrySdk sdk =
+        DeclarativeConfiguration.parseAndCreate(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+    assertThat(sdk)
+        .extracting("tracerProvider")
+        .extracting("delegate")
+        .extracting("sharedState")
+        .extracting("activeSpanProcessor")
+        .extracting("profiler")
+        .extracting("config")
+        .extracting("backupDiagnosticFiles")
+        .isEqualTo(true);
+
+    assertThat(sdk.toString())
+        .contains("spanProcessor=io.opentelemetry.contrib.inferredspans.InferredSpansProcessor");
   }
 }
