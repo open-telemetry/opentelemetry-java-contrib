@@ -182,34 +182,36 @@ final class SamplingRuleApplier {
   @SuppressWarnings("deprecation") // TODO
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
-    String httpTarget = null;
-    String httpUrl = null;
-    String httpMethod = null;
-    String host = null;
+
+    String httpTarget = attributes.get(UrlAttributes.URL_PATH); 
+    if (httpTarget == null) { 
+      httpTarget = attributes.get(HTTP_TARGET); 
+    }
+
+    String httpUrl = attributes.get(UrlAttributes.URL_FULL); 
+    if (httpUrl == null) { 
+      httpUrl = attributes.get(HTTP_URL); 
+    }
+
+    String httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD); 
+    if (httpMethod == null) { 
+      httpMethod = attributes.get(HTTP_METHOD); 
+    }
+
+    if (httpMethod != null && httpMethod.equals(_OTHER_REQUEST_METHOD)) {
+      httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
+    }
+
+    String host = attributes.get(ServerAttributes.SERVER_ADDRESS); 
+    if (host == null) { 
+      host = attributes.get(NET_HOST_NAME); 
+      if (host == null) {
+        host = attributes.get(HTTP_HOST);
+      }
+    }
+
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(HTTP_TARGET) || entry.getKey().equals(UrlAttributes.URL_PATH)) {
-        httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_URL) || entry.getKey().equals(UrlAttributes.URL_FULL)) {
-        httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_METHOD)
-          || entry.getKey().equals(HttpAttributes.HTTP_REQUEST_METHOD)) {
-        httpMethod = (String) entry.getValue();
-        // according to semantic conventions, if the HTTP request method is not known to
-        // instrumentation, it must be set to _OTHER and the
-        // HTTP_REQUEST_METHOD_ORIGINAL should contain the original method
-        if (httpMethod.equals(_OTHER_REQUEST_METHOD)) {
-          httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
-        }
-      } else if (entry.getKey().equals(NET_HOST_NAME)
-          || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
-        host = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_HOST)
-          || entry.getKey().equals(ServerAttributes.SERVER_ADDRESS)) {
-        // TODO (trask) remove support for deprecated http.host attribute
-        host = (String) entry.getValue();
-      }
-
       Matcher matcher = attributeMatchers.get(entry.getKey().getKey());
       if (matcher == null) {
         continue;
