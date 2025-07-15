@@ -61,6 +61,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
     PropertiesApplier applier = new PropertiesApplier(properties);
 
+    applier.applyBool(ENABLED_OPTION, builder::profilerEnabled);
     applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
     applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
     applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
