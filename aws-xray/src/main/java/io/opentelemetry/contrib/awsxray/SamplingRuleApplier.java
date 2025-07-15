@@ -183,33 +183,32 @@ final class SamplingRuleApplier {
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
 
-    String httpTarget = attributes.get(UrlAttributes.URL_PATH); 
-    if (httpTarget == null) { 
-      httpTarget = attributes.get(HTTP_TARGET); 
+    String httpTarget = attributes.get(UrlAttributes.URL_PATH);
+    if (httpTarget == null) {
+      httpTarget = attributes.get(HTTP_TARGET);
     }
 
-    String httpUrl = attributes.get(UrlAttributes.URL_FULL); 
-    if (httpUrl == null) { 
-      httpUrl = attributes.get(HTTP_URL); 
+    String httpUrl = attributes.get(UrlAttributes.URL_FULL);
+    if (httpUrl == null) {
+      httpUrl = attributes.get(HTTP_URL);
     }
 
-    String httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD); 
-    if (httpMethod == null) { 
-      httpMethod = attributes.get(HTTP_METHOD); 
+    String httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD);
+    if (httpMethod == null) {
+      httpMethod = attributes.get(HTTP_METHOD);
     }
 
     if (httpMethod != null && httpMethod.equals(_OTHER_REQUEST_METHOD)) {
       httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
     }
 
-    String host = attributes.get(ServerAttributes.SERVER_ADDRESS); 
-    if (host == null) { 
-      host = attributes.get(NET_HOST_NAME); 
+    String host = attributes.get(ServerAttributes.SERVER_ADDRESS);
+    if (host == null) {
+      host = attributes.get(NET_HOST_NAME);
       if (host == null) {
         host = attributes.get(HTTP_HOST);
       }
     }
-
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
       Matcher matcher = attributeMatchers.get(entry.getKey().getKey());
