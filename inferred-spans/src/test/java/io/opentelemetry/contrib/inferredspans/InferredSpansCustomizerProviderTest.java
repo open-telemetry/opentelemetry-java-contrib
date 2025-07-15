@@ -5,14 +5,13 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
-import org.junit.jupiter.api.Test;
-
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class InferredSpansCustomizerProviderTest {
 
