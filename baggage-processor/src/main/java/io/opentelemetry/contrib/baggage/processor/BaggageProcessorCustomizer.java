@@ -35,43 +35,50 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
 
   private static void addSpanProcessor(
       SdkTracerProviderBuilder sdkTracerProviderBuilder, ConfigProperties config) {
-    BaggageSpanProcessor processor = createBaggageSpanProcessor(config);
-    if (processor.isEmpty()) {
+    if (spanKeys(config).isEmpty()) {
       return;
     }
-    sdkTracerProviderBuilder.addSpanProcessor(processor);
+
+    sdkTracerProviderBuilder.addSpanProcessor(createBaggageSpanProcessor(config));
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(ConfigProperties config) {
-    return createBaggageSpanProcessor(config.getList(SPAN_PREFIX + "copy-from-baggage.include"));
+    return createBaggageSpanProcessor(spanKeys(config));
+  }
+
+  static List<String> spanKeys(ConfigProperties config) {
+    return config.getList(SPAN_PREFIX + "copy-from-baggage.include");
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
     if (matchAll(keys)) {
       return BaggageSpanProcessor.allowAllBaggageKeys();
     }
-    return new BaggageSpanProcessor(keys::contains, keys.isEmpty());
+    return new BaggageSpanProcessor(keys::contains);
   }
 
   private static void addLogRecordProcessor(
       SdkLoggerProviderBuilder sdkLoggerProviderBuilder, ConfigProperties config) {
-    BaggageLogRecordProcessor processor = createBaggageLogRecordProcessor(config);
-    if (processor.isEmpty()) {
+    if (logKeys(config).isEmpty()) {
       return;
     }
-    sdkLoggerProviderBuilder.addLogRecordProcessor(processor);
+
+    sdkLoggerProviderBuilder.addLogRecordProcessor(createBaggageLogRecordProcessor(config));
   }
 
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(ConfigProperties config) {
-    return createBaggageLogRecordProcessor(
-        config.getList(LOG_PREFIX + "copy-from-baggage.include"));
+    return createBaggageLogRecordProcessor(logKeys(config));
+  }
+
+  static List<String> logKeys(ConfigProperties config) {
+    return config.getList(LOG_PREFIX + "copy-from-baggage.include");
   }
 
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
     if (matchAll(keys)) {
       return BaggageLogRecordProcessor.allowAllBaggageKeys();
     }
-    return new BaggageLogRecordProcessor(keys::contains, keys.isEmpty());
+    return new BaggageLogRecordProcessor(keys::contains);
   }
 
   private static boolean matchAll(List<String> keys) {

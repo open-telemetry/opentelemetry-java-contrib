@@ -18,19 +18,13 @@ import java.util.function.Predicate;
  */
 public class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
-  private boolean empty;
 
   /**
    * Creates a new {@link BaggageSpanProcessor} that copies only baggage entries with keys that pass
    * the provided filter into the newly created {@link io.opentelemetry.api.trace.Span}.
    */
   public BaggageSpanProcessor(Predicate<String> baggageKeyPredicate) {
-    this(baggageKeyPredicate, false); // we don't know if the predicate matches any keys
-  }
-
-  BaggageSpanProcessor(Predicate<String> baggageKeyPredicate, boolean empty) {
     this.baggageKeyPredicate = baggageKeyPredicate;
-    this.empty = empty;
   }
 
   /**
@@ -38,7 +32,7 @@ public class BaggageSpanProcessor implements SpanProcessor {
    * created {@link io.opentelemetry.api.trace.Span}.
    */
   public static BaggageSpanProcessor allowAllBaggageKeys() {
-    return new BaggageSpanProcessor(baggageKey -> true, false);
+    return new BaggageSpanProcessor(baggageKey -> true);
   }
 
   @Override
@@ -63,9 +57,5 @@ public class BaggageSpanProcessor implements SpanProcessor {
   @Override
   public boolean isEndRequired() {
     return false;
-  }
-
-  boolean isEmpty() {
-    return empty;
   }
 }
