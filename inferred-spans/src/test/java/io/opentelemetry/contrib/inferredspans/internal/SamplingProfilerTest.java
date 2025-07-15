@@ -329,4 +329,12 @@ class SamplingProfilerTest {
               configCustomizer.accept(config);
             });
   }
+
+  private static void awaitProfilerStarted(SamplingProfiler profiler) {
+    // ensure profiler is initialized
+    await()
+        .pollDelay(Duration.ofMillis(10))
+        .timeout(Duration.ofSeconds(6))
+        .until(() -> profiler.getProfilingSessions() > 1);
+  }
 }
