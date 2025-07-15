@@ -22,8 +22,9 @@ public class BaggageLogRecordComponentProvider implements ComponentProvider<LogR
 
   @Override
   public LogRecordProcessor create(DeclarativeConfigProperties config) {
-    return BaggageProcessorCustomizer.createBaggageLogRecordProcessor(ConfigPropertiesUtil.resolveConfig(
-        config, Collections.singletonMap(BaggageProcessorCustomizer.LOG_PREFIX, "")));
+    return BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
+        ConfigPropertiesUtil.resolveConfig(
+            config, Collections.singletonMap(BaggageProcessorCustomizer.LOG_PREFIX, "")));
   }
 
   @Override
