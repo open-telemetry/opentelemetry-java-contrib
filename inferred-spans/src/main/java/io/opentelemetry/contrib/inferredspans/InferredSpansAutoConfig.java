@@ -13,8 +13,10 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -45,17 +47,20 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          if (isEnabled(properties)) {
-            providerBuilder.addSpanProcessor(create(properties));
-          } else {
-            log.finest(
-                "Not enabling inferred spans processor because " + ENABLED_OPTION + " is not set");
-          }
+          providerBuilder.addSpanProcessor(create(properties, /* enableByDefault= */ false));
           return providerBuilder;
         });
   }
 
-  static InferredSpansProcessor create(ConfigProperties properties) {
+  static SpanProcessor create(ConfigProperties properties, boolean enableByDefault) {
+    if (!properties.getBoolean(ENABLED_OPTION, enableByDefault)) {
+      log.finest(
+          "Not creating inferred spans processor because "
+              + ENABLED_OPTION
+              + " is not set to true");
+      return SpanProcessor.composite(Collections.emptyList());
+    }
+
     InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
 
     PropertiesApplier applier = new PropertiesApplier(properties);
@@ -77,12 +82,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
       builder.parentOverrideHandler(constructParentOverrideHandler(parentOverrideHandlerName));
     }
 
-    InferredSpansProcessor spanProcessor = builder.build();
-    return spanProcessor;
-  }
-
-  static boolean isEnabled(ConfigProperties properties) {
-    return properties.getBoolean(ENABLED_OPTION, false);
+    return builder.build();
   }
 
   @SuppressWarnings("unchecked")
