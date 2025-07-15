@@ -11,7 +11,6 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -46,38 +45,35 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
           if (properties.getBoolean(ENABLED_OPTION, false)) {
-            providerBuilder.addSpanProcessor(create(properties));
+            InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
+
+            PropertiesApplier applier = new PropertiesApplier(properties);
+
+            applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
+            applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
+            applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
+            applier.applyBool(POSTPROCESSING_OPTION, builder::postProcessingEnabled);
+            applier.applyDuration(SAMPLING_INTERVAL_OPTION, builder::samplingInterval);
+            applier.applyDuration(MIN_DURATION_OPTION, builder::inferredSpansMinDuration);
+            applier.applyWildcards(INCLUDED_CLASSES_OPTION, builder::includedClasses);
+            applier.applyWildcards(EXCLUDED_CLASSES_OPTION, builder::excludedClasses);
+            applier.applyDuration(INTERVAL_OPTION, builder::profilerInterval);
+            applier.applyDuration(DURATION_OPTION, builder::profilingDuration);
+            applier.applyString(LIB_DIRECTORY_OPTION, builder::profilerLibDirectory);
+
+            String parentOverrideHandlerName = properties.getString(PARENT_OVERRIDE_HANDLER_OPTION);
+            if (parentOverrideHandlerName != null && !parentOverrideHandlerName.isEmpty()) {
+              builder.parentOverrideHandler(
+                  constructParentOverrideHandler(parentOverrideHandlerName));
+            }
+
+            providerBuilder.addSpanProcessor(builder.build());
           } else {
             log.finest(
                 "Not enabling inferred spans processor because " + ENABLED_OPTION + " is not set");
           }
           return providerBuilder;
         });
-  }
-
-  static SpanProcessor create(ConfigProperties properties) {
-    InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
-
-    PropertiesApplier applier = new PropertiesApplier(properties);
-
-    applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
-    applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
-    applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
-    applier.applyBool(POSTPROCESSING_OPTION, builder::postProcessingEnabled);
-    applier.applyDuration(SAMPLING_INTERVAL_OPTION, builder::samplingInterval);
-    applier.applyDuration(MIN_DURATION_OPTION, builder::inferredSpansMinDuration);
-    applier.applyWildcards(INCLUDED_CLASSES_OPTION, builder::includedClasses);
-    applier.applyWildcards(EXCLUDED_CLASSES_OPTION, builder::excludedClasses);
-    applier.applyDuration(INTERVAL_OPTION, builder::profilerInterval);
-    applier.applyDuration(DURATION_OPTION, builder::profilingDuration);
-    applier.applyString(LIB_DIRECTORY_OPTION, builder::profilerLibDirectory);
-
-    String parentOverrideHandlerName = properties.getString(PARENT_OVERRIDE_HANDLER_OPTION);
-    if (parentOverrideHandlerName != null && !parentOverrideHandlerName.isEmpty()) {
-      builder.parentOverrideHandler(constructParentOverrideHandler(parentOverrideHandlerName));
-    }
-
-    return builder.build();
   }
 
   @SuppressWarnings("unchecked")
