@@ -149,7 +149,6 @@ public class SamplingProfiler implements Runnable {
   private final ProfilingActivationListener activationListener;
 
   private final Supplier<Tracer> tracerProvider;
-  @Nullable private final File tempDir;
 
   private final AsyncProfiler profiler;
 
@@ -169,11 +168,9 @@ public class SamplingProfiler implements Runnable {
       SpanAnchoredClock nanoClock,
       Supplier<Tracer> tracerProvider,
       @Nullable File activationEventsFile,
-      @Nullable File jfrFile,
-      @Nullable File tempDir) {
+      @Nullable File jfrFile) {
     this.config = config;
     this.tracerProvider = tracerProvider;
-    this.tempDir = tempDir;
     this.scheduler =
         Executors.newSingleThreadScheduledExecutor(
             r -> {
@@ -253,13 +250,12 @@ public class SamplingProfiler implements Runnable {
 
   private synchronized void createFilesIfRequired() throws IOException {
     if (jfrFile == null || !jfrFile.exists()) {
-      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr", tempDir);
+      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr");
       jfrFile.deleteOnExit();
       canDeleteJfrFile = true;
     }
     if (activationEventsFile == null || !activationEventsFile.exists()) {
-      activationEventsFile =
-          File.createTempFile("otel-inferred-activation-events-", ".bin", tempDir);
+      activationEventsFile = File.createTempFile("otel-inferred-activation-events-", ".bin");
       activationEventsFile.deleteOnExit();
       canDeleteActivationEventsFile = true;
     }
