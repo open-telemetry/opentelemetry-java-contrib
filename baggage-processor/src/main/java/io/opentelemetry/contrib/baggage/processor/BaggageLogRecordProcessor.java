@@ -23,23 +23,17 @@ public class BaggageLogRecordProcessor implements LogRecordProcessor {
    * created log record.
    */
   public static BaggageLogRecordProcessor allowAllBaggageKeys() {
-    return new BaggageLogRecordProcessor(baggageKey -> true, false);
+    return new BaggageLogRecordProcessor(baggageKey -> true);
   }
 
   private final Predicate<String> baggageKeyPredicate;
-  private boolean empty;
 
   /**
    * Creates a new {@link BaggageLogRecordProcessor} that copies only baggage entries with keys that
    * pass the provided filter into the newly created log record.
    */
   public BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate) {
-    this(baggageKeyPredicate, false); // we don't know if the predicate matches any keys
-  }
-
-  BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate, boolean empty) {
     this.baggageKeyPredicate = baggageKeyPredicate;
-    this.empty = empty;
   }
 
   @Override
@@ -51,9 +45,5 @@ public class BaggageLogRecordProcessor implements LogRecordProcessor {
                 logRecord.setAttribute(AttributeKey.stringKey(s), baggageEntry.getValue());
               }
             });
-  }
-
-  boolean isEmpty() {
-    return empty;
   }
 }
