@@ -46,15 +46,15 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
     return createBaggageSpanProcessor(spanKeys(config));
   }
 
-  static List<String> spanKeys(ConfigProperties config) {
-    return config.getList(SPAN_PREFIX + "copy-from-baggage.include");
-  }
-
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
     if (matchAll(keys)) {
       return BaggageSpanProcessor.allowAllBaggageKeys();
     }
     return new BaggageSpanProcessor(keys::contains);
+  }
+
+  static List<String> spanKeys(ConfigProperties config) {
+    return config.getList(SPAN_PREFIX + "copy-from-baggage.include");
   }
 
   private static void addLogRecordProcessor(
@@ -70,15 +70,15 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
     return createBaggageLogRecordProcessor(logKeys(config));
   }
 
-  static List<String> logKeys(ConfigProperties config) {
-    return config.getList(LOG_PREFIX + "copy-from-baggage.include");
-  }
-
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
     if (matchAll(keys)) {
       return BaggageLogRecordProcessor.allowAllBaggageKeys();
     }
     return new BaggageLogRecordProcessor(keys::contains);
+  }
+
+  static List<String> logKeys(ConfigProperties config) {
+    return config.getList(LOG_PREFIX + "copy-from-baggage.include");
   }
 
   private static boolean matchAll(List<String> keys) {
