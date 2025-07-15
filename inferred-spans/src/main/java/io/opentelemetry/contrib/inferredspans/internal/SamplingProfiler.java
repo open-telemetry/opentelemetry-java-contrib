@@ -357,6 +357,10 @@ public class SamplingProfiler implements Runnable {
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
   public void run() {
+    if (!config.isEnabled()) {
+      logger.fine("Profiling is disabled, not starting profiling session");
+      return;
+    }
 
     // lazily create temporary files
     try {
