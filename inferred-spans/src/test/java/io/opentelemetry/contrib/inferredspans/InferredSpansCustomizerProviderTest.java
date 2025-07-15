@@ -33,6 +33,7 @@ class InferredSpansCustomizerProviderTest {
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - inferred_spans:\n"
+            + "        enabled: false\n"
             + "        backup:\n"
             + "          diagnostic:\n"
             + "            files: true\n";
