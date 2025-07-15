@@ -10,10 +10,12 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.util.Collections;
 
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
 public class InferredSpansComponentProvider implements ComponentProvider<SpanProcessor> {
+
   @Override
   public String getName() {
     return "inferred_spans";
@@ -22,8 +24,9 @@ public class InferredSpansComponentProvider implements ComponentProvider<SpanPro
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return InferredSpansAutoConfig.create(
-        ConfigPropertiesUtil.resolveInstrumentationConfig(
-            config, InferredSpansCustomizerProvider.TRANSLATION_MAP));
+        ConfigPropertiesUtil.resolveConfig(
+            config, Collections.singletonMap("otel.inferred.spans.", "")),
+        /* enableByDefault= */ true);
   }
 
   @Override

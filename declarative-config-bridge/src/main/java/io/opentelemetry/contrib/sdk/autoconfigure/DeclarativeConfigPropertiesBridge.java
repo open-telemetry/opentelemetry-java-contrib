@@ -50,13 +50,27 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
 
   private static final String OTEL_INSTRUMENTATION_PREFIX = "otel.instrumentation.";
 
-  // The node at .instrumentation.java
-  private final DeclarativeConfigProperties instrumentationJavaNode;
+  @Nullable private final DeclarativeConfigProperties baseNode;
   private final Map<String, String> translationMap;
 
-  DeclarativeConfigPropertiesBridge(
-      DeclarativeConfigProperties instrumentationNode, Map<String, String> translationMap) {
-    instrumentationJavaNode = instrumentationNode.getStructured("java", empty());
+  static DeclarativeConfigPropertiesBridge fromInstrumentationConfig(
+      @Nullable DeclarativeConfigProperties instrumentationConfig,
+      Map<String, String> translationMap) {
+    if (instrumentationConfig == null) {
+      instrumentationConfig = DeclarativeConfigProperties.empty();
+    }
+    return new DeclarativeConfigPropertiesBridge(
+        instrumentationConfig.getStructured("java", empty()), translationMap);
+  }
+
+  static DeclarativeConfigPropertiesBridge create(
+      @Nullable DeclarativeConfigProperties node, Map<String, String> translationMap) {
+    return new DeclarativeConfigPropertiesBridge(node, translationMap);
+  }
+
+  private DeclarativeConfigPropertiesBridge(
+      @Nullable DeclarativeConfigProperties baseNode, Map<String, String> translationMap) {
+    this.baseNode = baseNode;
     this.translationMap = translationMap;
   }
 
@@ -133,7 +147,7 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
   @Nullable
   private <T> T getPropertyValue(
       String property, BiFunction<DeclarativeConfigProperties, String, T> extractor) {
-    if (instrumentationJavaNode == null) {
+    if (baseNode == null) {
       return null;
     }
 
@@ -143,7 +157,7 @@ final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
     }
 
     // Extract the value by walking to the N-1 entry
-    DeclarativeConfigProperties target = instrumentationJavaNode;
+    DeclarativeConfigProperties target = baseNode;
     if (segments.length > 1) {
       for (int i = 0; i < segments.length - 1; i++) {
         target = target.getStructured(segments[i], empty());

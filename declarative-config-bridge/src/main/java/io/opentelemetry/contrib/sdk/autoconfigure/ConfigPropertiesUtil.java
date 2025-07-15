@@ -56,11 +56,13 @@ public class ConfigPropertiesUtil {
   public static ConfigProperties resolveInstrumentationConfig(
       @Nullable DeclarativeConfigProperties instrumentationConfig,
       Map<String, String> translationMap) {
-    if (instrumentationConfig == null) {
-      instrumentationConfig = DeclarativeConfigProperties.empty();
-    }
+    return DeclarativeConfigPropertiesBridge.fromInstrumentationConfig(
+        instrumentationConfig, translationMap);
+  }
 
-    return new DeclarativeConfigPropertiesBridge(instrumentationConfig, translationMap);
+  public static ConfigProperties resolveConfig(
+      @Nullable DeclarativeConfigProperties config, Map<String, String> translationMap) {
+    return DeclarativeConfigPropertiesBridge.create(config, translationMap);
   }
 
   public static String propertyYamlPath(String propertyName) {
