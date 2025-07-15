@@ -17,6 +17,8 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
+  testAnnotationProcessor("com.google.auto.service:auto-service")
+  testCompileOnly("com.google.auto.service:auto-service-annotations")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
