@@ -15,8 +15,6 @@ import java.util.List;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
-  static final String SPAN_PREFIX = "otel.java.experimental.span-attributes.";
-  static final String LOG_PREFIX = "otel.java.experimental.log-attributes.";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
@@ -54,7 +52,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
   }
 
   static List<String> spanKeys(ConfigProperties config) {
-    return config.getList(SPAN_PREFIX + "copy-from-baggage.include");
+    return config.getList("otel.java.experimental.span-attributes.copy-from-baggage.include");
   }
 
   private static void addLogRecordProcessor(
@@ -78,7 +76,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
   }
 
   static List<String> logKeys(ConfigProperties config) {
-    return config.getList(LOG_PREFIX + "copy-from-baggage.include");
+    return config.getList("otel.java.experimental.log-attributes.copy-from-baggage.include");
   }
 
   private static boolean matchAll(List<String> keys) {

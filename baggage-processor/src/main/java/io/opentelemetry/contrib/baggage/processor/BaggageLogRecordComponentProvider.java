@@ -24,7 +24,7 @@ public class BaggageLogRecordComponentProvider implements ComponentProvider<LogR
   public LogRecordProcessor create(DeclarativeConfigProperties config) {
     return BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
         ConfigPropertiesUtil.resolveConfig(
-            config, Collections.singletonMap(BaggageProcessorCustomizer.LOG_PREFIX, "")));
+            config, Collections.singletonMap("otel.java.experimental.log-attributes.", "")));
   }
 
   @Override

@@ -24,7 +24,7 @@ public class BaggageSpanComponentProvider implements ComponentProvider<SpanProce
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return BaggageProcessorCustomizer.createBaggageSpanProcessor(
         ConfigPropertiesUtil.resolveConfig(
-            config, Collections.singletonMap(BaggageProcessorCustomizer.SPAN_PREFIX, "")));
+            config, Collections.singletonMap("otel.java.experimental.span-attributes.", "")));
   }
 
   @Override
