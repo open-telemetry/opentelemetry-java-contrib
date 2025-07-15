@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -12,7 +13,11 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
 
+@AutoService(AutoConfigurationCustomizerProvider.class)
 public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
+  static final String SPAN_PREFIX = "otel.java.experimental.span-attributes.";
+  static final String LOG_PREFIX = "otel.java.experimental.log-attributes.";
+
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
     autoConfigurationCustomizer
@@ -30,39 +35,47 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
 
   private static void addSpanProcessor(
       SdkTracerProviderBuilder sdkTracerProviderBuilder, ConfigProperties config) {
-    List<String> keys =
-        config.getList("otel.java.experimental.span-attributes.copy-from-baggage.include");
-
-    if (keys.isEmpty()) {
+    BaggageSpanProcessor processor = createBaggageSpanProcessor(config);
+    if (processor.isEmpty()) {
       return;
     }
+    sdkTracerProviderBuilder.addSpanProcessor(processor);
+  }
 
-    sdkTracerProviderBuilder.addSpanProcessor(createBaggageSpanProcessor(keys));
+  static BaggageSpanProcessor createBaggageSpanProcessor(ConfigProperties config) {
+    return createBaggageSpanProcessor(
+        config.getList(SPAN_PREFIX + "copy-from-baggage.include"));
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
-    if (keys.size() == 1 && keys.get(0).equals("*")) {
+    if (matchAll(keys)) {
       return BaggageSpanProcessor.allowAllBaggageKeys();
     }
-    return new BaggageSpanProcessor(keys::contains);
+    return new BaggageSpanProcessor(keys::contains, keys.isEmpty());
   }
 
   private static void addLogRecordProcessor(
       SdkLoggerProviderBuilder sdkLoggerProviderBuilder, ConfigProperties config) {
-    List<String> keys =
-        config.getList("otel.java.experimental.log-attributes.copy-from-baggage.include");
-
-    if (keys.isEmpty()) {
+    BaggageLogRecordProcessor processor = createBaggageLogRecordProcessor(config);
+    if (processor.isEmpty()) {
       return;
     }
+    sdkLoggerProviderBuilder.addLogRecordProcessor(processor);
+  }
 
-    sdkLoggerProviderBuilder.addLogRecordProcessor(createBaggageLogRecordProcessor(keys));
+  static BaggageLogRecordProcessor createBaggageLogRecordProcessor(ConfigProperties config) {
+    return createBaggageLogRecordProcessor(
+        config.getList(LOG_PREFIX + "copy-from-baggage.include"));
   }
 
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
-    if (keys.size() == 1 && keys.get(0).equals("*")) {
+    if (matchAll(keys)) {
       return BaggageLogRecordProcessor.allowAllBaggageKeys();
     }
-    return new BaggageLogRecordProcessor(keys::contains);
+    return new BaggageLogRecordProcessor(keys::contains, keys.isEmpty());
+  }
+
+  private static boolean matchAll(List<String> keys) {
+    return keys.size() == 1 && keys.get(0).equals("*");
   }
 }
