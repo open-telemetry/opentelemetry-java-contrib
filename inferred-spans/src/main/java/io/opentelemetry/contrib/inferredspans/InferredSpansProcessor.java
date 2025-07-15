@@ -49,8 +49,7 @@ public class InferredSpansProcessor implements SpanProcessor {
       boolean startScheduledProfiling,
       @Nullable File activationEventsFile,
       @Nullable File jfrFile) {
-    profiler =
-        new SamplingProfiler(config, clock, this::getTracer, activationEventsFile, jfrFile, null);
+    profiler = new SamplingProfiler(config, clock, this::getTracer, activationEventsFile, jfrFile);
     if (startScheduledProfiling) {
       profiler.start();
     }
