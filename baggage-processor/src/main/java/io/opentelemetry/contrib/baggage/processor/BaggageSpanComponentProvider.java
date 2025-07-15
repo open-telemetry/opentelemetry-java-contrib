@@ -22,8 +22,9 @@ public class BaggageSpanComponentProvider implements ComponentProvider<SpanProce
 
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
-    return BaggageProcessorCustomizer.createBaggageSpanProcessor(ConfigPropertiesUtil.resolveConfig(
-        config, Collections.singletonMap(BaggageProcessorCustomizer.SPAN_PREFIX, "")));
+    return BaggageProcessorCustomizer.createBaggageSpanProcessor(
+        ConfigPropertiesUtil.resolveConfig(
+            config, Collections.singletonMap(BaggageProcessorCustomizer.SPAN_PREFIX, "")));
   }
 
   @Override

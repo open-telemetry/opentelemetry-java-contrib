@@ -43,8 +43,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(ConfigProperties config) {
-    return createBaggageSpanProcessor(
-        config.getList(SPAN_PREFIX + "copy-from-baggage.include"));
+    return createBaggageSpanProcessor(config.getList(SPAN_PREFIX + "copy-from-baggage.include"));
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
