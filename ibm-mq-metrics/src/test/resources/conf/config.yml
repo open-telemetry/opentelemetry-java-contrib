@@ -102,95 +102,95 @@ queueManagers:
              values: ["system","$SYS"]
 
 metrics:
-  "mq.message.retry.count":  # Number of message retries
+  "ibm.mq.message.retry.count":  # Number of message retries
     enabled: true
-  "mq.status":  # Channel status
+  "ibm.mq.status":  # Channel status
     enabled: true
-  "mq.max.sharing.conversations":  # Maximum number of conversations permitted on this channel instance.
+  "ibm.mq.max.sharing.conversations":  # Maximum number of conversations permitted on this channel instance.
     enabled: true
-  "mq.current.sharing.conversations":  # Current number of conversations permitted on this channel instance.
+  "ibm.mq.current.sharing.conversations":  # Current number of conversations permitted on this channel instance.
     enabled: true
-  "mq.byte.received":  # Number of bytes received
+  "ibm.mq.byte.received":  # Number of bytes received
     enabled: true
-  "mq.byte.sent":  # Number of bytes sent
+  "ibm.mq.byte.sent":  # Number of bytes sent
     enabled: true
-  "mq.buffers.received":  # Buffers received
+  "ibm.mq.buffers.received":  # Buffers received
     enabled: true
-  "mq.buffers.sent":  # Buffers sent
+  "ibm.mq.buffers.sent":  # Buffers sent
     enabled: true
-  "mq.message.count":  # Message count
+  "ibm.mq.message.count":  # Message count
     enabled: true
-  "mq.open.input.count":  # Count of applications sending messages to the queue
+  "ibm.mq.open.input.count":  # Count of applications sending messages to the queue
     enabled: true
-  "mq.open.output.count":  # Count of applications consuming messages from the queue
+  "ibm.mq.open.output.count":  # Count of applications consuming messages from the queue
     enabled: true
-  "mq.high.queue.depth":  # The current high queue depth
+  "ibm.mq.high.queue.depth":  # The current high queue depth
     enabled: true
-  "mq.service.interval":  # The queue service interval
+  "ibm.mq.service.interval":  # The queue service interval
     enabled: true
-  "mq.queue.depth.full.event":  # The number of full queue events
+  "ibm.mq.queue.depth.full.event":  # The number of full queue events
     enabled: true
-  "mq.queue.depth.high.event":  # The number of high queue events
+  "ibm.mq.queue.depth.high.event":  # The number of high queue events
     enabled: true
-  "mq.queue.depth.low.event":  # The number of low queue events
+  "ibm.mq.queue.depth.low.event":  # The number of low queue events
     enabled: true
-  "mq.uncommitted.messages":  # Number of uncommitted messages
+  "ibm.mq.uncommitted.messages":  # Number of uncommitted messages
     enabled: true
-  "mq.oldest.msg.age":  # Queue message oldest age
+  "ibm.mq.oldest.msg.age":  # Queue message oldest age
     enabled: true
-  "mq.current.max.queue.filesize":  # Current maximum queue file size
+  "ibm.mq.current.max.queue.filesize":  # Current maximum queue file size
     enabled: true
-  "mq.current.queue.filesize":  # Current queue file size
+  "ibm.mq.current.queue.filesize":  # Current queue file size
     enabled: true
-  "mq.instances.per.client":  # Instances per client
+  "ibm.mq.instances.per.client":  # Instances per client
     enabled: true
-  "mq.message.deq.count":  # Message dequeue count
+  "ibm.mq.message.deq.count":  # Message dequeue count
     enabled: true
-  "mq.message.enq.count":  # Message enqueue count
+  "ibm.mq.message.enq.count":  # Message enqueue count
     enabled: true
-  "mq.queue.depth":  # Current queue depth
+  "ibm.mq.queue.depth":  # Current queue depth
     enabled: true
-  "mq.service.interval.event":  # Queue service interval event
+  "ibm.mq.service.interval.event":  # Queue service interval event
     enabled: true
-  "mq.reusable.log.size":  # The amount of space occupied, in megabytes, by log extents available to be reused.
+  "ibm.mq.reusable.log.size":  # The amount of space occupied, in megabytes, by log extents available to be reused.
     enabled: true
-  "mq.manager.active.channels":  # The queue manager active maximum channels limit
+  "ibm.mq.manager.active.channels":  # The queue manager active maximum channels limit
     enabled: true
-  "mq.restart.log.size":  # Size of the log data required for restart recovery in megabytes.
+  "ibm.mq.restart.log.size":  # Size of the log data required for restart recovery in megabytes.
     enabled: true
-  "mq.max.queue.depth":  # Maximum queue depth
+  "ibm.mq.max.queue.depth":  # Maximum queue depth
     enabled: true
-  "mq.onqtime.1":  # Amount of time, in microseconds, that a message spent on the queue, over a short period
+  "ibm.mq.onqtime.1":  # Amount of time, in microseconds, that a message spent on the queue, over a short period
     enabled: true
-  "mq.onqtime.2":  # Amount of time, in microseconds, that a message spent on the queue, over a longer period
+  "ibm.mq.onqtime.2":  # Amount of time, in microseconds, that a message spent on the queue, over a longer period
     enabled: true
-  "mq.message.received.count":  # Number of messages received
+  "ibm.mq.message.received.count":  # Number of messages received
     enabled: true
-  "mq.message.sent.count":  # Number of messages sent
+  "ibm.mq.message.sent.count":  # Number of messages sent
     enabled: true
-  "mq.max.instances":  # Max channel instances
+  "ibm.mq.max.instances":  # Max channel instances
     enabled: true
-  "mq.connection.count":  # Active connections count
+  "ibm.mq.connection.count":  # Active connections count
     enabled: true
-  "mq.manager.status":  # Queue manager status
+  "ibm.mq.manager.status":  # Queue manager status
     enabled: true
-  "mq.heartbeat":  # Queue manager heartbeat
+  "ibm.mq.heartbeat":  # Queue manager heartbeat
     enabled: true
-  "mq.archive.log.size":  # Queue manager archive log size
+  "ibm.mq.archive.log.size":  # Queue manager archive log size
     enabled: true
-  "mq.manager.max.active.channels":  # Queue manager max active channels
+  "ibm.mq.manager.max.active.channels":  # Queue manager max active channels
     enabled: true
-  "mq.manager.statistics.interval":  # Queue manager statistics interval
+  "ibm.mq.manager.statistics.interval":  # Queue manager statistics interval
     enabled: true
-  "mq.publish.count":  # Topic publication count
+  "ibm.mq.publish.count":  # Topic publication count
     enabled: true
-  "mq.subscription.count":  # Topic subscription count
+  "ibm.mq.subscription.count":  # Topic subscription count
     enabled: true
-  "mq.listener.status":  # Listener status
+  "ibm.mq.listener.status":  # Listener status
     enabled: true
-  "mq.unauthorized.event":  # Number of authentication error events
+  "ibm.mq.unauthorized.event":  # Number of authentication error events
     enabled: true
-  "mq.manager.max.handles":  # Max open handles
+  "ibm.mq.manager.max.handles":  # Max open handles
     enabled: true
 
 #Run it as a scheduled task instead of running every minute.

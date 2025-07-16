@@ -71,37 +71,37 @@ class ChannelMetricsCollectorTest {
     List<String> metricsList =
         new ArrayList<>(
             Arrays.asList(
-                "mq.message.count",
-                "mq.status",
-                "mq.byte.sent",
-                "mq.byte.received",
-                "mq.buffers.sent",
-                "mq.buffers.received"));
+                "ibm.mq.message.count",
+                "ibm.mq.status",
+                "ibm.mq.byte.sent",
+                "ibm.mq.byte.received",
+                "ibm.mq.buffers.sent",
+                "ibm.mq.buffers.received"));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
-        if (metric.getName().equals("mq.message.count")) {
+        if (metric.getName().equals("ibm.mq.message.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(17);
         }
 
-        if (metric.getName().equals("mq.status")) {
+        if (metric.getName().equals("ibm.mq.status")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(3);
         }
-        if (metric.getName().equals("mq.byte.sent")) {
+        if (metric.getName().equals("ibm.mq.byte.sent")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(6984);
         }
-        if (metric.getName().equals("mq.byte.received")) {
+        if (metric.getName().equals("ibm.mq.byte.received")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(5772);
         }
-        if (metric.getName().equals("mq.buffers.sent")) {
+        if (metric.getName().equals("ibm.mq.buffers.sent")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(19);
         }
-        if (metric.getName().equals("mq.buffers.received")) {
+        if (metric.getName().equals("ibm.mq.buffers.received")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(20);
         }
@@ -214,7 +214,7 @@ class ChannelMetricsCollectorTest {
 
     List<MetricData> exported = otelTesting.getMetrics();
     assertThat(exported.get(0).getLongGaugeData().getPoints()).hasSize(1);
-    assertThatMetric(exported.get(0), 0).hasName("mq.manager.active.channels").hasValue(0);
+    assertThatMetric(exported.get(0), 0).hasName("ibm.mq.manager.active.channels").hasValue(0);
   }
 
   static Stream<Arguments> exceptionsToThrow() {

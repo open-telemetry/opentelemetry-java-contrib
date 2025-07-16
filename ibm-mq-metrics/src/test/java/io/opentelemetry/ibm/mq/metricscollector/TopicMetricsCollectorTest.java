@@ -63,11 +63,11 @@ public class TopicMetricsCollectorTest {
     classUnderTest.accept(context);
 
     List<String> metricsList =
-        new ArrayList<>(Arrays.asList("mq.publish.count", "mq.subscription.count"));
+        new ArrayList<>(Arrays.asList("ibm.mq.publish.count", "ibm.mq.subscription.count"));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
-        if (metric.getName().equals("mq.publish.count")) {
+        if (metric.getName().equals("ibm.mq.publish.count")) {
           Set<Long> values = new HashSet<>();
           values.add(2L);
           values.add(3L);
@@ -77,7 +77,7 @@ public class TopicMetricsCollectorTest {
                       .collect(Collectors.toSet()))
               .isEqualTo(values);
         }
-        if (metric.getName().equals("mq.subscription.count")) {
+        if (metric.getName().equals("ibm.mq.subscription.count")) {
           Set<Long> values = new HashSet<>();
           values.add(3L);
           values.add(4L);

@@ -72,19 +72,19 @@ public class QueueCollectionBuddyTest {
                 "DEV.DEAD.LETTER.QUEUE",
                 new HashMap<>(
                     ImmutableMap.of(
-                        "mq.oldest.msg.age", -1L,
-                        "mq.uncommitted.messages", 0L,
-                        "mq.onqtime.1", -1L,
-                        "mq.onqtime.2", -1L,
-                        "mq.queue.depth", 0L)),
+                        "ibm.mq.oldest.msg.age", -1L,
+                        "ibm.mq.uncommitted.messages", 0L,
+                        "ibm.mq.onqtime.1", -1L,
+                        "ibm.mq.onqtime.2", -1L,
+                        "ibm.mq.queue.depth", 0L)),
                 "DEV.QUEUE.1",
                 new HashMap<String, Long>(
                     ImmutableMap.of(
-                        "mq.oldest.msg.age", -1L,
-                        "mq.uncommitted.messages", 10L,
-                        "mq.onqtime.1", -1L,
-                        "mq.onqtime.2", -1L,
-                        "mq.queue.depth", 1L))));
+                        "ibm.mq.oldest.msg.age", -1L,
+                        "ibm.mq.uncommitted.messages", 10L,
+                        "ibm.mq.onqtime.1", -1L,
+                        "ibm.mq.onqtime.2", -1L,
+                        "ibm.mq.queue.depth", 1L))));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
@@ -113,17 +113,17 @@ public class QueueCollectionBuddyTest {
                 "DEV.DEAD.LETTER.QUEUE",
                 new HashMap<>(
                     ImmutableMap.of(
-                        "mq.queue.depth", 2L,
-                        "mq.max.queue.depth", 5000L,
-                        "mq.open.input.count", 2L,
-                        "mq.open.output.count", 2L)),
+                        "ibm.mq.queue.depth", 2L,
+                        "ibm.mq.max.queue.depth", 5000L,
+                        "ibm.mq.open.input.count", 2L,
+                        "ibm.mq.open.output.count", 2L)),
                 "DEV.QUEUE.1",
                 new HashMap<>(
                     ImmutableMap.of(
-                        "mq.queue.depth", 3L,
-                        "mq.max.queue.depth", 5000L,
-                        "mq.open.input.count", 3L,
-                        "mq.open.output.count", 3L))));
+                        "ibm.mq.queue.depth", 3L,
+                        "ibm.mq.max.queue.depth", 5000L,
+                        "ibm.mq.open.input.count", 3L,
+                        "ibm.mq.open.output.count", 3L))));
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {

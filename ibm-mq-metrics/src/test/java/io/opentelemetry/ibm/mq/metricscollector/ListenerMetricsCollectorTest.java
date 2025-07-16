@@ -59,7 +59,7 @@ class ListenerMetricsCollectorTest {
     classUnderTest.accept(context);
 
     MetricData metric = otelTesting.getMetrics().get(0);
-    assertThat(metric.getName()).isEqualTo("mq.listener.status");
+    assertThat(metric.getName()).isEqualTo("ibm.mq.listener.status");
     Set<Long> values = new HashSet<>();
     values.add(2L);
     values.add(3L);

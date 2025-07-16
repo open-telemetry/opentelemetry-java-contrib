@@ -62,18 +62,20 @@ class InquireChannelCmdCollectorTest {
     List<String> metricsList =
         new ArrayList<>(
             Arrays.asList(
-                "mq.message.retry.count", "mq.message.received.count", "mq.message.sent.count"));
+                "ibm.mq.message.retry.count",
+                "ibm.mq.message.received.count",
+                "ibm.mq.message.sent.count"));
     for (MetricData metric : otelTesting.getMetrics()) {
       if (metricsList.remove(metric.getName())) {
-        if (metric.getName().equals("mq.message.retry.count")) {
+        if (metric.getName().equals("ibm.mq.message.retry.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(22);
         }
-        if (metric.getName().equals("mq.message.received.count")) {
+        if (metric.getName().equals("ibm.mq.message.received.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(42);
         }
-        if (metric.getName().equals("mq.message.sent.count")) {
+        if (metric.getName().equals("ibm.mq.message.sent.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isEqualTo(64);
         }
