@@ -112,9 +112,9 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       throws PCFException {
     Attributes attributes =
         Attributes.of(
-            AttributeKey.stringKey("topic.name"),
+            AttributeKey.stringKey("messaging.destination.name"),
             topicString,
-            AttributeKey.stringKey("queue.manager"),
+            AttributeKey.stringKey("ibm.mq.queue.manager"),
             context.getQueueManagerName());
     if (context.getMetricsConfig().isIbmMqPublishCountEnabled()) {
       int publisherCount = 0;

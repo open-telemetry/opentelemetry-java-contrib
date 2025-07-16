@@ -62,7 +62,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
                       context.getQueueManagerName(),
                       AttributeKey.stringKey("user.name"),
                       username,
-                      AttributeKey.stringKey("application.name"),
+                      AttributeKey.stringKey("service.name"),
                       applicationName));
             }
           } else {

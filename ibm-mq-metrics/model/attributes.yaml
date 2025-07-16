@@ -3,55 +3,57 @@ groups:
     type: attribute_group
     brief: Attributes of metrics.
     attributes:
-      - id: queue.manager
+      - id: ibm.mq.queue.manager
         type: string
         brief: >
-          The name of the queue manager
+          The name of the IBM queue manager
         stability: development
         examples: ["MQ1"]
-      - id: topic.name
+      - id: messaging.destination.name
         type: string
         brief: >
-          The name of the topic
+          The system-specific name of the messaging operation.
+        note: This is duplicated from otel semantic-conventions.
         stability: development
         examples: [ "dev/" ]
-      - id: channel.name
+      - id: ibm.mq.channel.name
         type: string
         brief: >
           The name of the channel
         stability: development
         examples: [ "DEV.ADMIN.SVRCONN" ]
-      - id: channel.type
+      - id: ibm.mq.channel.type
         type: string
         brief: >
           The type of the channel
         stability: development
         examples: [ "server-connection", "cluster-receiver", "amqp" ]
-      - id: job.name
+      - id: ibm.mq.job.name
         type: string
         brief: >
           The job name
         stability: development
         examples: [ "0000074900000003" ]
-      - id: channel.start.time
+      - id: ibm.mq.channel.start.time
         type: int
         brief: >
           The start time of the channel as seconds since Epoch.
         stability: development
         examples: [ 1748462702 ]
-      - id: queue.name
-        type: string
-        brief: >
-          The queue name
-        stability: development
-        examples: [ "DEV.DEAD.LETTER.QUEUE" ]
-      - id: queue.type
+        # Use the messaging.destination.name attribute instead?
+#      - id: queue.name
+#        type: string
+#        brief: >
+#          The queue name
+#        stability: development
+#        examples: [ "DEV.DEAD.LETTER.QUEUE" ]
+      - id: ibm.mq.queue.type
         type: string
         brief: >
           The queue type
         stability: development
         examples: [ "local-normal" ]
-      - id: listener.name
+      - id: ibm.mq.listener.name
         type: string
         brief: >
           The listener name
@@ -60,12 +62,14 @@ groups:
       - id: user.name
         type: string
         brief: >
-          The user name
+          Short name or login/username of the user.
+        note: This is duplicated from otel semantic-conventions.
         stability: development
         examples: [ "foo", "root" ]
-      - id: application.name
+      - id: service.name
         type: string
         brief: >
-          The application name
+          Logical name of the service.
+        note: This is duplicated from otel semantic-conventions.
         stability: development
         examples: [ "Wordle", "JMSService" ]

@@ -7,11 +7,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.status
     type: metric
@@ -21,15 +21,15 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.max.sharing.conversations
     type: metric
@@ -39,15 +39,15 @@ groups:
     instrument: gauge
     unit: "{conversations}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.current.sharing.conversations
     type: metric
@@ -57,15 +57,15 @@ groups:
     brief: "Current number of conversations permitted on this channel instance."
     instrument: gauge
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.byte.received
     type: metric
@@ -75,15 +75,15 @@ groups:
     instrument: gauge
     unit: "{bytes}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.byte.sent
     type: metric
@@ -93,15 +93,15 @@ groups:
     instrument: gauge
     unit: "{bytes}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.buffers.received
     type: metric
@@ -111,15 +111,15 @@ groups:
     instrument: gauge
     unit: "{buffers}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.buffers.sent
     type: metric
@@ -129,15 +129,15 @@ groups:
     unit: "{buffers}"
     instrument: gauge
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.message.count
     type: metric
@@ -147,15 +147,15 @@ groups:
     unit: "{messages}"
     instrument: gauge
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: job.name
+      - ref: ibm.mq.job.name
         requirement_level: required
-      - ref: channel.start.time
+      - ref: ibm.mq.channel.start.time
         requirement_level: required
   - id: ibm.mq.open.input.count
     type: metric
@@ -165,11 +165,11 @@ groups:
     instrument: gauge
     unit: "{applications}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.open.output.count
     type: metric
@@ -179,11 +179,11 @@ groups:
     instrument: gauge
     unit: "{applications}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.high.queue.depth
     type: metric
@@ -193,11 +193,11 @@ groups:
     instrument: gauge
     unit: "{percent}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.service.interval
     type: metric
@@ -207,11 +207,11 @@ groups:
     instrument: gauge
     unit: "{percent}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.queue.depth.full.event
     type: metric
@@ -221,9 +221,9 @@ groups:
     instrument: counter
     unit: "{events}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
   - id: ibm.mq..queue.depth.high.event
     type: metric
@@ -233,9 +233,9 @@ groups:
     instrument: counter
     unit: "{events}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
   - id: ibm.mq..queue.depth.low.event
     type: metric
@@ -245,9 +245,9 @@ groups:
     instrument: counter
     unit: "{events}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
   - id: ibm.mq.uncommitted.messages
     type: metric
@@ -257,11 +257,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.oldest.msg.age
     type: metric
@@ -271,11 +271,11 @@ groups:
     instrument: gauge
     unit: "microseconds"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.current.max.queue.filesize
     type: metric
@@ -285,11 +285,11 @@ groups:
     instrument: gauge
     unit: "mib"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.current.queue.filesize
     type: metric
@@ -299,11 +299,11 @@ groups:
     instrument: gauge
     unit: "mib"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.instances.per.client
     type: metric
@@ -313,11 +313,11 @@ groups:
     instrument: gauge
     unit: "{instances}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.message.deq.count
     type: metric
@@ -327,11 +327,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.message.enq.count
     type: metric
@@ -341,11 +341,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.queue.depth
     type: metric
@@ -355,11 +355,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.service.interval.event
     type: metric
@@ -369,11 +369,11 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.reusable.log.size
     type: metric
@@ -383,7 +383,7 @@ groups:
     instrument: gauge
     unit: "mib"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.manager.active.channels
     type: metric
@@ -393,7 +393,7 @@ groups:
     instrument: gauge
     unit: "{channels}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.restart.log.size
     type: metric
@@ -403,7 +403,7 @@ groups:
     instrument: gauge
     unit: "mib"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.max.queue.depth
     type: metric
@@ -413,11 +413,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.onqtime.1
     type: metric
@@ -427,11 +427,11 @@ groups:
     instrument: gauge
     unit: "microseconds"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.onqtime.2
     type: metric
@@ -441,11 +441,11 @@ groups:
     instrument: gauge
     unit: "microseconds"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: queue.name
+      - ref: messaging.destination.name
         requirement_level: required
-      - ref: queue.type
+      - ref: ibm.mq.queue.type
         requirement_level: required
   - id: ibm.mq.message.received.count
     type: metric
@@ -455,11 +455,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.message.sent.count
     type: metric
@@ -469,11 +469,11 @@ groups:
     instrument: gauge
     unit: "{messages}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.max.instances
     type: metric
@@ -483,11 +483,11 @@ groups:
     instrument: gauge
     unit: "{instances}"
     attributes:
-      - ref: channel.name
+      - ref: ibm.mq.channel.name
         requirement_level: required
-      - ref: channel.type
+      - ref: ibm.mq.channel.type
         requirement_level: required
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.connection.count
     type: metric
@@ -497,7 +497,7 @@ groups:
     instrument: gauge
     unit: "{connections}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.manager.status
     type: metric
@@ -507,7 +507,7 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.heartbeat
     type: metric
@@ -517,7 +517,7 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.archive.log.size
     type: metric
@@ -527,7 +527,7 @@ groups:
     instrument: gauge
     unit: "mib"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.manager.max.active.channels
     type: metric
@@ -537,7 +537,7 @@ groups:
     instrument: gauge
     unit: "{channels}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.manager.statistics.interval
     type: metric
@@ -547,7 +547,7 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
   - id: ibm.mq.publish.count
     type: metric
@@ -557,9 +557,9 @@ groups:
     instrument: gauge
     unit: "{publications}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: topic.name
+      - ref: messaging.destination.name
         requirement_level: required
   - id: ibm.mq.subscription.count
     type: metric
@@ -569,9 +569,9 @@ groups:
     instrument: gauge
     unit: "{subscriptions}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: topic.name
+      - ref: messaging.destination.name
         requirement_level: required
   - id: ibm.mq.listener.status
     type: metric
@@ -581,9 +581,9 @@ groups:
     instrument: gauge
     unit: "1"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
-      - ref: listener.name
+      - ref: ibm.mq.listener.name
         requirement_level: required
   - id: ibm.mq.unauthorized.event
     type: metric
@@ -593,11 +593,11 @@ groups:
     instrument: counter
     unit: "{events}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required
       - ref: user.name
         requirement_level: required
-      - ref: application.name
+      - ref: service.name
         requirement_level: required
   - id: ibm.mq.manager.max.handles
     type: metric
@@ -607,5 +607,5 @@ groups:
     instrument: gauge
     unit: "{events}"
     attributes:
-      - ref: queue.manager
+      - ref: ibm.mq.queue.manager
         requirement_level: required

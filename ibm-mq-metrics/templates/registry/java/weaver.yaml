@@ -1,7 +1,10 @@
 templates:
-  - pattern: Metrics.java.j2
+  - template: Metrics.java.j2
     filter: '.groups | map(select(.type == "metric"))'
     application_mode: single
-  - pattern: MetricsConfig.java.j2
+  - template: MetricsConfig.java.j2
     filter: '.groups | map(select(.type == "metric"))'
+    application_mode: single
+  - template: IbmMqAttributes.java.j2
+    filter: '.groups | map(select(.type == "attribute_group")) | map(.attributes[])'
     application_mode: single

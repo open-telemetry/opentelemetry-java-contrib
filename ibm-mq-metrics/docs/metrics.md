@@ -12,9 +12,9 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -29,11 +29,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -48,11 +48,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -67,11 +67,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -86,11 +86,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -105,11 +105,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -124,11 +124,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -143,11 +143,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -162,11 +162,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.start.time` | int | The start time of the channel as seconds since Epoch. | `1748462702` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.job.name` | string | The job name | `0000074900000003` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -181,9 +181,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [1] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[1] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -198,9 +200,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [2] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[2] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -215,9 +219,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [3] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[3] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -232,9 +238,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [4] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[4] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -249,8 +257,10 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [5] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[5] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -265,8 +275,10 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [6] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[6] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -281,8 +293,10 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [7] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[7] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -297,9 +311,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [8] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[8] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -314,9 +330,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [9] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[9] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -331,9 +349,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [10] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[10] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -348,9 +368,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [11] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[11] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -365,9 +387,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [12] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[12] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -382,9 +406,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [13] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[13] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -399,9 +425,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [14] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[14] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -416,9 +444,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [15] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[15] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -433,9 +463,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [16] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[16] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -450,7 +482,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -465,7 +497,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -480,7 +512,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -495,9 +527,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [17] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[17] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -512,9 +546,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [18] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[18] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -529,9 +565,11 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.name` | string | The queue name | `DEV.DEAD.LETTER.QUEUE` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [19] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[19] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -546,9 +584,9 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -563,9 +601,9 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -580,9 +618,9 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.name` | string | The name of the channel | `DEV.ADMIN.SVRCONN` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.channel.type` | string | The type of the channel | `server-connection`; `cluster-receiver`; `amqp` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -597,7 +635,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -612,7 +650,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -627,7 +665,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -642,7 +680,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -657,7 +695,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -672,7 +710,7 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -687,8 +725,10 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `topic.name` | string | The name of the topic | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [20] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[20] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -703,8 +743,10 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `topic.name` | string | The name of the topic | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [21] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[21] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -719,8 +761,8 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `listener.name` | string | The listener name | `listener` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.listener.name` | string | The listener name | `listener` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 
@@ -735,9 +777,13 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `application.name` | string | The application name | `Wordle`; `JMSService` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `user.name` | string | The user name | `foo`; `root` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `service.name` | string | Logical name of the service. [22] | `Wordle`; `JMSService` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `user.name` | string | Short name or login/username of the user. [23] | `foo`; `root` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[22] `service.name`:** This is duplicated from otel semantic-conventions.
+
+**[23] `user.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -752,4 +798,4 @@
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
-| `queue.manager` | string | The name of the queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
