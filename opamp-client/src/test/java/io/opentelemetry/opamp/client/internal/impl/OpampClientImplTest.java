@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -327,16 +326,11 @@ class OpampClientImplTest {
   @Test
   void onConnectionFailed_notifyCallback() {
     awaitForStartRequest();
+    Throwable throwable = new Throwable();
 
-    // Close mock server to get an exception on the next request
-    server.close();
+    client.onConnectionFailed(throwable);
 
-    // Force request
-    requestService.sendRequest();
-
-    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onConnectFailedCalls.get() == 1);
-
-    verify(callbacks).onConnectFailed(eq(client), any());
+    verify(callbacks).onConnectFailed(client, throwable);
   }
 
   @Test
