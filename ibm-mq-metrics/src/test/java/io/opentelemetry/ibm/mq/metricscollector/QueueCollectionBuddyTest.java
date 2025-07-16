@@ -67,7 +67,7 @@ public class QueueCollectionBuddyTest {
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
     Map<String, Map<String, Long>> expectedValues =
-        new HashMap<String, Map<String, Long>>(
+        new HashMap<>(
             ImmutableMap.of(
                 "DEV.DEAD.LETTER.QUEUE",
                 new HashMap<>(
@@ -78,7 +78,7 @@ public class QueueCollectionBuddyTest {
                         "ibm.mq.onqtime.2", -1L,
                         "ibm.mq.queue.depth", 0L)),
                 "DEV.QUEUE.1",
-                new HashMap<String, Long>(
+                new HashMap<>(
                     ImmutableMap.of(
                         "ibm.mq.oldest.msg.age", -1L,
                         "ibm.mq.uncommitted.messages", 10L,

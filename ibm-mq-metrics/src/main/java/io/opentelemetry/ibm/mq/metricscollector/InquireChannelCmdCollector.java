@@ -5,6 +5,10 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_CHANNEL_NAME;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_CHANNEL_TYPE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.MQCFIL;
@@ -106,9 +110,9 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
       throws PCFException {
     Attributes attributes =
         Attributes.builder()
-            .put("channel.name", channelName)
-            .put("channel.type", channelType)
-            .put("queue.manager", context.getQueueManagerName())
+            .put(IBM_MQ_CHANNEL_NAME, channelName)
+            .put(IBM_MQ_CHANNEL_TYPE, channelType)
+            .put(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName())
             .build();
     if (context.getMetricsConfig().isIbmMqMaxInstancesEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTANCES) != null) {

@@ -7,6 +7,10 @@ package io.opentelemetry.ibm.mq.metricscollector;
 
 import static com.ibm.mq.constants.CMQC.MQRC_SELECTOR_ERROR;
 import static com.ibm.mq.constants.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_CHANNEL_NAME;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_CHANNEL_START_TIME;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_CHANNEL_TYPE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_JOB_NAME;
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 
 import com.ibm.mq.constants.CMQC;
@@ -175,11 +179,11 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       throws PCFException {
     Attributes attributes =
         Attributes.builder()
-            .put("channel.name", channelName)
-            .put("channel.type", channelType)
-            .put("queue.manager", context.getQueueManagerName())
-            .put("channel.start.time", channelStartTime)
-            .put("job.name", jobName)
+            .put(IBM_MQ_CHANNEL_NAME, channelName)
+            .put(IBM_MQ_CHANNEL_TYPE, channelType)
+            .put(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName())
+            .put(IBM_MQ_CHANNEL_START_TIME, channelStartTime)
+            .put(IBM_MQ_JOB_NAME, jobName)
             .build();
     if (context.getMetricsConfig().isIbmMqMessageCountEnabled()) {
       int received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS);
