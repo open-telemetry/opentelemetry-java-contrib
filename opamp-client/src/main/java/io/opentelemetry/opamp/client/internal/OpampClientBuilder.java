@@ -7,6 +7,7 @@ package io.opentelemetry.opamp.client.internal;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientImpl;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientState;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
@@ -37,9 +38,10 @@ public final class OpampClientBuilder {
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
   private long capabilities = 0;
+  private RequestService service =
+      HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
-  @Nullable private RequestService service;
 
   OpampClientBuilder() {}
 
