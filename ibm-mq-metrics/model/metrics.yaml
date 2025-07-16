@@ -213,9 +213,9 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: "mq.queue.depth.full.event"
+  - id: ibm.mq.queue.depth.full.event
     type: metric
-    metric_name: "mq.queue.depth.full.event"
+    metric_name: mq.queue.depth.full.event
     stability: development
     brief: "The number of full queue events"
     instrument: counter
@@ -225,9 +225,9 @@ groups:
         requirement_level: required
       - ref: queue.name
         requirement_level: required
-  - id: "mq.queue.depth.high.event"
+  - id: mq.queue.depth.high.event
     type: metric
-    metric_name: "mq.queue.depth.high.event"
+    metric_name: mq.queue.depth.high.event
     stability: development
     brief: "The number of high queue events"
     instrument: counter
@@ -237,9 +237,9 @@ groups:
         requirement_level: required
       - ref: queue.name
         requirement_level: required
-  - id: "mq.queue.depth.low.event"
+  - id: mq.queue.depth.low.event
     type: metric
-    metric_name: "mq.queue.depth.low.event"
+    metric_name: mq.queue.depth.low.event
     stability: development
     brief: "The number of low queue events"
     instrument: counter
