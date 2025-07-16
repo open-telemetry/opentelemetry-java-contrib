@@ -31,11 +31,11 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
   private final LongGauge messageSentCountGauge;
 
   public InquireChannelCmdCollector(Meter meter) {
-    this.maxClientsGauge = Metrics.createMqMaxInstances(meter);
-    this.instancesPerClientGauge = Metrics.createMqInstancesPerClient(meter);
-    this.messageRetryCountGauge = Metrics.createMqMessageRetryCount(meter);
-    this.messageReceivedCountGauge = Metrics.createMqMessageReceivedCount(meter);
-    this.messageSentCountGauge = Metrics.createMqMessageSentCount(meter);
+    this.maxClientsGauge = Metrics.createIbmMqMaxInstances(meter);
+    this.instancesPerClientGauge = Metrics.createIbmMqInstancesPerClient(meter);
+    this.messageRetryCountGauge = Metrics.createIbmMqMessageRetryCount(meter);
+    this.messageReceivedCountGauge = Metrics.createIbmMqMessageReceivedCount(meter);
+    this.messageSentCountGauge = Metrics.createIbmMqMessageSentCount(meter);
   }
 
   @Override
@@ -110,31 +110,31 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
             .put("channel.type", channelType)
             .put("queue.manager", context.getQueueManagerName())
             .build();
-    if (context.getMetricsConfig().isMqMaxInstancesEnabled()
+    if (context.getMetricsConfig().isIbmMqMaxInstancesEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTANCES) != null) {
       this.maxClientsGauge.set(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTANCES), attributes);
     }
-    if (context.getMetricsConfig().isMqInstancesPerClientEnabled()
+    if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT) != null) {
       this.instancesPerClientGauge.set(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT), attributes);
     }
-    if (context.getMetricsConfig().isMqMessageRetryCountEnabled()) {
+    if (context.getMetricsConfig().isIbmMqMessageRetryCountEnabled()) {
       int count = 0;
       if (message.getParameter(CMQCFC.MQIACH_MR_COUNT) != null) {
         count = message.getIntParameterValue(CMQCFC.MQIACH_MR_COUNT);
       }
       this.messageRetryCountGauge.set(count, attributes);
     }
-    if (context.getMetricsConfig().isMqInstancesPerClientEnabled()) {
+    if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()) {
       int received = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_RECEIVED) != null) {
         received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_RECEIVED);
       }
       this.messageReceivedCountGauge.set(received, attributes);
     }
-    if (context.getMetricsConfig().isMqMessageSentCountEnabled()) {
+    if (context.getMetricsConfig().isIbmMqMessageSentCountEnabled()) {
       int sent = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_SENT) != null) {
         sent = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_SENT);

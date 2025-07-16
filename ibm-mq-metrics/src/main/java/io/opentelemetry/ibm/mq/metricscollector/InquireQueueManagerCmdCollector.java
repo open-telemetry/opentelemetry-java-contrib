@@ -28,7 +28,7 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
   private final LongGauge statisticsIntervalGauge;
 
   public InquireQueueManagerCmdCollector(Meter meter) {
-    this.statisticsIntervalGauge = Metrics.createMqManagerStatisticsInterval(meter);
+    this.statisticsIntervalGauge = Metrics.createIbmMqManagerStatisticsInterval(meter);
   }
 
   @Override
@@ -59,7 +59,7 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
         logger.debug("Unexpected error while PCFMessage.send(), response is either null or empty");
         return;
       }
-      if (context.getMetricsConfig().isMqManagerStatisticsIntervalEnabled()) {
+      if (context.getMetricsConfig().isIbmMqManagerStatisticsIntervalEnabled()) {
         int interval = responses.get(0).getIntParameterValue(CMQC.MQIA_STATISTICS_INTERVAL);
         statisticsIntervalGauge.set(
             interval,

@@ -30,7 +30,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
   private final LongCounter authorityEventCounter;
 
   public QueueManagerEventCollector(Meter meter) {
-    this.authorityEventCounter = Metrics.createMqUnauthorizedEvent(meter);
+    this.authorityEventCounter = Metrics.createIbmMqUnauthorizedEvent(meter);
   }
 
   private void readEvents(MetricsCollectorContext context, String queueManagerEventsQueueName)
@@ -52,7 +52,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
           PCFMessage received = new PCFMessage(message);
           if (received.getReason() == CMQC.MQRC_NOT_AUTHORIZED) {
 
-            if (context.getMetricsConfig().isMqUnauthorizedEventEnabled()) {
+            if (context.getMetricsConfig().isIbmMqUnauthorizedEventEnabled()) {
               String username = received.getStringParameterValue(CMQCFC.MQCACF_USER_IDENTIFIER);
               String applicationName = received.getStringParameterValue(CMQCFC.MQCACF_APPL_NAME);
               authorityEventCounter.add(

@@ -65,62 +65,66 @@ final class QueueCollectionBuddy {
     gauges.put(
         CMQC.MQIA_CURRENT_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createMqQueueDepth(meter), MetricsConfig::isMqQueueDepthEnabled));
+            Metrics.createIbmMqQueueDepth(meter), MetricsConfig::isIbmMqQueueDepthEnabled));
     gauges.put(
         CMQC.MQIA_MAX_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createMqMaxQueueDepth(meter), MetricsConfig::isMqMaxQueueDepthEnabled));
+            Metrics.createIbmMqMaxQueueDepth(meter), MetricsConfig::isIbmMqMaxQueueDepthEnabled));
     gauges.put(
         CMQC.MQIA_OPEN_INPUT_COUNT,
         createAllowedGauge(
-            Metrics.createMqOpenInputCount(meter), MetricsConfig::isMqOpenInputCountEnabled));
+            Metrics.createIbmMqOpenInputCount(meter), MetricsConfig::isIbmMqOpenInputCountEnabled));
     gauges.put(
         CMQC.MQIA_OPEN_OUTPUT_COUNT,
         createAllowedGauge(
-            Metrics.createMqOpenOutputCount(meter), MetricsConfig::isMqOpenOutputCountEnabled));
+            Metrics.createIbmMqOpenOutputCount(meter),
+            MetricsConfig::isIbmMqOpenOutputCountEnabled));
     gauges.put(
         CMQC.MQIA_Q_SERVICE_INTERVAL,
         createAllowedGauge(
-            Metrics.createMqServiceInterval(meter), MetricsConfig::isMqServiceIntervalEnabled));
+            Metrics.createIbmMqServiceInterval(meter),
+            MetricsConfig::isIbmMqServiceIntervalEnabled));
     gauges.put(
         CMQC.MQIA_Q_SERVICE_INTERVAL_EVENT,
         createAllowedGauge(
-            Metrics.createMqServiceIntervalEvent(meter),
-            MetricsConfig::isMqServiceIntervalEventEnabled));
+            Metrics.createIbmMqServiceIntervalEvent(meter),
+            MetricsConfig::isIbmMqServiceIntervalEventEnabled));
     gauges.put(
         CMQCFC.MQIACF_OLDEST_MSG_AGE,
         createAllowedGauge(
-            Metrics.createMqOldestMsgAge(meter), MetricsConfig::isMqOldestMsgAgeEnabled));
+            Metrics.createIbmMqOldestMsgAge(meter), MetricsConfig::isIbmMqOldestMsgAgeEnabled));
     gauges.put(
         CMQCFC.MQIACF_UNCOMMITTED_MSGS,
         createAllowedGauge(
-            Metrics.createMqUncommittedMessages(meter),
-            MetricsConfig::isMqUncommittedMessagesEnabled));
+            Metrics.createIbmMqUncommittedMessages(meter),
+            MetricsConfig::isIbmMqUncommittedMessagesEnabled));
     gauges.put(
         CMQC.MQIA_MSG_DEQ_COUNT,
         createAllowedGauge(
-            Metrics.createMqMessageDeqCount(meter), MetricsConfig::isMqMessageDeqCountEnabled));
+            Metrics.createIbmMqMessageDeqCount(meter),
+            MetricsConfig::isIbmMqMessageDeqCountEnabled));
     gauges.put(
         CMQC.MQIA_MSG_ENQ_COUNT,
         createAllowedGauge(
-            Metrics.createMqMessageEnqCount(meter), MetricsConfig::isMqMessageEnqCountEnabled));
+            Metrics.createIbmMqMessageEnqCount(meter),
+            MetricsConfig::isIbmMqMessageEnqCountEnabled));
     gauges.put(
         CMQC.MQIA_HIGH_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createMqHighQueueDepth(meter), MetricsConfig::isMqHighQueueDepthEnabled));
+            Metrics.createIbmMqHighQueueDepth(meter), MetricsConfig::isIbmMqHighQueueDepthEnabled));
     gauges.put(
         CMQCFC.MQIACF_CUR_Q_FILE_SIZE,
         createAllowedGauge(
-            Metrics.createMqCurrentQueueFilesize(meter),
-            MetricsConfig::isMqCurrentQueueFilesizeEnabled));
+            Metrics.createIbmMqCurrentQueueFilesize(meter),
+            MetricsConfig::isIbmMqCurrentQueueFilesizeEnabled));
     gauges.put(
         CMQCFC.MQIACF_CUR_MAX_FILE_SIZE,
         createAllowedGauge(
-            Metrics.createMqCurrentMaxQueueFilesize(meter),
-            MetricsConfig::isMqCurrentMaxQueueFilesizeEnabled));
+            Metrics.createIbmMqCurrentMaxQueueFilesize(meter),
+            MetricsConfig::isIbmMqCurrentMaxQueueFilesizeEnabled));
 
-    this.onqtimeShort = Metrics.createMqOnqtime1(meter);
-    this.onqtimeLong = Metrics.createMqOnqtime2(meter);
+    this.onqtimeShort = Metrics.createIbmMqOnqtime1(meter);
+    this.onqtimeLong = Metrics.createIbmMqOnqtime2(meter);
   }
 
   /**
@@ -284,10 +288,10 @@ final class QueueCollectionBuddy {
     }
     if (pcfParam instanceof MQCFIL) {
       int[] metricVals = pcfMessage.getIntListParameterValue(constantValue);
-      if (context.getMetricsConfig().isMqOnqtime1Enabled()) {
+      if (context.getMetricsConfig().isIbmMqOnqtime1Enabled()) {
         onqtimeShort.set(metricVals[0], attributes);
       }
-      if (context.getMetricsConfig().isMqOnqtime2Enabled()) {
+      if (context.getMetricsConfig().isIbmMqOnqtime2Enabled()) {
         onqtimeLong.set(metricVals[1], attributes);
       }
     }

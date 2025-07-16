@@ -15,231 +15,231 @@ import io.opentelemetry.api.metrics.Meter;
 public final class Metrics {
   private Metrics() {}
 
-  public static LongGauge createMqMessageRetryCount(Meter meter) {
+  public static LongGauge createIbmMqMessageRetryCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.retry.count")
+        .gaugeBuilder("ibm.mq.message.retry.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Number of message retries")
         .build();
   }
 
-  public static LongGauge createMqStatus(Meter meter) {
+  public static LongGauge createIbmMqStatus(Meter meter) {
     return meter
-        .gaugeBuilder("mq.status")
+        .gaugeBuilder("ibm.mq.status")
         .ofLongs()
         .setUnit("1")
         .setDescription("Channel status")
         .build();
   }
 
-  public static LongGauge createMqMaxSharingConversations(Meter meter) {
+  public static LongGauge createIbmMqMaxSharingConversations(Meter meter) {
     return meter
-        .gaugeBuilder("mq.max.sharing.conversations")
+        .gaugeBuilder("ibm.mq.max.sharing.conversations")
         .ofLongs()
         .setUnit("{conversations}")
         .setDescription("Maximum number of conversations permitted on this channel instance.")
         .build();
   }
 
-  public static LongGauge createMqCurrentSharingConversations(Meter meter) {
+  public static LongGauge createIbmMqCurrentSharingConversations(Meter meter) {
     return meter
-        .gaugeBuilder("mq.current.sharing.conversations")
+        .gaugeBuilder("ibm.mq.current.sharing.conversations")
         .ofLongs()
         .setUnit("{conversations}")
         .setDescription("Current number of conversations permitted on this channel instance.")
         .build();
   }
 
-  public static LongGauge createMqByteReceived(Meter meter) {
+  public static LongGauge createIbmMqByteReceived(Meter meter) {
     return meter
-        .gaugeBuilder("mq.byte.received")
+        .gaugeBuilder("ibm.mq.byte.received")
         .ofLongs()
         .setUnit("{bytes}")
         .setDescription("Number of bytes received")
         .build();
   }
 
-  public static LongGauge createMqByteSent(Meter meter) {
+  public static LongGauge createIbmMqByteSent(Meter meter) {
     return meter
-        .gaugeBuilder("mq.byte.sent")
+        .gaugeBuilder("ibm.mq.byte.sent")
         .ofLongs()
         .setUnit("{bytes}")
         .setDescription("Number of bytes sent")
         .build();
   }
 
-  public static LongGauge createMqBuffersReceived(Meter meter) {
+  public static LongGauge createIbmMqBuffersReceived(Meter meter) {
     return meter
-        .gaugeBuilder("mq.buffers.received")
+        .gaugeBuilder("ibm.mq.buffers.received")
         .ofLongs()
         .setUnit("{buffers}")
         .setDescription("Buffers received")
         .build();
   }
 
-  public static LongGauge createMqBuffersSent(Meter meter) {
+  public static LongGauge createIbmMqBuffersSent(Meter meter) {
     return meter
-        .gaugeBuilder("mq.buffers.sent")
+        .gaugeBuilder("ibm.mq.buffers.sent")
         .ofLongs()
         .setUnit("{buffers}")
         .setDescription("Buffers sent")
         .build();
   }
 
-  public static LongGauge createMqMessageCount(Meter meter) {
+  public static LongGauge createIbmMqMessageCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.count")
+        .gaugeBuilder("ibm.mq.message.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Message count")
         .build();
   }
 
-  public static LongGauge createMqOpenInputCount(Meter meter) {
+  public static LongGauge createIbmMqOpenInputCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.open.input.count")
+        .gaugeBuilder("ibm.mq.open.input.count")
         .ofLongs()
         .setUnit("{applications}")
         .setDescription("Count of applications sending messages to the queue")
         .build();
   }
 
-  public static LongGauge createMqOpenOutputCount(Meter meter) {
+  public static LongGauge createIbmMqOpenOutputCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.open.output.count")
+        .gaugeBuilder("ibm.mq.open.output.count")
         .ofLongs()
         .setUnit("{applications}")
         .setDescription("Count of applications consuming messages from the queue")
         .build();
   }
 
-  public static LongGauge createMqHighQueueDepth(Meter meter) {
+  public static LongGauge createIbmMqHighQueueDepth(Meter meter) {
     return meter
-        .gaugeBuilder("mq.high.queue.depth")
+        .gaugeBuilder("ibm.mq.high.queue.depth")
         .ofLongs()
         .setUnit("{percent}")
         .setDescription("The current high queue depth")
         .build();
   }
 
-  public static LongGauge createMqServiceInterval(Meter meter) {
+  public static LongGauge createIbmMqServiceInterval(Meter meter) {
     return meter
-        .gaugeBuilder("mq.service.interval")
+        .gaugeBuilder("ibm.mq.service.interval")
         .ofLongs()
         .setUnit("{percent}")
         .setDescription("The queue service interval")
         .build();
   }
 
-  public static LongCounter createMqQueueDepthFullEvent(Meter meter) {
+  public static LongCounter createIbmMqQueueDepthFullEvent(Meter meter) {
     return meter
-        .counterBuilder("mq.queue.depth.full.event")
+        .counterBuilder("ibm.mq.queue.depth.full.event")
         .setUnit("{events}")
         .setDescription("The number of full queue events")
         .build();
   }
 
-  public static LongCounter createMqQueueDepthHighEvent(Meter meter) {
+  public static LongCounter createIbmMqQueueDepthHighEvent(Meter meter) {
     return meter
-        .counterBuilder("mq.queue.depth.high.event")
+        .counterBuilder("ibm.mq.queue.depth.high.event")
         .setUnit("{events}")
         .setDescription("The number of high queue events")
         .build();
   }
 
-  public static LongCounter createMqQueueDepthLowEvent(Meter meter) {
+  public static LongCounter createIbmMqQueueDepthLowEvent(Meter meter) {
     return meter
-        .counterBuilder("mq.queue.depth.low.event")
+        .counterBuilder("ibm.mq.queue.depth.low.event")
         .setUnit("{events}")
         .setDescription("The number of low queue events")
         .build();
   }
 
-  public static LongGauge createMqUncommittedMessages(Meter meter) {
+  public static LongGauge createIbmMqUncommittedMessages(Meter meter) {
     return meter
-        .gaugeBuilder("mq.uncommitted.messages")
+        .gaugeBuilder("ibm.mq.uncommitted.messages")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Number of uncommitted messages")
         .build();
   }
 
-  public static LongGauge createMqOldestMsgAge(Meter meter) {
+  public static LongGauge createIbmMqOldestMsgAge(Meter meter) {
     return meter
-        .gaugeBuilder("mq.oldest.msg.age")
+        .gaugeBuilder("ibm.mq.oldest.msg.age")
         .ofLongs()
         .setUnit("microseconds")
         .setDescription("Queue message oldest age")
         .build();
   }
 
-  public static LongGauge createMqCurrentMaxQueueFilesize(Meter meter) {
+  public static LongGauge createIbmMqCurrentMaxQueueFilesize(Meter meter) {
     return meter
-        .gaugeBuilder("mq.current.max.queue.filesize")
+        .gaugeBuilder("ibm.mq.current.max.queue.filesize")
         .ofLongs()
         .setUnit("mib")
         .setDescription("Current maximum queue file size")
         .build();
   }
 
-  public static LongGauge createMqCurrentQueueFilesize(Meter meter) {
+  public static LongGauge createIbmMqCurrentQueueFilesize(Meter meter) {
     return meter
-        .gaugeBuilder("mq.current.queue.filesize")
+        .gaugeBuilder("ibm.mq.current.queue.filesize")
         .ofLongs()
         .setUnit("mib")
         .setDescription("Current queue file size")
         .build();
   }
 
-  public static LongGauge createMqInstancesPerClient(Meter meter) {
+  public static LongGauge createIbmMqInstancesPerClient(Meter meter) {
     return meter
-        .gaugeBuilder("mq.instances.per.client")
+        .gaugeBuilder("ibm.mq.instances.per.client")
         .ofLongs()
         .setUnit("{instances}")
         .setDescription("Instances per client")
         .build();
   }
 
-  public static LongGauge createMqMessageDeqCount(Meter meter) {
+  public static LongGauge createIbmMqMessageDeqCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.deq.count")
+        .gaugeBuilder("ibm.mq.message.deq.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Message dequeue count")
         .build();
   }
 
-  public static LongGauge createMqMessageEnqCount(Meter meter) {
+  public static LongGauge createIbmMqMessageEnqCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.enq.count")
+        .gaugeBuilder("ibm.mq.message.enq.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Message enqueue count")
         .build();
   }
 
-  public static LongGauge createMqQueueDepth(Meter meter) {
+  public static LongGauge createIbmMqQueueDepth(Meter meter) {
     return meter
-        .gaugeBuilder("mq.queue.depth")
+        .gaugeBuilder("ibm.mq.queue.depth")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Current queue depth")
         .build();
   }
 
-  public static LongGauge createMqServiceIntervalEvent(Meter meter) {
+  public static LongGauge createIbmMqServiceIntervalEvent(Meter meter) {
     return meter
-        .gaugeBuilder("mq.service.interval.event")
+        .gaugeBuilder("ibm.mq.service.interval.event")
         .ofLongs()
         .setUnit("1")
         .setDescription("Queue service interval event")
         .build();
   }
 
-  public static LongGauge createMqReusableLogSize(Meter meter) {
+  public static LongGauge createIbmMqReusableLogSize(Meter meter) {
     return meter
-        .gaugeBuilder("mq.reusable.log.size")
+        .gaugeBuilder("ibm.mq.reusable.log.size")
         .ofLongs()
         .setUnit("mib")
         .setDescription(
@@ -247,36 +247,36 @@ public final class Metrics {
         .build();
   }
 
-  public static LongGauge createMqManagerActiveChannels(Meter meter) {
+  public static LongGauge createIbmMqManagerActiveChannels(Meter meter) {
     return meter
-        .gaugeBuilder("mq.manager.active.channels")
+        .gaugeBuilder("ibm.mq.manager.active.channels")
         .ofLongs()
         .setUnit("{channels}")
         .setDescription("The queue manager active maximum channels limit")
         .build();
   }
 
-  public static LongGauge createMqRestartLogSize(Meter meter) {
+  public static LongGauge createIbmMqRestartLogSize(Meter meter) {
     return meter
-        .gaugeBuilder("mq.restart.log.size")
+        .gaugeBuilder("ibm.mq.restart.log.size")
         .ofLongs()
         .setUnit("mib")
         .setDescription("Size of the log data required for restart recovery in megabytes.")
         .build();
   }
 
-  public static LongGauge createMqMaxQueueDepth(Meter meter) {
+  public static LongGauge createIbmMqMaxQueueDepth(Meter meter) {
     return meter
-        .gaugeBuilder("mq.max.queue.depth")
+        .gaugeBuilder("ibm.mq.max.queue.depth")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Maximum queue depth")
         .build();
   }
 
-  public static LongGauge createMqOnqtime1(Meter meter) {
+  public static LongGauge createIbmMqOnqtime1(Meter meter) {
     return meter
-        .gaugeBuilder("mq.onqtime.1")
+        .gaugeBuilder("ibm.mq.onqtime.1")
         .ofLongs()
         .setUnit("microseconds")
         .setDescription(
@@ -284,9 +284,9 @@ public final class Metrics {
         .build();
   }
 
-  public static LongGauge createMqOnqtime2(Meter meter) {
+  public static LongGauge createIbmMqOnqtime2(Meter meter) {
     return meter
-        .gaugeBuilder("mq.onqtime.2")
+        .gaugeBuilder("ibm.mq.onqtime.2")
         .ofLongs()
         .setUnit("microseconds")
         .setDescription(
@@ -294,125 +294,125 @@ public final class Metrics {
         .build();
   }
 
-  public static LongGauge createMqMessageReceivedCount(Meter meter) {
+  public static LongGauge createIbmMqMessageReceivedCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.received.count")
+        .gaugeBuilder("ibm.mq.message.received.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Number of messages received")
         .build();
   }
 
-  public static LongGauge createMqMessageSentCount(Meter meter) {
+  public static LongGauge createIbmMqMessageSentCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.message.sent.count")
+        .gaugeBuilder("ibm.mq.message.sent.count")
         .ofLongs()
         .setUnit("{messages}")
         .setDescription("Number of messages sent")
         .build();
   }
 
-  public static LongGauge createMqMaxInstances(Meter meter) {
+  public static LongGauge createIbmMqMaxInstances(Meter meter) {
     return meter
-        .gaugeBuilder("mq.max.instances")
+        .gaugeBuilder("ibm.mq.max.instances")
         .ofLongs()
         .setUnit("{instances}")
         .setDescription("Max channel instances")
         .build();
   }
 
-  public static LongGauge createMqConnectionCount(Meter meter) {
+  public static LongGauge createIbmMqConnectionCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.connection.count")
+        .gaugeBuilder("ibm.mq.connection.count")
         .ofLongs()
         .setUnit("{connections}")
         .setDescription("Active connections count")
         .build();
   }
 
-  public static LongGauge createMqManagerStatus(Meter meter) {
+  public static LongGauge createIbmMqManagerStatus(Meter meter) {
     return meter
-        .gaugeBuilder("mq.manager.status")
+        .gaugeBuilder("ibm.mq.manager.status")
         .ofLongs()
         .setUnit("1")
         .setDescription("Queue manager status")
         .build();
   }
 
-  public static LongGauge createMqHeartbeat(Meter meter) {
+  public static LongGauge createIbmMqHeartbeat(Meter meter) {
     return meter
-        .gaugeBuilder("mq.heartbeat")
+        .gaugeBuilder("ibm.mq.heartbeat")
         .ofLongs()
         .setUnit("1")
         .setDescription("Queue manager heartbeat")
         .build();
   }
 
-  public static LongGauge createMqArchiveLogSize(Meter meter) {
+  public static LongGauge createIbmMqArchiveLogSize(Meter meter) {
     return meter
-        .gaugeBuilder("mq.archive.log.size")
+        .gaugeBuilder("ibm.mq.archive.log.size")
         .ofLongs()
         .setUnit("mib")
         .setDescription("Queue manager archive log size")
         .build();
   }
 
-  public static LongGauge createMqManagerMaxActiveChannels(Meter meter) {
+  public static LongGauge createIbmMqManagerMaxActiveChannels(Meter meter) {
     return meter
-        .gaugeBuilder("mq.manager.max.active.channels")
+        .gaugeBuilder("ibm.mq.manager.max.active.channels")
         .ofLongs()
         .setUnit("{channels}")
         .setDescription("Queue manager max active channels")
         .build();
   }
 
-  public static LongGauge createMqManagerStatisticsInterval(Meter meter) {
+  public static LongGauge createIbmMqManagerStatisticsInterval(Meter meter) {
     return meter
-        .gaugeBuilder("mq.manager.statistics.interval")
+        .gaugeBuilder("ibm.mq.manager.statistics.interval")
         .ofLongs()
         .setUnit("1")
         .setDescription("Queue manager statistics interval")
         .build();
   }
 
-  public static LongGauge createMqPublishCount(Meter meter) {
+  public static LongGauge createIbmMqPublishCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.publish.count")
+        .gaugeBuilder("ibm.mq.publish.count")
         .ofLongs()
         .setUnit("{publications}")
         .setDescription("Topic publication count")
         .build();
   }
 
-  public static LongGauge createMqSubscriptionCount(Meter meter) {
+  public static LongGauge createIbmMqSubscriptionCount(Meter meter) {
     return meter
-        .gaugeBuilder("mq.subscription.count")
+        .gaugeBuilder("ibm.mq.subscription.count")
         .ofLongs()
         .setUnit("{subscriptions}")
         .setDescription("Topic subscription count")
         .build();
   }
 
-  public static LongGauge createMqListenerStatus(Meter meter) {
+  public static LongGauge createIbmMqListenerStatus(Meter meter) {
     return meter
-        .gaugeBuilder("mq.listener.status")
+        .gaugeBuilder("ibm.mq.listener.status")
         .ofLongs()
         .setUnit("1")
         .setDescription("Listener status")
         .build();
   }
 
-  public static LongCounter createMqUnauthorizedEvent(Meter meter) {
+  public static LongCounter createIbmMqUnauthorizedEvent(Meter meter) {
     return meter
-        .counterBuilder("mq.unauthorized.event")
+        .counterBuilder("ibm.mq.unauthorized.event")
         .setUnit("{events}")
         .setDescription("Number of authentication error events")
         .build();
   }
 
-  public static LongGauge createMqManagerMaxHandles(Meter meter) {
+  public static LongGauge createIbmMqManagerMaxHandles(Meter meter) {
     return meter
-        .gaugeBuilder("mq.manager.max.handles")
+        .gaugeBuilder("ibm.mq.manager.max.handles")
         .ofLongs()
         .setUnit("{events}")
         .setDescription("Max open handles")

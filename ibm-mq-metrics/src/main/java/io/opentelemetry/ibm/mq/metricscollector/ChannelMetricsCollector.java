@@ -44,15 +44,15 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
    * The Channel Status values are mentioned here http://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.dev.doc/q090880_.htm
    */
   public ChannelMetricsCollector(Meter meter) {
-    this.activeChannelsGauge = Metrics.createMqManagerActiveChannels(meter);
-    this.channelStatusGauge = Metrics.createMqStatus(meter);
-    this.messageCountGauge = Metrics.createMqMessageCount(meter);
-    this.byteSentGauge = Metrics.createMqByteSent(meter);
-    this.byteReceivedGauge = Metrics.createMqByteReceived(meter);
-    this.buffersSentGauge = Metrics.createMqBuffersSent(meter);
-    this.buffersReceivedGauge = Metrics.createMqBuffersReceived(meter);
-    this.currentSharingConvsGauge = Metrics.createMqCurrentSharingConversations(meter);
-    this.maxSharingConvsGauge = Metrics.createMqMaxSharingConversations(meter);
+    this.activeChannelsGauge = Metrics.createIbmMqManagerActiveChannels(meter);
+    this.channelStatusGauge = Metrics.createIbmMqStatus(meter);
+    this.messageCountGauge = Metrics.createIbmMqMessageCount(meter);
+    this.byteSentGauge = Metrics.createIbmMqByteSent(meter);
+    this.byteReceivedGauge = Metrics.createIbmMqByteReceived(meter);
+    this.buffersSentGauge = Metrics.createIbmMqBuffersSent(meter);
+    this.buffersReceivedGauge = Metrics.createIbmMqBuffersReceived(meter);
+    this.currentSharingConvsGauge = Metrics.createIbmMqCurrentSharingConversations(meter);
+    this.maxSharingConvsGauge = Metrics.createIbmMqMaxSharingConversations(meter);
   }
 
   @Override
@@ -182,12 +182,12 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
             .put("channel.start.time", channelStartTime)
             .put("job.name", jobName)
             .build();
-    if (context.getMetricsConfig().isMqMessageCountEnabled()) {
+    if (context.getMetricsConfig().isIbmMqMessageCountEnabled()) {
       int received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS);
       messageCountGauge.set(received, attributes);
     }
     int status = message.getIntParameterValue(CMQCFC.MQIACH_CHANNEL_STATUS);
-    if (context.getMetricsConfig().isMqStatusEnabled()) {
+    if (context.getMetricsConfig().isIbmMqStatusEnabled()) {
       channelStatusGauge.set(status, attributes);
     }
     // We follow the definition of active channel as documented in
@@ -197,27 +197,27 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
         && status != CMQCFC.MQCHS_STARTING) {
       activeChannels.add(channelName);
     }
-    if (context.getMetricsConfig().isMqByteSentEnabled()) {
+    if (context.getMetricsConfig().isIbmMqByteSentEnabled()) {
       byteSentGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BYTES_SENT), attributes);
     }
-    if (context.getMetricsConfig().isMqByteReceivedEnabled()) {
+    if (context.getMetricsConfig().isIbmMqByteReceivedEnabled()) {
       byteReceivedGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BYTES_RECEIVED), attributes);
     }
-    if (context.getMetricsConfig().isMqBuffersSentEnabled()) {
+    if (context.getMetricsConfig().isIbmMqBuffersSentEnabled()) {
       buffersSentGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_SENT), attributes);
     }
-    if (context.getMetricsConfig().isMqBuffersReceivedEnabled()) {
+    if (context.getMetricsConfig().isIbmMqBuffersReceivedEnabled()) {
       buffersReceivedGauge.set(
           message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_RECEIVED), attributes);
     }
-    if (context.getMetricsConfig().isMqCurrentSharingConversationsEnabled()) {
+    if (context.getMetricsConfig().isIbmMqCurrentSharingConversationsEnabled()) {
       int currentSharingConvs = 0;
       if (message.getParameter(CMQCFC.MQIACH_CURRENT_SHARING_CONVS) != null) {
         currentSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_CURRENT_SHARING_CONVS);
       }
       currentSharingConvsGauge.set(currentSharingConvs, attributes);
     }
-    if (context.getMetricsConfig().isMqMaxSharingConversationsEnabled()) {
+    if (context.getMetricsConfig().isIbmMqMaxSharingConversationsEnabled()) {
       int maxSharingConvs = 0;
       if (message.getParameter(CMQCFC.MQIACH_MAX_SHARING_CONVS) != null) {
         maxSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_MAX_SHARING_CONVS);

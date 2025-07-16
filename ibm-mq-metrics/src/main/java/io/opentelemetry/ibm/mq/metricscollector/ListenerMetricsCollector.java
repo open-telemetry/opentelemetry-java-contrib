@@ -41,7 +41,7 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
   private final LongGauge listenerStatusGauge;
 
   public ListenerMetricsCollector(Meter meter) {
-    this.listenerStatusGauge = Metrics.createMqListenerStatus(meter);
+    this.listenerStatusGauge = Metrics.createIbmMqListenerStatus(meter);
   }
 
   @Override
@@ -97,7 +97,7 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
   private void updateMetrics(
       PCFMessage message, String listenerName, MetricsCollectorContext context)
       throws PCFException {
-    if (context.getMetricsConfig().isMqListenerStatusEnabled()) {
+    if (context.getMetricsConfig().isIbmMqListenerStatusEnabled()) {
       int status = message.getIntParameterValue(CMQCFC.MQIACH_LISTENER_STATUS);
       listenerStatusGauge.set(
           status,

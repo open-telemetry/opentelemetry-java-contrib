@@ -34,7 +34,7 @@ public final class ReadConfigurationEventQueueCollector
 
   public ReadConfigurationEventQueueCollector(Meter meter) {
     this.bootTime = System.currentTimeMillis();
-    this.maxHandlesGauge = Metrics.createMqManagerMaxHandles(meter);
+    this.maxHandlesGauge = Metrics.createIbmMqManagerMaxHandles(meter);
   }
 
   @Nullable
@@ -121,7 +121,7 @@ public final class ReadConfigurationEventQueueCollector
       }
 
       if (candidate != null) {
-        if (context.getMetricsConfig().isMqManagerMaxHandlesEnabled()) {
+        if (context.getMetricsConfig().isIbmMqManagerMaxHandlesEnabled()) {
           int maxHandles = candidate.getIntParameterValue(CMQC.MQIA_MAX_HANDLES);
           maxHandlesGauge.set(
               maxHandles,

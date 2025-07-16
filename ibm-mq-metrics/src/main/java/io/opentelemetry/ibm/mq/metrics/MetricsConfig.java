@@ -19,184 +19,184 @@ public final class MetricsConfig {
     this.config = config.getMetrics();
   }
 
-  public boolean isMqMessageRetryCountEnabled() {
-    return isEnabled("mq.message.retry.count");
+  public boolean isIbmMqMessageRetryCountEnabled() {
+    return isEnabled("ibm.mq.message.retry.count");
   }
 
-  public boolean isMqStatusEnabled() {
-    return isEnabled("mq.status");
+  public boolean isIbmMqStatusEnabled() {
+    return isEnabled("ibm.mq.status");
   }
 
-  public boolean isMqMaxSharingConversationsEnabled() {
-    return isEnabled("mq.max.sharing.conversations");
+  public boolean isIbmMqMaxSharingConversationsEnabled() {
+    return isEnabled("ibm.mq.max.sharing.conversations");
   }
 
-  public boolean isMqCurrentSharingConversationsEnabled() {
-    return isEnabled("mq.current.sharing.conversations");
+  public boolean isIbmMqCurrentSharingConversationsEnabled() {
+    return isEnabled("ibm.mq.current.sharing.conversations");
   }
 
-  public boolean isMqByteReceivedEnabled() {
-    return isEnabled("mq.byte.received");
+  public boolean isIbmMqByteReceivedEnabled() {
+    return isEnabled("ibm.mq.byte.received");
   }
 
-  public boolean isMqByteSentEnabled() {
-    return isEnabled("mq.byte.sent");
+  public boolean isIbmMqByteSentEnabled() {
+    return isEnabled("ibm.mq.byte.sent");
   }
 
-  public boolean isMqBuffersReceivedEnabled() {
-    return isEnabled("mq.buffers.received");
+  public boolean isIbmMqBuffersReceivedEnabled() {
+    return isEnabled("ibm.mq.buffers.received");
   }
 
-  public boolean isMqBuffersSentEnabled() {
-    return isEnabled("mq.buffers.sent");
+  public boolean isIbmMqBuffersSentEnabled() {
+    return isEnabled("ibm.mq.buffers.sent");
   }
 
-  public boolean isMqMessageCountEnabled() {
-    return isEnabled("mq.message.count");
+  public boolean isIbmMqMessageCountEnabled() {
+    return isEnabled("ibm.mq.message.count");
   }
 
-  public boolean isMqOpenInputCountEnabled() {
-    return isEnabled("mq.open.input.count");
+  public boolean isIbmMqOpenInputCountEnabled() {
+    return isEnabled("ibm.mq.open.input.count");
   }
 
-  public boolean isMqOpenOutputCountEnabled() {
-    return isEnabled("mq.open.output.count");
+  public boolean isIbmMqOpenOutputCountEnabled() {
+    return isEnabled("ibm.mq.open.output.count");
   }
 
-  public boolean isMqHighQueueDepthEnabled() {
-    return isEnabled("mq.high.queue.depth");
+  public boolean isIbmMqHighQueueDepthEnabled() {
+    return isEnabled("ibm.mq.high.queue.depth");
   }
 
-  public boolean isMqServiceIntervalEnabled() {
-    return isEnabled("mq.service.interval");
+  public boolean isIbmMqServiceIntervalEnabled() {
+    return isEnabled("ibm.mq.service.interval");
   }
 
-  public boolean isMqQueueDepthFullEventEnabled() {
-    return isEnabled("mq.queue.depth.full.event");
+  public boolean isIbmMqQueueDepthFullEventEnabled() {
+    return isEnabled("ibm.mq.queue.depth.full.event");
   }
 
-  public boolean isMqQueueDepthHighEventEnabled() {
-    return isEnabled("mq.queue.depth.high.event");
+  public boolean isIbmMqQueueDepthHighEventEnabled() {
+    return isEnabled("ibm.mq.queue.depth.high.event");
   }
 
-  public boolean isMqQueueDepthLowEventEnabled() {
-    return isEnabled("mq.queue.depth.low.event");
+  public boolean isIbmMqQueueDepthLowEventEnabled() {
+    return isEnabled("ibm.mq.queue.depth.low.event");
   }
 
-  public boolean isMqUncommittedMessagesEnabled() {
-    return isEnabled("mq.uncommitted.messages");
+  public boolean isIbmMqUncommittedMessagesEnabled() {
+    return isEnabled("ibm.mq.uncommitted.messages");
   }
 
-  public boolean isMqOldestMsgAgeEnabled() {
-    return isEnabled("mq.oldest.msg.age");
+  public boolean isIbmMqOldestMsgAgeEnabled() {
+    return isEnabled("ibm.mq.oldest.msg.age");
   }
 
-  public boolean isMqCurrentMaxQueueFilesizeEnabled() {
-    return isEnabled("mq.current.max.queue.filesize");
+  public boolean isIbmMqCurrentMaxQueueFilesizeEnabled() {
+    return isEnabled("ibm.mq.current.max.queue.filesize");
   }
 
-  public boolean isMqCurrentQueueFilesizeEnabled() {
-    return isEnabled("mq.current.queue.filesize");
+  public boolean isIbmMqCurrentQueueFilesizeEnabled() {
+    return isEnabled("ibm.mq.current.queue.filesize");
   }
 
-  public boolean isMqInstancesPerClientEnabled() {
-    return isEnabled("mq.instances.per.client");
+  public boolean isIbmMqInstancesPerClientEnabled() {
+    return isEnabled("ibm.mq.instances.per.client");
   }
 
-  public boolean isMqMessageDeqCountEnabled() {
-    return isEnabled("mq.message.deq.count");
+  public boolean isIbmMqMessageDeqCountEnabled() {
+    return isEnabled("ibm.mq.message.deq.count");
   }
 
-  public boolean isMqMessageEnqCountEnabled() {
-    return isEnabled("mq.message.enq.count");
+  public boolean isIbmMqMessageEnqCountEnabled() {
+    return isEnabled("ibm.mq.message.enq.count");
   }
 
-  public boolean isMqQueueDepthEnabled() {
-    return isEnabled("mq.queue.depth");
+  public boolean isIbmMqQueueDepthEnabled() {
+    return isEnabled("ibm.mq.queue.depth");
   }
 
-  public boolean isMqServiceIntervalEventEnabled() {
-    return isEnabled("mq.service.interval.event");
+  public boolean isIbmMqServiceIntervalEventEnabled() {
+    return isEnabled("ibm.mq.service.interval.event");
   }
 
-  public boolean isMqReusableLogSizeEnabled() {
-    return isEnabled("mq.reusable.log.size");
+  public boolean isIbmMqReusableLogSizeEnabled() {
+    return isEnabled("ibm.mq.reusable.log.size");
   }
 
-  public boolean isMqManagerActiveChannelsEnabled() {
-    return isEnabled("mq.manager.active.channels");
+  public boolean isIbmMqManagerActiveChannelsEnabled() {
+    return isEnabled("ibm.mq.manager.active.channels");
   }
 
-  public boolean isMqRestartLogSizeEnabled() {
-    return isEnabled("mq.restart.log.size");
+  public boolean isIbmMqRestartLogSizeEnabled() {
+    return isEnabled("ibm.mq.restart.log.size");
   }
 
-  public boolean isMqMaxQueueDepthEnabled() {
-    return isEnabled("mq.max.queue.depth");
+  public boolean isIbmMqMaxQueueDepthEnabled() {
+    return isEnabled("ibm.mq.max.queue.depth");
   }
 
-  public boolean isMqOnqtime1Enabled() {
-    return isEnabled("mq.onqtime.1");
+  public boolean isIbmMqOnqtime1Enabled() {
+    return isEnabled("ibm.mq.onqtime.1");
   }
 
-  public boolean isMqOnqtime2Enabled() {
-    return isEnabled("mq.onqtime.2");
+  public boolean isIbmMqOnqtime2Enabled() {
+    return isEnabled("ibm.mq.onqtime.2");
   }
 
-  public boolean isMqMessageReceivedCountEnabled() {
-    return isEnabled("mq.message.received.count");
+  public boolean isIbmMqMessageReceivedCountEnabled() {
+    return isEnabled("ibm.mq.message.received.count");
   }
 
-  public boolean isMqMessageSentCountEnabled() {
-    return isEnabled("mq.message.sent.count");
+  public boolean isIbmMqMessageSentCountEnabled() {
+    return isEnabled("ibm.mq.message.sent.count");
   }
 
-  public boolean isMqMaxInstancesEnabled() {
-    return isEnabled("mq.max.instances");
+  public boolean isIbmMqMaxInstancesEnabled() {
+    return isEnabled("ibm.mq.max.instances");
   }
 
-  public boolean isMqConnectionCountEnabled() {
-    return isEnabled("mq.connection.count");
+  public boolean isIbmMqConnectionCountEnabled() {
+    return isEnabled("ibm.mq.connection.count");
   }
 
-  public boolean isMqManagerStatusEnabled() {
-    return isEnabled("mq.manager.status");
+  public boolean isIbmMqManagerStatusEnabled() {
+    return isEnabled("ibm.mq.manager.status");
   }
 
-  public boolean isMqHeartbeatEnabled() {
-    return isEnabled("mq.heartbeat");
+  public boolean isIbmMqHeartbeatEnabled() {
+    return isEnabled("ibm.mq.heartbeat");
   }
 
-  public boolean isMqArchiveLogSizeEnabled() {
-    return isEnabled("mq.archive.log.size");
+  public boolean isIbmMqArchiveLogSizeEnabled() {
+    return isEnabled("ibm.mq.archive.log.size");
   }
 
-  public boolean isMqManagerMaxActiveChannelsEnabled() {
-    return isEnabled("mq.manager.max.active.channels");
+  public boolean isIbmMqManagerMaxActiveChannelsEnabled() {
+    return isEnabled("ibm.mq.manager.max.active.channels");
   }
 
-  public boolean isMqManagerStatisticsIntervalEnabled() {
-    return isEnabled("mq.manager.statistics.interval");
+  public boolean isIbmMqManagerStatisticsIntervalEnabled() {
+    return isEnabled("ibm.mq.manager.statistics.interval");
   }
 
-  public boolean isMqPublishCountEnabled() {
-    return isEnabled("mq.publish.count");
+  public boolean isIbmMqPublishCountEnabled() {
+    return isEnabled("ibm.mq.publish.count");
   }
 
-  public boolean isMqSubscriptionCountEnabled() {
-    return isEnabled("mq.subscription.count");
+  public boolean isIbmMqSubscriptionCountEnabled() {
+    return isEnabled("ibm.mq.subscription.count");
   }
 
-  public boolean isMqListenerStatusEnabled() {
-    return isEnabled("mq.listener.status");
+  public boolean isIbmMqListenerStatusEnabled() {
+    return isEnabled("ibm.mq.listener.status");
   }
 
-  public boolean isMqUnauthorizedEventEnabled() {
-    return isEnabled("mq.unauthorized.event");
+  public boolean isIbmMqUnauthorizedEventEnabled() {
+    return isEnabled("ibm.mq.unauthorized.event");
   }
 
-  public boolean isMqManagerMaxHandlesEnabled() {
-    return isEnabled("mq.manager.max.handles");
+  public boolean isIbmMqManagerMaxHandlesEnabled() {
+    return isEnabled("ibm.mq.manager.max.handles");
   }
 
   private boolean isEnabled(String key) {

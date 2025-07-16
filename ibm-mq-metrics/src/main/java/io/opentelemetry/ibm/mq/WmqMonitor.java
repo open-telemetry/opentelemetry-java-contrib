@@ -106,7 +106,7 @@ public class WmqMonitor {
           e.getMessage(),
           e);
     } finally {
-      if (this.metricsConfig.isMqHeartbeatEnabled()) {
+      if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {
         heartbeatGauge.set(
             heartBeatMetricValue,
             Attributes.of(AttributeKey.stringKey("queue.manager"), queueManagerName));

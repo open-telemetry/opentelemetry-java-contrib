@@ -33,9 +33,9 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
   private final LongCounter lowQueueDepthCounter;
 
   public PerformanceEventQueueCollector(Meter meter) {
-    this.fullQueueDepthCounter = Metrics.createMqQueueDepthFullEvent(meter);
-    this.highQueueDepthCounter = Metrics.createMqQueueDepthHighEvent(meter);
-    this.lowQueueDepthCounter = Metrics.createMqQueueDepthLowEvent(meter);
+    this.fullQueueDepthCounter = Metrics.createIbmMqQueueDepthFullEvent(meter);
+    this.highQueueDepthCounter = Metrics.createIbmMqQueueDepthHighEvent(meter);
+    this.lowQueueDepthCounter = Metrics.createIbmMqQueueDepthLowEvent(meter);
   }
 
   private void readEvents(MetricsCollectorContext context, String performanceEventsQueueName)
@@ -88,17 +88,17 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
             queueName);
     switch (receivedMsg.getReason()) {
       case CMQC.MQRC_Q_FULL:
-        if (context.getMetricsConfig().isMqQueueDepthFullEventEnabled()) {
+        if (context.getMetricsConfig().isIbmMqQueueDepthFullEventEnabled()) {
           fullQueueDepthCounter.add(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_HIGH:
-        if (context.getMetricsConfig().isMqQueueDepthHighEventEnabled()) {
+        if (context.getMetricsConfig().isIbmMqQueueDepthHighEventEnabled()) {
           highQueueDepthCounter.add(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_LOW:
-        if (context.getMetricsConfig().isMqQueueDepthLowEventEnabled()) {
+        if (context.getMetricsConfig().isIbmMqQueueDepthLowEventEnabled()) {
           lowQueueDepthCounter.add(1, attributes);
         }
         break;
