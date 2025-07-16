@@ -56,7 +56,7 @@ public final class OpampClientImpl
   @Nullable private Callbacks callbacks;
 
   /** Fields that must always be sent. */
-  private static final List<Field> CONSTANT_FIELDS;
+  private static final List<Field> REQUIRED_FIELDS;
 
   /**
    * Fields that should only be sent in the first message and then omitted in following messages,
@@ -69,12 +69,12 @@ public final class OpampClientImpl
   private static final List<Field> COMPRESSABLE_FIELDS;
 
   static {
-    // Constant fields init
+    // Required fields init
     List<Field> constantFields = new ArrayList<>();
     constantFields.add(Field.INSTANCE_UID);
     constantFields.add(Field.SEQUENCE_NUM);
     constantFields.add(Field.CAPABILITIES);
-    CONSTANT_FIELDS = Collections.unmodifiableList(constantFields);
+    REQUIRED_FIELDS = Collections.unmodifiableList(constantFields);
 
     // Compressable fields init
     List<Field> compressableFields = new ArrayList<>();
@@ -96,7 +96,7 @@ public final class OpampClientImpl
             FlagsAppender.create(state.flags),
             AgentDisconnectAppender.create());
     return new OpampClientImpl(
-        requestService, appenders, state, RecipeManager.create(CONSTANT_FIELDS));
+        requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS));
   }
 
   private OpampClientImpl(
