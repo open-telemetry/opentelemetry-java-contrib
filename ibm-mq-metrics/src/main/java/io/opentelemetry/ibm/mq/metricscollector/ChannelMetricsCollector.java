@@ -7,12 +7,12 @@ package io.opentelemetry.ibm.mq.metricscollector;
 
 import static com.ibm.mq.constants.CMQC.MQRC_SELECTOR_ERROR;
 import static com.ibm.mq.constants.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -158,8 +158,7 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
     logger.info(
         "Active Channels in queueManager {} are {}", context.getQueueManagerName(), activeChannels);
     activeChannelsGauge.set(
-        activeChannels.size(),
-        Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        activeChannels.size(), Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
 
     long exitTime = System.currentTimeMillis() - entryTime;
     logger.debug("Time taken to publish metrics for all channels is {} milliseconds", exitTime);

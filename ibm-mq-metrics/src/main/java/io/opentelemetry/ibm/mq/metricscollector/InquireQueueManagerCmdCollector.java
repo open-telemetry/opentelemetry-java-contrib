@@ -5,12 +5,13 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.MQCFIL;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -62,8 +63,7 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
       if (context.getMetricsConfig().isIbmMqManagerStatisticsIntervalEnabled()) {
         int interval = responses.get(0).getIntParameterValue(CMQC.MQIA_STATISTICS_INTERVAL);
         statisticsIntervalGauge.set(
-            interval,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+            interval, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
       }
     } catch (Exception e) {
       logger.error("Error collecting QueueManagerCmd metrics", e);

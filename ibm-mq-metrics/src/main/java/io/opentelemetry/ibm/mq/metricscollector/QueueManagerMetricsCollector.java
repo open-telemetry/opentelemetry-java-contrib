@@ -5,9 +5,10 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -64,41 +65,30 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
         logger.debug("Unexpected error while PCFMessage.send(), response is empty");
         return;
       }
+      Attributes attributes = Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName());
       if (context.getMetricsConfig().isIbmMqManagerStatusEnabled()) {
         int status = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_Q_MGR_STATUS);
-        statusGauge.set(
-            status,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        statusGauge.set(status, attributes);
       }
       if (context.getMetricsConfig().isIbmMqConnectionCountEnabled()) {
         int count = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_CONNECTION_COUNT);
-        connectionCountGauge.set(
-            count,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        connectionCountGauge.set(count, attributes);
       }
       if (context.getMetricsConfig().isIbmMqRestartLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_RESTART_LOG_SIZE);
-        restartLogSizeGauge.set(
-            logSize,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        restartLogSizeGauge.set(logSize, attributes);
       }
       if (context.getMetricsConfig().isIbmMqReusableLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_REUSABLE_LOG_SIZE);
-        reuseLogSizeGauge.set(
-            logSize,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        reuseLogSizeGauge.set(logSize, attributes);
       }
       if (context.getMetricsConfig().isIbmMqArchiveLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_ARCHIVE_LOG_SIZE);
-        archiveLogSizeGauge.set(
-            logSize,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        archiveLogSizeGauge.set(logSize, attributes);
       }
       if (context.getMetricsConfig().isIbmMqManagerMaxActiveChannelsEnabled()) {
         int maxActiveChannels = context.getQueueManager().getMaxActiveChannels();
-        maxActiveChannelsGauge.set(
-            maxActiveChannels,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), context.getQueueManagerName()));
+        maxActiveChannelsGauge.set(maxActiveChannels, attributes);
       }
     } catch (Exception e) {
       logger.error(e.getMessage());

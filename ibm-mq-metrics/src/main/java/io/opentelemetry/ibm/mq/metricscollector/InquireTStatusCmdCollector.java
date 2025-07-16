@@ -5,12 +5,14 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
+
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.MQDataException;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -112,9 +114,9 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       throws PCFException {
     Attributes attributes =
         Attributes.of(
-            AttributeKey.stringKey("messaging.destination.name"),
+            MESSAGING_DESTINATION_NAME,
             topicString,
-            AttributeKey.stringKey("ibm.mq.queue.manager"),
+            IBM_MQ_QUEUE_MANAGER,
             context.getQueueManagerName());
     if (context.getMetricsConfig().isIbmMqPublishCountEnabled()) {
       int publisherCount = 0;

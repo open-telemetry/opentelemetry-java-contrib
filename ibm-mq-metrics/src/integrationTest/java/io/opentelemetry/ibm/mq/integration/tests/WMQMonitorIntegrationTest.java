@@ -5,6 +5,8 @@
 
 package io.opentelemetry.ibm.mq.integration.tests;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +18,6 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -191,46 +192,46 @@ class WMQMonitorIntegrationTest {
     }
     Set<String> metricNames = metrics.keySet();
     // this value is read from the active channels count:
-    assertThat(metricNames).contains("mq.manager.active.channels");
+    assertThat(metricNames).contains("ibm.mq.manager.active.channels");
     // this value is read from the configuration queue.
-    assertThat(metricNames).contains("mq.manager.max.handles");
+    assertThat(metricNames).contains("ibm.mq.manager.max.handles");
     // this value is read from the queue manager events, for unauthorized events.
-    assertThat(metricNames).contains("mq.unauthorized.event");
+    assertThat(metricNames).contains("ibm.mq.unauthorized.event");
     // this value is read from the performance event queue.
-    assertThat(metricNames).contains("mq.queue.depth.full.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.full.event");
     // this value is read from the performance event queue.
-    assertThat(metricNames).contains("mq.queue.depth.high.event");
-    assertThat(metricNames).contains("mq.queue.depth.low.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.high.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.low.event");
     // reads a value from the heartbeat gauge
-    assertThat(metricNames).contains("mq.heartbeat");
-    assertThat(metricNames).contains("mq.oldest.msg.age");
-    if (metrics.get("mq.oldest.msg.age") != null) {
+    assertThat(metricNames).contains("ibm.mq.heartbeat");
+    assertThat(metricNames).contains("ibm.mq.oldest.msg.age");
+    if (metrics.get("ibm.mq.oldest.msg.age") != null) {
       Set<String> queueNames =
-          metrics.get("mq.oldest.msg.age").getLongGaugeData().getPoints().stream()
-              .map(pt -> pt.getAttributes().get(AttributeKey.stringKey("queue.name")))
+          metrics.get("ibm.mq.oldest.msg.age").getLongGaugeData().getPoints().stream()
+              .map(pt -> pt.getAttributes().get(MESSAGING_DESTINATION_NAME))
               .collect(Collectors.toSet());
       assertThat(queueNames).contains("smallqueue");
     }
     // make sure we get MQ manager status
-    assertThat(metricNames).contains("mq.manager.status");
-    if (metrics.get("mq.manager.status") != null) {
+    assertThat(metricNames).contains("ibm.mq.manager.status");
+    if (metrics.get("ibm.mq.manager.status") != null) {
       Set<String> queueManagers =
-          metrics.get("mq.manager.status").getLongGaugeData().getPoints().stream()
-              .map(pt -> pt.getAttributes().get(AttributeKey.stringKey("queue.manager")))
+          metrics.get("ibm.mq.manager.status").getLongGaugeData().getPoints().stream()
+              .map(pt -> pt.getAttributes().get(IBM_MQ_QUEUE_MANAGER))
               .collect(Collectors.toSet());
       assertThat(queueManagers).contains("QM1");
     }
 
-    assertThat(metricNames).contains("mq.onqtime.2");
-    if (metrics.get("mq.onqtime.2") != null) {
+    assertThat(metricNames).contains("ibm.mq.onqtime.2");
+    if (metrics.get("ibm.mq.onqtime.2") != null) {
       Set<String> queueNames =
-          metrics.get("mq.onqtime.2").getLongGaugeData().getPoints().stream()
-              .map(pt -> pt.getAttributes().get(AttributeKey.stringKey("queue.name")))
+          metrics.get("ibm.mq.onqtime.2").getLongGaugeData().getPoints().stream()
+              .map(pt -> pt.getAttributes().get(MESSAGING_DESTINATION_NAME))
               .collect(Collectors.toSet());
       assertThat(queueNames).contains("smallqueue");
       Set<String> queueManagers =
-          metrics.get("mq.manager.status").getLongGaugeData().getPoints().stream()
-              .map(pt -> pt.getAttributes().get(AttributeKey.stringKey("queue.manager")))
+          metrics.get("ibm.mq.manager.status").getLongGaugeData().getPoints().stream()
+              .map(pt -> pt.getAttributes().get(IBM_MQ_QUEUE_MANAGER))
               .collect(Collectors.toSet());
       assertThat(queueManagers).contains("QM1");
       // TODO: Add more asserts about data values, units, attributes, etc, not just names
@@ -267,17 +268,17 @@ class WMQMonitorIntegrationTest {
       metricNames.add(metricData.getName());
     }
     // this value is read from the active channels count:
-    assertThat(metricNames).contains("mq.manager.active.channels");
+    assertThat(metricNames).contains("ibm.mq.manager.active.channels");
     // this value is read from the configuration queue.
-    assertThat(metricNames).contains("mq.manager.max.handles");
+    assertThat(metricNames).contains("ibm.mq.manager.max.handles");
     // this value is read from the queue manager events, for unauthorized events.
-    assertThat(metricNames).contains("mq.unauthorized.event");
+    assertThat(metricNames).contains("ibm.mq.unauthorized.event");
     // this value is read from the performance event queue.
-    assertThat(metricNames).contains("mq.queue.depth.full.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.full.event");
     // this value is read from the performance event queue.
-    assertThat(metricNames).contains("mq.queue.depth.high.event");
-    assertThat(metricNames).contains("mq.queue.depth.low.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.high.event");
+    assertThat(metricNames).contains("ibm.mq.queue.depth.low.event");
     // reads a value from the heartbeat gauge
-    assertThat(metricNames).contains("mq.heartbeat");
+    assertThat(metricNames).contains("ibm.mq.heartbeat");
   }
 }

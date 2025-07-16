@@ -5,6 +5,8 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
 import com.ibm.mq.MQMessage;
@@ -13,7 +15,6 @@ import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -124,9 +125,7 @@ public final class ReadConfigurationEventQueueCollector
         if (context.getMetricsConfig().isIbmMqManagerMaxHandlesEnabled()) {
           int maxHandles = candidate.getIntParameterValue(CMQC.MQIA_MAX_HANDLES);
           maxHandlesGauge.set(
-              maxHandles,
-              Attributes.of(
-                  AttributeKey.stringKey("queue.manager"), context.getQueueManager().getName()));
+              maxHandles, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManager().getName()));
         }
       }
 

@@ -5,10 +5,12 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_LISTENER_NAME;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -102,9 +104,9 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
       listenerStatusGauge.set(
           status,
           Attributes.of(
-              AttributeKey.stringKey("listener.name"),
+              IBM_MQ_LISTENER_NAME,
               listenerName,
-              AttributeKey.stringKey("queue.manager"),
+              IBM_MQ_QUEUE_MANAGER,
               context.getQueueManagerName()));
     }
   }

@@ -10,6 +10,9 @@ import static com.ibm.mq.constants.CMQC.MQQT_CLUSTER;
 import static com.ibm.mq.constants.CMQC.MQQT_LOCAL;
 import static com.ibm.mq.constants.CMQC.MQQT_MODEL;
 import static com.ibm.mq.constants.CMQC.MQQT_REMOTE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_TYPE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
 
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
@@ -19,7 +22,6 @@ import com.ibm.mq.headers.pcf.MQCFIN;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFParameter;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -271,11 +273,11 @@ final class QueueCollectionBuddy {
     PCFParameter pcfParam = pcfMessage.getParameter(constantValue);
     Attributes attributes =
         Attributes.of(
-            AttributeKey.stringKey("queue.name"),
+            MESSAGING_DESTINATION_NAME,
             queueName,
-            AttributeKey.stringKey("queue.type"),
+            IBM_MQ_QUEUE_TYPE,
             queueType,
-            AttributeKey.stringKey("queue.manager"),
+            IBM_MQ_QUEUE_MANAGER,
             context.getQueueManagerName());
 
     if (pcfParam instanceof MQCFIN) {

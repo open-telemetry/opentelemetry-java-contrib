@@ -5,6 +5,7 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -14,7 +15,6 @@ import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
@@ -88,7 +88,7 @@ public class QueueCollectionBuddyTest {
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
-        String queueName = d.getAttributes().get(AttributeKey.stringKey("queue.name"));
+        String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
         assertThat(d.getValue()).isEqualTo(expectedValue);
       }
@@ -127,7 +127,7 @@ public class QueueCollectionBuddyTest {
 
     for (MetricData metric : otelTesting.getMetrics()) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
-        String queueName = d.getAttributes().get(AttributeKey.stringKey("queue.name"));
+        String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
         assertThat(d.getValue()).isEqualTo(expectedValue);
       }
@@ -152,11 +152,11 @@ public class QueueCollectionBuddyTest {
 
     for (MetricData metric : otelTesting.getMetrics()) {
       Iterator<LongPointData> iterator = metric.getLongGaugeData().getPoints().iterator();
-      if (metric.getName().equals("mq.high.queue.depth")) {
+      if (metric.getName().equals("ibm.mq.high.queue.depth")) {
         assertThat(iterator.next().getValue()).isEqualTo(10);
-      } else if (metric.getName().equals("mq.message.deq.count")) {
+      } else if (metric.getName().equals("ibm.mq.message.deq.count")) {
         assertThat(iterator.next().getValue()).isEqualTo(0);
-      } else if (metric.getName().equals("mq.message.enq.count")) {
+      } else if (metric.getName().equals("ibm.mq.message.enq.count")) {
         assertThat(iterator.next().getValue()).isEqualTo(3);
       }
     }

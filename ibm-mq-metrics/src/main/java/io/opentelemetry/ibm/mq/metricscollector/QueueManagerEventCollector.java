@@ -5,6 +5,10 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.SERVICE_NAME;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.USER_NAME;
+
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
 import com.ibm.mq.MQMessage;
@@ -13,7 +17,6 @@ import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
@@ -58,11 +61,11 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
               authorityEventCounter.add(
                   1,
                   Attributes.of(
-                      AttributeKey.stringKey("queue.manager"),
+                      IBM_MQ_QUEUE_MANAGER,
                       context.getQueueManagerName(),
-                      AttributeKey.stringKey("user.name"),
+                      USER_NAME,
                       username,
-                      AttributeKey.stringKey("service.name"),
+                      SERVICE_NAME,
                       applicationName));
             }
           } else {

@@ -5,10 +5,11 @@
 
 package io.opentelemetry.ibm.mq;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
@@ -65,7 +66,7 @@ public class WmqMonitor {
 
     this.metricsConfig = new MetricsConfig(config);
 
-    this.heartbeatGauge = meter.gaugeBuilder("mq.heartbeat").setUnit("1").ofLongs().build();
+    this.heartbeatGauge = meter.gaugeBuilder("ibm.mq.heartbeat").setUnit("1").ofLongs().build();
     this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector(meter));
@@ -108,8 +109,7 @@ public class WmqMonitor {
     } finally {
       if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {
         heartbeatGauge.set(
-            heartBeatMetricValue,
-            Attributes.of(AttributeKey.stringKey("queue.manager"), queueManagerName));
+            heartBeatMetricValue, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName));
       }
       cleanUp(ibmQueueManager, agent);
       long endTime = System.currentTimeMillis() - startTime;

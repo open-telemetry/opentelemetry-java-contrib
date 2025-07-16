@@ -5,6 +5,9 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
+
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
 import com.ibm.mq.MQMessage;
@@ -13,7 +16,6 @@ import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
@@ -82,9 +84,9 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
     String queueName = receivedMsg.getStringParameterValue(CMQC.MQCA_BASE_OBJECT_NAME).trim();
     Attributes attributes =
         Attributes.of(
-            AttributeKey.stringKey("queue.manager"),
+            IBM_MQ_QUEUE_MANAGER,
             context.getQueueManagerName(),
-            AttributeKey.stringKey("queue.name"),
+            MESSAGING_DESTINATION_NAME,
             queueName);
     switch (receivedMsg.getReason()) {
       case CMQC.MQRC_Q_FULL:
