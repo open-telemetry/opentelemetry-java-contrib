@@ -18,7 +18,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./.github/scripts/link-check.sh --relative-only
+        run: ./.github/scripts/link-check.sh --local-links-only
 
       - name: Get modified files
         if: github.event_name == 'pull_request'
