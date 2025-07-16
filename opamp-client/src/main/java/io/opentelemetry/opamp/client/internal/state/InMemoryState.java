@@ -16,11 +16,11 @@ import javax.annotation.Nonnull;
 abstract class InMemoryState<T> implements State<T> {
   private final AtomicReference<T> state = new AtomicReference<>();
 
-  public InMemoryState(@Nonnull T initialValue) {
+  public InMemoryState(T initialValue) {
     state.set(initialValue);
   }
 
-  public void set(@Nonnull T value) {
+  public void set(T value) {
     state.set(value);
   }
 
