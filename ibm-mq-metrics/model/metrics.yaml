@@ -1,7 +1,7 @@
 groups:
   - id: mq.message.retry.count
     type: metric
-    metric_name: mq.message.retry.count
+    metric_name: ibm.mq.message.retry.count
     stability: development
     brief: "Number of message retries"
     instrument: gauge
@@ -15,7 +15,7 @@ groups:
         requirement_level: required
   - id: mq.status
     type: metric
-    metric_name: mq.status
+    metric_name: ibm.mq.status
     stability: development
     brief: "Channel status"
     instrument: gauge
@@ -33,7 +33,7 @@ groups:
         requirement_level: required
   - id: mq.max.sharing.conversations
     type: metric
-    metric_name: mq.max.sharing.conversations
+    metric_name: ibm.mq.max.sharing.conversations
     stability: development
     brief: "Maximum number of conversations permitted on this channel instance."
     instrument: gauge
@@ -51,7 +51,7 @@ groups:
         requirement_level: required
   - id: mq.current.sharing.conversations
     type: metric
-    metric_name: mq.current.sharing.conversations
+    metric_name: ibm.mq.current.sharing.conversations
     stability: development
     unit: "{conversations}"
     brief: "Current number of conversations permitted on this channel instance."
@@ -69,7 +69,7 @@ groups:
         requirement_level: required
   - id: mq.byte.received
     type: metric
-    metric_name: mq.byte.received
+    metric_name: ibm.mq.byte.received
     stability: development
     brief: "Number of bytes received"
     instrument: gauge
@@ -87,7 +87,7 @@ groups:
         requirement_level: required
   - id: mq.byte.sent
     type: metric
-    metric_name: mq.byte.sent
+    metric_name: ibm.mq.byte.sent
     stability: development
     brief: "Number of bytes sent"
     instrument: gauge
@@ -105,7 +105,7 @@ groups:
         requirement_level: required
   - id: mq.buffers.received
     type: metric
-    metric_name: mq.buffers.received
+    metric_name: ibm.mq.buffers.received
     stability: development
     brief: "Buffers received"
     instrument: gauge
@@ -123,7 +123,7 @@ groups:
         requirement_level: required
   - id: mq.buffers.sent
     type: metric
-    metric_name: mq.buffers.sent
+    metric_name: ibm.mq.buffers.sent
     stability: development
     brief: "Buffers sent"
     unit: "{buffers}"
@@ -141,7 +141,7 @@ groups:
         requirement_level: required
   - id: mq.message.count
     type: metric
-    metric_name: mq.message.count
+    metric_name: ibm.mq.message.count
     stability: development
     brief: "Message count"
     unit: "{messages}"
@@ -159,7 +159,7 @@ groups:
         requirement_level: required
   - id: mq.open.input.count
     type: metric
-    metric_name: mq.open.input.count
+    metric_name: ibm.mq.open.input.count
     stability: development
     brief: "Count of applications sending messages to the queue"
     instrument: gauge
@@ -173,7 +173,7 @@ groups:
         requirement_level: required
   - id: mq.open.output.count
     type: metric
-    metric_name: mq.open.output.count
+    metric_name: ibm.mq.open.output.count
     stability: development
     brief: "Count of applications consuming messages from the queue"
     instrument: gauge
@@ -187,7 +187,7 @@ groups:
         requirement_level: required
   - id: mq.high.queue.depth
     type: metric
-    metric_name: mq.high.queue.depth
+    metric_name: ibm.mq.high.queue.depth
     stability: development
     brief: "The current high queue depth"
     instrument: gauge
@@ -201,7 +201,7 @@ groups:
         requirement_level: required
   - id: mq.service.interval
     type: metric
-    metric_name: mq.service.interval
+    metric_name: ibm.mq.service.interval
     stability: development
     brief: "The queue service interval"
     instrument: gauge
@@ -251,7 +251,7 @@ groups:
         requirement_level: required
   - id: mq.uncommitted.messages
     type: metric
-    metric_name: mq.uncommitted.messages
+    metric_name: ibm.mq.uncommitted.messages
     stability: development
     brief: "Number of uncommitted messages"
     instrument: gauge
@@ -265,7 +265,7 @@ groups:
         requirement_level: required
   - id: mq.oldest.msg.age
     type: metric
-    metric_name: mq.oldest.msg.age
+    metric_name: ibm.mq.oldest.msg.age
     stability: development
     brief: "Queue message oldest age"
     instrument: gauge
@@ -279,7 +279,7 @@ groups:
         requirement_level: required
   - id: mq.current.max.queue.filesize
     type: metric
-    metric_name: mq.current.max.queue.filesize
+    metric_name: ibm.mq.current.max.queue.filesize
     stability: development
     brief: "Current maximum queue file size"
     instrument: gauge
@@ -293,7 +293,7 @@ groups:
         requirement_level: required
   - id: mq.current.queue.filesize
     type: metric
-    metric_name: mq.current.queue.filesize
+    metric_name: ibm.mq.current.queue.filesize
     stability: development
     brief: "Current queue file size"
     instrument: gauge
@@ -307,7 +307,7 @@ groups:
         requirement_level: required
   - id: mq.instances.per.client
     type: metric
-    metric_name: mq.instances.per.client
+    metric_name: ibm.mq.instances.per.client
     stability: development
     brief: "Instances per client"
     instrument: gauge
@@ -321,7 +321,7 @@ groups:
         requirement_level: required
   - id: mq.message.deq.count
     type: metric
-    metric_name: mq.message.deq.count
+    metric_name: ibm.mq.message.deq.count
     stability: development
     brief: "Message dequeue count"
     instrument: gauge
@@ -335,7 +335,7 @@ groups:
         requirement_level: required
   - id: mq.message.enq.count
     type: metric
-    metric_name: mq.message.enq.count
+    metric_name: ibm.mq.message.enq.count
     stability: development
     brief: "Message enqueue count"
     instrument: gauge
@@ -349,7 +349,7 @@ groups:
         requirement_level: required
   - id: mq.queue.depth
     type: metric
-    metric_name: mq.queue.depth
+    metric_name: ibm.mq.queue.depth
     stability: development
     brief: "Current queue depth"
     instrument: gauge
@@ -363,7 +363,7 @@ groups:
         requirement_level: required
   - id: mq.service.interval.event
     type: metric
-    metric_name: mq.service.interval.event
+    metric_name: ibm.mq.service.interval.event
     stability: development
     brief: "Queue service interval event"
     instrument: gauge
@@ -377,7 +377,7 @@ groups:
         requirement_level: required
   - id: mq.reusable.log.size
     type: metric
-    metric_name: mq.reusable.log.size
+    metric_name: ibm.mq.reusable.log.size
     stability: development
     brief: "The amount of space occupied, in megabytes, by log extents available to be reused."
     instrument: gauge
@@ -387,7 +387,7 @@ groups:
         requirement_level: required
   - id: mq.manager.active.channels
     type: metric
-    metric_name: mq.manager.active.channels
+    metric_name: ibm.mq.manager.active.channels
     stability: development
     brief: "The queue manager active maximum channels limit"
     instrument: gauge
@@ -397,7 +397,7 @@ groups:
         requirement_level: required
   - id: mq.restart.log.size
     type: metric
-    metric_name: mq.restart.log.size
+    metric_name: ibm.mq.restart.log.size
     stability: development
     brief: "Size of the log data required for restart recovery in megabytes."
     instrument: gauge
@@ -407,7 +407,7 @@ groups:
         requirement_level: required
   - id: mq.max.queue.depth
     type: metric
-    metric_name: mq.max.queue.depth
+    metric_name: ibm.mq.max.queue.depth
     stability: development
     brief: "Maximum queue depth"
     instrument: gauge
@@ -421,7 +421,7 @@ groups:
         requirement_level: required
   - id: mq.onqtime.1
     type: metric
-    metric_name: mq.onqtime.1
+    metric_name: ibm.mq.onqtime.1
     stability: development
     brief: "Amount of time, in microseconds, that a message spent on the queue, over a short period"
     instrument: gauge
@@ -435,7 +435,7 @@ groups:
         requirement_level: required
   - id: mq.onqtime.2
     type: metric
-    metric_name: mq.onqtime.2
+    metric_name: ibm.mq.onqtime.2
     stability: development
     brief: "Amount of time, in microseconds, that a message spent on the queue, over a longer period"
     instrument: gauge
@@ -449,7 +449,7 @@ groups:
         requirement_level: required
   - id: mq.message.received.count
     type: metric
-    metric_name: mq.message.received.count
+    metric_name: ibm.mq.message.received.count
     stability: development
     brief: "Number of messages received"
     instrument: gauge
@@ -463,7 +463,7 @@ groups:
         requirement_level: required
   - id: mq.message.sent.count
     type: metric
-    metric_name: mq.message.sent.count
+    metric_name: ibm.mq.message.sent.count
     stability: development
     brief: "Number of messages sent"
     instrument: gauge
@@ -477,7 +477,7 @@ groups:
         requirement_level: required
   - id: mq.max.instances
     type: metric
-    metric_name: mq.max.instances
+    metric_name: ibm.mq.max.instances
     stability: development
     brief: "Max channel instances"
     instrument: gauge
@@ -491,7 +491,7 @@ groups:
         requirement_level: required
   - id: mq.connection.count
     type: metric
-    metric_name: mq.connection.count
+    metric_name: ibm.mq.connection.count
     stability: development
     brief: "Active connections count"
     instrument: gauge
@@ -501,7 +501,7 @@ groups:
         requirement_level: required
   - id: mq.manager.status
     type: metric
-    metric_name: mq.manager.status
+    metric_name: ibm.mq.manager.status
     stability: development
     brief: "Queue manager status"
     instrument: gauge
@@ -511,7 +511,7 @@ groups:
         requirement_level: required
   - id: mq.heartbeat
     type: metric
-    metric_name: mq.heartbeat
+    metric_name: ibm.mq.heartbeat
     stability: development
     brief: "Queue manager heartbeat"
     instrument: gauge
@@ -521,7 +521,7 @@ groups:
         requirement_level: required
   - id: mq.archive.log.size
     type: metric
-    metric_name: mq.archive.log.size
+    metric_name: ibm.mq.archive.log.size
     stability: development
     brief: "Queue manager archive log size"
     instrument: gauge
@@ -531,7 +531,7 @@ groups:
         requirement_level: required
   - id: mq.manager.max.active.channels
     type: metric
-    metric_name: mq.manager.max.active.channels
+    metric_name: ibm.mq.manager.max.active.channels
     stability: development
     brief: "Queue manager max active channels"
     instrument: gauge
@@ -541,7 +541,7 @@ groups:
         requirement_level: required
   - id: mq.manager.statistics.interval
     type: metric
-    metric_name: mq.manager.statistics.interval
+    metric_name: ibm.mq.manager.statistics.interval
     stability: development
     brief: "Queue manager statistics interval"
     instrument: gauge
@@ -551,7 +551,7 @@ groups:
         requirement_level: required
   - id: mq.publish.count
     type: metric
-    metric_name: mq.publish.count
+    metric_name: ibm.mq.publish.count
     stability: development
     brief: "Topic publication count"
     instrument: gauge
@@ -563,7 +563,7 @@ groups:
         requirement_level: required
   - id: mq.subscription.count
     type: metric
-    metric_name: mq.subscription.count
+    metric_name: ibm.mq.subscription.count
     stability: development
     brief: "Topic subscription count"
     instrument: gauge
@@ -575,7 +575,7 @@ groups:
         requirement_level: required
   - id: mq.listener.status
     type: metric
-    metric_name: mq.listener.status
+    metric_name: ibm.mq.listener.status
     stability: development
     brief: "Listener status"
     instrument: gauge
@@ -587,7 +587,7 @@ groups:
         requirement_level: required
   - id: mq.unauthorized.event
     type: metric
-    metric_name: mq.unauthorized.event
+    metric_name: ibm.mq.unauthorized.event
     stability: development
     brief: "Number of authentication error events"
     instrument: counter
@@ -601,7 +601,7 @@ groups:
         requirement_level: required
   - id: mq.manager.max.handles
     type: metric
-    metric_name: mq.manager.max.handles
+    metric_name: ibm.mq.manager.max.handles
     stability: development
     brief: "Max open handles"
     instrument: gauge
