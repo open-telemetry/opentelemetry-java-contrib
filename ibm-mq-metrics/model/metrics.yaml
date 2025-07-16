@@ -1,5 +1,5 @@
 groups:
-  - id: mq.message.retry.count
+  - id: ibm.mq.message.retry.count
     type: metric
     metric_name: ibm.mq.message.retry.count
     stability: development
@@ -13,7 +13,7 @@ groups:
         requirement_level: required
       - ref: queue.manager
         requirement_level: required
-  - id: mq.status
+  - id: ibm.mq.status
     type: metric
     metric_name: ibm.mq.status
     stability: development
@@ -31,7 +31,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.max.sharing.conversations
+  - id: ibm.mq.max.sharing.conversations
     type: metric
     metric_name: ibm.mq.max.sharing.conversations
     stability: development
@@ -49,7 +49,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.current.sharing.conversations
+  - id: ibm.mq.current.sharing.conversations
     type: metric
     metric_name: ibm.mq.current.sharing.conversations
     stability: development
@@ -67,7 +67,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.byte.received
+  - id: ibm.mq.byte.received
     type: metric
     metric_name: ibm.mq.byte.received
     stability: development
@@ -85,7 +85,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.byte.sent
+  - id: ibm.mq.byte.sent
     type: metric
     metric_name: ibm.mq.byte.sent
     stability: development
@@ -103,7 +103,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.buffers.received
+  - id: ibm.mq.buffers.received
     type: metric
     metric_name: ibm.mq.buffers.received
     stability: development
@@ -121,7 +121,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.buffers.sent
+  - id: ibm.mq.buffers.sent
     type: metric
     metric_name: ibm.mq.buffers.sent
     stability: development
@@ -139,7 +139,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.message.count
+  - id: ibm.mq.message.count
     type: metric
     metric_name: ibm.mq.message.count
     stability: development
@@ -157,7 +157,7 @@ groups:
         requirement_level: required
       - ref: channel.start.time
         requirement_level: required
-  - id: mq.open.input.count
+  - id: ibm.mq.open.input.count
     type: metric
     metric_name: ibm.mq.open.input.count
     stability: development
@@ -171,7 +171,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.open.output.count
+  - id: ibm.mq.open.output.count
     type: metric
     metric_name: ibm.mq.open.output.count
     stability: development
@@ -185,7 +185,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.high.queue.depth
+  - id: ibm.mq.high.queue.depth
     type: metric
     metric_name: ibm.mq.high.queue.depth
     stability: development
@@ -199,7 +199,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.service.interval
+  - id: ibm.mq.service.interval
     type: metric
     metric_name: ibm.mq.service.interval
     stability: development
@@ -249,7 +249,7 @@ groups:
         requirement_level: required
       - ref: queue.name
         requirement_level: required
-  - id: mq.uncommitted.messages
+  - id: ibm.mq.uncommitted.messages
     type: metric
     metric_name: ibm.mq.uncommitted.messages
     stability: development
@@ -263,7 +263,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.oldest.msg.age
+  - id: ibm.mq.oldest.msg.age
     type: metric
     metric_name: ibm.mq.oldest.msg.age
     stability: development
@@ -277,7 +277,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.current.max.queue.filesize
+  - id: ibm.mq.current.max.queue.filesize
     type: metric
     metric_name: ibm.mq.current.max.queue.filesize
     stability: development
@@ -291,7 +291,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.current.queue.filesize
+  - id: ibm.mq.current.queue.filesize
     type: metric
     metric_name: ibm.mq.current.queue.filesize
     stability: development
@@ -305,7 +305,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.instances.per.client
+  - id: ibm.mq.instances.per.client
     type: metric
     metric_name: ibm.mq.instances.per.client
     stability: development
@@ -319,7 +319,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.message.deq.count
+  - id: ibm.mq.message.deq.count
     type: metric
     metric_name: ibm.mq.message.deq.count
     stability: development
@@ -333,7 +333,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.message.enq.count
+  - id: ibm.mq.message.enq.count
     type: metric
     metric_name: ibm.mq.message.enq.count
     stability: development
@@ -347,7 +347,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.queue.depth
+  - id: ibm.mq.queue.depth
     type: metric
     metric_name: ibm.mq.queue.depth
     stability: development
@@ -361,7 +361,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.service.interval.event
+  - id: ibm.mq.service.interval.event
     type: metric
     metric_name: ibm.mq.service.interval.event
     stability: development
@@ -375,7 +375,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.reusable.log.size
+  - id: ibm.mq.reusable.log.size
     type: metric
     metric_name: ibm.mq.reusable.log.size
     stability: development
@@ -385,7 +385,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.manager.active.channels
+  - id: ibm.mq.manager.active.channels
     type: metric
     metric_name: ibm.mq.manager.active.channels
     stability: development
@@ -395,7 +395,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.restart.log.size
+  - id: ibm.mq.restart.log.size
     type: metric
     metric_name: ibm.mq.restart.log.size
     stability: development
@@ -405,7 +405,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.max.queue.depth
+  - id: ibm.mq.max.queue.depth
     type: metric
     metric_name: ibm.mq.max.queue.depth
     stability: development
@@ -419,7 +419,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.onqtime.1
+  - id: ibm.mq.onqtime.1
     type: metric
     metric_name: ibm.mq.onqtime.1
     stability: development
@@ -433,7 +433,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.onqtime.2
+  - id: ibm.mq.onqtime.2
     type: metric
     metric_name: ibm.mq.onqtime.2
     stability: development
@@ -447,7 +447,7 @@ groups:
         requirement_level: required
       - ref: queue.type
         requirement_level: required
-  - id: mq.message.received.count
+  - id: ibm.mq.message.received.count
     type: metric
     metric_name: ibm.mq.message.received.count
     stability: development
@@ -461,7 +461,7 @@ groups:
         requirement_level: required
       - ref: queue.manager
         requirement_level: required
-  - id: mq.message.sent.count
+  - id: ibm.mq.message.sent.count
     type: metric
     metric_name: ibm.mq.message.sent.count
     stability: development
@@ -475,7 +475,7 @@ groups:
         requirement_level: required
       - ref: queue.manager
         requirement_level: required
-  - id: mq.max.instances
+  - id: ibm.mq.max.instances
     type: metric
     metric_name: ibm.mq.max.instances
     stability: development
@@ -489,7 +489,7 @@ groups:
         requirement_level: required
       - ref: queue.manager
         requirement_level: required
-  - id: mq.connection.count
+  - id: ibm.mq.connection.count
     type: metric
     metric_name: ibm.mq.connection.count
     stability: development
@@ -499,7 +499,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.manager.status
+  - id: ibm.mq.manager.status
     type: metric
     metric_name: ibm.mq.manager.status
     stability: development
@@ -509,7 +509,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.heartbeat
+  - id: ibm.mq.heartbeat
     type: metric
     metric_name: ibm.mq.heartbeat
     stability: development
@@ -519,7 +519,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.archive.log.size
+  - id: ibm.mq.archive.log.size
     type: metric
     metric_name: ibm.mq.archive.log.size
     stability: development
@@ -529,7 +529,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.manager.max.active.channels
+  - id: ibm.mq.manager.max.active.channels
     type: metric
     metric_name: ibm.mq.manager.max.active.channels
     stability: development
@@ -539,7 +539,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.manager.statistics.interval
+  - id: ibm.mq.manager.statistics.interval
     type: metric
     metric_name: ibm.mq.manager.statistics.interval
     stability: development
@@ -549,7 +549,7 @@ groups:
     attributes:
       - ref: queue.manager
         requirement_level: required
-  - id: mq.publish.count
+  - id: ibm.mq.publish.count
     type: metric
     metric_name: ibm.mq.publish.count
     stability: development
@@ -561,7 +561,7 @@ groups:
         requirement_level: required
       - ref: topic.name
         requirement_level: required
-  - id: mq.subscription.count
+  - id: ibm.mq.subscription.count
     type: metric
     metric_name: ibm.mq.subscription.count
     stability: development
@@ -573,7 +573,7 @@ groups:
         requirement_level: required
       - ref: topic.name
         requirement_level: required
-  - id: mq.listener.status
+  - id: ibm.mq.listener.status
     type: metric
     metric_name: ibm.mq.listener.status
     stability: development
@@ -585,7 +585,7 @@ groups:
         requirement_level: required
       - ref: listener.name
         requirement_level: required
-  - id: mq.unauthorized.event
+  - id: ibm.mq.unauthorized.event
     type: metric
     metric_name: ibm.mq.unauthorized.event
     stability: development
@@ -599,7 +599,7 @@ groups:
         requirement_level: required
       - ref: application.name
         requirement_level: required
-  - id: mq.manager.max.handles
+  - id: ibm.mq.manager.max.handles
     type: metric
     metric_name: ibm.mq.manager.max.handles
     stability: development
