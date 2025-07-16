@@ -7,26 +7,37 @@ package io.opentelemetry.opamp.client.internal.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.request.Request;
+import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
 import io.opentelemetry.opamp.client.internal.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
-import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
-import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.internal.state.State;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
+import mockwebserver3.junit5.StartStop;
+import okio.Buffer;
 import okio.ByteString;
-import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentConfigFile;
 import opamp.proto.AgentConfigMap;
 import opamp.proto.AgentDescription;
@@ -42,19 +53,21 @@ import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerToAgent;
 import opamp.proto.ServerToAgentFlags;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class OpampClientImplTest {
-  @Mock private RequestService requestService;
-  @Mock private OpampClient.Callbacks callbacks;
+  private RequestService requestService;
   private OpampClientState state;
   private OpampClientImpl client;
   private TestEffectiveConfig effectiveConfig;
+  private TestCallbacks callbacks;
+  @StartStop private final MockWebServer server = new MockWebServer();
 
   @BeforeEach
   void setUp() {
@@ -69,22 +82,62 @@ class OpampClientImplTest {
                 getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
             new State.SequenceNum(1L),
             new State.AgentDescription(new AgentDescription.Builder().build()),
-            new State.Capabilities(
-                (long) AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
+            new State.Capabilities(5L),
             new State.InstanceUid(new byte[] {1, 2, 3}),
             new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
             effectiveConfig);
+    requestService = createHttpService();
     client = OpampClientImpl.create(requestService, state);
+
+    // Prepare first request on start
+    ServerToAgent response = new ServerToAgent.Builder().build();
+    enqueueServerToAgentResponse(response);
+
+    callbacks = spy(new TestCallbacks());
+    client.start(callbacks);
+  }
+
+  @AfterEach
+  void tearDown() {
+    client.stop();
   }
 
   @Test
-  void verifyStart() {
-    client.start(callbacks);
+  void verifyFieldsSent() {
+    // Check first request
+    ServerToAgent response = new ServerToAgent.Builder().build();
+    RecordedRequest firstRequest = takeRequest();
+    AgentToServer firstMessage = getAgentToServerMessage(firstRequest);
 
-    verify(requestService).start(client, client);
+    // Required first request fields
+    assertThat(firstMessage.instance_uid).isNotNull();
+    assertThat(firstMessage.sequence_num).isEqualTo(1);
+    assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(firstMessage.agent_description).isEqualTo(state.agentDescription.get());
+    assertThat(firstMessage.effective_config).isEqualTo(state.effectiveConfig.get());
+    assertThat(firstMessage.remote_config_status).isEqualTo(state.remoteConfigStatus.get());
+
+    // Check second request
+    enqueueServerToAgentResponse(response);
+    RemoteConfigStatus remoteConfigStatus =
+        new RemoteConfigStatus.Builder()
+            .status(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING)
+            .build();
+    client.setRemoteConfigStatus(remoteConfigStatus);
+
+    RecordedRequest secondRequest = takeRequest();
+    AgentToServer secondMessage = getAgentToServerMessage(secondRequest);
+
+    // Verify only changed and required fields are present
+    assertThat(secondMessage.instance_uid).isNotNull();
+    assertThat(secondMessage.sequence_num).isEqualTo(2);
+    assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(secondMessage.agent_description).isNull();
+    assertThat(secondMessage.effective_config).isNull();
+    assertThat(secondMessage.remote_config_status).isEqualTo(remoteConfigStatus);
 
     // Check state observing
-    clearInvocations(requestService);
+    enqueueServerToAgentResponse(response);
     EffectiveConfig otherConfig =
         new EffectiveConfig.Builder()
             .config_map(createAgentConfigMap("other", "other value"))
@@ -92,29 +145,56 @@ class OpampClientImplTest {
     effectiveConfig.config = otherConfig;
     effectiveConfig.notifyUpdate();
 
-    verify(requestService).sendRequest();
-    assertThat(client.get().getAgentToServer().effective_config).isEqualTo(otherConfig);
+    // Check third request
+    RecordedRequest thirdRequest = takeRequest();
+    AgentToServer thirdMessage = getAgentToServerMessage(thirdRequest);
+
+    assertThat(thirdMessage.instance_uid).isNotNull();
+    assertThat(thirdMessage.sequence_num).isEqualTo(3);
+    assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(thirdMessage.agent_description).isNull();
+    assertThat(thirdMessage.remote_config_status).isNull();
+    assertThat(thirdMessage.effective_config)
+        .isEqualTo(otherConfig); // it was changed via observable state
+
+    // Check when the server requests for all fields
+
+    ServerToAgent reportFullState =
+        new ServerToAgent.Builder()
+            .flags(ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue())
+            .build();
+    enqueueServerToAgentResponse(reportFullState);
+    requestService.sendRequest();
+    takeRequest(); // Notifying the client to send all fields next time
+
+    // Request with all fields
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    requestService.sendRequest();
+
+    AgentToServer fullRequestedMessage = getAgentToServerMessage(takeRequest());
+
+    // Required first request fields
+    assertThat(fullRequestedMessage.instance_uid).isNotNull();
+    assertThat(fullRequestedMessage.sequence_num).isEqualTo(5);
+    assertThat(fullRequestedMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(fullRequestedMessage.agent_description).isEqualTo(state.agentDescription.get());
+    assertThat(fullRequestedMessage.effective_config).isEqualTo(state.effectiveConfig.get());
+    assertThat(fullRequestedMessage.remote_config_status).isEqualTo(state.remoteConfigStatus.get());
   }
 
   @Test
   void verifyStop() {
-    client.start(callbacks);
-    verify(requestService).start(client, client);
+    awaitForStartRequest();
 
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.stop();
-    verify(requestService).stop();
 
-    // Check state observing
-    clearInvocations(requestService);
-    effectiveConfig.notifyUpdate();
-
-    verifyNoInteractions(requestService);
+    AgentToServer agentToServerMessage = getAgentToServerMessage(takeRequest());
+    assertThat(agentToServerMessage.agent_disconnect).isNotNull();
   }
 
   @Test
   void verifyStartOnlyOnce() {
-    client.start(callbacks);
-
     try {
       client.start(callbacks);
       fail("Should have thrown an exception");
@@ -124,51 +204,20 @@ class OpampClientImplTest {
   }
 
   @Test
-  void checkRequestFields() {
-    client.start(callbacks);
-
-    AgentToServer firstRequest = client.get().getAgentToServer();
-
-    assertThat(firstRequest.instance_uid.toByteArray()).isEqualTo(state.instanceUid.get());
-    assertThat(firstRequest.sequence_num).isEqualTo(1);
-    assertThat(firstRequest.capabilities).isEqualTo(state.capabilities.get());
-    assertThat(firstRequest.agent_description).isNotNull();
-    assertThat(firstRequest.effective_config).isNotNull();
-    assertThat(firstRequest.remote_config_status).isNotNull();
-
-    client.onRequestSuccess(null);
-
-    // Second request
-    AgentToServer secondRequest = client.get().getAgentToServer();
-
-    assertThat(secondRequest.instance_uid.toByteArray()).isEqualTo(state.instanceUid.get());
-    assertThat(secondRequest.sequence_num).isEqualTo(2);
-    assertThat(secondRequest.capabilities).isEqualTo(state.capabilities.get());
-    assertThat(secondRequest.agent_description).isNull();
-    assertThat(secondRequest.effective_config).isNull();
-    assertThat(secondRequest.remote_config_status).isNull();
-  }
-
-  @Test
-  void verifyRequestBuildingAfterStopIsCalled() {
-    client.start(callbacks);
-
-    client.stop();
-
-    Request request = client.get();
-    assertThat(request.getAgentToServer().agent_disconnect).isNotNull();
-  }
-
-  @Test
   void onSuccess_withChangesToReport_notifyCallbackOnMessage() {
+    awaitForStartRequest();
     AgentRemoteConfig remoteConfig =
         new AgentRemoteConfig.Builder()
             .config(createAgentConfigMap("someKey", "someValue"))
             .build();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().remote_config(remoteConfig).build();
-    client.start(callbacks);
+    enqueueServerToAgentResponse(serverToAgent);
 
-    client.onRequestSuccess(Response.create(serverToAgent));
+    // Force request
+    requestService.sendRequest();
+
+    // Await for onMessage call
+    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onMessageCalls.get() == 1);
 
     verify(callbacks)
         .onMessage(client, MessageData.builder().setRemoteConfig(remoteConfig).build());
@@ -176,47 +225,55 @@ class OpampClientImplTest {
 
   @Test
   void onSuccess_withNoChangesToReport_doNotNotifyCallbackOnMessage() {
+    awaitForStartRequest();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
-    client.start(callbacks);
+    enqueueServerToAgentResponse(serverToAgent);
 
-    client.onRequestSuccess(Response.create(serverToAgent));
+    // Force request
+    requestService.sendRequest();
+
+    // Giving some time for the callback to get called
+    await().during(Duration.ofSeconds(1));
 
     verify(callbacks, never()).onMessage(any(), any());
   }
 
   @Test
   void verifyAgentDescriptionSetter() {
+    awaitForStartRequest();
     AgentDescription agentDescription =
         getAgentDescriptionWithOneIdentifyingValue("service.name", "My service");
 
     // Update when changed
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.setAgentDescription(agentDescription);
-    verify(requestService).sendRequest();
+    assertThat(takeRequest()).isNotNull();
 
     // Ignore when the provided value is the same as the current one
-    clearInvocations(requestService);
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.setAgentDescription(agentDescription);
-    verify(requestService, never()).sendRequest();
+    assertThat(takeRequest()).isNull();
   }
 
   @Test
   void verifyRemoteConfigStatusSetter() {
+    awaitForStartRequest();
+    RemoteConfigStatus remoteConfigStatus =
+        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING);
+
     // Update when changed
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-    verify(requestService).sendRequest();
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    client.setRemoteConfigStatus(remoteConfigStatus);
+    assertThat(takeRequest()).isNotNull();
 
     // Ignore when the provided value is the same as the current one
-    clearInvocations(requestService);
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-    verify(requestService, never()).sendRequest();
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    client.setRemoteConfigStatus(remoteConfigStatus);
+    assertThat(takeRequest()).isNull();
   }
 
   @Test
   void onConnectionSuccessful_notifyCallback() {
-    client.start(callbacks);
-
     client.onConnectionSuccess();
 
     verify(callbacks).onConnect(client);
@@ -225,28 +282,43 @@ class OpampClientImplTest {
 
   @Test
   void onFailedResponse_keepFieldsForNextRequest() {
+    awaitForStartRequest();
+
+    // Mock failed request
+    server.enqueue(new MockResponse.Builder().code(404).build());
+
     // Adding a non-constant field
     AgentDescription agentDescription =
         getAgentDescriptionWithOneIdentifyingValue("service.namespace", "something");
     client.setAgentDescription(agentDescription);
 
     // Assert first request contains it
-    assertThat(client.get().getAgentToServer().agent_description).isEqualTo(agentDescription);
+    assertThat(getAgentToServerMessage(takeRequest()).agent_description)
+        .isEqualTo(agentDescription);
 
-    // On fail, keep agent description field
-    client.onRequestFailed(new Throwable());
-    assertThat(client.get().getAgentToServer().agent_description).isEqualTo(agentDescription);
+    // Since it failed, send the agent description field in the next request
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    requestService.sendRequest();
+    assertThat(getAgentToServerMessage(takeRequest()).agent_description)
+        .isEqualTo(agentDescription);
 
     // When there's no failure, do not keep it.
-    assertThat(client.get().getAgentToServer().agent_description).isNull();
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    requestService.sendRequest();
+    assertThat(getAgentToServerMessage(takeRequest()).agent_description).isNull();
   }
 
   @Test
   void onFailedResponse_withServerErrorData_notifyCallback() {
-    client.start(callbacks);
-    ServerErrorResponse errorResponse = new ServerErrorResponse.Builder().build();
+    awaitForStartRequest();
 
-    client.onRequestFailed(new OpampServerResponseException(errorResponse, "error message"));
+    ServerErrorResponse errorResponse = new ServerErrorResponse.Builder().build();
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().error_response(errorResponse).build());
+
+    // Force request
+    requestService.sendRequest();
+
+    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onErrorResponseCalls.get() == 1);
 
     verify(callbacks).onErrorResponse(client, errorResponse);
     verify(callbacks, never()).onMessage(any(), any());
@@ -254,83 +326,24 @@ class OpampClientImplTest {
 
   @Test
   void onConnectionFailed_notifyCallback() {
-    client.start(callbacks);
-    Throwable throwable = mock();
+    awaitForStartRequest();
 
-    client.onConnectionFailed(throwable);
+    // Close mock server to get an exception on the next request
+    server.close();
 
-    verify(callbacks).onConnectFailed(client, throwable);
-    verify(callbacks, never()).onConnect(any());
-  }
+    // Force request
+    requestService.sendRequest();
 
-  @Test
-  void verifyDisableCompressionWhenRequestedByServer() {
-    ServerToAgent serverToAgent =
-        new ServerToAgent.Builder()
-            .flags(ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue())
-            .build();
-    client.start(callbacks);
+    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onConnectFailedCalls.get() == 1);
 
-    // First payload contains compressable fields
-    AgentToServer firstRequest = client.get().getAgentToServer();
-    assertThat(firstRequest.agent_description).isNotNull();
-    assertThat(firstRequest.effective_config).isNotNull();
-    assertThat(firstRequest.remote_config_status).isNotNull();
-
-    // Second payload doesn't contain compressable fields
-    AgentToServer secondRequest = client.get().getAgentToServer();
-    assertThat(secondRequest.agent_description).isNull();
-    assertThat(secondRequest.effective_config).isNull();
-    assertThat(secondRequest.remote_config_status).isNull();
-
-    // When the server requests a full payload, send them again.
-    client.onRequestSuccess(Response.create(serverToAgent));
-
-    AgentToServer thirdRequest = client.get().getAgentToServer();
-    assertThat(thirdRequest.agent_description).isNotNull();
-    assertThat(thirdRequest.effective_config).isNotNull();
-    assertThat(thirdRequest.remote_config_status).isNotNull();
-  }
-
-  @Test
-  void verifySequenceNumberIncreasesOnCreatingRequest() {
-    client.start(callbacks);
-    assertThat(state.sequenceNum.get()).isEqualTo(1);
-
-    client.get();
-
-    assertThat(state.sequenceNum.get()).isEqualTo(2);
-  }
-
-  @Test
-  void whenStatusIsUpdated_notifyServerImmediately() {
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET));
-    client.start(callbacks);
-    clearInvocations(requestService);
-
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-
-    verify(requestService).sendRequest();
-  }
-
-  @Test
-  void whenStatusIsNotUpdated_doNotNotifyServer() {
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-    client.start(callbacks);
-    clearInvocations(requestService);
-
-    client.setRemoteConfigStatus(
-        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-
-    verify(requestService, never()).sendRequest();
+    verify(callbacks).onConnectFailed(eq(client), any());
   }
 
   @Test
   void whenServerProvidesNewInstanceUid_useIt() {
-    client.start(callbacks);
+    awaitForStartRequest();
+    byte[] initialUid = state.instanceUid.get();
+
     byte[] serverProvidedUid = new byte[] {1, 2, 3};
     ServerToAgent response =
         new ServerToAgent.Builder()
@@ -340,9 +353,43 @@ class OpampClientImplTest {
                     .build())
             .build();
 
-    client.onRequestSuccess(Response.create(response));
+    enqueueServerToAgentResponse(response);
+    requestService.sendRequest();
+
+    await().atMost(Duration.ofSeconds(1)).until(() -> state.instanceUid.get() != initialUid);
 
     assertThat(state.instanceUid.get()).isEqualTo(serverProvidedUid);
+  }
+
+  private static AgentToServer getAgentToServerMessage(RecordedRequest request) {
+    try {
+      return AgentToServer.ADAPTER.decode(Objects.requireNonNull(request.getBody()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private RecordedRequest takeRequest() {
+    try {
+      return server.takeRequest(1, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void enqueueServerToAgentResponse(ServerToAgent response) {
+    server.enqueue(getMockResponse(response));
+  }
+
+  @Nonnull
+  private static MockResponse getMockResponse(ServerToAgent response) {
+    Buffer bodyBuffer = new Buffer();
+    bodyBuffer.write(response.encode());
+    return new MockResponse.Builder().code(200).body(bodyBuffer).build();
+  }
+
+  private void awaitForStartRequest() {
+    assertThat(takeRequest()).isNotNull();
   }
 
   private static RemoteConfigStatus getRemoteConfigStatus(RemoteConfigStatuses status) {
@@ -377,6 +424,63 @@ class OpampClientImplTest {
     @Override
     public opamp.proto.EffectiveConfig get() {
       return config;
+    }
+  }
+
+  private RequestService createHttpService() {
+    return new TestHttpRequestService(
+        HttpRequestService.create(OkHttpSender.create(server.url("/v1/opamp").toString())));
+  }
+
+  private static class TestHttpRequestService implements RequestService {
+    private final HttpRequestService delegate;
+
+    private TestHttpRequestService(HttpRequestService delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void start(Callback callback, Supplier<Request> requestSupplier) {
+      delegate.start(callback, requestSupplier);
+    }
+
+    @Override
+    public void sendRequest() {
+      delegate.sendRequest();
+    }
+
+    @Override
+    public void stop() {
+      // This is to verify agent disconnect field presence for the websocket use case.
+      delegate.sendRequest();
+      delegate.stop();
+    }
+  }
+
+  private static class TestCallbacks implements OpampClient.Callbacks {
+    private final AtomicInteger onConnectCalls = new AtomicInteger();
+    private final AtomicInteger onConnectFailedCalls = new AtomicInteger();
+    private final AtomicInteger onErrorResponseCalls = new AtomicInteger();
+    private final AtomicInteger onMessageCalls = new AtomicInteger();
+
+    @Override
+    public void onConnect(OpampClient client) {
+      onConnectCalls.incrementAndGet();
+    }
+
+    @Override
+    public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {
+      onConnectFailedCalls.incrementAndGet();
+    }
+
+    @Override
+    public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {
+      onErrorResponseCalls.incrementAndGet();
+    }
+
+    @Override
+    public void onMessage(OpampClient client, MessageData messageData) {
+      onMessageCalls.incrementAndGet();
     }
   }
 }

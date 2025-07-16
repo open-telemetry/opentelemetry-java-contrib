@@ -111,7 +111,7 @@ public final class OpampClientImpl
   }
 
   @Override
-  public void start(Callbacks callbacks) {
+  public void start(@Nonnull Callbacks callbacks) {
     if (hasStopped.get()) {
       throw new IllegalStateException("The client cannot start after it has been stopped.");
     }
@@ -137,7 +137,7 @@ public final class OpampClientImpl
   }
 
   @Override
-  public void setAgentDescription(AgentDescription agentDescription) {
+  public void setAgentDescription(@Nonnull AgentDescription agentDescription) {
     if (!state.agentDescription.get().equals(agentDescription)) {
       state.agentDescription.set(agentDescription);
       addFieldAndSend(Field.AGENT_DESCRIPTION);
@@ -145,7 +145,7 @@ public final class OpampClientImpl
   }
 
   @Override
-  public void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus) {
+  public void setRemoteConfigStatus(@Nonnull RemoteConfigStatus remoteConfigStatus) {
     if (!state.remoteConfigStatus.get().equals(remoteConfigStatus)) {
       state.remoteConfigStatus.set(remoteConfigStatus);
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
