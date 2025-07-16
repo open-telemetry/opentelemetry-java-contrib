@@ -103,9 +103,9 @@ class BaggageProcessorCustomizerTest {
                         // We set the export interval of the spans to 10 ms. The default value is 5
                         // seconds.
                         "otel.bsp.schedule.delay", // span exporter
-                        "100",
+                        "10",
                         "otel.blrp.schedule.delay", // log exporter
-                        "100",
+                        "10",
                         "otel.traces.exporter",
                         MEMORY_EXPORTER,
                         "otel.metrics.exporter",
