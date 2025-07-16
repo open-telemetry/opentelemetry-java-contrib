@@ -17,10 +17,16 @@ abstract class InMemoryState<T> implements State<T> {
   private final AtomicReference<T> state = new AtomicReference<>();
 
   public InMemoryState(T initialValue) {
+    if (initialValue == null) {
+      throw new IllegalArgumentException("The value must not be null");
+    }
     state.set(initialValue);
   }
 
   public void set(T value) {
+    if (value == null) {
+      throw new IllegalArgumentException("The value must not be null");
+    }
     state.set(value);
   }
 
