@@ -86,14 +86,6 @@ class OpampClientImplTest {
             new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
             effectiveConfig);
     requestService = createHttpService();
-    client = OpampClientImpl.create(requestService, state);
-
-    // Prepare first request on start
-    ServerToAgent response = new ServerToAgent.Builder().build();
-    enqueueServerToAgentResponse(response);
-
-    callbacks = spy(new TestCallbacks());
-    client.start(callbacks);
   }
 
   @AfterEach
@@ -105,7 +97,7 @@ class OpampClientImplTest {
   void verifyFieldsSent() {
     // Check first request
     ServerToAgent response = new ServerToAgent.Builder().build();
-    RecordedRequest firstRequest = takeRequest();
+    RecordedRequest firstRequest = initializeClient(response);
     AgentToServer firstMessage = getAgentToServerMessage(firstRequest);
 
     // Required first request fields
@@ -183,7 +175,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyStop() {
-    awaitForStartRequest();
+    initializeClient();
 
     enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.stop();
@@ -194,6 +186,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyStartOnlyOnce() {
+    initializeClient();
     try {
       client.start(callbacks);
       fail("Should have thrown an exception");
@@ -204,7 +197,7 @@ class OpampClientImplTest {
 
   @Test
   void onSuccess_withChangesToReport_notifyCallbackOnMessage() {
-    awaitForStartRequest();
+    initializeClient();
     AgentRemoteConfig remoteConfig =
         new AgentRemoteConfig.Builder()
             .config(createAgentConfigMap("someKey", "someValue"))
@@ -224,7 +217,7 @@ class OpampClientImplTest {
 
   @Test
   void onSuccess_withNoChangesToReport_doNotNotifyCallbackOnMessage() {
-    awaitForStartRequest();
+    initializeClient();
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
     enqueueServerToAgentResponse(serverToAgent);
 
@@ -239,7 +232,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyAgentDescriptionSetter() {
-    awaitForStartRequest();
+    initializeClient();
     AgentDescription agentDescription =
         getAgentDescriptionWithOneIdentifyingValue("service.name", "My service");
 
@@ -256,7 +249,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyRemoteConfigStatusSetter() {
-    awaitForStartRequest();
+    initializeClient();
     RemoteConfigStatus remoteConfigStatus =
         getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING);
 
@@ -273,7 +266,9 @@ class OpampClientImplTest {
 
   @Test
   void onConnectionSuccessful_notifyCallback() {
-    client.onConnectionSuccess();
+    initializeClient();
+
+    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onConnectCalls.get() == 1);
 
     verify(callbacks).onConnect(client);
     verify(callbacks, never()).onConnectFailed(any(), any());
@@ -281,7 +276,7 @@ class OpampClientImplTest {
 
   @Test
   void onFailedResponse_keepFieldsForNextRequest() {
-    awaitForStartRequest();
+    initializeClient();
 
     // Mock failed request
     server.enqueue(new MockResponse.Builder().code(404).build());
@@ -309,7 +304,7 @@ class OpampClientImplTest {
 
   @Test
   void onFailedResponse_withServerErrorData_notifyCallback() {
-    awaitForStartRequest();
+    initializeClient();
 
     ServerErrorResponse errorResponse = new ServerErrorResponse.Builder().build();
     enqueueServerToAgentResponse(new ServerToAgent.Builder().error_response(errorResponse).build());
@@ -325,7 +320,7 @@ class OpampClientImplTest {
 
   @Test
   void onConnectionFailed_notifyCallback() {
-    awaitForStartRequest();
+    initializeClient();
     Throwable throwable = new Throwable();
 
     client.onConnectionFailed(throwable);
@@ -335,7 +330,7 @@ class OpampClientImplTest {
 
   @Test
   void whenServerProvidesNewInstanceUid_useIt() {
-    awaitForStartRequest();
+    initializeClient();
     byte[] initialUid = state.instanceUid.get();
 
     byte[] serverProvidedUid = new byte[] {1, 2, 3};
@@ -382,10 +377,6 @@ class OpampClientImplTest {
     return new MockResponse.Builder().code(200).body(bodyBuffer).build();
   }
 
-  private void awaitForStartRequest() {
-    assertThat(takeRequest()).isNotNull();
-  }
-
   private static RemoteConfigStatus getRemoteConfigStatus(RemoteConfigStatuses status) {
     return new RemoteConfigStatus.Builder().status(status).build();
   }
@@ -406,6 +397,21 @@ class OpampClientImplTest {
     List<KeyValue> keyValues = new ArrayList<>();
     keyValues.add(keyValue);
     return new AgentDescription.Builder().identifying_attributes(keyValues).build();
+  }
+
+  private RecordedRequest initializeClient() {
+    return initializeClient(new ServerToAgent.Builder().build());
+  }
+
+  private RecordedRequest initializeClient(ServerToAgent initialResponse) {
+    client = OpampClientImpl.create(requestService, state);
+
+    // Prepare first request on start
+    enqueueServerToAgentResponse(initialResponse);
+
+    callbacks = spy(new TestCallbacks());
+    client.start(callbacks);
+    return takeRequest();
   }
 
   private static class TestEffectiveConfig extends State.EffectiveConfig {
