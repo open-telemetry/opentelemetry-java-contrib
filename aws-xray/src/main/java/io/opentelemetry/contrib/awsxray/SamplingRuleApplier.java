@@ -19,6 +19,9 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.ServerAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -56,6 +59,10 @@ final class SamplingRuleApplier {
   private static final AttributeKey<String> NET_HOST_NAME = AttributeKey.stringKey("net.host.name");
 
   private static final Map<String, String> XRAY_CLOUD_PLATFORM;
+
+  // _OTHER request method:
+  // https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/http.md?plain=1#L96
+  private static final String _OTHER_REQUEST_METHOD = "_OTHER";
 
   static {
     Map<String, String> xrayCloudPlatform = new HashMap<>();
@@ -175,25 +182,35 @@ final class SamplingRuleApplier {
   @SuppressWarnings("deprecation") // TODO
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
-    String httpTarget = null;
-    String httpUrl = null;
-    String httpMethod = null;
-    String host = null;
+
+    String httpTarget = attributes.get(UrlAttributes.URL_PATH);
+    if (httpTarget == null) {
+      httpTarget = attributes.get(HTTP_TARGET);
+    }
+
+    String httpUrl = attributes.get(UrlAttributes.URL_FULL);
+    if (httpUrl == null) {
+      httpUrl = attributes.get(HTTP_URL);
+    }
+
+    String httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD);
+    if (httpMethod == null) {
+      httpMethod = attributes.get(HTTP_METHOD);
+    }
+
+    if (httpMethod != null && httpMethod.equals(_OTHER_REQUEST_METHOD)) {
+      httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
+    }
+
+    String host = attributes.get(ServerAttributes.SERVER_ADDRESS);
+    if (host == null) {
+      host = attributes.get(NET_HOST_NAME);
+      if (host == null) {
+        host = attributes.get(HTTP_HOST);
+      }
+    }
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(HTTP_TARGET)) {
-        httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_URL)) {
-        httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_METHOD)) {
-        httpMethod = (String) entry.getValue();
-      } else if (entry.getKey().equals(NET_HOST_NAME)) {
-        host = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_HOST)) {
-        // TODO (trask) remove support for deprecated http.host attribute
-        host = (String) entry.getValue();
-      }
-
       Matcher matcher = attributeMatchers.get(entry.getKey().getKey());
       if (matcher == null) {
         continue;
