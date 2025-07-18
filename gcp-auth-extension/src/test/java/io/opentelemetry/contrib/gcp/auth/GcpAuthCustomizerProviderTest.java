@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
@@ -52,7 +51,7 @@ class GcpAuthCustomizerProviderTest {
     OpenTelemetryConfigurationModel model =
         DeclarativeConfiguration.parse(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    ConfigProperties properties = ConfigPropertiesUtil.resolveModel(model);
+    ConfigProperties properties = GcpAuthCustomizerProvider.getConfigProperties(model);
 
     assertThat(GcpAuthAutoConfigurationCustomizerProvider.targetSignals(properties))
         .containsExactly("metrics", "traces");
