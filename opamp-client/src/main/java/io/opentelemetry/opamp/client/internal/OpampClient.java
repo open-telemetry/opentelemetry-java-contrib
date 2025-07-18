@@ -6,11 +6,16 @@
 package io.opentelemetry.opamp.client.internal;
 
 import io.opentelemetry.opamp.client.internal.response.MessageData;
+import javax.annotation.Nullable;
 import opamp.proto.AgentDescription;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
 
 public interface OpampClient {
+
+  static OpampClientBuilder builder() {
+    return new OpampClientBuilder();
+  }
 
   /**
    * Starts the client and begin attempts to connect to the Server. Once connection is established
@@ -72,7 +77,7 @@ public interface OpampClient {
      * @param client The relevant {@link OpampClient} instance.
      * @param throwable The exception.
      */
-    void onConnectFailed(OpampClient client, Throwable throwable);
+    void onConnectFailed(OpampClient client, @Nullable Throwable throwable);
 
     /**
      * Called when the Server reports an error in response to some previously sent request. Useful

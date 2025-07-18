@@ -10,7 +10,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
-import io.opentelemetry.opamp.client.internal.response.OpampServerResponseError;
+import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -168,11 +168,12 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
     try {
       ServerToAgent serverToAgent = readServerToAgent(data);
 
-      if (serverToAgent.error_response != null) {
-        handleServerError(serverToAgent.error_response);
+      ServerErrorResponse errorResponse = serverToAgent.error_response;
+      if (errorResponse != null) {
+        handleServerError(errorResponse);
         getCallback()
             .onRequestFailed(
-                new OpampServerResponseError(serverToAgent.error_response.error_message));
+                new OpampServerResponseException(errorResponse, errorResponse.error_message));
         return;
       }
 
