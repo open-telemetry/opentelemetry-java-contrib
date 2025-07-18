@@ -15,6 +15,7 @@ import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchSpanProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.MeterProviderModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.MetricReaderModel;
@@ -51,7 +52,7 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
           customize(
               model,
               GcpAuthAutoConfigurationCustomizerProvider.getCredentials(),
-              ConfigPropertiesUtil.resolveModel(model));
+              getConfigProperties(model));
 
           return model;
         });
@@ -66,6 +67,11 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
             credentials, configProperties);
     customizeMeter(model, headerMap, configProperties);
     customizeTracer(model, headerMap, configProperties);
+  }
+
+  static ConfigProperties getConfigProperties(OpenTelemetryConfigurationModel model) {
+    return ConfigPropertiesUtil.resolveInstrumentationConfig(
+        SdkConfigProvider.create(model).getInstrumentationConfig());
   }
 
   private static void customizeMeter(

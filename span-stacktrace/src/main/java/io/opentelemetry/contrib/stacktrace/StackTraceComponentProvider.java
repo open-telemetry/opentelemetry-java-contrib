@@ -10,7 +10,6 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import java.util.Collections;
 
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
@@ -24,7 +23,9 @@ public class StackTraceComponentProvider implements ComponentProvider<SpanProces
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return StackTraceAutoConfig.create(
         ConfigPropertiesUtil.resolveConfig(
-            config, Collections.singletonMap(StackTraceAutoConfig.PREFIX, "")));
+            config,
+            ConfigPropertiesUtil.propertyTranslatorBuilder()
+                .addTranslation(StackTraceAutoConfig.PREFIX, "")));
   }
 
   @Override
