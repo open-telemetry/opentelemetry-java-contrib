@@ -136,6 +136,42 @@ When doing so, the `java -jar` command can´t be used, we have to provide the cl
 java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScraper <config>
 ```
 
+## Migration from JMX Gatherer
+
+The JMX Scraper aims to replace the [JMX Gatherer](../jmx-metrics) tool and thus share most features
+and configuration with it.
+
+Features not supported:
+
+- Define and capture metrics with custom Groovy definitions with `otel.jmx.groovy.script`, this is now replaced with YAML and `otel.jmx.config` configuration option.
+- Ability to export to prometheus collector, only the OTLP exporter is included.
+
+The YAML-based implementation is provided by [java instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics)
+and thus should be used for syntax details and documentation.
+
+Like with the JMX Gatherer, the selection of provided metrics to use is still done with `otel.jmx.target.system` configuration option.
+
+However, there is now two distinct sets of metrics to select from using the `otel.jmx.target.source` configuration option:
+
+- `legacy`: [metrics definitions](./src/main/resources) equivalent to JMX Gatherer definitions to help transition and preserve compatibility
+- `instrumentation`: [metrics definitions inherited from instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/), which is now used as a reference for JMX metrics.
+
+In both cases, the metrics definitions themselves are embedded in the JMX Scraper binary, thus they
+will only change if the release version of the JMX Scraper binary changes.
+
+By default, `otel.jmx.target.source` is `auto`, which means for each value of `otel.jmx.target.system`:
+
+- metrics definitions from instrumentation will be used by default, if available
+- legacy metrics definitions equivalent to JMX Gatherer will be used as fallback
+- whenever new metrics definitions are being added or modified in instrumentation, those newer definitions will be used
+
+There are multiple strategies depending on the ability or willingness to embrace change in metrics definitions:
+
+- To preserve maximum compatibility, using `legacy` is the recommended option, however it means to not benefit from future updates and contributions.
+- To only get the most recent definitions, using `instrumentation` ensures that none of the legacy definitions is used, only the "reference" from instrumentation, which could still evolve over time.
+- To embrace newer definitions whenever they become available, using `auto` is the recommended option, however it means the metrics produced could change when updating the version of JMX Scraper.
+- To handle more complex migration strategies or for tight control of metrics definitions, using copies of the YAML metrics definitions and providing them explicitly with `otel.jmx.config` is the recommended option.
+
 ## Component owners
 
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
