@@ -1,5 +1,7 @@
 # JMX Metric Gatherer
 
+**Deprecation notice**: the JMX Metric Gatherer is deprecated and replaced by [JMX Scraper](../jmx-scraper/), see [migration instructions](../jmx-scraper/README.md#migration-from-jmx-gatherer).
+
 This utility provides an easy framework for gathering and reporting metrics based on queried
 MBeans from a JMX server.  It loads included and/or custom Groovy scripts and establishes a helpful,
 bound `otel` object with methods for obtaining MBeans and constructing OpenTelemetry instruments:
