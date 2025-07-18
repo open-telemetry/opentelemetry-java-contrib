@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.io.IOException;
 import java.util.HashMap;
@@ -84,11 +83,11 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   public int order() {
     // run after the fast cloud resource providers that only check environment variables
     // and after the AKS provider
-    return 100;
+    return 101;
   }
 
   @Override
-  public Resource createResource(ConfigProperties config) {
+  public Resource createResource() {
     return client
         .get()
         .map(body -> parseMetadata(body, COMPUTE_MAPPING, AZURE_VM))

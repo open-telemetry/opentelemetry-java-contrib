@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.azure.resource;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_AKS;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.K8S_CLUSTER_NAME;
 
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,12 +55,12 @@ public class AzureAksResourceProvider extends CloudResourceProvider {
   @Override
   public int order() {
     // run after the fast cloud resource providers that only check environment variables
-    // and before the AKS provider
+    // and before the VM provider
     return 100;
   }
 
   @Override
-  public Resource createResource(ConfigProperties configProperties) {
+  public Resource createResource() {
     if (environment.get(KUBERNETES_SERVICE_HOST) == null) {
       return Resource.empty();
     }
