@@ -167,9 +167,12 @@ By default, `otel.jmx.target.source` is `auto`, which means for each value of `o
 There are multiple possible strategies depending on the ability or willingness to embrace change in metrics definitions:
 
 - To preserve maximum compatibility, using `legacy` is the recommended option, however it means to not benefit from future updates and contributions.
-- To only get the most recent definitions, using `instrumentation` ensures that none of the legacy definitions is used, only the reference from instrumentation, which could still evolve over time.
+- To only get the most recent definitions, using `instrumentation` ensures that none of the legacy definitions is used, only the reference from instrumentation closer to semconv recommendations, those could still evolve over time.
 - To embrace reference definitions whenever they become available, using `auto` is the recommended option, however it means the metrics produced could change when updating the version of JMX Scraper.
 - To handle more complex migration strategies or for tight control of metrics definitions, using copies of the YAML metrics definitions and providing them explicitly with `otel.jmx.config` is the recommended option.
+
+When using `otel.target.source` = `auto` or `legacy`, one or more legacy definitions might be used. If strict compatibility with metrics produced by JMX Gatherer is required it is recommended to review
+the [legacy metrics definitions YAML files](./src/main/resources/) as they contain comments on the minor differences with JMX Gatherer Groovy definitions.
 
 ## Component owners
 
