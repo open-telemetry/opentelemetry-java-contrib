@@ -12,13 +12,12 @@ import static org.mockito.Mockito.verify;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
-import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
-import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
@@ -113,45 +112,46 @@ class BaggageProcessorCustomizerTest {
                         "none",
                         "otel.logs.exporter",
                         MEMORY_EXPORTER))
-            .addPropertiesSupplier(() -> properties);
-    AutoConfigureUtil.setComponentLoader(
-        sdkBuilder,
-        new ComponentLoader() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public <T> List<T> load(Class<T> spiClass) {
-            if (spiClass == ConfigurableSpanExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableSpanExporterProvider() {
-                        @Override
-                        public SpanExporter createExporter(ConfigProperties configProperties) {
-                          return spanExporter;
-                        }
+            .addPropertiesSupplier(() -> properties)
+            .setComponentLoader(
+                new ComponentLoader() {
+                  @SuppressWarnings("unchecked")
+                  @Override
+                  public <T> List<T> load(Class<T> spiClass) {
+                    if (spiClass == ConfigurableSpanExporterProvider.class) {
+                      return Collections.singletonList(
+                          (T)
+                              new ConfigurableSpanExporterProvider() {
+                                @Override
+                                public SpanExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return spanExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return MEMORY_EXPORTER;
-                        }
-                      });
-            } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableLogRecordExporterProvider() {
-                        @Override
-                        public LogRecordExporter createExporter(ConfigProperties configProperties) {
-                          return logRecordExporter;
-                        }
+                                @Override
+                                public String getName() {
+                                  return MEMORY_EXPORTER;
+                                }
+                              });
+                    } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
+                      return Collections.singletonList(
+                          (T)
+                              new ConfigurableLogRecordExporterProvider() {
+                                @Override
+                                public LogRecordExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return logRecordExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return MEMORY_EXPORTER;
-                        }
-                      });
-            }
-            return spiHelper.load(spiClass);
-          }
-        });
+                                @Override
+                                public String getName() {
+                                  return MEMORY_EXPORTER;
+                                }
+                              });
+                    }
+                    return spiHelper.load(spiClass);
+                  }
+                });
     return sdkBuilder.build().getOpenTelemetrySdk();
   }
 
