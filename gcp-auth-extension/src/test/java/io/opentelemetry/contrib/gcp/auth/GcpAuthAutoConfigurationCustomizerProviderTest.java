@@ -963,12 +963,11 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
             .addPropertiesSupplier(() -> customOtelProperties)
             .setComponentLoader(
                 new ComponentLoader() {
-                  @SuppressWarnings("unchecked")
                   @Override
                   public <T> List<T> load(Class<T> spiClass) {
                     if (spiClass == ConfigurableSpanExporterProvider.class) {
                       return Collections.singletonList(
-                          (T)
+                          spiClass.cast(
                               new ConfigurableSpanExporterProvider() {
                                 @Override
                                 public SpanExporter createExporter(
@@ -980,11 +979,11 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                                 public String getName() {
                                   return "otlp";
                                 }
-                              });
+                              }));
                     }
                     if (spiClass == ConfigurableMetricExporterProvider.class) {
                       return Collections.singletonList(
-                          (T)
+                          spiClass.cast(
                               new ConfigurableMetricExporterProvider() {
                                 @Override
                                 public MetricExporter createExporter(
@@ -996,7 +995,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                                 public String getName() {
                                   return "otlp";
                                 }
-                              });
+                              }));
                     }
                     return spiHelper.load(spiClass);
                   }

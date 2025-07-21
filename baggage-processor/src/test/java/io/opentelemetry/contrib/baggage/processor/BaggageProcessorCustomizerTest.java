@@ -115,12 +115,11 @@ class BaggageProcessorCustomizerTest {
             .addPropertiesSupplier(() -> properties)
             .setComponentLoader(
                 new ComponentLoader() {
-                  @SuppressWarnings("unchecked")
                   @Override
                   public <T> List<T> load(Class<T> spiClass) {
                     if (spiClass == ConfigurableSpanExporterProvider.class) {
                       return Collections.singletonList(
-                          (T)
+                          spiClass.cast(
                               new ConfigurableSpanExporterProvider() {
                                 @Override
                                 public SpanExporter createExporter(
@@ -132,10 +131,10 @@ class BaggageProcessorCustomizerTest {
                                 public String getName() {
                                   return MEMORY_EXPORTER;
                                 }
-                              });
+                              }));
                     } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
                       return Collections.singletonList(
-                          (T)
+                          spiClass.cast(
                               new ConfigurableLogRecordExporterProvider() {
                                 @Override
                                 public LogRecordExporter createExporter(
@@ -147,7 +146,7 @@ class BaggageProcessorCustomizerTest {
                                 public String getName() {
                                   return MEMORY_EXPORTER;
                                 }
-                              });
+                              }));
                     }
                     return spiHelper.load(spiClass);
                   }
