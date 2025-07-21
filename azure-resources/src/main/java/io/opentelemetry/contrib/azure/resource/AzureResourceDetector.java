@@ -35,7 +35,7 @@ public class AzureResourceDetector implements ComponentProvider<Resource> {
   }
 
   private static class Builder {
-    ResourceBuilder builder = Resource.builder();
+    final ResourceBuilder builder = Resource.builder();
     int attributesCount = 0;
 
     private void add(CloudResourceProvider provider) {
