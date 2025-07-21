@@ -13,7 +13,10 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0 # needed for merge-base below
-      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+      - uses: jdx/mise-action@bfb9fa0b029db830a8c570757cee683df207a6c5 # v2.4.0
+        with:
+          version: v2025.7.11
+          sha256: fe2d4c5c681c942b2f52bf0c71d04429ba4a5e090973514bde466a411190cd00
       - name: Link check - relative links (all files)
         if: github.event_name == 'pull_request'
         env:
