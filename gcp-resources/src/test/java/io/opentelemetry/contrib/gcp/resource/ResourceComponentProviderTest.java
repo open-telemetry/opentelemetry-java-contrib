@@ -11,7 +11,7 @@ import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import org.junit.jupiter.api.Test;
 
-public class ResourceComponentProviderTest {
+class ResourceComponentProviderTest {
 
   @Test
   @SuppressWarnings("rawtypes")
