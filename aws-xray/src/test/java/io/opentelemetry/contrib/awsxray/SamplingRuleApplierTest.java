@@ -400,17 +400,23 @@ class SamplingRuleApplierTest {
               .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          stableSemConvAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGET").build();
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGET")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
       attributes =
-          stableSemConvAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "GETGET").build();
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "GETGET")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void stableSemConvMethodNotMatch() {
       Attributes attributes =
-          stableSemConvAttributes.toBuilder().put(HttpAttributes.HTTP_REQUEST_METHOD, "POST").build();
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "POST")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes = removeAttribute(stableSemConvAttributes, HttpAttributes.HTTP_REQUEST_METHOD);
       assertThat(applier.matches(attributes, resource)).isFalse();
@@ -447,26 +453,48 @@ class SamplingRuleApplierTest {
     @Test
     void stableSemConvHostMatches() {
       Attributes attributes =
-          this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "alpha.opentelemetry.io").build();
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "alpha.opentelemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opfdnqtelemetry.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opfdnqtelemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opentglemetry.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opentglemry.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opentglemrz.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemrz.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isTrue();
     }
 
     @Test
     void stableSemConvHostNotMatch() {
       Attributes attributes =
-          this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opentelemetryfio").build();
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentelemetryfio")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "opentgalemetry.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentgalemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
-      attributes = this.stableSemConvAttributes.toBuilder().put(ServerAttributes.SERVER_ADDRESS, "alpha.oentelemetry.io").build();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "alpha.oentelemetry.io")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes = removeAttribute(this.stableSemConvAttributes, ServerAttributes.SERVER_ADDRESS);
       assertThat(applier.matches(attributes, resource)).isFalse();
