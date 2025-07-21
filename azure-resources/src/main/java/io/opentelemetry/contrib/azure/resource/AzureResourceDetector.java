@@ -34,7 +34,7 @@ public class AzureResourceDetector implements ComponentProvider<Resource> {
     return builder.builder.build();
   }
 
-  static class Builder {
+  private static class Builder {
     ResourceBuilder builder = Resource.builder();
     int attributesCount = 0;
 
