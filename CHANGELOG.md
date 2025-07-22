@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Azure resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### CloudFoundry resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
 ### Consistent sampling
 
 - Refactor ConsistentFixedThresholdSampler to prepare for dynamic threshold support
@@ -9,10 +24,32 @@
 - ConsistentRateLimitingSampler can fail if used in combination with legacy samplers
   ([#2022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2022))
 
-### OpAMP client
+### GCP resources
 
-- Add OpAMP WebSocket service implementation
-  ([#1969](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1969))
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### JMX metrics
+
+- Deprecate JMX Gatherer and provide migration guide to JMX Scraper
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### JMX scraper
+
+- Update Jetty metrics configuration corresponding to Java Instrumentation 2.18.0
+  ([#2033](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2033))
+- Mark as production-ready and remove experimental status
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### Maven extension
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Resource providers
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
 
 ## Version 1.47.0 (2025-07-04)
 
