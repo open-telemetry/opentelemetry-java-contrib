@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.contrib.stacktrace;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,18 +15,18 @@ import org.junit.jupiter.api.Test;
 
 class StackTraceComponentProviderTest {
   @Test
-   void endToEnd() {
-     String yaml =
-         "file_format: 0.4\n"
-             + "tracer_provider:\n"
-             + "  processors:\n"
-             + "    - experimental-stacktrace:\n";
+  void endToEnd() {
+    String yaml =
+        "file_format: 0.4\n"
+            + "tracer_provider:\n"
+            + "  processors:\n"
+            + "    - experimental-stacktrace:\n";
 
-     OpenTelemetrySdk openTelemetrySdk =
-         DeclarativeConfiguration.parseAndCreate(
-             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+    OpenTelemetrySdk openTelemetrySdk =
+        DeclarativeConfiguration.parseAndCreate(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
 
     assertThat(openTelemetrySdk.getSdkTracerProvider().toString())
         .contains("StackTraceSpanProcessor");
-   }
+  }
 }
