@@ -11,7 +11,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
-import io.opentelemetry.opamp.client.internal.response.OpampServerResponseError;
+import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.IOException;
 import java.time.Duration;
@@ -206,7 +206,9 @@ public final class HttpRequestService implements RequestService {
       }
       connectionStatus.retryAfter(retryAfter);
     }
-    getCallback().onRequestFailed(new OpampServerResponseError(errorResponse.error_message));
+    getCallback()
+        .onRequestFailed(
+            new OpampServerResponseException(errorResponse, errorResponse.error_message));
   }
 
   private Callback getCallback() {

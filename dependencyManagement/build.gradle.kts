@@ -17,6 +17,7 @@ dependencies {
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.2"))
   api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.31.1"))
+  api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -44,7 +45,6 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.squareup.okhttp3:okhttp:5.1.0")
     api("com.uber.nullaway:nullaway:0.12.7")
     api("org.assertj:assertj-core:3.27.3")
     api("org.awaitility:awaitility:4.3.0")
@@ -58,5 +58,6 @@ dependencies {
     api("tools.profiler:async-profiler:4.0")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
+    api("com.github.f4b6a3:uuid-creator:6.0.0")
   }
 }
