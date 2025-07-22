@@ -8,7 +8,6 @@ package io.opentelemetry.opamp.client.internal.connectivity.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -51,12 +50,12 @@ public final class OkHttpSender implements HttpSender {
         .enqueue(
             new Callback() {
               @Override
-              public void onResponse(@Nonnull Call call, @Nonnull okhttp3.Response response) {
+              public void onResponse(Call call, okhttp3.Response response) {
                 future.complete(new OkHttpResponse(response));
               }
 
               @Override
-              public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
+              public void onFailure(Call call, IOException e) {
                 future.completeExceptionally(e);
               }
             });
@@ -120,7 +119,7 @@ public final class OkHttpSender implements HttpSender {
     }
 
     @Override
-    public void writeTo(@Nonnull BufferedSink bufferedSink) throws IOException {
+    public void writeTo(BufferedSink bufferedSink) throws IOException {
       writer.writeTo(bufferedSink.outputStream());
     }
   }
