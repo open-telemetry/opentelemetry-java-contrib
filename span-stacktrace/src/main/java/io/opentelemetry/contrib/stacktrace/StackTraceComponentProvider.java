@@ -16,7 +16,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public class StackTraceComponentProvider implements ComponentProvider<SpanProcessor> {
   @Override
   public String getName() {
-    return "stacktrace";
+    return "experimental-stacktrace";
   }
 
   @Override
