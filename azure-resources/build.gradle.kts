@@ -15,6 +15,7 @@ java {
 
 dependencies {
   api("io.opentelemetry:opentelemetry-api")
+  compileOnly("io.opentelemetry:opentelemetry-api-incubator")
   api("io.opentelemetry:opentelemetry-sdk")
 
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
@@ -26,6 +27,7 @@ dependencies {
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
 //  testImplementation("org.mockito:mockito-core")
