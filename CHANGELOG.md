@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- Refactor ConsistentFixedThresholdSampler to prepare for dynamic threshold support
+  ([#2018](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2018))
+- ConsistentRateLimitingSampler can fail if used in combination with legacy samplers
+  ([#2022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2022))
+
+### OpAMP client
+
+- Add OpAMP WebSocket service implementation
+  ([#1969](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1969))
+
 ## Version 1.47.0 (2025-07-04)
 
 ### Disk buffering
