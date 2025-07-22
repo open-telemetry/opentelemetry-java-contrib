@@ -154,12 +154,12 @@ public final class OpampClientImpl
 
   @Override
   public void onConnectionSuccess() {
-    getCallbacks().onConnect(this);
+    getCallbacks().onConnect();
   }
 
   @Override
   public void onConnectionFailed(Throwable throwable) {
-    getCallbacks().onConnectFailed(this, throwable);
+    getCallbacks().onConnectFailed(throwable);
   }
 
   @Override
@@ -176,7 +176,7 @@ public final class OpampClientImpl
     preserveFailedRequestRecipe();
     if (throwable instanceof OpampServerResponseException) {
       ServerErrorResponse errorResponse = ((OpampServerResponseException) throwable).errorResponse;
-      getCallbacks().onErrorResponse(this, errorResponse);
+      getCallbacks().onErrorResponse(errorResponse);
     }
   }
 
@@ -203,7 +203,7 @@ public final class OpampClientImpl
     }
 
     if (notifyOnMessage) {
-      getCallbacks().onMessage(this, messageBuilder.build());
+      getCallbacks().onMessage(messageBuilder.build());
     }
   }
 

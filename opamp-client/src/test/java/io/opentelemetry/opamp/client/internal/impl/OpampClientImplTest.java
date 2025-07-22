@@ -211,8 +211,7 @@ class OpampClientImplTest {
     // Await for onMessage call
     await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onMessageCalls.get() == 1);
 
-    verify(callbacks)
-        .onMessage(client, MessageData.builder().setRemoteConfig(remoteConfig).build());
+    verify(callbacks).onMessage(MessageData.builder().setRemoteConfig(remoteConfig).build());
   }
 
   @Test
@@ -227,7 +226,7 @@ class OpampClientImplTest {
     // Giving some time for the callback to get called
     await().during(Duration.ofSeconds(1));
 
-    verify(callbacks, never()).onMessage(any(), any());
+    verify(callbacks, never()).onMessage(any());
   }
 
   @Test
@@ -270,8 +269,8 @@ class OpampClientImplTest {
 
     await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onConnectCalls.get() == 1);
 
-    verify(callbacks).onConnect(client);
-    verify(callbacks, never()).onConnectFailed(any(), any());
+    verify(callbacks).onConnect();
+    verify(callbacks, never()).onConnectFailed(any());
   }
 
   @Test
@@ -314,8 +313,8 @@ class OpampClientImplTest {
 
     await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onErrorResponseCalls.get() == 1);
 
-    verify(callbacks).onErrorResponse(client, errorResponse);
-    verify(callbacks, never()).onMessage(any(), any());
+    verify(callbacks).onErrorResponse(errorResponse);
+    verify(callbacks, never()).onMessage(any());
   }
 
   @Test
@@ -325,7 +324,7 @@ class OpampClientImplTest {
 
     client.onConnectionFailed(throwable);
 
-    verify(callbacks).onConnectFailed(client, throwable);
+    verify(callbacks).onConnectFailed(throwable);
   }
 
   @Test
@@ -464,22 +463,22 @@ class OpampClientImplTest {
     private final AtomicInteger onMessageCalls = new AtomicInteger();
 
     @Override
-    public void onConnect(OpampClient client) {
+    public void onConnect() {
       onConnectCalls.incrementAndGet();
     }
 
     @Override
-    public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {
+    public void onConnectFailed(@Nullable Throwable throwable) {
       onConnectFailedCalls.incrementAndGet();
     }
 
     @Override
-    public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {
+    public void onErrorResponse(ServerErrorResponse errorResponse) {
       onErrorResponseCalls.incrementAndGet();
     }
 
     @Override
-    public void onMessage(OpampClient client, MessageData messageData) {
+    public void onMessage(MessageData messageData) {
       onMessageCalls.incrementAndGet();
     }
   }

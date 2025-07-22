@@ -20,8 +20,7 @@ public interface OpampClient {
   /**
    * Starts the client and begin attempts to connect to the Server. Once connection is established
    * the client will attempt to maintain it by reconnecting if the connection is lost. All failed
-   * connection attempts will be reported via {@link Callbacks#onConnectFailed(OpampClient,
-   * Throwable)} callback.
+   * connection attempts will be reported via {@link Callbacks#onConnectFailed(Throwable)} callback.
    *
    * <p>This method does not wait until the connection to the Server is established and will likely
    * return before the connection attempts are even made.
@@ -45,7 +44,7 @@ public interface OpampClient {
    * the Server. When called after {@link #start(Callbacks)}, the attributes will be included in the
    * next outgoing status report. This is typically used by Agents which allow their
    * AgentDescription to change dynamically while the OpAMPClient is started. May be also called
-   * from {@link Callbacks#onMessage(OpampClient, MessageData)}.
+   * from {@link Callbacks#onMessage(MessageData)}.
    *
    * @param agentDescription The new agent description.
    */
@@ -64,20 +63,17 @@ public interface OpampClient {
      * {@link #start(Callbacks)} is called and every time a connection is established to the Server.
      * For WebSocket clients this is called after the handshake is completed without any error. For
      * HTTP clients this is called for any request if the response status is OK.
-     *
-     * @param client The relevant {@link OpampClient} instance.
      */
-    void onConnect(OpampClient client);
+    void onConnect();
 
     /**
      * Called when the connection to the Server cannot be established. May be called after {@link
      * #start(Callbacks)} is called and tries to connect to the Server. May also be called if the
      * connection is lost and reconnection attempt fails.
      *
-     * @param client The relevant {@link OpampClient} instance.
      * @param throwable The exception.
      */
-    void onConnectFailed(OpampClient client, @Nullable Throwable throwable);
+    void onConnectFailed(@Nullable Throwable throwable);
 
     /**
      * Called when the Server reports an error in response to some previously sent request. Useful
@@ -85,10 +81,9 @@ public interface OpampClient {
      * retrying previous operations. The client handles the ErrorResponse_UNAVAILABLE case
      * internally by performing retries as necessary.
      *
-     * @param client The relevant {@link OpampClient} instance.
      * @param errorResponse The error returned by the Server.
      */
-    void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse);
+    void onErrorResponse(ServerErrorResponse errorResponse);
 
     /**
      * Called when the Agent receives a message that needs processing. See {@link MessageData}
@@ -99,9 +94,8 @@ public interface OpampClient {
      * onMessage returns. This is advisable if processing can take a long time. In that case
      * returning quickly is preferable to avoid blocking the {@link OpampClient}.
      *
-     * @param client The relevant {@link OpampClient} instance.
      * @param messageData The server response data that needs processing.
      */
-    void onMessage(OpampClient client, MessageData messageData);
+    void onMessage(MessageData messageData);
   }
 }
