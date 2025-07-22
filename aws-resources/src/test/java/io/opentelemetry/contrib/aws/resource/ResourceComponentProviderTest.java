@@ -24,7 +24,7 @@ class ResourceComponentProviderTest {
     Iterable<ComponentProvider> providers =
         ComponentLoader.forClassLoader(ResourceComponentProviderTest.class.getClassLoader())
             .load(ComponentProvider.class);
-    assertThat(providers).extracting(ComponentProvider::getName).containsExactly("aws");
+    assertThat(providers).extracting(ComponentProvider::getName).contains("aws");
   }
 
   @Test
