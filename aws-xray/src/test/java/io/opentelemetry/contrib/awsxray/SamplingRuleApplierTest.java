@@ -29,6 +29,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.time.TestClock;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.ServerAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,6 +71,15 @@ class SamplingRuleApplierTest {
             .put(HTTP_METHOD, "GET")
             .put(NET_HOST_NAME, "opentelemetry.io")
             .put(HTTP_TARGET, "/instrument-me")
+            .put(AttributeKey.stringKey("animal"), "cat")
+            .put(AttributeKey.longKey("speed"), 10)
+            .build();
+
+    private final Attributes stableSemConvAttributes =
+        Attributes.builder()
+            .put(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
+            .put(ServerAttributes.SERVER_ADDRESS, "opentelemetry.io")
+            .put(UrlAttributes.URL_PATH, "/instrument-me")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -121,6 +133,21 @@ class SamplingRuleApplierTest {
     }
 
     @Test
+    void matchesURLFullStableSemConv() {
+      assertThat(applier.matches(stableSemConvAttributes, resource)).isTrue();
+
+      // url.full works too
+      assertThat(
+              applier.matches(
+                  attributes.toBuilder()
+                      .remove(HTTP_TARGET)
+                      .put(UrlAttributes.URL_FULL, "scheme://host:port/instrument-me")
+                      .build(),
+                  resource))
+          .isTrue();
+    }
+
+    @Test
     void serviceNameNotMatch() {
       assertThat(
               applier.matches(
@@ -137,6 +164,15 @@ class SamplingRuleApplierTest {
     @Test
     void methodNotMatch() {
       Attributes attributes = this.attributes.toBuilder().put(HTTP_METHOD, "POST").build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void methodStableSemConvNotMatch() {
+      Attributes attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "POST")
+              .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
@@ -173,6 +209,36 @@ class SamplingRuleApplierTest {
           this.attributes.toBuilder()
               .remove(HTTP_TARGET)
               .put(HTTP_URL, "host:port/instrument-me")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void pathStableSemConvNotMatch() {
+      Attributes attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "scheme://host:port/instrument-you")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "scheme://host:port")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+
+      // Correct path, but we ignore anyways since the URL is malformed per spec, scheme is always
+      // present.
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .remove(UrlAttributes.URL_PATH)
+              .put(UrlAttributes.URL_FULL, "host:port/instrument-me")
               .build();
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
@@ -231,6 +297,15 @@ class SamplingRuleApplierTest {
             .put(HTTP_METHOD, "GET")
             .put(NET_HOST_NAME, "opentelemetry.io")
             .put(HTTP_TARGET, "/instrument-me?foo=bar&cat=meow")
+            .put(AttributeKey.stringKey("animal"), "cat")
+            .put(AttributeKey.longKey("speed"), 10)
+            .build();
+
+    private final Attributes stableSemConvAttributes =
+        Attributes.builder()
+            .put(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
+            .put(ServerAttributes.SERVER_ADDRESS, "opentelemetry.io")
+            .put(UrlAttributes.URL_PATH, "/instrument-me?foo=bar&cat=meow")
             .put(AttributeKey.stringKey("animal"), "cat")
             .put(AttributeKey.longKey("speed"), 10)
             .build();
@@ -318,6 +393,36 @@ class SamplingRuleApplierTest {
     }
 
     @Test
+    void stableSemConvMethodMatches() {
+      Attributes attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGETGOOD")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "BADGET")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "GETGET")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+    }
+
+    @Test
+    void stableSemConvMethodNotMatch() {
+      Attributes attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(HttpAttributes.HTTP_REQUEST_METHOD, "POST")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(stableSemConvAttributes, HttpAttributes.HTTP_REQUEST_METHOD);
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
     void hostMatches() {
       Attributes attributes =
           this.attributes.toBuilder().put(NET_HOST_NAME, "alpha.opentelemetry.io").build();
@@ -346,6 +451,56 @@ class SamplingRuleApplierTest {
     }
 
     @Test
+    void stableSemConvHostMatches() {
+      Attributes attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "alpha.opentelemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opfdnqtelemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentglemrz.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+    }
+
+    @Test
+    void stableSemConvHostNotMatch() {
+      Attributes attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentelemetryfio")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "opentgalemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          this.stableSemConvAttributes.toBuilder()
+              .put(ServerAttributes.SERVER_ADDRESS, "alpha.oentelemetry.io")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(this.stableSemConvAttributes, ServerAttributes.SERVER_ADDRESS);
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
     void pathMatches() {
       Attributes attributes =
           this.attributes.toBuilder().put(HTTP_TARGET, "/instrument-me?foo=bar&cat=").build();
@@ -365,6 +520,37 @@ class SamplingRuleApplierTest {
           this.attributes.toBuilder().put(HTTP_TARGET, "foo/instrument-meafoo=bar&cat=").build();
       assertThat(applier.matches(attributes, resource)).isFalse();
       attributes = removeAttribute(this.attributes, HTTP_TARGET);
+      assertThat(applier.matches(attributes, resource)).isFalse();
+    }
+
+    @Test
+    void pathStableSemConvMatches() {
+      Attributes attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-me?foo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+      // Deceptive question mark, it's actually a wildcard :-)
+      attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-meafoo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isTrue();
+    }
+
+    @Test
+    void pathStableSemConvNotMatch() {
+      Attributes attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "/instrument-mea?foo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes =
+          stableSemConvAttributes.toBuilder()
+              .put(UrlAttributes.URL_PATH, "foo/instrument-meafoo=bar&cat=")
+              .build();
+      assertThat(applier.matches(attributes, resource)).isFalse();
+      attributes = removeAttribute(stableSemConvAttributes, UrlAttributes.URL_PATH);
       assertThat(applier.matches(attributes, resource)).isFalse();
     }
 
