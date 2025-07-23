@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.48.0 (2025-07-23)
+
 ### AWS resources
 
 - Support for declarative configuration
