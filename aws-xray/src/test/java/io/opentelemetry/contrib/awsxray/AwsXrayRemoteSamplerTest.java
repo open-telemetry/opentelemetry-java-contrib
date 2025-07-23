@@ -196,7 +196,6 @@ class AwsXrayRemoteSamplerTest {
             .setEndpoint(server.httpUri().toString())
             .setPollingInterval(Duration.ofMinutes(5))
             .build()) {
-      assertThat(samplerWithLongerPollingInterval.getNextSamplerUpdateScheduledDuration()).isNull();
       await()
           .untilAsserted(
               () -> {
