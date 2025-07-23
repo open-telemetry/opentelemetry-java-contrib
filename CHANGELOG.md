@@ -7,6 +7,11 @@
 - Support for declarative configuration
   ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
 
+### AWS X-Ray SDK support
+
+- Update SamplerRulesApplier to recognize new HTTP/URL semconv
+  ([#1959](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1959))
+
 ### Azure resources
 
 - Support for declarative configuration
