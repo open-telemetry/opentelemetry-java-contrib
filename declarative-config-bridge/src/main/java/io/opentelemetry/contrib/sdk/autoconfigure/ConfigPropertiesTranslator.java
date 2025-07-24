@@ -10,12 +10,12 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("NonApiType")
-class PropertyTranslator {
+class ConfigPropertiesTranslator {
   // lookup order matters - we choose the first match
   private final LinkedHashMap<String, String> translationMap;
   private final Map<String, Object> fixedValues;
 
-  PropertyTranslator(
+  ConfigPropertiesTranslator(
       LinkedHashMap<String, String> translationMap, Map<String, Object> fixedValues) {
     this.translationMap = translationMap;
     this.fixedValues = fixedValues;

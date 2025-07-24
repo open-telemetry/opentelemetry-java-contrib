@@ -27,26 +27,26 @@ class DeclarativeConfigPropertiesBridgeTest {
 
   @BeforeEach
   void setup() {
-    bridge = create(ConfigPropertiesUtil.propertyTranslatorBuilder());
+    bridge = create(new DeclarativeConfigPropertiesBridgeBuilder());
 
     OpenTelemetryConfigurationModel emptyModel =
         new OpenTelemetryConfigurationModel()
             .withAdditionalProperty("instrumentation/development", new InstrumentationModel());
     SdkConfigProvider emptyConfigProvider = SdkConfigProvider.create(emptyModel);
     emptyBridge =
-        ConfigPropertiesUtil.resolveInstrumentationConfig(
-            Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()));
+        new DeclarativeConfigPropertiesBridgeBuilder()
+            .resolveInstrumentationConfig(
+                Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()));
   }
 
-  private static ConfigProperties create(PropertyTranslatorBuilder builder) {
+  private static ConfigProperties create(DeclarativeConfigPropertiesBridgeBuilder builder) {
     OpenTelemetryConfigurationModel model =
         DeclarativeConfiguration.parse(
             DeclarativeConfigPropertiesBridgeTest.class
                 .getClassLoader()
                 .getResourceAsStream("config.yaml"));
-    SdkConfigProvider configProvider = SdkConfigProvider.create(model);
-    return ConfigPropertiesUtil.resolveInstrumentationConfig(
-        configProvider.getInstrumentationConfig(), builder);
+    return builder.resolveInstrumentationConfig(
+        SdkConfigProvider.create(model).getInstrumentationConfig());
   }
 
   @Test
@@ -125,7 +125,7 @@ class DeclarativeConfigPropertiesBridgeTest {
   void vendorTranslation() {
     ConfigProperties propertiesBridge =
         create(
-            ConfigPropertiesUtil.propertyTranslatorBuilder()
+            new DeclarativeConfigPropertiesBridgeBuilder()
                 .addTranslation("acme", "acme.full_name"));
     assertThat(propertiesBridge.getBoolean("acme.preserved")).isTrue();
   }
@@ -134,7 +134,7 @@ class DeclarativeConfigPropertiesBridgeTest {
   void agentCommonTranslation() {
     assertThat(
             create(
-                    ConfigPropertiesUtil.propertyTranslatorBuilder()
+                    new DeclarativeConfigPropertiesBridgeBuilder()
                         .addTranslation(
                             "otel.instrumentation.common.default-enabled",
                             "common.default.enabled"))
@@ -146,7 +146,7 @@ class DeclarativeConfigPropertiesBridgeTest {
   void agentTranslation() {
     ConfigProperties bridge =
         create(
-            ConfigPropertiesUtil.propertyTranslatorBuilder()
+            new DeclarativeConfigPropertiesBridgeBuilder()
                 .addTranslation("otel.javaagent", "agent")
                 .addFixedValue("otel.javaagent.debug", true)
                 .addFixedValue("otel.javaagent.logging", "application"));

@@ -45,30 +45,19 @@ import javax.annotation.Nullable;
  *       common:
  *         string_key: value
  * </pre>
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
  */
 final class DeclarativeConfigPropertiesBridge implements ConfigProperties {
 
   private static final String OTEL_INSTRUMENTATION_PREFIX = "otel.instrumentation.";
 
-  private final PropertyTranslator translator;
+  private final ConfigPropertiesTranslator translator;
   @Nullable private final DeclarativeConfigProperties baseNode;
 
-  static DeclarativeConfigPropertiesBridge fromInstrumentationConfig(
-      @Nullable DeclarativeConfigProperties instrumentationConfig, PropertyTranslator translator) {
-    if (instrumentationConfig == null) {
-      instrumentationConfig = DeclarativeConfigProperties.empty();
-    }
-    return new DeclarativeConfigPropertiesBridge(
-        instrumentationConfig.getStructured("java", empty()), translator);
-  }
-
-  static DeclarativeConfigPropertiesBridge create(
-      @Nullable DeclarativeConfigProperties node, PropertyTranslator translator) {
-    return new DeclarativeConfigPropertiesBridge(node, translator);
-  }
-
-  private DeclarativeConfigPropertiesBridge(
-      @Nullable DeclarativeConfigProperties baseNode, PropertyTranslator translator) {
+  DeclarativeConfigPropertiesBridge(
+      @Nullable DeclarativeConfigProperties baseNode, ConfigPropertiesTranslator translator) {
     this.baseNode = baseNode;
     this.translator = translator;
   }

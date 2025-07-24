@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.stacktrace;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
-import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
+import io.opentelemetry.contrib.sdk.autoconfigure.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
@@ -22,10 +22,9 @@ public class StackTraceComponentProvider implements ComponentProvider<SpanProces
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return StackTraceAutoConfig.create(
-        ConfigPropertiesUtil.resolveConfig(
-            config,
-            ConfigPropertiesUtil.propertyTranslatorBuilder()
-                .addTranslation(StackTraceAutoConfig.PREFIX, "")));
+        new DeclarativeConfigPropertiesBridgeBuilder()
+            .addTranslation(StackTraceAutoConfig.PREFIX, "")
+            .resolveConfig(config));
   }
 
   @Override
