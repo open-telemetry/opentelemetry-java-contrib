@@ -6,8 +6,8 @@ plugins {
 }
 
 description = "IBM-MQ metrics"
-otelJava.moduleName.set("io.opentelemetry.contrib.jmxscraper")
-application.mainClass.set("io.opentelemetry.contrib.jmxscraper.JmxScraper")
+otelJava.moduleName.set("io.opentelemetry.contrib.ibm-mq-metrics")
+application.mainClass.set("io.opentelemetry.ibm.mq.opentelemetry.Main")
 
 sourceSets {
   create("integrationTest") {
