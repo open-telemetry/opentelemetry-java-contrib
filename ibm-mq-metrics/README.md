@@ -109,7 +109,7 @@ command, chg permission is needed.
 
 ### SSL Support
 
-_Note: The following is only needed for versions of Java 8 before 8u161._ 
+_Note: The following is only needed for versions of Java 8 before 8u161._
 
 1. Configure the IBM SSL Cipher Suite in the config.yml.
    Note that, to use some CipherSuites the unrestricted policy needs to be configured in JRE.
