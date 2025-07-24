@@ -109,11 +109,13 @@ command, chg permission is needed.
 
 ### SSL Support
 
+_Note: The following is only needed for versions of Java 8 before 8u161._ 
+
 1. Configure the IBM SSL Cipher Suite in the config.yml.
    Note that, to use some CipherSuites the unrestricted policy needs to be configured in JRE.
    Please visit [this link](http://www.ibm.com/support/knowledgecenter/SSYKE2_8.0.0/com.ibm.java.security.component.80.doc/security-component/sdkpolicyfiles.html)
    for more details. For Oracle JRE, please update with [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).
-   The download includes a readme file with instructions on how to apply these files to JRE
+   The download includes a readme file with instructions on how to apply these files to JRE.
 
 2. Please add the following JVM arguments to the MA start up command or script.
 
@@ -172,8 +174,7 @@ See [docs/metrics.md](docs/metrics.md).
 
 ## Troubleshooting
 
-1. Please follow the steps listed in this [troubleshooting-document](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) in order to troubleshoot your issue. These are a set of common issues that customers might have faced during the installation of the extension.
-2. Error `Completion Code '2', Reason '2495'`
+1. Error `Completion Code '2', Reason '2495'`
    Normally this error occurs if the environment variables are not set up correctly for this extension to work MQ in Bindings Mode.
 
    If you are seeing `Failed to load the WebSphere MQ native JNI library: 'mqjbnd'`, please add the following jvm argument when starting the MA.
@@ -194,20 +195,20 @@ See [docs/metrics.md](docs/metrics.md).
    Another way to get around this issue is to avoid using the Bindings mode. Connect using CLIENT
    transport type from a remote box.
 
-3. Error `Completion Code '2', Reason '2035'`
+2. Error `Completion Code '2', Reason '2035'`
    This could happen for various reasons but for most of the cases, for **Client** mode the
    user specified in config.yml is not authorized to access the queue manager. Also sometimes
    even if userid and password are correct, channel auth (CHLAUTH) for that queue manager blocks
    traffics from other ips, you need to contact admin to provide you access to the queue manager.
    For Bindings mode, please make sure that the MA is owned by a mqm user.
 
-4. `MQJE001: Completion Code '2', Reason '2195'`
+3. `MQJE001: Completion Code '2', Reason '2195'`
    This could happen in **Client** mode. Please make sure that the IBM MQ dependency jars are correctly referenced in classpath of monitor.xml
 
-5. `MQJE001: Completion Code '2', Reason '2400'`
+4. `MQJE001: Completion Code '2', Reason '2400'`
    This could happen if unsupported cipherSuite is provided or JRE not having/enabled unlimited jurisdiction policy files. Please check SSL Support section.
 
-6. If you are seeing "NoClassDefFoundError" or "ClassNotFound" error for any of the MQ dependency even after providing correct path in monitor.xml, then you can also try copying all the required jars in WMQMonitor (MAHome/monitors/WMQMonitor) folder and provide classpath in monitor.xml like below
+5. If you are seeing "NoClassDefFoundError" or "ClassNotFound" error for any of the MQ dependency even after providing correct path in monitor.xml, then you can also try copying all the required jars in WMQMonitor (MAHome/monitors/WMQMonitor) folder and provide classpath in monitor.xml like below
 
    ```
     <classpath>ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.allclient.jar</classpath>
