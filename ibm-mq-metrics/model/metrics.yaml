@@ -283,7 +283,7 @@ groups:
     stability: development
     brief: "Current maximum queue file size"
     instrument: gauge
-    unit: "mib"
+    unit: "By"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -297,7 +297,7 @@ groups:
     stability: development
     brief: "Current queue file size"
     instrument: gauge
-    unit: "mib"
+    unit: "By"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -381,7 +381,7 @@ groups:
     stability: development
     brief: "The amount of space occupied, in megabytes, by log extents available to be reused."
     instrument: gauge
-    unit: "mib"
+    unit: "By"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -401,7 +401,7 @@ groups:
     stability: development
     brief: "Size of the log data required for restart recovery in megabytes."
     instrument: gauge
-    unit: "mib"
+    unit: "By"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -525,7 +525,7 @@ groups:
     stability: development
     brief: "Queue manager archive log size"
     instrument: gauge
-    unit: "mib"
+    unit: "By"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required

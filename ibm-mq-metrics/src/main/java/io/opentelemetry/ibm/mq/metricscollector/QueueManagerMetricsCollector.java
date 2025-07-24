@@ -6,6 +6,7 @@
 package io.opentelemetry.ibm.mq.metricscollector;
 
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.Metrics.MIBY_TO_BYTES;
 
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
@@ -76,15 +77,15 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
       }
       if (context.getMetricsConfig().isIbmMqRestartLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_RESTART_LOG_SIZE);
-        restartLogSizeGauge.set(logSize, attributes);
+        restartLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqReusableLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_REUSABLE_LOG_SIZE);
-        reuseLogSizeGauge.set(logSize, attributes);
+        reuseLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqArchiveLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_ARCHIVE_LOG_SIZE);
-        archiveLogSizeGauge.set(logSize, attributes);
+        archiveLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqManagerMaxActiveChannelsEnabled()) {
         int maxActiveChannels = context.getQueueManager().getMaxActiveChannels();

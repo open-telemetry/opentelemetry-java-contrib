@@ -7,11 +7,13 @@ package io.opentelemetry.ibm.mq.metrics;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
+import java.util.function.Function;
 
 // This file is generated using weaver. Do not edit manually.
 
 /** Metric definitions generated from a Weaver model. Do not edit manually. */
 public final class Metrics {
+public final static Function<Integer, Long> MIBY_TO_BYTES = x -> x * 1024L * 1024L;
 private Metrics(){
 }
 {% for metric in ctx %}

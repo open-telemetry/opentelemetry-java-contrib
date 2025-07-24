@@ -342,7 +342,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.current.max.queue.filesize` | Gauge | `mib` | Current maximum queue file size | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.current.max.queue.filesize` | Gauge | `By` | Current maximum queue file size | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.current.max.queue.filesize` Attributes
@@ -361,7 +361,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.current.queue.filesize` | Gauge | `mib` | Current queue file size | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.current.queue.filesize` | Gauge | `By` | Current queue file size | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.current.queue.filesize` Attributes
@@ -475,7 +475,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.reusable.log.size` | Gauge | `mib` | The amount of space occupied, in megabytes, by log extents available to be reused. | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.reusable.log.size` | Gauge | `By` | The amount of space occupied, in megabytes, by log extents available to be reused. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.reusable.log.size` Attributes
@@ -505,7 +505,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.restart.log.size` | Gauge | `mib` | Size of the log data required for restart recovery in megabytes. | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.restart.log.size` | Gauge | `By` | Size of the log data required for restart recovery in megabytes. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.restart.log.size` Attributes
@@ -673,7 +673,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.archive.log.size` | Gauge | `mib` | Queue manager archive log size | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.archive.log.size` | Gauge | `By` | Queue manager archive log size | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.archive.log.size` Attributes

@@ -8,11 +8,14 @@ package io.opentelemetry.ibm.mq.metrics;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
+import java.util.function.Function;
 
 // This file is generated using weaver. Do not edit manually.
 
 /** Metric definitions generated from a Weaver model. Do not edit manually. */
 public final class Metrics {
+  public static final Function<Integer, Long> MIBY_TO_BYTES = x -> x * 1024L * 1024L;
+
   private Metrics() {}
 
   public static LongGauge createIbmMqMessageRetryCount(Meter meter) {
@@ -178,7 +181,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.current.max.queue.filesize")
         .ofLongs()
-        .setUnit("mib")
+        .setUnit("By")
         .setDescription("Current maximum queue file size")
         .build();
   }
@@ -187,7 +190,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.current.queue.filesize")
         .ofLongs()
-        .setUnit("mib")
+        .setUnit("By")
         .setDescription("Current queue file size")
         .build();
   }
@@ -241,7 +244,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.reusable.log.size")
         .ofLongs()
-        .setUnit("mib")
+        .setUnit("By")
         .setDescription(
             "The amount of space occupied, in megabytes, by log extents available to be reused.")
         .build();
@@ -260,7 +263,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.restart.log.size")
         .ofLongs()
-        .setUnit("mib")
+        .setUnit("By")
         .setDescription("Size of the log data required for restart recovery in megabytes.")
         .build();
   }
@@ -352,7 +355,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.archive.log.size")
         .ofLongs()
-        .setUnit("mib")
+        .setUnit("By")
         .setDescription("Queue manager archive log size")
         .build();
   }

@@ -13,6 +13,7 @@ import static com.ibm.mq.constants.CMQC.MQQT_REMOTE;
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_TYPE;
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.MESSAGING_DESTINATION_NAME;
+import static io.opentelemetry.ibm.mq.metrics.Metrics.MIBY_TO_BYTES;
 
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
@@ -55,9 +56,16 @@ final class QueueCollectionBuddy {
 
   private static AllowedGauge createAllowedGauge(
       LongGauge gauge, Function<MetricsConfig, Boolean> allowed) {
+    return createAllowedGauge(gauge, allowed, Integer::longValue /*identity*/);
+  }
+
+  private static AllowedGauge createAllowedGauge(
+      LongGauge gauge,
+      Function<MetricsConfig, Boolean> allowed,
+      Function<Integer, Long> unitMangler) {
     return (context, val, attributes) -> {
       if (allowed.apply(context.getMetricsConfig())) {
-        gauge.set(val, attributes);
+        gauge.set(unitMangler.apply(val), attributes);
       }
     };
   }
@@ -118,12 +126,14 @@ final class QueueCollectionBuddy {
         CMQCFC.MQIACF_CUR_Q_FILE_SIZE,
         createAllowedGauge(
             Metrics.createIbmMqCurrentQueueFilesize(meter),
-            MetricsConfig::isIbmMqCurrentQueueFilesizeEnabled));
+            MetricsConfig::isIbmMqCurrentQueueFilesizeEnabled,
+            MIBY_TO_BYTES));
     gauges.put(
         CMQCFC.MQIACF_CUR_MAX_FILE_SIZE,
         createAllowedGauge(
             Metrics.createIbmMqCurrentMaxQueueFilesize(meter),
-            MetricsConfig::isIbmMqCurrentMaxQueueFilesizeEnabled));
+            MetricsConfig::isIbmMqCurrentMaxQueueFilesizeEnabled,
+            MIBY_TO_BYTES));
 
     this.onqtimeShort = Metrics.createIbmMqOnqtime1(meter);
     this.onqtimeLong = Metrics.createIbmMqOnqtime2(meter);
