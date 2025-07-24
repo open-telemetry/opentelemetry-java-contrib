@@ -12,6 +12,7 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
+import io.opentelemetry.contrib.sdk.autoconfigure.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
@@ -70,8 +71,8 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
   }
 
   static ConfigProperties getConfigProperties(OpenTelemetryConfigurationModel model) {
-    return ConfigPropertiesUtil.resolveInstrumentationConfig(
-        SdkConfigProvider.create(model).getInstrumentationConfig());
+    return new DeclarativeConfigPropertiesBridgeBuilder()
+        .resolveInstrumentationConfig(SdkConfigProvider.create(model).getInstrumentationConfig());
   }
 
   private static void customizeMeter(
