@@ -72,12 +72,13 @@ Note: Due to restrictive licensing, this uber-jar (fat-jar) does not include the
 Run the standalone jar alongside the IBM jar:
 
 ```shell
+cd ibm-mq-metrics
 java \
    -Djavax.net.ssl.keyStore=key.jks \
    -Djavax.net.ssl.keyStorePassword=<password> \
    -Djavax.net.ssl.trustStore=key.jks \
    -Djavax.net.ssl.trustStorePassword=<password> \
-   -cp target/ibm-mq-monitoring-<version>-all.jar:lib/com.ibm.mq.allclient.jar \
+   -cp build/libs/ibm-mq-monitoring-<version>-all.jar:lib/com.ibm.mq.allclient.jar \
    io.opentelemetry.ibm.mq.opentelemetry.Main \
    ./my-config.yml
 ```
