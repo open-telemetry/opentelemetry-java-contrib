@@ -5,7 +5,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.retry.count` | Gauge | `{messages}` | Number of message retries | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.retry.count` | Gauge | `{message}` | Number of message retries | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.retry.count` Attributes
@@ -41,7 +41,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.max.sharing.conversations` | Gauge | `{conversations}` | Maximum number of conversations permitted on this channel instance. | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.max.sharing.conversations` | Gauge | `{conversation}` | Maximum number of conversations permitted on this channel instance. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.max.sharing.conversations` Attributes
@@ -60,7 +60,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.current.sharing.conversations` | Gauge | `{conversations}` | Current number of conversations permitted on this channel instance. | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.current.sharing.conversations` | Gauge | `{conversation}` | Current number of conversations permitted on this channel instance. | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.current.sharing.conversations` Attributes
@@ -79,7 +79,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.byte.received` | Gauge | `{bytes}` | Number of bytes received | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.byte.received` | Gauge | `By` | Number of bytes received | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.byte.received` Attributes
@@ -98,7 +98,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.byte.sent` | Gauge | `{bytes}` | Number of bytes sent | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.byte.sent` | Gauge | `By` | Number of bytes sent | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.byte.sent` Attributes
@@ -117,7 +117,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.buffers.received` | Gauge | `{buffers}` | Buffers received | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.buffers.received` | Gauge | `{buffer}` | Buffers received | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.buffers.received` Attributes
@@ -136,7 +136,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.buffers.sent` | Gauge | `{buffers}` | Buffers sent | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.buffers.sent` | Gauge | `{buffer}` | Buffers sent | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.buffers.sent` Attributes
@@ -155,7 +155,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.count` | Gauge | `{messages}` | Message count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.count` | Gauge | `{message}` | Message count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.count` Attributes
@@ -174,7 +174,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.open.input.count` | Gauge | `{applications}` | Count of applications sending messages to the queue | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.open.input.count` | Gauge | `{application}` | Count of applications sending messages to the queue | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.open.input.count` Attributes
@@ -193,7 +193,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.open.output.count` | Gauge | `{applications}` | Count of applications consuming messages from the queue | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.open.output.count` | Gauge | `{application}` | Count of applications consuming messages from the queue | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.open.output.count` Attributes
@@ -250,7 +250,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.queue.depth.full.event` | Counter | `{events}` | The number of full queue events | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.depth.full.event` | Counter | `{event}` | The number of full queue events | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.queue.depth.full.event` Attributes
@@ -268,7 +268,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.queue.depth.high.event` | Counter | `{events}` | The number of high queue events | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.depth.high.event` | Counter | `{event}` | The number of high queue events | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.queue.depth.high.event` Attributes
@@ -286,7 +286,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.queue.depth.low.event` | Counter | `{events}` | The number of low queue events | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.depth.low.event` | Counter | `{event}` | The number of low queue events | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.queue.depth.low.event` Attributes
@@ -304,7 +304,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.uncommitted.messages` | Gauge | `{messages}` | Number of uncommitted messages | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.uncommitted.messages` | Gauge | `{message}` | Number of uncommitted messages | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.uncommitted.messages` Attributes
@@ -380,7 +380,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.instances.per.client` | Gauge | `{instances}` | Instances per client | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.instances.per.client` | Gauge | `{instance}` | Instances per client | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.instances.per.client` Attributes
@@ -399,7 +399,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.deq.count` | Gauge | `{messages}` | Message dequeue count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.deq.count` | Gauge | `{message}` | Message dequeue count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.deq.count` Attributes
@@ -418,7 +418,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.enq.count` | Gauge | `{messages}` | Message enqueue count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.enq.count` | Gauge | `{message}` | Message enqueue count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.enq.count` Attributes
@@ -437,7 +437,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.queue.depth` | Gauge | `{messages}` | Current queue depth | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.depth` | Gauge | `{message}` | Current queue depth | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.queue.depth` Attributes
@@ -490,7 +490,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.manager.active.channels` | Gauge | `{channels}` | The queue manager active maximum channels limit | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.manager.active.channels` | Gauge | `{channel}` | The queue manager active maximum channels limit | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.manager.active.channels` Attributes
@@ -520,7 +520,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.max.queue.depth` | Gauge | `{messages}` | Maximum queue depth | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.max.queue.depth` | Gauge | `{message}` | Maximum queue depth | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.max.queue.depth` Attributes
@@ -577,7 +577,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.received.count` | Gauge | `{messages}` | Number of messages received | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.received.count` | Gauge | `{message}` | Number of messages received | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.received.count` Attributes
@@ -594,7 +594,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.message.sent.count` | Gauge | `{messages}` | Number of messages sent | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.message.sent.count` | Gauge | `{message}` | Number of messages sent | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.message.sent.count` Attributes
@@ -611,7 +611,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.max.instances` | Gauge | `{instances}` | Max channel instances | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.max.instances` | Gauge | `{instance}` | Max channel instances | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.max.instances` Attributes
@@ -628,7 +628,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.connection.count` | Gauge | `{connections}` | Active connections count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.connection.count` | Gauge | `{connection}` | Active connections count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.connection.count` Attributes
@@ -688,7 +688,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.manager.max.active.channels` | Gauge | `{channels}` | Queue manager max active channels | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.manager.max.active.channels` | Gauge | `{channel}` | Queue manager max active channels | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.manager.max.active.channels` Attributes
@@ -718,7 +718,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.publish.count` | Gauge | `{publications}` | Topic publication count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.publish.count` | Gauge | `{publication}` | Topic publication count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.publish.count` Attributes
@@ -736,7 +736,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.subscription.count` | Gauge | `{subscriptions}` | Topic subscription count | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.subscription.count` | Gauge | `{subscription}` | Topic subscription count | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.subscription.count` Attributes
@@ -770,7 +770,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.unauthorized.event` | Counter | `{events}` | Number of authentication error events | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.unauthorized.event` | Counter | `{event}` | Number of authentication error events | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.unauthorized.event` Attributes
@@ -791,7 +791,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.manager.max.handles` | Gauge | `{events}` | Max open handles | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.manager.max.handles` | Gauge | `{event}` | Max open handles | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.manager.max.handles` Attributes

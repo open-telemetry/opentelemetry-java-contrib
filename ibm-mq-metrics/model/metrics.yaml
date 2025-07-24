@@ -5,7 +5,7 @@ groups:
     stability: development
     brief: "Number of message retries"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -37,7 +37,7 @@ groups:
     stability: development
     brief: "Maximum number of conversations permitted on this channel instance."
     instrument: gauge
-    unit: "{conversations}"
+    unit: "{conversation}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -53,7 +53,7 @@ groups:
     type: metric
     metric_name: ibm.mq.current.sharing.conversations
     stability: development
-    unit: "{conversations}"
+    unit: "{conversation}"
     brief: "Current number of conversations permitted on this channel instance."
     instrument: gauge
     attributes:
@@ -73,7 +73,7 @@ groups:
     stability: development
     brief: "Number of bytes received"
     instrument: gauge
-    unit: "{bytes}"
+    unit: "By"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -91,7 +91,7 @@ groups:
     stability: development
     brief: "Number of bytes sent"
     instrument: gauge
-    unit: "{bytes}"
+    unit: "By"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -109,7 +109,7 @@ groups:
     stability: development
     brief: "Buffers received"
     instrument: gauge
-    unit: "{buffers}"
+    unit: "{buffer}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -126,7 +126,7 @@ groups:
     metric_name: ibm.mq.buffers.sent
     stability: development
     brief: "Buffers sent"
-    unit: "{buffers}"
+    unit: "{buffer}"
     instrument: gauge
     attributes:
       - ref: ibm.mq.channel.name
@@ -144,7 +144,7 @@ groups:
     metric_name: ibm.mq.message.count
     stability: development
     brief: "Message count"
-    unit: "{messages}"
+    unit: "{message}"
     instrument: gauge
     attributes:
       - ref: ibm.mq.channel.name
@@ -163,7 +163,7 @@ groups:
     stability: development
     brief: "Count of applications sending messages to the queue"
     instrument: gauge
-    unit: "{applications}"
+    unit: "{application}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -177,7 +177,7 @@ groups:
     stability: development
     brief: "Count of applications consuming messages from the queue"
     instrument: gauge
-    unit: "{applications}"
+    unit: "{application}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -219,7 +219,7 @@ groups:
     stability: development
     brief: "The number of full queue events"
     instrument: counter
-    unit: "{events}"
+    unit: "{event}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -231,7 +231,7 @@ groups:
     stability: development
     brief: "The number of high queue events"
     instrument: counter
-    unit: "{events}"
+    unit: "{event}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -243,7 +243,7 @@ groups:
     stability: development
     brief: "The number of low queue events"
     instrument: counter
-    unit: "{events}"
+    unit: "{event}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -255,7 +255,7 @@ groups:
     stability: development
     brief: "Number of uncommitted messages"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -311,7 +311,7 @@ groups:
     stability: development
     brief: "Instances per client"
     instrument: gauge
-    unit: "{instances}"
+    unit: "{instance}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -325,7 +325,7 @@ groups:
     stability: development
     brief: "Message dequeue count"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -339,7 +339,7 @@ groups:
     stability: development
     brief: "Message enqueue count"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -353,7 +353,7 @@ groups:
     stability: development
     brief: "Current queue depth"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -391,7 +391,7 @@ groups:
     stability: development
     brief: "The queue manager active maximum channels limit"
     instrument: gauge
-    unit: "{channels}"
+    unit: "{channel}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -411,7 +411,7 @@ groups:
     stability: development
     brief: "Maximum queue depth"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -453,7 +453,7 @@ groups:
     stability: development
     brief: "Number of messages received"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -467,7 +467,7 @@ groups:
     stability: development
     brief: "Number of messages sent"
     instrument: gauge
-    unit: "{messages}"
+    unit: "{message}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -481,7 +481,7 @@ groups:
     stability: development
     brief: "Max channel instances"
     instrument: gauge
-    unit: "{instances}"
+    unit: "{instance}"
     attributes:
       - ref: ibm.mq.channel.name
         requirement_level: required
@@ -495,7 +495,7 @@ groups:
     stability: development
     brief: "Active connections count"
     instrument: gauge
-    unit: "{connections}"
+    unit: "{connection}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -535,7 +535,7 @@ groups:
     stability: development
     brief: "Queue manager max active channels"
     instrument: gauge
-    unit: "{channels}"
+    unit: "{channel}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -555,7 +555,7 @@ groups:
     stability: development
     brief: "Topic publication count"
     instrument: gauge
-    unit: "{publications}"
+    unit: "{publication}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -567,7 +567,7 @@ groups:
     stability: development
     brief: "Topic subscription count"
     instrument: gauge
-    unit: "{subscriptions}"
+    unit: "{subscription}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -591,7 +591,7 @@ groups:
     stability: development
     brief: "Number of authentication error events"
     instrument: counter
-    unit: "{events}"
+    unit: "{event}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
@@ -605,7 +605,7 @@ groups:
     stability: development
     brief: "Max open handles"
     instrument: gauge
-    unit: "{events}"
+    unit: "{event}"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required

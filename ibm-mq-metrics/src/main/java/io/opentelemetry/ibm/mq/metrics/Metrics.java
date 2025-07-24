@@ -19,7 +19,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.retry.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Number of message retries")
         .build();
   }
@@ -37,7 +37,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.max.sharing.conversations")
         .ofLongs()
-        .setUnit("{conversations}")
+        .setUnit("{conversation}")
         .setDescription("Maximum number of conversations permitted on this channel instance.")
         .build();
   }
@@ -46,7 +46,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.current.sharing.conversations")
         .ofLongs()
-        .setUnit("{conversations}")
+        .setUnit("{conversation}")
         .setDescription("Current number of conversations permitted on this channel instance.")
         .build();
   }
@@ -55,7 +55,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.byte.received")
         .ofLongs()
-        .setUnit("{bytes}")
+        .setUnit("By")
         .setDescription("Number of bytes received")
         .build();
   }
@@ -64,7 +64,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.byte.sent")
         .ofLongs()
-        .setUnit("{bytes}")
+        .setUnit("By")
         .setDescription("Number of bytes sent")
         .build();
   }
@@ -73,7 +73,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.buffers.received")
         .ofLongs()
-        .setUnit("{buffers}")
+        .setUnit("{buffer}")
         .setDescription("Buffers received")
         .build();
   }
@@ -82,7 +82,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.buffers.sent")
         .ofLongs()
-        .setUnit("{buffers}")
+        .setUnit("{buffer}")
         .setDescription("Buffers sent")
         .build();
   }
@@ -91,7 +91,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Message count")
         .build();
   }
@@ -100,7 +100,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.open.input.count")
         .ofLongs()
-        .setUnit("{applications}")
+        .setUnit("{application}")
         .setDescription("Count of applications sending messages to the queue")
         .build();
   }
@@ -109,7 +109,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.open.output.count")
         .ofLongs()
-        .setUnit("{applications}")
+        .setUnit("{application}")
         .setDescription("Count of applications consuming messages from the queue")
         .build();
   }
@@ -135,7 +135,7 @@ public final class Metrics {
   public static LongCounter createIbmMqQueueDepthFullEvent(Meter meter) {
     return meter
         .counterBuilder("ibm.mq.queue.depth.full.event")
-        .setUnit("{events}")
+        .setUnit("{event}")
         .setDescription("The number of full queue events")
         .build();
   }
@@ -143,7 +143,7 @@ public final class Metrics {
   public static LongCounter createIbmMqQueueDepthHighEvent(Meter meter) {
     return meter
         .counterBuilder("ibm.mq.queue.depth.high.event")
-        .setUnit("{events}")
+        .setUnit("{event}")
         .setDescription("The number of high queue events")
         .build();
   }
@@ -151,7 +151,7 @@ public final class Metrics {
   public static LongCounter createIbmMqQueueDepthLowEvent(Meter meter) {
     return meter
         .counterBuilder("ibm.mq.queue.depth.low.event")
-        .setUnit("{events}")
+        .setUnit("{event}")
         .setDescription("The number of low queue events")
         .build();
   }
@@ -160,7 +160,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.uncommitted.messages")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Number of uncommitted messages")
         .build();
   }
@@ -196,7 +196,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.instances.per.client")
         .ofLongs()
-        .setUnit("{instances}")
+        .setUnit("{instance}")
         .setDescription("Instances per client")
         .build();
   }
@@ -205,7 +205,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.deq.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Message dequeue count")
         .build();
   }
@@ -214,7 +214,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.enq.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Message enqueue count")
         .build();
   }
@@ -223,7 +223,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.queue.depth")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Current queue depth")
         .build();
   }
@@ -251,7 +251,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.manager.active.channels")
         .ofLongs()
-        .setUnit("{channels}")
+        .setUnit("{channel}")
         .setDescription("The queue manager active maximum channels limit")
         .build();
   }
@@ -269,7 +269,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.max.queue.depth")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Maximum queue depth")
         .build();
   }
@@ -298,7 +298,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.received.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Number of messages received")
         .build();
   }
@@ -307,7 +307,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.message.sent.count")
         .ofLongs()
-        .setUnit("{messages}")
+        .setUnit("{message}")
         .setDescription("Number of messages sent")
         .build();
   }
@@ -316,7 +316,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.max.instances")
         .ofLongs()
-        .setUnit("{instances}")
+        .setUnit("{instance}")
         .setDescription("Max channel instances")
         .build();
   }
@@ -325,7 +325,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.connection.count")
         .ofLongs()
-        .setUnit("{connections}")
+        .setUnit("{connection}")
         .setDescription("Active connections count")
         .build();
   }
@@ -361,7 +361,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.manager.max.active.channels")
         .ofLongs()
-        .setUnit("{channels}")
+        .setUnit("{channel}")
         .setDescription("Queue manager max active channels")
         .build();
   }
@@ -379,7 +379,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.publish.count")
         .ofLongs()
-        .setUnit("{publications}")
+        .setUnit("{publication}")
         .setDescription("Topic publication count")
         .build();
   }
@@ -388,7 +388,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.subscription.count")
         .ofLongs()
-        .setUnit("{subscriptions}")
+        .setUnit("{subscription}")
         .setDescription("Topic subscription count")
         .build();
   }
@@ -405,7 +405,7 @@ public final class Metrics {
   public static LongCounter createIbmMqUnauthorizedEvent(Meter meter) {
     return meter
         .counterBuilder("ibm.mq.unauthorized.event")
-        .setUnit("{events}")
+        .setUnit("{event}")
         .setDescription("Number of authentication error events")
         .build();
   }
@@ -414,7 +414,7 @@ public final class Metrics {
     return meter
         .gaugeBuilder("ibm.mq.manager.max.handles")
         .ofLongs()
-        .setUnit("{events}")
+        .setUnit("{event}")
         .setDescription("Max open handles")
         .build();
   }
