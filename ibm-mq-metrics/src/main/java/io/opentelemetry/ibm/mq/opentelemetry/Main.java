@@ -33,7 +33,7 @@ public final class Main {
     }
 
     try {
-      Main.class.getClassLoader().loadClass("com.ibm.mq.headers.MQDataException");
+      Class.forName("com.ibm.mq.headers.MQDataException");
     } catch (ClassNotFoundException e) {
       System.err.println("IBM MQ jar is missing from classpath.");
       System.exit(1);
