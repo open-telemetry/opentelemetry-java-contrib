@@ -197,8 +197,6 @@ public class WmqMonitor {
       try {
         name = ibmQueueManager.getName();
         ibmQueueManager.disconnect();
-        // logger.debug("Connection disconnected for queue manager {} in thread {}",
-        // ibmQueueManager.getName(), Thread.currentThread().getName());
       } catch (Exception e) {
         logger.error(
             "Error occurred while disconnecting queueManager {} in thread {}",
