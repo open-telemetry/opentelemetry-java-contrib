@@ -61,7 +61,8 @@ Please turn on those events to take advantage of this monitoring.
 Build the package with:
 
 ```shell
-./gradlew shadowJar
+cd ibm-mq-metrics
+../gradlew shadowJar
 ```
 
 Note: Due to restrictive licensing, this uber-jar (fat-jar) does not include the IBM client jar f
