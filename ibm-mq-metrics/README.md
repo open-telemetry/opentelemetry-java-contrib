@@ -65,7 +65,7 @@ cd ibm-mq-metrics
 ../gradlew shadowJar
 ```
 
-Note: Due to restrictive licensing, this uber-jar (fat-jar) does not include the IBM client jar f
+Note: Due to restrictive licensing, this uber-jar (fat-jar) does not include the IBM client jar.
 
 ## Run
 
