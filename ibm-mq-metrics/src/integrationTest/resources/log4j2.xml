@@ -2,7 +2,7 @@
 <Configuration status="WARN" monitorInterval="30">
 
     <Appenders>
-        <!-- Console appender: nice for quick output during Maven run -->
+        <!-- Console appender: nice for quick output during run -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </Console>
