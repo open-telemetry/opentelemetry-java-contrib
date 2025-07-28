@@ -37,42 +37,42 @@ class ConsistentSamplerTest {
     private OptionalLong parentThreshold = OptionalLong.empty();
     private OptionalLong parentRandomValue = OptionalLong.empty();
 
-    public void setParentSampled(boolean parentSampled) {
+    void setParentSampled(boolean parentSampled) {
       this.parentSampled = parentSampled;
     }
 
-    public void setParentThreshold(long parentThreshold) {
+    void setParentThreshold(long parentThreshold) {
       assertThat(parentThreshold).isBetween(0L, 0xffffffffffffffL);
       this.parentThreshold = OptionalLong.of(parentThreshold);
     }
 
-    public void setParentRandomValue(long parentRandomValue) {
+    void setParentRandomValue(long parentRandomValue) {
       assertThat(parentRandomValue).isBetween(0L, 0xffffffffffffffL);
       this.parentRandomValue = OptionalLong.of(parentRandomValue);
     }
 
-    public Context getParentContext() {
+    Context getParentContext() {
       return createParentContext(
           traceId, spanId, parentThreshold, parentRandomValue, parentSampled);
     }
 
-    public static String getTraceId() {
+    static String getTraceId() {
       return traceId;
     }
 
-    public static String getName() {
+    static String getName() {
       return name;
     }
 
-    public static SpanKind getSpanKind() {
+    static SpanKind getSpanKind() {
       return spanKind;
     }
 
-    public static Attributes getAttributes() {
+    static Attributes getAttributes() {
       return attributes;
     }
 
-    public static List<LinkData> getParentLinks() {
+    static List<LinkData> getParentLinks() {
       return parentLinks;
     }
   }
