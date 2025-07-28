@@ -110,8 +110,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
       applyValue(properties.getString(configKey), funcToApply);
     }
 
-    void applyWildcards(
-        String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
+    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
       String wildcardListString = properties.getString(configKey);
       if (wildcardListString != null && !wildcardListString.isEmpty()) {
         List<WildcardMatcher> values =
