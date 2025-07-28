@@ -65,7 +65,7 @@ components:
     - LikeTheSalad
     - breedx-splk
     - jack-berg
-  prometheus-collector:
+  prometheus-client-bridge:
     - jkwatson
   resource-providers:
     - breedx-splk
