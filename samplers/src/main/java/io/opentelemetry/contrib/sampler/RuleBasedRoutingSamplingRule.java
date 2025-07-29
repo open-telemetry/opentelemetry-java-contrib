@@ -11,12 +11,13 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
-class SamplingRule {
+class RuleBasedRoutingSamplingRule {
   final AttributeKey<String> attributeKey;
   final Sampler delegate;
   final Pattern pattern;
 
-  SamplingRule(AttributeKey<String> attributeKey, String pattern, Sampler delegate) {
+  RuleBasedRoutingSamplingRule(
+      AttributeKey<String> attributeKey, String pattern, Sampler delegate) {
     this.attributeKey = attributeKey;
     this.pattern = Pattern.compile(pattern);
     this.delegate = delegate;
@@ -24,7 +25,7 @@ class SamplingRule {
 
   @Override
   public String toString() {
-    return "SamplingRule{"
+    return "RuleBasedRoutingSamplingRule{"
         + "attributeKey="
         + attributeKey
         + ", delegate="
@@ -39,10 +40,10 @@ class SamplingRule {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof SamplingRule)) {
+    if (!(o instanceof RuleBasedRoutingSamplingRule)) {
       return false;
     }
-    SamplingRule that = (SamplingRule) o;
+    RuleBasedRoutingSamplingRule that = (RuleBasedRoutingSamplingRule) o;
     return attributeKey.equals(that.attributeKey) && pattern.equals(that.pattern);
   }
 
