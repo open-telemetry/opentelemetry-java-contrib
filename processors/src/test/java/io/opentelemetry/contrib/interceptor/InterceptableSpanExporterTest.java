@@ -82,7 +82,7 @@ class InterceptableSpanExporterTest {
   private static class ModifiableSpanData extends DelegatingSpanData {
     private final AttributesBuilder attributes = Attributes.builder();
 
-    protected ModifiableSpanData(SpanData delegate) {
+    ModifiableSpanData(SpanData delegate) {
       super(delegate);
     }
 

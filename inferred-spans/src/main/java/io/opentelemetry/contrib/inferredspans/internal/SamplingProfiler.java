@@ -806,7 +806,7 @@ public class SamplingProfiler implements Runnable {
   }
 
   private static class ActivationEvent {
-    public static final int SERIALIZED_SIZE =
+    static final int SERIALIZED_SIZE =
         Long.SIZE / Byte.SIZE
             + // timestamp
             TraceContext.SERIALIZED_LENGTH
@@ -826,7 +826,7 @@ public class SamplingProfiler implements Runnable {
     private long threadId;
     private boolean activation;
 
-    public void activation(
+    void activation(
         Span context,
         long threadId,
         @Nullable Span previousContext,
@@ -835,7 +835,7 @@ public class SamplingProfiler implements Runnable {
       set(context, threadId, /* activation= */ true, previousContext, nanoTime, clock);
     }
 
-    public void deactivation(
+    void deactivation(
         Span context,
         long threadId,
         @Nullable Span previousContext,
@@ -864,7 +864,7 @@ public class SamplingProfiler implements Runnable {
       this.timestamp = nanoTime;
     }
 
-    public void handle(SamplingProfiler samplingProfiler) {
+    void handle(SamplingProfiler samplingProfiler) {
       if (logger.isLoggable(Level.FINE)) {
         logger.log(
             Level.FINE,
@@ -975,7 +975,7 @@ public class SamplingProfiler implements Runnable {
       }
     }
 
-    public void serialize(ByteBuffer buf) {
+    void serialize(ByteBuffer buf) {
       buf.putLong(timestamp);
       buf.put(traceContextBuffer);
       buf.put(previousContextBuffer);
@@ -984,7 +984,7 @@ public class SamplingProfiler implements Runnable {
       buf.put(activation ? (byte) 1 : (byte) 0);
     }
 
-    public void deserialize(ByteBuffer buf) {
+    void deserialize(ByteBuffer buf) {
       timestamp = buf.getLong();
       buf.get(traceContextBuffer);
       buf.get(previousContextBuffer);

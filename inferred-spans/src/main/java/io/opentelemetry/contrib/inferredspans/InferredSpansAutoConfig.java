@@ -90,28 +90,27 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
     private final ConfigProperties properties;
 
-    public PropertiesApplier(ConfigProperties properties) {
+    PropertiesApplier(ConfigProperties properties) {
       this.properties = properties;
     }
 
-    public void applyBool(String configKey, Consumer<Boolean> funcToApply) {
+    void applyBool(String configKey, Consumer<Boolean> funcToApply) {
       applyValue(properties.getBoolean(configKey), funcToApply);
     }
 
-    public void applyInt(String configKey, Consumer<Integer> funcToApply) {
+    void applyInt(String configKey, Consumer<Integer> funcToApply) {
       applyValue(properties.getInt(configKey), funcToApply);
     }
 
-    public void applyDuration(String configKey, Consumer<Duration> funcToApply) {
+    void applyDuration(String configKey, Consumer<Duration> funcToApply) {
       applyValue(properties.getDuration(configKey), funcToApply);
     }
 
-    public void applyString(String configKey, Consumer<String> funcToApply) {
+    void applyString(String configKey, Consumer<String> funcToApply) {
       applyValue(properties.getString(configKey), funcToApply);
     }
 
-    public void applyWildcards(
-        String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
+    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
       String wildcardListString = properties.getString(configKey);
       if (wildcardListString != null && !wildcardListString.isEmpty()) {
         List<WildcardMatcher> values =

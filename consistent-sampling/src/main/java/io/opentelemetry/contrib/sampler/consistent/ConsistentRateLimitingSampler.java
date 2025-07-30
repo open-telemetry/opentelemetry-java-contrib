@@ -74,7 +74,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     private final double effectiveWindowNanos;
     private final long lastNanoTime;
 
-    public State(double effectiveWindowCount, double effectiveWindowNanos, long lastNanoTime) {
+    State(double effectiveWindowCount, double effectiveWindowNanos, long lastNanoTime) {
       this.effectiveWindowCount = effectiveWindowCount;
       this.effectiveWindowNanos = effectiveWindowNanos;
       this.lastNanoTime = lastNanoTime;
