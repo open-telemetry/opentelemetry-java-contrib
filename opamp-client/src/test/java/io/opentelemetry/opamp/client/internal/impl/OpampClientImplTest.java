@@ -6,7 +6,6 @@
 package io.opentelemetry.opamp.client.internal.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -90,7 +89,7 @@ class OpampClientImplTest {
 
   @AfterEach
   void tearDown() {
-    client.stop();
+    client.close();
   }
 
   @Test
@@ -178,21 +177,10 @@ class OpampClientImplTest {
     initializeClient();
 
     enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
-    client.stop();
+    client.close();
 
     AgentToServer agentToServerMessage = getAgentToServerMessage(takeRequest());
     assertThat(agentToServerMessage.agent_disconnect).isNotNull();
-  }
-
-  @Test
-  void verifyStartOnlyOnce() {
-    initializeClient();
-    try {
-      client.start(callbacks);
-      fail("Should have thrown an exception");
-    } catch (IllegalStateException e) {
-      assertThat(e).hasMessage("The client has already been started");
-    }
   }
 
   @Test
@@ -403,13 +391,12 @@ class OpampClientImplTest {
   }
 
   private RecordedRequest initializeClient(ServerToAgent initialResponse) {
-    client = OpampClientImpl.create(requestService, state);
-
     // Prepare first request on start
     enqueueServerToAgentResponse(initialResponse);
 
     callbacks = spy(new TestCallbacks());
-    client.start(callbacks);
+    client = OpampClientImpl.create(requestService, state, callbacks);
+
     return takeRequest();
   }
 
