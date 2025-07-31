@@ -148,9 +148,9 @@ metrics:
     enabled: true
   "ibm.mq.max.queue.depth":  # Maximum queue depth
     enabled: true
-  "ibm.mq.onqtime.1":  # Amount of time, in microseconds, that a message spent on the queue, over a short period
+  "ibm.mq.onqtime.short_period":  # Amount of time, in microseconds, that a message spent on the queue, over a short period
     enabled: true
-  "ibm.mq.onqtime.2":  # Amount of time, in microseconds, that a message spent on the queue, over a longer period
+  "ibm.mq.onqtime.long_period":  # Amount of time, in microseconds, that a message spent on the queue, over a longer period
     enabled: true
   "ibm.mq.message.received.count":  # Number of messages received
     enabled: true

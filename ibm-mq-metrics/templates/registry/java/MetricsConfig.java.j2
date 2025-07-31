@@ -18,7 +18,7 @@ public final class MetricsConfig {
       this.config = config.getMetrics();
   }
 {% for metric in ctx %}
-  public boolean is{{ metric.metric_name.split('.')|map('capitalize')|join }}Enabled() {
+  public boolean is{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}Enabled() {
     return isEnabled("{{ metric.metric_name }}");
   }
 {% endfor %}

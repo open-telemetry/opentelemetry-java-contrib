@@ -225,7 +225,7 @@ groups:
         requirement_level: required
       - ref: messaging.destination.name
         requirement_level: required
-  - id: ibm.mq..queue.depth.high.event
+  - id: ibm.mq.queue.depth.high.event
     type: metric
     metric_name: ibm.mq.queue.depth.high.event
     stability: development
@@ -237,7 +237,7 @@ groups:
         requirement_level: required
       - ref: messaging.destination.name
         requirement_level: required
-  - id: ibm.mq..queue.depth.low.event
+  - id: ibm.mq.queue.depth.low.event
     type: metric
     metric_name: ibm.mq.queue.depth.low.event
     stability: development
@@ -419,9 +419,9 @@ groups:
         requirement_level: required
       - ref: ibm.mq.queue.type
         requirement_level: required
-  - id: ibm.mq.onqtime.1
+  - id: ibm.mq.onqtime.short_period
     type: metric
-    metric_name: ibm.mq.onqtime.1
+    metric_name: ibm.mq.onqtime.short_period
     stability: development
     brief: "Amount of time, in microseconds, that a message spent on the queue, over a short period"
     instrument: gauge
@@ -433,9 +433,9 @@ groups:
         requirement_level: required
       - ref: ibm.mq.queue.type
         requirement_level: required
-  - id: ibm.mq.onqtime.2
+  - id: ibm.mq.onqtime.long_period
     type: metric
-    metric_name: ibm.mq.onqtime.2
+    metric_name: ibm.mq.onqtime.long_period
     stability: development
     brief: "Amount of time, in microseconds, that a message spent on the queue, over a longer period"
     instrument: gauge

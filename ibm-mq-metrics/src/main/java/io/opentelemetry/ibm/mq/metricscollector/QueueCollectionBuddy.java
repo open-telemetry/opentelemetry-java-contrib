@@ -135,8 +135,8 @@ final class QueueCollectionBuddy {
             MetricsConfig::isIbmMqCurrentMaxQueueFilesizeEnabled,
             MIBY_TO_BYTES));
 
-    this.onqtimeShort = Metrics.createIbmMqOnqtime1(meter);
-    this.onqtimeLong = Metrics.createIbmMqOnqtime2(meter);
+    this.onqtimeShort = Metrics.createIbmMqOnqtimeShortPeriod(meter);
+    this.onqtimeLong = Metrics.createIbmMqOnqtimeLongPeriod(meter);
   }
 
   /**
@@ -300,10 +300,10 @@ final class QueueCollectionBuddy {
     }
     if (pcfParam instanceof MQCFIL) {
       int[] metricVals = pcfMessage.getIntListParameterValue(constantValue);
-      if (context.getMetricsConfig().isIbmMqOnqtime1Enabled()) {
+      if (context.getMetricsConfig().isIbmMqOnqtimeShortPeriodEnabled()) {
         onqtimeShort.set(metricVals[0], attributes);
       }
-      if (context.getMetricsConfig().isIbmMqOnqtime2Enabled()) {
+      if (context.getMetricsConfig().isIbmMqOnqtimeLongPeriodEnabled()) {
         onqtimeLong.set(metricVals[1], attributes);
       }
     }

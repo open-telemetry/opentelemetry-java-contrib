@@ -135,12 +135,12 @@ public final class MetricsConfig {
     return isEnabled("ibm.mq.max.queue.depth");
   }
 
-  public boolean isIbmMqOnqtime1Enabled() {
-    return isEnabled("ibm.mq.onqtime.1");
+  public boolean isIbmMqOnqtimeShortPeriodEnabled() {
+    return isEnabled("ibm.mq.onqtime.short_period");
   }
 
-  public boolean isIbmMqOnqtime2Enabled() {
-    return isEnabled("ibm.mq.onqtime.2");
+  public boolean isIbmMqOnqtimeLongPeriodEnabled() {
+    return isEnabled("ibm.mq.onqtime.long_period");
   }
 
   public boolean isIbmMqMessageReceivedCountEnabled() {

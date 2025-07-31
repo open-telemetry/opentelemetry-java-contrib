@@ -74,16 +74,16 @@ public class QueueCollectionBuddyTest {
                     ImmutableMap.of(
                         "ibm.mq.oldest.msg.age", -1L,
                         "ibm.mq.uncommitted.messages", 0L,
-                        "ibm.mq.onqtime.1", -1L,
-                        "ibm.mq.onqtime.2", -1L,
+                        "ibm.mq.onqtime.short_period", -1L,
+                        "ibm.mq.onqtime.long_period", -1L,
                         "ibm.mq.queue.depth", 0L)),
                 "DEV.QUEUE.1",
                 new HashMap<>(
                     ImmutableMap.of(
                         "ibm.mq.oldest.msg.age", -1L,
                         "ibm.mq.uncommitted.messages", 10L,
-                        "ibm.mq.onqtime.1", -1L,
-                        "ibm.mq.onqtime.2", -1L,
+                        "ibm.mq.onqtime.short_period", -1L,
+                        "ibm.mq.onqtime.long_period", -1L,
                         "ibm.mq.queue.depth", 1L))));
 
     for (MetricData metric : otelTesting.getMetrics()) {

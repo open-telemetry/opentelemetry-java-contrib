@@ -277,9 +277,9 @@ public final class Metrics {
         .build();
   }
 
-  public static LongGauge createIbmMqOnqtime1(Meter meter) {
+  public static LongGauge createIbmMqOnqtimeShortPeriod(Meter meter) {
     return meter
-        .gaugeBuilder("ibm.mq.onqtime.1")
+        .gaugeBuilder("ibm.mq.onqtime.short_period")
         .ofLongs()
         .setUnit("microseconds")
         .setDescription(
@@ -287,9 +287,9 @@ public final class Metrics {
         .build();
   }
 
-  public static LongGauge createIbmMqOnqtime2(Meter meter) {
+  public static LongGauge createIbmMqOnqtimeLongPeriod(Meter meter) {
     return meter
-        .gaugeBuilder("ibm.mq.onqtime.2")
+        .gaugeBuilder("ibm.mq.onqtime.long_period")
         .ofLongs()
         .setUnit("microseconds")
         .setDescription(

@@ -17,8 +17,24 @@ public final static Function<Integer, Long> MIBY_TO_BYTES = x -> x * 1024L * 102
 private Metrics(){
 }
 {% for metric in ctx %}
-  public static {% if metric.instrument == "gauge" %}LongGauge{% elif metric.instrument == "counter" %}LongCounter{% endif %} create{{ metric.metric_name.split('.')|map('capitalize')|join }}(Meter meter) {
-    return meter.{% if metric.instrument == "gauge" %}gauge{% elif metric.instrument == "counter" %}counter{% endif %}Builder("{{ metric.metric_name }}").{% if metric.instrument == "gauge" %}ofLongs().{% endif %}setUnit("{{ metric.unit }}").setDescription("{{ metric.brief }}").build();
+
+  {% if metric.instrument == "gauge" %}
+  public static LongGauge create{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(Meter meter) {
+    return meter
+        .gaugeBuilder("{{ metric.metric_name }}")
+        .ofLongs()
+        .setUnit("{{ metric.unit }}")
+        .setDescription("{{ metric.brief }}")
+        .build();
   }
+  {% elif metric.instrument == "counter" %}
+  public static LongCounter create{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(Meter meter) {
+    return meter
+        .counterBuilder("{{ metric.metric_name }}")
+        .setUnit("{{ metric.unit }}")
+        .setDescription("{{ metric.brief }}")
+        .build();
+  }
+  {% endif %}
 {% endfor %}
 }

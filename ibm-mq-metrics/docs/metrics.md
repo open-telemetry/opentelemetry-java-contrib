@@ -535,14 +535,14 @@
 
 
 
-## Metric `ibm.mq.onqtime.1`
+## Metric `ibm.mq.onqtime.short_period`
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.onqtime.1` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a short period | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.onqtime.short_period` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a short period | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
-### `ibm.mq.onqtime.1` Attributes
+### `ibm.mq.onqtime.short_period` Attributes
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
@@ -554,14 +554,14 @@
 
 
 
-## Metric `ibm.mq.onqtime.2`
+## Metric `ibm.mq.onqtime.long_period`
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.onqtime.2` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a longer period | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.onqtime.long_period` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a longer period | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
-### `ibm.mq.onqtime.2` Attributes
+### `ibm.mq.onqtime.long_period` Attributes
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
