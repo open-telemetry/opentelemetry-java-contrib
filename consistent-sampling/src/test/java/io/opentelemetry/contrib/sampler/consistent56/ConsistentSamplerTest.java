@@ -188,7 +188,7 @@ class ConsistentSamplerTest {
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
-    assertThat(output.getThreshold()).isEmpty();
+    assertThat(output.getThreshold()).isNotPresent();
     assertThat(output.getRandomValue()).isNotPresent();
   }
 
