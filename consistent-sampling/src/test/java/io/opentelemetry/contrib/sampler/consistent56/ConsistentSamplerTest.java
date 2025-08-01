@@ -87,10 +87,6 @@ class ConsistentSamplerTest {
       this.parentContext = parentContext;
     }
 
-    boolean getSampledFlag() {
-      return SamplingDecision.RECORD_AND_SAMPLE.equals(samplingResult.getDecision());
-    }
-
     OptionalLong getThreshold() {
       Span parentSpan = Span.fromContext(parentContext);
       OtelTraceState otelTraceState =
@@ -163,7 +159,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).hasValue(0);
     assertThat(output.getRandomValue()).isNotPresent();
-    assertThat(output.getSampledFlag()).isTrue();
   }
 
   @Test
@@ -181,7 +176,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).hasValue(0);
     assertThat(output.getRandomValue()).hasValue(parentRandomValue);
-    assertThat(output.getSampledFlag()).isTrue();
   }
 
   @Test
@@ -196,7 +190,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
     assertThat(output.getThreshold()).isEmpty();
     assertThat(output.getRandomValue()).isNotPresent();
-    assertThat(output.getSampledFlag()).isFalse();
   }
 
   @Test
@@ -216,7 +209,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).hasValue(parentRandomValue);
     assertThat(output.getRandomValue()).hasValue(parentRandomValue);
-    assertThat(output.getSampledFlag()).isTrue();
   }
 
   @Test
@@ -232,7 +224,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).isNotPresent();
     assertThat(output.getRandomValue()).isNotPresent();
-    assertThat(output.getSampledFlag()).isTrue();
   }
 
   @Test
@@ -248,7 +239,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
     assertThat(output.getThreshold()).isNotPresent();
     assertThat(output.getRandomValue()).hasValue(0x7FFFFFFFFFFFFFL);
-    assertThat(output.getSampledFlag()).isFalse();
   }
 
   @Test
@@ -264,7 +254,6 @@ class ConsistentSamplerTest {
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
     assertThat(output.getThreshold()).hasValue(0x80000000000000L);
     assertThat(output.getRandomValue()).hasValue(0x80000000000000L);
-    assertThat(output.getSampledFlag()).isTrue();
   }
 
   @Test
@@ -279,9 +268,7 @@ class ConsistentSamplerTest {
     Output output = sample(input, sampler);
 
     assertThat(output.samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-
     assertThat(output.getThreshold()).hasValue(0x0L);
     assertThat(output.getRandomValue()).hasValue(0x80000000000000L);
-    assertThat(output.getSampledFlag()).isTrue();
   }
 }
