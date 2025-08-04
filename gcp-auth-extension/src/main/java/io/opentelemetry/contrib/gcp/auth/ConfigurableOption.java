@@ -92,8 +92,7 @@ enum ConfigurableOption {
   }
 
   /**
-   * Retrieves the configured value for this option. This method checks the environment variable
-   * first and then the system property.
+   * Retrieves the configured value for this option.
    *
    * @return The configured value as a string, or throws an exception if not configured.
    * @throws ConfigurationException if neither the environment variable nor the system property is
@@ -113,10 +112,9 @@ enum ConfigurableOption {
   }
 
   /**
-   * Retrieves the configured value for this option. This method checks the environment variable
-   * first and then the system property.
+   * Retrieves the configured value for this option.
    *
-   * @return The configured value as a string, or throws an exception if not configured.
+   * @return The configured value as a string, or {@code null} if not configured.
    */
   @Nullable
   <T> T getConfiguredValue(
