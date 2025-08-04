@@ -161,6 +161,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
                 targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
   }
 
+  @VisibleForTesting
   static List<String> targetSignals(ConfigProperties configProperties) {
     return Objects.requireNonNull(
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValue(
