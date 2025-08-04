@@ -11,6 +11,7 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.contrib.sdk.autoconfigure.ConfigPropertiesUtil;
 import io.opentelemetry.contrib.sdk.autoconfigure.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -37,7 +38,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
-public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustomizerProvider {
+public class GcpAuthDeclarativeConfigurationCustomizerProvider implements DeclarativeConfigurationCustomizerProvider {
 
   static final String SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION =
       String.format(

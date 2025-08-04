@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
-import static io.opentelemetry.contrib.gcp.auth.GcpAuthCustomizerProvider.SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthDeclarativeConfigurationCustomizerProvider.SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
-class GcpAuthCustomizerProviderTest {
+class GcpAuthDeclarativeConfigurationCustomizerProviderTest {
 
   @Test
   void declarativeConfig() throws IOException {
@@ -51,7 +51,7 @@ class GcpAuthCustomizerProviderTest {
     OpenTelemetryConfigurationModel model =
         DeclarativeConfiguration.parse(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    ConfigProperties properties = GcpAuthCustomizerProvider.getConfigProperties(model);
+    ConfigProperties properties = GcpAuthDeclarativeConfigurationCustomizerProvider.getConfigProperties(model);
 
     assertThat(GcpAuthAutoConfigurationCustomizerProvider.targetSignals(properties))
         .containsExactly("metrics", "traces");
@@ -64,7 +64,7 @@ class GcpAuthCustomizerProviderTest {
         .thenReturn(
             Collections.singletonMap("x-goog-user-project", Collections.singletonList("qp")));
 
-    GcpAuthCustomizerProvider.customize(model, credentials, properties);
+    GcpAuthDeclarativeConfigurationCustomizerProvider.customize(model, credentials, properties);
 
     String header =
         "headers=\\[io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.NameStringValuePairModel@.*\\[name=x-goog-user-project,value=qp]";
