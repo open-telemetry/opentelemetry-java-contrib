@@ -2,7 +2,6 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("com.gradleup.shadow")
-  id("org.springframework.boot") version "2.7.18"
 }
 
 description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"
@@ -14,6 +13,8 @@ val agent: Configuration by configurations.creating {
 }
 
 dependencies {
+  implementation(platform("org.springframework.boot:spring-boot-dependencies:2.7.18"))
+
   annotationProcessor("com.google.auto.service:auto-service")
   // We use `compileOnly` dependency because during runtime all necessary classes are provided by
   // javaagent itself.
@@ -87,11 +88,6 @@ tasks {
 
   assemble {
     dependsOn(shadowJar)
-  }
-
-  bootJar {
-    // disable bootJar in build since it only runs as part of test
-    enabled = false
   }
 }
 
