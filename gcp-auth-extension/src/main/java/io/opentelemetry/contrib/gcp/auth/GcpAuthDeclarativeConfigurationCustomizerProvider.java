@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_METRICS;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_TRACES;
-import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.shouldConfigureExporter;
+import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.shouldCustomizeExporter;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
@@ -86,7 +86,7 @@ public class GcpAuthDeclarativeConfigurationCustomizerProvider implements Declar
       return;
     }
 
-    if (shouldConfigureExporter(
+    if (shouldCustomizeExporter(
         SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION, configProperties)) {
       for (MetricReaderModel reader : meterProvider.getReaders()) {
         if (reader.getPeriodic() != null) {
@@ -122,7 +122,7 @@ public class GcpAuthDeclarativeConfigurationCustomizerProvider implements Declar
       return;
     }
 
-    if (shouldConfigureExporter(
+    if (shouldCustomizeExporter(
         SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION, configProperties)) {
       for (SpanProcessorModel processor : tracerProvider.getProcessors()) {
         BatchSpanProcessorModel batch = processor.getBatch();

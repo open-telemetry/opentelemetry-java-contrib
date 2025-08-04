@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
@@ -124,7 +125,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldConfigureExporter(
+    if (shouldCustomizeExporter(
         SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     }
@@ -133,14 +134,25 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldConfigureExporter(
+    if (shouldCustomizeExporter(
         SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
     }
     return exporter;
   }
 
-  static boolean shouldConfigureExporter(
+  /**
+   * Utility method to check whether OTLP exporters should be customized for the given target
+   * signal.
+   *
+   * @param signal The target signal to check against. Could be one of {@value SIGNAL_TYPE_TRACES},
+   *     {@value SIGNAL_TYPE_METRICS} or {@value SIGNAL_TYPE_ALL}.
+   * @param fixSuggestion A warning to alert the user that auth extension is not configured for the
+   *     provided target signal.
+   * @param configProperties The {@link ConfigProperties} object used to configure the extension.
+   * @return A boolean indicating whether the OTLP exporters should be customized or not.
+   */
+  static boolean shouldCustomizeExporter(
       String signal, String fixSuggestion, ConfigProperties configProperties) {
     if (isSignalTargeted(signal, configProperties)) {
       return true;
