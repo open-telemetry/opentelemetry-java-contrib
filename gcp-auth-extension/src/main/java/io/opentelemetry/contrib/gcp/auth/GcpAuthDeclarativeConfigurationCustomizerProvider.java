@@ -38,7 +38,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
-public class GcpAuthDeclarativeConfigurationCustomizerProvider implements DeclarativeConfigurationCustomizerProvider {
+public class GcpAuthDeclarativeConfigurationCustomizerProvider
+    implements DeclarativeConfigurationCustomizerProvider {
 
   static final String SIGNAL_TARGET_WARNING_YAML_FIX_SUGGESTION =
       String.format(

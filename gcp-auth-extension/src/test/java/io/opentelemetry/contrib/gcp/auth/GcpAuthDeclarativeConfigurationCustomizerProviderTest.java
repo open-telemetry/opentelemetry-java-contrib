@@ -51,7 +51,8 @@ class GcpAuthDeclarativeConfigurationCustomizerProviderTest {
     OpenTelemetryConfigurationModel model =
         DeclarativeConfiguration.parse(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    ConfigProperties properties = GcpAuthDeclarativeConfigurationCustomizerProvider.getConfigProperties(model);
+    ConfigProperties properties =
+        GcpAuthDeclarativeConfigurationCustomizerProvider.getConfigProperties(model);
 
     assertThat(GcpAuthAutoConfigurationCustomizerProvider.targetSignals(properties))
         .containsExactly("metrics", "traces");
