@@ -59,6 +59,7 @@ public class GcpAuthCustomizerProvider implements DeclarativeConfigurationCustom
         });
   }
 
+  @VisibleForTesting
   static void customize(
       OpenTelemetryConfigurationModel model,
       GoogleCredentials credentials,
