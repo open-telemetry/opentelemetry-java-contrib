@@ -1,6 +1,6 @@
 plugins {
   id("java")
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
   id("otel.java-conventions")
   id("otel.publish-conventions")
 }

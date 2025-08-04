@@ -1,7 +1,7 @@
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
   id("org.springframework.boot") version "2.7.18"
 }
 
