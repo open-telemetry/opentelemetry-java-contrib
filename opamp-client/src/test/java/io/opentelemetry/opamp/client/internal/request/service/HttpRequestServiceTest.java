@@ -352,15 +352,15 @@ class HttpRequestServiceTest {
       return response;
     }
 
-    public void enqueueResponse(HttpSender.Response response) {
+    void enqueueResponse(HttpSender.Response response) {
       enqueueResponseFuture(CompletableFuture.completedFuture(response));
     }
 
-    public void enqueueResponseFuture(CompletableFuture<HttpSender.Response> future) {
+    void enqueueResponseFuture(CompletableFuture<HttpSender.Response> future) {
       responses.add(future);
     }
 
-    public List<RequestParams> getRequests(int size) {
+    List<RequestParams> getRequests(int size) {
       assertThat(requests).hasSize(size);
       List<RequestParams> immutableRequests =
           Collections.unmodifiableList(new ArrayList<>(requests));
@@ -369,7 +369,7 @@ class HttpRequestServiceTest {
     }
 
     private static class RequestParams {
-      public final int contentLength;
+      final int contentLength;
 
       private RequestParams(int contentLength) {
         this.contentLength = contentLength;

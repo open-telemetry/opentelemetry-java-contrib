@@ -766,8 +766,8 @@ public final class MetricDataMapper {
   }
 
   private static final class DataWithType {
-    public final Data<?> data;
-    public final MetricDataType type;
+    final Data<?> data;
+    final MetricDataType type;
 
     private DataWithType(Data<?> data, MetricDataType type) {
       this.data = data;

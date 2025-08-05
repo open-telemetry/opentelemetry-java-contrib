@@ -125,7 +125,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
       return CompletableResultCode.ofSuccess();
     }
 
-    public void reset() {
+    void reset() {
       this.countDownLatch = new CountDownLatch(numberOfSpansToWaitFor);
     }
   }
