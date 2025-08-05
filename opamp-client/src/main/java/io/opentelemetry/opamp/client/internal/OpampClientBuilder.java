@@ -381,11 +381,7 @@ public final class OpampClientBuilder {
     return this;
   }
 
-  public OpampClient build() {
-    if (service == null) {
-      throw new IllegalStateException(
-          "The request service is not set. You must provide it by calling setRequestService()");
-    }
+  public OpampClient build(OpampClient.Callbacks callbacks) {
     List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
     List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
     identifyingAttributes.forEach(
@@ -411,7 +407,7 @@ public final class OpampClientBuilder {
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
-    return OpampClientImpl.create(service, state);
+    return OpampClientImpl.create(service, state, callbacks);
   }
 
   private static State.EffectiveConfig createEffectiveConfigNoop() {

@@ -11,6 +11,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.RetryAfterParser
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
+import io.opentelemetry.opamp.client.internal.request.delay.RetryPeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.IOException;
@@ -47,6 +48,8 @@ public final class HttpRequestService implements RequestService {
   @Nullable private Supplier<Request> requestSupplier;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_REQUESTS =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
+  public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
+      RetryPeriodicDelay.create(Duration.ofSeconds(30));
 
   /**
    * Creates an {@link HttpRequestService}.
@@ -54,7 +57,7 @@ public final class HttpRequestService implements RequestService {
    * @param requestSender The HTTP sender implementation.
    */
   public static HttpRequestService create(HttpSender requestSender) {
-    return create(requestSender, DEFAULT_DELAY_BETWEEN_REQUESTS, DEFAULT_DELAY_BETWEEN_REQUESTS);
+    return create(requestSender, DEFAULT_DELAY_BETWEEN_REQUESTS, DEFAULT_DELAY_BETWEEN_RETRIES);
   }
 
   /**
