@@ -1,0 +1,36 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.opentelemetry.ibm.mq.metrics;
+
+import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
+import java.util.Map;
+
+// This file is generated using weaver. Do not edit manually.
+
+/** Configuration of metrics as defined in config.yml. */
+public final class MetricsConfig {
+
+  private final Map<String, ?> config;
+
+  public MetricsConfig(ConfigWrapper config) {
+      this.config = config.getMetrics();
+  }
+{% for metric in ctx %}
+  public boolean is{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}Enabled() {
+    return isEnabled("{{ metric.metric_name }}");
+  }
+{% endfor %}
+  private boolean isEnabled(String key) {
+    Object metricInfo = config.get(key);
+    if (!(metricInfo instanceof Map)) {
+      return false;
+    }
+    Object enabled = ((Map<?, ?>) metricInfo).get("enabled");
+    if (enabled instanceof Boolean) {
+      return (Boolean) enabled;
+    }
+    return false;
+  }
+}
