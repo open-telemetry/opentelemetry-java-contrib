@@ -66,11 +66,11 @@ public final class EcsResource {
   }
 
   private static Resource buildResource() {
-    return buildResource(System.getenv(), new SimpleHttpClient());
+    return buildResource(System.getenv(), new JdkHttpClient());
   }
 
   // Visible for testing
-  static Resource buildResource(Map<String, String> sysEnv, SimpleHttpClient httpClient) {
+  static Resource buildResource(Map<String, String> sysEnv, JdkHttpClient httpClient) {
     // Note: If V4 is set V3 is set as well, so check V4 first.
     String ecsMetadataUrl =
         sysEnv.getOrDefault(ECS_METADATA_KEY_V4, sysEnv.getOrDefault(ECS_METADATA_KEY_V3, ""));
@@ -86,8 +86,7 @@ public final class EcsResource {
     return Resource.empty();
   }
 
-  static void fetchMetadata(
-      SimpleHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
+  static void fetchMetadata(JdkHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
     String json = httpClient.fetchString("GET", url, Collections.emptyMap(), null);
     if (json.isEmpty()) {
       return;
