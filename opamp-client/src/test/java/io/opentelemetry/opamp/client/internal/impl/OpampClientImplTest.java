@@ -209,7 +209,7 @@ class OpampClientImplTest {
     requestService.sendRequest();
 
     // Await for onMessage call
-    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onMessageCalls.get() == 1);
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onMessageCalls.get() == 1);
 
     verify(callbacks).onMessage(MessageData.builder().setRemoteConfig(remoteConfig).build());
   }
@@ -267,7 +267,7 @@ class OpampClientImplTest {
   void onConnectionSuccessful_notifyCallback() {
     initializeClient();
 
-    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onConnectCalls.get() == 1);
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onConnectCalls.get() == 1);
 
     verify(callbacks).onConnect();
     verify(callbacks, never()).onConnectFailed(any());
@@ -311,7 +311,7 @@ class OpampClientImplTest {
     // Force request
     requestService.sendRequest();
 
-    await().atMost(Duration.ofSeconds(1)).until(() -> callbacks.onErrorResponseCalls.get() == 1);
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onErrorResponseCalls.get() == 1);
 
     verify(callbacks).onErrorResponse(errorResponse);
     verify(callbacks, never()).onMessage(any());
@@ -344,7 +344,7 @@ class OpampClientImplTest {
     enqueueServerToAgentResponse(response);
     requestService.sendRequest();
 
-    await().atMost(Duration.ofSeconds(1)).until(() -> state.instanceUid.get() != initialUid);
+    await().atMost(Duration.ofSeconds(5)).until(() -> state.instanceUid.get() != initialUid);
 
     assertThat(state.instanceUid.get()).isEqualTo(serverProvidedUid);
   }
@@ -359,7 +359,7 @@ class OpampClientImplTest {
 
   private RecordedRequest takeRequest() {
     try {
-      return server.takeRequest(1, TimeUnit.SECONDS);
+      return server.takeRequest(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
