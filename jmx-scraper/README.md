@@ -6,6 +6,12 @@ The JMX MBeans and their metric mappings are defined in YAML and reuse implement
 
 This is an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
 
+## Release
+
+This project is released as part of the [OpenTelemetry Java Contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) project. 
+The latest release is available from [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
+or can be browsed via [MVN Repository](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper).
+
 ## Usage
 
 The general command to invoke JMX scraper is `java -jar scraper.jar <config>`, where `scraper.jar`
