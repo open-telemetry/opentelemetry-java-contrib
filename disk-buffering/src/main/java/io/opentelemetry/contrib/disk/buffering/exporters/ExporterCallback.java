@@ -11,21 +11,6 @@ public interface ExporterCallback {
   void onShutdown(SignalType type);
 
   static ExporterCallback noop() {
-    return Noop.INSTANCE;
-  }
-
-  class Noop implements ExporterCallback {
-    private static final Noop INSTANCE = new Noop();
-
-    private Noop() {}
-
-    @Override
-    public void onExportSuccess(SignalType type) {}
-
-    @Override
-    public void onExportError(SignalType type, @Nullable Throwable error) {}
-
-    @Override
-    public void onShutdown(SignalType type) {}
+    return NoopExporterCallback.INSTANCE;
   }
 }

@@ -7,4 +7,8 @@ public interface WriteResult {
 
   @Nullable
   Throwable getError();
+
+  static WriteResult create(boolean successful, @Nullable Throwable error) {
+    return new DefaultWriteResult(successful, error);
+  }
 }
