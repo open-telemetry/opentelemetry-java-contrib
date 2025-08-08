@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+/** Internal utility for common export to disk operations across all exporters. */
 final class SignalStorageExporter<T> {
   private final SignalStorage<T> storage;
   private final ExporterCallback callback;

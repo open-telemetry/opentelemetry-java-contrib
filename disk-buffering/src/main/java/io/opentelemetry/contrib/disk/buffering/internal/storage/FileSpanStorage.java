@@ -9,24 +9,27 @@ import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 
-public class FileSpanStorage implements SignalStorage.Span {
+/** Default storage implementation where items are stored in multiple protobuf files. */
+public final class FileSpanStorage implements SignalStorage.Span {
 
   @Override
   public CompletableFuture<WriteResult> write(Collection<SpanData> items) {
-    return null;
+    throw new UnsupportedOperationException("For next PR");
   }
 
   @Override
   public CompletableFuture<WriteResult> clear() {
-    return null;
+    throw new UnsupportedOperationException("For next PR");
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() throws IOException {
+    throw new UnsupportedOperationException("For next PR");
+  }
 
   @Nonnull
   @Override
   public Iterator<Collection<SpanData>> iterator() {
-    return null;
+    throw new UnsupportedOperationException("For next PR");
   }
 }

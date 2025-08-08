@@ -8,6 +8,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.time.Duration;
 import java.util.Collection;
 
+/** Exporter that stores spans into disk. */
 public final class SpanToDiskExporter implements SpanExporter {
   private final SignalStorageExporter<SpanData> storageExporter;
   private final ExporterCallback callback;
