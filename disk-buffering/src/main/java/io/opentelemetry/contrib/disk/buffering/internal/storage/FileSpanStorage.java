@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 
 public class FileSpanStorage implements SignalStorage.Span {
 
@@ -17,9 +17,14 @@ public class FileSpanStorage implements SignalStorage.Span {
   }
 
   @Override
+  public CompletableFuture<WriteResult> clear() {
+    return null;
+  }
+
+  @Override
   public void close() throws IOException {}
 
-  @NotNull
+  @Nonnull
   @Override
   public Iterator<Collection<SpanData>> iterator() {
     return null;

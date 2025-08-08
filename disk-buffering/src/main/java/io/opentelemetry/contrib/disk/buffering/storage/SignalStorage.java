@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 public interface SignalStorage<T> extends Iterable<Collection<T>>, Closeable {
   CompletableFuture<WriteResult> write(Collection<T> items);
 
+  CompletableFuture<WriteResult> clear();
+
   interface Span extends SignalStorage<SpanData> {}
 
   interface LogRecord extends SignalStorage<LogRecordData> {}
