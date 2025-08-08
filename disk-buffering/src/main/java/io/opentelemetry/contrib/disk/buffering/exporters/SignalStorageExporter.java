@@ -12,7 +12,9 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
 final class SignalStorageExporter<T> {
@@ -44,7 +46,7 @@ final class SignalStorageExporter<T> {
         }
         return CompletableResultCode.ofFailure();
       }
-    } catch (Throwable e) {
+    } catch (ExecutionException | InterruptedException | TimeoutException e) {
       callback.onExportError(type, e);
       return CompletableResultCode.ofExceptionalFailure(e);
     }

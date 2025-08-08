@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.SignalType;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -50,11 +51,13 @@ public final class SpanToDiskExporter implements SpanExporter {
     private ExporterCallback callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
+    @CanIgnoreReturnValue
     public Builder setExporterCallback(ExporterCallback value) {
       callback = value;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder setWriteTimeout(Duration value) {
       writeTimeout = value;
       return this;
