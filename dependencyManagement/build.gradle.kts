@@ -45,8 +45,8 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.12.7")
-    api("org.assertj:assertj-core:3.27.3")
+    api("com.uber.nullaway:nullaway:0.12.8")
+    api("org.assertj:assertj-core:3.27.4")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
