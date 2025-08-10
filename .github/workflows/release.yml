@@ -181,12 +181,18 @@ jobs:
         run: |
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
+          cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar
+          cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar.asc
+          
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar \
-                            opentelemetry-jmx-metrics.jar.asc
+                            opentelemetry-jmx-metrics.jar.asc \ 
+                            opentelemetry-jmx-scraper.jar \
+                            opentelemetry-jmx-scraper.jar.asc 
+                            
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
