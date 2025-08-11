@@ -1052,7 +1052,7 @@ class CallTreeTest {
     private final List<StackFrame> trace;
     private final long nanoTime;
 
-    public StackTraceEvent(List<StackFrame> trace, long nanoTime) {
+    StackTraceEvent(List<StackFrame> trace, long nanoTime) {
 
       this.trace = trace;
       this.nanoTime = nanoTime;

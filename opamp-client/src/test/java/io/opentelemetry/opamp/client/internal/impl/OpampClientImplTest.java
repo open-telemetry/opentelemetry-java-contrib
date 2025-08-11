@@ -416,7 +416,7 @@ class OpampClientImplTest {
   private static class TestEffectiveConfig extends State.EffectiveConfig {
     private opamp.proto.EffectiveConfig config;
 
-    public TestEffectiveConfig(opamp.proto.EffectiveConfig initialValue) {
+    TestEffectiveConfig(opamp.proto.EffectiveConfig initialValue) {
       config = initialValue;
     }
 
