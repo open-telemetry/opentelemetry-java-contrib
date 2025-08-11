@@ -1,14 +1,14 @@
-# this file is used by .github/workflows/assign-reviewers.yml
+# this file is used by .github/workflows/assign-reviewers.yml and .github/workflows/assign-issue-owners.yml
 #
 # NOTE component owners must be members of the GitHub OpenTelemetry organization
 # so that they can be added to @open-telemetry/java-contrib-triagers
-# which in turn is required for them to be auto-assigned as reviewers by the automation
+# which in turn is required for them to be auto-assigned as reviewers and issue assignees by the automation
 #
 # NOTE when updating this file, don't forget to update the README.md files in the associated
 # components also
 #
 # NOTE when adding/updating one of the component names, don't forget to update the associated
-# `comp:*` labels
+# `component:*` labels (used for both PR reviews and issue assignment)
 components:
   aws-resources:
     - wangzlei
@@ -65,7 +65,7 @@ components:
     - LikeTheSalad
     - breedx-splk
     - jack-berg
-  prometheus-collector:
+  prometheus-client-bridge:
     - jkwatson
   resource-providers:
     - breedx-splk
