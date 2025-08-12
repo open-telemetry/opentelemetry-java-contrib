@@ -12,7 +12,7 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
-  implementation("com.squareup.okhttp3:okhttp")
+  implementation("com.squareup.okhttp3:okhttp-jvm")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
