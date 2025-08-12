@@ -199,6 +199,10 @@ public class JfrParser implements Recyclable {
       case ContentTypeId.CONTENT_SYMBOL:
         readSymbolConstants(count);
         break;
+      case ContentTypeId.CONTENT_STRING:
+        // ignore empty string
+        bufferedFile.skip(2);
+        break;
       default:
         throw new IllegalStateException("Unhandled constant pool type: " + typeId);
     }
@@ -499,5 +503,6 @@ public class JfrParser implements Recyclable {
     static final int CONTENT_FRAME_TYPE = 24;
     static final int CONTENT_GC_WHEN = 32;
     static final int CONTENT_PACKAGE = 30;
+    static final int CONTENT_STRING = 20;
   }
 }
