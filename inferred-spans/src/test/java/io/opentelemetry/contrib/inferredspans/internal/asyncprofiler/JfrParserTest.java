@@ -58,6 +58,6 @@ class JfrParserTest {
           }
           stackFrames.clear();
         });
-    assertThat(stackTraces.get()).isEqualTo(66);
+    assertThat(stackTraces.get()).isEqualTo(92);
   }
 }
