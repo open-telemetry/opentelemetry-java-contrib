@@ -14,6 +14,17 @@ The Maven OpenTelemetry Extension is configured using environment variables or J
 In the code snippets below, replace `OPENTELEMETRY_MAVEN_VERSION` with the [latest
 release](https://search.maven.org/search?q=g:io.opentelemetry.contrib%20AND%20a:opentelemetry-maven-extension).
 
+## Installation
+jmx-scraper is typically run as a standalone JAR file. 
+o use it, you generally need to download the latest JAR from the OpenTelemetry Java Contrib releases page 
+or retrieve it as a dependency from a Maven repository. 
+Once obtained, you can run it using the Java command line tool.
+Please refer to [Usage](#usage). 
+
+For systemd service, the opentelemetry-jmx-scraper-x.xx.x.tar.gz tar.gz file is available 
+with the JAR and a ready to install systemd service file.
+
+
 ### Adding the extension to the classpath
 
 Add the Maven OpenTelemetry Extension to `${maven.home}/lib/ext` or to the classpath using `-Dmaven.ext.class.path=`.
