@@ -1,9 +1,7 @@
 plugins {
   application
   id("com.gradleup.shadow")
-
   id("otel.java-conventions")
-
   id("otel.publish-conventions")
 }
 
@@ -89,6 +87,39 @@ tasks {
   // the POM anyways so in practice we shouldn't be losing anything.
   withType<GenerateModuleMetadata>().configureEach {
     enabled = false
+  }
+}
+
+// This task copies the jar to a package dir for packaging.
+val copyJarForPackage by tasks.registering(Copy::class) {
+  dependsOn(tasks.jar)
+
+  // Clean target directory before copying
+  doFirst {
+    val targetDir = file("package/usr/local/bin")
+    if (targetDir.exists()) {
+      targetDir.deleteRecursively()
+    }
+  }
+
+  from(tasks.jar.get().outputs.files)
+  into("package/usr/local/bin")
+  rename { "jmx-scraper.jar" }
+}
+
+// This task creates a tarball of the package directory.
+val createTarball by tasks.registering(Tar::class) {
+  dependsOn(copyJarForPackage)
+  archiveBaseName.set("opentelemetry-jmx-scraper")
+  archiveVersion.set(project.version.toString())
+  archiveExtension.set("tar.gz")
+  compression = Compression.GZIP
+  // simply put it at the project root
+  destinationDirectory.set(file("./"))
+
+  from("package") {
+    // preserve directory structure relative to package/
+    into("/")
   }
 }
 

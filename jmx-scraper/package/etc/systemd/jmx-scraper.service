@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenTelemetry JMX Scraper
+After=network.target
+
+[Service]
+Type=simple
+User=jmxscraper
+Group=jmxscraper
+ExecStart=/usr/bin/java -jar /usr/local/bin/jmx-scraper.jar
+Restart=on-failure
+RestartSec=10
+WorkingDirectory=/usr/local/bin
+
+[Install]
+WantedBy=multi-user.target
