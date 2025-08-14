@@ -5,13 +5,14 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
-import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
+import com.google.cloud.ServiceOptions;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
@@ -25,6 +26,7 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -111,7 +113,12 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
                 customizeMetricExporter(metricExporter, credentials, configProperties))
-        .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
+        .addResourceCustomizer(
+            (resource, configProperties) -> {
+              String gcpProjectId = getGoogleProjectId(configProperties);
+
+              return customizeResource(resource, gcpProjectId);
+            });
   }
 
   @Override
@@ -228,10 +235,35 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
-  private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
-    Resource res = Resource.create(Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
+  private static Resource customizeResource(Resource resource, String gcpProjectId) {
+    Resource res =
+        Resource.create(
+            Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
     return resource.merge(res);
+  }
+
+  /**
+   * Retrieves the Google Cloud Project ID from the configuration properties, falling back to
+   * google-cloud-core's ServiceOptions project ID resolution if not explicitly set.
+   *
+   * @param configProperties The configuration properties containing the GCP project ID.
+   * @return The Google Cloud Project ID.
+   */
+  @Nonnull
+  static String getGoogleProjectId(ConfigProperties configProperties) {
+    String googleProjectId =
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValueWithFallback(
+            configProperties, ServiceOptions::getDefaultProjectId);
+
+    if (googleProjectId == null || googleProjectId.isEmpty()) {
+      throw new ConfigurationException(
+          String.format(
+              "GCP Authentication Extension not configured properly: %s not configured. Configure it by exporting environment variable %s or system property %s",
+              ConfigurableOption.GOOGLE_CLOUD_PROJECT,
+              ConfigurableOption.GOOGLE_CLOUD_PROJECT.getEnvironmentVariable(),
+              ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty()));
+    }
+
+    return googleProjectId;
   }
 }
