@@ -104,7 +104,7 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
     private final double effectiveDelegateProbability;
     private final long lastNanoTime;
 
-    public State(
+    State(
         double effectiveWindowCount,
         double effectiveWindowNanos,
         long lastNanoTime,

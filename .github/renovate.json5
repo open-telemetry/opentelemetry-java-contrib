@@ -6,6 +6,7 @@
   ],
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
+    'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
   ],
   prHourlyLimit: 5, // we have a large number of parallel runners
   labels: [
@@ -170,11 +171,22 @@
       customType: 'regex',
       datasourceTemplate: 'npm',
       managerFilePatterns: [
-        '/^.github/workflows//',
+        '.github/workflows/**'
       ],
       matchStrings: [
         'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
       ],
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'java-version',
+      managerFilePatterns: [
+        '.github/workflows/**'
+      ],
+      matchStrings: [
+        '(?<currentValue>\\d+) # renovate: datasource=java-version',
+      ],
+      depNameTemplate: 'java',
     },
   ],
 }

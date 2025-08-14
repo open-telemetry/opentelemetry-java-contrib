@@ -23,8 +23,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        id: create-token
+        with:
+          # analyzing classic branch protections requires a token with admin read permissions
+          # see https://github.com/ossf/scorecard-action/blob/main/docs/authentication/fine-grained-auth-token.md
+          # and https://github.com/open-telemetry/community/issues/2769
+          app-id: ${{ vars.OSSF_SCORECARD_APP_ID }}
+          private-key: ${{ secrets.OSSF_SCORECARD_PRIVATE_KEY }}
+
       - uses: ossf/scorecard-action@05b42c624433fc40578a4040d5cf5e36ddca8cde # v2.4.2
         with:
+          repo_token:  ${{ steps.create-token.outputs.token }}
           results_file: results.sarif
           results_format: sarif
           publish_results: true
@@ -42,6 +52,6 @@ jobs:
       # Upload the results to GitHub's code scanning dashboard (optional).
       # Commenting out will disable upload of results to your repo's Code Scanning dashboard
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.2
+        uses: github/codeql-action/upload-sarif@df559355d593797519d70b90fc8edd5db049e7a2 # v3.29.9
         with:
           sarif_file: results.sarif

@@ -23,6 +23,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
@@ -35,8 +36,6 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
-import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
-import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
@@ -960,46 +959,48 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     SpiHelper spiHelper =
         SpiHelper.create(GcpAuthAutoConfigurationCustomizerProviderTest.class.getClassLoader());
     AutoConfiguredOpenTelemetrySdkBuilder builder =
-        AutoConfiguredOpenTelemetrySdk.builder().addPropertiesSupplier(() -> customOtelProperties);
-    AutoConfigureUtil.setComponentLoader(
-        builder,
-        new ComponentLoader() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public <T> List<T> load(Class<T> spiClass) {
-            if (spiClass == ConfigurableSpanExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableSpanExporterProvider() {
-                        @Override
-                        public SpanExporter createExporter(ConfigProperties configProperties) {
-                          return spanExporter;
-                        }
+        AutoConfiguredOpenTelemetrySdk.builder()
+            .addPropertiesSupplier(() -> customOtelProperties)
+            .setComponentLoader(
+                new ComponentLoader() {
+                  @Override
+                  public <T> List<T> load(Class<T> spiClass) {
+                    if (spiClass == ConfigurableSpanExporterProvider.class) {
+                      return Collections.singletonList(
+                          spiClass.cast(
+                              new ConfigurableSpanExporterProvider() {
+                                @Override
+                                public SpanExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return spanExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return "otlp";
-                        }
-                      });
-            }
-            if (spiClass == ConfigurableMetricExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableMetricExporterProvider() {
-                        @Override
-                        public MetricExporter createExporter(ConfigProperties configProperties) {
-                          return metricExporter;
-                        }
+                                @Override
+                                public String getName() {
+                                  return "otlp";
+                                }
+                              }));
+                    }
+                    if (spiClass == ConfigurableMetricExporterProvider.class) {
+                      return Collections.singletonList(
+                          spiClass.cast(
+                              new ConfigurableMetricExporterProvider() {
+                                @Override
+                                public MetricExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return metricExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return "otlp";
-                        }
-                      });
-            }
-            return spiHelper.load(spiClass);
-          }
-        });
+                                @Override
+                                public String getName() {
+                                  return "otlp";
+                                }
+                              }));
+                    }
+                    return spiHelper.load(spiClass);
+                  }
+                });
+
     return builder.build().getOpenTelemetrySdk();
   }
 

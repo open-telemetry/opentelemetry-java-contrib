@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## Version 1.48.0 (2025-07-23)
+
+### AWS resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### AWS X-Ray SDK support
+
+- Update SamplerRulesApplier to recognize new HTTP/URL semconv
+  ([#1959](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1959))
+
+### Azure resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### CloudFoundry resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Consistent sampling
+
+- Refactor ConsistentFixedThresholdSampler to prepare for dynamic threshold support
+  ([#2018](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2018))
+- ConsistentRateLimitingSampler can fail if used in combination with legacy samplers
+  ([#2022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2022))
+
+### GCP resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### JMX metrics
+
+- Deprecate JMX Gatherer and provide migration guide to JMX Scraper
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### JMX scraper
+
+- Update Jetty metrics configuration corresponding to Java Instrumentation 2.18.0
+  ([#2033](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2033))
+- Mark as production-ready and remove experimental status
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### Maven extension
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Resource providers
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
 ## Version 1.47.0 (2025-07-04)
 
 ### Disk buffering

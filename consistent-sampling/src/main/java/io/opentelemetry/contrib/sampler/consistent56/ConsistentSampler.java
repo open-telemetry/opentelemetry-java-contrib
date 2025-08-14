@@ -186,10 +186,19 @@ public abstract class ConsistentSampler implements Sampler, Composable {
     boolean isSampled;
     boolean isAdjustedCountCorrect;
     if (isValidThreshold(threshold)) {
-      long randomness = getRandomness(otelTraceState, traceId);
-      isSampled = threshold <= randomness;
       isAdjustedCountCorrect = intent.isAdjustedCountReliable();
-    } else { // DROP
+      // determine the randomness value to use
+      long randomness;
+      if (isAdjustedCountCorrect) {
+        randomness = getRandomness(otelTraceState, traceId);
+      } else {
+        // We cannot assume any particular distribution of the provided trace randomness,
+        // because the sampling decision may depend directly or indirectly on the randomness value;
+        // however, we still want to sample with probability corresponding to the obtained threshold
+        randomness = RandomValueGenerators.getDefault().generate(traceId);
+      }
+      isSampled = threshold <= randomness;
+    } else { // invalid threshold, DROP
       isSampled = false;
       isAdjustedCountCorrect = false;
     }

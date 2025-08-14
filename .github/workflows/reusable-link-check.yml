@@ -18,7 +18,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./.github/scripts/link-check.sh --relative-only
+        run: ./.github/scripts/link-check.sh --local-links-only
 
       - name: Get modified files
         if: github.event_name == 'pull_request'
@@ -39,7 +39,7 @@ jobs:
         run: ./.github/scripts/link-check.sh ${{ steps.modified-files.outputs.files }}
 
       - name: Link check - all links (all files)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: ./.github/scripts/link-check.sh

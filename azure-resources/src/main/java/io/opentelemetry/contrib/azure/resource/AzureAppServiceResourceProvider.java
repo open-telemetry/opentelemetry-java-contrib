@@ -17,7 +17,6 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.internal.StringUtils;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
   }
 
   @Override
-  public Resource createResource(ConfigProperties config) {
+  public Resource createResource() {
     return Resource.create(getAttributes());
   }
 

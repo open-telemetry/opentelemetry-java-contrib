@@ -23,6 +23,10 @@ public class MavenResourceProvider implements ResourceProvider {
 
   @Override
   public Resource createResource(ConfigProperties config) {
+    return create();
+  }
+
+  static Resource create() {
     return Resource.builder()
         .put(ServiceAttributes.SERVICE_NAME, MavenOtelSemanticAttributes.SERVICE_NAME_VALUE)
         .put(ServiceAttributes.SERVICE_VERSION, getMavenRuntimeVersion())

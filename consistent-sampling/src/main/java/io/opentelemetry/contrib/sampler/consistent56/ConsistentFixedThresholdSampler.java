@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateSamplingProbability;
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.checkThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
@@ -22,9 +23,20 @@ public class ConsistentFixedThresholdSampler extends ConsistentSampler {
   private final String description;
 
   protected ConsistentFixedThresholdSampler(long threshold) {
-    checkThreshold(threshold);
-    this.threshold = threshold;
+    this.threshold = getThreshold(threshold);
+    this.description = getThresholdDescription(threshold);
+  }
 
+  protected ConsistentFixedThresholdSampler(double samplingProbability) {
+    this(calculateThreshold(samplingProbability));
+  }
+
+  private static long getThreshold(long threshold) {
+    checkThreshold(threshold);
+    return threshold;
+  }
+
+  private static String getThresholdDescription(long threshold) {
     String thresholdString;
     if (threshold == getMaxThreshold()) {
       thresholdString = "max";
@@ -35,12 +47,11 @@ public class ConsistentFixedThresholdSampler extends ConsistentSampler {
               .toString();
     }
 
-    this.description =
-        "ConsistentFixedThresholdSampler{threshold="
-            + thresholdString
-            + ", sampling probability="
-            + calculateSamplingProbability(threshold)
-            + "}";
+    return "ConsistentFixedThresholdSampler{threshold="
+        + thresholdString
+        + ", sampling probability="
+        + calculateSamplingProbability(threshold)
+        + "}";
   }
 
   @Override

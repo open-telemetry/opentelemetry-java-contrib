@@ -16,6 +16,7 @@ dependencies {
   compileOnly("javax.inject:javax.inject:1")
 
   implementation("io.opentelemetry:opentelemetry-api")
+  compileOnly("io.opentelemetry:opentelemetry-api-incubator")
   implementation("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-sdk-trace")
   implementation("io.opentelemetry:opentelemetry-sdk-metrics")
@@ -32,6 +33,7 @@ dependencies {
   compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update, support older mvn versions
   compileOnly("org.slf4j:slf4j-api")
 
+  testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
 }

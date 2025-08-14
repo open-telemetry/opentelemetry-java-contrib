@@ -5,7 +5,7 @@ import java.net.URL
 plugins {
   id("otel.java-conventions")
   id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.3"
+  id("com.squareup.wire") version "5.3.8"
 }
 
 description = "Client implementation of the OpAMP spec."
@@ -13,9 +13,13 @@ otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
 dependencies {
   implementation("com.squareup.okhttp3:okhttp")
+  implementation("com.github.f4b6a3:uuid-creator")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
   testImplementation("org.mockito:mockito-inline")
+  testImplementation("com.google.protobuf:protobuf-java-util")
+  testImplementation("com.squareup.okhttp3:mockwebserver3")
+  testImplementation("com.squareup.okhttp3:mockwebserver3-junit5")
 }
 
 val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
