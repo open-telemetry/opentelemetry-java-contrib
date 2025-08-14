@@ -54,7 +54,7 @@ jobs:
           - 11
           - 17
           - 21
-          - 23 # renovate: datasource=java-version
+          - 24 # renovate: datasource=java-version
         # macos-latest drops support for java 8 temurin. Run java 8 on macos-13. Run java 11, 17, 21 on macos-latest.
         exclude:
           - os: macos-latest
@@ -66,7 +66,7 @@ jobs:
           - os: macos-13
             test-java-version: 21
           - os: macos-13
-            test-java-version: 23 # renovate: datasource=java-version
+            test-java-version: 24 # renovate: datasource=java-version
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
