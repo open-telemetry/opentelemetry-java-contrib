@@ -25,6 +25,7 @@ dependencies {
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
   implementation("com.google.auth:google-auth-library-oauth2-http:1.37.1")
+  implementation("com.google.cloud:google-cloud-core:2.58.1")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
