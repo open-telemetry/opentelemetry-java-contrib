@@ -187,6 +187,7 @@
         '(?<currentValue>\\d+) # renovate: datasource=java-version',
       ],
       depNameTemplate: 'java',
+      extractVersionTemplate: '^(?<version>\\d+)',
     },
   ],
 }
