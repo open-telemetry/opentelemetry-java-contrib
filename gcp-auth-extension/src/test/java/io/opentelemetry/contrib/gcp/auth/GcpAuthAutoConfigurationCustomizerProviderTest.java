@@ -12,6 +12,8 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_TRACES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,6 +42,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -74,6 +77,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -536,6 +541,51 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         Mockito.verifyNoInteractions(spyOtlpGrpcMetricExporterBuilder);
       }
     }
+  }
+
+  @Test
+  @ClearSystemProperty(key = "GOOGLE_CLOUD_PROJECT")
+  @ClearSystemProperty(key = "google.cloud.project")
+  void testThrowsExceptionIfGoogleProjectIsNotFound() {
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    Mockito.when(mockedGoogleCredentials.getProjectId()).thenReturn(null);
+
+    assertThrows(
+        ConfigurationException.class,
+        () ->
+            GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(
+                configProperties, mockedGoogleCredentials));
+  }
+
+  @Test
+  @SetSystemProperty(key = "google.cloud.project", value = DUMMY_GCP_RESOURCE_PROJECT_ID)
+  void testResolveGoogleProjectIdFromSystemProperty() {
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    assertEquals(
+        DUMMY_GCP_RESOURCE_PROJECT_ID,
+        GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(
+            configProperties, mockedGoogleCredentials));
+
+    Mockito.verifyNoInteractions(mockedGoogleCredentials);
+  }
+
+  @Test
+  @ClearSystemProperty(key = "google.cloud.project")
+  @ClearSystemProperty(key = "GOOGLE_CLOUD_PROJECT")
+  void testResolveGoogleProjectIdFromCredentials() {
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    Mockito.when(mockedGoogleCredentials.getProjectId()).thenReturn(DUMMY_GCP_RESOURCE_PROJECT_ID);
+
+    assertEquals(
+        DUMMY_GCP_RESOURCE_PROJECT_ID,
+        GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(
+            configProperties, mockedGoogleCredentials));
   }
 
   /** Test cases specifying expected behavior for GOOGLE_OTEL_AUTH_TARGET_SIGNALS */
