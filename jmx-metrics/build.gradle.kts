@@ -72,7 +72,9 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+
     systemProperty("gradle.project.version", "${project.version}")
   }
 
