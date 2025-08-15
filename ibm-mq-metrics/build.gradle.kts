@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.provideDelegate
+
 plugins {
   application
   id("com.gradleup.shadow")
@@ -60,6 +62,16 @@ dependencies {
 tasks.shadowJar {
   dependencies {
     exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.3.0"))
+  }
+}
+
+tasks {
+  // This exists purely to get the IBM jar into our build dir
+  val copyIbmClientJar by registering(Jar::class) {
+    archiveFileName.set("com.ibm.mq.allclient.jar")
+    doFirst {
+      from(zipTree(ibmClientJar.singleFile))
+    }
   }
 }
 
