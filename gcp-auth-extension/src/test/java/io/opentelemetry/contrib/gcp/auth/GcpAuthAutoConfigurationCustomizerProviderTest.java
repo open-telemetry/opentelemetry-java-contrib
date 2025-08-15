@@ -39,6 +39,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -536,6 +537,49 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         Mockito.verifyNoInteractions(spyOtlpGrpcMetricExporterBuilder);
       }
     }
+  }
+
+  @Test
+  void testThrowsExceptionIfGoogleProjectIsNotFound() {
+    // Clear the system property to ensure it does not interfere with the test
+    System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty());
+    System.clearProperty("GOOGLE_CLOUD_PROJECT");
+
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    assertThrows(
+        ConfigurationException.class,
+        () -> GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(configProperties));
+  }
+
+  @Test
+  void testResolveGoogleProjectIdFromSystemProperty() {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    assertEquals(
+        DUMMY_GCP_RESOURCE_PROJECT_ID,
+        GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(configProperties));
+  }
+
+  @Test
+  void testResolveGoogleProjectIdFromServiceOptions() {
+    // Clear the system property to ensure it does not interfere with the test
+    System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty());
+    // Property that the extension expects is google.cloud.project, ServiceOptions works with
+    // GOOGLE_CLOUD_PROJECT, so this will highlight the fallback to ServiceOptions
+    System.setProperty("GOOGLE_CLOUD_PROJECT", DUMMY_GCP_RESOURCE_PROJECT_ID);
+
+    DefaultConfigProperties configProperties =
+        DefaultConfigProperties.create(Collections.emptyMap(), Mockito.mock(ComponentLoader.class));
+
+    assertEquals(
+        DUMMY_GCP_RESOURCE_PROJECT_ID,
+        GcpAuthAutoConfigurationCustomizerProvider.getGoogleProjectId(configProperties));
   }
 
   /** Test cases specifying expected behavior for GOOGLE_OTEL_AUTH_TARGET_SIGNALS */
