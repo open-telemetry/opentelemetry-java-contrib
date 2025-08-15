@@ -26,11 +26,3 @@ dependencies {
   testImplementation("com.google.guava:guava")
   testImplementation("org.awaitility:awaitility")
 }
-
-configurations.all {
-  // todo remove version number before merging, should be provided by the bom
-  resolutionStrategy {
-    force("io.opentelemetry:opentelemetry-sdk-common:1.52.0")
-    force("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:1.52.0")
-  }
-}
