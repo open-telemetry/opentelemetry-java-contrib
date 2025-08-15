@@ -14,6 +14,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.Metrics;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
 import io.opentelemetry.ibm.mq.metricscollector.InquireChannelCmdCollector;
@@ -66,7 +67,7 @@ public class WmqMonitor {
 
     this.metricsConfig = new MetricsConfig(config);
 
-    this.heartbeatGauge = meter.gaugeBuilder("ibm.mq.heartbeat").setUnit("1").ofLongs().build();
+    this.heartbeatGauge = Metrics.createIbmMqHeartbeat(meter);
     this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector(meter));
