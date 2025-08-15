@@ -13,11 +13,11 @@ public final class ConfigPropertiesUtil {
   }
 
   static String yamlPath(String property) {
-     String[] segments = DeclarativeConfigPropertiesBridge.getSegments(property);
-     if (segments.length == 0) {
-       throw new IllegalArgumentException("Invalid property: " + property);
-     }
+    String[] segments = DeclarativeConfigPropertiesBridge.getSegments(property);
+    if (segments.length == 0) {
+      throw new IllegalArgumentException("Invalid property: " + property);
+    }
 
-     return "'instrumentation/development' / 'java' / '" + String.join("' / '", segments) + "'";
-   }
+    return "'instrumentation/development' / 'java' / '" + String.join("' / '", segments) + "'";
+  }
 }
