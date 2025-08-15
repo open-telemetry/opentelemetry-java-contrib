@@ -48,11 +48,15 @@ class BaggageProcessorCustomizerTest {
   private static final String MEMORY_EXPORTER = "memory";
 
   @Test
-  void test_customizer() {
+  void test_empty_customizer() {
     assertCustomizer(
         Collections.emptyMap(),
         span -> assertThat(span).hasTotalAttributeCount(0),
         logRecord -> assertThat(logRecord).hasTotalAttributeCount(0));
+  }
+
+  @Test
+  void test_customizer() {
     Map<String, String> properties = new HashMap<>();
     properties.put("otel.java.experimental.span-attributes.copy-from-baggage.include", "key");
     properties.put("otel.java.experimental.log-attributes.copy-from-baggage.include", "key");
