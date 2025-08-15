@@ -121,7 +121,7 @@ class BaggageProcessorCustomizerTest {
                 new ComponentLoader() {
                   @Override
                   public <T> List<T> load(Class<T> spiClass) {
-                    if (spiClass == ConfigurableSpanExporterProvider.class) {
+                    if (spiClass.equals(ConfigurableSpanExporterProvider.class)) {
                       return Collections.singletonList(
                           spiClass.cast(
                               new ConfigurableSpanExporterProvider() {
@@ -136,7 +136,7 @@ class BaggageProcessorCustomizerTest {
                                   return MEMORY_EXPORTER;
                                 }
                               }));
-                    } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
+                    } else if (spiClass.equals(ConfigurableLogRecordExporterProvider.class)) {
                       return Collections.singletonList(
                           spiClass.cast(
                               new ConfigurableLogRecordExporterProvider() {
