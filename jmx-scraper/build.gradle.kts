@@ -64,14 +64,17 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
 
     val testAppTask = project("test-app").tasks.named<Jar>("jar")
     dependsOn(testAppTask)
+    inputs.files(layout.files(testAppTask))
     systemProperty("app.jar.path", testAppTask.get().archiveFile.get().asFile.absolutePath)
 
     val testWarTask = project("test-webapp").tasks.named<Jar>("war")
     dependsOn(testWarTask)
+    inputs.files(layout.files(testWarTask))
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
