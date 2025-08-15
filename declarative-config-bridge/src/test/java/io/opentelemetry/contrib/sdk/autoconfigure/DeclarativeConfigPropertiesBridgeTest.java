@@ -35,7 +35,7 @@ class DeclarativeConfigPropertiesBridgeTest {
     SdkConfigProvider emptyConfigProvider = SdkConfigProvider.create(emptyModel);
     emptyBridge =
         new DeclarativeConfigPropertiesBridgeBuilder()
-            .resolveInstrumentationConfig(
+            .buildFromInstrumentationConfig(
                 Objects.requireNonNull(emptyConfigProvider.getInstrumentationConfig()));
   }
 
@@ -45,7 +45,7 @@ class DeclarativeConfigPropertiesBridgeTest {
             DeclarativeConfigPropertiesBridgeTest.class
                 .getClassLoader()
                 .getResourceAsStream("config.yaml"));
-    return builder.resolveInstrumentationConfig(
+    return builder.buildFromInstrumentationConfig(
         SdkConfigProvider.create(model).getInstrumentationConfig());
   }
 
@@ -124,22 +124,8 @@ class DeclarativeConfigPropertiesBridgeTest {
   @Test
   void vendorTranslation() {
     ConfigProperties propertiesBridge =
-        create(
-            new DeclarativeConfigPropertiesBridgeBuilder()
-                .addTranslation("acme", "acme.full_name"));
+        create(new DeclarativeConfigPropertiesBridgeBuilder().addMapping("acme", "acme.full_name"));
     assertThat(propertiesBridge.getBoolean("acme.preserved")).isTrue();
-  }
-
-  @Test
-  void agentCommonTranslation() {
-    assertThat(
-            create(
-                    new DeclarativeConfigPropertiesBridgeBuilder()
-                        .addTranslation(
-                            "otel.instrumentation.common.default-enabled",
-                            "common.default.enabled"))
-                .getBoolean("otel.instrumentation.common.default-enabled"))
-        .isFalse();
   }
 
   @Test
@@ -147,9 +133,9 @@ class DeclarativeConfigPropertiesBridgeTest {
     ConfigProperties bridge =
         create(
             new DeclarativeConfigPropertiesBridgeBuilder()
-                .addTranslation("otel.javaagent", "agent")
-                .addFixedValue("otel.javaagent.debug", true)
-                .addFixedValue("otel.javaagent.logging", "application"));
+                .addMapping("otel.javaagent", "agent")
+                .addOverride("otel.javaagent.debug", true)
+                .addOverride("otel.javaagent.logging", "application"));
 
     assertThat(bridge.getBoolean("otel.javaagent.debug")).isTrue();
     assertThat(bridge.getBoolean("otel.javaagent.experimental.indy")).isTrue();

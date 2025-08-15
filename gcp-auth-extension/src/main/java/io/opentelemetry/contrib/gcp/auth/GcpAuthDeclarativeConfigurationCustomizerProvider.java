@@ -75,7 +75,7 @@ public class GcpAuthDeclarativeConfigurationCustomizerProvider
 
   static ConfigProperties getConfigProperties(OpenTelemetryConfigurationModel model) {
     return new DeclarativeConfigPropertiesBridgeBuilder()
-        .resolveInstrumentationConfig(SdkConfigProvider.create(model).getInstrumentationConfig());
+        .buildFromInstrumentationConfig(SdkConfigProvider.create(model).getInstrumentationConfig());
   }
 
   private static void customizeMeter(

@@ -5,14 +5,19 @@
 
 package io.opentelemetry.contrib.sdk.autoconfigure;
 
-/**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
- */
 public final class ConfigPropertiesUtil {
   private ConfigPropertiesUtil() {}
 
   public static String propertyYamlPath(String propertyName) {
-    return DeclarativeConfigPropertiesBridge.yamlPath(propertyName);
+    return yamlPath(propertyName);
   }
+
+  static String yamlPath(String property) {
+     String[] segments = DeclarativeConfigPropertiesBridge.getSegments(property);
+     if (segments.length == 0) {
+       throw new IllegalArgumentException("Invalid property: " + property);
+     }
+
+     return "'instrumentation/development' / 'java' / '" + String.join("' / '", segments) + "'";
+   }
 }
