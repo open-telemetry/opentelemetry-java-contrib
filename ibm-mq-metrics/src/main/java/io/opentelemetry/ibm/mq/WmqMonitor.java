@@ -5,20 +5,18 @@
 
 package io.opentelemetry.ibm.mq;
 
-import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.ERROR_CODE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
-import io.opentelemetry.ibm.mq.metrics.IbmMqAttributes;
 import io.opentelemetry.ibm.mq.metrics.Metrics;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
@@ -117,7 +115,8 @@ public class WmqMonitor {
       if (e.getCause() instanceof MQException) {
         MQException mqe = (MQException) e.getCause();
         String errorCode = String.valueOf(mqe.getReason());
-        errorCodesCounter.add(1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
+        errorCodesCounter.add(
+            1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
       }
     } finally {
       if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {

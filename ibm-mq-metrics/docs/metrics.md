@@ -815,5 +815,3 @@
 |---|---|---|---|---|---|
 | `error.code` | string | The reason code associated with an error | `2038`; `2543`; `2009` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-
-
