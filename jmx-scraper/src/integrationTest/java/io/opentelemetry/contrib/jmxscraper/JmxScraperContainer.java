@@ -237,8 +237,8 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     } else {
       Path script = generateShellScript(cmd, config);
 
-      this.withCopyFileToContainer(MountableFile.forHostPath(script, 500), "/scraper.sh");
-      this.withCommand("/scraper.sh");
+      this.withCopyFileToContainer(MountableFile.forHostPath(script), "/scraper.sh");
+      this.withCommand("bash", "/scraper.sh");
     }
 
     logger().info("Starting scraper with command: " + String.join(" ", this.getCommandParts()));
@@ -263,7 +263,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
 
     logger().info("Scraper executed with /scraper.sh shell script");
     for (int i = 0; i < lines.size(); i++) {
-      logger().info("/scrapper.sh:{}  {}", i, lines.get(i));
+      logger().info("/scraper.sh:{}  {}", i, lines.get(i));
     }
     return script;
   }
