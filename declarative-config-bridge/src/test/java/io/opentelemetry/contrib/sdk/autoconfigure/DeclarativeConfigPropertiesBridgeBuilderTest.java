@@ -33,7 +33,7 @@ class DeclarativeConfigPropertiesBridgeBuilderTest {
           .thenReturn(configPropertiesMock);
 
       ConfigProperties configProperties =
-          new DeclarativeConfigPropertiesBridgeBuilder().resolveConfigProperties(sdkMock);
+          new DeclarativeConfigPropertiesBridgeBuilder().build(sdkMock);
 
       assertThat(configProperties).isSameAs(configPropertiesMock);
     }
@@ -62,7 +62,7 @@ class DeclarativeConfigPropertiesBridgeBuilderTest {
           .thenReturn(configProviderMock);
 
       ConfigProperties configProperties =
-          new DeclarativeConfigPropertiesBridgeBuilder().resolveConfigProperties(sdkMock);
+          new DeclarativeConfigPropertiesBridgeBuilder().build(sdkMock);
 
       assertThat(configProperties.getString(propertyName)).isEqualTo(expectedValue);
     }
@@ -82,9 +82,9 @@ class DeclarativeConfigPropertiesBridgeBuilderTest {
           .thenReturn(configProviderMock);
 
       ConfigProperties configProperties =
-          new DeclarativeConfigPropertiesBridgeBuilder().resolveConfigProperties(sdkMock);
+          new DeclarativeConfigPropertiesBridgeBuilder().build(sdkMock);
 
-      assertThat(configProperties.getString("testProperty")).isEqualTo(null);
+      assertThat(configProperties.getString("testProperty")).isNull();
     }
   }
 }
