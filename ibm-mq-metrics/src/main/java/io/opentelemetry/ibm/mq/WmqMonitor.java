@@ -6,14 +6,20 @@
 package io.opentelemetry.ibm.mq;
 
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.ERROR_CODE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.IbmMqAttributes;
+import io.opentelemetry.ibm.mq.metrics.Metrics;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
 import io.opentelemetry.ibm.mq.metricscollector.InquireChannelCmdCollector;
@@ -45,6 +51,7 @@ public class WmqMonitor {
 
   private final List<QueueManager> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
+  private final LongCounter errorCodesCounter;
   private final LongGauge heartbeatGauge;
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
@@ -67,6 +74,7 @@ public class WmqMonitor {
     this.metricsConfig = new MetricsConfig(config);
 
     this.heartbeatGauge = meter.gaugeBuilder("ibm.mq.heartbeat").setUnit("1").ofLongs().build();
+    this.errorCodesCounter = Metrics.createMqConnectionErrors(meter);
     this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector(meter));
@@ -106,6 +114,11 @@ public class WmqMonitor {
           Thread.currentThread().getName(),
           e.getMessage(),
           e);
+      if (e.getCause() instanceof MQException) {
+        MQException mqe = (MQException) e.getCause();
+        String errorCode = String.valueOf(mqe.getReason());
+        errorCodesCounter.add(1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
+      }
     } finally {
       if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {
         heartbeatGauge.set(

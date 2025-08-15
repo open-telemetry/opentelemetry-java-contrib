@@ -609,3 +609,15 @@ groups:
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
+  - id: mq.connection.errors
+    type: metric
+    metric_name: mq.connection.errors
+    stability: development
+    brief: "Number of connection errors"
+    instrument: counter
+    unit: "{errors}"
+    attributes:
+      - ref: ibm.mq.queue.manager
+        requirement_level: required
+      - ref: error.code
+        requirement_level: required
