@@ -6,14 +6,22 @@
 package io.opentelemetry.ibm.mq;
 
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.ERROR_CODE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.LongGauge;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+<<<<<<< HEAD
+=======
+import io.opentelemetry.ibm.mq.metrics.IbmMqAttributes;
+>>>>>>> 4d9a69db (Add a counter that records the number of times the connection was not established successfully, with an error.code dimension recording the code of the error reported)
 import io.opentelemetry.ibm.mq.metrics.Metrics;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
@@ -46,6 +54,7 @@ public class WmqMonitor {
 
   private final List<QueueManager> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
+  private final LongCounter errorCodesCounter;
   private final LongGauge heartbeatGauge;
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
@@ -68,6 +77,7 @@ public class WmqMonitor {
     this.metricsConfig = new MetricsConfig(config);
 
     this.heartbeatGauge = Metrics.createIbmMqHeartbeat(meter);
+    this.errorCodesCounter = Metrics.createMqConnectionErrors(meter);
     this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector(meter));
@@ -107,6 +117,11 @@ public class WmqMonitor {
           Thread.currentThread().getName(),
           e.getMessage(),
           e);
+      if (e.getCause() instanceof MQException) {
+        MQException mqe = (MQException) e.getCause();
+        String errorCode = String.valueOf(mqe.getReason());
+        errorCodesCounter.add(1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
+      }
     } finally {
       if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {
         heartbeatGauge.set(
