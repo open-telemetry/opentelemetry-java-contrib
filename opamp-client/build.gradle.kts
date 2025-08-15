@@ -5,7 +5,7 @@ import java.net.URL
 plugins {
   id("otel.java-conventions")
   id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.8"
+  id("com.squareup.wire") version "5.3.10"
 }
 
 description = "Client implementation of the OpAMP spec."
