@@ -72,7 +72,7 @@ public class WmqMonitor {
     this.metricsConfig = new MetricsConfig(config);
 
     this.heartbeatGauge = Metrics.createIbmMqHeartbeat(meter);
-    this.errorCodesCounter = Metrics.createMqConnectionErrors(meter);
+    this.errorCodesCounter = Metrics.createIbmMqConnectionErrors(meter);
     this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector(meter));

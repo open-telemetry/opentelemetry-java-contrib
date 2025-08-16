@@ -802,14 +802,14 @@
 
 
 
-## Metric `mq.connection.errors`
+## Metric `ibm.mq.connection.errors`
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `mq.connection.errors` | Counter | `{errors}` | Number of connection errors | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.connection.errors` | Counter | `{errors}` | Number of connection errors | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
-### `mq.connection.errors` Attributes
+### `ibm.mq.connection.errors` Attributes
 
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
