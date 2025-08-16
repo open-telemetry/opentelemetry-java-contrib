@@ -59,6 +59,8 @@ tasks {
   shadowJar {
     mergeServiceFiles()
 
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }
