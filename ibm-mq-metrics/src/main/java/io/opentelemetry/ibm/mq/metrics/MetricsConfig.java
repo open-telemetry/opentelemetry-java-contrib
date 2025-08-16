@@ -199,8 +199,8 @@ public final class MetricsConfig {
     return isEnabled("ibm.mq.manager.max.handles");
   }
 
-  public boolean isMqConnectionErrorsEnabled() {
-    return isEnabled("mq.connection.errors");
+  public boolean isIbmMqConnectionErrorsEnabled() {
+    return isEnabled("ibm.mq.connection.errors");
   }
 
   private boolean isEnabled(String key) {

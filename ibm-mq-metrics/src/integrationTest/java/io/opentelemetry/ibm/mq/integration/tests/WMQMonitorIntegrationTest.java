@@ -302,7 +302,7 @@ class WMQMonitorIntegrationTest {
 
     SumData<LongPointData> connectionErrors = null;
     for (MetricData metricData : data) {
-      if ("mq.connection.errors".equals(metricData.getName())) {
+      if ("ibm.mq.connection.errors".equals(metricData.getName())) {
         connectionErrors = (SumData<LongPointData>) metricData.getData();
       }
     }

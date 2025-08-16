@@ -422,9 +422,9 @@ public final class Metrics {
         .build();
   }
 
-  public static LongCounter createMqConnectionErrors(Meter meter) {
+  public static LongCounter createIbmMqConnectionErrors(Meter meter) {
     return meter
-        .counterBuilder("mq.connection.errors")
+        .counterBuilder("ibm.mq.connection.errors")
         .setUnit("{errors}")
         .setDescription("Number of connection errors")
         .build();
