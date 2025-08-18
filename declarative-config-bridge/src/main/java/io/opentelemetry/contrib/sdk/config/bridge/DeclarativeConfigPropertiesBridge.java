@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sdk.autoconfigure;
+package io.opentelemetry.contrib.sdk.config.bridge;
 
 import static io.opentelemetry.api.incubator.config.DeclarativeConfigProperties.empty;
 
