@@ -38,14 +38,14 @@ final class SignalStorageExporter<T> {
       if (operation.isSuccessful()) {
         callback.onExportSuccess(type);
         return CompletableResultCode.ofSuccess();
-      } else {
-        Throwable error = operation.getError();
-        callback.onExportError(type, error);
-        if (error != null) {
-          return CompletableResultCode.ofExceptionalFailure(error);
-        }
-        return CompletableResultCode.ofFailure();
       }
+
+      Throwable error = operation.getError();
+      callback.onExportError(type, error);
+      if (error != null) {
+        return CompletableResultCode.ofExceptionalFailure(error);
+      }
+      return CompletableResultCode.ofFailure();
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
       callback.onExportError(type, e);
       return CompletableResultCode.ofExceptionalFailure(e);
