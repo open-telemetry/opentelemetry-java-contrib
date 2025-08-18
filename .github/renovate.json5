@@ -194,5 +194,19 @@
       depNameTemplate: 'java',
       extractVersionTemplate: '^(?<version>\\d+)',
     },
+    {
+      customType: "regex",
+      description: "update mise",
+      managerFilePatterns: [
+        "/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/",
+        "/(^|/)action\\.ya?ml$/"
+      ],
+      datasourceTemplate: "github-release-attachments",
+      packageNameTemplate: "jdx/mise",
+      depNameTemplate: "mise",
+      matchStrings: [
+        "jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"
+      ],
+    }
   ],
 }
