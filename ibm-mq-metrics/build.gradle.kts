@@ -42,11 +42,11 @@ dependencies {
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   integrationTestImplementation("org.assertj:assertj-core:3.27.4")
-  integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
+  integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
   integrationTestImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   integrationTestImplementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
   integrationTestImplementation("jakarta.jms:jakarta.jms-api:3.1.0")
-  integrationTestImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.2")
+  integrationTestImplementation("org.junit.jupiter:junit-jupiter-engine:5.13.4")
   integrationTestRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
   ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.3.0") {
     artifact {
