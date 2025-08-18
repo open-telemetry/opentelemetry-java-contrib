@@ -4,7 +4,7 @@ plugins {
 }
 
 description = "OpenTelemetry extension that provides a bridge for declarative configuration."
-otelJava.moduleName.set("io.opentelemetry.contrib.sdk.declarative.config.bridge")
+otelJava.moduleName.set("io.opentelemetry.contrib.sdk.config.bridge")
 
 dependencies {
   // We use `compileOnly` dependency because during runtime all necessary classes are provided by
