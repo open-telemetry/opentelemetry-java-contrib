@@ -39,6 +39,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   api("org.slf4j:slf4j-api:2.0.17")
+  implementation("org.slf4j:slf4j-simple:2.0.17")
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   integrationTestImplementation("org.assertj:assertj-core:3.27.4")
