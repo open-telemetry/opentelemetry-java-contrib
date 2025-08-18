@@ -10,26 +10,34 @@
   ],
   prHourlyLimit: 5, // we have a large number of parallel runners
   labels: [
-    'dependencies'
+    'dependencies',
   ],
   packageRules: [
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
-      "groupName": "all patch versions",
-      "matchUpdateTypes": ["patch"],
-      "schedule": ["before 8am every weekday"]
+      groupName: 'all patch versions',
+      matchUpdateTypes: [
+        'patch',
+      ],
+      schedule: [
+        'before 8am every weekday',
+      ],
     },
     {
       // avoids these Renovate PRs from trickling in throughout the week
       // (consolidating the review process)
-      "matchUpdateTypes": ["minor", "major"],
-      "excludePackageNames": [
-        // want OpenTelemetry package updates right away
-        'io.opentelemetry:**',
-        'io.opentelemetry.*:**',
+      matchUpdateTypes: [
+        'minor',
+        'major',
       ],
-      "schedule": ["before 8am on Monday"]
+      schedule: [
+        'before 8am on Monday',
+      ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+      ],
     },
     {
       matchPackageNames: [
@@ -176,7 +184,7 @@
       customType: 'regex',
       datasourceTemplate: 'npm',
       managerFilePatterns: [
-        '.github/workflows/**'
+        '.github/workflows/**',
       ],
       matchStrings: [
         'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
@@ -186,7 +194,7 @@
       customType: 'regex',
       datasourceTemplate: 'java-version',
       managerFilePatterns: [
-        '.github/workflows/**'
+        '.github/workflows/**',
       ],
       matchStrings: [
         '(?<currentValue>\\d+) # renovate: datasource=java-version',
