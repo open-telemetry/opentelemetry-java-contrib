@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.sdk.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.contrib.sdk.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.SdkConfigProvider;
