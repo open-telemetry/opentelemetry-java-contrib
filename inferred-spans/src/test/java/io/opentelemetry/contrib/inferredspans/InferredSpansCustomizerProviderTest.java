@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.inferredspans;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 
 import io.opentelemetry.contrib.inferredspans.internal.ProfilingActivationListener;
 import io.opentelemetry.contrib.inferredspans.internal.util.OtelReflectionUtils;
@@ -17,9 +18,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-@DisabledOnOs(OS.WINDOWS)
+@DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
 class InferredSpansCustomizerProviderTest {
 
   @BeforeEach
