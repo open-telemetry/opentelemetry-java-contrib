@@ -5,31 +5,35 @@
     'helpers:pinGitHubActionDigestsToSemver',
   ],
   ignorePresets: [
-    ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
-    'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
+    ':ignoreModulesAndTests',
+    'workarounds:javaLTSVersions',
   ],
-  prHourlyLimit: 5, // we have a large number of parallel runners
+  prHourlyLimit: 5,
   labels: [
-    'dependencies'
+    'dependencies',
   ],
   packageRules: [
     {
-      // reduces the number of Renovate PRs
-      // (patch updates are typically non-breaking)
-      "groupName": "all patch versions",
-      "matchUpdateTypes": ["patch"],
-      "schedule": ["before 8am every weekday"]
+      groupName: 'all patch versions',
+      matchUpdateTypes: [
+        'patch',
+      ],
+      schedule: [
+        'before 8am every weekday',
+      ],
     },
     {
-      // avoids these Renovate PRs from trickling in throughout the week
-      // (consolidating the review process)
-      "matchUpdateTypes": ["minor", "major"],
-      "excludePackageNames": [
-        // want OpenTelemetry package updates right away
-        'io.opentelemetry:**',
-        'io.opentelemetry.*:**',
+      matchUpdateTypes: [
+        'minor',
+        'major',
       ],
-      "schedule": ["before 8am on Monday"]
+      schedule: [
+        'before 8am on Monday',
+      ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+      ],
     },
     {
       matchPackageNames: [
@@ -38,20 +42,15 @@
         'io.opentelemetry.semconv:**',
         'io.opentelemetry.proto:**',
       ],
-      // Renovate's default behavior is only to update from unstable -> unstable if it's for the
-      // major.minor.patch, under the assumption that you would want to update to the stable version
-      // of that release instead of the unstable version for a future release
       ignoreUnstable: false,
     },
     {
-      // prevent 3.0.1u2 -> 3.0.1
       matchPackageNames: [
         'com.google.code.findbugs:annotations',
       ],
       allowedVersions: '!/^3\\.0\\.1$/',
     },
     {
-      // disruptor 4+ requires Java 11+
       matchPackageNames: [
         'com.lmax:disruptor',
       ],
@@ -61,7 +60,6 @@
       enabled: false,
     },
     {
-      // junit-pioneer 2+ requires Java 11+
       matchPackageNames: [
         'org.junit-pioneer:junit-pioneer',
       ],
@@ -71,7 +69,6 @@
       enabled: false,
     },
     {
-      // mockito 5+ requires Java 11+
       matchUpdateTypes: [
         'major',
       ],
@@ -81,7 +78,6 @@
       ],
     },
     {
-      // agrona 1.23+ requires Java 17+
       matchPackageNames: [
         'org.agrona:agrona',
       ],
@@ -92,7 +88,6 @@
       enabled: false,
     },
     {
-      // system-stubs-jupiter 2.1+ requires Java 11+
       matchPackageNames: [
         'uk.org.webcompere:system-stubs-jupiter',
       ],
@@ -103,7 +98,6 @@
       enabled: false,
     },
     {
-      // pinned version for compatibility
       matchPackageNames: [
         'io.micrometer:micrometer-core',
       ],
@@ -111,7 +105,6 @@
       enabled: false,
     },
     {
-      // pinned version for compatibility
       matchCurrentVersion: '3.5.0',
       enabled: false,
       matchPackageNames: [
@@ -137,7 +130,6 @@
       ],
     },
     {
-      // pinned version for compatibility with java 8 JFR parsing
       matchUpdateTypes: [
         'major',
       ],
@@ -147,7 +139,6 @@
       ],
     },
     {
-      // pinned version for compatibility
       matchFileNames: [
         'jmx-scraper/test-webapp/build.gradle.kts',
       ],
@@ -158,7 +149,6 @@
       ],
     },
     {
-      // intentionally using Spring Boot 2 in gcp-auth-extension in order to test with Java 8+
       matchFileNames: [
         'gcp-auth-extension/build.gradle.kts',
       ],
@@ -176,7 +166,7 @@
       customType: 'regex',
       datasourceTemplate: 'npm',
       managerFilePatterns: [
-        '.github/workflows/**'
+        '.github/workflows/**',
       ],
       matchStrings: [
         'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
@@ -186,7 +176,7 @@
       customType: 'regex',
       datasourceTemplate: 'java-version',
       managerFilePatterns: [
-        '.github/workflows/**'
+        '.github/workflows/**',
       ],
       matchStrings: [
         '(?<currentValue>\\d+) # renovate: datasource=java-version',
