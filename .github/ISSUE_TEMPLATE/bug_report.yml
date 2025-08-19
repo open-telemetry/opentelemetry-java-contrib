@@ -13,6 +13,7 @@ body:
         - aws-xray
         - aws-xray-propagator
         - consistent-sampling
+        - declarative-config-bridge
         - disk-buffering
         - gcp-auth-extension
         - gcp-resources
