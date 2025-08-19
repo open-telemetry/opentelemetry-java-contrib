@@ -1,0 +1,125 @@
+#Run it as a scheduled task instead of running every minute.
+#If you want to run this every minute, comment this out
+#taskSchedule:
+#  numberOfThreads: 20
+#  taskDelaySeconds: 300
+
+#This is the timeout on queue metrics and channel metrics threads.Default value is 20 seconds.
+#No need to change the default unless you know what you are doing.
+#queueMetricsCollectionTimeoutInSeconds: 40
+#channelMetricsCollectionTimeoutInSeconds: 40
+#topicMetricsCollectionTimeoutInSeconds: 40
+
+queueManagers:
+  - name: "QM1"
+    host: "localhost"
+    port: 1414
+
+    # Indicate the MaxActiveChannels as set in qm.ini, see https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=qmini-channels-stanza-file
+    maxActiveChannels: 4200
+
+    #The transport type for the queue manager connection, the default is "Bindings" for a binding type connection
+    #For bindings type, connection WMQ extension (i.e machine agent) need to be on the same machine on which WebbsphereMQ server is running
+    #For client type, connection change it to "Client".
+    transportType: "Bindings"
+
+    #Channel name of the queue manager, channel should be server-conn type.
+    #This field is not required in case of transportType: Bindings
+    #channelName: "SYSTEM.ADMIN.SVRCONN"
+
+    #for user access level, please check "Access Permissions" section on the extensions page
+    #comment out the username and password in case of transportType: Bindings.
+    #username: ""
+    #password: ""
+
+    #PCF requests are always sent to SYSTEM.ADMIN.COMMAND.QUEUE. The PCF responses to these requests are sent to the default reply-to queue called
+    #SYSTEM.DEFAULT.MODEL.QUEUE. However, you can override this behavior and send it to a temporary dynamic queue by changing the modelQueueName and replyQueuePrefix fields.
+    #For more details around this https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q083240_.htm & https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm
+    #modelQueueName: ""
+    #replyQueuePrefix: ""
+
+    # Name of the temporary dynamic queue holding the configuration events. This queue contains information regarding the configuration of the queue manager, notable MaxChannels and MaxActiveChannels.
+    # If unset, the default queue name `SYSTEM.ADMIN.CONFIG.EVENT` is applied.
+    # Configuration events need to be enabled explicitly in the queue manager configuration. See https://www.ibm.com/docs/en/ibm-mq/9.4.x?topic=monitoring-configuration-events for reference.
+    #configurationQueueName: "SYSTEM.ADMIN.CONFIG.EVENT"
+
+    # Interval in milliseconds at which the configuration events in the configuration queue can be consumed.
+    # By default, no events are consumed.
+    #consumeConfigurationEventInterval: 600000 # 10 minutes
+
+    # Enable running a queue manager refresh request to reload its configuration and create a configuration event.
+    # This action is only executed if no configuration events are found when reading the configuration queue.name:
+    # By default, this action is disabled.
+    #refreshQueueManagerConfigurationEnabled: false
+
+    #Sets the CCSID used in the message descriptor of request and response messages. The default value is MQC.MQCCSI_Q_MGR.
+    #To set this, please use the integer value.
+    #ccsid:
+
+    #Sets the encoding used in the message descriptor of request and response messages. The default value is MQC.MQENC_NATIVE.
+    #To set this, please use the integer value.
+    #encoding:
+
+    # IBM Cipher Suite e.g. "SSL_RSA_WITH_AES_128_CBC_SHA256"..
+    # For translation to IBM Cipher  http://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.dev.doc/q113210_.htm
+    # A cipher working for IBM Cloud MQ and Temurin JDK 8 is TLS_AES_128_GCM_SHA256
+    #cipherSuite: ""
+
+    queueFilters:
+        #Can provide complete queue name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+             #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+             #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM","AMQ"]
+
+
+    channelFilters:
+        #Can provide complete channel name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+           #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+           #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM"]
+
+    listenerFilters:
+        #Can provide complete channel name or generic names. A generic name is a character string followed by an asterisk (*),
+        #for example ABC*, and it selects all objects having names that start with the selected character string.
+        #An asterisk on its own matches all possible names.
+        include: ["*"]
+        exclude:
+           #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+           #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM"]
+
+    topicFilters:
+        # For topics, IBM MQ uses the topic wildcard characters ('#' and '+') and does not treat a trailing asterisk as a wildcard
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.pla.doc/q005020_.htm
+        include: ["#"]
+        exclude:
+             #type value: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+           - type: "STARTSWITH"
+             #The name of the queue or queue name pattern as per queue filter, comma separated values
+             values: ["SYSTEM","$SYS"]
+
+metrics:
+{% for metric in ctx %}  {{ metric.metric_name }}:  # {{ metric.brief | safe }}
+    enabled: true
+{% endfor %}
+sslConnection:
+  trustStorePath: ""
+  trustStorePassword: ""
+
+  keyStorePath: ""
+  keyStorePassword: ""
+
+# Configure the OTLP exporter using system properties keys following the specification https://opentelemetry.io/docs/languages/java/configuration/
+otlpExporter:
+  otel.exporter.otlp.endpoint: http://localhost:4318
