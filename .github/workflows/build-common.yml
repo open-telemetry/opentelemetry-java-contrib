@@ -1,23 +1,17 @@
-name: Build
+name: Reusable - Common
 
 on:
-  push:
-    branches:
-      - main
-      - release/*
-  pull_request:
-  merge_group:
-  workflow_dispatch:
-  schedule:
-    # Run daily at 7:30 AM UTC
-    - cron: '30 7 * * *'
+  workflow_call:
+    inputs:
+      cache-read-only:
+        type: boolean
+        required: false
+      no-build-cache:
+        type: boolean
+        required: false
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -34,9 +28,10 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-read-only: ${{ inputs.cache-read-only }}
+
       - name: Gradle build and test
-        run: ./gradlew build -x test
+        run: ./gradlew build -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
   test:
     name: Test
@@ -87,13 +82,15 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-read-only: ${{ inputs.cache-read-only }}
+
       - name: Gradle test
         run: >
           ./gradlew test
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
           "-Porg.gradle.java.installations.paths=${{ steps.setup-java-test.outputs.path }}"
           "-Porg.gradle.java.installations.auto-download=false"
+           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
   integration-test:
     runs-on: ubuntu-latest
@@ -109,10 +106,10 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Integration test
-        run: ./gradlew integrationTest
+        run: ./gradlew integrationTest ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
       - name: Save integration test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -120,16 +117,6 @@ jobs:
         with:
           name: integration-test-results
           path: jmx-metrics/build/reports/tests/integrationTest
-
-  link-check:
-    # merge group and push events are excluded to avoid unnecessary CI failures
-    # (these failures will instead be captured by the daily scheduled run)
-    #
-    # release branches are excluded to avoid unnecessary maintenance if external links break
-    # (and also because the README.md might need update on release branches before the release
-    # download has been published)
-    if: github.event_name != 'merge_group' && github.event_name != 'push' && !startsWith(github.ref_name, 'release/')
-    uses: ./.github/workflows/reusable-link-check.yml
 
   markdown-lint-check:
     uses: ./.github/workflows/reusable-markdown-lint.yml
@@ -139,97 +126,3 @@ jobs:
 
   shell-script-check:
     uses: ./.github/workflows/reusable-shell-script-check.yml
-
-  publish-snapshots:
-    # the condition is on the steps below instead of here on the job, because skipping the job
-    # causes the job to show up as canceled in the GitHub UI which prevents the PR build section
-    # from collapsing when everything (else) is green
-    #
-    # and the name is updated when the steps below are skipped which makes what's happening clearer
-    # in the GitHub UI
-    #
-    # note: the condition below has to be written so that '' is last since it resolves to false
-    # and so would not short-circuit if used in the second-last position
-    name: publish-snapshots${{ (github.ref_name != 'main' || github.repository != 'open-telemetry/opentelemetry-java-contrib') && ' (skipped)' || '' }}
-    needs:
-      # intentionally not blocking snapshot publishing on link-check or misspell-check
-      - build
-      - integration-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-
-      - name: Set up JDK for running Gradle
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Set up gradle
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
-        # skipping release branches because the versions in those branches are not snapshots
-        # (also this skips pull requests)
-        if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
-      - name: Build and publish snapshots
-        if: ${{ github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib' }}
-        run: ./gradlew assemble publishToSonatype
-        env:
-          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
-          SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-
-  required-status-check:
-    if: (github.event_name == 'pull_request' || github.event_name == 'merge_group') && always()
-    needs:
-      - build
-      - test
-      - integration-test
-      - markdown-lint-check
-      - misspell-check
-      - shell-script-check
-    runs-on: ubuntu-latest
-    steps:
-      # only the build and test checks are required for release branch PRs in order
-      # to avoid any unnecessary release branch maintenance (especially for patches)
-      - if: |
-          needs.build.result != 'success' ||
-          needs.test.result != 'success' ||
-          needs.integration-test.result != 'success' ||
-          (
-            !startsWith(github.base_ref, 'release/') &&
-            (
-              needs.markdown-lint-check.result != 'success' ||
-              needs.misspell-check.result != 'success' ||
-              needs.shell-script-check.result != 'success'
-            )
-          )
-        run: exit 1 # fail
-
-  workflow-notification:
-    permissions:
-      contents: read
-      issues: write
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && always()
-    needs:
-      - build
-      - test
-      - integration-test
-      - link-check
-      - markdown-lint-check
-      - misspell-check
-      - shell-script-check
-      - publish-snapshots
-    uses: ./.github/workflows/reusable-workflow-notification.yml
-    with:
-      success: >-
-        ${{
-          needs.build.result == 'success' &&
-          needs.test.result == 'success' &&
-          needs.integration-test.result == 'success' &&
-          needs.link-check.result == 'success' &&
-          needs.markdown-lint-check.result == 'success' &&
-          needs.misspell-check.result == 'success' &&
-          needs.shell-script-check.result == 'success' &&
-          needs.publish-snapshots.result == 'success'
-        }}
