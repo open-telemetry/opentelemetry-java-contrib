@@ -37,6 +37,9 @@ components:
   consistent-sampling:
     - oertl
     - PeterF778
+  declarative-config-bridge:
+    - jaydeluca
+    - zeitlinger
   disk-buffering:
     - LikeTheSalad
     - zeitlinger
