@@ -13,7 +13,7 @@ First, there is a configuration method that reads the properties and is unaware 
 configuration:
 
 ```java
-public class InferredSpansConfig {
+class InferredSpansConfig {
   static SpanProcessor create(ConfigProperties properties) {
     // read properties here
     boolean backupDiagnosticFiles =
@@ -69,7 +69,7 @@ public class InferredSpansComponentProvider implements ComponentProvider<SpanPro
 
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
-    return InferredSpansAutoConfig.create(
+    return InferredSpansConfig.create(
         new DeclarativeConfigPropertiesBridgeBuilder()
             // crop the prefix, because the properties are under the "inferred_spans" processor
             .addMapping("otel.inferred.spans.", "")

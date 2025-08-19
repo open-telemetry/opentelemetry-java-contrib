@@ -17,7 +17,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-public class InferredSpansConfig {
+class InferredSpansConfig {
+
+  private InferredSpansConfig() {}
+
   static final String ENABLED_OPTION = "otel.inferred.spans.enabled";
   static final String LOGGING_OPTION = "otel.inferred.spans.logging.enabled";
   static final String DIAGNOSTIC_FILES_OPTION = "otel.inferred.spans.backup.diagnostic.files";
