@@ -47,6 +47,8 @@ public final class OkHttpSender implements HttpSender {
     RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);
     builder.post(body);
 
+    // By suppressing instrumentations, we prevent automatic instrumentations for the okhttp request
+    // that polls the opamp server.
     InstrumentationUtil.suppressInstrumentation(() -> doSendRequest(builder.build(), future));
 
     return future;
