@@ -19,6 +19,7 @@ import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -300,17 +302,16 @@ class WMQMonitorIntegrationTest {
     assertThat(data).isNotEmpty();
     assertThat(data).hasSize(2);
 
-    SumData<LongPointData> connectionErrors = null;
+    Attributes attrs = null;
     for (MetricData metricData : data) {
       if ("ibm.mq.connection.errors".equals(metricData.getName())) {
-        connectionErrors = (SumData<LongPointData>) metricData.getData();
+        attrs = metricData.getData().getPoints().stream().iterator().next().getAttributes();
       }
     }
 
-    assertThat(connectionErrors).isNotNull();
+    assertThat(attrs).isNotNull();
 
-    LongPointData metricPoint = connectionErrors.getPoints().iterator().next();
-    String value = metricPoint.getAttributes().get(AttributeKey.stringKey("error.code"));
+    String value = attrs.get(AttributeKey.stringKey("error.code"));
 
     assertThat(value).isEqualTo("2538");
   }
