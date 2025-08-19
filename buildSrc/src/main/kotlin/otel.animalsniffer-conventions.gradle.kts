@@ -17,8 +17,3 @@ animalsniffer {
 tasks.withType<AnimalSniffer> {
   reports.text.required.set(true)
 }
-
-// Attaching animalsniffer check to the compilation process.
-tasks.named("classes").configure {
-  finalizedBy("animalsnifferMain")
-}
