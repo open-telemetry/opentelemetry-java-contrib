@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public final class ToDiskExporterBuilder<T> {
 
-  private SignalSerializer<T> serializer = ts -> new byte[0];
+  private SignalSerializer<T> serializer = new NoopSerializer<T>();
 
   private final Storage storage;
 
