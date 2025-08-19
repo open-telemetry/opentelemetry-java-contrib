@@ -199,6 +199,10 @@ public final class MetricsConfig {
     return isEnabled("ibm.mq.manager.max.handles");
   }
 
+  public boolean isIbmMqConnectionErrorsEnabled() {
+    return isEnabled("ibm.mq.connection.errors");
+  }
+
   private boolean isEnabled(String key) {
     Object metricInfo = config.get(key);
     if (!(metricInfo instanceof Map)) {

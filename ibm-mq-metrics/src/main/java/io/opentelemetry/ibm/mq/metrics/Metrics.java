@@ -421,4 +421,12 @@ public final class Metrics {
         .setDescription("Max open handles")
         .build();
   }
+
+  public static LongCounter createIbmMqConnectionErrors(Meter meter) {
+    return meter
+        .counterBuilder("ibm.mq.connection.errors")
+        .setUnit("{errors}")
+        .setDescription("Number of connection errors")
+        .build();
+  }
 }

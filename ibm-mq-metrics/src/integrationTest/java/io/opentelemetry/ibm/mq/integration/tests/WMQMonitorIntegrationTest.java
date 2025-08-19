@@ -18,6 +18,8 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -280,5 +282,34 @@ class WMQMonitorIntegrationTest {
     assertThat(metricNames).contains("ibm.mq.queue.depth.low.event");
     // reads a value from the heartbeat gauge
     assertThat(metricNames).contains("ibm.mq.heartbeat");
+  }
+
+  @Test
+  void test_bad_connection() throws Exception {
+    logger.info("\n\n\n\n\n\nRunning test: test_bad_connection");
+    String configFile = getConfigFile("conf/test-bad-config.yml");
+
+    ConfigWrapper config = ConfigWrapper.parse(configFile);
+    Meter meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
+    TestWMQMonitor monitor = new TestWMQMonitor(config, meter, service);
+    monitor.runTest();
+
+    List<MetricData> data = otelTesting.getMetrics();
+
+    assertThat(data).isNotEmpty();
+    assertThat(data).hasSize(2);
+
+    Attributes attrs = null;
+    for (MetricData metricData : data) {
+      if ("ibm.mq.connection.errors".equals(metricData.getName())) {
+        attrs = metricData.getData().getPoints().stream().iterator().next().getAttributes();
+      }
+    }
+
+    assertThat(attrs).isNotNull();
+
+    String value = attrs.get(AttributeKey.stringKey("error.code"));
+
+    assertThat(value).isEqualTo("2538");
   }
 }
