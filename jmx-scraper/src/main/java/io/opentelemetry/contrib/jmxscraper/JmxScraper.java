@@ -95,7 +95,7 @@ public class JmxScraper {
         jmxScraper.start();
       }
     } catch (ConfigurationException e) {
-      logger.log(Level.SEVERE, "invalid configuration ", e);
+      logger.log(Level.SEVERE, "invalid configuration: " + e.getMessage(), e);
       System.exit(1);
     } catch (InvalidArgumentException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);

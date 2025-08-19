@@ -88,7 +88,7 @@ public final class PollingMeterCallbackRegistrar implements CallbackRegistrar {
 
     private final Runnable callback;
 
-    public PollingIterable(Runnable callback) {
+    PollingIterable(Runnable callback) {
       this.callback = callback;
     }
 

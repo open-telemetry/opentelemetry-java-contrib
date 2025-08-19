@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.18.1-alpha"
+val otelInstrumentationVersion = "2.19.0-alpha"
 val semconvVersion = "1.34.0"
 
 javaPlatform {
@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.2"))
-  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.31.1"))
+  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.0"))
   api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
@@ -27,8 +27,8 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")
     api("com.google.auto.value:auto-value-annotations:1.11.0")
-    api("com.google.errorprone:error_prone_annotations:2.40.0")
-    api("com.google.errorprone:error_prone_core:2.40.0")
+    api("com.google.errorprone:error_prone_annotations:2.41.0")
+    api("com.google.errorprone:error_prone_core:2.41.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -45,8 +45,8 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.12.7")
-    api("org.assertj:assertj-core:3.27.3")
+    api("com.uber.nullaway:nullaway:0.12.9")
+    api("org.assertj:assertj-core:3.27.4")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
@@ -55,7 +55,7 @@ dependencies {
     api("org.testcontainers:kafka:1.21.3")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:4.0")
+    api("tools.profiler:async-profiler:4.1")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
     api("com.github.f4b6a3:uuid-creator:6.1.1")

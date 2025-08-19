@@ -4,9 +4,9 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("otel.animalsniffer-conventions")
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("com.squareup.wire") version "5.3.5"
+  id("com.squareup.wire") version "5.3.11"
 }
 
 description = "Exporter implementations that store signals on disk"

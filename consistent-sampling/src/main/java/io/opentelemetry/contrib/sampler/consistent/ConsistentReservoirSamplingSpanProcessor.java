@@ -55,7 +55,7 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
     private final int rval;
     private final long priority;
 
-    public static ReadableSpanWithPriority create(
+    static ReadableSpanWithPriority create(
         ReadableSpan readableSpan, RandomGenerator randomGenerator) {
       String otelTraceStateString =
           readableSpan.getSpanContext().getTraceState().get(OtelTraceState.TRACE_STATE_KEY);
@@ -201,7 +201,7 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
     private final PriorityQueue<ReadableSpanWithPriority> queue;
     private final RandomGenerator randomGenerator;
 
-    public Reservoir(int reservoirSize, RandomGenerator randomGenerator) {
+    Reservoir(int reservoirSize, RandomGenerator randomGenerator) {
       if (reservoirSize < 1) {
         throw new IllegalArgumentException();
       }
@@ -211,7 +211,7 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
       this.randomGenerator = randomGenerator;
     }
 
-    public void add(ReadableSpanWithPriority readableSpanWithPriority) {
+    void add(ReadableSpanWithPriority readableSpanWithPriority) {
 
       if (queue.size() < reservoirSize) {
         queue.add(readableSpanWithPriority);
@@ -232,7 +232,7 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
       }
     }
 
-    public List<SpanData> getResult() {
+    List<SpanData> getResult() {
 
       if (numberOfDiscardedSpansWithMaxDiscardedRValue == 0) {
         return queue.stream().map(x -> x.readableSpan.toSpanData()).collect(Collectors.toList());
@@ -294,7 +294,7 @@ public final class ConsistentReservoirSamplingSpanProcessor implements SpanProce
       return result;
     }
 
-    public boolean isEmpty() {
+    boolean isEmpty() {
       return queue.isEmpty();
     }
   }

@@ -1,0 +1,40 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.opentelemetry.ibm.mq.metrics;
+
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongGauge;
+import io.opentelemetry.api.metrics.Meter;
+import java.util.function.Function;
+
+// This file is generated using weaver. Do not edit manually.
+
+/** Metric definitions generated from a Weaver model. Do not edit manually. */
+public final class Metrics {
+public final static Function<Integer, Long> MIBY_TO_BYTES = x -> x * 1024L * 1024L;
+private Metrics(){
+}
+{% for metric in ctx %}
+
+  {% if metric.instrument == "gauge" %}
+  public static LongGauge create{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(Meter meter) {
+    return meter
+        .gaugeBuilder("{{ metric.metric_name }}")
+        .ofLongs()
+        .setUnit("{{ metric.unit }}")
+        .setDescription("{{ metric.brief }}")
+        .build();
+  }
+  {% elif metric.instrument == "counter" %}
+  public static LongCounter create{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(Meter meter) {
+    return meter
+        .counterBuilder("{{ metric.metric_name }}")
+        .setUnit("{{ metric.unit }}")
+        .setDescription("{{ metric.brief }}")
+        .build();
+  }
+  {% endif %}
+{% endfor %}
+}

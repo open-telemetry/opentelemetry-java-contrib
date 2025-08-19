@@ -1,7 +1,7 @@
 plugins {
   id("otel.java-conventions")
   application
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
 
   id("otel.groovy-conventions")
   id("otel.publish-conventions")
@@ -59,6 +59,8 @@ tasks {
   shadowJar {
     mergeServiceFiles()
 
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }
@@ -72,7 +74,9 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+
     systemProperty("gradle.project.version", "${project.version}")
   }
 
