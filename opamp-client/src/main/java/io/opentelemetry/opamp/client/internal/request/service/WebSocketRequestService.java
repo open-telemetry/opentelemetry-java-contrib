@@ -10,6 +10,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.delay.AcceptsDelaySuggestion;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
+import io.opentelemetry.opamp.client.internal.request.delay.RetryPeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.io.ByteArrayOutputStream;
@@ -30,7 +31,7 @@ import opamp.proto.ServerToAgent;
 
 public final class WebSocketRequestService implements RequestService, WebSocket.Listener {
   private static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
-      PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
+      RetryPeriodicDelay.create(Duration.ofSeconds(30));
 
   private final WebSocket webSocket;
   private final AtomicBoolean isRunning = new AtomicBoolean(false);

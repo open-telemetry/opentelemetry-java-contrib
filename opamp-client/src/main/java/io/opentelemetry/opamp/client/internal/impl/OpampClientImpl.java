@@ -28,11 +28,9 @@ import io.opentelemetry.opamp.client.internal.state.State;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import okio.ByteString;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentToServer;
@@ -51,9 +49,8 @@ public final class OpampClientImpl
   private final AgentToServerAppenders appenders;
   private final OpampClientState state;
   private final RecipeManager recipeManager;
-  private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
-  @Nullable private Callbacks callbacks;
+  private final Callbacks callbacks;
 
   /** Fields that must always be sent. */
   private static final List<Field> REQUIRED_FIELDS;
@@ -84,7 +81,8 @@ public final class OpampClientImpl
     COMPRESSABLE_FIELDS = Collections.unmodifiableList(compressableFields);
   }
 
-  public static OpampClientImpl create(RequestService requestService, OpampClientState state) {
+  public static OpampClientImpl create(
+      RequestService requestService, OpampClientState state, Callbacks callbacks) {
     AgentToServerAppenders appenders =
         new AgentToServerAppenders(
             AgentDescriptionAppender.create(state.agentDescription),
@@ -95,41 +93,35 @@ public final class OpampClientImpl
             InstanceUidAppender.create(state.instanceUid),
             FlagsAppender.create(state.flags),
             AgentDisconnectAppender.create());
-    return new OpampClientImpl(
-        requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS));
+    OpampClientImpl client =
+        new OpampClientImpl(
+            requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS), callbacks);
+
+    // Start
+    requestService.start(client, client);
+    client.disableCompression();
+    client.startObservingStateChange();
+    requestService.sendRequest();
+
+    return client;
   }
 
   private OpampClientImpl(
       RequestService requestService,
       AgentToServerAppenders appenders,
       OpampClientState state,
-      RecipeManager recipeManager) {
+      RecipeManager recipeManager,
+      Callbacks callbacks) {
     this.requestService = requestService;
     this.appenders = appenders;
     this.state = state;
     this.recipeManager = recipeManager;
+    this.callbacks = callbacks;
   }
 
   @Override
-  public void start(@Nonnull Callbacks callbacks) {
-    if (hasStopped.get()) {
-      throw new IllegalStateException("The client cannot start after it has been stopped.");
-    }
-    if (isRunning.compareAndSet(false, true)) {
-      this.callbacks = callbacks;
-      requestService.start(this, this);
-      disableCompression();
-      startObservingStateChange();
-      requestService.sendRequest();
-    } else {
-      throw new IllegalStateException("The client has already been started");
-    }
-  }
-
-  @Override
-  public void stop() {
-    if (isRunning.compareAndSet(true, false)) {
-      hasStopped.set(true);
+  public void close() {
+    if (hasStopped.compareAndSet(false, true)) {
       stopObservingStateChange();
       prepareDisconnectRequest();
       requestService.stop();
@@ -154,12 +146,12 @@ public final class OpampClientImpl
 
   @Override
   public void onConnectionSuccess() {
-    getCallbacks().onConnect();
+    callbacks.onConnect();
   }
 
   @Override
   public void onConnectionFailed(Throwable throwable) {
-    getCallbacks().onConnectFailed(throwable);
+    callbacks.onConnectFailed(throwable);
   }
 
   @Override
@@ -176,7 +168,7 @@ public final class OpampClientImpl
     preserveFailedRequestRecipe();
     if (throwable instanceof OpampServerResponseException) {
       ServerErrorResponse errorResponse = ((OpampServerResponseException) throwable).errorResponse;
-      getCallbacks().onErrorResponse(errorResponse);
+      callbacks.onErrorResponse(errorResponse);
     }
   }
 
@@ -203,7 +195,7 @@ public final class OpampClientImpl
     }
 
     if (notifyOnMessage) {
-      getCallbacks().onMessage(messageBuilder.build());
+      callbacks.onMessage(messageBuilder.build());
     }
   }
 
@@ -222,11 +214,6 @@ public final class OpampClientImpl
 
   private void prepareDisconnectRequest() {
     recipeManager.next().addField(Field.AGENT_DISCONNECT);
-  }
-
-  @Nonnull
-  private Callbacks getCallbacks() {
-    return Objects.requireNonNull(callbacks);
   }
 
   @Override

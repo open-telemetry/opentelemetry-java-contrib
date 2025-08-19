@@ -4,6 +4,8 @@ import java.net.URL
 
 plugins {
   id("otel.java-conventions")
+  id("otel.publish-conventions")
+  id("otel.animalsniffer-conventions")
   id("de.undercouch.download") version "5.6.0"
   id("com.squareup.wire") version "5.3.11"
 }
@@ -14,6 +16,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 dependencies {
   implementation("com.squareup.okhttp3:okhttp")
   implementation("com.github.f4b6a3:uuid-creator")
+  implementation("io.opentelemetry:opentelemetry-api")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
   testImplementation("org.mockito:mockito-inline")
