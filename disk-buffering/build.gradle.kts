@@ -7,7 +7,7 @@ plugins {
   id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
   id("ru.vyarus.animalsniffer") version "2.0.1"
-  id("com.squareup.wire") version "5.3.10"
+  id("com.squareup.wire") version "5.3.11"
 }
 
 description = "Exporter implementations that store signals on disk"
