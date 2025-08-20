@@ -66,6 +66,12 @@ tasks {
   withType<Test>().configureEach {
     useJUnitPlatform()
 
+    val maxTestRetries = gradle.startParameter.projectProperties["maxTestRetries"]?.toInt() ?: 0
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      maxRetries.set(maxTestRetries)
+    }
+
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
