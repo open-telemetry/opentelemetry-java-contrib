@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.ByteArraySerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
@@ -87,7 +88,7 @@ class StorageTest {
 
   @Test
   void whenWritingMultipleTimes_reuseWriter() throws IOException {
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
     WritableFile anotherWriter = createWritableFile();
     when(folderManager.createWritableFile()).thenReturn(writableFile).thenReturn(anotherWriter);
 
@@ -108,7 +109,7 @@ class StorageTest {
   @Test
   void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
     storage.close();
-    assertFalse(storage.write(new byte[1]));
+    assertFalse(storage.write(new ByteArraySerializer(new byte[1])));
   }
 
   @Test
@@ -159,7 +160,7 @@ class StorageTest {
   @Test
   void appendDataToFile() throws IOException {
     when(folderManager.createWritableFile()).thenReturn(writableFile);
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
 
     storage.write(data);
 
@@ -168,7 +169,7 @@ class StorageTest {
 
   @Test
   void whenWritingTimeoutHappens_retryWithNewFile() throws IOException {
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
@@ -182,7 +183,7 @@ class StorageTest {
 
   @Test
   void whenThereIsNoSpaceAvailableForWriting_retryWithNewFile() throws IOException {
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
@@ -196,7 +197,7 @@ class StorageTest {
 
   @Test
   void whenWritingResourceIsClosed_retryWithNewFile() throws IOException {
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
     WritableFile workingWritableFile = createWritableFile();
     when(folderManager.createWritableFile())
         .thenReturn(writableFile)
@@ -210,7 +211,7 @@ class StorageTest {
 
   @Test
   void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
-    byte[] data = new byte[1];
+    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
     when(folderManager.createWritableFile()).thenReturn(writableFile);
     when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
@@ -223,7 +224,7 @@ class StorageTest {
   void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
     when(folderManager.createWritableFile()).thenReturn(writableFile);
     when(folderManager.getReadableFile()).thenReturn(readableFile);
-    storage.write(new byte[1]);
+    storage.write(new ByteArraySerializer(new byte[1]));
     storage.readAndProcess(processing);
 
     storage.close();

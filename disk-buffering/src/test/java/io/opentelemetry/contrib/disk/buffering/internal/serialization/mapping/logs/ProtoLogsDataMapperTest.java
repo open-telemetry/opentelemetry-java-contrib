@@ -12,8 +12,8 @@ import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.logs.v1.LogRecord;
-import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -104,7 +104,7 @@ class ProtoLogsDataMapperTest {
   void verifyConversionDataStructure() {
     List<LogRecordData> signals = Collections.singletonList(LOG_RECORD);
 
-    LogsData result = mapToProto(signals);
+    ExportLogsServiceRequest result = mapToProto(signals);
 
     List<ResourceLogs> resourceLogsList = result.resource_logs;
     assertEquals(1, resourceLogsList.size());
@@ -118,7 +118,7 @@ class ProtoLogsDataMapperTest {
   void verifyMultipleLogsWithSameResourceAndScope() {
     List<LogRecordData> signals = Arrays.asList(LOG_RECORD, OTHER_LOG_RECORD);
 
-    LogsData proto = mapToProto(signals);
+    ExportLogsServiceRequest proto = mapToProto(signals);
 
     List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(1, resourceLogsList.size());
@@ -139,7 +139,7 @@ class ProtoLogsDataMapperTest {
     List<LogRecordData> signals =
         Arrays.asList(LOG_RECORD, LOG_RECORD_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
 
-    LogsData proto = mapToProto(signals);
+    ExportLogsServiceRequest proto = mapToProto(signals);
 
     List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(1, resourceLogsList.size());
@@ -159,7 +159,7 @@ class ProtoLogsDataMapperTest {
   void verifyMultipleLogsWithDifferentResource() {
     List<LogRecordData> signals = Arrays.asList(LOG_RECORD, LOG_RECORD_WITH_DIFFERENT_RESOURCE);
 
-    LogsData proto = mapToProto(signals);
+    ExportLogsServiceRequest proto = mapToProto(signals);
 
     List<ResourceLogs> resourceLogsList = proto.resource_logs;
     assertEquals(2, resourceLogsList.size());
@@ -183,7 +183,7 @@ class ProtoLogsDataMapperTest {
   void verifyLogWithEventName() {
     List<LogRecordData> signals = Collections.singletonList(LOG_RECORD_WITH_EVENT_NAME);
 
-    LogsData result = mapToProto(signals);
+    ExportLogsServiceRequest result = mapToProto(signals);
 
     List<ResourceLogs> resourceLogsList = result.resource_logs;
     LogRecord firstLog = resourceLogsList.get(0).scope_logs.get(0).log_records.get(0);
@@ -192,11 +192,11 @@ class ProtoLogsDataMapperTest {
     assertThat(mapFromProto(result)).containsExactlyInAnyOrderElementsOf(signals);
   }
 
-  private static LogsData mapToProto(Collection<LogRecordData> signals) {
+  private static ExportLogsServiceRequest mapToProto(Collection<LogRecordData> signals) {
     return ProtoLogsDataMapper.getInstance().toProto(signals);
   }
 
-  private static List<LogRecordData> mapFromProto(LogsData protoData) {
+  private static List<LogRecordData> mapFromProto(ExportLogsServiceRequest protoData) {
     return ProtoLogsDataMapper.getInstance().fromProto(protoData);
   }
 }

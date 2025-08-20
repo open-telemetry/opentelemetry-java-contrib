@@ -5,33 +5,41 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ProtoMetricsDataMapper;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
-import io.opentelemetry.proto.metrics.v1.MetricsData;
+import io.opentelemetry.exporter.internal.otlp.metrics.LowAllocationMetricsRequestMarshaler;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 
 public final class MetricDataSerializer implements SignalSerializer<MetricData> {
-  private static final MetricDataSerializer INSTANCE = new MetricDataSerializer();
 
-  private MetricDataSerializer() {}
+  private final LowAllocationMetricsRequestMarshaler marshaler =
+      new LowAllocationMetricsRequestMarshaler();
 
-  static MetricDataSerializer getInstance() {
-    return INSTANCE;
+  MetricDataSerializer() {}
+
+  @CanIgnoreReturnValue
+  @Override
+  public MetricDataSerializer initialize(Collection<MetricData> data) {
+    marshaler.initialize(data);
+    return this;
   }
 
   @Override
-  public byte[] serialize(Collection<MetricData> metricData) {
-    MetricsData proto = ProtoMetricsDataMapper.getInstance().toProto(metricData);
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      int size = MetricsData.ADAPTER.encodedSize(proto);
-      ProtobufTools.writeRawVarint32(size, out);
-      proto.encode(out);
-      return out.toByteArray();
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+  public void writeBinaryTo(OutputStream output) throws IOException {
+    ProtobufTools.writeRawVarint32(marshaler.getBinarySerializedSize(), output);
+    marshaler.writeBinaryTo(output);
+  }
+
+  @Override
+  public int getBinarySerializedSize() {
+    return marshaler.getBinarySerializedSize();
+  }
+
+  @Override
+  public void reset() {
+    marshaler.reset();
   }
 }

@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.models.SpanDataImpl;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.opentelemetry.proto.trace.v1.Span;
-import io.opentelemetry.proto.trace.v1.TracesData;
 import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -116,7 +116,7 @@ class ProtoSpansDataMapperTest {
   void verifyConversionDataStructure() {
     List<SpanData> signals = Collections.singletonList(SPAN_DATA);
 
-    TracesData proto = mapToProto(signals);
+    ExportTraceServiceRequest proto = mapToProto(signals);
 
     List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
@@ -130,7 +130,7 @@ class ProtoSpansDataMapperTest {
   void verifyMultipleSpansWithSameResourceAndScope() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, OTHER_SPAN_DATA);
 
-    TracesData proto = mapToProto(signals);
+    ExportTraceServiceRequest proto = mapToProto(signals);
 
     List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
@@ -146,7 +146,7 @@ class ProtoSpansDataMapperTest {
   void verifyMultipleSpansWithSameResourceDifferentScope() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, SPAN_DATA_WITH_DIFFERENT_SCOPE_SAME_RESOURCE);
 
-    TracesData proto = mapToProto(signals);
+    ExportTraceServiceRequest proto = mapToProto(signals);
 
     List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(1, resourceSpans.size());
@@ -166,7 +166,7 @@ class ProtoSpansDataMapperTest {
   void verifyMultipleSpansWithDifferentResource() {
     List<SpanData> signals = Arrays.asList(SPAN_DATA, SPAN_DATA_WITH_DIFFERENT_RESOURCE);
 
-    TracesData proto = mapToProto(signals);
+    ExportTraceServiceRequest proto = mapToProto(signals);
 
     List<ResourceSpans> resourceSpans = proto.resource_spans;
     assertEquals(2, resourceSpans.size());
@@ -186,11 +186,11 @@ class ProtoSpansDataMapperTest {
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(signals);
   }
 
-  private static TracesData mapToProto(Collection<SpanData> signals) {
+  private static ExportTraceServiceRequest mapToProto(Collection<SpanData> signals) {
     return ProtoSpansDataMapper.getInstance().toProto(signals);
   }
 
-  private static List<SpanData> mapFromProto(TracesData protoData) {
+  private static List<SpanData> mapFromProto(ExportTraceServiceRequest protoData) {
     return ProtoSpansDataMapper.getInstance().fromProto(protoData);
   }
 }

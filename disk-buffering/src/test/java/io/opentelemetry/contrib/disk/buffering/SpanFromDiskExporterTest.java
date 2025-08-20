@@ -86,7 +86,7 @@ class SpanFromDiskExporterTest {
     SpanData span2 = makeSpan2(TraceFlags.getSampled(), now);
     List<SpanData> spans = Arrays.asList(span1, span2);
 
-    storage.write(SignalSerializer.ofSpans().serialize(spans));
+    storage.write(SignalSerializer.ofSpans().initialize(spans));
     storage.flush();
     return spans;
   }
