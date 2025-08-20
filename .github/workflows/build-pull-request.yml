@@ -1,0 +1,32 @@
+name: Build Pull Request
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  common:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      cache-read-only: true
+
+  link-check:
+    uses: ./.github/workflows/reusable-link-check.yml
+
+  required-status-check:
+    if: always()
+    needs:
+      - common
+      - link-check # wait for link check to complete, but don't require it to pass for merging
+    runs-on: ubuntu-latest
+    steps:
+      # The reusable workflow success depends on all its jobs passing
+      - if: needs.common.result != 'success'
+        run: exit 1 # fail
