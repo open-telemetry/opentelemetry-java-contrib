@@ -26,7 +26,7 @@ public final class SpanToDiskExporter implements SpanExporter {
     this.callback = callback;
   }
 
-  public Builder builder(SignalStorage.Span storage) {
+  public static Builder builder(SignalStorage.Span storage) {
     return new Builder(storage);
   }
 
