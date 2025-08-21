@@ -8,27 +8,29 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import static java.util.logging.Level.WARNING;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
-public final class Storage implements Closeable {
+public final class Storage<T> implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final DebugLogger logger;
   private final FolderManager folderManager;
   private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
+  private final AtomicBoolean activeReadResultAvailable = new AtomicBoolean(false);
   private final AtomicReference<WritableFile> writableFileRef = new AtomicReference<>();
   private final AtomicReference<ReadableFile> readableFileRef = new AtomicReference<>();
 
@@ -53,11 +55,11 @@ public final class Storage implements Closeable {
    * @param marshaler - The data that would be appended to the file.
    * @throws IOException If an unexpected error happens.
    */
-  public boolean write(SignalSerializer<?> marshaler) throws IOException {
+  public boolean write(SignalSerializer<T> marshaler) throws IOException {
     return write(marshaler, 1);
   }
 
-  private boolean write(SignalSerializer<?> marshaler, int attemptNumber) throws IOException {
+  private boolean write(SignalSerializer<T> marshaler, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to write to storage after being closed.");
       return false;
@@ -93,27 +95,25 @@ public final class Storage implements Closeable {
   /**
    * Attempts to read an item from a ready-to-read file.
    *
-   * @param processing Is passed over to {@link ReadableFile#readAndProcess(Function)}.
    * @throws IOException If an unexpected error happens.
    */
-  public ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
+  public ReadableResult<T> readNext(SignalDeserializer<T> deserializer) throws IOException {
+    if (activeReadResultAvailable.get()) {
+      throw new IllegalStateException(
+          "You must close any previous ReadableResult before requesting a new one");
+    }
+    return doReadAndProcess(deserializer, 1);
+  }
+
+  private ReadableResult<T> doReadAndProcess(SignalDeserializer<T> deserializer, int attemptNumber)
       throws IOException {
-    return doReadAndProcess(processing, 1);
-  }
-
-  public void clear() throws IOException {
-    folderManager.clear();
-  }
-
-  private ReadableResult doReadAndProcess(
-      Function<byte[], ProcessResult> processing, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to read from storage after being closed.");
-      return ReadableResult.FAILED;
+      return null;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
       logger.log("Maximum number of attempts to read and process buffered data exceeded.", WARNING);
-      return ReadableResult.FAILED;
+      return null;
     }
     ReadableFile readableFile = readableFileRef.get();
     if (readableFile == null) {
@@ -122,20 +122,33 @@ public final class Storage implements Closeable {
       readableFileRef.set(readableFile);
       if (readableFile == null) {
         logger.log("Unable to get or create readable file.");
-        return ReadableResult.FAILED;
+        return null;
       }
     }
+
     logger.log("Attempting to read data from " + readableFile);
-    ReadableResult result = readableFile.readAndProcess(processing);
-    switch (result) {
-      case SUCCEEDED:
-      case TRY_LATER:
-        return result;
-      default:
-        // Retry with new file
-        readableFileRef.set(null);
-        return doReadAndProcess(processing, ++attemptNumber);
+    byte[] result = readableFile.readNext();
+    if (result != null) {
+      try {
+        Collection<T> items = deserializer.deserialize(result);
+        return new FileReadResult(items, readableFile);
+      } catch (DeserializationException e) {
+        // Data corrupted, clear file.
+        readableFile.clear();
+      }
     }
+
+    // Retry with new file
+    readableFileRef.set(null);
+    return doReadAndProcess(deserializer, ++attemptNumber);
+  }
+
+  public void clear() throws IOException {
+    folderManager.clear();
+  }
+
+  public boolean isClosed() {
+    return isClosed.get();
   }
 
   @Override
@@ -145,6 +158,46 @@ public final class Storage implements Closeable {
       folderManager.close();
       writableFileRef.set(null);
       readableFileRef.set(null);
+    }
+  }
+
+  class FileReadResult implements ReadableResult<T> {
+    private final Collection<T> content;
+    private final AtomicBoolean itemDeleted = new AtomicBoolean(false);
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicReference<ReadableFile> readableFile = new AtomicReference<>();
+
+    FileReadResult(Collection<T> content, ReadableFile readableFile) {
+      this.content = content;
+      this.readableFile.set(readableFile);
+    }
+
+    @Override
+    public Collection<T> getContent() {
+      return content;
+    }
+
+    @Override
+    public void delete() throws IOException {
+      if (closed.get()) {
+        return;
+      }
+      if (itemDeleted.compareAndSet(false, true)) {
+        try {
+          readableFile.get().removeTopItem();
+        } catch (IOException e) {
+          itemDeleted.set(false);
+          throw e;
+        }
+      }
+    }
+
+    @Override
+    public void close() throws IOException {
+      if (closed.compareAndSet(false, true)) {
+        activeReadResultAvailable.set(false);
+        readableFile.set(null);
+      }
     }
   }
 }
