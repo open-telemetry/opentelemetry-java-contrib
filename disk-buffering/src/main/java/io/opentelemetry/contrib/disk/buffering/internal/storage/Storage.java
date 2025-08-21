@@ -19,9 +19,9 @@ import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 
 public final class Storage implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
@@ -29,8 +29,8 @@ public final class Storage implements Closeable {
   private final FolderManager folderManager;
   private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
-  @Nullable private WritableFile writableFile;
-  @Nullable private ReadableFile readableFile;
+  private final AtomicReference<WritableFile> writableFileRef = new AtomicReference<>();
+  private final AtomicReference<ReadableFile> readableFileRef = new AtomicReference<>();
 
   public Storage(FolderManager folderManager, boolean debugEnabled) {
     this.folderManager = folderManager;
@@ -66,20 +66,23 @@ public final class Storage implements Closeable {
       logger.log("Max number of attempts to write buffered data exceeded.", WARNING);
       return false;
     }
+    WritableFile writableFile = writableFileRef.get();
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
+      writableFileRef.set(writableFile);
       logger.log("Created new writableFile: " + writableFile);
     }
     WritableResult result = writableFile.append(marshaler);
     if (result != WritableResult.SUCCEEDED) {
       // Retry with new file
-      writableFile = null;
+      writableFileRef.set(null);
       return write(marshaler, ++attemptNumber);
     }
     return true;
   }
 
   public void flush() throws IOException {
+    WritableFile writableFile = writableFileRef.get();
     if (writableFile != null) {
       writableFile.flush();
     } else {
@@ -95,10 +98,14 @@ public final class Storage implements Closeable {
    */
   public ReadableResult readAndProcess(Function<byte[], ProcessResult> processing)
       throws IOException {
-    return readAndProcess(processing, 1);
+    return doReadAndProcess(processing, 1);
   }
 
-  private ReadableResult readAndProcess(
+  public void clear() throws IOException {
+    folderManager.clear();
+  }
+
+  private ReadableResult doReadAndProcess(
       Function<byte[], ProcessResult> processing, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to read from storage after being closed.");
@@ -108,9 +115,11 @@ public final class Storage implements Closeable {
       logger.log("Maximum number of attempts to read and process buffered data exceeded.", WARNING);
       return ReadableResult.FAILED;
     }
+    ReadableFile readableFile = readableFileRef.get();
     if (readableFile == null) {
       logger.log("Obtaining a new readableFile from the folderManager.");
       readableFile = folderManager.getReadableFile();
+      readableFileRef.set(readableFile);
       if (readableFile == null) {
         logger.log("Unable to get or create readable file.");
         return ReadableResult.FAILED;
@@ -124,8 +133,8 @@ public final class Storage implements Closeable {
         return result;
       default:
         // Retry with new file
-        readableFile = null;
-        return readAndProcess(processing, ++attemptNumber);
+        readableFileRef.set(null);
+        return doReadAndProcess(processing, ++attemptNumber);
     }
   }
 
@@ -133,12 +142,9 @@ public final class Storage implements Closeable {
   public void close() throws IOException {
     logger.log("Closing disk buffering storage.");
     if (isClosed.compareAndSet(false, true)) {
-      if (writableFile != null) {
-        writableFile.close();
-      }
-      if (readableFile != null) {
-        readableFile.close();
-      }
+      folderManager.close();
+      writableFileRef.set(null);
+      readableFileRef.set(null);
     }
   }
 }

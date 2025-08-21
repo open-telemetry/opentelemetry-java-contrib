@@ -79,7 +79,7 @@ class SignalStorageExporterTest {
 
     // Without exception
     when(storage.write(anyCollection()))
-        .thenReturn(CompletableFuture.completedFuture(WriteResult.create(false, null)));
+        .thenReturn(CompletableFuture.completedFuture(WriteResult.error(null)));
 
     CompletableResultCode resultCode =
         storageExporter.exportToStorage(Collections.singletonList(item1));
@@ -93,7 +93,7 @@ class SignalStorageExporterTest {
     clearInvocations(callback);
     Exception exception = new Exception();
     when(storage.write(anyCollection()))
-        .thenReturn(CompletableFuture.completedFuture(WriteResult.create(false, exception)));
+        .thenReturn(CompletableFuture.completedFuture(WriteResult.error(exception)));
 
     resultCode = storageExporter.exportToStorage(Collections.singletonList(item1));
 
@@ -129,7 +129,7 @@ class SignalStorageExporterTest {
 
     @Nonnull
     private static CompletableFuture<WriteResult> getSuccessfulFuture() {
-      return CompletableFuture.completedFuture(WriteResult.create(true, null));
+      return CompletableFuture.completedFuture(WriteResult.successful());
     }
   }
 }

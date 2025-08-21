@@ -9,6 +9,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -53,6 +54,22 @@ class FolderManagerTest {
     WritableFile file = folderManager.createWritableFile();
 
     assertEquals("1000", file.getFile().getName());
+  }
+
+  @Test
+  void clearFiles() throws IOException {
+    when(clock.now())
+        .thenReturn(MILLISECONDS.toNanos(1000L))
+        .thenReturn(MILLISECONDS.toNanos(2000L));
+
+    // Creating 2 files
+    folderManager.createWritableFile();
+    folderManager.createWritableFile();
+    assertThat(rootDir.list()).containsExactlyInAnyOrder("1000", "2000");
+
+    // Clear
+    folderManager.clear();
+    assertThat(rootDir.list()).isEmpty();
   }
 
   @Test

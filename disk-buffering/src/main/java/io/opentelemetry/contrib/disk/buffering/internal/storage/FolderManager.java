@@ -14,6 +14,8 @@ import io.opentelemetry.sdk.common.Clock;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +27,18 @@ public final class FolderManager implements Closeable {
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
+  public static FolderManager create(
+      File destinationDir, StorageConfiguration configuration, Clock clock) {
+    if (destinationDir.isFile()) {
+      throw new IllegalArgumentException("destinationDir must be a directory");
+    } else if (!destinationDir.exists()) {
+      if (!destinationDir.mkdirs()) {
+        throw new IllegalStateException("Could not created dir " + destinationDir);
+      }
+    }
+    return new FolderManager(destinationDir, configuration, clock);
+  }
+
   public FolderManager(File folder, StorageConfiguration configuration, Clock clock) {
     this.folder = folder;
     this.configuration = configuration;
@@ -33,12 +47,7 @@ public final class FolderManager implements Closeable {
 
   @Override
   public void close() throws IOException {
-    if (currentReadableFile != null) {
-      currentReadableFile.close();
-    }
-    if (currentWritableFile != null) {
-      currentWritableFile.close();
-    }
+    closeCurrentFiles();
   }
 
   @Nullable
@@ -66,6 +75,21 @@ public final class FolderManager implements Closeable {
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
     currentWritableFile = new WritableFile(file, systemCurrentTimeMillis, configuration, clock);
     return currentWritableFile;
+  }
+
+  public synchronized void clear() throws IOException {
+    closeCurrentFiles();
+    List<File> undeletedFiles = new ArrayList<>();
+
+    for (File file : Objects.requireNonNull(folder.listFiles())) {
+      if (!file.delete()) {
+        undeletedFiles.add(file);
+      }
+    }
+
+    if (!undeletedFiles.isEmpty()) {
+      throw new IOException("Could not delete files " + undeletedFiles);
+    }
   }
 
   @Nullable
@@ -151,5 +175,14 @@ public final class FolderManager implements Closeable {
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {
     return systemCurrentTimeMillis
         > (createdTimeInMillis + configuration.getMaxFileAgeForReadMillis());
+  }
+
+  private synchronized void closeCurrentFiles() throws IOException {
+    if (currentReadableFile != null) {
+      currentReadableFile.close();
+    }
+    if (currentWritableFile != null) {
+      currentWritableFile.close();
+    }
   }
 }
