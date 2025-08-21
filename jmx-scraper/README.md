@@ -9,13 +9,18 @@ This is an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
 ## Release
 
 This project is released as part of the [OpenTelemetry Java Contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) project.
-The latest release is available from [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
-or can be browsed via [MVN Repository](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper).
+The latest release is available from:
+
+- [GitHub Release assets](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/latest)
+- [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)or can be browsed via [MVN Repository](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper).
 
 ## Usage
 
 The general command to invoke JMX scraper is `java -jar scraper.jar <config>`, where `scraper.jar`
-is the `build/libs/opentelemetry-jmx-scraper-<version>.jar` packaged binary when building this module.
+is the packaged binary:
+
+- `build/libs/opentelemetry-jmx-scraper-<version>.jar` when building from sources
+- `.jar` file downloaded from Maven central or Release assets
 
 Minimal configuration required
 
