@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.consistent56;
 
+import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateSamplingProbability;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.checkThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
@@ -31,9 +32,7 @@ public abstract class ConsistentThresholdSampler extends ConsistentSampler {
       thresholdString = "max";
     } else {
       thresholdString =
-          ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
-                  new StringBuilder(), threshold)
-              .toString();
+          appendLast56BitHexEncodedWithoutTrailingZeros(new StringBuilder(), threshold).toString();
     }
 
     return "ConsistentFixedThresholdSampler{threshold="
