@@ -64,8 +64,7 @@ class InferredSpansTest {
                     .profilingDuration(Duration.ofMillis(500)));
 
     // assert that the interval set before the profiler was initialized is ignored
-    assertThat(setup.profiler.getConfig().getProfilingInterval())
-        .isEqualTo(Duration.ofSeconds(10));
+    assertThat(setup.profiler.getConfig().getProfilingInterval()).isEqualTo(Duration.ofSeconds(10));
   }
 
   @Test
@@ -78,14 +77,12 @@ class InferredSpansTest {
 
     SamplingProfiler profiler = setup.profiler;
     await()
-        .untilAsserted(
-            () -> assertThat(profiler.getProfilingSessions()).isGreaterThanOrEqualTo(1));
+        .untilAsserted(() -> assertThat(profiler.getProfilingSessions()).isGreaterThanOrEqualTo(1));
 
     InferredSpans.setProfilerInterval(Duration.ofMillis(100));
 
     await()
         .timeout(Duration.ofSeconds(2))
-        .untilAsserted(
-            () -> assertThat(profiler.getProfilingSessions()).isGreaterThanOrEqualTo(2));
+        .untilAsserted(() -> assertThat(profiler.getProfilingSessions()).isGreaterThanOrEqualTo(2));
   }
 }
