@@ -18,14 +18,14 @@ import java.util.logging.Logger;
 public class ToDiskExporter<EXPORT_DATA> {
 
   private final DebugLogger logger;
-  private final Storage storage;
+  private final Storage<EXPORT_DATA> storage;
   private final SignalSerializer<EXPORT_DATA> serializer;
   private final Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction;
 
   ToDiskExporter(
       SignalSerializer<EXPORT_DATA> serializer,
       Function<Collection<EXPORT_DATA>, CompletableResultCode> exportFunction,
-      Storage storage) {
+      Storage<EXPORT_DATA> storage) {
     this.serializer = serializer;
     this.exportFunction = exportFunction;
     this.storage = storage;
@@ -34,7 +34,7 @@ public class ToDiskExporter<EXPORT_DATA> {
             Logger.getLogger(ToDiskExporter.class.getName()), storage.isDebugEnabled());
   }
 
-  public static <T> ToDiskExporterBuilder<T> builder(Storage storage) {
+  public static <T> ToDiskExporterBuilder<T> builder(Storage<T> storage) {
     return new ToDiskExporterBuilder<>(storage);
   }
 

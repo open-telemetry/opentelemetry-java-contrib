@@ -68,7 +68,6 @@ class SignalStorageExporterTest {
     assertThat(storedItems).containsExactly(item1, item2, item3);
   }
 
-  @SuppressWarnings("ThrowableNotThrown")
   @Test
   void verifyExportToStorage_failure() {
     SignalStorage.Span storage = mock();

@@ -28,9 +28,10 @@ public class LogRecordToDiskExporter implements LogRecordExporter {
    * @param storage - The Storage instance that specifies how storage is managed.
    * @return A new LogRecordToDiskExporter instance.
    */
-  public static LogRecordToDiskExporter create(LogRecordExporter delegate, Storage storage) {
+  public static LogRecordToDiskExporter create(
+      LogRecordExporter delegate, Storage<LogRecordData> storage) {
     ToDiskExporter<LogRecordData> toDisk =
-        ToDiskExporter.<LogRecordData>builder(storage)
+        ToDiskExporter.builder(storage)
             .setSerializer(SignalSerializer.ofLogs())
             .setExportFunction(delegate::export)
             .build();

@@ -29,9 +29,9 @@ public class SpanToDiskExporter implements SpanExporter {
    * @param storage - The Storage instance that specifies how storage is managed.
    * @return A new SpanToDiskExporter instance.
    */
-  public static SpanToDiskExporter create(SpanExporter delegate, Storage storage) {
+  public static SpanToDiskExporter create(SpanExporter delegate, Storage<SpanData> storage) {
     ToDiskExporter<SpanData> toDisk =
-        ToDiskExporter.<SpanData>builder(storage)
+        ToDiskExporter.builder(storage)
             .setSerializer(SignalSerializer.ofSpans())
             .setExportFunction(delegate::export)
             .build();

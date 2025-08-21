@@ -16,12 +16,12 @@ public final class ToDiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer = new NoopSerializer<T>();
 
-  private final Storage storage;
+  private final Storage<T> storage;
 
   private Function<Collection<T>, CompletableResultCode> exportFunction =
       x -> CompletableResultCode.ofFailure();
 
-  ToDiskExporterBuilder(Storage storage) {
+  ToDiskExporterBuilder(Storage<T> storage) {
     if (storage == null) {
       throw new NullPointerException("Storage cannot be null");
     }

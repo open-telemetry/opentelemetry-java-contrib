@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 
 /** Default storage implementation where items are stored in multiple protobuf files. */
 public final class FileSpanStorage implements SignalStorage.Span {
-  private final Storage storage;
+  private final Storage<SpanData> storage;
   private final SignalSerializer<SpanData> serializer;
   private final Logger logger = Logger.getLogger(FileSpanStorage.class.getName());
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -36,10 +36,10 @@ public final class FileSpanStorage implements SignalStorage.Span {
       File destinationDir, StorageConfiguration configuration, Clock clock) {
     FolderManager folderManager = FolderManager.create(destinationDir, configuration, clock);
     return new FileSpanStorage(
-        new Storage(folderManager, configuration.isDebugEnabled()), SignalSerializer.ofSpans());
+        new Storage<>(folderManager, configuration.isDebugEnabled()), SignalSerializer.ofSpans());
   }
 
-  FileSpanStorage(Storage storage, SignalSerializer<SpanData> serializer) {
+  FileSpanStorage(Storage<SpanData> storage, SignalSerializer<SpanData> serializer) {
     this.storage = storage;
     this.serializer = serializer;
   }

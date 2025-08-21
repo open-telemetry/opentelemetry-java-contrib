@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import static java.util.logging.Level.WARNING;
 
-import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.DeserializationException;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
@@ -36,8 +35,7 @@ public final class Storage<T> implements Closeable {
 
   public Storage(FolderManager folderManager, boolean debugEnabled) {
     this.folderManager = folderManager;
-    this.logger =
-        DebugLogger.wrap(Logger.getLogger(FromDiskExporterImpl.class.getName()), debugEnabled);
+    this.logger = DebugLogger.wrap(Logger.getLogger(Storage.class.getName()), debugEnabled);
     this.debugEnabled = debugEnabled;
   }
 

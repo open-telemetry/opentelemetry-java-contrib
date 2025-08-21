@@ -33,9 +33,9 @@ public class MetricToDiskExporter implements MetricExporter {
    * @param storage - The Storage instance that specifies how storage is managed.
    * @return A new MetricToDiskExporter instance.
    */
-  public static MetricToDiskExporter create(MetricExporter delegate, Storage storage) {
+  public static MetricToDiskExporter create(MetricExporter delegate, Storage<MetricData> storage) {
     ToDiskExporter<MetricData> toDisk =
-        ToDiskExporter.<MetricData>builder(storage)
+        ToDiskExporter.builder(storage)
             .setSerializer(SignalSerializer.ofMetrics())
             .setExportFunction(delegate::export)
             .build();
