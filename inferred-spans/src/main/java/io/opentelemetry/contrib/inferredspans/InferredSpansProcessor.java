@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -38,6 +39,7 @@ public class InferredSpansProcessor implements SpanProcessor {
 
   // Visible for testing
   final SamplingProfiler profiler;
+  private final InferredSpansConfiguration config;
 
   private Supplier<TracerProvider> tracerProvider = GlobalOpenTelemetry::getTracerProvider;
 
@@ -49,10 +51,16 @@ public class InferredSpansProcessor implements SpanProcessor {
       boolean startScheduledProfiling,
       @Nullable File activationEventsFile,
       @Nullable File jfrFile) {
+    this.config = config;
     profiler = new SamplingProfiler(config, clock, this::getTracer, activationEventsFile, jfrFile);
     if (startScheduledProfiling) {
       profiler.start();
     }
+  }
+
+  public void setProfilerInterval(Duration interval) {
+    config.setProfilerInterval(interval);
+    profiler.reschedule();
   }
 
   public static InferredSpansProcessorBuilder builder() {
