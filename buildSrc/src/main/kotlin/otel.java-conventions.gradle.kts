@@ -76,6 +76,13 @@ tasks {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }
+    
+    configure<JacocoTaskExtension> {
+      // only care about code coverage for code in this repository
+      // (in particular avoiding netty classes which sometimes end up
+      // causing sporadic CI failures)
+      includes = listOf("io/opentelemetry/contrib/**")
+    }
   }
 
   withType<Javadoc>().configureEach {
