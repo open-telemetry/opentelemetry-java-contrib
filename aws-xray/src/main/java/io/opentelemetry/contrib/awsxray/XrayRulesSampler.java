@@ -134,6 +134,8 @@ final class XrayRulesSampler implements Sampler {
         SamplingResult result =
             applier.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
 
+        // If the trace state has a sampling rule reference, propagate it
+        // Otherwise, propagate the matched sampling rule using AwsSamplingResult
         String ruleToPropagate =
             upstreamMatchedRule == null ? applier.getRuleName() : upstreamMatchedRule;
         if (this.adaptiveSamplingConfig != null
@@ -199,6 +201,15 @@ final class XrayRulesSampler implements Sampler {
         operation = generateIngressOperation(spanData);
       }
       for (AwsXrayAdaptiveSamplingConfig.AnomalyConditions condition : anomalyConditions) {
+        // Skip condition if it would only re-apply action already being taken
+        if ((shouldBoostSampling
+                && AwsXrayAdaptiveSamplingConfig.UsageType.SAMPLING_BOOST.equals(
+                    condition.getUsage()))
+            || (shouldCaptureAnomalySpan
+                && AwsXrayAdaptiveSamplingConfig.UsageType.ERROR_SPAN_CAPTURE.equals(
+                    condition.getUsage()))) {
+          continue;
+        }
         // Check if the operation matches any in the list or if operations list is null (match all)
         List<String> operations = condition.getOperations();
         if (!(operations == null || operations.isEmpty() || operations.contains(operation))) {
@@ -253,15 +264,15 @@ final class XrayRulesSampler implements Sampler {
     boolean isLocalRootSpan =
         parentContext == null || !parentContext.isValid() || parentContext.isRemote();
 
-    if (shouldBoostSampling || shouldCaptureAnomalySpan || isLocalRootSpan) {
-      // Anomaly Capture
-      if (shouldCaptureAnomalySpan
-          && anomalyCaptureRateLimiter != null
-          && anomalyCaptureRateLimiter.trySpend(1)) {
-        spanBatcher.accept(span);
-      }
+    // Anomaly Capture
+    if (shouldCaptureAnomalySpan
+        && anomalyCaptureRateLimiter != null
+        && anomalyCaptureRateLimiter.trySpend(1)) {
+      spanBatcher.accept(span);
+    }
 
-      // Sampling Boost
+    // Sampling Boost
+    if (shouldBoostSampling || isLocalRootSpan) {
       String ruleNameForBoostStats =
           span.getSpanContext()
               .getTraceState()
