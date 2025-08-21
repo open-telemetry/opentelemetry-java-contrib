@@ -9,6 +9,10 @@ on:
       no-build-cache:
         type: boolean
         required: false
+      max-test-retries:
+        type: number
+        required: false
+        default: 0
 
 permissions:
   contents: read
@@ -90,6 +94,7 @@ jobs:
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
           "-Porg.gradle.java.installations.paths=${{ steps.setup-java-test.outputs.path }}"
           "-Porg.gradle.java.installations.auto-download=false"
+          "-PmaxTestRetries=${{ inputs.max-test-retries }}"
           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
   integration-test:
@@ -109,7 +114,7 @@ jobs:
           cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Integration test
-        run: ./gradlew integrationTest ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+        run: ./gradlew integrationTest "-PmaxTestRetries=${{ inputs.max-test-retries }}" ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
       - name: Save integration test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
