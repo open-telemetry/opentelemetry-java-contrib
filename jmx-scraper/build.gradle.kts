@@ -82,7 +82,7 @@ tasks {
     systemProperty("gradle.project.version", "${project.version}")
 
     develocity.testRetry {
-      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      // TODO (trask) fix flaky tests and remove this workaround
       if (System.getenv().containsKey("CI")) {
         maxRetries.set(5)
       }
