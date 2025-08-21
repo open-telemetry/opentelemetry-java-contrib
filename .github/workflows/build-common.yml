@@ -90,7 +90,7 @@ jobs:
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
           "-Porg.gradle.java.installations.paths=${{ steps.setup-java-test.outputs.path }}"
           "-Porg.gradle.java.installations.auto-download=false"
-           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+          ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
   integration-test:
     runs-on: ubuntu-latest

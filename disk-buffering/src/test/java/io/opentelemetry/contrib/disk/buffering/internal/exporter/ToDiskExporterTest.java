@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,8 +30,6 @@ class ToDiskExporterTest {
 
   private final List<String> records = Arrays.asList("one", "two", "three");
 
-  private final byte[] serialized = "one,two,three".getBytes(UTF_8);
-
   @Mock private SignalSerializer<String> serializer;
 
   @Mock private Storage storage;
@@ -50,21 +48,20 @@ class ToDiskExporterTest {
           return exportFnResultToReturn.get();
         };
     toDiskExporter = new ToDiskExporter<>(serializer, exportFn, storage);
-    when(serializer.serialize(records)).thenReturn(serialized);
   }
 
   @Test
   void whenWritingSucceedsOnExport_returnSuccessfulResultCode() throws Exception {
-    when(storage.write(serialized)).thenReturn(true);
+    when(storage.write(any())).thenReturn(true);
     CompletableResultCode completableResultCode = toDiskExporter.export(records);
     assertThat(completableResultCode.isSuccess()).isTrue();
-    verify(storage).write(serialized);
+    verify(storage).write(any());
     assertThat(exportedFnSeen).isNull();
   }
 
   @Test
   void whenWritingFailsOnExport_doExportRightAway() throws Exception {
-    when(storage.write(serialized)).thenReturn(false);
+    when(storage.write(any())).thenReturn(false);
     exportFnResultToReturn.set(CompletableResultCode.ofSuccess());
 
     CompletableResultCode completableResultCode = toDiskExporter.export(records);
@@ -75,7 +72,7 @@ class ToDiskExporterTest {
 
   @Test
   void whenExceptionInWrite_doExportRightAway() throws Exception {
-    when(storage.write(serialized)).thenThrow(new IOException("boom"));
+    when(storage.write(any())).thenThrow(new IOException("boom"));
     exportFnResultToReturn.set(CompletableResultCode.ofFailure());
 
     CompletableResultCode completableResultCode = toDiskExporter.export(records);

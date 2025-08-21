@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.ByteArraySerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.TestData;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.sdk.common.Clock;
@@ -71,8 +72,8 @@ class WritableFileTest {
   void appendDataInNewLines_andIncreaseSize() throws IOException {
     byte[] line1 = getByteArrayLine("First line");
     byte[] line2 = getByteArrayLine("Second line");
-    writableFile.append(line1);
-    writableFile.append(line2);
+    writableFile.append(new ByteArraySerializer(line1));
+    writableFile.append(new ByteArraySerializer(line2));
     writableFile.close();
 
     List<String> lines = getWrittenLines();
@@ -85,9 +86,11 @@ class WritableFileTest {
 
   @Test
   void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnFailed() throws IOException {
-    assertEquals(WritableResult.SUCCEEDED, writableFile.append(new byte[MAX_FILE_SIZE]));
+    assertEquals(
+        WritableResult.SUCCEEDED,
+        writableFile.append(new ByteArraySerializer(new byte[MAX_FILE_SIZE])));
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[1])));
 
     assertEquals(1, getWrittenLines().size());
     assertEquals(MAX_FILE_SIZE, writableFile.getSize());
@@ -95,21 +98,21 @@ class WritableFileTest {
 
   @Test
   void whenAppendingData_andHasExpired_closeAndReturnExpiredStatus() throws IOException {
-    writableFile.append(new byte[2]);
+    writableFile.append(new ByteArraySerializer(new byte[2]));
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS));
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new byte[1]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[1])));
 
     assertEquals(1, getWrittenLines().size());
   }
 
   @Test
   void whenAppendingData_andIsAlreadyClosed_returnFailedStatus() throws IOException {
-    writableFile.append(new byte[1]);
+    writableFile.append(new ByteArraySerializer(new byte[1]));
     writableFile.close();
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new byte[2]));
+    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[2])));
   }
 
   private static byte[] getByteArrayLine(String line) {

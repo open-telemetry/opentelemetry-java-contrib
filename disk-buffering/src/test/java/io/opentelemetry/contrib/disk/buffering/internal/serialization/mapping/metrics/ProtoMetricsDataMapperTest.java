@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.metrics.v1.Metric;
-import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -30,7 +30,7 @@ class ProtoMetricsDataMapperTest {
     MetricData expectedGauge1 = TestData.makeLongGauge(TraceFlags.getSampled());
     List<MetricData> expectedSignals = Collections.singletonList(expectedGauge1);
 
-    MetricsData proto = mapToProto(signals);
+    ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
@@ -49,7 +49,7 @@ class ProtoMetricsDataMapperTest {
     MetricData expectedGauge2 = TestData.makeLongGauge(TraceFlags.getSampled());
     List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
 
-    MetricsData proto = mapToProto(signals);
+    ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
@@ -78,7 +78,7 @@ class ProtoMetricsDataMapperTest {
     List<MetricData> signals = Arrays.asList(gauge1, gauge2);
     List<MetricData> expectedSignals = Arrays.asList(expectedGauge1, expectedGauge2);
 
-    MetricsData proto = mapToProto(signals);
+    ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(1, resourceMetrics.size());
@@ -113,7 +113,7 @@ class ProtoMetricsDataMapperTest {
     //    , LONG_GAUGE_METRIC_WITH_DIFFERENT_RESOURCE);
     //    List<MetricData> expectedSignals = Arrays.asList(expected);
 
-    MetricsData proto = mapToProto(signals);
+    ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
     assertEquals(2, resourceMetrics.size());
@@ -133,11 +133,11 @@ class ProtoMetricsDataMapperTest {
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
 
-  private static MetricsData mapToProto(Collection<MetricData> signals) {
+  private static ExportMetricsServiceRequest mapToProto(Collection<MetricData> signals) {
     return ProtoMetricsDataMapper.getInstance().toProto(signals);
   }
 
-  private static List<MetricData> mapFromProto(MetricsData protoData) {
+  private static List<MetricData> mapFromProto(ExportMetricsServiceRequest protoData) {
     return ProtoMetricsDataMapper.getInstance().fromProto(protoData);
   }
 }

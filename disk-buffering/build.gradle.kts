@@ -17,6 +17,7 @@ val protos by configurations.creating
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-api-incubator")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
   testImplementation("org.mockito:mockito-inline")
@@ -47,9 +48,10 @@ wire {
   }
 
   root(
-    "opentelemetry.proto.trace.v1.TracesData",
-    "opentelemetry.proto.metrics.v1.MetricsData",
-    "opentelemetry.proto.logs.v1.LogsData",
+    // These are the types used by the Java SDK's OTLP exporters.
+    "opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest",
+    "opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest",
+    "opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest",
   )
 }
 
