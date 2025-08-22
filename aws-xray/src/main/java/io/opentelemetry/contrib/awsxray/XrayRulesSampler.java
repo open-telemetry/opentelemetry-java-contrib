@@ -245,6 +245,9 @@ final class XrayRulesSampler implements Sampler {
                 shouldCaptureAnomalySpan = true;
                 break;
             }
+          } else {
+            shouldBoostSampling = true;
+            shouldCaptureAnomalySpan = true;
           }
         }
         if (shouldBoostSampling && shouldCaptureAnomalySpan) {
@@ -300,6 +303,7 @@ final class XrayRulesSampler implements Sampler {
       }
 
       if (shouldBoostSampling
+          && !span.getSpanContext().isSampled()
           && ruleToReportTo != null
           && ruleToReportTo.hasBoost()
           && this.anomalyTracesSet.add(traceId)) {
