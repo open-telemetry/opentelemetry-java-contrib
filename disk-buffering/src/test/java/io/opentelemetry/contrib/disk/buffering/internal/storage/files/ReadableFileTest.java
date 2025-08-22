@@ -83,15 +83,6 @@ class ReadableFileTest {
   }
 
   @Test
-  void readWithoutRemoving() throws IOException {
-    readableFile.readNext();
-
-    List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
-
-    assertEquals(3, logs.size());
-  }
-
-  @Test
   void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 
@@ -117,14 +108,12 @@ class ReadableFileTest {
   }
 
   @Test
-  void whenReadingAfterTheConfiguredReadingTimeExpired_deleteFile_and_close() throws IOException {
+  void whenReadingAfterTheConfiguredReadingTimeExpired_close() throws IOException {
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS));
 
     assertNull(readableFile.readNext());
-
     assertTrue(readableFile.isClosed());
-    assertFalse(source.exists());
   }
 
   @Test
