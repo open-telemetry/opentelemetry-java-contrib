@@ -15,29 +15,27 @@ import org.junit.jupiter.api.Test;
 
 class MetricDataDeserializerTest extends BaseSignalSerializerTest<MetricData> {
 
-    @Test
-    void whenDecodingMalformedMessage_wrapIntoDeserializationException() {
-        assertThrows(
-                DeserializationException.class,
-                () -> getDeserializer().deserialize(TestData.makeMalformedSignalBinary())
-        );
-    }
+  @Test
+  void whenDecodingMalformedMessage_wrapIntoDeserializationException() {
+    assertThrows(
+        DeserializationException.class,
+        () -> getDeserializer().deserialize(TestData.makeMalformedSignalBinary()));
+  }
 
-    @Test
-    void whenDecodingTooShortMessage_wrapIntoDeserializationException() {
-        assertThrows(
-                DeserializationException.class,
-                () -> getDeserializer().deserialize(TestData.makeTooShortSignalBinary())
-        );
-    }
+  @Test
+  void whenDecodingTooShortMessage_wrapIntoDeserializationException() {
+    assertThrows(
+        DeserializationException.class,
+        () -> getDeserializer().deserialize(TestData.makeTooShortSignalBinary()));
+  }
 
-    @Override
-    protected SignalSerializer<MetricData> getSerializer() {
-        return SignalSerializer.ofMetrics();
-    }
+  @Override
+  protected SignalSerializer<MetricData> getSerializer() {
+    return SignalSerializer.ofMetrics();
+  }
 
-    @Override
-    protected SignalDeserializer<MetricData> getDeserializer() {
-        return SignalDeserializer.ofMetrics();
-    }
+  @Override
+  protected SignalDeserializer<MetricData> getDeserializer() {
+    return SignalDeserializer.ofMetrics();
+  }
 }

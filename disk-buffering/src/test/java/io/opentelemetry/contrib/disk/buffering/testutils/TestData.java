@@ -133,20 +133,20 @@ public final class TestData {
 
   @NotNull
   public static byte[] makeTooShortSignalBinary() {
-    return new byte[]{
-        (byte) 0x0A, // type
-        (byte) 0xFF, // defining length 255, but message is shorter
-        (byte) 0x01  // content
+    return new byte[] {
+      (byte) 0x0A, // type
+      (byte) 0xFF, // defining length 255, but message is shorter
+      (byte) 0x01 // content
     };
   }
 
   @NotNull
   public static byte[] makeMalformedSignalBinary() {
     return new byte[] {
-        (byte) 0x0A, // type
-        (byte) 0x02, // length
-        (byte) 0x08, // field 1, wire type 0 (varint) - this should be a nested message but isn't
-        (byte) 0x01  // content
+      (byte) 0x0A, // type
+      (byte) 0x02, // length
+      (byte) 0x08, // field 1, wire type 0 (varint) - this should be a nested message but isn't
+      (byte) 0x01 // content
     };
   }
 
