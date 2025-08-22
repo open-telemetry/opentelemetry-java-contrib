@@ -189,10 +189,9 @@ jobs:
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar \
-                            opentelemetry-jmx-metrics.jar.asc \ 
+                            opentelemetry-jmx-metrics.jar.asc \
                             opentelemetry-jmx-scraper.jar \
-                            opentelemetry-jmx-scraper.jar.asc 
-                            
+                            opentelemetry-jmx-scraper.jar.asc
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
