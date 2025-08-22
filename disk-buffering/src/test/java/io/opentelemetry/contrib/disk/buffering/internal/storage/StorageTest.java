@@ -48,9 +48,8 @@ class StorageTest {
   void setUp() {
     currentTimeMillis = new AtomicLong(0);
     serializer = SignalSerializer.ofLogs();
-    folderManager =
-        FolderManager.create(destinationDir, getConfiguration(destinationDir), new TestClock());
-    storage = new Storage<>(folderManager, true);
+    folderManager = FolderManager.create(destinationDir, getConfiguration(), new TestClock());
+    storage = new Storage<>(folderManager);
   }
 
   @AfterEach

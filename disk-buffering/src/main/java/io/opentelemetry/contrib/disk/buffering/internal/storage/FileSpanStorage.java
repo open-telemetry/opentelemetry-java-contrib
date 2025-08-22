@@ -35,8 +35,7 @@ public final class FileSpanStorage implements SignalStorage.Span {
   public static FileSpanStorage create(
       File destinationDir, StorageConfiguration configuration, Clock clock) {
     FolderManager folderManager = FolderManager.create(destinationDir, configuration, clock);
-    return new FileSpanStorage(
-        new Storage<>(folderManager, configuration.isDebugEnabled()), SignalSerializer.ofSpans());
+    return new FileSpanStorage(new Storage<>(folderManager), SignalSerializer.ofSpans());
   }
 
   FileSpanStorage(Storage<SpanData> storage, SignalSerializer<SpanData> serializer) {

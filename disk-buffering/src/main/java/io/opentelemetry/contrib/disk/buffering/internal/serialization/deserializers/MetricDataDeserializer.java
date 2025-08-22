@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics.ProtoMetricsDataMapper;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.IOException;
@@ -29,10 +28,5 @@ public final class MetricDataDeserializer implements SignalDeserializer<MetricDa
     } catch (IOException e) {
       throw new DeserializationException(e);
     }
-  }
-
-  @Override
-  public String signalType() {
-    return SignalTypes.metrics.name();
   }
 }

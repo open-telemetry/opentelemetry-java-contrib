@@ -14,7 +14,6 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFi
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -27,22 +26,15 @@ import javax.annotation.Nullable;
 
 public final class Storage<T> implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
-  private final DebugLogger logger;
+  private final Logger logger = Logger.getLogger(Storage.class.getName());
   private final FolderManager folderManager;
-  private final boolean debugEnabled;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final AtomicBoolean activeReadResultAvailable = new AtomicBoolean(false);
   private final AtomicReference<WritableFile> writableFileRef = new AtomicReference<>();
   private final AtomicReference<ReadableFile> readableFileRef = new AtomicReference<>();
 
-  public Storage(FolderManager folderManager, boolean debugEnabled) {
+  public Storage(FolderManager folderManager) {
     this.folderManager = folderManager;
-    this.logger = DebugLogger.wrap(Logger.getLogger(Storage.class.getName()), debugEnabled);
-    this.debugEnabled = debugEnabled;
-  }
-
-  public boolean isDebugEnabled() {
-    return debugEnabled;
   }
 
   /**
@@ -57,18 +49,18 @@ public final class Storage<T> implements Closeable {
 
   private boolean write(SignalSerializer<T> marshaler, int attemptNumber) throws IOException {
     if (isClosed.get()) {
-      logger.log("Refusing to write to storage after being closed.");
+      logger.info("Refusing to write to storage after being closed.");
       return false;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
-      logger.log("Max number of attempts to write buffered data exceeded.", WARNING);
+      logger.log(WARNING, "Max number of attempts to write buffered data exceeded.");
       return false;
     }
     WritableFile writableFile = writableFileRef.get();
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
       writableFileRef.set(writableFile);
-      logger.log("Created new writableFile: " + writableFile);
+      logger.info("Created new writableFile: " + writableFile);
     }
     WritableResult result = writableFile.append(marshaler);
     if (result != WritableResult.SUCCEEDED) {
@@ -84,7 +76,7 @@ public final class Storage<T> implements Closeable {
     if (writableFile != null) {
       writableFile.flush();
     } else {
-      logger.log("No writable file to flush.");
+      logger.info("No writable file to flush.");
     }
   }
 
@@ -106,25 +98,25 @@ public final class Storage<T> implements Closeable {
   private ReadableResult<T> doReadNext(SignalDeserializer<T> deserializer, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
-      logger.log("Refusing to read from storage after being closed.");
+      logger.info("Refusing to read from storage after being closed.");
       return null;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
-      logger.log("Maximum number of attempts to read and process buffered data exceeded.", WARNING);
+      logger.log(WARNING, "Maximum number of attempts to read buffered data exceeded.");
       return null;
     }
     ReadableFile readableFile = readableFileRef.get();
     if (readableFile == null) {
-      logger.log("Obtaining a new readableFile from the folderManager.");
+      logger.info("Obtaining a new readableFile from the folderManager.");
       readableFile = folderManager.getReadableFile();
       readableFileRef.set(readableFile);
       if (readableFile == null) {
-        logger.log("Unable to get or create readable file.");
+        logger.info("Unable to get or create readable file.");
         return null;
       }
     }
 
-    logger.log("Attempting to read data from " + readableFile);
+    logger.info("Attempting to read data from " + readableFile);
     byte[] result = readableFile.readNext();
     if (result != null) {
       try {
@@ -152,7 +144,7 @@ public final class Storage<T> implements Closeable {
 
   @Override
   public void close() throws IOException {
-    logger.log("Closing disk buffering storage.");
+    logger.info("Closing disk buffering storage.");
     if (isClosed.compareAndSet(false, true)) {
       folderManager.close();
       writableFileRef.set(null);

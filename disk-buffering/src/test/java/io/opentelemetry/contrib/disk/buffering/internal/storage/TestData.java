@@ -10,7 +10,6 @@ import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
-import java.io.File;
 
 public final class TestData {
 
@@ -71,9 +70,8 @@ public final class TestData {
   public static final int MAX_FILE_SIZE = 2000;
   public static final int MAX_FOLDER_SIZE = 6000;
 
-  public static StorageConfiguration getConfiguration(File rootDir) {
+  public static StorageConfiguration getConfiguration() {
     return StorageConfiguration.builder()
-        .setRootDir(rootDir)
         .setMaxFileAgeForWriteMillis(MAX_FILE_AGE_FOR_WRITE_MILLIS)
         .setMinFileAgeForReadMillis(MIN_FILE_AGE_FOR_READ_MILLIS)
         .setMaxFileAgeForReadMillis(MAX_FILE_AGE_FOR_READ_MILLIS)

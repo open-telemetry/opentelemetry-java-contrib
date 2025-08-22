@@ -51,7 +51,7 @@ class ReadableFileTest {
     source = new File(dir, "sourceFile");
     addFileContents(source);
     clock = mock();
-    readableFile = new ReadableFile(source, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
+    readableFile = new ReadableFile(source, CREATED_TIME_MILLIS, clock, getConfiguration());
   }
 
   @AfterEach
@@ -99,7 +99,7 @@ class ReadableFileTest {
     }
 
     ReadableFile emptyReadableFile =
-        new ReadableFile(emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
+        new ReadableFile(emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration());
 
     assertNull(emptyReadableFile.readNext());
 

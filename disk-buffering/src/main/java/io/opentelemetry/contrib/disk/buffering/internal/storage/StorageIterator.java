@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
-public final class StorageIterator<T> implements Iterator<Collection<T>> {
+final class StorageIterator<T> implements Iterator<Collection<T>> {
   private final Storage<T> storage;
   private final SignalDeserializer<T> deserializer;
   private final Logger logger = Logger.getLogger(StorageIterator.class.getName());
@@ -23,7 +23,7 @@ public final class StorageIterator<T> implements Iterator<Collection<T>> {
   @GuardedBy("this")
   private boolean currentResultConsumed = false;
 
-  public StorageIterator(Storage<T> storage, SignalDeserializer<T> deserializer) {
+  StorageIterator(Storage<T> storage, SignalDeserializer<T> deserializer) {
     this.storage = storage;
     this.deserializer = deserializer;
   }
