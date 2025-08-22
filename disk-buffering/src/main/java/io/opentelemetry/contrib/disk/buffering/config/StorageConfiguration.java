@@ -78,6 +78,16 @@ public abstract class StorageConfiguration {
 
     public abstract Builder setDebugEnabled(boolean debugEnabled);
 
-    public abstract StorageConfiguration build();
+    abstract StorageConfiguration autoBuild();
+
+    public final StorageConfiguration build() {
+      StorageConfiguration configuration = autoBuild();
+      if (configuration.getMinFileAgeForReadMillis()
+          <= configuration.getMaxFileAgeForWriteMillis()) {
+        throw new IllegalArgumentException(
+            "The configured max file age for writing must be lower than the configured min file age for reading");
+      }
+      return configuration;
+    }
   }
 }

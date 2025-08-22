@@ -15,13 +15,15 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFi
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 public final class Storage<T> implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
@@ -37,10 +39,6 @@ public final class Storage<T> implements Closeable {
     this.folderManager = folderManager;
     this.logger = DebugLogger.wrap(Logger.getLogger(Storage.class.getName()), debugEnabled);
     this.debugEnabled = debugEnabled;
-  }
-
-  public static StorageBuilder builder(SignalTypes types) {
-    return new StorageBuilder(types);
   }
 
   public boolean isDebugEnabled() {
@@ -95,15 +93,17 @@ public final class Storage<T> implements Closeable {
    *
    * @throws IOException If an unexpected error happens.
    */
+  @Nullable
   public ReadableResult<T> readNext(SignalDeserializer<T> deserializer) throws IOException {
     if (activeReadResultAvailable.get()) {
       throw new IllegalStateException(
           "You must close any previous ReadableResult before requesting a new one");
     }
-    return doReadAndProcess(deserializer, 1);
+    return doReadNext(deserializer, 1);
   }
 
-  private ReadableResult<T> doReadAndProcess(SignalDeserializer<T> deserializer, int attemptNumber)
+  @Nullable
+  private ReadableResult<T> doReadNext(SignalDeserializer<T> deserializer, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to read from storage after being closed.");
@@ -128,7 +128,8 @@ public final class Storage<T> implements Closeable {
     byte[] result = readableFile.readNext();
     if (result != null) {
       try {
-        Collection<T> items = deserializer.deserialize(result);
+        List<T> items = deserializer.deserialize(result);
+        activeReadResultAvailable.set(true);
         return new FileReadResult(items, readableFile);
       } catch (DeserializationException e) {
         // Data corrupted, clear file.
@@ -138,7 +139,7 @@ public final class Storage<T> implements Closeable {
 
     // Retry with new file
     readableFileRef.set(null);
-    return doReadAndProcess(deserializer, ++attemptNumber);
+    return doReadNext(deserializer, ++attemptNumber);
   }
 
   public void clear() throws IOException {
@@ -182,7 +183,7 @@ public final class Storage<T> implements Closeable {
       }
       if (itemDeleted.compareAndSet(false, true)) {
         try {
-          readableFile.get().removeTopItem();
+          Objects.requireNonNull(readableFile.get()).removeTopItem();
         } catch (IOException e) {
           itemDeleted.set(false);
           throw e;

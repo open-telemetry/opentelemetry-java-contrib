@@ -37,6 +37,7 @@ public final class StorageIterator<T> implements Iterator<Collection<T>> {
   }
 
   @Override
+  @Nullable
   public synchronized Collection<T> next() {
     if (findNext()) {
       currentResultConsumed = true;
@@ -56,7 +57,7 @@ public final class StorageIterator<T> implements Iterator<Collection<T>> {
     }
   }
 
-  private boolean findNext() {
+  private synchronized boolean findNext() {
     try {
       if (currentResult != null) {
         if (!currentResultConsumed) {

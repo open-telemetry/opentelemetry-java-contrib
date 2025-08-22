@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Reads from a file and updates it in parallel in order to avoid re-reading the same items later.
@@ -64,6 +65,7 @@ public final class ReadableFile implements FileOperations {
    * Reads the next line available in the file and provides it to a {@link Function processing}
    * which will determine whether to remove the provided line or not.
    */
+  @Nullable
   public synchronized byte[] readNext() throws IOException {
     if (isClosed.get()) {
       return null;
