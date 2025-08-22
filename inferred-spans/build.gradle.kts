@@ -9,13 +9,12 @@ description = "OpenTelemetry Java profiling based inferred spans module"
 otelJava.moduleName.set("io.opentelemetry.contrib.inferredspans")
 
 dependencies {
-  implementation(project(":declarative-config-bridge"))
-
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  compileOnly("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("com.lmax:disruptor")
   implementation("org.jctools:jctools-core")
@@ -32,6 +31,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
 }
 
 tasks {
@@ -50,5 +50,15 @@ tasks {
 
   withType<Test>().configureEach {
     jvmArgs("-Djava.util.logging.config.file=${project.projectDir.resolve("src/test/resources/logging.properties")}")
+  }
+}
+
+// todo remove when https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/14497 is merged
+// pin io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator to 2.20.0-alpha-SNAPSHOT
+
+configurations.all {
+  resolutionStrategy {
+    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.20.0-alpha-SNAPSHOT")
+    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.19.0")
   }
 }

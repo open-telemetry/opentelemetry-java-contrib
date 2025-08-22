@@ -14,35 +14,34 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
-| Status* | Library                                                            |
-|---------|--------------------------------------------------------------------|
-| beta    | [AWS Resources](./aws-resources/README.md)                         |
-| stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                      |
-| alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)            |
-| alpha   | [Baggage Processors](./baggage-processor/README.md)                |
-| alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)         |
+| Status* | Library                                                           |
+|---------|-------------------------------------------------------------------|
+| beta    | [AWS Resources](./aws-resources/README.md)                        |
+| stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
+| alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
+| alpha   | [Baggage Processors](./baggage-processor/README.md)               |
+| alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
 | alpha   | [CEL-Based Sampler](./cel-sampler/README.md)                     |
-| alpha   | [Consistent Sampling](./consistent-sampling/README.md)             |
-| alpha   | [Declarative Config Bridge](./declarative-config-bridge/README.md) |
-| alpha   | [Disk Buffering](./disk-buffering/README.md)                       |
-| alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)     |
-| beta    | [GCP Resources](./gcp-resources/README.md)                         |
-| beta    | [Inferred Spans](./inferred-spans/README.md)                       |
-| alpha   | [IBM MQ Metrics](./ibm-mq-metrics/README.md)                       |
-| alpha   | [JFR Connection](./jfr-connection/README.md)                       |
-| alpha   | [JFR Events](./jfr-events/README.md)                               |
-| alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                     |
-| alpha   | [JMX Metric Scraper](./jmx-scraper/README.md)                      |
-| alpha   | [Kafka Support](./kafka-exporter/README.md)                        |
-| alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)       |
-| alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md)  |
-| alpha   | [No-Op API](./noop-api/README.md)                                  |
-| alpha   | [Intercept and Process Signals Globally](./processors/README.md)   |
-| alpha   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)   |
-| alpha   | [Resource Providers](./resource-providers/README.md)               |
-| alpha   | [Runtime Attach](./runtime-attach/README.md)                       |
-| alpha   | [Samplers](./samplers/README.md)                                   |
-| beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)             |
+| alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
+| alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
+| alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
+| beta    | [GCP Resources](./gcp-resources/README.md)                        |
+| beta    | [Inferred Spans](./inferred-spans/README.md)                      |
+| alpha   | [IBM MQ Metrics](./ibm-mq-metrics/README.md)                      |
+| alpha   | [JFR Connection](./jfr-connection/README.md)                      |
+| alpha   | [JFR Events](./jfr-events/README.md)                              |
+| alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
+| alpha   | [JMX Metric Scraper](./jmx-scraper/README.md)                     |
+| alpha   | [Kafka Support](./kafka-exporter/README.md)                       |
+| alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
+| alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
+| alpha   | [No-Op API](./noop-api/README.md)                                 |
+| alpha   | [Intercept and Process Signals Globally](./processors/README.md)  |
+| alpha   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
+| alpha   | [Resource Providers](./resource-providers/README.md)              |
+| alpha   | [Runtime Attach](./runtime-attach/README.md)                      |
+| alpha   | [Samplers](./samplers/README.md)                                  |
+| beta    | [Span Stacktrace Capture](./span-stacktrace/README.md)            |
 
 \* `alpha`, `beta` and `stable` are currently used to denote library status per [otep 0232](https://github.com/open-telemetry/oteps/blob/main/text/0232-maturity-of-otel.md).
 To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
