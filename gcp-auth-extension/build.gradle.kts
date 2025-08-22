@@ -15,8 +15,6 @@ val agent: Configuration by configurations.creating {
 dependencies {
   implementation(platform("org.springframework.boot:spring-boot-dependencies:2.7.18"))
 
-  implementation(project(":declarative-config-bridge"))
-
   annotationProcessor("com.google.auto.service:auto-service")
   // We use `compileOnly` dependency because during runtime all necessary classes are provided by
   // javaagent itself.
@@ -24,6 +22,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-api")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  compileOnly("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
@@ -41,6 +40,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator")
 
   testImplementation("org.awaitility:awaitility")
   testImplementation("org.mockito:mockito-inline")
@@ -133,4 +133,12 @@ tasks.register<Test>("IntegrationTestUserCreds") {
     "-Dotel.javaagent.debug=false",
     "-Dmockserver.logLevel=trace"
   )
+}
+
+// todo remove when https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/14497 is merged
+configurations.all {
+  resolutionStrategy {
+    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.20.0-alpha-SNAPSHOT")
+    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.19.0")
+  }
 }
