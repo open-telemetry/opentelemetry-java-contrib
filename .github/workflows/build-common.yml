@@ -18,6 +18,25 @@ permissions:
   contents: read
 
 jobs:
+  spotless:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Spotless
+        run: ./gradlew spotlessCheck ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -29,13 +48,13 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
-      - name: Gradle build and test
-        run: ./gradlew build -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+      - name: Build
+        run: ./gradlew build -x spotlessCheck -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
   test:
     name: Test
@@ -44,8 +63,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
-          - macos-13
           - ubuntu-latest
           - windows-latest
         test-java-version:
@@ -54,18 +71,6 @@ jobs:
           - 17
           - 21
           - 24 # renovate: datasource=java-version
-        # macos-latest drops support for java 8 temurin. Run java 8 on macos-13. Run java 11, 17, 21 on macos-latest.
-        exclude:
-          - os: macos-latest
-            test-java-version: 8
-          - os: macos-13
-            test-java-version: 11
-          - os: macos-13
-            test-java-version: 17
-          - os: macos-13
-            test-java-version: 21
-          - os: macos-13
-            test-java-version: 24 # renovate: datasource=java-version
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -83,12 +88,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
-      - name: Gradle test
+      - name: Test
         run: >
           ./gradlew test
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
@@ -108,7 +113,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
