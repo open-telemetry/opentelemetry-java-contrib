@@ -1,6 +1,11 @@
 name: Release
 on:
   workflow_dispatch:
+    inputs:
+      already-published:
+        description: 'Skip publishing, download artifacts from Maven Central instead'
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -125,13 +130,30 @@ jobs:
 
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+
       - name: Build and publish artifacts
+        if: ${{ !inputs.already-published }}
         run: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+
+      - name: Download artifacts from Maven Central (when already published)
+        if: ${{ inputs.already-published }}
+        run: |
+          mkdir -p jmx-metrics/build/libs
+          mkdir -p jmx-scraper/build/libs
+          
+          curl -L -o jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar \
+            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/$VERSION-alpha/opentelemetry-jmx-metrics-$VERSION-alpha.jar"
+          curl -L -o jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc \
+            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/$VERSION-alpha/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc"
+          curl -L -o jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar \
+            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/$VERSION-alpha/opentelemetry-jmx-scraper-$VERSION-alpha.jar"
+          curl -L -o jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc \
+            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/$VERSION-alpha/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc"
 
       - name: Generate release notes
         env:
@@ -182,17 +204,16 @@ jobs:
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
           cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar
-          cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar.asc
+          cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc opentelemetry-jmx-scraper.jar.asc
           
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
                             opentelemetry-jmx-metrics.jar \
-                            opentelemetry-jmx-metrics.jar.asc \ 
+                            opentelemetry-jmx-metrics.jar.asc \
                             opentelemetry-jmx-scraper.jar \
-                            opentelemetry-jmx-scraper.jar.asc 
-                            
+                            opentelemetry-jmx-scraper.jar.asc
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
