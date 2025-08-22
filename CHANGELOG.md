@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.49.0 (2025-08-22)
+
 ### Consistent sampling
 
 - Add updateable threshold sampler for dynamic sampling configuration
