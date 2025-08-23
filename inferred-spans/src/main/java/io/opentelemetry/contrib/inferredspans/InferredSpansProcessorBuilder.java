@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("CanIgnoreReturnValueSuggester")
 public class InferredSpansProcessorBuilder {
+  private boolean enabled = true;
   private boolean profilerLoggingEnabled = true;
   private boolean backupDiagnosticFiles = false;
   private int asyncProfilerSafeMode = 0;
@@ -60,6 +61,7 @@ public class InferredSpansProcessorBuilder {
   public InferredSpansProcessor build() {
     InferredSpansConfiguration config =
         new InferredSpansConfiguration(
+            enabled,
             profilerLoggingEnabled,
             backupDiagnosticFiles,
             asyncProfilerSafeMode,
@@ -74,6 +76,11 @@ public class InferredSpansProcessorBuilder {
             parentOverrideHandler);
     return new InferredSpansProcessor(
         config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+  }
+
+  public InferredSpansProcessorBuilder profilerEnabled(boolean profilerEnabled) {
+    this.enabled = profilerEnabled;
+    return this;
   }
 
   /**
