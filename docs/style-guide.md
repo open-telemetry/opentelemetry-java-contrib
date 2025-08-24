@@ -39,7 +39,8 @@ Consider statically importing the following commonly used methods and constants:
 - **Time unit constants**
   - `java.util.concurrent.TimeUnit.*` (SECONDS, etc.)
 - **OpenTelemetry semantic convention constants**
-  - All constants under `io.opentelemetry.semconv.**`, except for `io.opentelemetry.semconv.SchemaUrls.*` constants.
+  - All constants under `io.opentelemetry.semconv.**`, except for
+    `io.opentelemetry.semconv.SchemaUrls.*` constants.
 
 ### Class organization
 
@@ -64,7 +65,7 @@ methods.
 Follow the principle of minimal necessary visibility. Use the most restrictive access modifier that
 still allows the code to function correctly.
 
-### Package conventions
+### Internal packages
 
 Classes in `.internal` packages are not considered public API and may change without notice. These
 packages contain implementation details that should not be used by external consumers.
@@ -75,7 +76,8 @@ packages contain implementation details that should not be used by external cons
 
 ### `final` keyword usage
 
-Public non-internal classes should be declared `final` where possible.
+Public non-internal classes should be declared `final` where possible. Internal and non-public
+classes should not be declared `final`.
 
 Methods should only be declared `final` if they are in public non-internal non-final classes.
 
