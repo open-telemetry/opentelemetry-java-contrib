@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -62,13 +62,13 @@ class InterceptableLogRecordExporterTest {
 
     List<LogRecordData> finishedLogRecordItems =
         memoryLogRecordExporter.getFinishedLogRecordItems();
-    assertEquals(1, finishedLogRecordItems.size());
+    assertThat(finishedLogRecordItems.size()).isEqualTo(1);
     LogRecordData logRecordData = finishedLogRecordItems.get(0);
-    assertEquals(2, logRecordData.getAttributes().size());
-    assertEquals(
-        "from interceptor",
-        logRecordData.getAttributes().get(AttributeKey.stringKey("global.attr")));
-    assertEquals("local", logRecordData.getAttributes().get(AttributeKey.stringKey("local.attr")));
+    assertThat(logRecordData.getAttributes().size()).isEqualTo(2);
+    assertThat(logRecordData.getAttributes().get(AttributeKey.stringKey("global.attr")))
+        .isEqualTo("from interceptor");
+    assertThat(logRecordData.getAttributes().get(AttributeKey.stringKey("local.attr")))
+        .isEqualTo("local");
   }
 
   @Test
@@ -87,9 +87,9 @@ class InterceptableLogRecordExporterTest {
 
     List<LogRecordData> finishedLogRecordItems =
         memoryLogRecordExporter.getFinishedLogRecordItems();
-    assertEquals(2, finishedLogRecordItems.size());
-    assertEquals(Value.of("One log"), finishedLogRecordItems.get(0).getBodyValue());
-    assertEquals(Value.of("Another log"), finishedLogRecordItems.get(1).getBodyValue());
+    assertThat(finishedLogRecordItems.size()).isEqualTo(2);
+    assertThat(finishedLogRecordItems.get(0).getBodyValue()).isEqualTo(Value.of("One log"));
+    assertThat(finishedLogRecordItems.get(1).getBodyValue()).isEqualTo(Value.of("Another log"));
   }
 
   private static class ModifiableLogRecordData implements LogRecordData {
