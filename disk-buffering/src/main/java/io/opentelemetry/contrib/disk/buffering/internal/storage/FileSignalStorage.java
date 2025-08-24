@@ -5,13 +5,10 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
-import io.opentelemetry.sdk.common.Clock;
-import io.opentelemetry.sdk.trace.data.SpanData;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -20,31 +17,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.GuardedBy;
 
 /** Default storage implementation where items are stored in multiple protobuf files. */
-public final class FileSpanStorage implements SignalStorage.Span {
-  private final Storage<SpanData> storage;
-  private final SignalSerializer<SpanData> serializer;
-  private final Logger logger = Logger.getLogger(FileSpanStorage.class.getName());
+public final class FileSignalStorage<T> implements SignalStorage<T> {
+  private final Storage<T> storage;
+  private final SignalSerializer<T> serializer;
+  private final SignalDeserializer<T> deserializer;
+  private final Logger logger = Logger.getLogger(FileSignalStorage.class.getName());
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
+  private final Object iteratorLock = new Object();
 
-  public static FileSpanStorage create(File destinationDir, StorageConfiguration configuration) {
-    return create(destinationDir, configuration, Clock.getDefault());
-  }
+  @GuardedBy("iteratorLock")
+  private Iterator<Collection<T>> iterator;
 
-  public static FileSpanStorage create(
-      File destinationDir, StorageConfiguration configuration, Clock clock) {
-    FolderManager folderManager = FolderManager.create(destinationDir, configuration, clock);
-    return new FileSpanStorage(new Storage<>(folderManager), SignalSerializer.ofSpans());
-  }
-
-  FileSpanStorage(Storage<SpanData> storage, SignalSerializer<SpanData> serializer) {
+  public FileSignalStorage(
+      Storage<T> storage, SignalSerializer<T> serializer, SignalDeserializer<T> deserializer) {
     this.storage = storage;
     this.serializer = serializer;
+    this.deserializer = deserializer;
   }
 
   @Override
-  public CompletableFuture<WriteResult> write(Collection<SpanData> items) {
+  public CompletableFuture<WriteResult> write(Collection<T> items) {
     logger.finer("Intercepting batch.");
     try {
       serializer.initialize(items);
@@ -83,7 +78,12 @@ public final class FileSpanStorage implements SignalStorage.Span {
 
   @Nonnull
   @Override
-  public Iterator<Collection<SpanData>> iterator() {
-    throw new UnsupportedOperationException("For next PR");
+  public Iterator<Collection<T>> iterator() {
+    synchronized (iteratorLock) {
+      if (iterator == null) {
+        iterator = new StorageIterator<>(storage, deserializer);
+      }
+      return iterator;
+    }
   }
 }

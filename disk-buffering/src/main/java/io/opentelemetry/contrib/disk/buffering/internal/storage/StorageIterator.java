@@ -39,6 +39,9 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
   @Override
   @Nullable
   public synchronized Collection<T> next() {
+    if (storage.isClosed()) {
+      return null;
+    }
     if (findNext()) {
       currentResultConsumed = true;
       return Objects.requireNonNull(currentResult).getContent();
