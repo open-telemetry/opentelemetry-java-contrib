@@ -24,20 +24,21 @@ need to run `./gradlew spotlessApply` periodically.
 Consider statically importing the following commonly used methods and constants:
 
 - **Test methods**
-  - `io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions` (assertThat, satisfies, etc.)
-  - `org.assertj.core.api.Assertions.*` (assertThat, assertThatThrownBy, entry, etc.)
-  - `org.mockito.Mockito.*` (when, mock, verify, times, etc.)
-  - `org.mockito.ArgumentMatchers.*` (any, eq, anyLong, etc.)
+  - `io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.*`
+  - `org.assertj.core.api.Assertions.*`
+  - `org.mockito.Mockito.*`
+  - `org.mockito.ArgumentMatchers.*`
 - **Utility methods**
-  - `io.opentelemetry.api.common.AttributeKey.*` (stringKey, longKey, etc.)
-  - `java.util.Arrays.*` (asList, stream, etc.)
-  - `java.util.Collections.*` (singletonList, emptyList, emptyMap, emptySet, etc.)
-  - `java.util.stream.Collectors.*` (toList, toMap, toSet, etc.)
-  - `java.util.Objects.requireNonNull`
-  - `java.util.logging.Level.*` (FINE, INFO, WARNING, etc.)
-  - `java.nio.charset.StandardCharsets.*` (UTF_8, etc.)
-- **Time unit constants**
-  - `java.util.concurrent.TimeUnit.*` (SECONDS, etc.)
+  - `io.opentelemetry.api.common.AttributeKey.*`
+  - `java.util.Arrays` - asList, stream
+  - `java.util.Collections` - singleton*, empty*, unmodifiable*, synchronized*, checked*
+  - `java.util.Objects` - requireNonNull
+  - `java.util.stream.Collectors.*`
+- **Utility constants**
+  - `java.util.Locale.*`
+  - `java.util.concurrent.TimeUnit.*`
+  - `java.util.logging.Level.*`
+  - `java.nio.charset.StandardCharsets.*`
 - **OpenTelemetry semantic convention constants**
   - All constants under `io.opentelemetry.semconv.**`, except for
     `io.opentelemetry.semconv.SchemaUrls.*` constants.
