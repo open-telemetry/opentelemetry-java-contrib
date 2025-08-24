@@ -33,7 +33,7 @@ Consider statically importing the following commonly used methods and constants:
   - `java.util.Arrays.*` (asList, etc.)
   - `java.util.Collections.*` (singletonList, emptyList, emptyMap, emptySet, etc.)
   - `java.util.stream.Collectors.*` (toList, toMap, toSet, etc.)
-  - `java.util.Objects` (requireNonNull, etc.)
+  - `java.util.Objects` (requireNonNull)
   - `java.util.logging.Level.*` (FINE, INFO, WARNING, etc.)
   - `java.nio.charset.StandardCharsets.*` (UTF_8, etc.)
 - **Time unit constants**
@@ -75,9 +75,9 @@ packages contain implementation details that should not be used by external cons
 
 ### `final` keyword usage
 
-Public API classes should be declared `final` where possible.
+Public non-internal classes should be declared `final` where possible.
 
-Methods should only be declared `final` if they are in non-final public API classes.
+Methods should only be declared `final` if they are in public non-internal non-final classes.
 
 Fields should be declared `final` where possible.
 
