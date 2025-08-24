@@ -59,6 +59,11 @@ methods.
 
 ## Java Language Conventions
 
+### Visibility modifiers
+
+Follow the principle of minimal necessary visibility. Use the most restrictive access modifier that
+still allows the code to function correctly.
+
 ### Package conventions
 
 Classes in `.internal` packages are not considered public API and may change without notice. These
@@ -117,6 +122,12 @@ Following the reasoning from
 Prefer AssertJ assertions over JUnit assertions (assertEquals, assertTrue, etc.) for better error
 messages.
 
+### JUnit
+
+Test classes and test methods should generally be package-protected (no explicit visibility
+modifier) rather than `public`. This follows the principle of minimal necessary visibility and is
+sufficient for JUnit to discover and execute tests.
+
 ### AutoService
 
 Use the `@AutoService` annotation when implementing SPI interfaces. This automatically generates the
@@ -140,7 +151,7 @@ public class MyCustomizerProvider implements AutoConfigurationCustomizerProvider
 ## Configuration
 
 - Use `otel.` prefix for all configuration property keys
-- Read config via the `ConfigProperties` interface
+- Read configuration via the `ConfigProperties` interface
 - Provide sensible defaults and document all options
 - Validate configuration early with clear error messages
 
