@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
 /** Default storage implementation where items are stored in multiple protobuf files. */
@@ -29,6 +30,7 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
   private final Object iteratorLock = new Object();
 
   @GuardedBy("iteratorLock")
+  @Nullable
   private Iterator<Collection<T>> iterator;
 
   public FileSignalStorage(
