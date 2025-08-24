@@ -7,9 +7,9 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.FileStorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +21,7 @@ public final class WritableFile implements FileOperations {
 
   private final File file;
 
-  private final StorageConfiguration configuration;
+  private final FileStorageConfiguration configuration;
   private final Clock clock;
   private final long expireTimeMillis;
   private final OutputStream out;
@@ -29,7 +29,7 @@ public final class WritableFile implements FileOperations {
   private int size;
 
   public WritableFile(
-      File file, long createdTimeMillis, StorageConfiguration configuration, Clock clock)
+      File file, long createdTimeMillis, FileStorageConfiguration configuration, Clock clock)
       throws IOException {
     this.file = file;
     this.configuration = configuration;

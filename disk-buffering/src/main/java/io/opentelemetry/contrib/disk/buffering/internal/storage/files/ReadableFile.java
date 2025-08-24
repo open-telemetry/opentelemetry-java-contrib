@@ -7,10 +7,10 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.utils.FileStream;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.FileStorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public final class ReadableFile implements FileOperations {
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
   public ReadableFile(
-      File file, long createdTimeMillis, Clock clock, StorageConfiguration configuration)
+      File file, long createdTimeMillis, Clock clock, FileStorageConfiguration configuration)
       throws IOException {
     this(
         file,
@@ -51,7 +51,7 @@ public final class ReadableFile implements FileOperations {
       @Nonnull File file,
       long createdTimeMillis,
       Clock clock,
-      StorageConfiguration configuration,
+      FileStorageConfiguration configuration,
       StreamReader.Factory readerFactory)
       throws IOException {
     this.file = file;

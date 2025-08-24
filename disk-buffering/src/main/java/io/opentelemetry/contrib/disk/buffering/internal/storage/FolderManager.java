@@ -7,9 +7,9 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.FileStorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.Closeable;
 import java.io.File;
@@ -23,12 +23,12 @@ import org.jetbrains.annotations.NotNull;
 public final class FolderManager implements Closeable {
   private final File folder;
   private final Clock clock;
-  private final StorageConfiguration configuration;
+  private final FileStorageConfiguration configuration;
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
   public static FolderManager create(
-      File destinationDir, StorageConfiguration configuration, Clock clock) {
+      File destinationDir, FileStorageConfiguration configuration, Clock clock) {
     if (destinationDir.isFile()) {
       throw new IllegalArgumentException("destinationDir must be a directory");
     } else if (!destinationDir.exists()) {
@@ -39,7 +39,7 @@ public final class FolderManager implements Closeable {
     return new FolderManager(destinationDir, configuration, clock);
   }
 
-  public FolderManager(File folder, StorageConfiguration configuration, Clock clock) {
+  public FolderManager(File folder, FileStorageConfiguration configuration, Clock clock) {
     this.folder = folder;
     this.configuration = configuration;
     this.clock = clock;

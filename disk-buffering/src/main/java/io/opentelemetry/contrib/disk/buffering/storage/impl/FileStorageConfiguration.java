@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.config;
+package io.opentelemetry.contrib.disk.buffering.storage.impl;
 
 import com.google.auto.value.AutoValue;
 import java.util.concurrent.TimeUnit;
 
 /** Defines how the storage should be managed. */
 @AutoValue
-public abstract class StorageConfiguration {
+public abstract class FileStorageConfiguration {
 
   /** The max amount of time a file can receive new data. */
   public abstract long getMaxFileAgeForWriteMillis();
@@ -41,12 +41,12 @@ public abstract class StorageConfiguration {
    */
   public abstract int getMaxFolderSize();
 
-  public static StorageConfiguration getDefault() {
+  public static FileStorageConfiguration getDefault() {
     return builder().build();
   }
 
   public static Builder builder() {
-    return new AutoValue_StorageConfiguration.Builder()
+    return new AutoValue_FileStorageConfiguration.Builder()
         .setMaxFileSize(1024 * 1024) // 1MB
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
@@ -66,10 +66,10 @@ public abstract class StorageConfiguration {
 
     public abstract Builder setMaxFolderSize(int value);
 
-    abstract StorageConfiguration autoBuild();
+    abstract FileStorageConfiguration autoBuild();
 
-    public final StorageConfiguration build() {
-      StorageConfiguration configuration = autoBuild();
+    public final FileStorageConfiguration build() {
+      FileStorageConfiguration configuration = autoBuild();
       if (configuration.getMinFileAgeForReadMillis()
           <= configuration.getMaxFileAgeForWriteMillis()) {
         throw new IllegalArgumentException(
