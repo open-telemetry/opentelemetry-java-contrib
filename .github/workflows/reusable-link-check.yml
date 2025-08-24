@@ -32,6 +32,19 @@ jobs:
           echo "files=$modified_files" >> $GITHUB_OUTPUT
           echo "Modified files: $modified_files"
 
+      - name: Check if lychee config was modified
+        if: github.event_name == 'pull_request'
+        id: config-check
+        run: |
+          merge_base=$(git merge-base origin/${{ github.base_ref }} HEAD)
+          config_modified=$(git diff --name-only $merge_base...${{ github.event.pull_request.head.sha }} \
+                            | grep -E '\.github/scripts/lychee-config\.toml$' || true)
+          if [ -n "$config_modified" ]; then
+            echo "modified=true" >> $GITHUB_OUTPUT
+          else
+            echo "modified=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Link check - all links (modified files only)
         if: github.event_name == 'pull_request' && steps.modified-files.outputs.files != ''
         env:
@@ -39,7 +52,7 @@ jobs:
         run: ./.github/scripts/link-check.sh ${{ steps.modified-files.outputs.files }}
 
       - name: Link check - all links (all files)
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' || steps.config-check.outputs.modified == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: ./.github/scripts/link-check.sh
