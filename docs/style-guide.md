@@ -96,14 +96,6 @@ Annotate all parameters and fields that can be `null` with `@Nullable` (specific
 **Defensive programming**: Public APIs should still check for `null` parameters even if not
 annotated with `@Nullable`. Internal APIs do not need these checks.
 
-**Enforcement**: Use the `otel.errorprone-conventions` Gradle plugin in all modules:
-
-```kotlin
-plugins {
-  id("otel.errorprone-conventions")
-}
-```
-
 ### `Optional` usage
 
 Following the reasoning from
