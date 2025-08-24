@@ -30,16 +30,16 @@ Consider statically importing the following commonly used methods and constants:
   - `org.mockito.ArgumentMatchers.*` (any, eq, anyLong, etc.)
 - **Utility methods**
   - `io.opentelemetry.api.common.AttributeKey.*` (stringKey, longKey, etc.)
-  - `java.util.Arrays.*` (asList, etc.)
+  - `java.util.Arrays.*` (asList, stream, etc.)
   - `java.util.Collections.*` (singletonList, emptyList, emptyMap, emptySet, etc.)
   - `java.util.stream.Collectors.*` (toList, toMap, toSet, etc.)
-  - `java.util.Objects` (requireNonNull)
+  - `java.util.Objects.requireNonNull`
   - `java.util.logging.Level.*` (FINE, INFO, WARNING, etc.)
   - `java.nio.charset.StandardCharsets.*` (UTF_8, etc.)
 - **Time unit constants**
   - `java.util.concurrent.TimeUnit.*` (SECONDS, etc.)
 - **OpenTelemetry semantic convention constants**
-  - All constants under `io.opentelemetry.semconv.**`
+  - All constants under `io.opentelemetry.semconv.**`, except for `io.opentelemetry.semconv.SchemaUrls.*` constants.
 
 ### Class organization
 
