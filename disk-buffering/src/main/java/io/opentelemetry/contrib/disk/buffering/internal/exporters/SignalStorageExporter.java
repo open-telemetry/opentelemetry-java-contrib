@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import io.opentelemetry.contrib.disk.buffering.SignalType;
+import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
-final class SignalStorageExporter<T> {
+public final class SignalStorageExporter<T> {
   private final SignalStorage<T> storage;
   private final ExporterCallback callback;
   private final Duration writeTimeout;

@@ -11,30 +11,30 @@ import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallba
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.time.Duration;
 import java.util.Collection;
 
-/** Exporter that stores spans into disk. */
-public final class SpanToDiskExporter implements SpanExporter {
-  private final SignalStorageExporter<SpanData> storageExporter;
+/** Exporter that stores logs into disk. */
+public final class LogRecordToDiskExporter implements LogRecordExporter {
+  private final SignalStorageExporter<LogRecordData> storageExporter;
   private final ExporterCallback callback;
-  private static final SignalType TYPE = SignalType.SPAN;
+  private static final SignalType TYPE = SignalType.LOG;
 
-  private SpanToDiskExporter(
-      SignalStorageExporter<SpanData> storageExporter, ExporterCallback callback) {
+  private LogRecordToDiskExporter(
+      SignalStorageExporter<LogRecordData> storageExporter, ExporterCallback callback) {
     this.storageExporter = storageExporter;
     this.callback = callback;
   }
 
-  public static Builder builder(SignalStorage.Span storage) {
+  public static Builder builder(SignalStorage.LogRecord storage) {
     return new Builder(storage);
   }
 
   @Override
-  public CompletableResultCode export(Collection<SpanData> spans) {
-    return storageExporter.exportToStorage(spans);
+  public CompletableResultCode export(Collection<LogRecordData> logs) {
+    return storageExporter.exportToStorage(logs);
   }
 
   @Override
@@ -49,7 +49,7 @@ public final class SpanToDiskExporter implements SpanExporter {
   }
 
   public static final class Builder {
-    private final SignalStorage.Span storage;
+    private final SignalStorage.LogRecord storage;
     private ExporterCallback callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
@@ -65,13 +65,13 @@ public final class SpanToDiskExporter implements SpanExporter {
       return this;
     }
 
-    public SpanToDiskExporter build() {
-      SignalStorageExporter<SpanData> storageExporter =
+    public LogRecordToDiskExporter build() {
+      SignalStorageExporter<LogRecordData> storageExporter =
           new SignalStorageExporter<>(storage, callback, writeTimeout, TYPE);
-      return new SpanToDiskExporter(storageExporter, callback);
+      return new LogRecordToDiskExporter(storageExporter, callback);
     }
 
-    private Builder(SignalStorage.Span storage) {
+    private Builder(SignalStorage.LogRecord storage) {
       this.storage = storage;
     }
   }

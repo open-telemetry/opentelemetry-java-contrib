@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.SignalType;
+import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -40,8 +41,8 @@ class SignalStorageExporterTest {
   void verifyExportToStorage_success() {
     SignalStorage.Span storage = new TestSpanStorage();
     SignalType signalType = SignalType.SPAN;
-    SignalStorageExporter<SpanData> storageExporter =
-        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
+    io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter<SpanData> storageExporter =
+        new io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
     SpanData item1 = mock();
     SpanData item2 = mock();
     SpanData item3 = mock();
@@ -72,8 +73,8 @@ class SignalStorageExporterTest {
   void verifyExportToStorage_failure() {
     SignalStorage.Span storage = mock();
     SignalType signalType = SignalType.SPAN;
-    SignalStorageExporter<SpanData> storageExporter =
-        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
+    io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter<SpanData> storageExporter =
+        new io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
     SpanData item1 = mock();
 
     // Without exception

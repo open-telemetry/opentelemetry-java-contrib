@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering.exporters.callback;
 
 import io.opentelemetry.contrib.disk.buffering.SignalType;
 import javax.annotation.Nullable;
