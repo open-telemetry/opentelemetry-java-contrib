@@ -28,3 +28,11 @@ This repository provides observability instrumentation for Java applications.
 - OpenTelemetry specification and semantic convention compliance
 - Resource cleanup and lifecycle management
 - Comprehensive unit tests for new functionality
+
+## Coding Agent Instructions
+
+When implementing changes or new features:
+
+1. Follow all [Style Guide](../docs/style-guide.md) conventions and the Code Review Priorities above
+2. Run tests to ensure they still pass (use `./gradlew test` and `./gradlew integrationTest` as needed)
+3. **Always run `./gradlew spotlessApply`** after making code changes to ensure proper formatting
