@@ -5,9 +5,14 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
+import static io.opentelemetry.api.common.AttributeKey.stringKey;
+import static java.util.Arrays.stream;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
@@ -25,14 +30,11 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 /**
@@ -150,7 +152,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     String userSpecifiedTargetedSignals =
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
             configProperties, () -> SIGNAL_TYPE_ALL);
-    return Arrays.stream(userSpecifiedTargetedSignals.split(","))
+    return stream(userSpecifiedTargetedSignals.split(","))
         .map(String::trim)
         .anyMatch(
             targetedSignal ->
@@ -202,17 +204,16 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_REFRESH, e);
     }
-    // flatten list
     Map<String, String> flattenedHeaders =
         gcpHeaders.entrySet().stream()
             .collect(
-                Collectors.toMap(
+                toMap(
                     Map.Entry::getKey,
                     entry ->
                         entry.getValue().stream()
-                            .filter(Objects::nonNull) // Filter nulls
+                            .filter(nonNull) // Filter nulls
                             .filter(s -> !s.isEmpty()) // Filter empty strings
-                            .collect(Collectors.joining(","))));
+                            .collect(joining(","))));
     // Add quota user project header if not detected by the auth library and user provided it via
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
@@ -232,7 +233,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     Resource res =
         Resource.create(
-            Attributes.of(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
+            Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
     return resource.merge(res);
   }
 }

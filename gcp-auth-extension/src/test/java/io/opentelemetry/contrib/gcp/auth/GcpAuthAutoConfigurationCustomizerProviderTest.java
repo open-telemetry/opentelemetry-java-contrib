@@ -10,10 +10,17 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_ALL;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_METRICS;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.SIGNAL_TYPE_TRACES;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -135,15 +142,15 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_TRACES);
     // Prepare mocks
     prepareMockBehaviorForGoogleCredentials();
-    OtlpHttpSpanExporter mockOtlpHttpSpanExporter = Mockito.mock(OtlpHttpSpanExporter.class);
+    OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
     OtlpHttpSpanExporterBuilder otlpSpanExporterBuilder = OtlpHttpSpanExporter.builder();
     OtlpHttpSpanExporterBuilder spyOtlpHttpSpanExporterBuilder =
         Mockito.spy(otlpSpanExporterBuilder);
-    Mockito.when(spyOtlpHttpSpanExporterBuilder.build()).thenReturn(mockOtlpHttpSpanExporter);
+    when(spyOtlpHttpSpanExporterBuilder.build()).thenReturn(mockOtlpHttpSpanExporter);
 
-    Mockito.when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
+    when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     List<SpanData> exportedSpans = new ArrayList<>();
-    Mockito.when(mockOtlpHttpSpanExporter.export(Mockito.anyCollection()))
+    when(mockOtlpHttpSpanExporter.export(any()))
         .thenAnswer(
             invocationOnMock -> {
               exportedSpans.addAll(invocationOnMock.getArgument(0));
