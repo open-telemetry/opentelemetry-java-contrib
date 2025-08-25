@@ -33,7 +33,7 @@ public final class FolderManager implements Closeable {
       throw new IllegalArgumentException("destinationDir must be a directory");
     } else if (!destinationDir.exists()) {
       if (!destinationDir.mkdirs()) {
-        throw new IllegalStateException("Could not created dir " + destinationDir);
+        throw new IllegalStateException("Could not create dir: " + destinationDir);
       }
     }
     return new FolderManager(destinationDir, configuration, clock);
