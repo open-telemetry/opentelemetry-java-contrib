@@ -5,12 +5,13 @@
 
 package io.opentelemetry.contrib.awsxray.propagator;
 
+import static java.util.Collections.singletonMap;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +76,7 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
     }
     return xrayPropagator.extract(
         xrayContext,
-        Collections.singletonMap(AwsXrayPropagator.TRACE_HEADER_KEY, traceHeader),
+        singletonMap(AwsXrayPropagator.TRACE_HEADER_KEY, traceHeader),
         MapGetter.INSTANCE);
   }
 
