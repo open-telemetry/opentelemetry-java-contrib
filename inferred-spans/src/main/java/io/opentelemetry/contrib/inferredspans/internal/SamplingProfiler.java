@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -151,6 +152,7 @@ public class SamplingProfiler implements Runnable {
   private final Supplier<Tracer> tracerProvider;
 
   private final AsyncProfiler profiler;
+  @Nullable private volatile Future<?> profilingTask;
 
   /**
    * Creates a sampling profiler, optionally relying on existing files.
@@ -385,7 +387,7 @@ public class SamplingProfiler implements Runnable {
 
     if (!interrupted && !scheduler.isShutdown()) {
       long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-      scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -723,7 +725,19 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings("FutureReturnValueIgnored")
   public void start() {
-    scheduler.submit(this);
+    profilingTask = scheduler.submit(this);
+  }
+
+  @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
+  public void reschedule() {
+    Future<?> future = this.profilingTask;
+    if (future != null) {
+      if (future.cancel(true)) {
+        Duration profilingDuration = config.getProfilingDuration();
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      }
+    }
   }
 
   public void stop() throws InterruptedException, IOException {
