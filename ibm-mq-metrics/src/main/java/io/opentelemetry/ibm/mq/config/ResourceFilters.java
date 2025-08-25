@@ -8,7 +8,7 @@ package io.opentelemetry.ibm.mq.config;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ResourceFilters {
+public final class ResourceFilters {
 
   private Set<String> include = new HashSet<>();
   private Set<ExcludeFilters> exclude = new HashSet<>();
