@@ -72,7 +72,12 @@ public class KafkaSpanExporter implements SpanExporter {
                     result.fail();
                   }
                 }),
-        executorService);
+        executorService).whenComplete((ignore, exception) -> {
+          if (exception != null) {
+            logger.error("Executor task failed while sending to Kafka topic {}", topicName, exception);
+            result.fail();
+          }
+        });
     return result;
   }
 
