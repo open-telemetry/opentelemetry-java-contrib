@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
 
-public final class DelimitedProtoStreamReader implements StreamReader {
+public class DelimitedProtoStreamReader implements StreamReader {
   private final InputStream inputStream;
 
   public DelimitedProtoStreamReader(InputStream inputStream) {

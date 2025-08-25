@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class MetricFromDiskExporter implements FromDiskExporter {
+public final class MetricFromDiskExporter implements FromDiskExporter {
 
   private final FromDiskExporterImpl<MetricData> delegate;
 
