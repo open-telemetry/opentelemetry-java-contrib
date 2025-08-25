@@ -79,7 +79,7 @@ public class FilteringLogRecordProcessorTest {
                     logRecordData -> {
                       SpanContext spanContext = logRecordData.getSpanContext();
                       return spanContext.isSampled();
-                    }) {})
+                    }))
             .build()
             .get("TestScope");
   }
