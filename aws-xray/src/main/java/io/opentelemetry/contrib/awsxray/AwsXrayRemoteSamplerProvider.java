@@ -15,7 +15,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Map;
 
 @AutoService(ConfigurableSamplerProvider.class)
-public class AwsXrayRemoteSamplerProvider implements ConfigurableSamplerProvider {
+public final class AwsXrayRemoteSamplerProvider implements ConfigurableSamplerProvider {
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
