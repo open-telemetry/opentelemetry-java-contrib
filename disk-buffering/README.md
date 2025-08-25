@@ -19,8 +19,7 @@ The default implementations are the following:
 ### Set up
 
 We need to create a signal storage object per signal type to start writing signals to disk. Each
-`File*Storage` implementation
-has a `create()` function that receives:
+`File*Storage` implementation has a `create()` function that receives:
 
 * A File directory to store the signal files. Note that each signal storage object must have a
   dedicated directory to work properly.
