@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## Version 1.49.0 (2025-08-22)
+## Version 1.49.0 (2025-08-25)
 
 ### Consistent sampling
 
