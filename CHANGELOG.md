@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## Version 1.49.0 (2025-08-22)
+
+### Consistent sampling
+
+- Add updateable threshold sampler for dynamic sampling configuration
+  ([#2137](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2137))
+
+### Disk buffering
+
+- Introduce API changes for improved disk buffering functionality
+  ([#2084](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2084))
+- Implement more efficient serializer with direct disk write capabilities
+  ([#2138](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2138))
+
+### IBM MQ metrics - New 🌟
+
+IBM MQ metrics collection utility.
+
+### Inferred spans
+
+- Update async profiler to version 4.1 for improved performance
+  ([#2096](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2096))
+
+### OpAMP client - New 🌟
+
+OpenTelemetry Agent Management Protocol (OpAMP) client implementation.
+
 ## Version 1.48.0 (2025-07-23)
 
 ### AWS resources

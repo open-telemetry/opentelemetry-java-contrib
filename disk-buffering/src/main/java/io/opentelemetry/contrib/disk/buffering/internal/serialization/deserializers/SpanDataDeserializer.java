@@ -25,7 +25,7 @@ public final class SpanDataDeserializer implements SignalDeserializer<SpanData> 
     try {
       return ProtoSpansDataMapper.getInstance()
           .fromProto(ExportTraceServiceRequest.ADAPTER.decode(source));
-    } catch (IOException e) {
+    } catch (IOException | IllegalStateException e) {
       throw new DeserializationException(e);
     }
   }

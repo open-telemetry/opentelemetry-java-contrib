@@ -25,7 +25,7 @@ public final class LogRecordDataDeserializer implements SignalDeserializer<LogRe
     try {
       return ProtoLogsDataMapper.getInstance()
           .fromProto(ExportLogsServiceRequest.ADAPTER.decode(source));
-    } catch (IOException e) {
+    } catch (IOException | IllegalStateException e) {
       throw new DeserializationException(e);
     }
   }
