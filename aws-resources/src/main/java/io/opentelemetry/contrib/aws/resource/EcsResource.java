@@ -26,6 +26,8 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAIN
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_ECS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,7 +37,6 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -88,7 +89,7 @@ public final class EcsResource {
 
   static void fetchMetadata(
       SimpleHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
-    String json = httpClient.fetchString("GET", url, Collections.emptyMap(), null);
+    String json = httpClient.fetchString("GET", url, emptyMap(), null);
     if (json.isEmpty()) {
       return;
     }
@@ -103,14 +104,14 @@ public final class EcsResource {
           .getLogGroupArn()
           .ifPresent(
               logGroupArn -> {
-                attrBuilders.put(AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
+                attrBuilders.put(AWS_LOG_GROUP_ARNS, singletonList(logGroupArn));
               });
 
       logArnBuilder
           .getLogStreamArn()
           .ifPresent(
               logStreamArn -> {
-                attrBuilders.put(AWS_LOG_STREAM_ARNS, Collections.singletonList(logStreamArn));
+                attrBuilders.put(AWS_LOG_STREAM_ARNS, singletonList(logStreamArn));
               });
     } catch (IOException e) {
       logger.log(Level.WARNING, "Can't get ECS metadata", e);
