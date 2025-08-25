@@ -5,9 +5,10 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +28,7 @@ public final class ScheduledCallbackRegistrarBuilder {
   /** Sets the period between successive executions of each registered callback */
   @CanIgnoreReturnValue
   public ScheduledCallbackRegistrarBuilder setPeriod(long period, TimeUnit unit) {
-    Objects.requireNonNull(unit, "unit");
+    requireNonNull(unit, "unit");
     this.period = period;
     this.timeUnit = unit;
     return this;
@@ -36,7 +37,7 @@ public final class ScheduledCallbackRegistrarBuilder {
   /** Sets the period between successive executions of each registered callback */
   @CanIgnoreReturnValue
   public ScheduledCallbackRegistrarBuilder setPeriod(Duration period) {
-    Objects.requireNonNull(period, "period");
+    requireNonNull(period, "period");
     this.period = period.toMillis();
     this.timeUnit = TimeUnit.MILLISECONDS;
     return this;
