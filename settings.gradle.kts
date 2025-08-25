@@ -34,7 +34,6 @@ develocity {
 
 rootProject.name = "opentelemetry-java-contrib"
 
-include(":all")
 include(":aws-resources")
 include(":aws-xray")
 include(":aws-xray-propagator")
