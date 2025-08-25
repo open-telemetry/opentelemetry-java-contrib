@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.metrics.prometheus.clientbridge;
 
+import static java.util.Collections.unmodifiableList;
+
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -15,7 +17,6 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -79,7 +80,7 @@ public final class PrometheusCollector implements MetricReader {
       for (MetricData metricData : allMetrics) {
         allSamples.add(MetricAdapter.toMetricFamilySamples(metricData));
       }
-      return Collections.unmodifiableList(allSamples);
+      return unmodifiableList(allSamples);
     }
   }
 }

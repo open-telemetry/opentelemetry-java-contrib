@@ -5,9 +5,10 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import org.assertj.core.api.Assertions;
 
 public class MetricAssert {
 
@@ -24,12 +25,12 @@ public class MetricAssert {
   }
 
   MetricAssert hasName(String name) {
-    Assertions.assertThat(metric.getName()).isEqualTo(name);
+    assertThat(metric.getName()).isEqualTo(name);
     return this;
   }
 
   MetricAssert hasValue(long value) {
-    Assertions.assertThat(
+    assertThat(
             ((LongPointData) metric.getLongGaugeData().getPoints().toArray()[this.pointOffset])
                 .getValue())
         .isEqualTo(value);

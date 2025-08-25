@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static java.util.logging.Level.FINE;
+import static java.util.stream.Collectors.toList;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -21,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 final class XrayRulesSampler implements Sampler {
 
@@ -84,7 +85,7 @@ final class XrayRulesSampler implements Sampler {
     // In practice, X-Ray always returns a Default rule that matches all requests so it is a bug in
     // our code or X-Ray to reach here, fallback just in case.
     logger.log(
-        Level.FINE,
+        FINE,
         "No sampling rule matched the request. "
             + "This is a bug in either the OpenTelemetry SDK or X-Ray.");
     return fallbackSampler.shouldSample(
@@ -100,7 +101,7 @@ final class XrayRulesSampler implements Sampler {
     return Arrays.stream(ruleAppliers)
         .map(rule -> rule.snapshot(now))
         .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   long nextTargetFetchTimeNanos() {

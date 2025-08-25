@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.cloudfoundry.resources;
 
+import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
@@ -18,8 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class CloudFoundryResourceTest {
@@ -36,11 +36,11 @@ class CloudFoundryResourceTest {
       if (is != null) {
         return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
             .lines()
-            .collect(Collectors.joining());
+            .collect(joining());
       }
-      Assertions.fail("Cannot load resource " + filename);
+      fail("Cannot load resource " + filename);
     } catch (IOException e) {
-      Assertions.fail("Error reading " + filename);
+      fail("Error reading " + filename);
     }
     return "";
   }

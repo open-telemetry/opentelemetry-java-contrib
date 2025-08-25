@@ -14,7 +14,7 @@ import java.util.List;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class OpampClientState {
+public class OpampClientState {
   public final State.RemoteConfigStatus remoteConfigStatus;
   public final State.SequenceNum sequenceNum;
   public final State.AgentDescription agentDescription;

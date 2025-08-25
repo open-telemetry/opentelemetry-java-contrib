@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import static java.util.Objects.requireNonNull;
+
 import io.opentelemetry.api.metrics.DoubleGaugeBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogramBuilder;
 import io.opentelemetry.api.metrics.LongCounterBuilder;
@@ -15,7 +17,6 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.instruments.Micromet
 import io.opentelemetry.contrib.metrics.micrometer.internal.instruments.MicrometerLongCounter;
 import io.opentelemetry.contrib.metrics.micrometer.internal.instruments.MicrometerLongUpDownCounter;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
-import java.util.Objects;
 
 final class MicrometerMeter implements Meter {
   final MeterSharedState meterSharedState;
@@ -26,25 +27,25 @@ final class MicrometerMeter implements Meter {
 
   @Override
   public LongCounterBuilder counterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    requireNonNull(name, "name");
     return MicrometerLongCounter.builder(meterSharedState, name);
   }
 
   @Override
   public LongUpDownCounterBuilder upDownCounterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    requireNonNull(name, "name");
     return MicrometerLongUpDownCounter.builder(meterSharedState, name);
   }
 
   @Override
   public DoubleHistogramBuilder histogramBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    requireNonNull(name, "name");
     return MicrometerDoubleHistogram.builder(meterSharedState, name);
   }
 
   @Override
   public DoubleGaugeBuilder gaugeBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    requireNonNull(name, "name");
     return MicrometerDoubleGauge.builder(meterSharedState, name);
   }
 }

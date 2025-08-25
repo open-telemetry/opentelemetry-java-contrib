@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 /**
  * A {@link ContextStorageProvider} that returns a {@link ContextStorage} which is completely no-op.
  */
-public class NoopContextStorageProvider implements ContextStorageProvider {
+public final class NoopContextStorageProvider implements ContextStorageProvider {
 
   /** Returns a no-op context storage. */
   @Override

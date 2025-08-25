@@ -13,7 +13,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
 
-public class ClientCallbackHandler implements CallbackHandler {
+public final class ClientCallbackHandler implements CallbackHandler {
   private final String username;
   @Nullable private final char[] password;
   private final String realm;

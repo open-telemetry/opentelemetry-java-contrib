@@ -12,7 +12,7 @@ import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import java.time.Instant;
 
-public class MessageBuddy {
+public final class MessageBuddy {
 
   private MessageBuddy() {}
 

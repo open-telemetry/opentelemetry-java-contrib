@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import static java.util.logging.Level.WARNING;
+
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,7 +19,6 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.management.remote.JMXConnector;
@@ -33,7 +34,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
 
-public class JmxConnectorBuilder {
+public final class JmxConnectorBuilder {
 
   private static final Logger logger = Logger.getLogger(JmxConnectorBuilder.class.getName());
 
@@ -146,7 +147,7 @@ public class JmxConnectorBuilder {
                 }
               });
     } catch (ReflectiveOperationException e) {
-      logger.log(Level.WARNING, "SASL unsupported in current environment: " + e.getMessage());
+      logger.log(WARNING, "SASL unsupported in current environment: " + e.getMessage());
     }
     return env;
   }
