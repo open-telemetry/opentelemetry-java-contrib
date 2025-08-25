@@ -33,6 +33,7 @@ Consider statically importing the following commonly used methods and constants:
   - `java.util.Arrays` - asList, stream
   - `java.util.Collections` - singleton*, empty*, unmodifiable*, synchronized*, checked*
   - `java.util.Objects` - requireNonNull
+  - `java.util.function.Function` - identity
   - `java.util.stream.Collectors.*`
 - **Utility constants**
   - `java.util.Locale.*`
