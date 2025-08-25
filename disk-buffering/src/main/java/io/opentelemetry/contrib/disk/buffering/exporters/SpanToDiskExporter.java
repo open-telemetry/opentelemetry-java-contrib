@@ -16,9 +16,10 @@ import java.util.Collection;
 
 /** Exporter that stores spans into disk. */
 public final class SpanToDiskExporter implements SpanExporter {
+  private static final SignalType TYPE = SignalType.SPAN;
+
   private final SignalStorageExporter<SpanData> storageExporter;
   private final ExporterCallback callback;
-  private static final SignalType TYPE = SignalType.SPAN;
 
   private SpanToDiskExporter(
       SignalStorageExporter<SpanData> storageExporter, ExporterCallback callback) {
@@ -26,7 +27,7 @@ public final class SpanToDiskExporter implements SpanExporter {
     this.callback = callback;
   }
 
-  public Builder builder(SignalStorage.Span storage) {
+  public static Builder builder(SignalStorage.Span storage) {
     return new Builder(storage);
   }
 
@@ -51,6 +52,10 @@ public final class SpanToDiskExporter implements SpanExporter {
     private ExporterCallback callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
+    private Builder(SignalStorage.Span storage) {
+      this.storage = storage;
+    }
+
     @CanIgnoreReturnValue
     public Builder setExporterCallback(ExporterCallback value) {
       callback = value;
@@ -67,10 +72,6 @@ public final class SpanToDiskExporter implements SpanExporter {
       SignalStorageExporter<SpanData> storageExporter =
           new SignalStorageExporter<>(storage, callback, writeTimeout, TYPE);
       return new SpanToDiskExporter(storageExporter, callback);
-    }
-
-    private Builder(SignalStorage.Span storage) {
-      this.storage = storage;
     }
   }
 }

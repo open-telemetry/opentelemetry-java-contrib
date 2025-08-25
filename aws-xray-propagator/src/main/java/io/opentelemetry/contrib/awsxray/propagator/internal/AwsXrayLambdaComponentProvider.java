@@ -5,11 +5,14 @@
 
 package io.opentelemetry.contrib.awsxray.propagator.internal;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.awsxray.propagator.AwsXrayLambdaPropagator;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 
+@SuppressWarnings("rawtypes")
+@AutoService(ComponentProvider.class)
 public class AwsXrayLambdaComponentProvider implements ComponentProvider<TextMapPropagator> {
   @Override
   public Class<TextMapPropagator> getType() {

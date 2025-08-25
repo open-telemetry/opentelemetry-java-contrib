@@ -37,7 +37,7 @@ public final class LinksBasedSampler implements Sampler {
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
-    if (parentLinks.size() > 0) {
+    if (!parentLinks.isEmpty()) {
       for (LinkData linkData : parentLinks) {
         if (linkData.getSpanContext().isSampled()) {
           return SamplingResult.recordAndSample();

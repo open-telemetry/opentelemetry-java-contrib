@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Defaults to an exponential backoff strategy, unless a delay is suggested. */
-public final class RetryPeriodicDelay implements PeriodicDelay, AcceptsDelaySuggestion {
+public class RetryPeriodicDelay implements PeriodicDelay, AcceptsDelaySuggestion {
   private final ExponentialBackoffPeriodicDelay exponentialBackoff;
   private final AtomicReference<PeriodicDelay> currentDelay;
 

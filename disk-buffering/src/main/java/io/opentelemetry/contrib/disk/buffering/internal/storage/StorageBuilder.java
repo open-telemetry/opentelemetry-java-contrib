@@ -5,13 +5,14 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static java.util.logging.Level.INFO;
+
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class StorageBuilder {
@@ -43,7 +44,7 @@ public class StorageBuilder {
     File folder = ensureSubdir(configuration.getRootDir(), folderName);
     FolderManager folderManager = new FolderManager(folder, configuration, clock);
     if (configuration.isDebugEnabled()) {
-      logger.log(Level.INFO, "Building storage with configuration => " + configuration);
+      logger.log(INFO, "Building storage with configuration => " + configuration);
     }
     return new Storage(folderManager, configuration.isDebugEnabled());
   }

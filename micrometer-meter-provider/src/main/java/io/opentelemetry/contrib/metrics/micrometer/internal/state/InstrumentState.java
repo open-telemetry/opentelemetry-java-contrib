@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public final class InstrumentState {
+public class InstrumentState {
   private final MeterSharedState meterSharedState;
   private final String name;
   @Nullable private final String description;

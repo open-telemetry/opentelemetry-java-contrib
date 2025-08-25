@@ -9,7 +9,7 @@ import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 import javax.annotation.Nullable;
 
-public final class ResourceMapper {
+public class ResourceMapper {
 
   private static final ResourceMapper INSTANCE = new ResourceMapper();
 

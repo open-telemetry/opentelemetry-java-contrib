@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 
 /** Default storage implementation where items are stored in multiple protobuf files. */
-public final class FileSpanStorage implements SignalStorage.Span {
+public class FileSpanStorage implements SignalStorage.Span {
 
   @Override
   public CompletableFuture<WriteResult> write(Collection<SpanData> items) {

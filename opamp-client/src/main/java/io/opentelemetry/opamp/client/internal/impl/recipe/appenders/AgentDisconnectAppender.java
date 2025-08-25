@@ -12,7 +12,7 @@ import opamp.proto.AgentToServer;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class AgentDisconnectAppender implements AgentToServerAppender {
+public class AgentDisconnectAppender implements AgentToServerAppender {
 
   public static AgentDisconnectAppender create() {
     return new AgentDisconnectAppender();

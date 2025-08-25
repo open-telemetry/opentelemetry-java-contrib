@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
-public final class SpanDataSerializer implements SignalSerializer<SpanData> {
+public class SpanDataSerializer implements SignalSerializer<SpanData> {
 
   private final LowAllocationTraceRequestMarshaler marshaler =
       new LowAllocationTraceRequestMarshaler();

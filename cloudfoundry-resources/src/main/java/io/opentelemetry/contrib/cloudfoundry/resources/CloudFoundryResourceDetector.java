@@ -5,11 +5,14 @@
 
 package io.opentelemetry.contrib.cloudfoundry.resources;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
-public class CloudFoundryResourceDetector implements ComponentProvider<Resource> {
+@SuppressWarnings("rawtypes")
+@AutoService(ComponentProvider.class)
+public final class CloudFoundryResourceDetector implements ComponentProvider<Resource> {
 
   @Override
   public Class<Resource> getType() {

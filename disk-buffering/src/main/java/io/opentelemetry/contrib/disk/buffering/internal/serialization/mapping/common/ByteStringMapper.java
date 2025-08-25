@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.c
 
 import okio.ByteString;
 
-public final class ByteStringMapper {
+public class ByteStringMapper {
 
   private static final ByteStringMapper INSTANCE = new ByteStringMapper();
 
