@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 
@@ -16,7 +17,6 @@ import com.linecorp.armeria.testing.junit5.server.mock.MockWebServerExtension;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -47,7 +47,7 @@ public abstract class MetadataBasedResourceProviderTest {
   @NotNull
   private AttributesAssert createResource(Supplier<Optional<String>> client) {
     Resource resource = getResourceProvider(client).createResource(null);
-    return OpenTelemetryAssertions.assertThat(resource.getAttributes());
+    return assertThat(resource.getAttributes());
   }
 
   @NotNull
