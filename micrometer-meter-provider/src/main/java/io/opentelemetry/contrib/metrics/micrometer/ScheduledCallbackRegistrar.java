@@ -5,8 +5,9 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,7 +40,7 @@ public final class ScheduledCallbackRegistrar implements CallbackRegistrar {
 
   public static ScheduledCallbackRegistrarBuilder builder(
       ScheduledExecutorService scheduledExecutorService) {
-    Objects.requireNonNull(scheduledExecutorService, "scheduledExecutorService");
+    requireNonNull(scheduledExecutorService, "scheduledExecutorService");
     return new ScheduledCallbackRegistrarBuilder(scheduledExecutorService);
   }
 

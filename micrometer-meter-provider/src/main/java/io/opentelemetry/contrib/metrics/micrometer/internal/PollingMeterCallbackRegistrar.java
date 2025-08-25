@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public final class PollingMeterCallbackRegistrar implements CallbackRegistrar {
+public class PollingMeterCallbackRegistrar implements CallbackRegistrar {
   static final String OTEL_POLLING_METER_NAME = "otel_polling_meter";
 
   private final Supplier<MeterRegistry> meterRegistrySupplier;
