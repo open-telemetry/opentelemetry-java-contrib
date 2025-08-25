@@ -5,7 +5,8 @@
 
 package io.opentelemetry.opamp.client.internal.state;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 
@@ -33,6 +34,6 @@ abstract class InMemoryState<T> implements State<T> {
   @Nonnull
   @Override
   public T get() {
-    return Objects.requireNonNull(state.get());
+    return requireNonNull(state.get());
   }
 }

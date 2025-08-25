@@ -8,7 +8,7 @@ package io.opentelemetry.opamp.client.internal.request.delay;
 import java.time.Duration;
 import javax.annotation.concurrent.GuardedBy;
 
-public final class ExponentialBackoffPeriodicDelay implements PeriodicDelay {
+public class ExponentialBackoffPeriodicDelay implements PeriodicDelay {
   private final Duration initialDelay;
   private final Object delayNanosLock = new Object();
 

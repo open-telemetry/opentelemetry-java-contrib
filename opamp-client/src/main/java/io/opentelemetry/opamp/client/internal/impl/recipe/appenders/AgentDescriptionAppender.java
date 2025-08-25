@@ -13,7 +13,7 @@ import opamp.proto.AgentToServer;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class AgentDescriptionAppender implements AgentToServerAppender {
+public class AgentDescriptionAppender implements AgentToServerAppender {
   private final Supplier<AgentDescription> data;
 
   public static AgentDescriptionAppender create(Supplier<AgentDescription> data) {
