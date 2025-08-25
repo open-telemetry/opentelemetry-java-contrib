@@ -5,34 +5,30 @@
 
 package io.opentelemetry.contrib.disk.buffering.exporters.callback;
 
-import io.opentelemetry.contrib.disk.buffering.SignalType;
+import java.util.Collection;
 import javax.annotation.Nullable;
 
 /** Notifies about exporter and storage-related operations from within a signal to disk exporter. */
-public interface ExporterCallback {
+public interface ExporterCallback<T> {
   /**
    * Called when an export to disk operation succeeded.
    *
-   * @param type The type of signal associated to the exporter.
+   * @param items The items successfully stored in disk.
    */
-  void onExportSuccess(SignalType type);
+  void onExportSuccess(Collection<T> items);
 
   /**
    * Called when an export to disk operation failed.
    *
-   * @param type The type of signal associated to the exporter.
+   * @param items The items that couldn't get stored in disk.
    * @param error Optional - provides more information of why the operation failed.
    */
-  void onExportError(SignalType type, @Nullable Throwable error);
+  void onExportError(Collection<T> items, @Nullable Throwable error);
 
-  /**
-   * Called when the exporter is closed.
-   *
-   * @param type The type of signal associated to the exporter.
-   */
-  void onShutdown(SignalType type);
+  /** Called when the exporter is closed. */
+  void onShutdown();
 
-  static ExporterCallback noop() {
-    return NoopExporterCallback.INSTANCE;
+  static <T> ExporterCallback<T> noop() {
+    return new NoopExporterCallback<>();
   }
 }

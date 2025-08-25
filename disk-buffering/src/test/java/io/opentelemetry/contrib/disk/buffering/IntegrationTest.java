@@ -7,8 +7,7 @@ package io.opentelemetry.contrib.disk.buffering;
 
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -44,8 +43,12 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationTest {
   private Tracer tracer;
   private SdkMeterProvider meterProvider;
@@ -57,13 +60,14 @@ public class IntegrationTest {
   private SpanToDiskExporter spanToDiskExporter;
   private MetricToDiskExporter metricToDiskExporter;
   private LogRecordToDiskExporter logToDiskExporter;
-  private ExporterCallback callback;
+  @Mock private ExporterCallback<SpanData> spanCallback;
+  @Mock private ExporterCallback<LogRecordData> logCallback;
+  @Mock private ExporterCallback<MetricData> metricCallback;
   @TempDir private File rootDir;
   private static final long DELAY_BEFORE_READING_MILLIS = 500;
 
   @BeforeEach
   void setUp() {
-    callback = mock();
     FileStorageConfiguration storageConfig =
         FileStorageConfiguration.builder()
             .setMaxFileAgeForWriteMillis(DELAY_BEFORE_READING_MILLIS - 1)
@@ -73,20 +77,20 @@ public class IntegrationTest {
     // Setting up spans
     spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), storageConfig);
     spanToDiskExporter =
-        SpanToDiskExporter.builder(spanStorage).setExporterCallback(callback).build();
+        SpanToDiskExporter.builder(spanStorage).setExporterCallback(spanCallback).build();
     tracer = createTracerProvider(spanToDiskExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
     metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"), storageConfig);
     metricToDiskExporter =
-        MetricToDiskExporter.builder(metricStorage).setExporterCallback(callback).build();
+        MetricToDiskExporter.builder(metricStorage).setExporterCallback(metricCallback).build();
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
     // Setting up logs
     logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"), storageConfig);
     logToDiskExporter =
-        LogRecordToDiskExporter.builder(logStorage).setExporterCallback(callback).build();
+        LogRecordToDiskExporter.builder(logStorage).setExporterCallback(logCallback).build();
     logger = createLoggerProvider(logToDiskExporter).get("LogInstrumentationScope");
   }
 
@@ -94,20 +98,18 @@ public class IntegrationTest {
   void tearDown() throws IOException {
     // Closing span exporter
     spanToDiskExporter.shutdown();
-    verify(callback).onShutdown(SignalType.SPAN);
-    verifyNoMoreInteractions(callback);
+    verify(spanCallback).onShutdown();
+    verifyNoMoreInteractions(spanCallback);
 
     // Closing log exporter
-    clearInvocations(callback);
     logToDiskExporter.shutdown();
-    verify(callback).onShutdown(SignalType.LOG);
-    verifyNoMoreInteractions(callback);
+    verify(logCallback).onShutdown();
+    verifyNoMoreInteractions(spanCallback);
 
     // Closing metric exporter
-    clearInvocations(callback);
     metricToDiskExporter.shutdown();
-    verify(callback).onShutdown(SignalType.METRIC);
-    verifyNoMoreInteractions(callback);
+    verify(metricCallback).onShutdown();
+    verifyNoMoreInteractions(spanCallback);
 
     // Closing storages
     spanStorage.close();
@@ -120,21 +122,19 @@ public class IntegrationTest {
     // Creating span
     Span span = tracer.spanBuilder("Span name").startSpan();
     span.end();
-    verify(callback).onExportSuccess(SignalType.SPAN);
-    verifyNoMoreInteractions(callback);
+    verify(spanCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(spanCallback);
 
     // Creating log
-    clearInvocations(callback);
     logger.logRecordBuilder().setBody("Log body").emit();
-    verify(callback).onExportSuccess(SignalType.LOG);
-    verifyNoMoreInteractions(callback);
+    verify(logCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(spanCallback);
 
     // Creating metric
-    clearInvocations(callback);
     meter.counterBuilder("counter").build().add(1);
     meterProvider.forceFlush();
-    verify(callback).onExportSuccess(SignalType.METRIC);
-    verifyNoMoreInteractions(callback);
+    verify(metricCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(spanCallback);
 
     // Waiting for read time
     sleep(DELAY_BEFORE_READING_MILLIS);

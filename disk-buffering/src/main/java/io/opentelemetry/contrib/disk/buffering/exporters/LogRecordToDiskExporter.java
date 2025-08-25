@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.SignalType;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
@@ -19,11 +18,11 @@ import java.util.Collection;
 /** Exporter that stores logs into disk. */
 public final class LogRecordToDiskExporter implements LogRecordExporter {
   private final SignalStorageExporter<LogRecordData> storageExporter;
-  private final ExporterCallback callback;
-  private static final SignalType TYPE = SignalType.LOG;
+  private final ExporterCallback<LogRecordData> callback;
 
   private LogRecordToDiskExporter(
-      SignalStorageExporter<LogRecordData> storageExporter, ExporterCallback callback) {
+      SignalStorageExporter<LogRecordData> storageExporter,
+      ExporterCallback<LogRecordData> callback) {
     this.storageExporter = storageExporter;
     this.callback = callback;
   }
@@ -44,17 +43,17 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
 
   @Override
   public CompletableResultCode shutdown() {
-    callback.onShutdown(TYPE);
+    callback.onShutdown();
     return CompletableResultCode.ofSuccess();
   }
 
   public static final class Builder {
     private final SignalStorage.LogRecord storage;
-    private ExporterCallback callback = ExporterCallback.noop();
+    private ExporterCallback<LogRecordData> callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
     @CanIgnoreReturnValue
-    public Builder setExporterCallback(ExporterCallback value) {
+    public Builder setExporterCallback(ExporterCallback<LogRecordData> value) {
       callback = value;
       return this;
     }
@@ -67,7 +66,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
 
     public LogRecordToDiskExporter build() {
       SignalStorageExporter<LogRecordData> storageExporter =
-          new SignalStorageExporter<>(storage, callback, writeTimeout, TYPE);
+          new SignalStorageExporter<>(storage, callback, writeTimeout);
       return new LogRecordToDiskExporter(storageExporter, callback);
     }
 

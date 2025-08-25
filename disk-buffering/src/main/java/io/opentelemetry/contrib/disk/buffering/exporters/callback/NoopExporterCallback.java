@@ -5,20 +5,19 @@
 
 package io.opentelemetry.contrib.disk.buffering.exporters.callback;
 
-import io.opentelemetry.contrib.disk.buffering.SignalType;
+import java.util.Collection;
 import javax.annotation.Nullable;
 
-final class NoopExporterCallback implements ExporterCallback {
-  static final NoopExporterCallback INSTANCE = new NoopExporterCallback();
+final class NoopExporterCallback<T> implements ExporterCallback<T> {
 
-  private NoopExporterCallback() {}
-
-  @Override
-  public void onExportSuccess(SignalType type) {}
+  NoopExporterCallback() {}
 
   @Override
-  public void onExportError(SignalType type, @Nullable Throwable error) {}
+  public void onExportSuccess(Collection<T> items) {}
 
   @Override
-  public void onShutdown(SignalType type) {}
+  public void onExportError(Collection<T> items, @Nullable Throwable error) {}
+
+  @Override
+  public void onShutdown() {}
 }

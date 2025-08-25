@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.contrib.disk.buffering.SignalType;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
@@ -33,32 +32,34 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class SignalStorageExporterTest {
-  @Mock private ExporterCallback callback;
+  @Mock private ExporterCallback<SpanData> callback;
 
   @Test
   void verifyExportToStorage_success() {
     SignalStorage.Span storage = new TestSpanStorage();
-    SignalType signalType = SignalType.SPAN;
     SignalStorageExporter<SpanData> storageExporter =
-        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
+        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1));
     SpanData item1 = mock();
     SpanData item2 = mock();
     SpanData item3 = mock();
 
-    CompletableResultCode resultCode = storageExporter.exportToStorage(Arrays.asList(item1, item2));
+    List<SpanData> items = Arrays.asList(item1, item2);
+    CompletableResultCode resultCode = storageExporter.exportToStorage(items);
 
     assertThat(resultCode.isSuccess()).isTrue();
-    verify(callback).onExportSuccess(signalType);
+    verify(callback).onExportSuccess(items);
     verifyNoMoreInteractions(callback);
 
     // Adding more items
     clearInvocations(callback);
-    resultCode = storageExporter.exportToStorage(Collections.singletonList(item3));
+    List<SpanData> items2 = Collections.singletonList(item3);
+    resultCode = storageExporter.exportToStorage(items2);
 
     assertThat(resultCode.isSuccess()).isTrue();
-    verify(callback).onExportSuccess(signalType);
+    verify(callback).onExportSuccess(items2);
     verifyNoMoreInteractions(callback);
 
     // Checking items
@@ -72,21 +73,20 @@ class SignalStorageExporterTest {
   @Test
   void verifyExportToStorage_failure() {
     SignalStorage.Span storage = mock();
-    SignalType signalType = SignalType.SPAN;
     SignalStorageExporter<SpanData> storageExporter =
-        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1), signalType);
+        new SignalStorageExporter<>(storage, callback, Duration.ofSeconds(1));
     SpanData item1 = mock();
 
     // Without exception
     when(storage.write(anyCollection()))
         .thenReturn(CompletableFuture.completedFuture(WriteResult.error(null)));
 
-    CompletableResultCode resultCode =
-        storageExporter.exportToStorage(Collections.singletonList(item1));
+    List<SpanData> items = Collections.singletonList(item1);
+    CompletableResultCode resultCode = storageExporter.exportToStorage(items);
 
     assertThat(resultCode.isSuccess()).isFalse();
     assertThat(resultCode.getFailureThrowable()).isNull();
-    verify(callback).onExportError(signalType, null);
+    verify(callback).onExportError(items, null);
     verifyNoMoreInteractions(callback);
 
     // With exception
@@ -95,11 +95,11 @@ class SignalStorageExporterTest {
     when(storage.write(anyCollection()))
         .thenReturn(CompletableFuture.completedFuture(WriteResult.error(exception)));
 
-    resultCode = storageExporter.exportToStorage(Collections.singletonList(item1));
+    resultCode = storageExporter.exportToStorage(items);
 
     assertThat(resultCode.isSuccess()).isFalse();
     assertThat(resultCode.getFailureThrowable()).isEqualTo(exception);
-    verify(callback).onExportError(signalType, exception);
+    verify(callback).onExportError(items, exception);
     verifyNoMoreInteractions(callback);
   }
 

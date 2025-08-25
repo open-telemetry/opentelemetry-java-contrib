@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.SignalType;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
@@ -19,11 +18,10 @@ import java.util.Collection;
 /** Exporter that stores spans into disk. */
 public final class SpanToDiskExporter implements SpanExporter {
   private final SignalStorageExporter<SpanData> storageExporter;
-  private final ExporterCallback callback;
-  private static final SignalType TYPE = SignalType.SPAN;
+  private final ExporterCallback<SpanData> callback;
 
   private SpanToDiskExporter(
-      SignalStorageExporter<SpanData> storageExporter, ExporterCallback callback) {
+      SignalStorageExporter<SpanData> storageExporter, ExporterCallback<SpanData> callback) {
     this.storageExporter = storageExporter;
     this.callback = callback;
   }
@@ -44,17 +42,17 @@ public final class SpanToDiskExporter implements SpanExporter {
 
   @Override
   public CompletableResultCode shutdown() {
-    callback.onShutdown(TYPE);
+    callback.onShutdown();
     return CompletableResultCode.ofSuccess();
   }
 
   public static final class Builder {
     private final SignalStorage.Span storage;
-    private ExporterCallback callback = ExporterCallback.noop();
+    private ExporterCallback<SpanData> callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
     @CanIgnoreReturnValue
-    public Builder setExporterCallback(ExporterCallback value) {
+    public Builder setExporterCallback(ExporterCallback<SpanData> value) {
       callback = value;
       return this;
     }
@@ -67,7 +65,7 @@ public final class SpanToDiskExporter implements SpanExporter {
 
     public SpanToDiskExporter build() {
       SignalStorageExporter<SpanData> storageExporter =
-          new SignalStorageExporter<>(storage, callback, writeTimeout, TYPE);
+          new SignalStorageExporter<>(storage, callback, writeTimeout);
       return new SpanToDiskExporter(storageExporter, callback);
     }
 

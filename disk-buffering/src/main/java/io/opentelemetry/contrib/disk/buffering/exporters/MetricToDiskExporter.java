@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.opentelemetry.contrib.disk.buffering.SignalType;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
@@ -23,13 +22,12 @@ import java.util.Collection;
 public final class MetricToDiskExporter implements MetricExporter {
   private final SignalStorageExporter<MetricData> storageExporter;
   private final AggregationTemporalitySelector aggregationTemporalitySelector;
-  private final ExporterCallback callback;
-  private static final SignalType TYPE = SignalType.METRIC;
+  private final ExporterCallback<MetricData> callback;
 
   private MetricToDiskExporter(
       SignalStorageExporter<MetricData> storageExporter,
       AggregationTemporalitySelector aggregationTemporalitySelector,
-      ExporterCallback callback) {
+      ExporterCallback<MetricData> callback) {
     this.storageExporter = storageExporter;
     this.aggregationTemporalitySelector = aggregationTemporalitySelector;
     this.callback = callback;
@@ -51,7 +49,7 @@ public final class MetricToDiskExporter implements MetricExporter {
 
   @Override
   public CompletableResultCode shutdown() {
-    callback.onShutdown(TYPE);
+    callback.onShutdown();
     return CompletableResultCode.ofSuccess();
   }
 
@@ -64,11 +62,11 @@ public final class MetricToDiskExporter implements MetricExporter {
     private final SignalStorage.Metric storage;
     private AggregationTemporalitySelector aggregationTemporalitySelector =
         AggregationTemporalitySelector.alwaysCumulative();
-    private ExporterCallback callback = ExporterCallback.noop();
+    private ExporterCallback<MetricData> callback = ExporterCallback.noop();
     private Duration writeTimeout = Duration.ofSeconds(10);
 
     @CanIgnoreReturnValue
-    public Builder setExporterCallback(ExporterCallback value) {
+    public Builder setExporterCallback(ExporterCallback<MetricData> value) {
       callback = value;
       return this;
     }
@@ -87,7 +85,7 @@ public final class MetricToDiskExporter implements MetricExporter {
 
     public MetricToDiskExporter build() {
       SignalStorageExporter<MetricData> storageExporter =
-          new SignalStorageExporter<>(storage, callback, writeTimeout, TYPE);
+          new SignalStorageExporter<>(storage, callback, writeTimeout);
       return new MetricToDiskExporter(storageExporter, aggregationTemporalitySelector, callback);
     }
 
