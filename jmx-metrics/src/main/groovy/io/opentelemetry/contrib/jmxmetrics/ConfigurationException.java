@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
-public class ConfigurationException extends RuntimeException {
+public final class ConfigurationException extends RuntimeException {
   private static final long serialVersionUID = 0L;
 
   public ConfigurationException(final String message, final Throwable cause) {

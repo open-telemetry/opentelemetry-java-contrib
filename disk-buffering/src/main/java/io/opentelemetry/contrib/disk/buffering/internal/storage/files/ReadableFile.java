@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p>More information on the overall storage process in the CONTRIBUTING.md file.
  */
-public final class ReadableFile implements FileOperations {
+public class ReadableFile implements FileOperations {
   @NotNull private final File file;
   private final FileStream fileStream;
   private final StreamReader reader;

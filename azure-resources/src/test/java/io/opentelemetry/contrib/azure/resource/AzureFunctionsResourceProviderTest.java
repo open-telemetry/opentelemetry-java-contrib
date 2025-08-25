@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_INSTANCE;
@@ -14,7 +15,6 @@ import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +55,6 @@ class AzureFunctionsResourceProviderTest {
 
   @NotNull
   private static AttributesAssert createResource(Map<String, String> map) {
-    return OpenTelemetryAssertions.assertThat(
-        new AzureFunctionsResourceProvider(map).createResource(null).getAttributes());
+    return assertThat(new AzureFunctionsResourceProvider(map).createResource(null).getAttributes());
   }
 }

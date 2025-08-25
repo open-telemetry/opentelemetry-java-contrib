@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
-public final class Storage implements Closeable {
+public class Storage implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final DebugLogger logger;
   private final FolderManager folderManager;

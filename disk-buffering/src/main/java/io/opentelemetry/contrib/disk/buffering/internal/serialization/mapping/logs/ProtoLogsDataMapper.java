@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class ProtoLogsDataMapper
+public class ProtoLogsDataMapper
     extends BaseProtoSignalsDataMapper<
         LogRecordData, LogRecord, ExportLogsServiceRequest, ResourceLogs, ScopeLogs> {
 

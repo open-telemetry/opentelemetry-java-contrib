@@ -5,8 +5,9 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -32,7 +33,7 @@ public abstract class WildcardMatcher {
   private static final String CASE_SENSITIVE_PREFIX = "(?-i)";
   private static final String WILDCARD = "*";
   private static final WildcardMatcher MATCH_ALL = valueOf(WILDCARD);
-  private static final List<WildcardMatcher> MATCH_ALL_LIST = Collections.singletonList(MATCH_ALL);
+  private static final List<WildcardMatcher> MATCH_ALL_LIST = singletonList(MATCH_ALL);
 
   public static WildcardMatcher caseSensitiveMatcher(String matcher) {
     return valueOf(CASE_SENSITIVE_PREFIX + matcher);

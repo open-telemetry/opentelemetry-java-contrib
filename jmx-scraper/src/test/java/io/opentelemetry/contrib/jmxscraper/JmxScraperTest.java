@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,8 +14,6 @@ import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.TestUtil;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class JmxScraperTest {
 
   @Test
   void emptyArgumentsAllowed() throws InvalidArgumentException {
-    assertThat(JmxScraper.argsToConfig(Collections.emptyList()))
+    assertThat(JmxScraper.argsToConfig(emptyList()))
         .describedAs("empty config allowed to use JVM properties")
         .isEmpty();
   }
@@ -43,7 +43,7 @@ class JmxScraperTest {
   }
 
   private static void testInvalidArguments(String... args) {
-    assertThatThrownBy(() -> JmxScraper.argsToConfig(Arrays.asList(args)))
+    assertThatThrownBy(() -> JmxScraper.argsToConfig(asList(args)))
         .isInstanceOf(InvalidArgumentException.class);
   }
 
@@ -54,7 +54,7 @@ class JmxScraperTest {
     // Windows returns /C:/path/to/file, which is not a valid path for Path.get() in Java.
     String filePath =
         ClassLoader.getSystemClassLoader().getResource("validConfig.properties").getPath();
-    List<String> args = Arrays.asList("-config", filePath);
+    List<String> args = asList("-config", filePath);
 
     // When
     Properties parsedConfig = JmxScraper.argsToConfig(args);
@@ -73,7 +73,7 @@ class JmxScraperTest {
         ClassLoader.getSystemClassLoader().getResourceAsStream("validConfig.properties")) {
       // Given
       System.setIn(stream);
-      List<String> args = Arrays.asList("-config", "-");
+      List<String> args = asList("-config", "-");
 
       // When
       Properties parsedConfig = JmxScraper.argsToConfig(args);

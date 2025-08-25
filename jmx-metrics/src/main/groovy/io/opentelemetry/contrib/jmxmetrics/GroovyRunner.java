@@ -29,7 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.groovy.control.CompilationFailedException;
 
-public class GroovyRunner {
+public final class GroovyRunner {
   private static final Logger logger = Logger.getLogger(GroovyRunner.class.getName());
 
   private final List<Script> scripts;

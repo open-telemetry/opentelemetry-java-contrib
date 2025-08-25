@@ -8,6 +8,9 @@ description = "OpenTelemetry CloudFoundry Resources"
 otelJava.moduleName.set("io.opentelemetry.contrib.cloudfoundry.resources")
 
 dependencies {
+  annotationProcessor("com.google.auto.service:auto-service")
+  compileOnly("com.google.auto.service:auto-service")
+
   api("io.opentelemetry:opentelemetry-api")
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")
   api("io.opentelemetry:opentelemetry-sdk")

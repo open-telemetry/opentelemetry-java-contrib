@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-public class GroovyMetricEnvironment {
+public final class GroovyMetricEnvironment {
   private final SdkMeterProvider meterProvider;
   private final Meter meter;
 

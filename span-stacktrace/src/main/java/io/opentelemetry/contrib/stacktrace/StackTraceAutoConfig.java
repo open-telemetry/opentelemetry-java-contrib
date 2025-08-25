@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.SEVERE;
+
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -19,7 +22,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
-public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider {
+public final class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider {
 
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
@@ -50,7 +53,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
       log.fine("Stack traces capture is disabled");
     } else {
       log.log(
-          Level.FINE,
+          FINE,
           "Stack traces will be added to spans with a minimum duration of {0} nanos",
           minDuration);
     }
@@ -70,7 +73,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
     if (filter == null) {
       // if value is set, lack of filtering is likely an error and must be reported
-      Level disabledLogLevel = filterClass != null ? Level.SEVERE : Level.FINE;
+      Level disabledLogLevel = filterClass != null ? SEVERE : FINE;
       log.log(disabledLogLevel, "Span stacktrace filtering disabled");
       return span -> true;
     } else {

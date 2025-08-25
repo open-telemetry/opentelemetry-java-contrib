@@ -34,7 +34,7 @@ import opamp.proto.RemoteConfigStatus;
  *
  * <p>Builds an {@link OpampClient} instance.
  */
-public final class OpampClientBuilder {
+public class OpampClientBuilder {
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
   private long capabilities = 0;

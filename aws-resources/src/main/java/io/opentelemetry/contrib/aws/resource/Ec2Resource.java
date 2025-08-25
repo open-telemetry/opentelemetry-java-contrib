@@ -15,6 +15,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_ID
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_IMAGE_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.HOST_TYPE;
+import static java.util.logging.Level.WARNING;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -28,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -125,7 +125,7 @@ public final class Ec2Resource {
         }
       }
     } catch (IOException e) {
-      logger.log(Level.WARNING, "Could not parse identity document, resource not filled.", e);
+      logger.log(WARNING, "Could not parse identity document, resource not filled.", e);
       return Resource.empty();
     }
 

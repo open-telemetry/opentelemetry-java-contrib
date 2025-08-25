@@ -20,7 +20,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serializer;
 
-public class KafkaSpanExporterBuilder {
+public final class KafkaSpanExporterBuilder {
   private static final long DEFAULT_TIMEOUT_IN_SECONDS = 5L;
   private String topicName;
   private Producer<String, Collection<SpanData>> producer;
@@ -67,7 +67,7 @@ public class KafkaSpanExporterBuilder {
     return new KafkaSpanExporter(topicName, producer, executorService, timeoutInSeconds);
   }
 
-  public static class ProducerBuilder {
+  public static final class ProducerBuilder {
     private Map<String, Object> config;
     private Serializer<String> keySerializer;
     private Serializer<Collection<SpanData>> valueSerializer;
