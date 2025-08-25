@@ -11,7 +11,7 @@ import java.util.Objects;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
-public class SpanDataDeserializer implements Deserializer<ExportTraceServiceRequest> {
+public final class SpanDataDeserializer implements Deserializer<ExportTraceServiceRequest> {
   @SuppressWarnings("NullAway")
   @Override
   public ExportTraceServiceRequest deserialize(String topic, byte[] data) {

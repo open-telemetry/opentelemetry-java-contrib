@@ -42,7 +42,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
  * <p>The above will succeed both with the {@linkplain OpenTelemetry#noop() default implementation}
  * and this one, but with this implementation there will be no overhead at all.
  */
-public class NoopOpenTelemetry implements OpenTelemetry {
+public final class NoopOpenTelemetry implements OpenTelemetry {
 
   private static final OpenTelemetry INSTANCE = new NoopOpenTelemetry();
 

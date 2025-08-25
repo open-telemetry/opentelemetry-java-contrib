@@ -11,10 +11,10 @@ import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.util.function.Predicate;
 
-public class FilteringLogRecordProcessor implements LogRecordProcessor {
+public final class FilteringLogRecordProcessor implements LogRecordProcessor {
 
-  public final LogRecordProcessor delegate;
-  public final Predicate<LogRecordData> predicate;
+  private final LogRecordProcessor delegate;
+  private final Predicate<LogRecordData> predicate;
 
   public FilteringLogRecordProcessor(
       LogRecordProcessor delegate, Predicate<LogRecordData> predicate) {

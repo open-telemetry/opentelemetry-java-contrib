@@ -13,7 +13,7 @@ import opamp.proto.EffectiveConfig;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class EffectiveConfigAppender implements AgentToServerAppender {
+public class EffectiveConfigAppender implements AgentToServerAppender {
   private final Supplier<EffectiveConfig> effectiveConfig;
 
   public static EffectiveConfigAppender create(Supplier<EffectiveConfig> effectiveConfig) {

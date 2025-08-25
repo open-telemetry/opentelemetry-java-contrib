@@ -13,8 +13,6 @@ import io.opentelemetry.api.common.AttributeKey;
  */
 class IncubatingAttributes {
 
-  private IncubatingAttributes() {}
-
   public static final AttributeKey<String> CLOUD_ACCOUNT_ID =
       AttributeKey.stringKey("cloud.account.id");
   public static final AttributeKey<String> CLOUD_AVAILABILITY_ZONE =
@@ -26,7 +24,6 @@ class IncubatingAttributes {
   public static final AttributeKey<String> CLOUD_REGION = AttributeKey.stringKey("cloud.region");
 
   public static final class CloudPlatformIncubatingValues {
-    private CloudPlatformIncubatingValues() {}
 
     public static final String GCP_COMPUTE_ENGINE = "gcp_compute_engine";
     public static final String GCP_CLOUD_RUN = "gcp_cloud_run";
@@ -34,6 +31,8 @@ class IncubatingAttributes {
     public static final String GCP_CLOUD_FUNCTIONS = "gcp_cloud_functions";
     public static final String GCP_APP_ENGINE = "gcp_app_engine";
     public static final String GCP = "gcp";
+
+    private CloudPlatformIncubatingValues() {}
   }
 
   public static final AttributeKey<String> FAAS_INSTANCE = AttributeKey.stringKey("faas.instance");
@@ -56,4 +55,6 @@ class IncubatingAttributes {
 
   public static final AttributeKey<String> K8S_CLUSTER_NAME =
       AttributeKey.stringKey("k8s.cluster.name");
+
+  private IncubatingAttributes() {}
 }

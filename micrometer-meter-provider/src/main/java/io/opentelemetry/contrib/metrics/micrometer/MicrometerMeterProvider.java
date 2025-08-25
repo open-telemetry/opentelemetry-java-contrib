@@ -5,12 +5,13 @@
 
 package io.opentelemetry.contrib.metrics.micrometer;
 
+import static java.util.Objects.requireNonNull;
+
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.api.metrics.MeterBuilder;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.contrib.metrics.micrometer.internal.MemoizingSupplier;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterProviderSharedState;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -44,13 +45,13 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
   /** {@inheritDoc} */
   @Override
   public MeterBuilder meterBuilder(String instrumentationScopeName) {
-    Objects.requireNonNull(instrumentationScopeName, "instrumentationScopeName");
+    requireNonNull(instrumentationScopeName, "instrumentationScopeName");
     return new MicrometerMeterBuilder(meterProviderSharedState, instrumentationScopeName);
   }
 
   /** Returns a new builder instance for this provider with the specified {@link MeterRegistry}. */
   public static MicrometerMeterProviderBuilder builder(MeterRegistry meterRegistry) {
-    Objects.requireNonNull(meterRegistry, "meterRegistry");
+    requireNonNull(meterRegistry, "meterRegistry");
     return new MicrometerMeterProviderBuilder(() -> meterRegistry);
   }
 
@@ -62,7 +63,7 @@ public final class MicrometerMeterProvider implements MeterProvider, AutoCloseab
    */
   public static MicrometerMeterProviderBuilder builder(
       Supplier<MeterRegistry> meterRegistrySupplier) {
-    Objects.requireNonNull(meterRegistrySupplier, "meterRegistrySupplier");
+    requireNonNull(meterRegistrySupplier, "meterRegistrySupplier");
     return new MicrometerMeterProviderBuilder(new MemoizingSupplier<>(meterRegistrySupplier));
   }
 }

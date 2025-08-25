@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * authorization.<br>
  * It also validates the arguments passed for various scenarios.
  */
-public class WmqContext {
+public final class WmqContext {
   private static final String TRANSPORT_TYPE_CLIENT = "Client";
   private static final String TRANSPORT_TYPE_BINDINGS = "Bindings";
 

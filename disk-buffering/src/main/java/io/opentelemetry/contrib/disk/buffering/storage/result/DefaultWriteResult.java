@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.storage.result;
 
 import javax.annotation.Nullable;
 
-final class DefaultWriteResult implements WriteResult {
+class DefaultWriteResult implements WriteResult {
   private final boolean successful;
   @Nullable private final Throwable error;
 
