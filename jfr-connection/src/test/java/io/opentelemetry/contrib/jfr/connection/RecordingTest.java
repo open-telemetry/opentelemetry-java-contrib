@@ -5,12 +5,8 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.google.errorprone.annotations.Keep;
 import java.io.FileInputStream;
@@ -109,8 +105,8 @@ class RecordingTest {
   @Test
   void assertNewRecordingInitialValues() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
-      assertEquals(Recording.State.NEW, recording.getState());
-      assertEquals(-1, recording.getId());
+      assertThat(recording.getState()).isEqualTo(Recording.State.NEW);
+      assertThat(recording.getId()).isEqualTo(-1);
     } catch (IOException | IllegalStateException | JfrConnectionException exception) {
       fail("assertNewRecordingInitialValues caught exception", exception);
     }
@@ -120,8 +116,8 @@ class RecordingTest {
   void assertRecordingStartIdAndState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
-      assertEquals(id, recording.getId());
-      assertEquals(Recording.State.RECORDING, recording.getState());
+      assertThat(recording.getId()).isEqualTo(id);
+      assertThat(recording.getState()).isEqualTo(Recording.State.RECORDING);
     } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingStartIdAndState caught exception", e);
     }
@@ -131,9 +127,9 @@ class RecordingTest {
   void assertRecordingStopState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
-      assertEquals(id, recording.getId());
+      assertThat(recording.getId()).isEqualTo(id);
       recording.stop();
-      assertEquals(Recording.State.STOPPED, recording.getState());
+      assertThat(recording.getState()).isEqualTo(Recording.State.STOPPED);
     } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingStopState caught exception", e);
     }
@@ -143,9 +139,9 @@ class RecordingTest {
   void assertRecordingCloseState() {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       long id = recording.start();
-      assertEquals(id, recording.getId());
+      assertThat(recording.getId()).isEqualTo(id);
       recording.close();
-      assertEquals(Recording.State.CLOSED, recording.getState());
+      assertThat(recording.getState()).isEqualTo(Recording.State.CLOSED);
     } catch (IOException | IllegalStateException | JfrConnectionException e) {
       fail("assertRecordingCloseState caught exception", e);
     }
@@ -255,7 +251,7 @@ class RecordingTest {
     try (Recording recording = flightRecorderConnection.newRecording(null, null)) {
       reflectivelyInvokeMethods(recording, args);
     } catch (InvocationTargetException invocationTargetException) {
-      assertTrue(invocationTargetException.getCause() instanceof IllegalStateException);
+      assertThat(invocationTargetException.getCause()).isInstanceOf(IllegalStateException.class);
     } catch (Exception e) {
       fail("Bad test code", e);
     }
@@ -322,7 +318,7 @@ class RecordingTest {
                   "getRecordingOptions",
                   new Object[] {id},
                   new String[] {long.class.getName()});
-      assertFalse(flightRecorderMXBeanOptions.isEmpty());
+      assertThat(flightRecorderMXBeanOptions.isEmpty()).isFalse();
       ((Collection<CompositeData>) flightRecorderMXBeanOptions.values())
           .forEach(
               compositeData -> {
@@ -344,7 +340,7 @@ class RecordingTest {
                   // and for destination since FlightRecorderMXBean returns null as default
                   if (!("name".equals(key) && "".equals(actual))
                       && !("destination".equals(key) && "".equals(actual))) {
-                    assertEquals(expected, actual, getter);
+                    assertThat(actual).as(getter).isEqualTo(expected);
                   }
                 } catch (NoSuchMethodException
                     | IllegalArgumentException
@@ -393,7 +389,7 @@ class RecordingTest {
       recording.stop();
       Path dumpFile = Paths.get(System.getProperty("user.dir"), "testRecordingDump_dumped.jfr");
       recording.dump(dumpFile.toString());
-      assertTrue(Files.exists(dumpFile));
+      assertThat(dumpFile).exists();
     } catch (IllegalArgumentException badData) {
       fail("Issue in test data: " + badData.getMessage());
     } catch (IOException ioe) {
@@ -428,7 +424,7 @@ class RecordingTest {
         fail(e.getMessage(), e);
       }
 
-      assertTrue(Files.exists(streamedFile));
+      assertThat(streamedFile).exists();
 
     } catch (IllegalArgumentException badData) {
       fail("Issue in test data: " + badData.getMessage());
@@ -502,9 +498,9 @@ class RecordingTest {
     try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, null)) {
       recording.start();
       Recording clone = recording.clone(true);
-      assertSame(recording.getState(), Recording.State.RECORDING);
-      assertSame(clone.getState(), Recording.State.STOPPED);
-      assertNotEquals(recording.getId(), clone.getId());
+      assertThat(recording.getState()).isEqualTo(Recording.State.RECORDING);
+      assertThat(clone.getState()).isEqualTo(Recording.State.STOPPED);
+      assertThat(recording.getId()).isNotEqualTo(clone.getId());
       recording.stop();
     } catch (IOException ioe) {
       // possible that this can be thrown, but should not happen in this context

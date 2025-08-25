@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
@@ -49,6 +49,6 @@ class OpenDataUtilsTest {
             mBeanServerConnection.invoke(
                 objectInstance.getObjectName(), "getRecordingSettings", args, argTypes);
 
-    assertEquals(expected, actual);
+    assertThat(actual).isEqualTo(expected);
   }
 }
