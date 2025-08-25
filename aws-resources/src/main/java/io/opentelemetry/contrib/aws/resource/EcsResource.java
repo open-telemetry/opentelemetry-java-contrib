@@ -28,6 +28,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPl
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.logging.Level.WARNING;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -40,7 +41,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,7 +114,7 @@ public final class EcsResource {
                 attrBuilders.put(AWS_LOG_STREAM_ARNS, singletonList(logStreamArn));
               });
     } catch (IOException e) {
-      logger.log(Level.WARNING, "Can't get ECS metadata", e);
+      logger.log(WARNING, "Can't get ECS metadata", e);
     }
   }
 
@@ -157,7 +157,7 @@ public final class EcsResource {
       JsonParser parser, AttributesBuilder attrBuilders, LogArnBuilder logArnBuilder)
       throws IOException {
     if (!parser.isExpectedStartObjectToken()) {
-      logger.log(Level.WARNING, "Couldn't parse ECS metadata, invalid JSON");
+      logger.log(WARNING, "Couldn't parse ECS metadata, invalid JSON");
       return;
     }
 
@@ -340,7 +340,7 @@ public final class EcsResource {
       }
       Matcher matcher = imagePattern.matcher(image);
       if (!matcher.matches()) {
-        logger.log(Level.WARNING, "Couldn't parse image '" + image + "'");
+        logger.log(WARNING, "Couldn't parse image '" + image + "'");
         return null;
       }
       String repository = matcher.group("repository");
