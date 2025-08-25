@@ -22,7 +22,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 
-public class JmxClient {
+public final class JmxClient {
   private static final Logger logger = Logger.getLogger(JmxClient.class.getName());
 
   private final JMXServiceURL url;
