@@ -11,7 +11,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class AwsMetricAttributesSpanExporterBuilder {
+public final class AwsMetricAttributesSpanExporterBuilder {
 
   // Defaults
   private static final MetricAttributeGenerator DEFAULT_GENERATOR =

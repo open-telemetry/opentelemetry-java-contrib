@@ -30,7 +30,7 @@ import javax.annotation.concurrent.Immutable;
  * attributes.
  */
 @Immutable
-public class AwsMetricAttributesSpanExporter implements SpanExporter {
+public final class AwsMetricAttributesSpanExporter implements SpanExporter {
 
   private final SpanExporter delegate;
   private final MetricAttributeGenerator generator;
