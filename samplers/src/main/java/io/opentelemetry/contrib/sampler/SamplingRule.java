@@ -5,9 +5,10 @@
 
 package io.opentelemetry.contrib.sampler;
 
+import static java.util.Objects.hash;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
@@ -48,6 +49,6 @@ class SamplingRule {
 
   @Override
   public int hashCode() {
-    return Objects.hash(attributeKey, pattern);
+    return hash(attributeKey, pattern);
   }
 }

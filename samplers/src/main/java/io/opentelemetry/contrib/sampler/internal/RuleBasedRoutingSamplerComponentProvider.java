@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.sampler.internal;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigException;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
@@ -22,6 +23,8 @@ import java.util.List;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
+@SuppressWarnings("rawtypes")
+@AutoService(ComponentProvider.class)
 public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvider<Sampler> {
 
   private static final String ACTION_RECORD_AND_SAMPLE = "RECORD_AND_SAMPLE";
