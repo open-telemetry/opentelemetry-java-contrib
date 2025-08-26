@@ -113,8 +113,8 @@ public class InferredSpansAutoConfigTest {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
             .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansAutoConfig.DURATION_OPTION, "500ms")
-            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "500ms")
+            .put(InferredSpansAutoConfig.DURATION_OPTION, "1000ms")
+            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "1000ms")
             .put(InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "5ms")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
