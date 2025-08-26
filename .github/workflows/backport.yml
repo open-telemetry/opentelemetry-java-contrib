@@ -12,7 +12,7 @@ permissions:
 jobs:
   backport:
     permissions:
-      contents: write  # for Git to git push
+      contents: write  # for git push to PR branch
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -48,6 +48,15 @@ jobs:
 
           git checkout -b $branch
           git cherry-pick $commit
+
+          if git diff --name-only HEAD~1 HEAD | grep -q '^\.github/workflows/'; then
+            echo "::error::This PR contains changes to workflow files (.github/workflows/)."
+            echo "::error::Workflow files cannot be automatically backported because the standard"
+            echo "::error::GitHub token doesn't have the required 'workflow' write permission."
+            echo "::error::Please backport this PR manually."
+            exit 1
+          fi
+
           git push --set-upstream origin $branch
           gh pr create --title "[$GITHUB_REF_NAME] $title" \
                        --body "Clean cherry-pick of #$NUMBER to the \`$GITHUB_REF_NAME\` branch." \

@@ -26,7 +26,7 @@ public final class MetricDataDeserializer implements SignalDeserializer<MetricDa
     try {
       return ProtoMetricsDataMapper.getInstance()
           .fromProto(ExportMetricsServiceRequest.ADAPTER.decode(source));
-    } catch (IOException e) {
+    } catch (IOException | IllegalStateException e) {
       throw new DeserializationException(e);
     }
   }

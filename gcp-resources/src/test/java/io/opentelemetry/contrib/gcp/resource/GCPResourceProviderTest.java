@@ -52,7 +52,7 @@ import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
 import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 
 import com.google.cloud.opentelemetry.detection.DetectedPlatform;
