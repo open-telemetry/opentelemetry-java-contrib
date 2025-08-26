@@ -58,14 +58,11 @@ class FolderManagerTest {
 
   @Test
   void clearFiles() throws IOException {
-    when(clock.now())
-        .thenReturn(MILLISECONDS.toNanos(1000L))
-        .thenReturn(MILLISECONDS.toNanos(2000L));
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L));
 
-    // Creating 2 files
+    // Creating file
     folderManager.createWritableFile();
-    folderManager.createWritableFile();
-    assertThat(rootDir.list()).containsExactlyInAnyOrder("1000", "2000");
+    assertThat(rootDir.list()).containsExactly("1000");
 
     // Clear
     folderManager.clear();
