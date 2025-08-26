@@ -159,7 +159,7 @@ public class InferredSpansAutoConfigTest {
 
   private static void doSleep() {
     try {
-      Thread.sleep(100);
+      Thread.sleep(300);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
