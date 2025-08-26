@@ -9,8 +9,4 @@ include_fragments = true
 exclude = [
   # excluding links to pull requests and issues is done for performance
   "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
-  # groovy-lang.org links are timing out when accessed via lychee
-  "^http://(docs.|)groovy-lang.org",
-  # mvnrepository.com links are returning 403 when accessed via lychee
-  "^https://mvnrepository.com",
 ]
