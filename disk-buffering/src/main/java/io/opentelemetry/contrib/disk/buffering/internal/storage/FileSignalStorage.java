@@ -48,7 +48,7 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
       if (storage.write(serializer)) {
         return CompletableFuture.completedFuture(WriteResult.successful());
       }
-      logger.info("Could not store batch in disk.");
+      logger.fine("Could not store batch in disk.");
       return CompletableFuture.completedFuture(WriteResult.error(null));
     } catch (IOException e) {
       logger.log(

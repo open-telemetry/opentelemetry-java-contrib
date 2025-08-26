@@ -49,7 +49,7 @@ public final class Storage<T> implements Closeable {
 
   private boolean write(SignalSerializer<T> marshaler, int attemptNumber) throws IOException {
     if (isClosed.get()) {
-      logger.info("Refusing to write to storage after being closed.");
+      logger.fine("Refusing to write to storage after being closed.");
       return false;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
@@ -60,7 +60,7 @@ public final class Storage<T> implements Closeable {
     if (writableFile == null) {
       writableFile = folderManager.createWritableFile();
       writableFileRef.set(writableFile);
-      logger.info("Created new writableFile: " + writableFile);
+      logger.finer("Created new writableFile: " + writableFile);
     }
     WritableResult result = writableFile.append(marshaler);
     if (result != WritableResult.SUCCEEDED) {
@@ -98,7 +98,7 @@ public final class Storage<T> implements Closeable {
   private ReadableResult<T> doReadNext(SignalDeserializer<T> deserializer, int attemptNumber)
       throws IOException {
     if (isClosed.get()) {
-      logger.info("Refusing to read from storage after being closed.");
+      logger.fine("Refusing to read from storage after being closed.");
       return null;
     }
     if (attemptNumber > MAX_ATTEMPTS) {
@@ -107,16 +107,16 @@ public final class Storage<T> implements Closeable {
     }
     ReadableFile readableFile = readableFileRef.get();
     if (readableFile == null) {
-      logger.info("Obtaining a new readableFile from the folderManager.");
+      logger.finer("Obtaining a new readableFile from the folderManager.");
       readableFile = folderManager.getReadableFile();
       readableFileRef.set(readableFile);
       if (readableFile == null) {
-        logger.info("Unable to get or create readable file.");
+        logger.fine("Unable to get or create readable file.");
         return null;
       }
     }
 
-    logger.info("Attempting to read data from " + readableFile);
+    logger.finer("Attempting to read data from " + readableFile);
     byte[] result = readableFile.readNext();
     if (result != null) {
       try {
@@ -144,7 +144,7 @@ public final class Storage<T> implements Closeable {
 
   @Override
   public void close() throws IOException {
-    logger.info("Closing disk buffering storage.");
+    logger.fine("Closing disk buffering storage.");
     if (isClosed.compareAndSet(false, true)) {
       folderManager.close();
       writableFileRef.set(null);
