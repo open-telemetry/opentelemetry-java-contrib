@@ -9,6 +9,10 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.exporter.internal.grpc.GrpcExporter;
+import io.opentelemetry.exporter.internal.http.HttpExporter;
+import io.opentelemetry.exporter.internal.marshal.Marshaler;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.io.IOException;
@@ -16,19 +20,38 @@ import java.util.concurrent.TimeUnit;
 
 public class LogRecordFromDiskExporter implements FromDiskExporter {
 
-  private final FromDiskExporterImpl<LogRecordData> delegate;
+  private final FromDiskExporterImpl delegate;
 
   public static LogRecordFromDiskExporter create(LogRecordExporter exporter, Storage storage)
       throws IOException {
-    FromDiskExporterImpl<LogRecordData> delegate =
-        FromDiskExporterImpl.<LogRecordData>builder(storage)
-            .setDeserializer(SignalDeserializer.ofLogs())
-            .setExportFunction(exporter::export)
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<LogRecordData>builder(storage, SignalTypes.logs)
+            .setExportFunction(exporter::export, SignalDeserializer.ofLogs())
             .build();
     return new LogRecordFromDiskExporter(delegate);
   }
 
-  private LogRecordFromDiskExporter(FromDiskExporterImpl<LogRecordData> delegate) {
+  public static LogRecordFromDiskExporter create(HttpExporter<Marshaler> exporter, Storage storage)
+      throws IOException {
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<LogRecordData>builder(storage, SignalTypes.logs)
+            .setExporter(exporter)
+            .build();
+    return new LogRecordFromDiskExporter(delegate);
+  }
+
+  // Private because untested.
+  @SuppressWarnings("unused")
+  private static LogRecordFromDiskExporter create(GrpcExporter<Marshaler> exporter, Storage storage)
+      throws IOException {
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<LogRecordData>builder(storage, SignalTypes.logs)
+            .setExporter(exporter)
+            .build();
+    return new LogRecordFromDiskExporter(delegate);
+  }
+
+  private LogRecordFromDiskExporter(FromDiskExporterImpl delegate) {
     this.delegate = delegate;
   }
 

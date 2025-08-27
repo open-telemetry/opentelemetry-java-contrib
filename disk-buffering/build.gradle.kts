@@ -22,6 +22,8 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-sender-okhttp")
 
   protos("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha@jar")
 }

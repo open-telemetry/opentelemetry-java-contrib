@@ -9,6 +9,10 @@ import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporte
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.exporter.internal.grpc.GrpcExporter;
+import io.opentelemetry.exporter.internal.http.HttpExporter;
+import io.opentelemetry.exporter.internal.marshal.Marshaler;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.io.IOException;
@@ -16,19 +20,38 @@ import java.util.concurrent.TimeUnit;
 
 public class MetricFromDiskExporter implements FromDiskExporter {
 
-  private final FromDiskExporterImpl<MetricData> delegate;
+  private final FromDiskExporterImpl delegate;
 
   public static MetricFromDiskExporter create(MetricExporter exporter, Storage storage)
       throws IOException {
-    FromDiskExporterImpl<MetricData> delegate =
-        FromDiskExporterImpl.<MetricData>builder(storage)
-            .setDeserializer(SignalDeserializer.ofMetrics())
-            .setExportFunction(exporter::export)
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<MetricData>builder(storage, SignalTypes.metrics)
+            .setExportFunction(exporter::export, SignalDeserializer.ofMetrics())
             .build();
     return new MetricFromDiskExporter(delegate);
   }
 
-  private MetricFromDiskExporter(FromDiskExporterImpl<MetricData> delegate) {
+  public static MetricFromDiskExporter create(HttpExporter<Marshaler> exporter, Storage storage)
+      throws IOException {
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<MetricData>builder(storage, SignalTypes.metrics)
+            .setExporter(exporter)
+            .build();
+    return new MetricFromDiskExporter(delegate);
+  }
+
+  // Private because untested.
+  @SuppressWarnings("unused")
+  private static MetricFromDiskExporter create(GrpcExporter<Marshaler> exporter, Storage storage)
+      throws IOException {
+    FromDiskExporterImpl delegate =
+        FromDiskExporterImpl.<MetricData>builder(storage, SignalTypes.metrics)
+            .setExporter(exporter)
+            .build();
+    return new MetricFromDiskExporter(delegate);
+  }
+
+  private MetricFromDiskExporter(FromDiskExporterImpl delegate) {
     this.delegate = delegate;
   }
 

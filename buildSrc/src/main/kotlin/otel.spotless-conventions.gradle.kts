@@ -5,6 +5,7 @@ plugins {
 spotless {
   java {
     googleJavaFormat()
+    toggleOffOn()
     licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public|// Includes work from:)")
     target("src/**/*.java")
   }
