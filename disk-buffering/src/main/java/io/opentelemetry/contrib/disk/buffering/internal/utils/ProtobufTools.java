@@ -89,29 +89,29 @@ public final class ProtobufTools {
       if (fieldNumber == targetField) {
         switch (wireType) {
           case WIRETYPE_VARINT:
-              long[] v = readVarint(data, i);
-              i += (int) v[1];
-              count++;
-              break;
+            long[] v = readVarint(data, i);
+            i += (int) v[1];
+            count++;
+            break;
           case WIRETYPE_FIXED64:
-              i += 8;
-              count++;
-              break;
+            i += 8;
+            count++;
+            break;
           case WIRETYPE_FIXED32:
-              i += 4;
-              count++;
-              break;
+            i += 4;
+            count++;
+            break;
           case WIRETYPE_LENGTH_DELIMITED:
-              long[] lres = readVarint(data, i);
-              int len = (int) lres[0];
-              int ln = (int) lres[1];
-              i += ln;
+            long[] lres = readVarint(data, i);
+            int len = (int) lres[0];
+            int ln = (int) lres[1];
+            i += ln;
 
-              // Each length-delimited field occurrence counts as one element
-              // (message, string, bytes, or unpacked repeated field element)
-              count++;
-              i += len;
-              break;
+            // Each length-delimited field occurrence counts as one element
+            // (message, string, bytes, or unpacked repeated field element)
+            count++;
+            i += len;
+            break;
           default:
             throw new DeserializationException("Unsupported wire type: " + wireType);
         }
