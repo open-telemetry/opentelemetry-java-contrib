@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.exporter.internal.grpc.GrpcExporter;
 import io.opentelemetry.exporter.internal.http.HttpExporter;
@@ -19,11 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 public class FromDiskExporterBuilder<EXPORT_DATA> {
 
-  private final DebugLogger logger;
   private final Storage storage;
   private final SignalTypes signalType;
 
@@ -36,9 +33,6 @@ public class FromDiskExporterBuilder<EXPORT_DATA> {
     }
     this.storage = storage;
     this.signalType = signalType;
-    this.logger =
-        DebugLogger.wrap(
-            Logger.getLogger(FromDiskExporterImpl.class.getName()), storage.isDebugEnabled());
   }
 
   @CanIgnoreReturnValue

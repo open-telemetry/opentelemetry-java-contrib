@@ -129,7 +129,7 @@ public class HttpIntegrationTest {
   void setUp() throws IOException {
     clock = mock();
     storageConfig =
-        StorageConfiguration.builder().setRootDir(rootDir).setDebugEnabled(true).build();
+        StorageConfiguration.builder().setRootDir(rootDir).setDebugEnabled(false).build();
     spanStorage =
         Storage.builder(SignalTypes.spans)
             .setStorageConfiguration(storageConfig)
