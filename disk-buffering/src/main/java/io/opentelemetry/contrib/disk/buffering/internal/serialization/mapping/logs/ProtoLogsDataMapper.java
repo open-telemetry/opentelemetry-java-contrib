@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseProtoSignalsDataMapper;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.logs.v1.LogRecord;
-import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public final class ProtoLogsDataMapper
     extends BaseProtoSignalsDataMapper<
-        LogRecordData, LogRecord, LogsData, ResourceLogs, ScopeLogs> {
+        LogRecordData, LogRecord, ExportLogsServiceRequest, ResourceLogs, ScopeLogs> {
 
   private static final ProtoLogsDataMapper INSTANCE = new ProtoLogsDataMapper();
 
@@ -39,12 +39,12 @@ public final class ProtoLogsDataMapper
   }
 
   @Override
-  protected List<ResourceLogs> getProtoResources(LogsData logsData) {
+  protected List<ResourceLogs> getProtoResources(ExportLogsServiceRequest logsData) {
     return logsData.resource_logs;
   }
 
   @Override
-  protected LogsData createProtoData(
+  protected ExportLogsServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> itemsByResource) {
     List<ResourceLogs> items = new ArrayList<>();
     itemsByResource.forEach(
@@ -58,7 +58,7 @@ public final class ProtoLogsDataMapper
           }
           items.add(resourceLogsBuilder.build());
         });
-    return new LogsData.Builder().resource_logs(items).build();
+    return new ExportLogsServiceRequest.Builder().resource_logs(items).build();
   }
 
   private ScopeLogs.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {

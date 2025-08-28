@@ -6,10 +6,10 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseProtoSignalsDataMapper;
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.opentelemetry.proto.trace.v1.Span;
-import io.opentelemetry.proto.trace.v1.TracesData;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class ProtoSpansDataMapper
-    extends BaseProtoSignalsDataMapper<SpanData, Span, TracesData, ResourceSpans, ScopeSpans> {
+    extends BaseProtoSignalsDataMapper<
+        SpanData, Span, ExportTraceServiceRequest, ResourceSpans, ScopeSpans> {
 
   private static final ProtoSpansDataMapper INSTANCE = new ProtoSpansDataMapper();
 
@@ -32,7 +33,7 @@ public final class ProtoSpansDataMapper
   }
 
   @Override
-  protected List<ResourceSpans> getProtoResources(TracesData protoData) {
+  protected List<ResourceSpans> getProtoResources(ExportTraceServiceRequest protoData) {
     return protoData.resource_spans;
   }
 
@@ -43,7 +44,7 @@ public final class ProtoSpansDataMapper
   }
 
   @Override
-  protected TracesData createProtoData(
+  protected ExportTraceServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Span>>> itemsByResource) {
     List<ResourceSpans> items = new ArrayList<>();
     itemsByResource.forEach(
@@ -57,7 +58,7 @@ public final class ProtoSpansDataMapper
           }
           items.add(resourceSpansBuilder.build());
         });
-    return new TracesData.Builder().resource_spans(items).build();
+    return new ExportTraceServiceRequest.Builder().resource_spans(items).build();
   }
 
   @Override

@@ -12,6 +12,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializer
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.DelimitedProtoStreamReader;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.StreamReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,17 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public abstract class BaseSignalSerializerTest<SIGNAL_SDK_ITEM> {
   protected byte[] serialize(SIGNAL_SDK_ITEM... items) {
-    return getSerializer().serialize(Arrays.asList(items));
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    SignalSerializer<SIGNAL_SDK_ITEM> serializer = getSerializer();
+    try {
+      serializer.initialize(Arrays.asList(items));
+      serializer.writeBinaryTo(byteArrayOutputStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } finally {
+      serializer.reset();
+    }
+    return byteArrayOutputStream.toByteArray();
   }
 
   protected List<SIGNAL_SDK_ITEM> deserialize(byte[] source) {

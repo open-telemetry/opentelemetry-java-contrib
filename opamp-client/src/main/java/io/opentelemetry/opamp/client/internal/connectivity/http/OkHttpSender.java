@@ -5,6 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
+import io.opentelemetry.api.internal.InstrumentationUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +14,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
 
@@ -45,8 +47,16 @@ public final class OkHttpSender implements HttpSender {
     RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);
     builder.post(body);
 
+    // By suppressing instrumentations, we prevent automatic instrumentations for the okhttp request
+    // that polls the opamp server.
+    InstrumentationUtil.suppressInstrumentation(() -> doSendRequest(builder.build(), future));
+
+    return future;
+  }
+
+  private void doSendRequest(Request request, CompletableFuture<Response> future) {
     client
-        .newCall(builder.build())
+        .newCall(request)
         .enqueue(
             new Callback() {
               @Override
@@ -59,8 +69,6 @@ public final class OkHttpSender implements HttpSender {
                 future.completeExceptionally(e);
               }
             });
-
-    return future;
   }
 
   private static class OkHttpResponse implements Response {

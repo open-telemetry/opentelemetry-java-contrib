@@ -47,5 +47,8 @@ public final class IbmMqAttributes {
   /** Logical name of the service. */
   public static final AttributeKey<String> SERVICE_NAME = stringKey("service.name");
 
+  /** The reason code associated with an error */
+  public static final AttributeKey<String> ERROR_CODE = stringKey("error.code");
+
   private IbmMqAttributes() {}
 }

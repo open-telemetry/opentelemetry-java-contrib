@@ -38,10 +38,11 @@ public class ToDiskExporter<EXPORT_DATA> {
     return new ToDiskExporterBuilder<>(storage);
   }
 
-  public CompletableResultCode export(Collection<EXPORT_DATA> data) {
+  public synchronized CompletableResultCode export(Collection<EXPORT_DATA> data) {
     logger.log("Intercepting exporter batch.", Level.FINER);
     try {
-      if (storage.write(serializer.serialize(data))) {
+      serializer.initialize(data);
+      if (storage.write(serializer)) {
         return CompletableResultCode.ofSuccess();
       }
       logger.log("Could not store batch in disk. Exporting it right away.");
@@ -52,6 +53,8 @@ public class ToDiskExporter<EXPORT_DATA> {
           Level.WARNING,
           e);
       return exportFunction.apply(data);
+    } finally {
+      serializer.reset();
     }
   }
 

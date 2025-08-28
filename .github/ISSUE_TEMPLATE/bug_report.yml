@@ -16,6 +16,7 @@ body:
         - disk-buffering
         - gcp-auth-extension
         - gcp-resources
+        - ibm-mq-metrics
         - jfr-connection
         - jfr-events
         - jmx-metrics

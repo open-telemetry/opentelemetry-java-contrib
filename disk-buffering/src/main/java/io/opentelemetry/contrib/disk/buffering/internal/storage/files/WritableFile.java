@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.ClockBuddy.nowMillis;
 
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
@@ -43,9 +44,9 @@ public final class WritableFile implements FileOperations {
    * reached the configured max size, the file stream is closed with the contents available in the
    * buffer before attempting to append the new data.
    *
-   * @param data - The new data line to add.
+   * @param marshaler - The new data line to add.
    */
-  public synchronized WritableResult append(byte[] data) throws IOException {
+  public synchronized WritableResult append(SignalSerializer<?> marshaler) throws IOException {
     if (isClosed.get()) {
       return WritableResult.FAILED;
     }
@@ -53,12 +54,12 @@ public final class WritableFile implements FileOperations {
       close();
       return WritableResult.FAILED;
     }
-    int futureSize = size + data.length;
+    int futureSize = size + marshaler.getBinarySerializedSize();
     if (futureSize > configuration.getMaxFileSize()) {
       close();
       return WritableResult.FAILED;
     }
-    out.write(data);
+    marshaler.writeBinaryTo(out);
     size = futureSize;
     return WritableResult.SUCCEEDED;
   }

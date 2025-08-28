@@ -5,9 +5,9 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,32 +33,32 @@ class FlightRecorderDiagnosticCommandConnectionTest {
 
   @Test
   void assertCommercialFeaturesLockedThrows() throws Exception {
-    assertThrows(
-        JfrConnectionException.class,
-        () -> {
-          ObjectName objectName = mock(ObjectName.class);
-          MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "locked");
-          FlightRecorderDiagnosticCommandConnection.assertCommercialFeaturesUnlocked(
-              mBeanServerConnection, objectName);
-        });
+    assertThatThrownBy(
+            () -> {
+              ObjectName objectName = mock(ObjectName.class);
+              MBeanServerConnection mBeanServerConnection = mockMbeanServer(objectName, "locked");
+              FlightRecorderDiagnosticCommandConnection.assertCommercialFeaturesUnlocked(
+                  mBeanServerConnection, objectName);
+            })
+        .isInstanceOf(JfrConnectionException.class);
   }
 
   @Test
   void closeRecording() throws Exception {
-    assertThrows(UnsupportedOperationException.class, () -> createconnection().closeRecording(1));
+    assertThatThrownBy(() -> createconnection().closeRecording(1))
+        .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
   void testGetStream() throws Exception {
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> createconnection().getStream(1L, null, null, 0L));
+    assertThatThrownBy(() -> createconnection().getStream(1L, null, null, 0L))
+        .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
   void testCloneRecording() throws Exception {
-    assertThrows(
-        UnsupportedOperationException.class, () -> createconnection().cloneRecording(1, false));
+    assertThatThrownBy(() -> createconnection().cloneRecording(1, false))
+        .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
@@ -73,7 +73,7 @@ class FlightRecorderDiagnosticCommandConnectionTest {
     long id =
         connection.startRecording(
             new RecordingOptions.Builder().build(), RecordingConfiguration.PROFILE_CONFIGURATION);
-    assertEquals(id, 99);
+    assertThat(id).isEqualTo(99);
   }
 
   @Test

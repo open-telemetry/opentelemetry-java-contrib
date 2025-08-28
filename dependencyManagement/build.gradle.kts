@@ -2,8 +2,8 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.18.1-alpha"
-val semconvVersion = "1.34.0"
+val otelInstrumentationVersion = "2.19.0-alpha"
+val semconvVersion = "1.37.0"
 
 javaPlatform {
   allowDependencies()
@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.2"))
-  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.31.1"))
+  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.0"))
   api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
@@ -45,7 +45,7 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.12.8")
+    api("com.uber.nullaway:nullaway:0.12.9")
     api("org.assertj:assertj-core:3.27.4")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")

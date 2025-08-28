@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.ByteArraySerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.sdk.common.Clock;
@@ -83,7 +84,7 @@ class FolderManagerTest {
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(createdFileTime));
 
     WritableFile writableFile = folderManager.createWritableFile();
-    writableFile.append(new byte[3]);
+    writableFile.append(new ByteArraySerializer(new byte[3]));
 
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS));

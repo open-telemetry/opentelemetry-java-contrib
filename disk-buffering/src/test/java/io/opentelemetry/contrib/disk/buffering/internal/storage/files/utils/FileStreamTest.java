@@ -61,7 +61,7 @@ class FileStreamTest {
 
     // Truncate all available data
     stream.truncateTop(3);
-    assertThat(stream.size()).isEqualTo(0);
+    assertThat(stream).isEmpty();
     assertThat(readString(temporaryFile)).isEqualTo("");
 
     stream.close();

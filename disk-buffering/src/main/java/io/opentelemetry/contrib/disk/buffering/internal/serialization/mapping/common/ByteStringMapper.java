@@ -16,10 +16,10 @@ public final class ByteStringMapper {
   }
 
   public ByteString stringToProto(String source) {
-    return ByteString.encodeUtf8(source);
+    return ByteString.decodeHex(source);
   }
 
   public String protoToString(ByteString source) {
-    return source.utf8();
+    return source.hex();
   }
 }

@@ -1,8 +1,8 @@
 pluginManagement {
   plugins {
-    id("com.gradleup.shadow") version "8.3.9"
+    id("com.gradleup.shadow") version "9.0.2"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-    id("com.gradle.develocity") version "4.1"
+    id("com.gradle.develocity") version "4.1.1"
   }
 }
 
@@ -34,7 +34,6 @@ develocity {
 
 rootProject.name = "opentelemetry-java-contrib"
 
-include(":all")
 include(":aws-resources")
 include(":aws-xray")
 include(":aws-xray-propagator")
@@ -45,7 +44,6 @@ include(":cloudfoundry-resources")
 include(":consistent-sampling")
 include(":dependencyManagement")
 include(":disk-buffering")
-include(":example")
 include(":ibm-mq-metrics")
 include(":jfr-events")
 include(":jfr-connection")

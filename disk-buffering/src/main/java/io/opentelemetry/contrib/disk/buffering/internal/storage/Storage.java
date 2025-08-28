@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import static java.util.logging.Level.WARNING;
 
 import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporterImpl;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
@@ -49,14 +50,14 @@ public final class Storage implements Closeable {
   /**
    * Attempts to write an item into a writable file.
    *
-   * @param item - The data that would be appended to the file.
+   * @param marshaler - The data that would be appended to the file.
    * @throws IOException If an unexpected error happens.
    */
-  public boolean write(byte[] item) throws IOException {
-    return write(item, 1);
+  public boolean write(SignalSerializer<?> marshaler) throws IOException {
+    return write(marshaler, 1);
   }
 
-  private boolean write(byte[] item, int attemptNumber) throws IOException {
+  private boolean write(SignalSerializer<?> marshaler, int attemptNumber) throws IOException {
     if (isClosed.get()) {
       logger.log("Refusing to write to storage after being closed.");
       return false;
@@ -69,11 +70,11 @@ public final class Storage implements Closeable {
       writableFile = folderManager.createWritableFile();
       logger.log("Created new writableFile: " + writableFile);
     }
-    WritableResult result = writableFile.append(item);
+    WritableResult result = writableFile.append(marshaler);
     if (result != WritableResult.SUCCEEDED) {
       // Retry with new file
       writableFile = null;
-      return write(item, ++attemptNumber);
+      return write(marshaler, ++attemptNumber);
     }
     return true;
   }

@@ -51,6 +51,8 @@ tasks {
   shadowJar {
     mergeServiceFiles()
 
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
+
     manifest {
       attributes["Implementation-Version"] = project.version
     }
@@ -64,20 +66,23 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
 
     val testAppTask = project("test-app").tasks.named<Jar>("jar")
     dependsOn(testAppTask)
+    inputs.files(layout.files(testAppTask))
     systemProperty("app.jar.path", testAppTask.get().archiveFile.get().asFile.absolutePath)
 
     val testWarTask = project("test-webapp").tasks.named<Jar>("war")
     dependsOn(testWarTask)
+    inputs.files(layout.files(testWarTask))
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
 
     develocity.testRetry {
-      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      // TODO (trask) fix flaky tests and remove this workaround
       if (System.getenv().containsKey("CI")) {
         maxRetries.set(5)
       }
