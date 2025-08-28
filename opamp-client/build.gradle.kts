@@ -1,6 +1,4 @@
 import de.undercouch.gradle.tasks.download.DownloadExtension
-import java.net.HttpURLConnection
-import java.net.URL
 
 plugins {
   id("otel.java-conventions")
@@ -53,19 +51,7 @@ abstract class DownloadOpampProtos @Inject constructor(
 
   @TaskAction
   fun execute() {
-    // Get the latest release tag by following the redirect from GitHub's latest release URL
-    val latestReleaseUrl = "https://github.com/open-telemetry/opamp-spec/releases/latest"
-    val connection = URL(latestReleaseUrl).openConnection() as HttpURLConnection
-    connection.instanceFollowRedirects = false
-    connection.requestMethod = "HEAD"
-
-    val redirectLocation = connection.getHeaderField("Location")
-    connection.disconnect()
-
-    // Extract tag from URL like: https://github.com/open-telemetry/opamp-spec/releases/tag/v0.12.0
-    val latestTag = redirectLocation.substringAfterLast("/")
-    // Download the source code for the latest release
-    val zipUrl = "https://github.com/open-telemetry/opamp-spec/zipball/$latestTag"
+    val zipUrl = "https://github.com/open-telemetry/opamp-spec/zipball/v0.14.0"
 
     download.run {
       src(zipUrl)
