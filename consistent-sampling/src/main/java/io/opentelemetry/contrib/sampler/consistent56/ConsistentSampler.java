@@ -56,6 +56,17 @@ public abstract class ConsistentSampler implements Sampler, Composable {
   }
 
   /**
+   * Returns a {@link ConsistentSampler} that samples each span with a known probability, where the
+   * probablity can be dynamically updated.
+   *
+   * @param samplingProbability the sampling probability
+   * @return a sampler
+   */
+  public static ConsistentSampler updateableProbabilityBased(double samplingProbability) {
+    return new ConsistentVariableThresholdSampler(samplingProbability);
+  }
+
+  /**
    * Returns a new {@link ConsistentSampler} that respects the sampling decision of the parent span
    * or falls-back to the given sampler if it is a root span.
    *

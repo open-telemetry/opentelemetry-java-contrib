@@ -34,7 +34,6 @@ develocity {
 
 rootProject.name = "opentelemetry-java-contrib"
 
-include(":all")
 include(":aws-resources")
 include(":aws-xray")
 include(":aws-xray-propagator")
@@ -45,7 +44,6 @@ include(":cloudfoundry-resources")
 include(":consistent-sampling")
 include(":dependencyManagement")
 include(":disk-buffering")
-include(":example")
 include(":ibm-mq-metrics")
 include(":jfr-events")
 include(":jfr-connection")

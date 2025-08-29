@@ -1,10 +1,6 @@
 name: CodeQL
 
 on:
-  push:
-    branches:
-      - main
-      - release/*
   pull_request:
     branches:
       - main
@@ -15,6 +11,10 @@ on:
   # - https://github.com/github/codeql-action/issues/1537
   # - https://github.com/github/codeql-action/issues/2691
   # merge_group:
+  push:
+    branches:
+      - main
+      - release/*
   schedule:
     - cron: "29 13 * * 2"  # weekly at 13:29 UTC on Tuesday
 
@@ -40,7 +40,7 @@ jobs:
 
       - name: Set up Java 17
         if: matrix.language == 'java'
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: temurin
           java-version: 17
@@ -50,7 +50,7 @@ jobs:
         uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@96f518a34f7a870018057716cc4d7a5c014bd61c # v3.29.10
+        uses: github/codeql-action/init@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
         with:
           languages: ${{ matrix.language }}
           # using "linked" helps to keep up with the latest Kotlin support
@@ -65,6 +65,6 @@ jobs:
         run: ./gradlew assemble --no-build-cache --no-daemon
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@96f518a34f7a870018057716cc4d7a5c014bd61c # v3.29.10
+        uses: github/codeql-action/analyze@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
         with:
           category: "/language:${{matrix.language}}"
