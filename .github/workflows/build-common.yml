@@ -102,6 +102,10 @@ jobs:
           "-PmaxTestRetries=${{ inputs.max-test-retries }}"
           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
 
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
+
   integration-test:
     runs-on: ubuntu-latest
     steps:
@@ -120,6 +124,10 @@ jobs:
 
       - name: Integration test
         run: ./gradlew integrationTest "-PmaxTestRetries=${{ inputs.max-test-retries }}" ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
 
       - name: Save integration test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

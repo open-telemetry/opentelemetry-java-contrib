@@ -29,6 +29,12 @@ develocity {
     publishing.onlyIf { System.getenv("CI") != null }
     termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
     termsOfUseAgree.set("yes")
+
+    buildScanPublished {
+      File("build-scan.txt").printWriter().use { writer ->
+        writer.println(buildScanUri)
+      }
+    }
   }
 }
 
