@@ -62,7 +62,8 @@ abstract class GetSamplingRulesResponse {
         @JsonProperty("ServiceName") String serviceName,
         @JsonProperty("ServiceType") String serviceType,
         @JsonProperty("URLPath") String urlPath,
-        @JsonProperty("Version") int version) {
+        @JsonProperty("Version") int version,
+        @JsonProperty("SamplingRateBoost") @Nullable SamplingRateBoost samplingRateBoost) {
       return new AutoValue_GetSamplingRulesResponse_SamplingRule(
           attributes,
           fixedRate,
@@ -76,7 +77,8 @@ abstract class GetSamplingRulesResponse {
           serviceName,
           serviceType,
           urlPath,
-          version);
+          version,
+          samplingRateBoost);
     }
 
     abstract Map<String, String> getAttributes();
@@ -106,5 +108,23 @@ abstract class GetSamplingRulesResponse {
     abstract String getUrlPath();
 
     abstract int getVersion();
+
+    @Nullable
+    abstract SamplingRateBoost getSamplingRateBoost();
+  }
+
+  @AutoValue
+  abstract static class SamplingRateBoost {
+    @JsonCreator
+    static SamplingRateBoost create(
+        @JsonProperty("MaxRate") double maxRate,
+        @JsonProperty("CooldownWindowMinutes") long cooldownWindowMinutes) {
+      return new AutoValue_GetSamplingRulesResponse_SamplingRateBoost(
+          maxRate, cooldownWindowMinutes);
+    }
+
+    abstract double getMaxRate();
+
+    abstract long getCooldownWindowMinutes();
   }
 }
