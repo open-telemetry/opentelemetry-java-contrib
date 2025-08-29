@@ -44,7 +44,7 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
 
   @Container
   GenericContainer<?> kafka =
-      new GenericContainer<>("bitnami/kafka:2.8.1")
+      new GenericContainer<>("bitnamilegacy/kafka:2.8.1")
           .withNetwork(Network.SHARED)
           .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
           .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
