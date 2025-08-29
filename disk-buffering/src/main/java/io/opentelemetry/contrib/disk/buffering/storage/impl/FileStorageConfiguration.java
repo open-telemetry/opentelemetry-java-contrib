@@ -3,21 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.config;
+package io.opentelemetry.contrib.disk.buffering.storage.impl;
 
 import com.google.auto.value.AutoValue;
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /** Defines how the storage should be managed. */
 @AutoValue
-public abstract class StorageConfiguration {
-
-  /** The root storage location for buffered telemetry. */
-  public abstract File getRootDir();
-
-  /** Returns true if the storage has been configured with debug verbosity enabled. */
-  public abstract boolean isDebugEnabled();
+public abstract class FileStorageConfiguration {
 
   /** The max amount of time a file can receive new data. */
   public abstract long getMaxFileAgeForWriteMillis();
@@ -48,18 +41,17 @@ public abstract class StorageConfiguration {
    */
   public abstract int getMaxFolderSize();
 
-  public static StorageConfiguration getDefault(File rootDir) {
-    return builder().setRootDir(rootDir).build();
+  public static FileStorageConfiguration getDefault() {
+    return builder().build();
   }
 
   public static Builder builder() {
-    return new AutoValue_StorageConfiguration.Builder()
+    return new AutoValue_FileStorageConfiguration.Builder()
         .setMaxFileSize(1024 * 1024) // 1MB
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(33))
-        .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18))
-        .setDebugEnabled(false);
+        .setMaxFileAgeForReadMillis(TimeUnit.HOURS.toMillis(18));
   }
 
   @AutoValue.Builder
@@ -74,10 +66,16 @@ public abstract class StorageConfiguration {
 
     public abstract Builder setMaxFolderSize(int value);
 
-    public abstract Builder setRootDir(File rootDir);
+    abstract FileStorageConfiguration autoBuild();
 
-    public abstract Builder setDebugEnabled(boolean debugEnabled);
-
-    public abstract StorageConfiguration build();
+    public final FileStorageConfiguration build() {
+      FileStorageConfiguration configuration = autoBuild();
+      if (configuration.getMinFileAgeForReadMillis()
+          <= configuration.getMaxFileAgeForWriteMillis()) {
+        throw new IllegalArgumentException(
+            "The configured max file age for writing must be lower than the configured min file age for reading");
+      }
+      return configuration;
+    }
   }
 }
