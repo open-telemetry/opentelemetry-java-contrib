@@ -12,4 +12,8 @@ public class DeserializationException extends IOException {
   public DeserializationException(Throwable cause) {
     super(cause);
   }
+
+  public DeserializationException(String message) {
+    super(message);
+  }
 }

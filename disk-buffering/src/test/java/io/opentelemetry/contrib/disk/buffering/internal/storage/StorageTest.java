@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 class StorageTest {
+  private static final boolean DEBUG_ENABLED = false;
   private FolderManager folderManager;
   private Storage storage;
   private Function<byte[], ProcessResult> processing;
@@ -46,7 +47,7 @@ class StorageTest {
     writableFile = createWritableFile();
     processing = mock();
     when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
-    storage = new Storage(folderManager, true);
+    storage = new Storage(folderManager, DEBUG_ENABLED);
   }
 
   @AfterEach

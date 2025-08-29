@@ -38,7 +38,7 @@ class FromDiskExporterImplTest {
   private SpanExporter wrapped;
   private SignalDeserializer<SpanData> deserializer;
   private Clock clock;
-  private FromDiskExporterImpl<SpanData> exporter;
+  private FromDiskExporterImpl exporter;
   private final List<SpanData> deserializedData = Collections.emptyList();
   @TempDir File rootDir;
   private static final String STORAGE_FOLDER_NAME = SignalTypes.spans.name();
@@ -51,9 +51,8 @@ class FromDiskExporterImplTest {
     wrapped = mock();
     exporter =
         FromDiskExporterImpl.<SpanData>builder(
-                TestData.getStorage(rootDir, SignalTypes.spans, clock))
-            .setDeserializer(deserializer)
-            .setExportFunction(wrapped::export)
+                TestData.getStorage(rootDir, SignalTypes.spans, clock), SignalTypes.spans)
+            .setExportFunction(wrapped::export, deserializer)
             .build();
   }
 
@@ -104,6 +103,7 @@ class FromDiskExporterImplTest {
   private void setUpSerializer() throws DeserializationException {
     deserializer = mock();
     when(deserializer.deserialize(any())).thenReturn(deserializedData);
+    when(deserializer.signalType()).thenReturn(SignalTypes.spans.name());
   }
 
   private static Clock createClockMock() {
