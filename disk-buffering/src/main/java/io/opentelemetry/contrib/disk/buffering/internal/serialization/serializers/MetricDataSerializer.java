@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
-public class MetricDataSerializer implements SignalSerializer<MetricData> {
+public final class MetricDataSerializer implements SignalSerializer<MetricData> {
 
   private final LowAllocationMetricsRequestMarshaler marshaler =
       new LowAllocationMetricsRequestMarshaler();

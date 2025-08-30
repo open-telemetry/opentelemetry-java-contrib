@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class WritableFile implements FileOperations {
+public final class WritableFile implements FileOperations {
 
   private final File file;
 

@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader;
 
-public class ReadResult {
+public final class ReadResult {
   /** The consumable data. */
   public final byte[] content;
 

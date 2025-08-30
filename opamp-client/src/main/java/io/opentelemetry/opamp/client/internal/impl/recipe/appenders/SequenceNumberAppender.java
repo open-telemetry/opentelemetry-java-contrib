@@ -12,7 +12,7 @@ import opamp.proto.AgentToServer;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class SequenceNumberAppender implements AgentToServerAppender {
+public final class SequenceNumberAppender implements AgentToServerAppender {
   private final Supplier<Long> sequenceNumber;
 
   public static SequenceNumberAppender create(Supplier<Long> sequenceNumber) {

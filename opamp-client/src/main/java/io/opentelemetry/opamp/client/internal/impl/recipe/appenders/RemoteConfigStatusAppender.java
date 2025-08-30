@@ -13,7 +13,7 @@ import opamp.proto.RemoteConfigStatus;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class RemoteConfigStatusAppender implements AgentToServerAppender {
+public final class RemoteConfigStatusAppender implements AgentToServerAppender {
   private final Supplier<RemoteConfigStatus> remoteConfigStatus;
 
   public static RemoteConfigStatusAppender create(Supplier<RemoteConfigStatus> remoteConfigStatus) {

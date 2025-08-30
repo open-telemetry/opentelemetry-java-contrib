@@ -13,7 +13,7 @@ import io.micrometer.core.instrument.Tag;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public class Constants {
+public final class Constants {
   public static final String OTEL_INSTRUMENTATION_NAME = "otel.instrumentation.name";
   public static final String OTEL_INSTRUMENTATION_VERSION = "otel.instrumentation.version";
   public static final Tag UNKNOWN_INSTRUMENTATION_VERSION_TAG =

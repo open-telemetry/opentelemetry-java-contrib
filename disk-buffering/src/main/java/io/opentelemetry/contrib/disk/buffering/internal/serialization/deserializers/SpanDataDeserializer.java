@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
 import java.util.List;
 
-public class SpanDataDeserializer implements SignalDeserializer<SpanData> {
+public final class SpanDataDeserializer implements SignalDeserializer<SpanData> {
   private static final SpanDataDeserializer INSTANCE = new SpanDataDeserializer();
 
   private SpanDataDeserializer() {}

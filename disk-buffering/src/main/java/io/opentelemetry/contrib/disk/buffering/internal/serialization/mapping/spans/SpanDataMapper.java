@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
-public class SpanDataMapper {
+public final class SpanDataMapper {
 
   private static final SpanDataMapper INSTANCE = new SpanDataMapper();
 

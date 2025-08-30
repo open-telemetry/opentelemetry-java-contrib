@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class ToDiskExporterBuilder<T> {
+public final class ToDiskExporterBuilder<T> {
 
   private SignalSerializer<T> serializer = new NoopSerializer<T>();
 

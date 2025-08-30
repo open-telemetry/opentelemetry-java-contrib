@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public class MemoizingSupplier<T> implements Supplier<T> {
+public final class MemoizingSupplier<T> implements Supplier<T> {
   private final Supplier<T> delegate;
   private volatile boolean initialized;
   @Nullable private volatile T cachedResult;
