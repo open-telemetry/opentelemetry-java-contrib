@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 import io.opentelemetry.contrib.disk.buffering.SignalType;
 import javax.annotation.Nullable;
 
-class NoopExporterCallback implements ExporterCallback {
+final class NoopExporterCallback implements ExporterCallback {
   static final NoopExporterCallback INSTANCE = new NoopExporterCallback();
 
   private NoopExporterCallback() {}

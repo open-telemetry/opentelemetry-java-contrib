@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
-class SignalStorageExporter<T> {
+final class SignalStorageExporter<T> {
   private final SignalStorage<T> storage;
   private final ExporterCallback callback;
   private final Duration writeTimeout;
