@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
 import java.util.List;
 
-public class LogRecordDataDeserializer implements SignalDeserializer<LogRecordData> {
+public final class LogRecordDataDeserializer implements SignalDeserializer<LogRecordData> {
   private static final LogRecordDataDeserializer INSTANCE = new LogRecordDataDeserializer();
 
   private LogRecordDataDeserializer() {}

@@ -15,7 +15,7 @@ import io.opentelemetry.proto.common.v1.KeyValue;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttributesMapper {
+public final class AttributesMapper {
 
   private static final AttributesMapper INSTANCE = new AttributesMapper();
 

@@ -34,7 +34,7 @@ import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
-public class HttpRequestService implements RequestService {
+public final class HttpRequestService implements RequestService {
   private final HttpSender requestSender;
   // must be a single threaded executor, the code in this class relies on requests being processed
   // serially

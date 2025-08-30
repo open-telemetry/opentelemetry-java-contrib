@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProtoMetricsDataMapper
+public final class ProtoMetricsDataMapper
     extends BaseProtoSignalsDataMapper<
         MetricData, Metric, ExportMetricsServiceRequest, ResourceMetrics, ScopeMetrics> {
 

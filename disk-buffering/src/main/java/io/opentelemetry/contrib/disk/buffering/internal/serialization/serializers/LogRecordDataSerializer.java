@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
-public class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
+public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
 
   private final LowAllocationLogsRequestMarshaler marshaler =
       new LowAllocationLogsRequestMarshaler();

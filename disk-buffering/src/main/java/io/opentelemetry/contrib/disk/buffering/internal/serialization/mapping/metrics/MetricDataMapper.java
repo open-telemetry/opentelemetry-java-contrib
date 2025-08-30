@@ -64,7 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
-public class MetricDataMapper {
+public final class MetricDataMapper {
 
   private static final MetricDataMapper INSTANCE = new MetricDataMapper();
 

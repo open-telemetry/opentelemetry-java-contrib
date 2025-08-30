@@ -29,7 +29,7 @@ import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
-public class WebSocketRequestService implements RequestService, WebSocket.Listener {
+public final class WebSocketRequestService implements RequestService, WebSocket.Listener {
   private static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       RetryPeriodicDelay.create(Duration.ofSeconds(30));
 

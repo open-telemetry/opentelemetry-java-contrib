@@ -18,7 +18,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
 
-public class OkHttpSender implements HttpSender {
+public final class OkHttpSender implements HttpSender {
   private final OkHttpClient client;
   private final String url;
 

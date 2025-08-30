@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class RetryAfterParser {
+public final class RetryAfterParser {
   private final SystemTime systemTime;
   private static final Pattern SECONDS_PATTERN = Pattern.compile("\\d+");
   private static final Pattern DATE_PATTERN =

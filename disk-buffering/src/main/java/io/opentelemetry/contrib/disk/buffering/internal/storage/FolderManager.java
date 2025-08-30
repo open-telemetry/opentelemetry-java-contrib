@@ -18,7 +18,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
-public class FolderManager implements Closeable {
+public final class FolderManager implements Closeable {
   private final File folder;
   private final Clock clock;
   private final StorageConfiguration configuration;

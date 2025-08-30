@@ -23,7 +23,7 @@ import java.util.Map;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class AgentToServerAppenders {
+public final class AgentToServerAppenders {
   public final AgentDescriptionAppender agentDescriptionAppender;
   public final EffectiveConfigAppender effectiveConfigAppender;
   public final RemoteConfigStatusAppender remoteConfigStatusAppender;

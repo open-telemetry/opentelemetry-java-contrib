@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Signal-type generic class that can read telemetry previously buffered on disk and send it to
  * another delegated exporter.
  */
-public class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter {
+public final class FromDiskExporterImpl<EXPORT_DATA> implements FromDiskExporter {
   private final DebugLogger logger;
   private final Storage storage;
   private final SignalDeserializer<EXPORT_DATA> deserializer;

@@ -16,7 +16,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigurablePropagatorProvider;
  * AwsXrayLambdaPropagator} with the propagator name {@code xray-lambda}.
  */
 @AutoService(ConfigurablePropagatorProvider.class)
-public class AwsXrayLambdaConfigurablePropagator implements ConfigurablePropagatorProvider {
+public final class AwsXrayLambdaConfigurablePropagator implements ConfigurablePropagatorProvider {
   @Override
   public TextMapPropagator getPropagator(ConfigProperties config) {
     return AwsXrayLambdaPropagator.getInstance();

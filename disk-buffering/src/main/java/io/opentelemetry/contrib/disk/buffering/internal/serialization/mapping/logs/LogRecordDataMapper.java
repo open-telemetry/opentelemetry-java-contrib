@@ -25,7 +25,7 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.stream.Collectors;
 
-public class LogRecordDataMapper {
+public final class LogRecordDataMapper {
 
   private static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();
 
