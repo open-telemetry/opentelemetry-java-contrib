@@ -13,8 +13,8 @@ import java.util.function.Predicate;
 
 public class FilteringLogRecordProcessor implements LogRecordProcessor {
 
-  private final LogRecordProcessor delegate;
-  private final Predicate<LogRecordData> predicate;
+  public final LogRecordProcessor delegate;
+  public final Predicate<LogRecordData> predicate;
 
   public FilteringLogRecordProcessor(
       LogRecordProcessor delegate, Predicate<LogRecordData> predicate) {
