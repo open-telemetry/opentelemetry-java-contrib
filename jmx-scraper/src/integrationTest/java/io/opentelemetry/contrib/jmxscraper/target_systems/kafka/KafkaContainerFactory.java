@@ -12,7 +12,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 public class KafkaContainerFactory {
   private static final int KAFKA_PORT = 9092;
   private static final String KAFKA_BROKER = "kafka:" + KAFKA_PORT;
-  private static final String KAFKA_DOCKER_IMAGE = "bitnami/kafka:2.8.1";
+  private static final String KAFKA_DOCKER_IMAGE = "bitnamilegacy/kafka:2.8.1";
 
   private KafkaContainerFactory() {}
 

@@ -202,5 +202,15 @@
       depNameTemplate: 'java',
       extractVersionTemplate: '^(?<version>\\d+)',
     },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'github-releases',
+      managerFilePatterns: [
+        '**/build.gradle.kts',
+      ],
+      matchStrings: [
+        '"https://github.com/(?<depName>[^/]+/[^/]+)/zipball/(?<currentValue>.+?)"',
+      ],
+    },
   ],
 }
