@@ -26,7 +26,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("com.google.auto.service:auto-service")
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testRuntimeOnly("org.bouncycastle:bcpkix-jdk15on")

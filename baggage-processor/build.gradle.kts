@@ -15,7 +15,6 @@ dependencies {
   compileOnly("com.google.auto.service:auto-service")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 
-  testImplementation("com.google.auto.service:auto-service")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.mockito:mockito-inline")
