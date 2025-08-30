@@ -1,2 +1,0 @@
-io.opentelemetry.contrib.awsxray.propagator.internal.AwsConfigurablePropagator
-io.opentelemetry.contrib.awsxray.propagator.internal.AwsXrayLambdaConfigurablePropagator

@@ -65,6 +65,7 @@ import java.util.logging.Logger;
 public class GCPResourceProvider implements ConditionalResourceProvider {
 
   private static final Logger LOGGER = Logger.getLogger(GCPResourceProvider.class.getSimpleName());
+
   private final GCPPlatformDetector detector;
 
   // for testing only

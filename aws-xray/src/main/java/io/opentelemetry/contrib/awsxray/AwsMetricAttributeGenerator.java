@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.api.common.AttributeKey.longKey;
+import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_BUCKET_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_OPERATION;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_LOCAL_SERVICE;
@@ -16,6 +18,7 @@ import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_SPAN_KIND;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_STREAM_NAME;
 import static io.opentelemetry.contrib.awsxray.AwsAttributeKeys.AWS_TABLE_NAME;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static java.util.logging.Level.FINEST;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -27,7 +30,6 @@ import io.opentelemetry.semconv.ServiceAttributes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,36 +56,31 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
   private static final String UNKNOWN_REMOTE_OPERATION = "UnknownRemoteOperation";
 
   // copied from DbIncubatingAttributes
-  private static final AttributeKey<String> DB_OPERATION = AttributeKey.stringKey("db.operation");
-  private static final AttributeKey<String> DB_SYSTEM = AttributeKey.stringKey("db.system");
+  private static final AttributeKey<String> DB_OPERATION = stringKey("db.operation");
+  private static final AttributeKey<String> DB_SYSTEM = stringKey("db.system");
   // copied from FaasIncubatingAttributes
-  private static final AttributeKey<String> FAAS_INVOKED_NAME =
-      AttributeKey.stringKey("faas.invoked_name");
-  private static final AttributeKey<String> FAAS_TRIGGER = AttributeKey.stringKey("faas.trigger");
+  private static final AttributeKey<String> FAAS_INVOKED_NAME = stringKey("faas.invoked_name");
+  private static final AttributeKey<String> FAAS_TRIGGER = stringKey("faas.trigger");
   // copied from GraphqlIncubatingAttributes
   private static final AttributeKey<String> GRAPHQL_OPERATION_TYPE =
-      AttributeKey.stringKey("graphql.operation.type");
+      stringKey("graphql.operation.type");
   // copied from HttpIncubatingAttributes
-  private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
-  private static final AttributeKey<String> HTTP_TARGET = AttributeKey.stringKey("http.target");
-  private static final AttributeKey<String> HTTP_URL = AttributeKey.stringKey("http.url");
+  private static final AttributeKey<String> HTTP_METHOD = stringKey("http.method");
+  private static final AttributeKey<String> HTTP_TARGET = stringKey("http.target");
+  private static final AttributeKey<String> HTTP_URL = stringKey("http.url");
   // copied from MessagingIncubatingAttributes
-  private static final AttributeKey<String> MESSAGING_OPERATION =
-      AttributeKey.stringKey("messaging.operation");
-  private static final AttributeKey<String> MESSAGING_SYSTEM =
-      AttributeKey.stringKey("messaging.system");
+  private static final AttributeKey<String> MESSAGING_OPERATION = stringKey("messaging.operation");
+  private static final AttributeKey<String> MESSAGING_SYSTEM = stringKey("messaging.system");
   // copied from NetIncubatingAttributes
-  private static final AttributeKey<String> NET_PEER_NAME = AttributeKey.stringKey("net.peer.name");
-  private static final AttributeKey<Long> NET_PEER_PORT = AttributeKey.longKey("net.peer.port");
-  private static final AttributeKey<String> NET_SOCK_PEER_ADDR =
-      AttributeKey.stringKey("net.sock.peer.addr");
-  private static final AttributeKey<Long> NET_SOCK_PEER_PORT =
-      AttributeKey.longKey("net.sock.peer.port");
+  private static final AttributeKey<String> NET_PEER_NAME = stringKey("net.peer.name");
+  private static final AttributeKey<Long> NET_PEER_PORT = longKey("net.peer.port");
+  private static final AttributeKey<String> NET_SOCK_PEER_ADDR = stringKey("net.sock.peer.addr");
+  private static final AttributeKey<Long> NET_SOCK_PEER_PORT = longKey("net.sock.peer.port");
   // copied from PeerIncubatingAttributes
-  private static final AttributeKey<String> PEER_SERVICE = AttributeKey.stringKey("peer.service");
+  private static final AttributeKey<String> PEER_SERVICE = stringKey("peer.service");
   // copied from RpcIncubatingAttributes
-  private static final AttributeKey<String> RPC_METHOD = AttributeKey.stringKey("rpc.method");
-  private static final AttributeKey<String> RPC_SERVICE = AttributeKey.stringKey("rpc.service");
+  private static final AttributeKey<String> RPC_METHOD = stringKey("rpc.method");
+  private static final AttributeKey<String> RPC_SERVICE = stringKey("rpc.service");
 
   @Override
   public Attributes generateMetricAttributesFromSpan(SpanData span, Resource resource) {
@@ -307,7 +304,7 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
           remoteOperation = extractApiPathValue(url.getPath());
         }
       } catch (MalformedURLException e) {
-        logger.log(Level.FINEST, "invalid http.url attribute: ", httpUrl);
+        logger.log(FINEST, "invalid http.url attribute: ", httpUrl);
       }
     }
     if (isKeyPresent(span, HTTP_METHOD)) {
@@ -387,6 +384,6 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
     String[] params = {
       attributeKey.getKey(), span.getKind().name(), span.getSpanContext().getSpanId()
     };
-    logger.log(Level.FINEST, "No valid {0} value found for {1} span {2}", params);
+    logger.log(FINEST, "No valid {0} value found for {1} span {2}", params);
   }
 }

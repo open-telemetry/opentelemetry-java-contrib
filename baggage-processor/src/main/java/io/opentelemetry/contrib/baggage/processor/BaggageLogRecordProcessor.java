@@ -18,14 +18,6 @@ import java.util.function.Predicate;
  */
 public class BaggageLogRecordProcessor implements LogRecordProcessor {
 
-  /**
-   * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
-   * created log record.
-   */
-  public static BaggageLogRecordProcessor allowAllBaggageKeys() {
-    return new BaggageLogRecordProcessor(baggageKey -> true);
-  }
-
   private final Predicate<String> baggageKeyPredicate;
 
   /**
@@ -34,6 +26,14 @@ public class BaggageLogRecordProcessor implements LogRecordProcessor {
    */
   public BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate) {
     this.baggageKeyPredicate = baggageKeyPredicate;
+  }
+
+  /**
+   * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
+   * created log record.
+   */
+  public static BaggageLogRecordProcessor allowAllBaggageKeys() {
+    return new BaggageLogRecordProcessor(baggageKey -> true);
   }
 
   @Override

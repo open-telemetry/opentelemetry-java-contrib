@@ -12,6 +12,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPr
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.SERVICE_NAMESPACE;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
+import static java.util.logging.Level.WARNING;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -22,7 +23,6 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -65,7 +65,7 @@ public final class BeanstalkResource {
       parser.nextToken();
 
       if (!parser.isExpectedStartObjectToken()) {
-        logger.log(Level.WARNING, "Invalid Beanstalk config: ", configPath);
+        logger.log(WARNING, "Invalid Beanstalk config: ", configPath);
         return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
       }
 
@@ -87,7 +87,7 @@ public final class BeanstalkResource {
         }
       }
     } catch (IOException e) {
-      logger.log(Level.WARNING, "Could not parse Beanstalk config.", e);
+      logger.log(WARNING, "Could not parse Beanstalk config.", e);
       return Resource.empty();
     }
 

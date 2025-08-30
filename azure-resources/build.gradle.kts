@@ -5,8 +5,8 @@ plugins {
   id("maven-publish")
 }
 
-description = "OpenTelemetry GCP Resources Support"
-otelJava.moduleName.set("io.opentelemetry.contrib.gcp.resource")
+description = "OpenTelemetry Azure Resources Support"
+otelJava.moduleName.set("io.opentelemetry.contrib.azure.resource")
 
 // enable publishing to maven local
 java {
