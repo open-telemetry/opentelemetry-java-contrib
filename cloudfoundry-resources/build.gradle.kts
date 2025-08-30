@@ -9,7 +9,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.cloudfoundry.resources")
 
 dependencies {
   annotationProcessor("com.google.auto.service:auto-service")
-  compileOnly("com.google.auto.service:auto-service")
+  compileOnly("com.google.auto.service:auto-service-annotations")
 
   api("io.opentelemetry:opentelemetry-api")
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")

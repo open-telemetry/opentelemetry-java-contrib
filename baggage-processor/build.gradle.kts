@@ -12,7 +12,7 @@ dependencies {
 
   api("io.opentelemetry:opentelemetry-api")
   api("io.opentelemetry:opentelemetry-sdk")
-  compileOnly("com.google.auto.service:auto-service")
+  compileOnly("com.google.auto.service:auto-service-annotations")
   implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
