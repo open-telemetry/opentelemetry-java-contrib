@@ -18,7 +18,7 @@ import java.util.Collection;
  * This class implements a SpanExporter that delegates to an instance of {@code
  * ToDiskExporter<SpanData>}.
  */
-public final class SpanToDiskExporter implements SpanExporter {
+public class SpanToDiskExporter implements SpanExporter {
 
   private final ToDiskExporter<SpanData> delegate;
 

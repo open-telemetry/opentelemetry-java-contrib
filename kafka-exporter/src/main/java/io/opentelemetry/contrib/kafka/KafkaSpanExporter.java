@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 @ThreadSafe
 @SuppressWarnings("FutureReturnValueIgnored")
-public final class KafkaSpanExporter implements SpanExporter {
+public class KafkaSpanExporter implements SpanExporter {
   private static final Logger logger = LoggerFactory.getLogger(KafkaSpanExporter.class);
   private final String topicName;
   private final Producer<String, Collection<SpanData>> producer;

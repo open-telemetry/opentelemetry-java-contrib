@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public final class LogRecordFromDiskExporter implements FromDiskExporter {
+public class LogRecordFromDiskExporter implements FromDiskExporter {
 
   private final FromDiskExporterImpl<LogRecordData> delegate;
 

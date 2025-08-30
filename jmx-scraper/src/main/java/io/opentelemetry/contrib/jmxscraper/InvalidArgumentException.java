@@ -9,7 +9,7 @@ package io.opentelemetry.contrib.jmxscraper;
  * Exception indicating something is wrong with the provided arguments or reading the configuration
  * from them
  */
-public final class InvalidArgumentException extends Exception {
+public class InvalidArgumentException extends Exception {
 
   private static final long serialVersionUID = 0L;
 

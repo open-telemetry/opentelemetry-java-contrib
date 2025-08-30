@@ -19,7 +19,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AzureFunctionsResourceProvider extends CloudResourceProvider {
+public class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
   static final String FUNCTIONS_VERSION = "FUNCTIONS_EXTENSION_VERSION";
   private static final String FUNCTIONS_MEM_LIMIT = "WEBSITE_MEMORY_LIMIT_MB";

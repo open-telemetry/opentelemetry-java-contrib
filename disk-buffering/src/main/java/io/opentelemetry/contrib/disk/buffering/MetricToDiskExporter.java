@@ -21,7 +21,7 @@ import java.util.Collection;
  * This class implements a {@link MetricExporter} that delegates to an instance of {@code
  * ToDiskExporter<MetricData>}.
  */
-public final class MetricToDiskExporter implements MetricExporter {
+public class MetricToDiskExporter implements MetricExporter {
 
   private final ToDiskExporter<MetricData> delegate;
   private final AggregationTemporalitySelector aggregationTemporalitySelector;

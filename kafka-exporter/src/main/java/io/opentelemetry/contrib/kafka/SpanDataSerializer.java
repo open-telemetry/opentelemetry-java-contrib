@@ -20,7 +20,7 @@ import java.util.Objects;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
 
-public final class SpanDataSerializer implements Serializer<Collection<SpanData>> {
+public class SpanDataSerializer implements Serializer<Collection<SpanData>> {
   @Override
   public byte[] serialize(String topic, Collection<SpanData> data) {
     if (Objects.isNull(data)) {

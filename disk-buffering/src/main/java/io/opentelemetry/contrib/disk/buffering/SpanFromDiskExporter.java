@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public final class SpanFromDiskExporter implements FromDiskExporter {
+public class SpanFromDiskExporter implements FromDiskExporter {
 
   private final FromDiskExporterImpl<SpanData> delegate;
 

@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Predicate;
 
-public final class StackTraceSpanProcessor implements ExtendedSpanProcessor {
+public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
 
   private final long minSpanDurationNanos;
 

@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.function.Supplier;
 
 /** Configuration supplier for java properties */
-public final class PropertiesSupplier implements Supplier<Map<String, String>> {
+public class PropertiesSupplier implements Supplier<Map<String, String>> {
 
   private final Properties properties;
 

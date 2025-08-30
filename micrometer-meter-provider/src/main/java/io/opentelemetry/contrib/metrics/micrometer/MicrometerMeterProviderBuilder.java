@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /** Builder utility class for creating instances of {@link MicrometerMeterProvider}. */
-public final class MicrometerMeterProviderBuilder {
+public class MicrometerMeterProviderBuilder {
   private final Supplier<MeterRegistry> meterRegistrySupplier;
   @Nullable private CallbackRegistrar callbackRegistrar;
 

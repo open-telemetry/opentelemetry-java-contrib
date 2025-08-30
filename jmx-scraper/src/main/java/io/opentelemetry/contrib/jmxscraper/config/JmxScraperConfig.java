@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /** This class keeps application settings */
-public final class JmxScraperConfig {
+public class JmxScraperConfig {
 
   private static final Logger logger = Logger.getLogger(JmxScraperConfig.class.getName());
 

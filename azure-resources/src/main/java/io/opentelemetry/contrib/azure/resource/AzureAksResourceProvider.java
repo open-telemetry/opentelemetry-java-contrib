@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class AzureAksResourceProvider extends CloudResourceProvider {
+public class AzureAksResourceProvider extends CloudResourceProvider {
 
   private static final Map<String, AzureVmResourceProvider.Entry> COMPUTE_MAPPING = new HashMap<>();
 
