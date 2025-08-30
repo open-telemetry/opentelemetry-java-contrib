@@ -10,7 +10,7 @@ package io.opentelemetry.contrib.gcp.auth;
  * thrown when there are issues with retrieving or refreshing Google Application Default Credentials
  * (ADC).
  */
-public final class GoogleAuthException extends RuntimeException {
+public class GoogleAuthException extends RuntimeException {
 
   private static final long serialVersionUID = 149908685226796448L;
 

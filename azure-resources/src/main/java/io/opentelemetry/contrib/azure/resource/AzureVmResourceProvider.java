@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
-public final class AzureVmResourceProvider extends CloudResourceProvider {
+public class AzureVmResourceProvider extends CloudResourceProvider {
 
   private static final Map<String, Entry> COMPUTE_MAPPING = new HashMap<>();
 

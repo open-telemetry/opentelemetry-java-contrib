@@ -16,7 +16,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AzureContainersResourceProvider extends CloudResourceProvider {
+public class AzureContainersResourceProvider extends CloudResourceProvider {
 
   static final String CONTAINER_APP_NAME = "CONTAINER_APP_NAME";
 

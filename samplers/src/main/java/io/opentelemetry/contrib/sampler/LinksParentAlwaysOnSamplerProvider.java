@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 @AutoService(ConfigurableSamplerProvider.class)
-public final class LinksParentAlwaysOnSamplerProvider implements ConfigurableSamplerProvider {
+public class LinksParentAlwaysOnSamplerProvider implements ConfigurableSamplerProvider {
   @Override
   public Sampler createSampler(ConfigProperties config) {
     return LinksBasedSampler.create(Sampler.parentBased(Sampler.alwaysOn()));

@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
-public final class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
+public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
     autoConfigurationCustomizer

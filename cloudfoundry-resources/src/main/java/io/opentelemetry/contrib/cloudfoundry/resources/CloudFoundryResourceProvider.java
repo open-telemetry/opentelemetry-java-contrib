@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
 @AutoService(ResourceProvider.class)
-public final class CloudFoundryResourceProvider implements ResourceProvider {
+public class CloudFoundryResourceProvider implements ResourceProvider {
 
   @Override
   public Resource createResource(ConfigProperties configProperties) {

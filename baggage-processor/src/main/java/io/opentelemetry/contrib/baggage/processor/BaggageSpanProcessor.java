@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  * This span processor copies attributes stored in {@link Baggage} into each newly created {@link
  * io.opentelemetry.api.trace.Span}.
  */
-public final class BaggageSpanProcessor implements SpanProcessor {
+public class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
