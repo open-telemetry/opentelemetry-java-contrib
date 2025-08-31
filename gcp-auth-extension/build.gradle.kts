@@ -103,6 +103,9 @@ tasks.register<Copy>("copyAgent") {
 }
 
 tasks.register<Test>("IntegrationTestUserCreds") {
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 
