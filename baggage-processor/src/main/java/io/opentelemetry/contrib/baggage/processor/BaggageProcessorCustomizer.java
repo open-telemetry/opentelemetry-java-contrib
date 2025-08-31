@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
-import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -13,7 +12,6 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
 
-@AutoService(AutoConfigurationCustomizerProvider.class)
 public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
