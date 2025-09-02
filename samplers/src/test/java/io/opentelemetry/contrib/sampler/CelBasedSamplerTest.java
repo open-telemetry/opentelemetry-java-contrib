@@ -41,23 +41,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CelBasedSamplerTest {
-  private static final String SPAN_NAME = "MySpanName";
-  private static final SpanKind SPAN_KIND = SpanKind.SERVER;
+final class CelBasedSamplerTest {
+
   private final IdGenerator idsGenerator = IdGenerator.random();
   private final String traceId = idsGenerator.generateTraceId();
   private final String parentSpanId = idsGenerator.generateSpanId();
   private final SpanContext sampledSpanContext =
       SpanContext.create(traceId, parentSpanId, TraceFlags.getSampled(), TraceState.getDefault());
   private final Context parentContext = Context.root().with(Span.wrap(sampledSpanContext));
-
   private final List<CelBasedSamplingExpression> expressions = new ArrayList<>();
 
   @Mock(strictness = Mock.Strictness.LENIENT)
   private Sampler delegate;
 
   @BeforeEach
-  public void setup() throws CelValidationException {
+  void setup() throws CelValidationException {
     when(delegate.shouldSample(any(), any(), any(), any(), any(), any()))
         .thenReturn(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
 
@@ -66,7 +64,7 @@ class CelBasedSamplerTest {
             CelBasedSampler.celCompiler
                 .compile(
                     "spanKind == 'SERVER' && attribute[\""
-                        + URL_FULL
+                        + URL_FULL.getKey()
                         + "\"].matches(\"/actuator\")")
                 .getAst(),
             Sampler.alwaysOff()));
@@ -75,14 +73,14 @@ class CelBasedSamplerTest {
             CelBasedSampler.celCompiler
                 .compile(
                     "spanKind == 'SERVER' && attribute[\""
-                        + URL_FULL
+                        + URL_FULL.getKey()
                         + "\"].matches(\".*/healthcheck\")")
                 .getAst(),
             Sampler.alwaysOff()));
   }
 
   @Test
-  public void testThatThrowsOnNullParameter() {
+  void testThatThrowsOnNullParameter() {
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(() -> new CelBasedSampler(expressions, null));
 
@@ -100,33 +98,37 @@ class CelBasedSamplerTest {
   }
 
   @Test
-  public void testThatDelegatesIfNoExpressionGiven() {
+  void testThatDelegatesIfNoExpressionGiven() {
     CelBasedSampler sampler = CelBasedSampler.builder(delegate).build();
 
     // no http.url attribute
     Attributes attributes = Attributes.empty();
-    sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    sampler.shouldSample(
+        parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
     verify(delegate)
-        .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+        .shouldSample(
+            parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
 
     clearInvocations(delegate);
 
     // with http.url attribute
     attributes = Attributes.of(URL_FULL, "https://example.com");
-    sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    sampler.shouldSample(
+        parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
     verify(delegate)
-        .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+        .shouldSample(
+            parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
   }
 
   @Test
-  public void testDropOnExactMatch() throws CelValidationException {
+  void testDropOnExactMatch() throws CelValidationException {
     CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
 
   @Test
-  public void testDelegateOnDifferentKind() throws CelValidationException {
+  void testDelegateOnDifferentKind() throws CelValidationException {
     CelBasedSampler sampler =
         addRules(CelBasedSampler.builder(delegate), SpanKind.CLIENT.name()).build();
     assertThat(shouldSample(sampler, "https://example.com/healthcheck").getDecision())
@@ -135,7 +137,7 @@ class CelBasedSamplerTest {
   }
 
   @Test
-  public void testDelegateOnNoMatch() throws CelValidationException {
+  void testDelegateOnNoMatch() throws CelValidationException {
     CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "https://example.com/customers").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
@@ -143,7 +145,7 @@ class CelBasedSamplerTest {
   }
 
   @Test
-  public void testDelegateOnMalformedUrl() throws CelValidationException {
+  void testDelegateOnMalformedUrl() throws CelValidationException {
     CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     assertThat(shouldSample(sampler, "abracadabra").getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
@@ -157,12 +159,13 @@ class CelBasedSamplerTest {
   }
 
   @Test
-  public void testVerifiesAllGivenAttributes() throws CelValidationException {
+  void testVerifiesAllGivenAttributes() throws CelValidationException {
     CelBasedSampler sampler = addRules(CelBasedSampler.builder(delegate)).build();
     Attributes attributes = Attributes.of(URL_PATH, "/actuator/info");
     assertThat(
             sampler
-                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .shouldSample(
+                    parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList())
                 .getDecision())
         .isEqualTo(SamplingDecision.DROP);
   }
@@ -177,12 +180,14 @@ class CelBasedSamplerTest {
             .build();
     assertThat(
             testSampler
-                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .shouldSample(
+                    parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList())
                 .getDecision())
         .isEqualTo(SamplingDecision.DROP);
     assertThat(
             testSampler
-                .shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList())
+                .shouldSample(
+                    parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList())
                 .getDecision())
         .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -201,7 +206,8 @@ class CelBasedSamplerTest {
     Attributes attributes = Attributes.of(THREAD_NAME, "Test worker");
     CelBasedSampler sampler = new CelBasedSampler(expressions, delegate);
     SamplingResult samplingResult =
-        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+        sampler.shouldSample(
+            parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
     assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
   }
 
@@ -222,14 +228,15 @@ class CelBasedSamplerTest {
             Arrays.asList("example.com", "example.org"));
     CelBasedSampler sampler = new CelBasedSampler(expressions, delegate);
     SamplingResult samplingResult =
-        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+        sampler.shouldSample(
+            parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
     assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
   }
 
   private SamplingResult shouldSample(Sampler sampler, String url) {
     Attributes attributes = Attributes.of(URL_FULL, url);
     return sampler.shouldSample(
-        parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+        parentContext, traceId, "MySpanName", SpanKind.SERVER, attributes, emptyList());
   }
 
   private static CelBasedSamplerBuilder addRules(CelBasedSamplerBuilder builder, String kind)
@@ -237,7 +244,7 @@ class CelBasedSamplerTest {
     return builder
         .drop(
             "attribute[\""
-                + URL_FULL
+                + URL_FULL.getKey()
                 + "\"].matches(\".*/healthcheck\") && spanKind == '"
                 + kind
                 + "'")
@@ -247,11 +254,11 @@ class CelBasedSamplerTest {
 
   private static CelBasedSamplerBuilder addRules(CelBasedSamplerBuilder builder)
       throws CelValidationException {
-    return addRules(builder, SPAN_KIND.name());
+    return addRules(builder, SpanKind.SERVER.name());
   }
 
   /** Silly sampler that alternates decisions for testing. */
-  private static class AlternatingSampler implements Sampler {
+  private static final class AlternatingSampler implements Sampler {
     private final AtomicBoolean switcher = new AtomicBoolean();
 
     @Override

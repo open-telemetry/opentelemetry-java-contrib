@@ -8,6 +8,7 @@ package internal;
 import static io.opentelemetry.sdk.trace.samplers.SamplingResult.recordAndSample;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 import dev.cel.common.CelValidationException;
 import io.opentelemetry.api.common.Attributes;
@@ -24,8 +25,7 @@ import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.HttpAttributes;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -38,54 +38,178 @@ class CelBasedSamplerComponentProviderTest {
   private static final CelBasedSamplerComponentProvider PROVIDER =
       new CelBasedSamplerComponentProvider();
 
-  @Test
-  void endToEnd() {
-    String yaml =
-        "file_format: 0.4\n"
-            + "tracer_provider:\n"
-            + "  sampler:\n"
-            + "    parent_based:\n"
-            + "      root:\n"
-            + "        cel_based:\n"
-            + "          fallback_sampler:\n"
-            + "            always_on:\n"
-            + "          expressions:\n"
-            + "            - action: DROP\n"
-            + "              expression: '\"example.com\" in attribute[\"http.response.header.host\"] && attribute[\"http.response.status_code\"] == 200'\n"
-            + "            - action: DROP\n"
-            + "              expression: spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")\n"
-            + "            - action: RECORD_AND_SAMPLE\n"
-            + "              expression: spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")\n";
-    OpenTelemetrySdk openTelemetrySdk =
-        DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-    Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
-    assertThat(sampler.toString())
-        .isEqualTo(
-            "ParentBased{"
-                + "root:CelBasedSampler{"
-                + "fallback=AlwaysOnSampler, "
-                + "expressions=["
-                + "CelBasedSamplingExpression{"
-                + "expression='\"example.com\" in attribute[\"http.response.header.host\"] && attribute[\"http.response.status_code\"] == 200', "
-                + "delegate=AlwaysOffSampler"
-                + "}, "
-                + "CelBasedSamplingExpression{"
-                + "expression='spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")', "
-                + "delegate=AlwaysOffSampler"
-                + "}, "
-                + "CelBasedSamplingExpression{"
-                + "expression='spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")', "
-                + "delegate=AlwaysOnSampler"
-                + "}"
-                + "]},"
-                + "remoteParentSampled:AlwaysOnSampler,"
-                + "remoteParentNotSampled:AlwaysOffSampler,"
-                + "localParentSampled:AlwaysOnSampler,"
-                + "localParentNotSampled:AlwaysOffSampler"
-                + "}");
+  private static InputStream loadResource(String resourcePath) {
+    return CelBasedSamplerComponentProviderTest.class.getResourceAsStream("/" + resourcePath);
+  }
 
-    // SERVER span to other path should be recorded and sampled
+  @Test
+  void shouldCreateSamplerFromYamlConfiguration() {
+    // Load YAML configuration from resource file
+    InputStream configStream = loadResource("cel-sampler-config.yaml");
+
+    OpenTelemetrySdk openTelemetrySdk = DeclarativeConfiguration.parseAndCreate(configStream);
+    Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
+
+    // Create expected sampler for comparison
+    CelBasedSampler expectedSampler;
+    try {
+      expectedSampler =
+          CelBasedSampler.builder(Sampler.alwaysOn())
+              .drop(
+                  "\"example.com\" in attribute[\"http.response.header.host\"] && attribute[\"http.response.status_code\"] == 200")
+              .drop("spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")")
+              .recordAndSample(
+                  "spanKind == \"SERVER\" && attribute[\"url.path\"].matches(\"/actuator.*\")")
+              .build();
+    } catch (CelValidationException e) {
+      throw new RuntimeException("Failed to create expected sampler", e);
+    }
+
+    // Verify that the sampler behaves correctly with actual sampling calls
+    verifySamplerBehavior(sampler);
+
+    Sampler expectedParentBasedSampler = Sampler.parentBasedBuilder(expectedSampler).build();
+    // Verify that the sampler configuration matches the expected configuration
+    verifySamplerEquality(sampler, expectedParentBasedSampler);
+  }
+
+  static void verifySamplerEqualityForValidTests(CelBasedSampler actual, CelBasedSampler expected) {
+    // Compare descriptions which contain the configuration details
+    assertThat(actual.getDescription()).isEqualTo(expected.getDescription());
+
+    // Test with various scenarios to ensure behavior equivalence
+    Context context = Context.root();
+    String traceId = IdGenerator.random().generateTraceId();
+
+    // Test scenario 1: CLIENT span kind for drop test
+    Attributes clientAttrs = Attributes.builder().put("url.path", "/test").build();
+
+    assertThat(
+            actual.shouldSample(
+                context,
+                traceId,
+                "GET /test",
+                SpanKind.CLIENT,
+                clientAttrs,
+                Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context,
+                traceId,
+                "GET /test",
+                SpanKind.CLIENT,
+                clientAttrs,
+                Collections.emptyList()));
+
+    // Test scenario 2: SERVER span with specific path for record test
+    Attributes serverAttrs = Attributes.builder().put("url.path", "/v1/user").build();
+
+    assertThat(
+            actual.shouldSample(
+                context,
+                traceId,
+                "GET /v1/user",
+                SpanKind.SERVER,
+                serverAttrs,
+                Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context,
+                traceId,
+                "GET /v1/user",
+                SpanKind.SERVER,
+                serverAttrs,
+                Collections.emptyList()));
+
+    // Test scenario 3: Multiple expressions test with GET method
+    Attributes multiAttrs =
+        Attributes.builder().put("http.request.method", "GET").put("url.path", "/foo/bar").build();
+
+    assertThat(
+            actual.shouldSample(
+                context,
+                traceId,
+                "GET /foo/bar",
+                SpanKind.SERVER,
+                multiAttrs,
+                Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context,
+                traceId,
+                "GET /foo/bar",
+                SpanKind.SERVER,
+                multiAttrs,
+                Collections.emptyList()));
+  }
+
+  static void verifySamplerEquality(Sampler actual, Sampler expected) {
+    // Compare descriptions which contain the configuration details
+    assertThat(actual.getDescription()).isEqualTo(expected.getDescription());
+
+    // Test with various scenarios to ensure behavior equivalence
+    Context context = Context.root();
+    String traceId = IdGenerator.random().generateTraceId();
+
+    // Test scenario 1: Should drop due to host header and status code
+    Attributes attrs1 =
+        Attributes.builder()
+            .put(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, 200)
+            .put(
+                HttpAttributes.HTTP_RESPONSE_HEADER.getAttributeKey("host"),
+                new String[] {"example.com"})
+            .build();
+
+    assertThat(
+            actual.shouldSample(
+                context, traceId, "GET /test", SpanKind.SERVER, attrs1, Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context, traceId, "GET /test", SpanKind.SERVER, attrs1, Collections.emptyList()));
+
+    // Test scenario 2: Should drop due to actuator path
+    Attributes attrs2 = Attributes.builder().put("url.path", "/actuator/health").build();
+
+    assertThat(
+            actual.shouldSample(
+                context,
+                traceId,
+                "GET /actuator/health",
+                SpanKind.SERVER,
+                attrs2,
+                Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context,
+                traceId,
+                "GET /actuator/health",
+                SpanKind.SERVER,
+                attrs2,
+                Collections.emptyList()));
+
+    // Test scenario 3: Should record and sample for regular paths
+    Attributes attrs3 = Attributes.builder().put("url.path", "/v1/users").build();
+
+    assertThat(
+            actual.shouldSample(
+                context,
+                traceId,
+                "GET /v1/users",
+                SpanKind.SERVER,
+                attrs3,
+                Collections.emptyList()))
+        .isEqualTo(
+            expected.shouldSample(
+                context,
+                traceId,
+                "GET /v1/users",
+                SpanKind.SERVER,
+                attrs3,
+                Collections.emptyList()));
+  }
+
+  static void verifySamplerBehavior(Sampler sampler) {
+    // SERVER span matching host and status code should be dropped
     assertThat(
             sampler.shouldSample(
                 Context.root(),
@@ -101,7 +225,7 @@ class CelBasedSamplerComponentProviderTest {
                 Collections.emptyList()))
         .isEqualTo(SamplingResult.drop());
 
-    // SERVER span to /actuator.* path should be dropped. This is the first expression that matches.
+    // SERVER span to /actuator.* path should be dropped (first matching expression)
     assertThat(
             sampler.shouldSample(
                 Context.root(),
@@ -130,7 +254,7 @@ class CelBasedSamplerComponentProviderTest {
       try {
         builder.drop(expression);
       } catch (CelValidationException e) {
-        // Delegate to the provider to handle the exception
+        fail();
       }
     }
     return builder.build();
@@ -142,47 +266,37 @@ class CelBasedSamplerComponentProviderTest {
       try {
         builder.recordAndSample(expression);
       } catch (CelValidationException e) {
-        // Delegate to the provider to handle the exception
+        fail();
       }
     }
     return builder.build();
   }
 
   @ParameterizedTest
-  @MethodSource("createValidArgs")
-  void create_Valid(String yaml, CelBasedSampler expectedSampler) {
+  @MethodSource("validSamplerConfigurations")
+  void shouldCreateValidSamplerConfigurations(
+      InputStream yamlStream, CelBasedSampler expectedSampler) {
     DeclarativeConfigProperties configProperties =
-        DeclarativeConfiguration.toConfigProperties(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+        DeclarativeConfiguration.toConfigProperties(yamlStream);
 
     Sampler sampler = PROVIDER.create(configProperties);
-    assertThat(sampler.toString()).isEqualTo(expectedSampler.toString());
+    assertThat(sampler).isInstanceOf(CelBasedSampler.class);
+
+    CelBasedSampler actualSampler = (CelBasedSampler) sampler;
+
+    verifySamplerEqualityForValidTests(actualSampler, expectedSampler);
   }
 
-  static Stream<Arguments> createValidArgs() {
+  static Stream<Arguments> validSamplerConfigurations() {
     return Stream.of(
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_on:\n"
-                + "expressions:\n"
-                + "  - action: DROP\n"
-                + "    expression: 'spanKind == \"CLIENT\"'\n",
+            loadResource("valid/drop-client-spans.yaml"),
             dropSampler(Sampler.alwaysOn(), "spanKind == \"CLIENT\"")),
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_off:\n"
-                + "expressions:\n"
-                + "  - action: RECORD_AND_SAMPLE\n"
-                + "    expression: 'attribute[\"url.path\"] == \"/v1/user\"'\n",
+            loadResource("valid/record-specific-path.yaml"),
             recordAndSampleSampler(Sampler.alwaysOff(), "attribute[\"url.path\"] == \"/v1/user\"")),
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_off:\n"
-                + "expressions:\n"
-                + "  - action: DROP\n"
-                + "    expression: 'attribute[\"http.request.method\"] == \"GET\"'\n"
-                + "  - action: DROP\n"
-                + "    expression: 'attribute[\"url.path\"] == \"/foo/bar\"'\n",
+            loadResource("valid/multiple-drop-expressions.yaml"),
             dropSampler(
                 Sampler.alwaysOff(),
                 "attribute[\"http.request.method\"] == \"GET\"",
@@ -190,57 +304,61 @@ class CelBasedSamplerComponentProviderTest {
   }
 
   @ParameterizedTest
-  @MethodSource("createInvalidArgs")
-  void create_Invalid(String yaml, String expectedErrorMessage) {
+  @MethodSource("inValidSamplerConfigurations")
+  void shouldFailWithAnInValidSamplerConfigurations(
+      InputStream yamlStream, String expectedErrorMessage) {
     DeclarativeConfigProperties configProperties =
-        DeclarativeConfiguration.toConfigProperties(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+        DeclarativeConfiguration.toConfigProperties(yamlStream);
 
     assertThatThrownBy(() -> PROVIDER.create(configProperties))
         .isInstanceOf(DeclarativeConfigException.class)
         .hasMessage(expectedErrorMessage);
   }
 
-  static Stream<Arguments> createInvalidArgs() {
+  static Stream<Arguments> inValidSamplerConfigurations() {
     return Stream.of(
         Arguments.of(
-            "expressions:\n" + "  - action: DROP\n" + "    expression: 'spanKind == \"CLIENT\"'\n",
+            loadResource("invalid/missing-fallback-sampler.yaml"),
             "cel_based sampler .fallback_sampler is required but is null"),
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  foo:\n"
-                + "expressions:\n"
-                + "  - action: DROP\n"
-                + "    expression: 'spanKind == \"CLIENT\"'\n",
+            loadResource("invalid/invalid-fallback-sampler.yaml"),
             "cel_based sampler failed to create .fallback_sampler sampler"),
         Arguments.of(
-            "fallback_sampler:\n" + "  always_on: {}\n",
+            loadResource("invalid/missing-expressions.yaml"),
             "cel_based sampler .expressions is required"),
         Arguments.of(
-            "fallback_sampler:\n" + "  always_on: {}\n" + "expressions: []\n",
+            loadResource("invalid/empty-expressions.yaml"),
             "cel_based sampler .expressions is required"),
         Arguments.of(
-            "fallback_sampler:\n" + "  always_on: {}\n" + "expressions:\n" + "  - action: DROP\n",
+            loadResource("invalid/missing-expression.yaml"),
             "cel_based sampler .expressions[].expression is required"),
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_on: {}\n"
-                + "expressions:\n"
-                + "  - expression: 'spanKind == \"CLIENT\"'\n",
+            loadResource("invalid/missing-action.yaml"),
             "cel_based sampler .expressions[].action is required"),
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_on: {}\n"
-                + "expressions:\n"
-                + "  - action: INVALID\n"
-                + "    expression: 'spanKind == \"CLIENT\"'\n",
-            "cel_based sampler .expressions[].action must be RECORD_AND_SAMPLE or DROP"),
+            loadResource("invalid/invalid-action.yaml"),
+            "cel_based sampler .expressions[].action must be RECORD_AND_SAMPLE or DROP"));
+  }
+
+  @ParameterizedTest
+  @MethodSource("inValidExpressionSamplerConfigurations")
+  void shouldFailWithAnInValidExpressionSamplerConfigurations(
+      InputStream yamlStream, String expectedErrorMessage) {
+    DeclarativeConfigProperties configProperties =
+        DeclarativeConfiguration.toConfigProperties(yamlStream);
+
+    assertThatThrownBy(() -> PROVIDER.create(configProperties))
+        .isInstanceOf(DeclarativeConfigException.class)
+        .hasMessageMatching(expectedErrorMessage);
+  }
+
+  static Stream<Arguments> inValidExpressionSamplerConfigurations() {
+    return Stream.of(
         Arguments.of(
-            "fallback_sampler:\n"
-                + "  always_on: {}\n"
-                + "expressions:\n"
-                + "  - action: DROP\n"
-                + "    expression: 'invalid cel expression!'\n",
-            "Failed to compile CEL expression: invalid cel expression!"));
+            loadResource("invalid/empty-expression-value.yaml"),
+            "Failed to compile CEL expression: ''\\. CEL error: ERROR: <input>:1:1: mismatched input '<EOF>' expecting(?s).*"),
+        Arguments.of(
+            loadResource("invalid/invalid-cel-expression.yaml"),
+            "Failed to compile CEL expression: 'invalid cel expression!'\\. CEL error: ERROR: <input>:1:9: mismatched input 'cel' expecting(?s).*"));
   }
 }

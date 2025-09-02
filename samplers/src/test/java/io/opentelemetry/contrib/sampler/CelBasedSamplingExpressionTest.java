@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.sampler;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import dev.cel.common.CelAbstractSyntaxTree;
@@ -16,31 +15,12 @@ import dev.cel.compiler.CelCompilerFactory;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.Test;
 
-class CelBasedSamplingExpressionTest {
-
-  static final String expression = "1 == 1";
-
-  private static CelBasedSamplingExpression createCelBasedSamplingExpression(
-      String expression, Sampler sampler) throws CelValidationException {
-    CelAbstractSyntaxTree ast =
-        CelCompilerFactory.standardCelCompilerBuilder().build().compile(expression).getAst();
-    return new CelBasedSamplingExpression(ast, sampler);
-  }
-
-  private static CelBasedSamplingExpression createCelBasedSamplingExpression(String expression)
-      throws CelValidationException {
-    return createCelBasedSamplingExpression(expression, Sampler.alwaysOn());
-  }
-
-  private static CelBasedSamplingExpression createCelBasedSamplingExpression()
-      throws CelValidationException {
-    return createCelBasedSamplingExpression(expression);
-  }
+final class CelBasedSamplingExpressionTest {
 
   @Test
-  public void testThatThrowsOnNullParameter() throws CelValidationException {
+  void testThatThrowsOnNullParameter() throws CelValidationException {
     CelAbstractSyntaxTree ast =
-        CelCompilerFactory.standardCelCompilerBuilder().build().compile(expression).getAst();
+        CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst();
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(() -> new CelBasedSamplingExpression(ast, null));
 
@@ -50,37 +30,60 @@ class CelBasedSamplingExpressionTest {
 
   @Test
   void testToString() throws CelValidationException {
-    CelBasedSamplingExpression celExpression = createCelBasedSamplingExpression();
-    String expected =
-        "CelBasedSamplingExpression{expression='" + expression + "', delegate=AlwaysOnSampler}";
+    CelAbstractSyntaxTree ast =
+        CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst();
+    CelBasedSamplingExpression celExpression =
+        new CelBasedSamplingExpression(ast, Sampler.alwaysOn());
+    String expected = "CelBasedSamplingExpression{expression='1 == 1', delegate=AlwaysOnSampler}";
     assertEquals(expected, celExpression.toString());
   }
 
   @Test
   void testEquals() throws CelValidationException {
-    CelBasedSamplingExpression celExpression1 = createCelBasedSamplingExpression();
+    CelBasedSamplingExpression celExpressionOneEqualsOne1 =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
+            Sampler.alwaysOn());
 
-    assertEquals(celExpression1, celExpression1);
-    assertFalse(celExpression1.equals(null));
+    assertEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOne1);
+    assertNotEquals(celExpressionOneEqualsOne1, null);
 
-    CelBasedSamplingExpression celExpression2 = createCelBasedSamplingExpression();
+    CelBasedSamplingExpression celExpressionOneEqualsOne2 =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
+            Sampler.alwaysOn());
 
-    assertEquals(celExpression1, celExpression2);
+    assertEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOne2);
 
-    assertNotEquals(celExpression1, createCelBasedSamplingExpression("2 == 2"));
-    assertNotEquals(
-        celExpression1, createCelBasedSamplingExpression(expression, Sampler.alwaysOff()));
+    CelBasedSamplingExpression celExpressionTwoEqualsTwo =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("2 == 2").getAst(),
+            Sampler.alwaysOn());
+
+    assertNotEquals(celExpressionOneEqualsOne1, celExpressionTwoEqualsTwo);
+
+    CelBasedSamplingExpression celExpressionOneEqualsOneSamplerOff =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
+            Sampler.alwaysOff());
+    assertNotEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOneSamplerOff);
   }
 
   @Test
   void testHashCode() throws CelValidationException {
-    CelBasedSamplingExpression celExpression1 = createCelBasedSamplingExpression();
+    CelBasedSamplingExpression celExpression1 =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
+            Sampler.alwaysOn());
     int expectedHashCode1 = celExpression1.hashCode();
     int expectedHashCode2 = celExpression1.hashCode();
 
     assertEquals(expectedHashCode1, expectedHashCode2);
 
-    CelBasedSamplingExpression celExpression2 = createCelBasedSamplingExpression();
+    CelBasedSamplingExpression celExpression2 =
+        new CelBasedSamplingExpression(
+            CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
+            Sampler.alwaysOn());
 
     assertEquals(expectedHashCode1, celExpression2.hashCode());
   }

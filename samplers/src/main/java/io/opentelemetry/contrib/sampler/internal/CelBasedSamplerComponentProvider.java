@@ -21,7 +21,7 @@ import java.util.List;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public class CelBasedSamplerComponentProvider implements ComponentProvider<Sampler> {
+public final class CelBasedSamplerComponentProvider implements ComponentProvider<Sampler> {
 
   private static final String ACTION_RECORD_AND_SAMPLE = "RECORD_AND_SAMPLE";
   private static final String ACTION_DROP = "DROP";
@@ -38,25 +38,12 @@ public class CelBasedSamplerComponentProvider implements ComponentProvider<Sampl
 
   @Override
   public Sampler create(DeclarativeConfigProperties config) {
-    DeclarativeConfigProperties fallbackModel = config.getStructured("fallback_sampler");
-    if (fallbackModel == null) {
-      throw new DeclarativeConfigException(
-          "cel_based sampler .fallback_sampler is required but is null");
-    }
-    Sampler fallbackSampler;
-    try {
-      fallbackSampler = DeclarativeConfiguration.createSampler(fallbackModel);
-    } catch (DeclarativeConfigException e) {
-      throw new DeclarativeConfigException(
-          "cel_based sampler failed to create .fallback_sampler sampler", e);
-    }
-
     List<DeclarativeConfigProperties> expressions = config.getStructuredList("expressions");
     if (expressions == null || expressions.isEmpty()) {
       throw new DeclarativeConfigException("cel_based sampler .expressions is required");
     }
 
-    CelBasedSamplerBuilder builder = CelBasedSampler.builder(fallbackSampler);
+    CelBasedSamplerBuilder builder = CelBasedSampler.builder(getFallbackSampler(config));
 
     for (DeclarativeConfigProperties expressionConfig : expressions) {
       String expression = expressionConfig.getString("expression");
@@ -83,9 +70,27 @@ public class CelBasedSamplerComponentProvider implements ComponentProvider<Sampl
                   + ACTION_DROP);
         }
       } catch (CelValidationException e) {
-        throw new DeclarativeConfigException("Failed to compile CEL expression: " + expression, e);
+        throw new DeclarativeConfigException(
+            "Failed to compile CEL expression: '" + expression + "'. CEL error: " + e.getMessage(),
+            e);
       }
     }
     return builder.build();
+  }
+
+  private static Sampler getFallbackSampler(DeclarativeConfigProperties config) {
+    DeclarativeConfigProperties fallbackModel = config.getStructured("fallback_sampler");
+    if (fallbackModel == null) {
+      throw new DeclarativeConfigException(
+          "cel_based sampler .fallback_sampler is required but is null");
+    }
+    Sampler fallbackSampler;
+    try {
+      fallbackSampler = DeclarativeConfiguration.createSampler(fallbackModel);
+    } catch (DeclarativeConfigException e) {
+      throw new DeclarativeConfigException(
+          "cel_based sampler failed to create .fallback_sampler sampler", e);
+    }
+    return fallbackSampler;
   }
 }

@@ -50,6 +50,7 @@ tracer_provider:
         rule_based_routing:
           # Fallback to the always_on sampler if the criteria is not met.
           fallback_sampler:
+            # A fallback must be specified.
             always_on:
           # Only apply to SERVER spans.
           span_kind: SERVER
@@ -77,6 +78,7 @@ Schema for `cel_based` sampler:
 fallback_sampler:
   always_on:
 # List of CEL expressions to evaluate. Expressions are evaluated in order.
+# The first expression that evaluates to true has its action taken, and subsequent expressions are not evaluated.
 expressions:
   # The action to take when the expression evaluates to true. Must be one of: DROP, RECORD_AND_SAMPLE.
   - action: DROP
