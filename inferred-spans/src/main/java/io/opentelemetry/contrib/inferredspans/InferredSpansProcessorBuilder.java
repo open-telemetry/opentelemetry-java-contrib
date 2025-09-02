@@ -71,8 +71,11 @@ public class InferredSpansProcessorBuilder {
             profilingDuration,
             profilerLibDirectory,
             parentOverrideHandler);
-    return new InferredSpansProcessor(
-        config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+    InferredSpansProcessor processor =
+        new InferredSpansProcessor(
+            config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+    InferredSpans.setInstance(processor);
+    return processor;
   }
 
   /**
