@@ -39,7 +39,7 @@ testing {
         implementation("org.slf4j:slf4j-simple")
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
         implementation("org.bouncycastle:bcprov-jdk18on:1.81")
         implementation("org.bouncycastle:bcpkix-jdk18on:1.81")
       }
