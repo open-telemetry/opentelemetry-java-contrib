@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.utils;
 
+import static java.util.logging.Level.INFO;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +24,7 @@ public class DebugLogger {
   }
 
   public void log(String msg) {
-    log(msg, Level.INFO);
+    log(msg, INFO);
   }
 
   public void log(String msg, Level level) {
