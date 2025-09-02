@@ -5,33 +5,41 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers;
 
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.spans.ProtoSpansDataMapper;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.ProtobufTools;
-import io.opentelemetry.proto.trace.v1.TracesData;
+import io.opentelemetry.exporter.internal.otlp.traces.LowAllocationTraceRequestMarshaler;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 
 public final class SpanDataSerializer implements SignalSerializer<SpanData> {
-  private static final SpanDataSerializer INSTANCE = new SpanDataSerializer();
 
-  private SpanDataSerializer() {}
+  private final LowAllocationTraceRequestMarshaler marshaler =
+      new LowAllocationTraceRequestMarshaler();
 
-  static SpanDataSerializer getInstance() {
-    return INSTANCE;
+  SpanDataSerializer() {}
+
+  @CanIgnoreReturnValue
+  @Override
+  public SpanDataSerializer initialize(Collection<SpanData> data) {
+    marshaler.initialize(data);
+    return this;
   }
 
   @Override
-  public byte[] serialize(Collection<SpanData> spanData) {
-    TracesData proto = ProtoSpansDataMapper.getInstance().toProto(spanData);
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      int size = TracesData.ADAPTER.encodedSize(proto);
-      ProtobufTools.writeRawVarint32(size, out);
-      proto.encode(out);
-      return out.toByteArray();
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+  public void writeBinaryTo(OutputStream output) throws IOException {
+    ProtobufTools.writeRawVarint32(marshaler.getBinarySerializedSize(), output);
+    marshaler.writeBinaryTo(output);
+  }
+
+  @Override
+  public int getBinarySerializedSize() {
+    return marshaler.getBinarySerializedSize();
+  }
+
+  @Override
+  public void reset() {
+    marshaler.reset();
   }
 }

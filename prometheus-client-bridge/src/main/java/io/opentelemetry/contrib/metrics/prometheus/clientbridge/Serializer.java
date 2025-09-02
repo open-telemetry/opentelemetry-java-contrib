@@ -21,11 +21,12 @@
 
 package io.opentelemetry.contrib.metrics.prometheus.clientbridge;
 
+import static java.util.Collections.emptyList;
+
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.PointData;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /** Serializes metrics into Prometheus exposition formats. */
@@ -71,7 +72,7 @@ class Serializer {
       case EXPONENTIAL_HISTOGRAM:
         return metricData.getExponentialHistogramData().getPoints();
     }
-    return Collections.emptyList();
+    return emptyList();
   }
 
   private Serializer() {}

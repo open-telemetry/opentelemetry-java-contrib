@@ -36,20 +36,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class AzureVmResourceProvider extends CloudResourceProvider {
 
-  static class Entry {
-    final AttributeKey<String> key;
-    final Function<String, String> transform;
-
-    Entry(AttributeKey<String> key) {
-      this(key, Function.identity());
-    }
-
-    Entry(AttributeKey<String> key, Function<String, String> transform) {
-      this.key = key;
-      this.transform = transform;
-    }
-  }
-
   private static final Map<String, Entry> COMPUTE_MAPPING = new HashMap<>();
 
   static {
@@ -159,6 +145,20 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
       throws IOException {
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       consumer.accept(parser.currentName(), parser.nextTextValue());
+    }
+  }
+
+  static class Entry {
+    final AttributeKey<String> key;
+    final Function<String, String> transform;
+
+    Entry(AttributeKey<String> key) {
+      this(key, Function.identity());
+    }
+
+    Entry(AttributeKey<String> key, Function<String, String> transform) {
+      this.key = key;
+      this.transform = transform;
     }
   }
 }

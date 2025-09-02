@@ -3,7 +3,7 @@ plugins {
 }
 
 val otelInstrumentationVersion = "2.19.0-alpha"
-val semconvVersion = "1.34.0"
+val semconvVersion = "1.37.0"
 
 javaPlatform {
   allowDependencies()
@@ -30,7 +30,7 @@ dependencies {
     api("com.google.errorprone:error_prone_annotations:2.41.0")
     api("com.google.errorprone:error_prone_core:2.41.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
-    api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+    api("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
     api("io.prometheus:simpleclient_common:0.16.0")
     api("io.prometheus:simpleclient_httpserver:0.16.0")

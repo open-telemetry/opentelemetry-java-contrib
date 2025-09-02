@@ -66,9 +66,22 @@ tasks {
   withType<Test>().configureEach {
     useJUnitPlatform()
 
+    val maxTestRetries = gradle.startParameter.projectProperties["maxTestRetries"]?.toInt() ?: 0
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      maxRetries.set(maxTestRetries)
+    }
+
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
+    }
+    
+    configure<JacocoTaskExtension> {
+      // only care about code coverage for code in this repository
+      // (in particular avoiding netty classes which sometimes end up
+      // causing sporadic CI failures)
+      includes = listOf("io/opentelemetry/contrib/**")
     }
   }
 
@@ -138,7 +151,7 @@ testing {
       implementation(enforcedPlatform("org.junit:junit-bom:5.13.4"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.1"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.2"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

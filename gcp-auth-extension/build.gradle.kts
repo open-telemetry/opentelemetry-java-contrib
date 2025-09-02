@@ -24,7 +24,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.37.1")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.38.0")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -42,7 +42,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
   testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
@@ -103,6 +103,9 @@ tasks.register<Copy>("copyAgent") {
 }
 
 tasks.register<Test>("IntegrationTestUserCreds") {
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 

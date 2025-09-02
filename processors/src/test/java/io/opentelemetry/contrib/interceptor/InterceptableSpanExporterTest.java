@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -51,12 +51,12 @@ class InterceptableSpanExporterTest {
     tracer.spanBuilder("Test span").setAttribute("local.attr", 10).startSpan().end();
 
     List<SpanData> finishedSpanItems = memorySpanExporter.getFinishedSpanItems();
-    assertEquals(1, finishedSpanItems.size());
+    assertThat(finishedSpanItems.size()).isEqualTo(1);
     SpanData spanData = finishedSpanItems.get(0);
-    assertEquals(2, spanData.getAttributes().size());
-    assertEquals(
-        "from interceptor", spanData.getAttributes().get(AttributeKey.stringKey("global.attr")));
-    assertEquals(10, spanData.getAttributes().get(AttributeKey.longKey("local.attr")));
+    assertThat(spanData.getAttributes().size()).isEqualTo(2);
+    assertThat(spanData.getAttributes().get(AttributeKey.stringKey("global.attr")))
+        .isEqualTo("from interceptor");
+    assertThat(spanData.getAttributes().get(AttributeKey.longKey("local.attr"))).isEqualTo(10L);
   }
 
   @Test
@@ -74,9 +74,9 @@ class InterceptableSpanExporterTest {
     tracer.spanBuilder("Another span").startSpan().end();
 
     List<SpanData> finishedSpanItems = memorySpanExporter.getFinishedSpanItems();
-    assertEquals(2, finishedSpanItems.size());
-    assertEquals("One span", finishedSpanItems.get(0).getName());
-    assertEquals("Another span", finishedSpanItems.get(1).getName());
+    assertThat(finishedSpanItems.size()).isEqualTo(2);
+    assertThat(finishedSpanItems.get(0).getName()).isEqualTo("One span");
+    assertThat(finishedSpanItems.get(1).getName()).isEqualTo("Another span");
   }
 
   private static class ModifiableSpanData extends DelegatingSpanData {

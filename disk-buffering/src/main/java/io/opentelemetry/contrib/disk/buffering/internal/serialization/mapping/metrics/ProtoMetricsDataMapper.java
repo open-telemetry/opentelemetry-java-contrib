@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common.BaseProtoSignalsDataMapper;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.metrics.v1.Metric;
-import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public final class ProtoMetricsDataMapper
     extends BaseProtoSignalsDataMapper<
-        MetricData, Metric, MetricsData, ResourceMetrics, ScopeMetrics> {
+        MetricData, Metric, ExportMetricsServiceRequest, ResourceMetrics, ScopeMetrics> {
 
   private static final ProtoMetricsDataMapper INSTANCE = new ProtoMetricsDataMapper();
 
@@ -39,12 +39,12 @@ public final class ProtoMetricsDataMapper
   }
 
   @Override
-  protected List<ResourceMetrics> getProtoResources(MetricsData protoData) {
+  protected List<ResourceMetrics> getProtoResources(ExportMetricsServiceRequest protoData) {
     return protoData.resource_metrics;
   }
 
   @Override
-  protected MetricsData createProtoData(
+  protected ExportMetricsServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Metric>>> itemsByResource) {
     List<ResourceMetrics> items = new ArrayList<>();
     itemsByResource.forEach(
@@ -58,7 +58,7 @@ public final class ProtoMetricsDataMapper
           }
           items.add(resourceMetricsBuilder.build());
         });
-    return new MetricsData.Builder().resource_metrics(items).build();
+    return new ExportMetricsServiceRequest.Builder().resource_metrics(items).build();
   }
 
   private ScopeMetrics.Builder createProtoScopeBuilder(InstrumentationScopeInfo scopeInfo) {

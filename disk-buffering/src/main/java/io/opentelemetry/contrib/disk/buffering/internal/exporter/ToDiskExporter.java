@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporter;
 
+import static java.util.logging.Level.FINER;
+import static java.util.logging.Level.WARNING;
+
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.internal.utils.DebugLogger;
@@ -12,7 +15,6 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ToDiskExporter<EXPORT_DATA> {
@@ -38,10 +40,11 @@ public class ToDiskExporter<EXPORT_DATA> {
     return new ToDiskExporterBuilder<>(storage);
   }
 
-  public CompletableResultCode export(Collection<EXPORT_DATA> data) {
-    logger.log("Intercepting exporter batch.", Level.FINER);
+  public synchronized CompletableResultCode export(Collection<EXPORT_DATA> data) {
+    logger.log("Intercepting exporter batch.", FINER);
     try {
-      if (storage.write(serializer.serialize(data))) {
+      serializer.initialize(data);
+      if (storage.write(serializer)) {
         return CompletableResultCode.ofSuccess();
       }
       logger.log("Could not store batch in disk. Exporting it right away.");
@@ -49,9 +52,11 @@ public class ToDiskExporter<EXPORT_DATA> {
     } catch (IOException e) {
       logger.log(
           "An unexpected error happened while attempting to write the data in disk. Exporting it right away.",
-          Level.WARNING,
+          WARNING,
           e);
       return exportFunction.apply(data);
+    } finally {
+      serializer.reset();
     }
   }
 

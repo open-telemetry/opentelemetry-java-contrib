@@ -25,6 +25,8 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static java.util.logging.Level.FINE;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +39,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -114,7 +115,7 @@ final class XraySamplerClient {
   private static String readResponse(Response response, String endpoint) throws IOException {
     if (!response.isSuccessful()) {
       logger.log(
-          Level.FINE,
+          FINE,
           "Error response from "
               + endpoint
               + " code ("

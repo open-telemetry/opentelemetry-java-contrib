@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -105,14 +106,12 @@ class ReadableFileTest {
   }
 
   private static void addFileContents(File source) throws IOException {
-    List<byte[]> items = new ArrayList<>();
-    items.add(SERIALIZER.serialize(Collections.singleton(FIRST_LOG_RECORD)));
-    items.add(SERIALIZER.serialize(Collections.singleton(SECOND_LOG_RECORD)));
-    items.add(SERIALIZER.serialize(Collections.singleton(THIRD_LOG_RECORD)));
-
     try (FileOutputStream out = new FileOutputStream(source)) {
-      for (byte[] item : items) {
-        out.write(item);
+      for (LogRecordData item :
+          Arrays.asList(FIRST_LOG_RECORD, SECOND_LOG_RECORD, THIRD_LOG_RECORD)) {
+        SERIALIZER.initialize(Collections.singleton(item));
+        SERIALIZER.writeBinaryTo(out);
+        SERIALIZER.reset();
       }
     }
   }
