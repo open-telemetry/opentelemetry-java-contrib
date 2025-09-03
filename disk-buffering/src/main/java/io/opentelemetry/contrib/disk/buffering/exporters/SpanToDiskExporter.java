@@ -17,7 +17,6 @@ import java.util.Collection;
 
 /** Exporter that stores spans into disk. */
 public final class SpanToDiskExporter implements SpanExporter {
-  private static final SignalType TYPE = SignalType.SPAN;
 
   private final SignalStorageExporter<SpanData> storageExporter;
   private final ExporterCallback<SpanData> callback;
