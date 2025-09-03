@@ -6,11 +6,7 @@ max_concurrency = 4
 # Check link anchors
 include_fragments = true
 
-# excluding links to pull requests and issues is done for performance
-# sonatype snapshots are currrently unbrowseable
 exclude = [
+  # excluding links to pull requests and issues is done for performance
   "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
-  '^https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/io/opentelemetry/contrib/$',
 ]
-
-

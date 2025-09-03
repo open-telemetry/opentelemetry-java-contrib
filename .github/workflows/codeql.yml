@@ -1,10 +1,6 @@
 name: CodeQL
 
 on:
-  push:
-    branches:
-      - main
-      - release/*
   pull_request:
     branches:
       - main
@@ -15,6 +11,10 @@ on:
   # - https://github.com/github/codeql-action/issues/1537
   # - https://github.com/github/codeql-action/issues/2691
   # merge_group:
+  push:
+    branches:
+      - main
+      - release/*
   schedule:
     - cron: "29 13 * * 2"  # weekly at 13:29 UTC on Tuesday
 

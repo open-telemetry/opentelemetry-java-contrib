@@ -5,11 +5,12 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static java.util.logging.Level.WARNING;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class DockerHelper {
@@ -44,9 +45,9 @@ class DockerHelper {
         }
       }
     } catch (FileNotFoundException e) {
-      logger.log(Level.WARNING, "Failed to read container id, cgroup file does not exist.");
+      logger.log(WARNING, "Failed to read container id, cgroup file does not exist.");
     } catch (IOException e) {
-      logger.log(Level.WARNING, "Unable to read container id: " + e.getMessage());
+      logger.log(WARNING, "Unable to read container id: " + e.getMessage());
     }
 
     return "";

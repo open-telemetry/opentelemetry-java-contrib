@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
@@ -13,7 +15,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
@@ -32,7 +33,7 @@ public final class SignalStorageExporter<T> {
   public CompletableResultCode exportToStorage(Collection<T> items) {
     CompletableFuture<WriteResult> future = storage.write(items);
     try {
-      WriteResult operation = future.get(writeTimeout.toMillis(), TimeUnit.MILLISECONDS);
+      WriteResult operation = future.get(writeTimeout.toMillis(), MILLISECONDS);
       if (operation.isSuccessful()) {
         callback.onExportSuccess(items);
         return CompletableResultCode.ofSuccess();
