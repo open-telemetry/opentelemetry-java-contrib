@@ -59,7 +59,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
-    // need to add before the batch span processor
+    // need to add before the batch log processor
     sdkLoggerProviderBuilder.addLogRecordProcessorFirst(createBaggageLogRecordProcessor(keys));
   }
 
