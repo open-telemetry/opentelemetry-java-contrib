@@ -37,7 +37,8 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
-    sdkTracerProviderBuilder.addSpanProcessor(createBaggageSpanProcessor(keys));
+    // need to add before the batch span processor
+    sdkTracerProviderBuilder.addSpanProcessorFirst(createBaggageSpanProcessor(keys));
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
@@ -56,7 +57,8 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
-    sdkLoggerProviderBuilder.addLogRecordProcessor(createBaggageLogRecordProcessor(keys));
+    // need to add before the batch span processor
+    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(createBaggageLogRecordProcessor(keys));
   }
 
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
