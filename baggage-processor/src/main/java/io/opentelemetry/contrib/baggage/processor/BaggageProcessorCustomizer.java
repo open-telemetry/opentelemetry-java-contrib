@@ -37,6 +37,7 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
+    // need to add before the batch span processor
     sdkTracerProviderBuilder.addSpanProcessorFirst(createBaggageSpanProcessor(keys));
   }
 
