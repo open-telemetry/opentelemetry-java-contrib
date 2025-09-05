@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.disk.buffering.exporters;
+package io.opentelemetry.contrib.disk.buffering.internal.exporters;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import io.opentelemetry.contrib.disk.buffering.SignalType;
+import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -18,18 +18,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
-final class SignalStorageExporter<T> {
+public final class SignalStorageExporter<T> {
   private final SignalStorage<T> storage;
-  private final ExporterCallback callback;
+  private final ExporterCallback<T> callback;
   private final Duration writeTimeout;
-  private final SignalType type;
 
   public SignalStorageExporter(
-      SignalStorage<T> storage, ExporterCallback callback, Duration writeTimeout, SignalType type) {
+      SignalStorage<T> storage, ExporterCallback<T> callback, Duration writeTimeout) {
     this.storage = storage;
     this.callback = callback;
     this.writeTimeout = writeTimeout;
-    this.type = type;
   }
 
   public CompletableResultCode exportToStorage(Collection<T> items) {
@@ -37,18 +35,18 @@ final class SignalStorageExporter<T> {
     try {
       WriteResult operation = future.get(writeTimeout.toMillis(), MILLISECONDS);
       if (operation.isSuccessful()) {
-        callback.onExportSuccess(type);
+        callback.onExportSuccess(items);
         return CompletableResultCode.ofSuccess();
       }
 
       Throwable error = operation.getError();
-      callback.onExportError(type, error);
+      callback.onExportError(items, error);
       if (error != null) {
         return CompletableResultCode.ofExceptionalFailure(error);
       }
       return CompletableResultCode.ofFailure();
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      callback.onExportError(type, e);
+      callback.onExportError(items, e);
       return CompletableResultCode.ofExceptionalFailure(e);
     }
   }
