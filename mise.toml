@@ -1,5 +1,5 @@
 [tools]
-lychee = "0.18.1"
+lychee = "0.20.1"
 
 [tasks.lint-local-links]
 run = 'lychee --verbose --scheme file --include-fragments {{arg(name="files", default=".")}}'
