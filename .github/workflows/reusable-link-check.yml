@@ -41,7 +41,7 @@ jobs:
         run: |
           merge_base=$(git merge-base origin/${{ github.base_ref }} HEAD)
           config_modified=$(git diff --name-only $merge_base...${{ github.event.pull_request.head.sha }} \
-                            | grep -E '\.github/scripts/(lychee-config\.toml|link-check\.sh|dependencies\.Dockerfile)$' || true)
+                            | grep -E '^(\.github/scripts/lychee-config\.toml|mise\.toml)$' || true)
           if [ -n "$config_modified" ]; then
             echo "modified=true" >> $GITHUB_OUTPUT
           else
