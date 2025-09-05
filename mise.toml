@@ -1,0 +1,11 @@
+[tools]
+lychee = "0.18.1"
+
+[tasks.lint-local-links]
+run = 'lychee --verbose --scheme file --include-fragments {{arg(name="files", default=".")}}'
+
+[tasks.lint-links]
+run = 'lychee --verbose --config .github/scripts/lychee-config.toml {{arg(name="files", default=".")}}'
+
+[settings]
+idiomatic_version_file_enable_tools = []
