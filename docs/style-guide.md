@@ -78,9 +78,9 @@ packages contain implementation details that should not be used by external cons
 
 ### `final` keyword usage
 
-Public non-internal classes should be declared `final` where possible.
+Public non-internal non-test classes should be declared `final` where possible.
 
-Methods should only be declared `final` if they are in public non-internal non-final classes.
+Methods should only be declared `final` if they are in public non-internal non-test non-final classes.
 
 Fields should be declared `final` where possible.
 
