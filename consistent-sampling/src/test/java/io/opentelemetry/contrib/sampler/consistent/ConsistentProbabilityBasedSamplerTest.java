@@ -25,7 +25,7 @@ import org.hipparchus.stat.inference.GTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ConsistentProbabilityBasedSamplerTest {
+class ConsistentProbabilityBasedSamplerTest {
 
   private Context parentContext;
   private String traceId;
@@ -72,7 +72,7 @@ public class ConsistentProbabilityBasedSamplerTest {
   }
 
   @Test
-  public void test() {
+  void test() {
 
     // fix seed to get reproducible results
     SplittableRandom random = new SplittableRandom(0);

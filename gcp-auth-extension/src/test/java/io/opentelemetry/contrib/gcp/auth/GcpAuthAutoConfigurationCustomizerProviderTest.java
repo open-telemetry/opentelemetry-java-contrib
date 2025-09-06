@@ -130,7 +130,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   // TODO: Use parameterized test for testing traces customizer for http & grpc.
   @Test
-  public void testTraceCustomizerOtlpHttp() {
+  void testTraceCustomizerOtlpHttp() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -192,7 +192,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  public void testTraceCustomizerOtlpGrpc() {
+  void testTraceCustomizerOtlpGrpc() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -246,7 +246,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   // TODO: Use parameterized test for testing metrics customizer for http & grpc.
   @Test
-  public void testMetricCustomizerOtlpHttp() {
+  void testMetricCustomizerOtlpHttp() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -307,7 +307,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  public void testMetricCustomizerOtlpGrpc() {
+  void testMetricCustomizerOtlpGrpc() {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -368,7 +368,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  public void testCustomizerFailWithMissingResourceProject() {
+  void testCustomizerFailWithMissingResourceProject() {
     System.setProperty(
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
     OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
@@ -387,7 +387,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @ParameterizedTest
   @MethodSource("provideQuotaBehaviorTestCases")
   @SuppressWarnings("CannotMockMethod")
-  public void testQuotaProjectBehavior(QuotaProjectIdTestBehavior testCase) throws IOException {
+  void testQuotaProjectBehavior(QuotaProjectIdTestBehavior testCase) throws IOException {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
@@ -461,7 +461,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
   @ParameterizedTest
   @MethodSource("provideTargetSignalBehaviorTestCases")
-  public void testTargetSignalsBehavior(TargetSignalBehavior testCase) {
+  void testTargetSignalsBehavior(TargetSignalBehavior testCase) {
     // Set resource project system property
     System.setProperty(
         ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
