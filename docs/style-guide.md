@@ -78,10 +78,9 @@ packages contain implementation details that should not be used by external cons
 
 ### `final` keyword usage
 
-Public non-internal classes should be declared `final` where possible. Internal and non-public
-classes should not be declared `final`.
+Public non-internal non-test classes should be declared `final` where possible.
 
-Methods should only be declared `final` if they are in public non-internal non-final classes.
+Methods should only be declared `final` if they are in public non-internal non-test non-final classes.
 
 Fields should be declared `final` where possible.
 
@@ -123,19 +122,6 @@ messages.
 Test classes and test methods should generally be package-protected (no explicit visibility
 modifier) rather than `public`. This follows the principle of minimal necessary visibility and is
 sufficient for JUnit to discover and execute tests.
-
-### AutoService
-
-Use the `@AutoService` annotation when implementing SPI interfaces. This automatically generates the
-necessary `META-INF/services/` files at compile time, eliminating the need to manually create and
-maintain service registration files.
-
-```java
-@AutoService(AutoConfigurationCustomizerProvider.class)
-public class MyCustomizerProvider implements AutoConfigurationCustomizerProvider {
-  // implementation
-}
-```
 
 ### Gradle
 
