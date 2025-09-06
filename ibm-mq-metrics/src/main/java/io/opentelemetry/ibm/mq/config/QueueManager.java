@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 /** This is a jackson databind class used purely for config. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QueueManager {
+public final class QueueManager {
 
   @Nullable private String host;
   private int port = -1;

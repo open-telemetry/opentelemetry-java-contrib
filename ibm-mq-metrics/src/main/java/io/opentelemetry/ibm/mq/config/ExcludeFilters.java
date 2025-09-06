@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** A jackson databind class used for config. */
-public class ExcludeFilters {
+public final class ExcludeFilters {
 
   private String type = "UNKNOWN";
   private Set<String> values = new HashSet<>();

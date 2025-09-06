@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WmqUtil {
+public final class WmqUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqUtil.class);
 
