@@ -173,13 +173,15 @@ jobs:
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-  merge-change-log-to-main:
+  post-release-updates:
     permissions:
       contents: write # for git push to PR branch
     runs-on: ubuntu-latest
     needs:
       - release
     steps:
+      # add change log sync (if any) into this PR since the apidiff update
+      # is required before any other PR can be merged anyway
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Copy change log section from release branch
@@ -201,6 +203,37 @@ jobs:
           release_date=$(gh release view v$VERSION --json publishedAt --jq .publishedAt | sed 's/T.*//')
           RELEASE_DATE=$release_date .github/scripts/merge-change-log-after-release.sh
 
+      - name: Wait for release to be available in maven central
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          until curl --silent \
+                     --show-error \
+                     --output /dev/null \
+                     --head \
+                     --fail \
+                      https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-aws-xray/$VERSION/opentelemetry-aws-xray-$VERSION.jar
+          do
+            sleep 60
+          done
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+
+      - name: Update apidiff baseline
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+          PRIOR_VERSION: ${{ needs.release.outputs.prior-version }}
+        run: |
+          ./gradlew japicmp -PapiBaseVersion=$PRIOR_VERSION -PapiNewVersion=$VERSION
+          ./gradlew --refresh-dependencies japicmp
+
       - name: Use CLA approved bot
         run: .github/scripts/use-cla-approved-bot.sh
 
@@ -216,22 +249,14 @@ jobs:
           # not using secrets.GITHUB_TOKEN since pull requests from that token do not run workflows
           GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
-          if git diff --quiet; then
-            if [[ $VERSION == *.0 ]]; then
-              echo there are no updates to merge, not creating pull request
-              exit 0 # success
-            else
-              echo patch release notes did not get applied for some reason
-              exit 1 # failure
-            fi
-          fi
-
-          message="Merge change log updates from $GITHUB_REF_NAME"
-          body="Merge log updates from \`$GITHUB_REF_NAME\`."
-          branch="otelbot/merge-change-log-updates-from-${GITHUB_REF_NAME//\//-}"
+          message="Post-release updates for $VERSION"
+          body="Post-release updates for `$VERSION`."
+          branch="otelbot/update-apidiff-baseline-to-released-version-${VERSION}"
 
           git checkout -b $branch
-          git commit -a -m "$message"
+          git add CHANGELOG.md
+          git add docs/apidiffs
+          git commit -m "$message"
           git push --set-upstream origin $branch
           gh pr create --title "$message" \
                        --body "$body" \
