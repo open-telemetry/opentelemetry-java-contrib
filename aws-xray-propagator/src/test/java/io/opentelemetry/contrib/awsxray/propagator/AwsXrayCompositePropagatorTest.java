@@ -15,7 +15,7 @@ import io.opentelemetry.context.propagation.TextMapPropagator;
 import java.util.LinkedHashMap;
 import org.junit.jupiter.api.Test;
 
-public class AwsXrayCompositePropagatorTest extends AwsXrayPropagatorTest {
+class AwsXrayCompositePropagatorTest extends AwsXrayPropagatorTest {
 
   @Override
   TextMapPropagator propagator() {

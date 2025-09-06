@@ -25,7 +25,7 @@ import org.hipparchus.stat.inference.BinomialTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ConsistentFixedThresholdSamplerTest {
+class ConsistentFixedThresholdSamplerTest {
 
   private Context parentContext;
   private String name;
@@ -75,7 +75,7 @@ public class ConsistentFixedThresholdSamplerTest {
   }
 
   @Test
-  public void testSampling() {
+  void testSampling() {
 
     // fix seed to get reproducible results
     SplittableRandom random = new SplittableRandom(0);
@@ -92,7 +92,7 @@ public class ConsistentFixedThresholdSamplerTest {
   }
 
   @Test
-  public void testDescription() {
+  void testDescription() {
     assertThat(ConsistentSampler.probabilityBased(1.0).getDescription())
         .isEqualTo("ConsistentFixedThresholdSampler{threshold=0, sampling probability=1.0}");
     assertThat(ConsistentSampler.probabilityBased(0.5).getDescription())

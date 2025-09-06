@@ -62,7 +62,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testPassthroughDelegations() {
+  void testPassthroughDelegations() {
     awsMetricAttributesSpanExporter.flush();
     awsMetricAttributesSpanExporter.shutdown();
     awsMetricAttributesSpanExporter.close();
@@ -72,7 +72,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegationWithoutAttributeOrModification() {
+  void testExportDelegationWithoutAttributeOrModification() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_NO_ATTRIBUTES);
     SpanData spanDataMock = buildSpanDataMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_NO_ATTRIBUTES);
@@ -88,7 +88,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegationWithAttributeButWithoutModification() {
+  void testExportDelegationWithAttributeButWithoutModification() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_ATTRIBUTES);
     SpanData spanDataMock = buildSpanDataMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_NO_ATTRIBUTES);
@@ -104,7 +104,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegationWithoutAttributeButWithModification() {
+  void testExportDelegationWithoutAttributeButWithModification() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_NO_ATTRIBUTES);
     SpanData spanDataMock = buildSpanDataMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);
@@ -124,7 +124,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegationWithAttributeAndModification() {
+  void testExportDelegationWithAttributeAndModification() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_ATTRIBUTES);
     SpanData spanDataMock = buildSpanDataMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);
@@ -146,7 +146,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegationWithMultipleSpans() {
+  void testExportDelegationWithMultipleSpans() {
     Attributes spanAttributes1 = buildSpanAttributes(CONTAINS_NO_ATTRIBUTES);
     SpanData spanDataMock1 = buildSpanDataMock(spanAttributes1);
     Attributes metricAttributes1 = buildMetricAttributes(CONTAINS_NO_ATTRIBUTES);
@@ -185,7 +185,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testOverridenAttributes() {
+  void testOverridenAttributes() {
     Attributes spanAttributes =
         Attributes.of(
             AttributeKey.stringKey("key1"),
@@ -217,7 +217,7 @@ class AwsMetricAttributesSpanExporterTest {
   }
 
   @Test
-  public void testExportDelegatingSpanDataBehaviour() {
+  void testExportDelegatingSpanDataBehaviour() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_ATTRIBUTES);
     SpanData spanDataMock = buildSpanDataMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);

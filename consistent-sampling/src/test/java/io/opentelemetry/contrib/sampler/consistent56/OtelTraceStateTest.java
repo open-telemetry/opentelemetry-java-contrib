@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-public class OtelTraceStateTest {
+class OtelTraceStateTest {
 
   private static String getXString(int len) {
     return Stream.generate(() -> "X").limit(len).collect(Collectors.joining());
   }
 
   @Test
-  public void test() {
+  void test() {
 
     assertEquals("", OtelTraceState.parse("").serialize());
     assertEquals("", OtelTraceState.parse("").serialize());

@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class PrometheusIntegrationTest {
+class PrometheusIntegrationTest {
   private static final AttributeKey<String> KEY1 = AttributeKey.stringKey("key1");
   private static final AttributeKey<String> KEY2 = AttributeKey.stringKey("key2");
   private static final String VALUE1 = "value1";

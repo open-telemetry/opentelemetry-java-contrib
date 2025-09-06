@@ -101,13 +101,13 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testIsRequired() {
+  void testIsRequired() {
     assertThat(awsSpanMetricsProcessor.isStartRequired()).isFalse();
     assertThat(awsSpanMetricsProcessor.isEndRequired()).isTrue();
   }
 
   @Test
-  public void testStartDoesNothingToSpan() {
+  void testStartDoesNothingToSpan() {
     Context parentContextMock = mock(Context.class);
     ReadWriteSpan spanMock = mock(ReadWriteSpan.class);
     awsSpanMetricsProcessor.onStart(parentContextMock, spanMock);
@@ -115,7 +115,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testTearDown() {
+  void testTearDown() {
     assertThat(awsSpanMetricsProcessor.shutdown()).isEqualTo(CompletableResultCode.ofSuccess());
     assertThat(awsSpanMetricsProcessor.forceFlush()).isEqualTo(CompletableResultCode.ofSuccess());
 
@@ -128,7 +128,7 @@ class AwsSpanMetricsProcessorTest {
    * AwsSpanMetricsProcessor's onEnd method pertaining to metrics generation.
    */
   @Test
-  public void testOnEndMetricsGenerationWithoutSpanAttributes() {
+  void testOnEndMetricsGenerationWithoutSpanAttributes() {
     Attributes spanAttributes = buildSpanAttributes(CONTAINS_NO_ATTRIBUTES);
     ReadableSpan readableSpanMock = buildReadableSpanMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);
@@ -141,7 +141,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testOnEndMetricsGenerationWithoutMetricAttributes() {
+  void testOnEndMetricsGenerationWithoutMetricAttributes() {
     Attributes spanAttributes = Attributes.of(HTTP_STATUS_CODE, 500L);
     ReadableSpan readableSpanMock = buildReadableSpanMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_NO_ATTRIBUTES);
@@ -154,7 +154,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testOnEndMetricsGenerationWithoutEndRequired() {
+  void testOnEndMetricsGenerationWithoutEndRequired() {
     Attributes spanAttributes = Attributes.of(HTTP_STATUS_CODE, 500L);
     ReadableSpan readableSpanMock = buildReadableSpanMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);
@@ -167,7 +167,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testOnEndMetricsGenerationWithLatency() {
+  void testOnEndMetricsGenerationWithLatency() {
     Attributes spanAttributes = Attributes.of(HTTP_STATUS_CODE, 200L);
     ReadableSpan readableSpanMock = buildReadableSpanMock(spanAttributes);
     Attributes metricAttributes = buildMetricAttributes(CONTAINS_ATTRIBUTES);
@@ -182,7 +182,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testOnEndMetricsGenerationWithAwsStatusCodes() {
+  void testOnEndMetricsGenerationWithAwsStatusCodes() {
     validateMetricsGeneratedForAwsStatusCode(399L, ExpectedStatusMetric.NEITHER);
     validateMetricsGeneratedForAwsStatusCode(400L, ExpectedStatusMetric.ERROR);
     validateMetricsGeneratedForAwsStatusCode(499L, ExpectedStatusMetric.ERROR);
@@ -192,7 +192,7 @@ class AwsSpanMetricsProcessorTest {
   }
 
   @Test
-  public void testOnEndMetricsGenerationWithStatusCodes() {
+  void testOnEndMetricsGenerationWithStatusCodes() {
     // Invalid HTTP status codes
     validateMetricsGeneratedForHttpStatusCode(null, ExpectedStatusMetric.NEITHER);
 

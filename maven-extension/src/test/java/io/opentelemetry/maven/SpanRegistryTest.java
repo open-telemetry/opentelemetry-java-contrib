@@ -12,11 +12,11 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import org.junit.jupiter.api.Test;
 
-public class SpanRegistryTest {
+class SpanRegistryTest {
 
   /** MVND reuses the same Maven process and thus the Span Registry is reused. */
   @Test
-  public void testSpanRegistryReuseWhenUsingMvnDaemon() {
+  void testSpanRegistryReuseWhenUsingMvnDaemon() {
     SpanRegistry spanRegistry = new SpanRegistry();
 
     Tracer tracer = OpenTelemetry.noop().getTracer("test");

@@ -28,7 +28,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class MicrometerLongHistogramTest {
+class MicrometerLongHistogramTest {
 
   SimpleMeterRegistry meterRegistry;
 

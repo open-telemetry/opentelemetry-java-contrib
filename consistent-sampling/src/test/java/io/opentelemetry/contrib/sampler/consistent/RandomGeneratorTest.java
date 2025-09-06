@@ -14,7 +14,7 @@ import java.util.stream.DoubleStream;
 import org.hipparchus.stat.inference.GTest;
 import org.junit.jupiter.api.Test;
 
-public class RandomGeneratorTest {
+class RandomGeneratorTest {
 
   private static void testGenerateRandomBitSet(long seed, int numBits, int numOneBits) {
 

@@ -41,7 +41,7 @@ class AttributePropagatingSpanProcessorTest {
   }
 
   @Test
-  public void testAttributesPropagation() {
+  void testAttributesPropagation() {
     Span spanWithAppOnly = tracer.spanBuilder("parent").startSpan();
     spanWithAppOnly.setAttribute(testKey1, "testValue1");
     validateSpanAttributesInheritance(spanWithAppOnly, null, "testValue1", null);
@@ -57,7 +57,7 @@ class AttributePropagatingSpanProcessorTest {
   }
 
   @Test
-  public void testOverrideAttributes() {
+  void testOverrideAttributes() {
     Span parentSpan = tracer.spanBuilder("parent").startSpan();
     parentSpan.setAttribute(testKey1, "testValue1");
     parentSpan.setAttribute(testKey2, "testValue2");
@@ -75,13 +75,13 @@ class AttributePropagatingSpanProcessorTest {
   }
 
   @Test
-  public void testAttributesDoNotExist() {
+  void testAttributesDoNotExist() {
     Span span = tracer.spanBuilder("parent").startSpan();
     validateSpanAttributesInheritance(span, null, null, null);
   }
 
   @Test
-  public void testSpanNamePropagationBySpanKind() {
+  void testSpanNamePropagationBySpanKind() {
     for (SpanKind value : SpanKind.values()) {
       Span span = tracer.spanBuilder("parent").setSpanKind(value).startSpan();
       if (value == SpanKind.SERVER || value == SpanKind.CONSUMER) {
@@ -93,7 +93,7 @@ class AttributePropagatingSpanProcessorTest {
   }
 
   @Test
-  public void testSpanNamePropagationWithRemoteParentSpan() {
+  void testSpanNamePropagationWithRemoteParentSpan() {
     Span remoteParent =
         Span.wrap(
             SpanContext.createFromRemoteParent(

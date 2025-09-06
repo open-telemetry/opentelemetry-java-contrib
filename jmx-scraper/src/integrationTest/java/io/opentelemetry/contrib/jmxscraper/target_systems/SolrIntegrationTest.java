@@ -18,7 +18,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class SolrIntegrationTest extends TargetSystemIntegrationTest {
+class SolrIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {

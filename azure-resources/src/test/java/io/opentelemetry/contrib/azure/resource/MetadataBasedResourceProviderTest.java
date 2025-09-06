@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public abstract class MetadataBasedResourceProviderTest {
+abstract class MetadataBasedResourceProviderTest {
   @RegisterExtension
   public static final MockWebServerExtension server = new MockWebServerExtension();
 
@@ -79,30 +79,30 @@ public abstract class MetadataBasedResourceProviderTest {
   }
 
   @Test
-  public void successFromFile() {
+  void successFromFile() {
     assertDefaultAttributes(createResource(() -> Optional.of(okResponse())));
   }
 
   @Test
-  public void successFromMockServer() {
+  void successFromMockServer() {
     server.enqueue(HttpResponse.of(MediaType.JSON, okResponse()));
     assertDefaultAttributes(mockServerResponse());
   }
 
   @Test
-  public void responseNotFound() {
+  void responseNotFound() {
     server.enqueue(HttpResponse.of(HttpStatus.NOT_FOUND));
     mockServerResponse().isEmpty();
   }
 
   @Test
-  public void responseEmpty() {
+  void responseEmpty() {
     server.enqueue(HttpResponse.of(""));
     assertOnlyProvider(mockServerResponse());
   }
 
   @Test
-  public void responseEmptyJson() {
+  void responseEmptyJson() {
     server.enqueue(HttpResponse.of("{}"));
     assertOnlyProvider(mockServerResponse());
   }

@@ -15,7 +15,7 @@ import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class HBaseIntegrationTest extends TargetSystemIntegrationTest {
+class HBaseIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>("dajobe/hbase")

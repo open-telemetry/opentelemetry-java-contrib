@@ -16,7 +16,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-public class TomcatIntegrationTest extends TargetSystemIntegrationTest {
+class TomcatIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int TOMCAT_PORT = 8080;
 

@@ -35,7 +35,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.io.TempDir;
 
 @DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
-public class InferredSpansAutoConfigTest {
+class InferredSpansAutoConfigTest {
 
   @BeforeEach
   @AfterEach
@@ -99,7 +99,7 @@ public class InferredSpansAutoConfigTest {
   }
 
   @Test
-  public void checkDisabledbyDefault() {
+  void checkDisabledbyDefault() {
     try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
@@ -109,7 +109,7 @@ public class InferredSpansAutoConfigTest {
 
   @DisabledOnOpenJ9
   @Test
-  public void checkProfilerWorking() {
+  void checkProfilerWorking() {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
             .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")

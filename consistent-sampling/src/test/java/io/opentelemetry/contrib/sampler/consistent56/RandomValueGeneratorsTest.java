@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class RandomValueGeneratorsTest {
+class RandomValueGeneratorsTest {
   @Test
   void testRandomRange() {
     int attempts = 10000;

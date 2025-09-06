@@ -18,7 +18,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class MicrometerMeterProviderTest {
+class MicrometerMeterProviderTest {
   SimpleMeterRegistry meterRegistry;
 
   CallbackRegistrar callbackRegistrar;

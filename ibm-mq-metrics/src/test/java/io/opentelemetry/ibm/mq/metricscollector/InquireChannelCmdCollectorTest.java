@@ -54,7 +54,7 @@ class InquireChannelCmdCollectorTest {
   }
 
   @Test
-  public void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
+  void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelCmd());
     classUnderTest = new InquireChannelCmdCollector(meter);

@@ -12,10 +12,9 @@ import io.opentelemetry.maven.OtelExecutionListener;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class MojoGoalExecutionHandlerConfigurationTest {
-
+class MojoGoalExecutionHandlerConfigurationTest {
   @Test
-  public void mojoGoalExecutionHandlers() {
+  void mojoGoalExecutionHandlers() {
     Map<MavenGoal, MojoGoalExecutionHandler> actual =
         MojoGoalExecutionHandlerConfiguration.loadMojoGoalExecutionHandler(
             OtelExecutionListener.class.getClassLoader());

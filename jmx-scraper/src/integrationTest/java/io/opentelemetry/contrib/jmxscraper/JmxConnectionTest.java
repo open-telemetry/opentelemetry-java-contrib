@@ -28,7 +28,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
  * JmxConnectionBuilder and relies on containers to minimize the JMX/RMI network complications which
  * are not NAT-friendly.
  */
-public class JmxConnectionTest {
+class JmxConnectionTest {
 
   // OTLP endpoint is not used in test mode, but still has to be provided
   private static final String DUMMY_OTLP_ENDPOINT = "http://dummy-otlp-endpoint:8080/";

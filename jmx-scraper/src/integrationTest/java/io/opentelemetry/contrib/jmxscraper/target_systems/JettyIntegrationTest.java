@@ -16,7 +16,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-public class JettyIntegrationTest extends TargetSystemIntegrationTest {
+class JettyIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int JETTY_PORT = 8080;
 

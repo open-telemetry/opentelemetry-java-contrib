@@ -186,7 +186,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGceResourceAttributesMapping() {
+  void testGceResourceAttributesMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcePlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -210,7 +210,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGkeResourceAttributesMapping_LocationTypeRegion() {
+  void testGkeResourceAttributesMapping_LocationTypeRegion() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_REGION);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -227,7 +227,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGkeResourceAttributesMapping_LocationTypeZone() {
+  void testGkeResourceAttributesMapping_LocationTypeZone() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_ZONE);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -245,7 +245,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGkeResourceAttributesMapping_LocationTypeInvalid() {
+  void testGkeResourceAttributesMapping_LocationTypeInvalid() {
     Map<String, String> mockGKEAttributes = new HashMap<>(mockGKECommonAttributes);
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION_TYPE, "INVALID");
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION, "some-location");
@@ -270,7 +270,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGkeResourceAttributesMapping_LocationMissing() {
+  void testGkeResourceAttributesMapping_LocationMissing() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform("");
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -295,7 +295,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGcrServiceResourceAttributesMapping() {
+  void testGcrServiceResourceAttributesMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN);
@@ -312,7 +312,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGcfResourceAttributeMapping() {
+  void testGcfResourceAttributeMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(
@@ -343,7 +343,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGcrJobResourceAttributesMapping() {
+  void testGcrJobResourceAttributesMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcrJobPlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -368,7 +368,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testGaeResourceAttributeMapping() {
+  void testGaeResourceAttributeMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGaePlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -390,7 +390,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void testUnknownPlatformResourceAttributesMapping() {
+  void testUnknownPlatformResourceAttributesMapping() {
     GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockUnknownPlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -400,7 +400,7 @@ class GCPResourceProviderTest {
   }
 
   @Test
-  public void findsWithServiceLoader() {
+  void findsWithServiceLoader() {
     ServiceLoader<ResourceProvider> services =
         ServiceLoader.load(ResourceProvider.class, getClass().getClassLoader());
     while (services.iterator().hasNext()) {

@@ -51,7 +51,7 @@ class QueueManagerMetricsCollectorTest {
   }
 
   @Test
-  public void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
+  void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireQMgrStatusCmd());
     classUnderTest =

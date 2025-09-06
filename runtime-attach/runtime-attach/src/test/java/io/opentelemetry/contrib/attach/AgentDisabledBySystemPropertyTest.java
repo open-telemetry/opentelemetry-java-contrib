@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.junit.jupiter.api.Test;
 
-public class AgentDisabledBySystemPropertyTest extends AbstractAttachmentTest {
+class AgentDisabledBySystemPropertyTest extends AbstractAttachmentTest {
 
   @Test
   void shouldNotAttachWhenAgentDisabledWithProperty() {
