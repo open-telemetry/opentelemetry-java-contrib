@@ -5,7 +5,7 @@ plugins {
   id("otel.publish-conventions")
   id("otel.animalsniffer-conventions")
   id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.11"
+  id("com.squareup.wire") version "5.4.0"
 }
 
 description = "Client implementation of the OpAMP spec."
