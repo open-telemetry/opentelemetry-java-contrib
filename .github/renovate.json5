@@ -145,6 +145,12 @@
       ],
     },
     {
+      groupName: 'jackson packages',
+      matchPackageNames: [
+        'com.fasterxml.jackson{/,}**',
+      ],
+    },
+    {
       // pinned version for compatibility with java 8 JFR parsing
       matchUpdateTypes: [
         'major',
