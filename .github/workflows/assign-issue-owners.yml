@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install js-yaml
-        run: npm install js-yaml
+        run: npm install js-yaml@4.0.0
 
       - name: Parse component label and assign owners
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
