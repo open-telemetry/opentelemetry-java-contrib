@@ -8,11 +8,12 @@ spotless {
     licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public|// Includes work from:)")
     target("src/**/*.java")
   }
-  plugins.withId("groovy") {
-    groovy {
-      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|class)")
-    }
-  }
+  // commented out for now due to incompatibility with gradle cache configuration
+  // plugins.withId("groovy") {
+  //   groovy {
+  //     licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|class)")
+  //   }
+  // }
   plugins.withId("scala") {
     scala {
       scalafmt()
