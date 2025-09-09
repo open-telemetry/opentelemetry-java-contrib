@@ -63,7 +63,8 @@ For more information about the maintainer role, see the [community repository](h
 
 ### Approvers
 
-- [John Watson](https://github.com/jkwatson), Verta.ai
+- [Jay DeLuca](https://github.com/jaydeluca), Grafana
+- [John Watson](https://github.com/jkwatson), Cloudera
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
