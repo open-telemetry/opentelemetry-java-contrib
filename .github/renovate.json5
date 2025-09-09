@@ -85,7 +85,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.mockito:{/,}**',
+        'org.mockito:**',
       ],
     },
     {
@@ -123,31 +123,33 @@
       matchCurrentVersion: '3.5.0',
       enabled: false,
       matchPackageNames: [
-        'org.apache.maven:{/,}**',
+        'org.apache.maven:**',
       ],
     },
     {
       groupName: 'spotless packages',
       matchPackageNames: [
-        'com.diffplug.spotless{/,}**',
+        'com.diffplug.spotless',
+        'com.diffplug.spotless:**',
       ],
     },
     {
       groupName: 'hipparchus packages',
       matchPackageNames: [
-        'org.hipparchus{/,}**',
+        'org.hipparchus:**',
       ],
     },
     {
       groupName: 'errorprone packages',
       matchPackageNames: [
-        'com.google.errorprone{/,}**',
+        'com.google.errorprone:**',
       ],
     },
     {
       groupName: 'jackson packages',
       matchPackageNames: [
-        'com.fasterxml.jackson{/,}**',
+        'com.fasterxml.jackson:**',
+        'com.fasterxml.jackson.core:**',
       ],
     },
     {
@@ -157,7 +159,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.openjdk.jmc{/,}**',
+        'org.openjdk.jmc:**',
       ],
     },
     {
@@ -168,7 +170,7 @@
       matchCurrentVersion: '5.0.0',
       enabled: false,
       matchPackageNames: [
-        'jakarta.servlet:{/,}**',
+        'jakarta.servlet:**',
       ],
     },
     {
@@ -181,7 +183,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.springframework.boot{/,}**',
+        'org.springframework.boot:**',
       ],
     },
   ],
