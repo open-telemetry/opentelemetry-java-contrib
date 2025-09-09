@@ -15,7 +15,7 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.2"))
+  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.20.0"))
   api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.0"))
   api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 

@@ -34,7 +34,7 @@ dependencies {
   api("org.jetbrains:annotations:26.0.2-1")
   api("com.ibm.mq:com.ibm.mq.allclient:9.4.3.1")
   api("org.yaml:snakeyaml:2.5")
-  api("com.fasterxml.jackson.core:jackson-databind:2.19.2")
+  api("com.fasterxml.jackson.core:jackson-databind:2.20.0")
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")

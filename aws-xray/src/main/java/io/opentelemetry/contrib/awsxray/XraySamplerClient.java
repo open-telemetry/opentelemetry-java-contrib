@@ -52,7 +52,7 @@ final class XraySamplerClient {
 
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()
-          .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+          .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY)
           // AWS APIs return timestamps as floats.
           .registerModule(
               new SimpleModule().addDeserializer(Date.class, new FloatDateDeserializer()))
