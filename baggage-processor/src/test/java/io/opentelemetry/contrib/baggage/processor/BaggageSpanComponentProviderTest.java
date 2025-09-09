@@ -18,7 +18,7 @@ class BaggageSpanComponentProviderTest {
   @Test
   void declarativeConfig() {
     String yaml =
-        "file_format: 0.4\n"
+        "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - baggage:\n"
