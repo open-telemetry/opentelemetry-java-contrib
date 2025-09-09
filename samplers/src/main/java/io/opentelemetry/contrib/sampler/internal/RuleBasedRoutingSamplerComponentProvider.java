@@ -42,14 +42,14 @@ public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvid
     DeclarativeConfigProperties fallbackModel = config.getStructured("fallback_sampler");
     if (fallbackModel == null) {
       throw new DeclarativeConfigException(
-          "rule_based_routing sampler .fallback is required but is null");
+          "rule_based_routing sampler .fallback_sampler is required but is null");
     }
     Sampler fallbackSampler;
     try {
       fallbackSampler = DeclarativeConfiguration.createSampler(fallbackModel);
     } catch (DeclarativeConfigException e) {
       throw new DeclarativeConfigException(
-          "rule_Based_routing sampler failed to create .fallback sampler", e);
+          "rule_Based_routing sampler failed to create .fallback_sampler sampler", e);
     }
 
     String spanKindString = config.getString("span_kind", "SERVER");
