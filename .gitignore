@@ -53,3 +53,6 @@ bin
 .swp
 
 .gitpod.yml
+
+# Gradle build scans
+build-scan.txt

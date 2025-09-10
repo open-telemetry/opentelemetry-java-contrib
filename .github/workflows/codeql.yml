@@ -47,10 +47,10 @@ jobs:
 
       - name: Set up gradle
         if: matrix.language == 'java'
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
+        uses: github/codeql-action/init@d3678e237b9c32a6c9bffb3315c335f976f3549f # v3.30.2
         with:
           languages: ${{ matrix.language }}
           # using "linked" helps to keep up with the latest Kotlin support
@@ -65,6 +65,6 @@ jobs:
         run: ./gradlew assemble --no-build-cache --no-daemon
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
+        uses: github/codeql-action/analyze@d3678e237b9c32a6c9bffb3315c335f976f3549f # v3.30.2
         with:
           category: "/language:${{matrix.language}}"
