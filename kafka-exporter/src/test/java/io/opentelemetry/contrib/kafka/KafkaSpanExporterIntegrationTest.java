@@ -163,10 +163,7 @@ class KafkaSpanExporterIntegrationTest {
     var mockProducer = new MockProducer<String, Collection<SpanData>>();
     mockProducer.sendException = new KafkaException("Simulated kafka exception");
     var testSubjectWithMockProducer =
-        KafkaSpanExporter.newBuilder()
-            .setTopicName(TOPIC)
-            .setProducer(mockProducer)
-            .build();
+        KafkaSpanExporter.newBuilder().setTopicName(TOPIC).setProducer(mockProducer).build();
 
     ImmutableList<SpanData> spans =
         ImmutableList.of(makeBasicSpan("span-1"), makeBasicSpan("span-2"));

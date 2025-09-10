@@ -59,25 +59,28 @@ public class KafkaSpanExporter implements SpanExporter {
 
     CompletableResultCode result = new CompletableResultCode();
     CompletableFuture.runAsync(
-        () ->
-            producer.send(
-                producerRecord,
-                (metadata, exception) -> {
-                  if (exception == null) {
-                    result.succeed();
-                  } else {
-                    logger.error(
-                        String.format("Error while sending spans to Kafka topic %s", topicName),
-                        exception);
-                    result.fail();
-                  }
-                }),
-        executorService).whenComplete((ignore, exception) -> {
-          if (exception != null) {
-            logger.error("Executor task failed while sending to Kafka topic {}", topicName, exception);
-            result.fail();
-          }
-        });
+            () ->
+                producer.send(
+                    producerRecord,
+                    (metadata, exception) -> {
+                      if (exception == null) {
+                        result.succeed();
+                      } else {
+                        logger.error(
+                            String.format("Error while sending spans to Kafka topic %s", topicName),
+                            exception);
+                        result.fail();
+                      }
+                    }),
+            executorService)
+        .whenComplete(
+            (ignore, exception) -> {
+              if (exception != null) {
+                logger.error(
+                    "Executor task failed while sending to Kafka topic {}", topicName, exception);
+                result.fail();
+              }
+            });
     return result;
   }
 
