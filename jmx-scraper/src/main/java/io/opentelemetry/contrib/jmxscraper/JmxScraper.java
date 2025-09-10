@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 
-public class JmxScraper {
+public final class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
   private static final String TEST_ARG = "-test";
