@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class JettyServiceNameDetectorTest {
+class JettyServiceNameDetectorTest {
 
   @Test
   void testJettyBase(@TempDir Path tempDir) throws IOException {

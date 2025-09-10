@@ -15,7 +15,7 @@ import java.time.Duration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class CassandraIntegrationTest extends TargetSystemIntegrationTest {
+class CassandraIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int CASSANDRA_PORT = 9042;
 
