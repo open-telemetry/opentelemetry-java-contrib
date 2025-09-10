@@ -14,11 +14,13 @@ jobs:
         with:
           fetch-depth: 0 # needed for merge-base below
 
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+
       - name: Link check - relative links (all files)
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./.github/scripts/link-check.sh --local-links-only
+        run: mise run lint-local-links
 
       - name: Get modified files
         if: github.event_name == 'pull_request'
@@ -39,7 +41,7 @@ jobs:
         run: |
           merge_base=$(git merge-base origin/${{ github.base_ref }} HEAD)
           config_modified=$(git diff --name-only $merge_base...${{ github.event.pull_request.head.sha }} \
-                            | grep -E '\.github/scripts/(lychee-config\.toml|link-check\.sh|dependencies\.Dockerfile)$' || true)
+                            | grep -E '^(\.github/config/lychee\.toml|mise\.toml)$' || true)
           if [ -n "$config_modified" ]; then
             echo "modified=true" >> $GITHUB_OUTPUT
           else
@@ -50,10 +52,10 @@ jobs:
         if: github.event_name == 'pull_request' && steps.modified-files.outputs.files != ''
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./.github/scripts/link-check.sh ${{ steps.modified-files.outputs.files }}
+        run: mise run lint-links ${{ steps.modified-files.outputs.files }}
 
       - name: Link check - all links (all files)
         if: github.event_name != 'pull_request' || steps.config-check.outputs.modified == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./.github/scripts/link-check.sh
+        run: mise run lint-links

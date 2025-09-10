@@ -32,9 +32,9 @@ dependencies {
   api("com.google.code.findbugs:jsr305:3.0.2")
   api("io.swagger:swagger-annotations:1.6.16")
   api("org.jetbrains:annotations:26.0.2-1")
-  api("com.ibm.mq:com.ibm.mq.allclient:9.4.3.0")
-  api("org.yaml:snakeyaml:2.4")
-  api("com.fasterxml.jackson.core:jackson-databind:2.19.2")
+  api("com.ibm.mq:com.ibm.mq.allclient:9.4.3.1")
+  api("org.yaml:snakeyaml:2.5")
+  api("com.fasterxml.jackson.core:jackson-databind:2.20.0")
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -45,11 +45,11 @@ dependencies {
   integrationTestImplementation("org.assertj:assertj-core:3.27.4")
   integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
   integrationTestImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  integrationTestImplementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
+  integrationTestImplementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.1")
   integrationTestImplementation("jakarta.jms:jakarta.jms-api:3.1.0")
   integrationTestImplementation("org.junit.jupiter:junit-jupiter-engine:5.13.4")
   integrationTestRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
-  ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.3.0") {
+  ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.3.1") {
     artifact {
       name = "com.ibm.mq.allclient"
       extension = "jar"
@@ -60,7 +60,7 @@ dependencies {
 
 tasks.shadowJar {
   dependencies {
-    exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.3.0"))
+    exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.3.1"))
   }
 }
 

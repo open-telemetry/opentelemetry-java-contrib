@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.eventbridge.internal;
+package io.opentelemetry.contrib.baggage.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,21 +13,22 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-class EventToSpanBridgeComponentProviderTest {
+class BaggageSpanComponentProviderTest {
 
   @Test
-  void endToEnd() {
+  void declarativeConfig() {
     String yaml =
         "file_format: 1.0-rc.1\n"
-            + "logger_provider:\n"
+            + "tracer_provider:\n"
             + "  processors:\n"
-            + "    - event_to_span_event_bridge:\n";
+            + "    - baggage:\n"
+            + "        included: [foo]\n"
+            + "        excluded: [bar]\n";
 
-    OpenTelemetrySdk openTelemetrySdk =
+    OpenTelemetrySdk sdk =
         DeclarativeConfiguration.parseAndCreate(
             new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
 
-    assertThat(openTelemetrySdk.getSdkLoggerProvider().toString())
-        .matches("SdkLoggerProvider\\{.*logRecordProcessor=EventToSpanEventBridge\\{}.*}");
+    assertThat(sdk).asString().contains("BaggageSpanProcessor");
   }
 }
