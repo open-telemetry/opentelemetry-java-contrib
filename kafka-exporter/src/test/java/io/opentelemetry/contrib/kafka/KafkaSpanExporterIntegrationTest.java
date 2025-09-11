@@ -19,6 +19,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.ApiException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -46,7 +49,7 @@ import org.testcontainers.utility.DockerImageName;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaSpanExporterIntegrationTest {
   private static final DockerImageName KAFKA_TEST_IMAGE =
-      DockerImageName.parse("apache/kafka:3.8.1");
+      DockerImageName.parse("apache/kafka:3.9.1");
   private static final String TOPIC = "span_topic";
   private KafkaContainer kafka;
   private KafkaConsumer<String, ExportTraceServiceRequest> consumer;
@@ -153,6 +156,28 @@ class KafkaSpanExporterIntegrationTest {
             });
 
     testSubject.shutdown();
+  }
+
+  @Test
+  void exportWhenProducerFailsToSend() {
+    var mockProducer = new MockProducer<String, Collection<SpanData>>();
+    mockProducer.sendException = new KafkaException("Simulated kafka exception");
+    var testSubjectWithMockProducer =
+        KafkaSpanExporter.newBuilder().setTopicName(TOPIC).setProducer(mockProducer).build();
+
+    ImmutableList<SpanData> spans =
+        ImmutableList.of(makeBasicSpan("span-1"), makeBasicSpan("span-2"));
+
+    CompletableResultCode actual = testSubjectWithMockProducer.export(spans);
+
+    await()
+        .untilAsserted(
+            () -> {
+              assertThat(actual.isSuccess()).isFalse();
+              assertThat(actual.isDone()).isTrue();
+            });
+
+    testSubjectWithMockProducer.shutdown();
   }
 
   @Test

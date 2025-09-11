@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -12,7 +13,8 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
 
-public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
+@AutoService(AutoConfigurationCustomizerProvider.class)
+public final class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
     autoConfigurationCustomizer
@@ -37,7 +39,8 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
-    sdkTracerProviderBuilder.addSpanProcessor(createBaggageSpanProcessor(keys));
+    // need to add before the batch span processor
+    sdkTracerProviderBuilder.addSpanProcessorFirst(createBaggageSpanProcessor(keys));
   }
 
   static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
@@ -56,7 +59,8 @@ public class BaggageProcessorCustomizer implements AutoConfigurationCustomizerPr
       return;
     }
 
-    sdkLoggerProviderBuilder.addLogRecordProcessor(createBaggageLogRecordProcessor(keys));
+    // need to add before the batch log processor
+    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(createBaggageLogRecordProcessor(keys));
   }
 
   static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {

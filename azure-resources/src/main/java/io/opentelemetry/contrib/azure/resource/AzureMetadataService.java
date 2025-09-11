@@ -20,7 +20,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class AzureMetadataService {
+public final class AzureMetadataService {
   static final JsonFactory JSON_FACTORY = new JsonFactory();
   private static final URL METADATA_URL;
   private static final Duration TIMEOUT = Duration.ofSeconds(5);

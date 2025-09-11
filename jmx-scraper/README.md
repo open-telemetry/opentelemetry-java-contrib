@@ -12,7 +12,7 @@ This project is released as part of the [OpenTelemetry Java Contrib](https://git
 The latest release is available from:
 
 - [GitHub Release assets](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/latest/download/opentelemetry-jmx-scraper.jar)
-- [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper) or can be browsed via [MVN Repository](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper).
+- [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
 
 ## Usage
 

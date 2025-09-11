@@ -21,7 +21,7 @@ class AwsComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 0.4\n"
+        "file_format: 1.0-rc.1\n"
             + "propagator:\n"
             + "  composite:\n"
             + "    - xray:\n"

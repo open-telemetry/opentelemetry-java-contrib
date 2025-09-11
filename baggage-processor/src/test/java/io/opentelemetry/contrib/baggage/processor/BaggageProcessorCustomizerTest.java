@@ -48,11 +48,15 @@ class BaggageProcessorCustomizerTest {
   private static final String MEMORY_EXPORTER = "memory";
 
   @Test
-  void test_customizer() {
+  void test_empty_customizer() {
     assertCustomizer(
         Collections.emptyMap(),
         span -> assertThat(span).hasTotalAttributeCount(0),
         logRecord -> assertThat(logRecord).hasTotalAttributeCount(0));
+  }
+
+  @Test
+  void test_customizer() {
     Map<String, String> properties = new HashMap<>();
     properties.put("otel.java.experimental.span-attributes.copy-from-baggage.include", "key");
     properties.put("otel.java.experimental.log-attributes.copy-from-baggage.include", "key");
@@ -117,7 +121,7 @@ class BaggageProcessorCustomizerTest {
                 new ComponentLoader() {
                   @Override
                   public <T> List<T> load(Class<T> spiClass) {
-                    if (spiClass == ConfigurableSpanExporterProvider.class) {
+                    if (spiClass.equals(ConfigurableSpanExporterProvider.class)) {
                       return Collections.singletonList(
                           spiClass.cast(
                               new ConfigurableSpanExporterProvider() {
@@ -132,7 +136,7 @@ class BaggageProcessorCustomizerTest {
                                   return MEMORY_EXPORTER;
                                 }
                               }));
-                    } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
+                    } else if (spiClass.equals(ConfigurableLogRecordExporterProvider.class)) {
                       return Collections.singletonList(
                           spiClass.cast(
                               new ConfigurableLogRecordExporterProvider() {
@@ -155,7 +159,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
+  void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
         BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("*"))) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
@@ -166,7 +170,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
+  void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
         BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("key"))) {
@@ -184,7 +188,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(
+  void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
         BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
@@ -197,7 +201,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
+  void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
         BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
