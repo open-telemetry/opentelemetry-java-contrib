@@ -8,9 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters.callback;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
-final class NoopExporterCallback<T> implements ExporterCallback<T> {
-
-  NoopExporterCallback() {}
+public final class NoopExporterCallback<T> implements ExporterCallback<T> {
 
   @Override
   public void onExportSuccess(Collection<T> items) {}

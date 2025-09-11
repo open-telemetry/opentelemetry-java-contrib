@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
+import io.opentelemetry.contrib.disk.buffering.exporters.callback.NoopExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -19,6 +20,8 @@ import java.util.Collection;
 public final class LogRecordToDiskExporter implements LogRecordExporter {
   private final SignalStorageExporter<LogRecordData> storageExporter;
   private final ExporterCallback<LogRecordData> callback;
+  private static final ExporterCallback<LogRecordData> DEFAULT_CALLBACK =
+      new NoopExporterCallback<>();
   private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
 
   private LogRecordToDiskExporter(
@@ -50,7 +53,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
 
   public static final class Builder {
     private final SignalStorage.LogRecord storage;
-    private ExporterCallback<LogRecordData> callback = ExporterCallback.noop();
+    private ExporterCallback<LogRecordData> callback = DEFAULT_CALLBACK;
     private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
 
     @CanIgnoreReturnValue

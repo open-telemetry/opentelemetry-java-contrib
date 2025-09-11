@@ -27,8 +27,4 @@ public interface ExporterCallback<T> {
 
   /** Called when the exporter is closed. */
   void onShutdown();
-
-  static <T> ExporterCallback<T> noop() {
-    return new NoopExporterCallback<>();
-  }
 }

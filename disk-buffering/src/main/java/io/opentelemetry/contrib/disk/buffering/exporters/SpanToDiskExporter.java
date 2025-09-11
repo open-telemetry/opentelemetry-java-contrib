@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
+import io.opentelemetry.contrib.disk.buffering.exporters.callback.NoopExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.internal.exporters.SignalStorageExporter;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -19,6 +20,7 @@ import java.util.Collection;
 public final class SpanToDiskExporter implements SpanExporter {
   private final SignalStorageExporter<SpanData> storageExporter;
   private final ExporterCallback<SpanData> callback;
+  private static final ExporterCallback<SpanData> DEFAULT_CALLBACK = new NoopExporterCallback<>();
   private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
 
   private SpanToDiskExporter(
@@ -49,7 +51,7 @@ public final class SpanToDiskExporter implements SpanExporter {
 
   public static final class Builder {
     private final SignalStorage.Span storage;
-    private ExporterCallback<SpanData> callback = ExporterCallback.noop();
+    private ExporterCallback<SpanData> callback = DEFAULT_CALLBACK;
     private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
 
     private Builder(SignalStorage.Span storage) {
