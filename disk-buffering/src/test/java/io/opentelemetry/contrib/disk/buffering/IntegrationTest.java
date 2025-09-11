@@ -49,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationTest {
+class IntegrationTest {
   private Tracer tracer;
   private SdkMeterProvider meterProvider;
   private Meter meter;
