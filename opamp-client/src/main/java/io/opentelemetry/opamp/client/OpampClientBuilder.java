@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.opamp.client.internal;
+package io.opentelemetry.opamp.client;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -11,7 +11,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientImpl;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientState;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
-import io.opentelemetry.opamp.client.internal.request.service.RequestService;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.request.service.WebSocketRequestService;
 import io.opentelemetry.opamp.client.internal.state.State;
 import java.nio.ByteBuffer;

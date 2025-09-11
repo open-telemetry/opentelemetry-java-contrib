@@ -5,7 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.impl;
 
-import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.internal.impl.recipe.AgentToServerAppenders;
 import io.opentelemetry.opamp.client.internal.impl.recipe.RecipeManager;
 import io.opentelemetry.opamp.client.internal.impl.recipe.RequestRecipe;
@@ -19,7 +19,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfig
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
 import io.opentelemetry.opamp.client.internal.request.Field;
 import io.opentelemetry.opamp.client.internal.request.Request;
-import io.opentelemetry.opamp.client.internal.request.service.RequestService;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;

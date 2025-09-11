@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.aws.resource.internal;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.aws.resource.BeanstalkResource;
 import io.opentelemetry.contrib.aws.resource.Ec2Resource;
@@ -15,6 +16,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 
+@AutoService(ComponentProvider.class)
 public class AwsResourceDetector implements ComponentProvider<Resource> {
 
   @Override

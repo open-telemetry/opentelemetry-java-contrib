@@ -8,8 +8,11 @@ description = "OpenTelemetry AWS Resources Support"
 otelJava.moduleName.set("io.opentelemetry.contrib.aws.resource")
 
 dependencies {
-  api("io.opentelemetry:opentelemetry-api")
+  compileOnly("com.google.auto.service:auto-service")
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")
+
+  annotationProcessor("com.google.auto.service:auto-service")
+  api("io.opentelemetry:opentelemetry-api")
   api("io.opentelemetry:opentelemetry-sdk")
 
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
