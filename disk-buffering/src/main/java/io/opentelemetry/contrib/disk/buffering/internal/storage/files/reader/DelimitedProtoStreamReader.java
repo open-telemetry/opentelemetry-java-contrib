@@ -25,7 +25,7 @@ public final class DelimitedProtoStreamReader implements StreamReader {
       return null;
     }
     byte[] bytes = new byte[itemSize];
-    if (inputStream.read(bytes) < 0) {
+    if (inputStream.read(bytes) <= 0) {
       return null;
     }
     return bytes;
