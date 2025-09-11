@@ -23,6 +23,7 @@ public final class MetricToDiskExporter implements MetricExporter {
   private final SignalStorageExporter<MetricData> storageExporter;
   private final AggregationTemporalitySelector aggregationTemporalitySelector;
   private final ExporterCallback<MetricData> callback;
+  private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
 
   private MetricToDiskExporter(
       SignalStorageExporter<MetricData> storageExporter,
@@ -63,7 +64,7 @@ public final class MetricToDiskExporter implements MetricExporter {
     private AggregationTemporalitySelector aggregationTemporalitySelector =
         AggregationTemporalitySelector.alwaysCumulative();
     private ExporterCallback<MetricData> callback = ExporterCallback.noop();
-    private Duration writeTimeout = Duration.ofSeconds(10);
+    private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
 
     @CanIgnoreReturnValue
     public Builder setExporterCallback(ExporterCallback<MetricData> value) {

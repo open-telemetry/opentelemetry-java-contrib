@@ -19,6 +19,7 @@ import java.util.Collection;
 public final class LogRecordToDiskExporter implements LogRecordExporter {
   private final SignalStorageExporter<LogRecordData> storageExporter;
   private final ExporterCallback<LogRecordData> callback;
+  private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
 
   private LogRecordToDiskExporter(
       SignalStorageExporter<LogRecordData> storageExporter,
@@ -50,7 +51,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
   public static final class Builder {
     private final SignalStorage.LogRecord storage;
     private ExporterCallback<LogRecordData> callback = ExporterCallback.noop();
-    private Duration writeTimeout = Duration.ofSeconds(10);
+    private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
 
     @CanIgnoreReturnValue
     public Builder setExporterCallback(ExporterCallback<LogRecordData> value) {
