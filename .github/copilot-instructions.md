@@ -29,6 +29,33 @@ This repository provides observability instrumentation for Java applications.
 - Resource cleanup and lifecycle management
 - Comprehensive unit tests for new functionality
 
+### Test suites
+
+This project uses gradle 9 which requires specifying test classes and paths explicitly.
+
+For example, this will NOT work because it registers a `Test` without specifying the test classes or paths:
+
+```kotlin
+tasks.register<Test>("IntegrationTestUserCreds") {
+  dependsOn(tasks.shadowJar)
+  dependsOn(tasks.named("copyAgent"))
+  ...
+}
+```
+
+This is fixed by specifying the test classes and classpath explicitly:
+
+```kotlin
+tasks.register<Test>("IntegrationTestUserCreds") {
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+
+  dependsOn(tasks.shadowJar)
+  dependsOn(tasks.named("copyAgent"))
+  ...
+}
+```
+
 ## Coding Agent Instructions
 
 When implementing changes or new features:
