@@ -8,9 +8,7 @@ package io.opentelemetry.contrib.aws.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
 import org.assertj.core.api.InstanceOfAssertFactory;

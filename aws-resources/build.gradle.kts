@@ -39,6 +39,6 @@ tasks {
       "AWS_LAMBDA_FUNCTION_NAME" to "my-function",
       "AWS_LAMBDA_FUNCTION_VERSION" to "1.2.3"
     )
-    jvmArgs("-Dotel.experimental.config.file=${project.projectDir.resolve("src/test/resources/config.yaml")}")
+    jvmArgs("-Dotel.experimental.config.file=${project.projectDir.resolve("src/test/resources/declarative-config.yaml")}")
   }
 }
