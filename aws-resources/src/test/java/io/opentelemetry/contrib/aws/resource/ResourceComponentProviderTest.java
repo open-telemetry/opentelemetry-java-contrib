@@ -18,7 +18,8 @@ class ResourceComponentProviderTest {
   @Test
   void endToEnd() {
     assertThat(
-            AutoConfiguredOpenTelemetrySdk.initialize()
+            AutoConfiguredOpenTelemetrySdk.builder()
+                .build()
                 .getOpenTelemetrySdk()
                 .getSdkTracerProvider())
         .extracting("sharedState")
