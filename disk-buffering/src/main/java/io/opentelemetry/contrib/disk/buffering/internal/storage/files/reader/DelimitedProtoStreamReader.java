@@ -19,16 +19,22 @@ public final class DelimitedProtoStreamReader implements StreamReader {
 
   @Override
   @Nullable
-  public ReadResult readNext() throws IOException {
+  public byte[] readNext() throws IOException {
     int itemSize = getNextItemSize();
     if (itemSize < 1) {
       return null;
     }
     byte[] bytes = new byte[itemSize];
-    if (inputStream.read(bytes) < 0) {
-      return null;
+    int offset = 0;
+    int readCt;
+    do {
+      readCt = inputStream.read(bytes, offset, itemSize - offset);
+      offset += readCt;
+    } while (readCt != -1 && offset < itemSize);
+    if (offset != itemSize) {
+      return null; // unable to read the whole item correctly
     }
-    return new ReadResult(bytes);
+    return bytes;
   }
 
   private int getNextItemSize() {
