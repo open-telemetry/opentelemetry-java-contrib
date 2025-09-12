@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("otel.japicmp-conventions")
   id("org.owasp.dependencycheck")
 }
 
