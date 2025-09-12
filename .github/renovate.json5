@@ -200,16 +200,6 @@
     },
     {
       customType: 'regex',
-      datasourceTemplate: 'npm',
-      managerFilePatterns: [
-        '.github/workflows/**',
-      ],
-      matchStrings: [
-        'npm install (?<depName>[^@\\s]+)@(?<currentValue>[^\\s]+)',
-      ],
-    },
-    {
-      customType: 'regex',
       datasourceTemplate: 'java-version',
       managerFilePatterns: [
         '.github/workflows/**',
