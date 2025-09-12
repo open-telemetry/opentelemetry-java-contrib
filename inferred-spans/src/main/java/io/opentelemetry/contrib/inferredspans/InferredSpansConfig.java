@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.stream.Collectors.toList;
+
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -14,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 class InferredSpansConfig {
@@ -103,7 +104,7 @@ class InferredSpansConfig {
             Arrays.stream(wildcardListString.split(","))
                 .filter(str -> !str.isEmpty())
                 .map(WildcardMatcher::valueOf)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (!values.isEmpty()) {
           funcToApply.accept(values);
         }
