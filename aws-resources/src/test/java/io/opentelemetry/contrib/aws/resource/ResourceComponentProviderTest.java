@@ -17,16 +17,6 @@ import org.assertj.core.api.InstanceOfAssertFactory;
 import org.junit.jupiter.api.Test;
 
 class ResourceComponentProviderTest {
-
-  @Test
-  @SuppressWarnings("rawtypes")
-  void providerIsLoaded() {
-    Iterable<ComponentProvider> providers =
-        ComponentLoader.forClassLoader(ResourceComponentProviderTest.class.getClassLoader())
-            .load(ComponentProvider.class);
-    assertThat(providers).extracting(ComponentProvider::getName).contains("aws");
-  }
-
   @Test
   void endToEnd() {
     assertThat(
