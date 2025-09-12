@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -28,7 +28,7 @@ class AttributesMapperTest {
 
     List<KeyValue> proto = mapToProto(attributes);
 
-    assertEquals(attributes, mapFromProto(proto));
+    assertThat(mapFromProto(proto)).isEqualTo(attributes);
   }
 
   @Test
@@ -45,7 +45,7 @@ class AttributesMapperTest {
 
     List<KeyValue> serialized = mapToProto(attributes);
 
-    assertEquals(attributes, mapFromProto(serialized));
+    assertThat(mapFromProto(serialized)).isEqualTo(attributes);
   }
 
   private static List<KeyValue> mapToProto(Attributes attributes) {
