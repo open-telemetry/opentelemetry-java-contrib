@@ -6,9 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -168,20 +166,20 @@ class IntegrationTest {
   private <T> void assertExporter(FromDiskExporterImpl<T> exporter, Supplier<Integer> finishedItems)
       throws IOException {
     // Verify no data has been received in the original exporter until this point.
-    assertEquals(0, finishedItems.get());
+    assertThat(finishedItems.get()).isEqualTo(0);
 
     // Go to the future when we can read the stored items.
     fastForwardTimeByMillis(storageConfig.getMinFileAgeForReadMillis());
 
     // Read and send stored data.
-    assertTrue(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
+    assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isTrue();
 
     // Now the data must have been delegated to the original exporter.
-    assertEquals(1, finishedItems.get());
+    assertThat(finishedItems.get()).isEqualTo(1);
 
     // Bonus: Try to read again, no more data should be available.
-    assertFalse(exporter.exportStoredBatch(1, TimeUnit.SECONDS));
-    assertEquals(1, finishedItems.get());
+    assertThat(exporter.exportStoredBatch(1, TimeUnit.SECONDS)).isFalse();
+    assertThat(finishedItems.get()).isEqualTo(1);
   }
 
   @SuppressWarnings("DirectInvocationOnMock")
