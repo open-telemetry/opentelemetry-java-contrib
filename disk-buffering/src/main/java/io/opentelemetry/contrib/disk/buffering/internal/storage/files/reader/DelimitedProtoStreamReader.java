@@ -25,8 +25,14 @@ public final class DelimitedProtoStreamReader implements StreamReader {
       return null;
     }
     byte[] bytes = new byte[itemSize];
-    if (inputStream.read(bytes) <= 0) {
-      return null;
+    int offset = 0;
+    int readCt;
+    do {
+      readCt = inputStream.read(bytes, offset, itemSize - offset);
+      offset += readCt;
+    } while (readCt != -1 && offset < itemSize);
+    if (offset != itemSize) {
+      return null; // unable to read the whole item correctly
     }
     return bytes;
   }
