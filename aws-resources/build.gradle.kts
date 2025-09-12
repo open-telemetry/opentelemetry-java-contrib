@@ -30,7 +30,6 @@ dependencies {
   testRuntimeOnly("org.bouncycastle:bcpkix-jdk15on")
   testImplementation("com.google.guava:guava")
   testImplementation("org.skyscreamer:jsonassert")
-  testImplementation("org.junit-pioneer:junit-pioneer")
 }
 
 tasks {
