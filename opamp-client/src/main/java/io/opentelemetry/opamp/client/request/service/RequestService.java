@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.opamp.client.internal.request.service;
+package io.opentelemetry.opamp.client.request.service;
 
-import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.internal.request.Request;
+import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
+import io.opentelemetry.opamp.client.internal.request.service.WebSocketRequestService;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import java.util.function.Supplier;
 

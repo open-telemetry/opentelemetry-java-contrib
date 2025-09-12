@@ -23,6 +23,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
