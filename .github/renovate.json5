@@ -205,7 +205,7 @@
         '.github/workflows/**',
       ],
       matchStrings: [
-        'npm install (?<depName>[^@\\s]+)@(?<currentValue>[^\\s]+)',
+        'npm install (?<depName>[^@\\s]+)@(?<currentValue>[^\\s]+)(?:\\s+--integrity=(?<currentDigest>sha[0-9]+-.+?))?',
       ],
     },
     {
