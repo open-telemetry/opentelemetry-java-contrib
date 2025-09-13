@@ -33,7 +33,10 @@ dependencies {
   compileOnly("org.apache.maven:maven-core:3.5.0") // do not auto-update, support older mvn versions
   compileOnly("org.slf4j:slf4j-api")
 
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
 }
