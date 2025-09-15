@@ -14,14 +14,14 @@ dependencies {
   // under JvmTestSuite so they don't show up as runtime dependencies in license and vulnerability scans
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
-  api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.20.0"))
-  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.1"))
-  api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
+  api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
-    api("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}")
+    api("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}-alpha")
 
     api("com.google.auto.service:auto-service:1.1.1")
     api("com.google.auto.service:auto-service-annotations:1.1.1")

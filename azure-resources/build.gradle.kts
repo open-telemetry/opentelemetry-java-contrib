@@ -30,7 +30,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-//  testImplementation("org.mockito:mockito-core")
   testImplementation("com.google.guava:guava")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
