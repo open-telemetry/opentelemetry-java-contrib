@@ -6,8 +6,7 @@
 package io.opentelemetry.contrib.kafka;
 
 import static io.opentelemetry.contrib.kafka.TestUtil.makeBasicSpan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
@@ -28,14 +27,14 @@ class SpanDataSerializerTest {
 
     byte[] actual = testSubject.serialize("test-topic", spans);
 
-    assertNotNull(actual);
+    assertThat(actual).isNotNull();
   }
 
   @Test
   void serializeEmptyData() {
     byte[] actual = testSubject.serialize("test-topic", Collections.emptySet());
 
-    assertEquals(0, actual.length);
+    assertThat(actual).isEmpty();
   }
 
   @Test
@@ -46,16 +45,18 @@ class SpanDataSerializerTest {
 
     ExportTraceServiceRequest actual = testSubject.convertSpansToRequest(spans);
 
-    assertNotNull(actual);
-    assertEquals("span-1", actual.getResourceSpans(0).getScopeSpans(0).getSpans(0).getName());
-    assertEquals("span-2", actual.getResourceSpans(0).getScopeSpans(0).getSpans(1).getName());
+    assertThat(actual).isNotNull();
+    assertThat(actual.getResourceSpans(0).getScopeSpans(0).getSpans(0).getName())
+        .isEqualTo("span-1");
+    assertThat(actual.getResourceSpans(0).getScopeSpans(0).getSpans(1).getName())
+        .isEqualTo("span-2");
   }
 
   @Test
   void convertSpansToRequestForEmptySpans() {
     ExportTraceServiceRequest actual = testSubject.convertSpansToRequest(Collections.emptySet());
 
-    assertNotNull(actual);
-    assertEquals(ExportTraceServiceRequest.getDefaultInstance(), actual);
+    assertThat(actual).isNotNull();
+    assertThat(actual).isEqualTo(ExportTraceServiceRequest.getDefaultInstance());
   }
 }

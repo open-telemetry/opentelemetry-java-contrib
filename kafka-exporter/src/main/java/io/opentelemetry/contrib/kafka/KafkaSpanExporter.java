@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 @ThreadSafe
 @SuppressWarnings("FutureReturnValueIgnored")
-public class KafkaSpanExporter implements SpanExporter {
+public final class KafkaSpanExporter implements SpanExporter {
   private static final Logger logger = LoggerFactory.getLogger(KafkaSpanExporter.class);
   private final String topicName;
   private final Producer<String, Collection<SpanData>> producer;
@@ -59,20 +59,28 @@ public class KafkaSpanExporter implements SpanExporter {
 
     CompletableResultCode result = new CompletableResultCode();
     CompletableFuture.runAsync(
-        () ->
-            producer.send(
-                producerRecord,
-                (metadata, exception) -> {
-                  if (exception == null) {
-                    result.succeed();
-                  } else {
-                    logger.error(
-                        String.format("Error while sending spans to Kafka topic %s", topicName),
-                        exception);
-                    result.fail();
-                  }
-                }),
-        executorService);
+            () ->
+                producer.send(
+                    producerRecord,
+                    (metadata, exception) -> {
+                      if (exception == null) {
+                        result.succeed();
+                      } else {
+                        logger.error(
+                            String.format("Error while sending spans to Kafka topic %s", topicName),
+                            exception);
+                        result.fail();
+                      }
+                    }),
+            executorService)
+        .whenComplete(
+            (ignore, exception) -> {
+              if (exception != null) {
+                logger.error(
+                    "Executor task failed while sending to Kafka topic {}", topicName, exception);
+                result.fail();
+              }
+            });
     return result;
   }
 

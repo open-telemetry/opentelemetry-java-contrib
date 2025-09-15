@@ -3,7 +3,7 @@ plugins {
 }
 
 val otelInstrumentationVersion = "2.19.0-alpha"
-val semconvVersion = "1.34.0"
+val semconvVersion = "1.37.0"
 
 javaPlatform {
   allowDependencies()
@@ -15,8 +15,8 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.19.2"))
-  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.0"))
+  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.20.0"))
+  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.1"))
   api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
@@ -30,7 +30,7 @@ dependencies {
     api("com.google.errorprone:error_prone_annotations:2.41.0")
     api("com.google.errorprone:error_prone_core:2.41.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
-    api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+    api("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
     api("io.prometheus:simpleclient_common:0.16.0")
     api("io.prometheus:simpleclient_httpserver:0.16.0")
@@ -51,7 +51,7 @@ dependencies {
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.0.0")
+    api("org.apache.kafka:kafka-clients:4.1.0")
     api("org.testcontainers:kafka:1.21.3")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")

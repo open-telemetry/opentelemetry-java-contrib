@@ -5,7 +5,8 @@
 
 package io.opentelemetry.opamp.client.internal.connectivity.websocket;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,7 +66,7 @@ public class OkHttpWebSocket implements WebSocket {
   }
 
   private okhttp3.WebSocket getWebSocket() {
-    return Objects.requireNonNull(webSocket.get());
+    return requireNonNull(webSocket.get());
   }
 
   private class ListenerAdapter extends WebSocketListener {

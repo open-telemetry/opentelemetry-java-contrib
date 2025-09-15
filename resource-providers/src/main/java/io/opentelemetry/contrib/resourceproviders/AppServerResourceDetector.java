@@ -12,7 +12,7 @@ import io.opentelemetry.sdk.resources.Resource;
 
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class AppServerResourceDetector implements ComponentProvider<Resource> {
+public final class AppServerResourceDetector implements ComponentProvider<Resource> {
 
   @Override
   public Class<Resource> getType() {

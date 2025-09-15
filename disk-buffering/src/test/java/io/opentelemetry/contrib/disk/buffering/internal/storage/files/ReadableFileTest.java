@@ -8,10 +8,8 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -120,27 +118,27 @@ class ReadableFileTest {
   void readSingleItemAndRemoveIt() throws IOException {
     readableFile.readAndProcess(
         bytes -> {
-          assertEquals(FIRST_LOG_RECORD, deserialize(bytes));
+          assertThat(deserialize(bytes)).isEqualTo(FIRST_LOG_RECORD);
           return ProcessResult.SUCCEEDED;
         });
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
-    assertEquals(2, logs.size());
-    assertEquals(SECOND_LOG_RECORD, logs.get(0));
-    assertEquals(THIRD_LOG_RECORD, logs.get(1));
+    assertThat(logs.size()).isEqualTo(2);
+    assertThat(logs.get(0)).isEqualTo(SECOND_LOG_RECORD);
+    assertThat(logs.get(1)).isEqualTo(THIRD_LOG_RECORD);
   }
 
   @Test
   void whenProcessingSucceeds_returnSuccessStatus() throws IOException {
-    assertEquals(
-        ReadableResult.SUCCEEDED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
+    assertThat(readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED))
+        .isEqualTo(ReadableResult.SUCCEEDED);
   }
 
   @Test
   void whenProcessingFails_returnTryLaterStatus() throws IOException {
-    assertEquals(
-        ReadableResult.TRY_LATER, readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER));
+    assertThat(readableFile.readAndProcess(bytes -> ProcessResult.TRY_LATER))
+        .isEqualTo(ReadableResult.TRY_LATER);
   }
 
   @Test
@@ -158,8 +156,8 @@ class ReadableFileTest {
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
-    assertEquals(1, logs.size());
-    assertEquals(THIRD_LOG_RECORD, logs.get(0));
+    assertThat(logs.size()).isEqualTo(1);
+    assertThat(logs.get(0)).isEqualTo(THIRD_LOG_RECORD);
   }
 
   @Test
@@ -168,24 +166,24 @@ class ReadableFileTest {
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
-    assertEquals(3, logs.size());
+    assertThat(logs.size()).isEqualTo(3);
   }
 
   @Test
   void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 
-    assertFalse(source.exists());
-    assertTrue(readableFile.isClosed());
+    assertThat(source.exists()).isFalse();
+    assertThat(readableFile.isClosed()).isTrue();
   }
 
   @Test
   void whenTheFileContentIsInvalid_deleteOriginalFile_and_close() throws IOException {
-    assertEquals(
-        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.CONTENT_INVALID));
+    assertThat(readableFile.readAndProcess(bytes -> ProcessResult.CONTENT_INVALID))
+        .isEqualTo(ReadableResult.FAILED);
 
-    assertFalse(source.exists());
-    assertTrue(readableFile.isClosed());
+    assertThat(source.exists()).isFalse();
+    assertThat(readableFile.isClosed()).isTrue();
   }
 
   @Test
@@ -199,11 +197,11 @@ class ReadableFileTest {
     ReadableFile emptyReadableFile =
         new ReadableFile(emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration(dir));
 
-    assertEquals(
-        ReadableResult.FAILED, emptyReadableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
+    assertThat(emptyReadableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED))
+        .isEqualTo(ReadableResult.FAILED);
 
-    assertTrue(emptyReadableFile.isClosed());
-    assertFalse(emptyFile.exists());
+    assertThat(emptyReadableFile.isClosed()).isTrue();
+    assertThat(emptyFile.exists()).isFalse();
   }
 
   @Test
@@ -214,10 +212,10 @@ class ReadableFileTest {
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS));
 
-    assertEquals(
-        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
+    assertThat(readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED))
+        .isEqualTo(ReadableResult.FAILED);
 
-    assertTrue(readableFile.isClosed());
+    assertThat(readableFile.isClosed()).isTrue();
   }
 
   @Test
@@ -225,14 +223,14 @@ class ReadableFileTest {
     readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED);
     readableFile.close();
 
-    assertEquals(
-        ReadableResult.FAILED, readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED));
+    assertThat(readableFile.readAndProcess(bytes -> ProcessResult.SUCCEEDED))
+        .isEqualTo(ReadableResult.FAILED);
   }
 
   private static void assertDeserializedData(LogRecordData expected, byte[] bytes) {
     try {
       List<LogRecordData> deserialized = DESERIALIZER.deserialize(bytes);
-      assertEquals(expected, deserialized.get(0));
+      assertThat(deserialized.get(0)).isEqualTo(expected);
     } catch (DeserializationException e) {
       throw new RuntimeException(e);
     }

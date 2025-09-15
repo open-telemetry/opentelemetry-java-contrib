@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("otel.japicmp-conventions")
   id("org.owasp.dependencycheck")
 }
 
@@ -106,12 +107,13 @@ plugins.withId("otel.publish-conventions") {
     register("generateVersionResource") {
       val moduleName = otelJava.moduleName
       val propertiesDir = moduleName.map { layout.buildDirectory.file("generated/properties/${it.replace('.', '/')}") }
+      val projectVersion = project.version.toString()
 
-      inputs.property("project.version", project.version.toString())
+      inputs.property("project.version", projectVersion)
       outputs.dir(propertiesDir)
 
       doLast {
-        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${project.version}")
+        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${projectVersion}")
       }
     }
   }
@@ -151,7 +153,7 @@ testing {
       implementation(enforcedPlatform("org.junit:junit-bom:5.13.4"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.1"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.2"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

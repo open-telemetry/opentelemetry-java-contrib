@@ -18,7 +18,8 @@ import java.util.Collection;
  * This class implements a {@link LogRecordExporter} that delegates to an instance of {@code
  * ToDiskExporter<LogRecordData>}.
  */
-public class LogRecordToDiskExporter implements LogRecordExporter {
+public final class LogRecordToDiskExporter implements LogRecordExporter {
+
   private final ToDiskExporter<LogRecordData> delegate;
 
   /**

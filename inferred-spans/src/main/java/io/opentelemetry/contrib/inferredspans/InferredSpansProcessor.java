@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.Objects.requireNonNull;
+
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
@@ -19,7 +21,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -33,14 +35,13 @@ public class InferredSpansProcessor implements SpanProcessor {
   private static final Logger logger = Logger.getLogger(InferredSpansProcessor.class.getName());
 
   public static final String TRACER_NAME = "inferred-spans";
-
   public static final String TRACER_VERSION = readInferredSpansVersion();
 
   // Visible for testing
   final SamplingProfiler profiler;
+  private final InferredSpansConfiguration config;
 
   private Supplier<TracerProvider> tracerProvider = GlobalOpenTelemetry::getTracerProvider;
-
   @Nullable private volatile Tracer tracer;
 
   InferredSpansProcessor(
@@ -49,10 +50,16 @@ public class InferredSpansProcessor implements SpanProcessor {
       boolean startScheduledProfiling,
       @Nullable File activationEventsFile,
       @Nullable File jfrFile) {
+    this.config = config;
     profiler = new SamplingProfiler(config, clock, this::getTracer, activationEventsFile, jfrFile);
     if (startScheduledProfiling) {
       profiler.start();
     }
+  }
+
+  public void setProfilerInterval(Duration interval) {
+    config.setProfilerInterval(interval);
+    profiler.reschedule();
   }
 
   public static InferredSpansProcessorBuilder builder() {
@@ -134,7 +141,7 @@ public class InferredSpansProcessor implements SpanProcessor {
       Properties properties = new Properties();
       properties.load(is);
       String version = (String) properties.get("contrib.version");
-      Objects.requireNonNull(version);
+      requireNonNull(version);
       return version;
     } catch (IOException e) {
       throw new IllegalStateException(e);

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
-public class KafkaIntegrationTest extends TargetSystemIntegrationTest {
+class KafkaIntegrationTest extends TargetSystemIntegrationTest {
   @Override
   protected Collection<GenericContainer<?>> createPrerequisiteContainers() {
     GenericContainer<?> zookeeper =

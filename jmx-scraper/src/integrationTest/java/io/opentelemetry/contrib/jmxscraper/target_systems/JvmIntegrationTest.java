@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class JvmIntegrationTest extends TargetSystemIntegrationTest {
+class JvmIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
