@@ -23,14 +23,7 @@ val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
 java {
   toolchain {
     languageVersion.set(
-      otelJava.minJavaVersionSupported.map {
-        JavaLanguageVersion.of(
-          Math.max(
-            it.majorVersion.toInt(),
-            DEFAULT_JAVA_VERSION.majorVersion.toInt()
-          )
-        )
-      }
+        otelJava.minJavaVersionSupported.map { JavaLanguageVersion.of(Math.max(it.majorVersion.toInt(), DEFAULT_JAVA_VERSION.majorVersion.toInt())) }
     )
   }
 
@@ -43,7 +36,7 @@ tasks {
     with(options) {
       release.set(otelJava.minJavaVersionSupported.map { it.majorVersion.toInt() })
 
-      if (name != "jmhCompileGeneratedClasses") {
+      if (name!="jmhCompileGeneratedClasses") {
         compilerArgs.addAll(
           listOf(
             "-Xlint:all",
@@ -113,36 +106,21 @@ plugins.withId("otel.publish-conventions") {
   tasks {
     register("generateVersionResource") {
       val moduleName = otelJava.moduleName
-      val propertiesDir = moduleName.map {
-        layout.buildDirectory.file(
-          "generated/properties/${
-            it.replace(
-              '.',
-              '/'
-            )
-          }"
-        )
-      }
+      val propertiesDir = moduleName.map { layout.buildDirectory.file("generated/properties/${it.replace('.', '/')}") }
       val projectVersion = project.version.toString()
 
       inputs.property("project.version", projectVersion)
       outputs.dir(propertiesDir)
 
       doLast {
-        File(
-          propertiesDir.get().get().asFile,
-          "version.properties"
-        ).writeText("contrib.version=${projectVersion}")
+        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${projectVersion}")
       }
     }
   }
 
   sourceSets {
     main {
-      output.dir(
-        layout.buildDirectory.dir("generated/properties"),
-        "builtBy" to "generateVersionResource"
-      )
+      output.dir(layout.buildDirectory.dir("generated/properties"), "builtBy" to "generateVersionResource")
     }
   }
 }
@@ -199,21 +177,18 @@ fun isJavaVersionAllowed(version: JavaVersion): Boolean {
   if (otelJava.minJavaVersionSupported.get() > version) {
     return false
   }
-  if (otelJava.maxJavaVersionForTests.isPresent && otelJava.maxJavaVersionForTests.get()
-      .compareTo(version) < 0
-  ) {
+  if (otelJava.maxJavaVersionForTests.isPresent && otelJava.maxJavaVersionForTests.get().compareTo(version) < 0) {
     return false
   }
   return true
 }
 
 afterEvaluate {
-  val testJavaVersion =
-    gradle.startParameter.projectProperties["testJavaVersion"]?.let(JavaVersion::toVersion)
-  val useJ9 = gradle.startParameter.projectProperties["testJavaVM"]?.run { this == "openj9" }
+  val testJavaVersion = gradle.startParameter.projectProperties["testJavaVersion"]?.let(JavaVersion::toVersion)
+  val useJ9 = gradle.startParameter.projectProperties["testJavaVM"]?.run { this=="openj9" }
     ?: false
   tasks.withType<Test>().configureEach {
-    if (testJavaVersion != null) {
+    if (testJavaVersion!=null) {
       javaLauncher.set(
         javaToolchains.launcherFor {
           languageVersion.set(JavaLanguageVersion.of(testJavaVersion.majorVersion))
@@ -241,6 +216,5 @@ dependencyCheck {
   suppressionFile = "buildscripts/dependency-check-suppressions.xml"
   failBuildOnCVSS = 7.0f // fail on high or critical CVE
   nvd.apiKey = System.getenv("NVD_API_KEY")
-  nvd.delay =
-    3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
+  nvd.delay = 3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
 }
