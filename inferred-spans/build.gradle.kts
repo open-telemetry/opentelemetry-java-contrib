@@ -52,13 +52,3 @@ tasks {
     jvmArgs("-Djava.util.logging.config.file=${project.projectDir.resolve("src/test/resources/logging.properties")}")
   }
 }
-
-// todo remove when https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/14497 is merged
-// pin io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator to 2.20.0-alpha-SNAPSHOT
-
-configurations.all {
-  resolutionStrategy {
-    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.20.0-alpha-SNAPSHOT")
-    force("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.19.0")
-  }
-}
