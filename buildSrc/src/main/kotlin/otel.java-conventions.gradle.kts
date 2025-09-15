@@ -19,6 +19,7 @@ base.archivesName.set("opentelemetry-${project.name}")
 
 // Version to use to compile code and run tests.
 val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
+val semconvVersion = "1.37.0"
 
 java {
   toolchain {
@@ -77,7 +78,7 @@ tasks {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }
-    
+
     configure<JacocoTaskExtension> {
       // only care about code coverage for code in this repository
       // (in particular avoiding netty classes which sometimes end up
@@ -143,6 +144,13 @@ dependencies {
 
   compileOnly("com.google.code.findbugs:jsr305")
   compileOnly("com.google.errorprone:error_prone_annotations")
+}
+
+configurations.all {
+  resolutionStrategy {
+    force("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
+    force("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}-alpha")
+  }
 }
 
 testing {

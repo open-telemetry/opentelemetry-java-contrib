@@ -3,7 +3,6 @@ plugins {
 }
 
 val otelInstrumentationVersion = "2.19.0-alpha"
-val semconvVersion = "1.37.0"
 
 javaPlatform {
   allowDependencies()
@@ -20,9 +19,6 @@ dependencies {
   api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
-    api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
-    api("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}")
-
     api("com.google.auto.service:auto-service:1.1.1")
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")

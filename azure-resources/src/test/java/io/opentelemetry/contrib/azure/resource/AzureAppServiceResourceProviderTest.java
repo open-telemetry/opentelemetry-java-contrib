@@ -48,7 +48,7 @@ class AzureAppServiceResourceProviderTest {
     createResource(DEFAULT_ENV_VARS)
         .containsEntry(SERVICE_NAME, TEST_WEBSITE_SITE_NAME)
         .containsEntry(CLOUD_PROVIDER, "azure")
-        .containsEntry(CLOUD_PLATFORM, "azure_app_service")
+        .containsEntry(CLOUD_PLATFORM, "azure.app_service")
         .containsEntry(
             CLOUD_RESOURCE_ID,
             "/subscriptions/TEST_WEBSITE_OWNER_NAME/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME")
