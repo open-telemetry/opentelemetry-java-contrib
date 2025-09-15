@@ -47,10 +47,10 @@ import org.junit.jupiter.api.Test;
  * https://github.com/takari/takari-lifecycle/blob/master/takari-lifecycle-plugin/src/test/java/io/takari/maven/plugins/plugin/PluginDescriptorMojoTest.java
  */
 @SuppressWarnings({"DeduplicateConstants", "deprecation"})
-public class MojoGoalExecutionHandlerTest {
+class MojoGoalExecutionHandlerTest {
 
   @Test
-  public void testMavenDeploy() throws Exception {
+  void testMavenDeploy() throws Exception {
 
     String pomXmlPath = "projects/jar/pom.xml";
     String mojoGroupId = "org.apache.maven.plugins";
@@ -92,7 +92,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testSpringBootBuildImage_springboot_1() throws Exception {
+  void testSpringBootBuildImage_springboot_1() throws Exception {
 
     String pomXmlPath = "projects/springboot_1/pom.xml";
     String mojoGroupId = "org.springframework.boot";
@@ -136,7 +136,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testSpringBootBuildImage_springboot_2() throws Exception {
+  void testSpringBootBuildImage_springboot_2() throws Exception {
 
     String pomXmlPath = "projects/springboot_2/pom.xml";
     String mojoGroupId = "org.springframework.boot";
@@ -180,7 +180,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testGoogleJibBuild_jib_1() throws Exception {
+  void testGoogleJibBuild_jib_1() throws Exception {
 
     String pomXmlPath = "projects/jib_1/pom.xml";
     String mojoGroupId = "com.google.cloud.tools";
@@ -221,7 +221,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testGoogleJibBuild_jib_2() throws Exception {
+  void testGoogleJibBuild_jib_2() throws Exception {
 
     String pomXmlPath = "projects/jib_2/pom.xml";
     String mojoGroupId = "com.google.cloud.tools";
@@ -262,7 +262,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testSnykTest_snyk_1() throws Exception {
+  void testSnykTest_snyk_1() throws Exception {
 
     String pomXmlPath = "projects/snyk_1/pom.xml";
     String mojoGroupId = "io.snyk";
@@ -298,7 +298,7 @@ public class MojoGoalExecutionHandlerTest {
   }
 
   @Test
-  public void testSnykMonitor_snyk_1() throws Exception {
+  void testSnykMonitor_snyk_1() throws Exception {
 
     String pomXmlPath = "projects/snyk_1/pom.xml";
     String mojoGroupId = "io.snyk";

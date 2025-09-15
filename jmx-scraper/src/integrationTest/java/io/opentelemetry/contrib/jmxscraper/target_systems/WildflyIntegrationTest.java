@@ -22,7 +22,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.MountableFile;
 
-public class WildflyIntegrationTest extends TargetSystemIntegrationTest {
+class WildflyIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int WILDFLY_SERVICE_PORT = 8080;
   private static final int WILDFLY_MANAGEMENT_PORT = 9990;

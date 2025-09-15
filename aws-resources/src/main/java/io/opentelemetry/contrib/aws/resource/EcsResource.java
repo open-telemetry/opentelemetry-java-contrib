@@ -26,6 +26,9 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAIN
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AWS_ECS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.logging.Level.WARNING;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,11 +38,9 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,7 +89,7 @@ public final class EcsResource {
 
   static void fetchMetadata(
       SimpleHttpClient httpClient, String url, AttributesBuilder attrBuilders) {
-    String json = httpClient.fetchString("GET", url, Collections.emptyMap(), null);
+    String json = httpClient.fetchString("GET", url, emptyMap(), null);
     if (json.isEmpty()) {
       return;
     }
@@ -103,17 +104,17 @@ public final class EcsResource {
           .getLogGroupArn()
           .ifPresent(
               logGroupArn -> {
-                attrBuilders.put(AWS_LOG_GROUP_ARNS, Collections.singletonList(logGroupArn));
+                attrBuilders.put(AWS_LOG_GROUP_ARNS, singletonList(logGroupArn));
               });
 
       logArnBuilder
           .getLogStreamArn()
           .ifPresent(
               logStreamArn -> {
-                attrBuilders.put(AWS_LOG_STREAM_ARNS, Collections.singletonList(logStreamArn));
+                attrBuilders.put(AWS_LOG_STREAM_ARNS, singletonList(logStreamArn));
               });
     } catch (IOException e) {
-      logger.log(Level.WARNING, "Can't get ECS metadata", e);
+      logger.log(WARNING, "Can't get ECS metadata", e);
     }
   }
 
@@ -156,7 +157,7 @@ public final class EcsResource {
       JsonParser parser, AttributesBuilder attrBuilders, LogArnBuilder logArnBuilder)
       throws IOException {
     if (!parser.isExpectedStartObjectToken()) {
-      logger.log(Level.WARNING, "Couldn't parse ECS metadata, invalid JSON");
+      logger.log(WARNING, "Couldn't parse ECS metadata, invalid JSON");
       return;
     }
 
@@ -339,7 +340,7 @@ public final class EcsResource {
       }
       Matcher matcher = imagePattern.matcher(image);
       if (!matcher.matches()) {
-        logger.log(Level.WARNING, "Couldn't parse image '" + image + "'");
+        logger.log(WARNING, "Couldn't parse image '" + image + "'");
         return null;
       }
       String repository = matcher.group("repository");

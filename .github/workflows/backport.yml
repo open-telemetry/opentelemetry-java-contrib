@@ -12,7 +12,7 @@ permissions:
 jobs:
   backport:
     permissions:
-      contents: write  # for Git to git push
+      contents: write  # for git push to PR branch
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -29,7 +29,7 @@ jobs:
       - name: Use CLA approved bot
         run: .github/scripts/use-cla-approved-bot.sh
 
-      - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+      - uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
         id: otelbot-token
         with:
           app-id: ${{ vars.OTELBOT_APP_ID }}
@@ -48,6 +48,15 @@ jobs:
 
           git checkout -b $branch
           git cherry-pick $commit
+
+          if git diff --name-only HEAD~1 HEAD | grep -q '^\.github/workflows/'; then
+            echo "::error::This PR contains changes to workflow files (.github/workflows/)."
+            echo "::error::Workflow files cannot be automatically backported because the standard"
+            echo "::error::GitHub token doesn't have the required 'workflow' write permission."
+            echo "::error::Please backport this PR manually."
+            exit 1
+          fi
+
           git push --set-upstream origin $branch
           gh pr create --title "[$GITHUB_REF_NAME] $title" \
                        --body "Clean cherry-pick of #$NUMBER to the \`$GITHUB_REF_NAME\` branch." \

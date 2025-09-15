@@ -6,7 +6,7 @@
 package io.opentelemetry.opamp.client.internal.response;
 
 import com.google.auto.value.AutoValue;
-import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.OpampClient;
 import javax.annotation.Nullable;
 import opamp.proto.AgentRemoteConfig;
 

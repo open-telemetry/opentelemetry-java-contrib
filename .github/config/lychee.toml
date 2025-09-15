@@ -1,0 +1,14 @@
+timeout = 30
+retry_wait_time = 5
+max_retries = 6
+max_concurrency = 4
+
+# Check link anchors
+include_fragments = true
+
+exclude = [
+  # until https://github.com/open-telemetry/opentelemetry-java-contrib/issues/2221 is resolved
+  "^https?://www.ibm.com",
+  # excluding links to pull requests and issues is done for performance
+  "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
+]

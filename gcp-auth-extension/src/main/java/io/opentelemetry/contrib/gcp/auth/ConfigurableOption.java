@@ -5,9 +5,10 @@
 
 package io.opentelemetry.contrib.gcp.auth;
 
+import static java.util.Locale.ROOT;
+
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
-import java.util.Locale;
 import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 
@@ -60,8 +61,7 @@ enum ConfigurableOption {
   ConfigurableOption(String userReadableName) {
     this.userReadableName = userReadableName;
     this.environmentVariableName = this.name();
-    this.systemPropertyName =
-        this.environmentVariableName.toLowerCase(Locale.ROOT).replace('_', '.');
+    this.systemPropertyName = this.environmentVariableName.toLowerCase(ROOT).replace('_', '.');
   }
 
   /**
