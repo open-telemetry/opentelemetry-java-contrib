@@ -12,8 +12,6 @@ import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
-import com.google.common.annotations.VisibleForTesting;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
@@ -31,7 +29,6 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,8 +86,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    *       customizes only the signal specific exporter.
    * </ul>
    *
-   * <p>The 'customization' performed includes customizing the exporters by adding required headers
-   * to the export calls made and customizing the resource by adding required resource attributes to
+   * The 'customization' performed includes customizing the exporters by adding required headers to
+   * the export calls made and customizing the resource by adding required resource attributes to
    * enable GCP integration.
    *
    * @param autoConfiguration the AutoConfigurationCustomizer to customize.
@@ -101,7 +98,12 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    GoogleCredentials credentials = getCredentials();
+    GoogleCredentials credentials;
+    try {
+      credentials = GoogleCredentials.getApplicationDefault();
+    } catch (IOException e) {
+      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+    }
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
@@ -112,16 +114,6 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
   }
 
-  static GoogleCredentials getCredentials() {
-    GoogleCredentials credentials;
-    try {
-      credentials = GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
-    return credentials;
-  }
-
   @Override
   public int order() {
     return Integer.MAX_VALUE - 1;
@@ -129,61 +121,42 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldCustomizeExporter(
-        SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
+    if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
-    if (shouldCustomizeExporter(
-        SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION, configProperties)) {
+    if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
+    } else {
+      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          params);
     }
     return exporter;
   }
 
-  /**
-   * Utility method to check whether OTLP exporters should be customized for the given target
-   * signal.
-   *
-   * @param signal The target signal to check against. Could be one of {@value SIGNAL_TYPE_TRACES},
-   *     {@value SIGNAL_TYPE_METRICS} or {@value SIGNAL_TYPE_ALL}.
-   * @param fixSuggestion A warning to alert the user that auth extension is not configured for the
-   *     provided target signal.
-   * @param configProperties The {@link ConfigProperties} object used to configure the extension.
-   * @return A boolean indicating whether the OTLP exporters should be customized or not.
-   */
-  static boolean shouldCustomizeExporter(
-      String signal, String fixSuggestion, ConfigProperties configProperties) {
-    if (isSignalTargeted(signal, configProperties)) {
-      return true;
-    } else {
-      logger.log(
-          Level.WARNING,
-          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
-          new String[] {signal, fixSuggestion});
-      return false;
-    }
-  }
-
   // Checks if the auth extension is configured to target the passed signal for authentication.
   private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
-    return targetSignals(configProperties).stream()
+    String userSpecifiedTargetedSignals =
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
+            configProperties, () -> SIGNAL_TYPE_ALL);
+    return stream(userSpecifiedTargetedSignals.split(","))
+        .map(String::trim)
         .anyMatch(
             targetedSignal ->
                 targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
-  }
-
-  @VisibleForTesting
-  static List<String> targetSignals(ConfigProperties configProperties) {
-    return Objects.requireNonNull(
-        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValue(
-            configProperties,
-            (properties, name) ->
-                properties.getList(name, Collections.singletonList(SIGNAL_TYPE_ALL))));
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -222,7 +195,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return exporter;
   }
 
-  static Map<String, String> getRequiredHeaderMap(
+  private static Map<String, String> getRequiredHeaderMap(
       GoogleCredentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
     try {
@@ -244,31 +217,21 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // Add quota user project header if not detected by the auth library and user provided it via
     // system properties.
     if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
-      getQuotaProjectId(configProperties)
-          .ifPresent(
-              configuredQuotaProjectId ->
-                  flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
+      Optional<String> maybeConfiguredQuotaProjectId =
+          ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
+              configProperties);
+      maybeConfiguredQuotaProjectId.ifPresent(
+          configuredQuotaProjectId ->
+              flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
     }
     return flattenedHeaders;
   }
 
-  static Optional<String> getQuotaProjectId(ConfigProperties configProperties) {
-    return Optional.ofNullable(
-        ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValue(
-            configProperties, ConfigProperties::getString));
-  }
-
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    Resource res =
-        Resource.create(
-            Attributes.of(
-                stringKey(GCP_USER_PROJECT_ID_KEY), getProjectId(configProperties)));
+    String gcpProjectId =
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
+    Resource res = Resource.create(Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
     return resource.merge(res);
-  }
-
-  static String getProjectId(ConfigProperties configProperties) {
-    return ConfigurableOption.GOOGLE_CLOUD_PROJECT.getRequiredConfiguredValue(
-        configProperties, ConfigProperties::getString);
   }
 }
