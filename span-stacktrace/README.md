@@ -1,4 +1,3 @@
-
 # Span stacktrace capture
 
 This module provides a `SpanProcessor` that captures the [`code.stacktrace`](https://opentelemetry.io/docs/specs/semconv/attributes-registry/code/).
@@ -24,6 +23,19 @@ SDK when included in the application runtime dependencies.
 - defaults to include all spans.
 - value is the class name of a class implementing `java.util.function.Predicate<ReadableSpan>`
 - filter class must be publicly accessible and provide a no-arg constructor
+
+### Usage with declarative configuration
+
+You can enable the stacktrace span processor using declarative YAML configuration with the OpenTelemetry SDK. For example:
+
+```yaml
+file_format: 1.0-rc.1
+tracer_provider:
+  processors:
+    - experimental-stacktrace:
+```
+
+This configuration will register the StackTraceSpanProcessor for all spans. 
 
 ## Component owners
 
