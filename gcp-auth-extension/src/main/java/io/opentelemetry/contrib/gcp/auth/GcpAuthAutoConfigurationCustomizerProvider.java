@@ -6,14 +6,13 @@
 package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
-import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
@@ -31,7 +30,6 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -182,8 +180,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return Objects.requireNonNull(
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValue(
             configProperties,
-            (properties, name) ->
-                properties.getList(name, Collections.singletonList(SIGNAL_TYPE_ALL))));
+            (properties, name) -> properties.getList(name, singletonList(SIGNAL_TYPE_ALL))));
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
@@ -262,8 +259,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
     Resource res =
         Resource.create(
-            Attributes.of(
-                stringKey(GCP_USER_PROJECT_ID_KEY), getProjectId(configProperties)));
+            Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), getProjectId(configProperties)));
     return resource.merge(res);
   }
 

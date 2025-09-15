@@ -12,8 +12,8 @@ import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomiz
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
-import io.opentelemetry.instrumentation.api.incubator.config.bridge.ConfigPropertiesUtil;
-import io.opentelemetry.instrumentation.api.incubator.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
+import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesUtil;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
