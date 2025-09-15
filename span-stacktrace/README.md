@@ -35,7 +35,7 @@ tracer_provider:
     - experimental-stacktrace:
 ```
 
-This configuration will register the StackTraceSpanProcessor for all spans. 
+This configuration will register the StackTraceSpanProcessor for all spans.
 
 ## Component owners
 
