@@ -156,7 +156,7 @@ config.yml file in <code>src/main/resources/config.yml</code>.
 
 ### Monitoring Workings - Internals
 
-This software extracts metrics through [PCF framework](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q019990_.htm).
+This software extracts metrics through [PCF framework](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=tasks-introduction-programmable-command-formats).
 [A complete list of PCF commands are listed here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q086870_.htm).
 Each queue manager has an administration queue with a standard queue name and
 the extension sends PCF command messages to that queue. On Windows and Unix platforms, the PCF
