@@ -90,6 +90,8 @@ public final class AttributesMapper {
       // empty objects, we MUST assume here that the writer put an empty string
       // into the value of the attribute. This will need to change later, when complex
       // types arrive and the spec issue is resolved.
+      //
+      // See spec issue: https://github.com/open-telemetry/opentelemetry-specification/issues/4660
       builder.put(AttributeKey.stringKey(key), "");
     }
   }
