@@ -84,8 +84,7 @@ public final class AttributesMapper {
       builder.put(AttributeKey.doubleKey(key), value.double_value);
     } else if (value.array_value != null) {
       addArray(builder, key, value.array_value);
-    }
-    else {
+    } else {
       // Until we have complex attribute types that could potentially yield
       // empty objects, we MUST assume here that the writer put an empty string
       // into the value of the attribute. This will need to change later, when complex
