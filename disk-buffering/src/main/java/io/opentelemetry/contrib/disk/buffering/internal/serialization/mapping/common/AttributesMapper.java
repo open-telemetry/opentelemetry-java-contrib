@@ -84,8 +84,13 @@ public final class AttributesMapper {
       builder.put(AttributeKey.doubleKey(key), value.double_value);
     } else if (value.array_value != null) {
       addArray(builder, key, value.array_value);
-    } else {
-      throw new UnsupportedOperationException();
+    }
+    else {
+      // Until we have complex attribute types that could potentially yield
+      // empty objects, we MUST assume here that the writer put an empty string
+      // into the value of the attribute. This will need to change later, when complex
+      // types arrive and the spec issue is resolved.
+      builder.put(AttributeKey.stringKey(key), "");
     }
   }
 
