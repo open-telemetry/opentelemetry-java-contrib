@@ -37,6 +37,8 @@ public final class TestData {
           .put("conditions", false, true)
           .put("scores", 0L, 1L)
           .put("coins", 0.01, 0.05, 0.1)
+          .put("empty", "")
+          .put("blank", " ")
           .build();
 
   public static final Resource RESOURCE_FULL =
