@@ -1,6 +1,6 @@
 pluginManagement {
   plugins {
-    id("com.gradleup.shadow") version "9.0.2"
+    id("com.gradleup.shadow") version "9.1.0"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("com.gradle.develocity") version "4.1.1"
   }
@@ -29,6 +29,12 @@ develocity {
     publishing.onlyIf { System.getenv("CI") != null }
     termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
     termsOfUseAgree.set("yes")
+
+    buildScanPublished {
+      File("build-scan.txt").printWriter().use { writer ->
+        writer.println(buildScanUri)
+      }
+    }
   }
 }
 

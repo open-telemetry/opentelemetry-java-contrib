@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
@@ -33,9 +32,9 @@ class ProtoMetricsDataMapperTest {
     ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
-    assertEquals(1, resourceMetrics.size());
-    assertEquals(1, resourceMetrics.get(0).scope_metrics.size());
-    assertEquals(1, resourceMetrics.get(0).scope_metrics.get(0).metrics.size());
+    assertThat(resourceMetrics).hasSize(1);
+    assertThat(resourceMetrics.get(0).scope_metrics).hasSize(1);
+    assertThat(resourceMetrics.get(0).scope_metrics.get(0).metrics).hasSize(1);
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
@@ -52,11 +51,11 @@ class ProtoMetricsDataMapperTest {
     ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
-    assertEquals(1, resourceMetrics.size());
+    assertThat(resourceMetrics).hasSize(1);
     List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).scope_metrics;
-    assertEquals(1, scopeMetrics.size());
+    assertThat(scopeMetrics).hasSize(1);
     List<Metric> metrics = scopeMetrics.get(0).metrics;
-    assertEquals(2, metrics.size());
+    assertThat(metrics).hasSize(2);
 
     List<MetricData> result = mapFromProto(proto);
 
@@ -81,15 +80,15 @@ class ProtoMetricsDataMapperTest {
     ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
-    assertEquals(1, resourceMetrics.size());
+    assertThat(resourceMetrics).hasSize(1);
     List<ScopeMetrics> scopeMetrics = resourceMetrics.get(0).scope_metrics;
-    assertEquals(2, scopeMetrics.size());
+    assertThat(scopeMetrics).hasSize(2);
     ScopeMetrics firstScope = scopeMetrics.get(0);
     ScopeMetrics secondScope = scopeMetrics.get(1);
     List<Metric> firstScopeMetrics = firstScope.metrics;
     List<Metric> secondScopeMetrics = secondScope.metrics;
-    assertEquals(1, firstScopeMetrics.size());
-    assertEquals(1, secondScopeMetrics.size());
+    assertThat(firstScopeMetrics).hasSize(1);
+    assertThat(secondScopeMetrics).hasSize(1);
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }
@@ -116,19 +115,19 @@ class ProtoMetricsDataMapperTest {
     ExportMetricsServiceRequest proto = mapToProto(signals);
 
     List<ResourceMetrics> resourceMetrics = proto.resource_metrics;
-    assertEquals(2, resourceMetrics.size());
+    assertThat(resourceMetrics).hasSize(2);
     ResourceMetrics firstResourceMetrics = resourceMetrics.get(0);
     ResourceMetrics secondResourceMetrics = resourceMetrics.get(1);
     List<ScopeMetrics> firstScopeMetrics = firstResourceMetrics.scope_metrics;
     List<ScopeMetrics> secondScopeMetrics = secondResourceMetrics.scope_metrics;
-    assertEquals(1, firstScopeMetrics.size());
-    assertEquals(1, secondScopeMetrics.size());
+    assertThat(firstScopeMetrics).hasSize(1);
+    assertThat(secondScopeMetrics).hasSize(1);
     ScopeMetrics firstScope = firstScopeMetrics.get(0);
     ScopeMetrics secondScope = secondScopeMetrics.get(0);
     List<Metric> firstMetrics = firstScope.metrics;
     List<Metric> secondMetrics = secondScope.metrics;
-    assertEquals(1, firstMetrics.size());
-    assertEquals(1, secondMetrics.size());
+    assertThat(firstMetrics).hasSize(1);
+    assertThat(secondMetrics).hasSize(1);
 
     assertThat(mapFromProto(proto)).containsExactlyInAnyOrderElementsOf(expectedSignals);
   }

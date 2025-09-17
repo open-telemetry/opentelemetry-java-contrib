@@ -12,13 +12,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
-import io.opentelemetry.opamp.client.internal.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import io.opentelemetry.opamp.client.internal.state.State;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;

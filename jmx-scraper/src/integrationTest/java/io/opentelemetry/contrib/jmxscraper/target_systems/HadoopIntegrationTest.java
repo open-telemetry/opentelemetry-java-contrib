@@ -16,7 +16,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
-public class HadoopIntegrationTest extends TargetSystemIntegrationTest {
+class HadoopIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int HADOOP_PORT = 50070;
 

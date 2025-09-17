@@ -6,7 +6,7 @@
 package io.opentelemetry.opamp.client.internal.request.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
@@ -23,6 +23,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;

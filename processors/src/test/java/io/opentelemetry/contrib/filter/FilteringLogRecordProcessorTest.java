@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class FilteringLogRecordProcessorTest {
+class FilteringLogRecordProcessorTest {
 
   private final InMemoryLogRecordExporter memoryLogRecordExporter =
       InMemoryLogRecordExporter.create();
@@ -79,7 +79,7 @@ public class FilteringLogRecordProcessorTest {
                     logRecordData -> {
                       SpanContext spanContext = logRecordData.getSpanContext();
                       return spanContext.isSampled();
-                    }) {})
+                    }))
             .build()
             .get("TestScope");
   }

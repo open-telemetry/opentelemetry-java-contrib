@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.stream.Collectors.toList;
+
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
@@ -17,7 +19,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
@@ -117,7 +118,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
             Arrays.stream(wildcardListString.split(","))
                 .filter(str -> !str.isEmpty())
                 .map(WildcardMatcher::valueOf)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (!values.isEmpty()) {
           funcToApply.accept(values);
         }

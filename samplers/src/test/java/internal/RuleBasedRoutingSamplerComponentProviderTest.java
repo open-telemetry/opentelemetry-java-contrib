@@ -38,7 +38,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 0.4\n"
+        "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  sampler:\n"
             + "    parent_based:\n"
@@ -173,7 +173,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
                 + "rules:\n"
                 + "  - attribute: url.path\n"
                 + "    pattern: path\n",
-            "rule_Based_routing sampler failed to create .fallback sampler"),
+            "rule_based_routing sampler failed to create .fallback sampler"),
         Arguments.of(
             "fallback_sampler:\n"
                 + "  always_on:\n"
@@ -218,6 +218,6 @@ class RuleBasedRoutingSamplerComponentProviderTest {
                 + "  - attribute: url.path\n"
                 + "    pattern: path\n"
                 + "    action: foo\n",
-            "rule_based_routing sampler .rules[].action is must be RECORD_AND_SAMPLE or DROP"));
+            "rule_based_routing sampler .rules[].action must be RECORD_AND_SAMPLE or DROP"));
   }
 }

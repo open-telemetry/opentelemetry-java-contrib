@@ -6,6 +6,8 @@
 package io.opentelemetry.contrib.awsxray;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.sdk.common.Clock;
@@ -26,7 +28,7 @@ public final class AwsXrayRemoteSamplerBuilder {
   private Clock clock = Clock.getDefault();
   private String endpoint = DEFAULT_ENDPOINT;
   @Nullable private Sampler initialSampler;
-  private long pollingIntervalNanos = TimeUnit.SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
+  private long pollingIntervalNanos = SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
 
   AwsXrayRemoteSamplerBuilder(Resource resource) {
     this.resource = resource;
@@ -51,7 +53,7 @@ public final class AwsXrayRemoteSamplerBuilder {
   @CanIgnoreReturnValue
   public AwsXrayRemoteSamplerBuilder setPollingInterval(Duration delay) {
     requireNonNull(delay, "delay");
-    return setPollingInterval(delay.toNanos(), TimeUnit.NANOSECONDS);
+    return setPollingInterval(delay.toNanos(), NANOSECONDS);
   }
 
   /**

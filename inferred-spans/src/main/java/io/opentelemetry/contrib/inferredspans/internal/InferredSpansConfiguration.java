@@ -23,7 +23,7 @@ public class InferredSpansConfiguration {
   private final Duration inferredSpansMinDuration;
   private final List<WildcardMatcher> includedClasses;
   private final List<WildcardMatcher> excludedClasses;
-  private final Duration profilerInterval;
+  private volatile Duration profilerInterval;
   private final Duration profilingDuration;
   @Nullable private final String profilerLibDirectory;
   private final BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler;
@@ -82,6 +82,10 @@ public class InferredSpansConfiguration {
 
   public Duration getProfilingInterval() {
     return profilerInterval;
+  }
+
+  public void setProfilerInterval(Duration profilerInterval) {
+    this.profilerInterval = profilerInterval;
   }
 
   public Duration getProfilingDuration() {

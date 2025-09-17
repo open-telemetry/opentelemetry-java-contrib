@@ -6,9 +6,8 @@
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.TRY_LATER;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -58,7 +57,7 @@ class StorageTest {
   void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
 
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.SUCCEEDED);
 
     verify(readableFile).readAndProcess(processing);
   }
@@ -68,7 +67,7 @@ class StorageTest {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
     when(readableFile.readAndProcess(processing)).thenReturn(TRY_LATER);
 
-    assertEquals(TRY_LATER, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(TRY_LATER);
 
     verify(readableFile).readAndProcess(processing);
   }
@@ -78,8 +77,8 @@ class StorageTest {
     ReadableFile anotherReadable = mock();
     when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
 
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.SUCCEEDED);
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.SUCCEEDED);
 
     verify(readableFile, times(2)).readAndProcess(processing);
     verify(folderManager, times(1)).getReadableFile();
@@ -103,18 +102,18 @@ class StorageTest {
   @Test
   void whenAttemptingToReadAfterClosed_returnFailed() throws IOException {
     storage.close();
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.FAILED);
   }
 
   @Test
   void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
     storage.close();
-    assertFalse(storage.write(new ByteArraySerializer(new byte[1])));
+    assertThat(storage.write(new ByteArraySerializer(new byte[1]))).isFalse();
   }
 
   @Test
   void whenNoFileAvailableForReading_returnFailed() throws IOException {
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.FAILED);
   }
 
   @Test
@@ -152,7 +151,7 @@ class StorageTest {
     when(folderManager.getReadableFile()).thenReturn(readableFile);
     when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
 
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
+    assertThat(storage.readAndProcess(processing)).isEqualTo(ReadableResult.FAILED);
 
     verify(folderManager, times(3)).getReadableFile();
   }
@@ -215,7 +214,7 @@ class StorageTest {
     when(folderManager.createWritableFile()).thenReturn(writableFile);
     when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
 
-    assertFalse(storage.write(data));
+    assertThat(storage.write(data)).isFalse();
 
     verify(folderManager, times(3)).createWritableFile();
   }

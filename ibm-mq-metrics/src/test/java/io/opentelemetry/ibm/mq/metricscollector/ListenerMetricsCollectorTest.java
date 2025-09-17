@@ -47,7 +47,7 @@ class ListenerMetricsCollectorTest {
   }
 
   @Test
-  public void testPublishMetrics() throws Exception {
+  void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireListenerStatusCmd());
 

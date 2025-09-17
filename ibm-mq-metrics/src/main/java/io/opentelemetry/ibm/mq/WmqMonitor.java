@@ -43,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WmqMonitor {
+public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
 

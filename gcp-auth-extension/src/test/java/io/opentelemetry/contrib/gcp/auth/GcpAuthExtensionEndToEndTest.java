@@ -7,9 +7,8 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.GCP_USER_PROJECT_ID_KEY;
 import static io.opentelemetry.contrib.gcp.auth.GcpAuthAutoConfigurationCustomizerProvider.QUOTA_USER_PROJECT_HEADER;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.stop.Stop.stopQuietly;
@@ -51,7 +50,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 @SpringBootTest(
     classes = {Application.class},
     webEnvironment = WebEnvironment.RANDOM_PORT)
-public class GcpAuthExtensionEndToEndTest {
+class GcpAuthExtensionEndToEndTest {
 
   @LocalServerPort private int testApplicationPort; // port at which the spring app is running
 
@@ -115,7 +114,7 @@ public class GcpAuthExtensionEndToEndTest {
   }
 
   @Test
-  public void authExtensionSmokeTest() {
+  void authExtensionSmokeTest() {
     template.getForEntity(
         URI.create("http://localhost:" + testApplicationPort + "/ping"), String.class);
 
@@ -160,24 +159,22 @@ public class GcpAuthExtensionEndToEndTest {
   private static void verifyResourceAttributes(List<ResourceSpans> extractedResourceSpans) {
     extractedResourceSpans.forEach(
         resourceSpan ->
-            assertTrue(
-                resourceSpan
-                    .getResource()
-                    .getAttributesList()
-                    .contains(
-                        KeyValue.newBuilder()
-                            .setKey(GCP_USER_PROJECT_ID_KEY)
-                            .setValue(AnyValue.newBuilder().setStringValue(DUMMY_GCP_PROJECT))
-                            .build())));
+            assertThat(resourceSpan.getResource().getAttributesList())
+                .contains(
+                    KeyValue.newBuilder()
+                        .setKey(GCP_USER_PROJECT_ID_KEY)
+                        .setValue(AnyValue.newBuilder().setStringValue(DUMMY_GCP_PROJECT))
+                        .build()));
   }
 
   private static void verifyRequestHeaders(List<Headers> extractedHeaders) {
-    assertFalse(extractedHeaders.isEmpty());
+    assertThat(extractedHeaders).isNotEmpty();
     // verify if extension added the required headers
     extractedHeaders.forEach(
         headers -> {
-          assertTrue(headers.containsEntry(QUOTA_USER_PROJECT_HEADER, DUMMY_GCP_QUOTA_PROJECT));
-          assertTrue(headers.containsEntry("Authorization", "Bearer fake.access_token"));
+          assertThat(headers.containsEntry(QUOTA_USER_PROJECT_HEADER, DUMMY_GCP_QUOTA_PROJECT))
+              .isTrue();
+          assertThat(headers.containsEntry("Authorization", "Bearer fake.access_token")).isTrue();
         });
   }
 

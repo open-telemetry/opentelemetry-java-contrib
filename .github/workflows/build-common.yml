@@ -18,6 +18,25 @@ permissions:
   contents: read
 
 jobs:
+  spotless:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Spotless
+        run: ./gradlew spotlessCheck ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -29,13 +48,29 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
-      - name: Gradle build and test
-        run: ./gradlew build -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+      - name: Build
+        run: ./gradlew build -x spotlessCheck -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Check for jApiCmp diffs
+        # The jApiCmp diff compares current to latest, which isn't appropriate for release branches
+        if: ${{ !startsWith(github.ref_name, 'release/') && !startsWith(github.base_ref, 'release/') }}
+        run: |
+          # need to "git add" in case any generated files did not already exist
+          git add docs/apidiffs
+          if git diff --cached --quiet
+          then
+            echo "No diff detected."
+          else
+            echo "Diff detected - did you run './gradlew jApiCmp'?"
+            git diff --cached --name-only
+            git diff --cached
+            exit 1
+          fi
 
   test:
     name: Test
@@ -44,8 +79,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
-          - macos-13
           - ubuntu-latest
           - windows-latest
         test-java-version:
@@ -54,18 +87,6 @@ jobs:
           - 17
           - 21
           - 24 # renovate: datasource=java-version
-        # macos-latest drops support for java 8 temurin. Run java 8 on macos-13. Run java 11, 17, 21 on macos-latest.
-        exclude:
-          - os: macos-latest
-            test-java-version: 8
-          - os: macos-13
-            test-java-version: 11
-          - os: macos-13
-            test-java-version: 17
-          - os: macos-13
-            test-java-version: 21
-          - os: macos-13
-            test-java-version: 24 # renovate: datasource=java-version
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -83,12 +104,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
-      - name: Gradle test
+      - name: Test
         run: >
           ./gradlew test
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
@@ -96,6 +117,10 @@ jobs:
           "-Porg.gradle.java.installations.auto-download=false"
           "-PmaxTestRetries=${{ inputs.max-test-retries }}"
           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
 
   integration-test:
     runs-on: ubuntu-latest
@@ -108,13 +133,17 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up gradle
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Integration test
         run: ./gradlew integrationTest "-PmaxTestRetries=${{ inputs.max-test-retries }}" ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
 
       - name: Save integration test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

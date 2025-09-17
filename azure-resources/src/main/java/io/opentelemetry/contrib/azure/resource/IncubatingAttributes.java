@@ -24,10 +24,10 @@ final class IncubatingAttributes {
       AttributeKey.stringKey("cloud.resource_id");
 
   public static final class CloudPlatformIncubatingValues {
-    public static final String AZURE_VM = "azure_vm";
-    public static final String AZURE_AKS = "azure_aks";
-    public static final String AZURE_FUNCTIONS = "azure_functions";
-    public static final String AZURE_APP_SERVICE = "azure_app_service";
+    public static final String AZURE_VM = "azure.vm";
+    public static final String AZURE_AKS = "azure.aks";
+    public static final String AZURE_FUNCTIONS = "azure.functions";
+    public static final String AZURE_APP_SERVICE = "azure.app_service";
 
     private CloudPlatformIncubatingValues() {}
   }
