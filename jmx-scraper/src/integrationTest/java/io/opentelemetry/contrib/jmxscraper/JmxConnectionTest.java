@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
@@ -131,7 +132,7 @@ class JmxConnectionTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = JmxScraperContainer.ConfigSource.class)
+  @EnumSource
   void serverSslClientSsl(JmxScraperContainer.ConfigSource configSource) {
     // Note: this could have been made simpler by relying on the fact that keystore could be used
     // as a trust store, but having clear split provides also some extra clarity
@@ -173,6 +174,39 @@ class JmxConnectionTest {
                 .withKeyStore(clientKeyStore)
                 .withTrustStore(clientTrustStore)
                 .withConfigSource(configSource));
+  }
+
+  @Test
+  void stableServiceInstanceServiceId() {
+    UUID expectedServiceId = null;
+
+    // start a single app, connect twice to it and check that the service id is the same
+    try (TestAppContainer app = appContainer().withJmxPort(JMX_PORT)) {
+      app.start();
+      for (int i = 0; i < 2; i++) {
+        try (JmxScraperContainer scraper =
+            scraperContainer()
+                .withRmiServiceUrl(APP_HOST, JMX_PORT)
+                // does not need to be tested on all config sources
+                .withConfigSource(JmxScraperContainer.ConfigSource.SYSTEM_PROPERTIES)) {
+          scraper.start();
+          waitTerminated(scraper);
+          String[] logLines = scraper.getLogs().split("\n");
+          UUID serviceId = null;
+          for (String logLine : logLines) {
+            if (logLine.contains("remote service instance ID")) {
+              serviceId = UUID.fromString(logLine.substring(logLine.lastIndexOf(":") + 1).trim());
+            }
+          }
+          assertThat(serviceId).isNotNull();
+          if (expectedServiceId == null) {
+            expectedServiceId = serviceId;
+          } else {
+            assertThat(serviceId).isEqualTo(expectedServiceId);
+          }
+        }
+      }
+    }
   }
 
   private static void connectionTest(
