@@ -25,6 +25,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +38,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -146,7 +148,7 @@ public final class JmxScraper {
     }
   }
 
-  // TODO : test on local JVM and call it more than once for stability
+  @Nullable
   static UUID getRemoteServiceInstanceId(JmxConnectorBuilder connectorBuilder) {
     try (JMXConnector jmxConnector = connectorBuilder.build()) {
       MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
@@ -154,16 +156,16 @@ public final class JmxScraper {
       StringBuilder id = new StringBuilder();
       try {
         ObjectName objectName = new ObjectName("java.lang:type=Runtime");
-        for (String attribute : Arrays.asList("StartTime", "Pid", "Name")) {
+        for (String attribute : Arrays.asList("StartTime", "Name")) {
           Object value = connection.getAttribute(objectName, attribute);
           if (id.length() > 0) {
-            id.append(",");
+            id.append(" ");
           }
           id.append(value);
         }
-        return UUID.nameUUIDFromBytes(id.toString().getBytes());
+        return UUID.nameUUIDFromBytes(id.toString().getBytes(StandardCharsets.UTF_8));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
     } catch (IOException e) {
       return null;
