@@ -6,12 +6,14 @@
 package io.opentelemetry.contrib.jmxscraper;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesSupplier;
 import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
 import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.io.DataInputStream;
@@ -62,22 +64,12 @@ public class JmxScraper {
       Properties argsConfig = argsToConfig(effectiveArgs);
       propagateToSystemProperties(argsConfig);
 
-      // auto-configure and register SDK
       PropertiesCustomizer configCustomizer = new PropertiesCustomizer();
-      AutoConfiguredOpenTelemetrySdk.builder()
-          .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
-          .addPropertiesCustomizer(configCustomizer)
-          .setResultAsGlobal()
-          .build();
-
       JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
 
       long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
       logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
 
-      JmxMetricInsight service =
-          JmxMetricInsight.createService(
-              GlobalOpenTelemetry.get(), scraperConfig.getSamplingInterval().toMillis());
       JmxConnectorBuilder connectorBuilder =
           JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
 
@@ -91,7 +83,16 @@ public class JmxScraper {
       if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
-        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
+        // auto-configure SDK
+        OpenTelemetry openTelemetry = AutoConfiguredOpenTelemetrySdk.builder()
+            .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
+            .addPropertiesCustomizer(configCustomizer)
+            .build()
+            .getOpenTelemetrySdk();
+        JmxMetricInsight jmxInsight =
+            JmxMetricInsight.createService(
+                openTelemetry, scraperConfig.getSamplingInterval().toMillis());
+        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, jmxInsight, scraperConfig);
         jmxScraper.start();
       }
     } catch (ConfigurationException e) {
