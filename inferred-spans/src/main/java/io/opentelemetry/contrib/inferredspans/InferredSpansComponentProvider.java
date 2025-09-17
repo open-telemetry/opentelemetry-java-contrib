@@ -24,7 +24,8 @@ public class InferredSpansComponentProvider implements ComponentProvider<SpanPro
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return InferredSpansConfig.create(
         new DeclarativeConfigPropertiesBridgeBuilder()
-            // crop the prefix, because the properties are under the "experimental_inferred_spans" processor
+            // crop the prefix, because the properties are under the "experimental_inferred_spans"
+            // processor
             .addMapping("otel.inferred.spans.", "")
             .build(config));
   }
