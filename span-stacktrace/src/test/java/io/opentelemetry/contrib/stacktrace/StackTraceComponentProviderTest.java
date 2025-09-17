@@ -20,7 +20,7 @@ class StackTraceComponentProviderTest {
         "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  processors:\n"
-            + "    - experimental-stacktrace:\n";
+            + "    - experimental_stacktrace:\n";
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
