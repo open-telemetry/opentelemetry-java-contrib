@@ -5,17 +5,18 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesSupplier;
 import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
 import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,15 +28,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
 public class JmxScraper {
+
+  private static final AttributeKey<String> SERVICE_INSTANCE_ID =
+      AttributeKey.stringKey("service.instance.id");
+
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
   private static final String TEST_ARG = "-test";
@@ -65,30 +71,35 @@ public class JmxScraper {
       propagateToSystemProperties(argsConfig);
 
       PropertiesCustomizer configCustomizer = new PropertiesCustomizer();
+
+      // auto-configure SDK
+      OpenTelemetry openTelemetry =
+          AutoConfiguredOpenTelemetrySdk.builder()
+              .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
+              .addPropertiesCustomizer(configCustomizer)
+              // we rely on the config customizer to be executed first to get effective config
+              .addResourceCustomizer(
+                  (resource, configProperties) -> {
+                    UUID instanceId =
+                        getRemoteServiceInstanceId(configCustomizer.getConnectorBuilder());
+                    if (resource.getAttribute(SERVICE_INSTANCE_ID) != null || instanceId == null) {
+                      return resource;
+                    }
+                    logger.log(Level.INFO, "remote service instance ID: " + instanceId);
+                    return resource.merge(
+                        Resource.create(Attributes.of(SERVICE_INSTANCE_ID, instanceId.toString())));
+                  })
+              .build()
+              .getOpenTelemetrySdk();
+
+      // scraper configuration and connector builder are built using effective SDK configuration
+      // thus we have to get it after the SDK is built
       JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
-
-      long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
-      logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
-
-      JmxConnectorBuilder connectorBuilder =
-          JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
-
-      Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
-      Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
-
-      if (scraperConfig.isRegistrySsl()) {
-        connectorBuilder.withSslRegistry();
-      }
+      JmxConnectorBuilder connectorBuilder = configCustomizer.getConnectorBuilder();
 
       if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
-        // auto-configure SDK
-        OpenTelemetry openTelemetry = AutoConfiguredOpenTelemetrySdk.builder()
-            .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
-            .addPropertiesCustomizer(configCustomizer)
-            .build()
-            .getOpenTelemetrySdk();
         JmxMetricInsight jmxInsight =
             JmxMetricInsight.createService(
                 openTelemetry, scraperConfig.getSamplingInterval().toMillis());
@@ -116,7 +127,6 @@ public class JmxScraper {
 
   private static boolean testConnection(JmxConnectorBuilder connectorBuilder) {
     try (JMXConnector connector = connectorBuilder.build()) {
-
       MBeanServerConnection connection = connector.getMBeanServerConnection();
       Integer mbeanCount = connection.getMBeanCount();
       if (mbeanCount > 0) {
@@ -129,6 +139,30 @@ public class JmxScraper {
     } catch (IOException e) {
       logger.log(Level.SEVERE, "JMX connection test ERROR", e);
       return false;
+    }
+  }
+
+  // TODO : test on local JVM and call it more than once for stability
+  static UUID getRemoteServiceInstanceId(JmxConnectorBuilder connectorBuilder) {
+    try (JMXConnector jmxConnector = connectorBuilder.build()) {
+      MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
+
+      StringBuilder id = new StringBuilder();
+      try {
+        ObjectName objectName = new ObjectName("java.lang:type=Runtime");
+        for (String attribute : Arrays.asList("StartTime", "Pid", "Name")) {
+          Object value = connection.getAttribute(objectName, attribute);
+          if (id.length() > 0) {
+            id.append(",");
+          }
+          id.append(value);
+        }
+        return UUID.nameUUIDFromBytes(id.toString().getBytes());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } catch (IOException e) {
+      return null;
     }
   }
 

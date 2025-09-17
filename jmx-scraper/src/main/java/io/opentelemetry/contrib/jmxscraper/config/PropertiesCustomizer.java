@@ -8,10 +8,13 @@ package io.opentelemetry.contrib.jmxscraper.config;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.JMX_INTERVAL_LEGACY;
 import static io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig.METRIC_EXPORT_INTERVAL;
 
+import io.opentelemetry.contrib.jmxscraper.JmxConnectorBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -23,6 +26,8 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
   private static final String METRICS_EXPORTER = "otel.metrics.exporter";
 
   @Nullable private JmxScraperConfig scraperConfig;
+
+  @Nullable private JmxConnectorBuilder connectorBuilder;
 
   @Override
   public Map<String, String> apply(ConfigProperties config) {
@@ -45,6 +50,19 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
     }
 
     scraperConfig = JmxScraperConfig.fromConfig(config);
+
+    long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
+    logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
+
+    connectorBuilder = JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
+
+    Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
+    Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
+
+    if (scraperConfig.isRegistrySsl()) {
+      connectorBuilder.withSslRegistry();
+    }
+
     return result;
   }
 
@@ -59,5 +77,12 @@ public class PropertiesCustomizer implements Function<ConfigProperties, Map<Stri
       throw new IllegalStateException("apply() must be called before getConfig()");
     }
     return scraperConfig;
+  }
+
+  public JmxConnectorBuilder getConnectorBuilder() {
+    if (connectorBuilder == null) {
+      throw new IllegalStateException("apply() must be called before getConnectorBuilder()");
+    }
+    return connectorBuilder;
   }
 }
