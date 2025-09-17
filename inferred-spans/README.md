@@ -49,10 +49,10 @@ You can configure the inferred spans processor using declarative YAML configurat
 OpenTelemetry SDK. For example:
 
 ```yaml
-file_format: 0.4
+file_format: 1.0-rc.1
 tracer_provider:
   processors:
-    - inferred-spans:
+    - experimental_inferred_spans:
         enabled: true
         sampling_interval: 25ms
         included_classes: "org.example.myapp.*"
