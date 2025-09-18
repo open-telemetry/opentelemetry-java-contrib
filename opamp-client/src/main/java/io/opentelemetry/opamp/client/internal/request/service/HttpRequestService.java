@@ -161,12 +161,14 @@ public final class HttpRequestService implements RequestService {
       }
     } catch (IOException | InterruptedException | TimeoutException e) {
       getCallback().onConnectionFailed(e);
+      connectionStatus.retryAfter(null);
     } catch (ExecutionException e) {
       if (e.getCause() != null) {
         getCallback().onConnectionFailed(e.getCause());
       } else {
         getCallback().onConnectionFailed(e);
       }
+      connectionStatus.retryAfter(null);
     }
   }
 
