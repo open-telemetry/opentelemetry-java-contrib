@@ -5,13 +5,13 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
@@ -44,9 +44,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
 public final class JmxScraper {
-
-  private static final AttributeKey<String> SERVICE_INSTANCE_ID =
-      AttributeKey.stringKey("service.instance.id");
 
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
