@@ -20,6 +20,7 @@ import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
 import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.resources.Resource;
 import java.io.DataInputStream;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
@@ -75,23 +76,24 @@ public final class JmxScraper {
 
       PropertiesCustomizer configCustomizer = new PropertiesCustomizer();
 
+      // we rely on the config customizer to be executed first to get effective config.
+      BiFunction<Resource, ConfigProperties, Resource> resourceCustomizer =
+          (resource, configProperties) -> {
+            UUID instanceId = getRemoteServiceInstanceId(configCustomizer.getConnectorBuilder());
+            if (resource.getAttribute(SERVICE_INSTANCE_ID) != null || instanceId == null) {
+              return resource;
+            }
+            logger.log(INFO, "remote service instance ID: " + instanceId);
+            return resource.merge(
+                Resource.create(Attributes.of(SERVICE_INSTANCE_ID, instanceId.toString())));
+          };
+
       // auto-configure SDK
       OpenTelemetry openTelemetry =
           AutoConfiguredOpenTelemetrySdk.builder()
               .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
               .addPropertiesCustomizer(configCustomizer)
-              // we rely on the config customizer to be executed first to get effective config
-              .addResourceCustomizer(
-                  (resource, configProperties) -> {
-                    UUID instanceId =
-                        getRemoteServiceInstanceId(configCustomizer.getConnectorBuilder());
-                    if (resource.getAttribute(SERVICE_INSTANCE_ID) != null || instanceId == null) {
-                      return resource;
-                    }
-                    logger.log(Level.INFO, "remote service instance ID: " + instanceId);
-                    return resource.merge(
-                        Resource.create(Attributes.of(SERVICE_INSTANCE_ID, instanceId.toString())));
-                  })
+              .addResourceCustomizer(resourceCustomizer)
               .build()
               .getOpenTelemetrySdk();
 
@@ -146,7 +148,7 @@ public final class JmxScraper {
   }
 
   @Nullable
-  static UUID getRemoteServiceInstanceId(JmxConnectorBuilder connectorBuilder) {
+  private static UUID getRemoteServiceInstanceId(JmxConnectorBuilder connectorBuilder) {
     try (JMXConnector jmxConnector = connectorBuilder.build()) {
       MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
 
