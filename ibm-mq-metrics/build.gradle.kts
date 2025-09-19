@@ -42,7 +42,7 @@ dependencies {
   implementation("org.slf4j:slf4j-simple:2.0.17")
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  integrationTestImplementation("org.assertj:assertj-core:3.27.4")
+  integrationTestImplementation("org.assertj:assertj-core:3.27.5")
   integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
   integrationTestImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   integrationTestImplementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.1")
