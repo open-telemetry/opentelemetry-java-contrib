@@ -160,6 +160,12 @@
       ],
     },
     {
+      groupName: 'bouncycastle packages',
+      matchPackageNames: [
+        'com.bouncycastle:**',
+      ],
+    },
+    {
       // pinned version for compatibility with java 8 JFR parsing
       matchUpdateTypes: [
         'major',
