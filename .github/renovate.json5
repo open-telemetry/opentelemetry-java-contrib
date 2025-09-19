@@ -153,6 +153,13 @@
       ],
     },
     {
+      groupName: 'develocity packages',
+      matchPackageNames: [
+        'com.gradle.develocity',
+        'com.gradle:develocity-gradle-plugin',
+      ],
+    },
+    {
       // pinned version for compatibility with java 8 JFR parsing
       matchUpdateTypes: [
         'major',
