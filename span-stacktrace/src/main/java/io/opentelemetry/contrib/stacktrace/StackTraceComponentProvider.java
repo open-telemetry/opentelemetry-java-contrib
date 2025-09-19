@@ -23,6 +23,7 @@ public class StackTraceComponentProvider implements ComponentProvider<SpanProces
   public SpanProcessor create(DeclarativeConfigProperties config) {
     return StackTraceAutoConfig.create(
         new DeclarativeConfigPropertiesBridgeBuilder()
+            .addMapping(StackTraceAutoConfig.CONFIG_MIN_DURATION, "min_duration")
             .addMapping(StackTraceAutoConfig.PREFIX, "")
             .build(config));
   }

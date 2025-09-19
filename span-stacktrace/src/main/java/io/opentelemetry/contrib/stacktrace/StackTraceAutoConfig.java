@@ -27,7 +27,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
   static final String PREFIX = "otel.java.experimental.span-stacktrace.";
-  private static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
+  static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
   private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
   private static final String CONFIG_FILTER = PREFIX + "filter";
 

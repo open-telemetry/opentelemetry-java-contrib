@@ -32,9 +32,8 @@ You can enable the stacktrace span processor using declarative YAML configuratio
 file_format: 1.0-rc.1
 tracer_provider:
   processors:
-    - experimental-stacktrace:
-        min:
-          duration: 10 # minimal duration in ms, default is 5, MUST be an integer
+    - experimental_stacktrace:
+        min_duration: 10 # minimal duration in ms, default is 5, MUST be an integer
         filter: my.class.Name # optional, default is to include all spans
 ```
 
