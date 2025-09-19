@@ -49,21 +49,26 @@ public final class PropertiesCustomizer implements Function<ConfigProperties, Ma
       result.put(METRIC_EXPORT_INTERVAL, intervalLegacy + "ms");
     }
 
+    // scraper config and connector builder must be initialized with the effective SDK configuration
+    // thus we need to initialize them here and then rely on getter being called after this method.
     scraperConfig = JmxScraperConfig.fromConfig(config);
+    connectorBuilder = createConnectorBuilder(scraperConfig);
 
     long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
     logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
 
-    connectorBuilder = JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
+    return result;
+  }
 
+  private static JmxConnectorBuilder createConnectorBuilder(JmxScraperConfig scraperConfig) {
+    JmxConnectorBuilder connectorBuilder =
+        JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
     Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
     Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
-
     if (scraperConfig.isRegistrySsl()) {
       connectorBuilder.withSslRegistry();
     }
-
-    return result;
+    return connectorBuilder;
   }
 
   /**

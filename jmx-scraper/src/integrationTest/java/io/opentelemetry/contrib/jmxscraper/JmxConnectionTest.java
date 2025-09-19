@@ -178,34 +178,37 @@ class JmxConnectionTest {
 
   @Test
   void stableServiceInstanceServiceId() {
-    UUID expectedServiceId = null;
-
     // start a single app, connect twice to it and check that the service id is the same
     try (TestAppContainer app = appContainer().withJmxPort(JMX_PORT)) {
       app.start();
-      for (int i = 0; i < 2; i++) {
-        try (JmxScraperContainer scraper =
-            scraperContainer()
-                .withRmiServiceUrl(APP_HOST, JMX_PORT)
-                // does not need to be tested on all config sources
-                .withConfigSource(JmxScraperContainer.ConfigSource.SYSTEM_PROPERTIES)) {
-          scraper.start();
-          waitTerminated(scraper);
-          String[] logLines = scraper.getLogs().split("\n");
-          UUID serviceId = null;
-          for (String logLine : logLines) {
-            if (logLine.contains("remote service instance ID")) {
-              serviceId = UUID.fromString(logLine.substring(logLine.lastIndexOf(":") + 1).trim());
-            }
-          }
-          assertThat(serviceId).isNotNull();
-          if (expectedServiceId == null) {
-            expectedServiceId = serviceId;
-          } else {
-            assertThat(serviceId).isEqualTo(expectedServiceId);
-          }
+
+      UUID firstId = startScraperAndGetServiceId();
+      UUID secondId = startScraperAndGetServiceId();
+
+      assertThat(firstId)
+          .describedAs(
+              "connecting twice to the same JVM should return the same service instance ID")
+          .isEqualTo(secondId);
+    }
+  }
+
+  private static UUID startScraperAndGetServiceId() {
+    try (JmxScraperContainer scraper =
+        scraperContainer()
+            .withRmiServiceUrl(APP_HOST, JMX_PORT)
+            // does not need to be tested on all config sources
+            .withConfigSource(JmxScraperContainer.ConfigSource.SYSTEM_PROPERTIES)) {
+      scraper.start();
+      waitTerminated(scraper);
+      String[] logLines = scraper.getLogs().split("\n");
+      UUID serviceId = null;
+      for (String logLine : logLines) {
+        if (logLine.contains("remote service instance ID")) {
+          serviceId = UUID.fromString(logLine.substring(logLine.lastIndexOf(":") + 1).trim());
         }
       }
+      assertThat(serviceId).describedAs("unable to get service instance ID from logs").isNotNull();
+      return serviceId;
     }
   }
 
