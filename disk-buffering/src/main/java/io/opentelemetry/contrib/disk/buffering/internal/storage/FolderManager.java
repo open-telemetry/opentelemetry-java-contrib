@@ -31,7 +31,8 @@ public final class FolderManager implements Closeable {
       File destinationDir, FileStorageConfiguration configuration, Clock clock) {
     if (destinationDir.isFile()) {
       throw new IllegalArgumentException("destinationDir must be a directory");
-    } else if (!destinationDir.exists()) {
+    }
+    if (!destinationDir.exists()) {
       if (!destinationDir.mkdirs()) {
         throw new IllegalStateException("Could not create dir: " + destinationDir);
       }
