@@ -395,7 +395,7 @@ class OpampClientImplTest {
     enqueueServerToAgentResponse(initialResponse);
 
     callbacks = spy(new TestCallbacks());
-    client = OpampClientImpl.create(requestService, state, callbacks);
+    client = OpampClientImpl.create(requestService, state, x -> callbacks);
 
     return takeRequest();
   }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import okio.ByteString;
@@ -50,7 +51,7 @@ public final class OpampClientImpl
   private final OpampClientState state;
   private final RecipeManager recipeManager;
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
-  private final Callbacks callbacks;
+  private volatile Callbacks callbacks = NOOP_CALLBACKS;
 
   /** Fields that must always be sent. */
   private static final List<Field> REQUIRED_FIELDS;
@@ -82,7 +83,9 @@ public final class OpampClientImpl
   }
 
   public static OpampClientImpl create(
-      RequestService requestService, OpampClientState state, Callbacks callbacks) {
+      RequestService requestService,
+      OpampClientState state,
+      Function<OpampClient, Callbacks> callbacksFunction) {
     AgentToServerAppenders appenders =
         new AgentToServerAppenders(
             AgentDescriptionAppender.create(state.agentDescription),
@@ -95,7 +98,8 @@ public final class OpampClientImpl
             AgentDisconnectAppender.create());
     OpampClientImpl client =
         new OpampClientImpl(
-            requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS), callbacks);
+            requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS));
+    client.callbacks = callbacksFunction.apply(client);
 
     // Start
     requestService.start(client, client);
@@ -110,13 +114,11 @@ public final class OpampClientImpl
       RequestService requestService,
       AgentToServerAppenders appenders,
       OpampClientState state,
-      RecipeManager recipeManager,
-      Callbacks callbacks) {
+      RecipeManager recipeManager) {
     this.requestService = requestService;
     this.appenders = appenders;
     this.state = state;
     this.recipeManager = recipeManager;
-    this.callbacks = callbacks;
   }
 
   @Override
