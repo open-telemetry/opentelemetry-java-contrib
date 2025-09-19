@@ -126,7 +126,8 @@ class XraySamplerClientTest {
                     .setRequestCount(10500)
                     .setSampledCount(31)
                     .setBorrowCount(0)
-                    .build()));
+                    .build()),
+            Collections.emptyList());
     GetSamplingTargetsResponse response = client.getSamplingTargets(samplingTargetsRequest);
 
     AggregatedHttpRequest request = server.takeRequest().request();
@@ -174,7 +175,8 @@ class XraySamplerClientTest {
     assertThatThrownBy(
             () ->
                 client.getSamplingTargets(
-                    GetSamplingTargetsRequest.create(Collections.emptyList())))
+                    GetSamplingTargetsRequest.create(
+                        Collections.emptyList(), Collections.emptyList())))
         .isInstanceOf(UncheckedIOException.class)
         .hasMessage("Failed to deserialize response.");
   }
