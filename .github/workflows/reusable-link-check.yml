@@ -44,17 +44,15 @@ jobs:
                             | grep -E '^(\.github/config/lychee\.toml|mise\.toml)$' || true)
           if [ -n "$config_modified" ]; then
             echo "modified=true" >> $GITHUB_OUTPUT
-          else
-            echo "modified=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Link check - all links (modified files only)
-        if: github.event_name == 'pull_request' && steps.modified-files.outputs.files != ''
+      - name: Link check (modified files only)
+        if: github.event_name == 'pull_request' && steps.modified-files.outputs.files != '' && steps.config-check.outputs.modified != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: mise run lint-links ${{ steps.modified-files.outputs.files }}
 
-      - name: Link check - all links (all files)
+      - name: Link check (all files)
         if: github.event_name != 'pull_request' || steps.config-check.outputs.modified == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}

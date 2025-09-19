@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("otel.japicmp-conventions")
   id("org.owasp.dependencycheck")
 }
 
@@ -76,7 +77,7 @@ tasks {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }
-    
+
     configure<JacocoTaskExtension> {
       // only care about code coverage for code in this repository
       // (in particular avoiding netty classes which sometimes end up
@@ -152,7 +153,7 @@ testing {
       implementation(enforcedPlatform("org.junit:junit-bom:5.13.4"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.2"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.3"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.19.0-alpha"
+val otelInstrumentationVersion = "2.20.0-alpha"
 val semconvVersion = "1.37.0"
 
 javaPlatform {
@@ -14,14 +14,14 @@ dependencies {
   // under JvmTestSuite so they don't show up as runtime dependencies in license and vulnerability scans
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
-  api(enforcedPlatform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.20.0"))
-  api(enforcedPlatform("com.google.protobuf:protobuf-bom:4.32.0"))
-  api(enforcedPlatform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
+  api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
-    api("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}")
+    api("io.opentelemetry.semconv:opentelemetry-semconv-incubating:${semconvVersion}-alpha")
 
     api("com.google.auto.service:auto-service:1.1.1")
     api("com.google.auto.service:auto-service-annotations:1.1.1")
@@ -45,8 +45,8 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.12.9")
-    api("org.assertj:assertj-core:3.27.4")
+    api("com.uber.nullaway:nullaway:0.12.10")
+    api("org.assertj:assertj-core:3.27.5")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")

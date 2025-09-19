@@ -38,7 +38,7 @@ class AzureFunctionsResourceProviderTest {
   void defaultValues() {
     createResource(DEFAULT_ENV_VARS)
         .containsEntry(CLOUD_PROVIDER, "azure")
-        .containsEntry(CLOUD_PLATFORM, "azure_functions")
+        .containsEntry(CLOUD_PLATFORM, "azure.functions")
         .containsEntry(FAAS_NAME, TEST_WEBSITE_SITE_NAME)
         .containsEntry(FAAS_VERSION, TEST_FUNCTION_VERSION)
         .containsEntry(FAAS_INSTANCE, TEST_WEBSITE_INSTANCE_ID)

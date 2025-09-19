@@ -9,7 +9,7 @@ program-to-program messaging across multiple platforms.
 
 The IBM MQ metrics utility here can monitor multiple queues managers and their resources,
 namely queues, topics, channels and listeners The metrics are extracted out using the
-[PCF command messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm).
+[PCF command messages](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=tasks-introduction-programmable-command-formats).
 
 The metrics for queue manager, queue, topic, channel and listener can be configured.
 
@@ -120,7 +120,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 2. Please add the following JVM arguments to the MA start up command or script.
 
    ```-Dcom.ibm.mq.cfg.useIBMCipherMappings=false```  (If you are using IBM Cipher Suites, set the
-   flag to true. Please visit [this link](http://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.dev.doc/q113210_.htm) for more details.
+   flag to true. Please visit [this link](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=java-ssltls-cipherspecs-ciphersuites-in-mq-classes) for more details.
    )
 3. To configure SSL, the MA's trust store and keystore needs to be setup with the JKS filepath.
    They can be passed either as Machine Agent JVM arguments or configured in config.yml (sslConnection) <br />
@@ -156,12 +156,12 @@ config.yml file in <code>src/main/resources/config.yml</code>.
 
 ### Monitoring Workings - Internals
 
-This software extracts metrics through [PCF framework](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q019990_.htm).
+This software extracts metrics through [PCF framework](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=tasks-introduction-programmable-command-formats).
 [A complete list of PCF commands are listed here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q086870_.htm).
 Each queue manager has an administration queue with a standard queue name and
 the extension sends PCF command messages to that queue. On Windows and Unix platforms, the PCF
 commands are sent is always sent to the SYSTEM.ADMIN.COMMAND.QUEUE queue.
-[More details mentioned here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm)
+[More details mentioned here](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=formats-pcf-command-messages)
 
 By default, the PCF responses are sent to the SYSTEM.DEFAULT.MODEL.QUEUE. Using this queue causes
 a temporary dynamic queue to be created. You can override the default here by using the

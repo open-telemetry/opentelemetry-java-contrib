@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.opamp.client.internal;
+package io.opentelemetry.opamp.client;
 
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import java.io.Closeable;

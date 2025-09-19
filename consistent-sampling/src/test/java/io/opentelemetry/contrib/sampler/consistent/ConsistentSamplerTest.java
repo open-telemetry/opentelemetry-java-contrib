@@ -8,9 +8,7 @@ package io.opentelemetry.contrib.sampler.consistent;
 import static io.opentelemetry.contrib.sampler.consistent.OtelTraceState.getInvalidP;
 import static io.opentelemetry.contrib.sampler.consistent.OtelTraceState.getInvalidR;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
@@ -32,45 +30,50 @@ class ConsistentSamplerTest {
 
   @Test
   void testGetSamplingRate() {
-    assertThrows(
-        IllegalArgumentException.class, () -> ConsistentSampler.getSamplingProbability(-1));
+    assertThatThrownBy(() -> ConsistentSampler.getSamplingProbability(-1))
+        .isInstanceOf(IllegalArgumentException.class);
     for (int i = 0; i < OtelTraceState.getMaxP() - 1; i += 1) {
-      assertEquals(Math.pow(0.5, i), ConsistentSampler.getSamplingProbability(i));
+      assertThat(ConsistentSampler.getSamplingProbability(i)).isEqualTo(Math.pow(0.5, i));
     }
-    assertEquals(0., ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP()));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP() + 1));
+    assertThat(ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP())).isEqualTo(0.);
+    assertThatThrownBy(() -> ConsistentSampler.getSamplingProbability(OtelTraceState.getMaxP() + 1))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void testGetLowerBoundP() {
-    assertEquals(0, ConsistentSampler.getLowerBoundP(1.0));
-    assertEquals(0, ConsistentSampler.getLowerBoundP(Math.nextDown(1.0)));
+    assertThat(ConsistentSampler.getLowerBoundP(1.0)).isEqualTo(0);
+    assertThat(ConsistentSampler.getLowerBoundP(Math.nextDown(1.0))).isEqualTo(0);
     for (int i = 1; i < OtelTraceState.getMaxP() - 1; i += 1) {
       double samplingProbability = Math.pow(0.5, i);
-      assertEquals(i, ConsistentSampler.getLowerBoundP(samplingProbability));
-      assertEquals(i - 1, ConsistentSampler.getLowerBoundP(Math.nextUp(samplingProbability)));
-      assertEquals(i, ConsistentSampler.getLowerBoundP(Math.nextDown(samplingProbability)));
+      assertThat(ConsistentSampler.getLowerBoundP(samplingProbability)).isEqualTo(i);
+      assertThat(ConsistentSampler.getLowerBoundP(Math.nextUp(samplingProbability)))
+          .isEqualTo(i - 1);
+      assertThat(ConsistentSampler.getLowerBoundP(Math.nextDown(samplingProbability))).isEqualTo(i);
     }
-    assertEquals(OtelTraceState.getMaxP() - 1, ConsistentSampler.getLowerBoundP(Double.MIN_NORMAL));
-    assertEquals(OtelTraceState.getMaxP() - 1, ConsistentSampler.getLowerBoundP(Double.MIN_VALUE));
-    assertEquals(OtelTraceState.getMaxP(), ConsistentSampler.getLowerBoundP(0.0));
+    assertThat(ConsistentSampler.getLowerBoundP(Double.MIN_NORMAL))
+        .isEqualTo(OtelTraceState.getMaxP() - 1);
+    assertThat(ConsistentSampler.getLowerBoundP(Double.MIN_VALUE))
+        .isEqualTo(OtelTraceState.getMaxP() - 1);
+    assertThat(ConsistentSampler.getLowerBoundP(0.0)).isEqualTo(OtelTraceState.getMaxP());
   }
 
   @Test
   void testGetUpperBoundP() {
-    assertEquals(0, ConsistentSampler.getUpperBoundP(1.0));
-    assertEquals(1, ConsistentSampler.getUpperBoundP(Math.nextDown(1.0)));
+    assertThat(ConsistentSampler.getUpperBoundP(1.0)).isEqualTo(0);
+    assertThat(ConsistentSampler.getUpperBoundP(Math.nextDown(1.0))).isEqualTo(1);
     for (int i = 1; i < OtelTraceState.getMaxP() - 1; i += 1) {
       double samplingProbability = Math.pow(0.5, i);
-      assertEquals(i, ConsistentSampler.getUpperBoundP(samplingProbability));
-      assertEquals(i, ConsistentSampler.getUpperBoundP(Math.nextUp(samplingProbability)));
-      assertEquals(i + 1, ConsistentSampler.getUpperBoundP(Math.nextDown(samplingProbability)));
+      assertThat(ConsistentSampler.getUpperBoundP(samplingProbability)).isEqualTo(i);
+      assertThat(ConsistentSampler.getUpperBoundP(Math.nextUp(samplingProbability))).isEqualTo(i);
+      assertThat(ConsistentSampler.getUpperBoundP(Math.nextDown(samplingProbability)))
+          .isEqualTo(i + 1);
     }
-    assertEquals(OtelTraceState.getMaxP(), ConsistentSampler.getUpperBoundP(Double.MIN_NORMAL));
-    assertEquals(OtelTraceState.getMaxP(), ConsistentSampler.getUpperBoundP(Double.MIN_VALUE));
-    assertEquals(OtelTraceState.getMaxP(), ConsistentSampler.getUpperBoundP(0.0));
+    assertThat(ConsistentSampler.getUpperBoundP(Double.MIN_NORMAL))
+        .isEqualTo(OtelTraceState.getMaxP());
+    assertThat(ConsistentSampler.getUpperBoundP(Double.MIN_VALUE))
+        .isEqualTo(OtelTraceState.getMaxP());
+    assertThat(ConsistentSampler.getUpperBoundP(0.0)).isEqualTo(OtelTraceState.getMaxP());
   }
 
   @Test
@@ -168,18 +171,18 @@ class ConsistentSamplerTest {
     SamplingResult samplingResult =
         sampler.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
 
-    assertEquals(expectSampled, getSampledFlag(samplingResult));
+    assertThat(getSampledFlag(samplingResult)).isEqualTo(expectSampled);
     OptionalInt p = getP(samplingResult, parentContext);
     if (OtelTraceState.isValidP(expectedP)) {
-      assertEquals(expectedP, p.getAsInt());
+      assertThat(p.getAsInt()).isEqualTo(expectedP);
     } else {
-      assertFalse(p.isPresent());
+      assertThat(p.isPresent()).isFalse();
     }
     OptionalInt r = getR(samplingResult, parentContext);
     if (OtelTraceState.isValidR(expectedR)) {
-      assertEquals(expectedR, r.getAsInt());
+      assertThat(r.getAsInt()).isEqualTo(expectedR);
     } else {
-      assertFalse(r.isPresent());
+      assertThat(r.isPresent()).isFalse();
     }
   }
 

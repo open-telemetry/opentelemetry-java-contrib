@@ -8,9 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage.files;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_SIZE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,14 +56,14 @@ class WritableFileTest {
   void hasNotExpired_whenWriteAgeHasNotExpired() {
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(1500L));
 
-    assertFalse(writableFile.hasExpired());
+    assertThat(writableFile.hasExpired()).isFalse();
   }
 
   @Test
   void hasExpired_whenWriteAgeHasExpired() {
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(2000L));
 
-    assertTrue(writableFile.hasExpired());
+    assertThat(writableFile.hasExpired()).isTrue();
   }
 
   @Test
@@ -78,22 +76,22 @@ class WritableFileTest {
 
     List<String> lines = getWrittenLines();
 
-    assertEquals(2, lines.size());
-    assertEquals("First line", lines.get(0));
-    assertEquals("Second line", lines.get(1));
-    assertEquals(line1.length + line2.length, writableFile.getSize());
+    assertThat(lines).hasSize(2);
+    assertThat(lines.get(0)).isEqualTo("First line");
+    assertThat(lines.get(1)).isEqualTo("Second line");
+    assertThat(writableFile.getSize()).isEqualTo(line1.length + line2.length);
   }
 
   @Test
   void whenAppendingData_andNotEnoughSpaceIsAvailable_closeAndReturnFailed() throws IOException {
-    assertEquals(
-        WritableResult.SUCCEEDED,
-        writableFile.append(new ByteArraySerializer(new byte[MAX_FILE_SIZE])));
+    assertThat(writableFile.append(new ByteArraySerializer(new byte[MAX_FILE_SIZE])))
+        .isEqualTo(WritableResult.SUCCEEDED);
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[1])));
+    assertThat(writableFile.append(new ByteArraySerializer(new byte[1])))
+        .isEqualTo(WritableResult.FAILED);
 
-    assertEquals(1, getWrittenLines().size());
-    assertEquals(MAX_FILE_SIZE, writableFile.getSize());
+    assertThat(getWrittenLines()).hasSize(1);
+    assertThat(writableFile.getSize()).isEqualTo(MAX_FILE_SIZE);
   }
 
   @Test
@@ -102,9 +100,10 @@ class WritableFileTest {
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_WRITE_MILLIS));
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[1])));
+    assertThat(writableFile.append(new ByteArraySerializer(new byte[1])))
+        .isEqualTo(WritableResult.FAILED);
 
-    assertEquals(1, getWrittenLines().size());
+    assertThat(getWrittenLines()).hasSize(1);
   }
 
   @Test
@@ -112,7 +111,8 @@ class WritableFileTest {
     writableFile.append(new ByteArraySerializer(new byte[1]));
     writableFile.close();
 
-    assertEquals(WritableResult.FAILED, writableFile.append(new ByteArraySerializer(new byte[2])));
+    assertThat(writableFile.append(new ByteArraySerializer(new byte[2])))
+        .isEqualTo(WritableResult.FAILED);
   }
 
   private static byte[] getByteArrayLine(String line) {

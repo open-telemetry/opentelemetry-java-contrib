@@ -14,6 +14,7 @@ import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.request.delay.RetryPeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
@@ -160,12 +161,14 @@ public final class HttpRequestService implements RequestService {
       }
     } catch (IOException | InterruptedException | TimeoutException e) {
       getCallback().onConnectionFailed(e);
+      connectionStatus.retryAfter(null);
     } catch (ExecutionException e) {
       if (e.getCause() != null) {
         getCallback().onConnectionFailed(e.getCause());
       } else {
         getCallback().onConnectionFailed(e);
       }
+      connectionStatus.retryAfter(null);
     }
   }
 
