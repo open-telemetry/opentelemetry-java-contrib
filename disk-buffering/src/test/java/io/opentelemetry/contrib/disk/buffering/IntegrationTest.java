@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering;
 
 import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -147,9 +147,9 @@ class IntegrationTest {
     logStorage.forEach(storedLogs::addAll);
     metricStorage.forEach(storedMetrics::addAll);
 
-    assertEquals(1, storedSpans.size());
-    assertEquals(1, storedLogs.size());
-    assertEquals(1, storedMetrics.size());
+    assertThat(storedSpans).hasSize(1);
+    assertThat(storedLogs).hasSize(1);
+    assertThat(storedMetrics).hasSize(1);
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

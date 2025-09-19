@@ -11,10 +11,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.THIRD_LOG_RECORD;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -72,22 +69,22 @@ class ReadableFileTest {
 
   @Test
   void readAndRemoveItems() throws IOException {
-    assertEquals(FIRST_LOG_RECORD, deserialize(readableFile.readNext()));
+    assertThat(FIRST_LOG_RECORD).isEqualTo(deserialize(readableFile.readNext()));
     readableFile.removeTopItem();
 
     List<LogRecordData> logs = getRemainingDataAndClose(readableFile);
 
-    assertEquals(2, logs.size());
-    assertEquals(SECOND_LOG_RECORD, logs.get(0));
-    assertEquals(THIRD_LOG_RECORD, logs.get(1));
+    assertThat(2).isEqualTo(logs.size());
+    assertThat(SECOND_LOG_RECORD).isEqualTo(logs.get(0));
+    assertThat(THIRD_LOG_RECORD).isEqualTo(logs.get(1));
   }
 
   @Test
   void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 
-    assertFalse(source.exists());
-    assertTrue(readableFile.isClosed());
+    assertThat(source.exists()).isFalse();
+    assertThat(readableFile.isClosed()).isTrue();
   }
 
   @Test
@@ -101,10 +98,10 @@ class ReadableFileTest {
     ReadableFile emptyReadableFile =
         new ReadableFile(emptyFile, CREATED_TIME_MILLIS, clock, getConfiguration());
 
-    assertNull(emptyReadableFile.readNext());
+    assertThat(emptyReadableFile.readNext()).isNull();
 
-    assertTrue(emptyReadableFile.isClosed());
-    assertFalse(emptyFile.exists());
+    assertThat(emptyReadableFile.isClosed()).isTrue();
+    assertThat(emptyFile.exists()).isFalse();
   }
 
   @Test
@@ -112,15 +109,15 @@ class ReadableFileTest {
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(CREATED_TIME_MILLIS + MAX_FILE_AGE_FOR_READ_MILLIS));
 
-    assertNull(readableFile.readNext());
-    assertTrue(readableFile.isClosed());
+    assertThat(readableFile.readNext()).isNull();
+    assertThat(readableFile.isClosed()).isTrue();
   }
 
   @Test
   void whenReadingAfterClosed_returnNull() throws IOException {
     readableFile.close();
 
-    assertNull(readableFile.readNext());
+    assertThat(readableFile.readNext()).isNull();
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)
