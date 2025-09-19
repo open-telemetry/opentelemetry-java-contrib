@@ -11,7 +11,6 @@ client [spec](https://github.com/open-telemetry/opamp-spec/blob/main/specificati
 
 ```java
 // Initializing it
-
 RequestService requestService = HttpRequestService.create(OkHttpSender.create("[OPAMP_SERVICE_URL]"));
 // RequestService requestService = WebSocketRequestService.create(OkHttpWebSocket.create("[OPAMP_SERVICE_URL]")); // Use this instead to connect to the server via WebSocket.
 OpampClient client =
@@ -19,8 +18,7 @@ OpampClient client =
         .putIdentifyingAttribute("service.name", "My service name")
         .enableRemoteConfig()
         .setRequestService(requestService)
-        .build(
-            new OpampClient.Callbacks() {
+        .build(cx -> new OpampClient.Callbacks() {
               @Override
               public void onConnect() {}
 
@@ -37,7 +35,7 @@ OpampClient client =
                   // A remote config was received
 
                   // After applying it...
-                  client.setRemoteConfigStatus(
+                  cx.setRemoteConfigStatus(
                       new RemoteConfigStatus.Builder()
                           .status(RemoteConfigStatuses.RemoteConfigStatuses_APPLIED)
                           .build());
