@@ -17,16 +17,20 @@ import org.junit.jupiter.api.Test;
 
 class PropertiesCustomizerTest {
 
+  private static final String DUMMY_URL = "service:jmx:rmi:///jndi/rmi://host:999/jmxrmi";
+
   @Test
-  void tryGetConfigBeforeApply() {
+  void tryGetBeforeApply() {
     assertThatThrownBy(() -> new PropertiesCustomizer().getScraperConfig())
+        .isInstanceOf(IllegalStateException.class);
+    assertThatThrownBy(() -> new PropertiesCustomizer().getConnectorBuilder())
         .isInstanceOf(IllegalStateException.class);
   }
 
   @Test
   void defaultOtlpExporter() {
     Map<String, String> map = new HashMap<>();
-    map.put("otel.jmx.service.url", "dummy-url");
+    map.put("otel.jmx.service.url", DUMMY_URL);
     map.put("otel.jmx.target.system", "jvm");
     ConfigProperties config = DefaultConfigProperties.createFromMap(map);
 
@@ -37,7 +41,7 @@ class PropertiesCustomizerTest {
   @Test
   void explicitExporterSet() {
     Map<String, String> map = new HashMap<>();
-    map.put("otel.jmx.service.url", "dummy-url");
+    map.put("otel.jmx.service.url", DUMMY_URL);
     map.put("otel.jmx.target.system", "jvm");
     map.put("otel.metrics.exporter", "otlp,logging");
     ConfigProperties config = DefaultConfigProperties.createFromMap(map);
@@ -49,7 +53,7 @@ class PropertiesCustomizerTest {
   @Test
   void getSomeConfiguration() {
     Map<String, String> map = new HashMap<>();
-    map.put("otel.jmx.service.url", "dummy-url");
+    map.put("otel.jmx.service.url", DUMMY_URL);
     map.put("otel.jmx.target.system", "jvm");
     map.put("otel.metrics.exporter", "otlp");
     ConfigProperties config = DefaultConfigProperties.createFromMap(map);
@@ -67,7 +71,7 @@ class PropertiesCustomizerTest {
   @Test
   void setSdkMetricExportFromJmxInterval() {
     Map<String, String> map = new HashMap<>();
-    map.put("otel.jmx.service.url", "dummy-url");
+    map.put("otel.jmx.service.url", DUMMY_URL);
     map.put("otel.jmx.target.system", "jvm");
     map.put("otel.metrics.exporter", "otlp");
     map.put("otel.jmx.interval.milliseconds", "10000");
@@ -83,7 +87,7 @@ class PropertiesCustomizerTest {
   @Test
   void sdkMetricExportIntervalPriority() {
     Map<String, String> map = new HashMap<>();
-    map.put("otel.jmx.service.url", "dummy-url");
+    map.put("otel.jmx.service.url", DUMMY_URL);
     map.put("otel.jmx.target.system", "jvm");
     map.put("otel.metrics.exporter", "otlp");
     map.put("otel.jmx.interval.milliseconds", "10000");
