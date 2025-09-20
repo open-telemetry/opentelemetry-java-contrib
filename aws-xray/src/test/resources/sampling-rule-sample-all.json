@@ -1,0 +1,15 @@
+{
+  "RuleName": "Test",
+  "RuleARN": "arn:aws:xray:us-east-1:595986152929:sampling-rule/Test",
+  "ResourceARN": "arn:aws:xray:us-east-1:595986152929:my-service",
+  "Priority": 1,
+  "FixedRate": 1.0,
+  "ReservoirSize": 0,
+  "ServiceName": "*",
+  "ServiceType": "*",
+  "Host": "*",
+  "HTTPMethod": "*",
+  "URLPath": "*",
+  "Version": 1,
+  "Attributes": {}
+}
