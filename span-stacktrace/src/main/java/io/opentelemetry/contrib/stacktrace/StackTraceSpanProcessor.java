@@ -94,4 +94,14 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
     }
     return stackTrace.substring(nextNewLine + 1);
   }
+
+  @Override
+  public String toString() {
+    return "StackTraceSpanProcessor{"
+        + "minSpanDurationNanos="
+        + minSpanDurationNanos
+        + ", filterPredicate="
+        + filterPredicate
+        + '}';
+  }
 }

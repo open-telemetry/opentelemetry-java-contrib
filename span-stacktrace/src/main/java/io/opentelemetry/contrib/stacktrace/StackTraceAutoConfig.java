@@ -26,23 +26,24 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
-  private static final String CONFIG_MIN_DURATION =
-      "otel.java.experimental.span-stacktrace.min.duration";
+  static final String PREFIX = "otel.java.experimental.span-stacktrace.";
+  static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
   private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
-
-  private static final String CONFIG_FILTER = "otel.java.experimental.span-stacktrace.filter";
+  private static final String CONFIG_FILTER = PREFIX + "filter";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          long minDuration = getMinDuration(properties);
-          if (minDuration >= 0) {
-            Predicate<ReadableSpan> filter = getFilterPredicate(properties);
-            providerBuilder.addSpanProcessor(new StackTraceSpanProcessor(minDuration, filter));
+          if (getMinDuration(properties) >= 0) {
+            providerBuilder.addSpanProcessor(create(properties));
           }
           return providerBuilder;
         });
+  }
+
+  static StackTraceSpanProcessor create(ConfigProperties properties) {
+    return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
   // package-private for testing
