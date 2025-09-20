@@ -35,6 +35,21 @@ public interface OpampClient extends Closeable {
    */
   void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus);
 
+  Callbacks NOOP_CALLBACKS =
+      new Callbacks() {
+        @Override
+        public void onConnect() {}
+
+        @Override
+        public void onConnectFailed(@org.jetbrains.annotations.Nullable Throwable throwable) {}
+
+        @Override
+        public void onErrorResponse(ServerErrorResponse errorResponse) {}
+
+        @Override
+        public void onMessage(MessageData messageData) {}
+      };
+
   interface Callbacks {
     /**
      * Called when the connection is successfully established to the Server. For WebSocket clients
