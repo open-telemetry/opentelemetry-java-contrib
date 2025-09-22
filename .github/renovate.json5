@@ -155,9 +155,8 @@
     {
       groupName: 'develocity packages',
       matchPackageNames: [
-        'com.gradle.develocity',
-        'com.gradle:develocity-gradle-plugin',
-      ],
+        'com.gradle.develocity{/,}**',
+      ]
     },
     {
       groupName: 'bouncycastle packages',
