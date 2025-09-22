@@ -15,7 +15,7 @@ dependencies {
   implementation("com.diffplug.spotless:spotless-plugin-gradle:7.2.1")
   implementation("net.ltgt.gradle:gradle-errorprone-plugin:4.3.0")
   implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.3.0")
-  implementation("org.owasp:dependency-check-gradle:12.1.3")
+  implementation("org.owasp:dependency-check-gradle:12.1.5")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
   implementation("com.gradle:develocity-gradle-plugin:4.2")
   implementation("me.champeau.gradle:japicmp-gradle-plugin:0.4.6")
