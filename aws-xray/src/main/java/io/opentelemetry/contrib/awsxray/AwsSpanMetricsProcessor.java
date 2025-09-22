@@ -153,16 +153,16 @@ public final class AwsSpanMetricsProcessor implements SpanProcessor {
         Throwable throwable = exceptionEvent.getException();
 
         try {
-          Method method = throwable.getClass().getMethod("getStatusCode", new Class<?>[] {});
-          Object code = method.invoke(throwable, new Object[] {});
+          Method method = throwable.getClass().getMethod("getStatusCode");
+          Object code = method.invoke(throwable);
           return Long.valueOf((Integer) code);
         } catch (Exception e) {
           // Take no action
         }
 
         try {
-          Method method = throwable.getClass().getMethod("statusCode", new Class<?>[] {});
-          Object code = method.invoke(throwable, new Object[] {});
+          Method method = throwable.getClass().getMethod("statusCode");
+          Object code = method.invoke(throwable);
           return Long.valueOf((Integer) code);
         } catch (Exception e) {
           // Take no action
