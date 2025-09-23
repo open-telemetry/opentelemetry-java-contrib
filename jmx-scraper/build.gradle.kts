@@ -26,6 +26,8 @@ dependencies {
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.awaitility:awaitility")
