@@ -1,0 +1,33 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.awsxray;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Test;
+
+class AwsXrayRemoteSamplerComponentProviderTest {
+  @Test
+  void endToEnd() {
+    String yaml =
+        "file_format: 1.0-rc.1\n"
+            + "tracer_provider:\n"
+            + "  sampler:\n"
+            + "    xray:\n"
+            + "      endpoint: 'https://example.com'\n";
+
+    OpenTelemetrySdk openTelemetrySdk =
+        DeclarativeConfiguration.parseAndCreate(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+    assertThat(openTelemetrySdk.getSdkTracerProvider().toString())
+        .contains("AwsXrayRemoteSampler{endpoint=https://example.com}");
+  }
+}

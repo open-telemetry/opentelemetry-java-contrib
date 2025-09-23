@@ -49,6 +49,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
   private final Resource resource;
   private final Clock clock;
+  private final String endpoint;
   private final Sampler initialSampler;
   private final XraySamplerClient client;
   private final ScheduledExecutorService executor;
@@ -81,6 +82,7 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       long pollingIntervalNanos) {
     this.resource = resource;
     this.clock = clock;
+    this.endpoint = endpoint;
     this.initialSampler = initialSampler;
     client = new XraySamplerClient(endpoint);
     executor =
@@ -239,5 +241,10 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   // Visible for testing
   Resource getResource() {
     return resource;
+  }
+
+  @Override
+  public String toString() {
+    return "AwsXrayRemoteSampler{endpoint=" + endpoint + '}';
   }
 }
