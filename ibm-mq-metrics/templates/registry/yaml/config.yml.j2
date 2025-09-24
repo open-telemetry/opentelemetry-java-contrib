@@ -1,8 +1,8 @@
-#Run it as a scheduled task instead of running every minute.
-#If you want to run this every minute, comment this out
-#taskSchedule:
-#  numberOfThreads: 20
-#  taskDelaySeconds: 300
+# This section defines the schedule at which the program will scrape metrics.
+taskSchedule:
+  numberOfThreads: 20
+  initialDelaySeconds: 0
+  taskDelaySeconds: 60
 
 #This is the timeout on queue metrics and channel metrics threads.Default value is 20 seconds.
 #No need to change the default unless you know what you are doing.
