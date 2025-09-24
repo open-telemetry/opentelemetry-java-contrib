@@ -155,7 +155,6 @@
     {
       groupName: 'develocity packages',
       matchPackageNames: [
-        'com.gradle:**',
         'com.gradle.develocity:**',
       ],
     },
