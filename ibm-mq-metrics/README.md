@@ -83,6 +83,17 @@ java \
    ./my-config.yml
 ```
 
+## Generate code with Weaver
+
+Weaver generates code, documentation and configuration for this program.
+
+```shell
+make generate
+```
+
+This generates `config.yaml`, the `docs` folder, the `src/main/java/io/opentelemetry/ibm/mq/metrics`
+Java code folder.
+
 ## Connection
 
 There are two transport modes in which this extension can be run:
@@ -147,12 +158,11 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 
 **Note** : Please make sure to not use tab (\t) while editing yaml files. You may want to validate
 the yaml file using a [yaml validator](https://jsonformatter.org/yaml-validator). Configure the monitor by copying and editing the
-config.yml file in <code>src/main/resources/config.yml</code>.
+config.yml file.
 
 1. Configure the queueManagers with appropriate fields and filters. You can configure multiple
    queue managers in one configuration file.
 2. To run the extension at a frequency > 1 minute, please configure the taskSchedule section.
-   Refer to the [Task Schedule](https://community.appdynamics.com/t5/Knowledge-Base/Task-Schedule-for-Extensions/ta-p/35414) doc for details.
 
 ### Monitoring Workings - Internals
 
