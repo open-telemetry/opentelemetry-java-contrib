@@ -91,7 +91,7 @@ Weaver generates code, documentation and configuration for this program.
 make generate
 ```
 
-This generates `config.yaml`, the `docs` folder, the `src/main/java/io/opentelemetry/ibm/mq/metrics` 
+This generates `config.yaml`, the `docs` folder, the `src/main/java/io/opentelemetry/ibm/mq/metrics`
 Java code folder.
 
 ## Connection
