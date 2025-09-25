@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.50.0 (2025-09-25)
+
 Note: This release broadly applies some style guidelines across the repository. As a result,
 some classes that were visible might be package/private. Other non-final classes may now
 be final. See
