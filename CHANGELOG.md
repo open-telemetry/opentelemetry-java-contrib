@@ -55,7 +55,7 @@ an issue if this causes problems.
 
 ### Span stack traces
 
-- Declarative config: support Span stacktrace
+- Add declarative configuration support
   ([#2262](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2262))
 
 
