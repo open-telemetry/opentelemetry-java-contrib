@@ -28,7 +28,7 @@ an issue if this causes problems.
   ([#2157](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2157))
 - Apply final to public API classes where possible
   ([#2216](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2216))
-- Handle empty attribute values in disk buffering
+- Handle empty attribute values
   ([#2268](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2268))
 
 ### Inferred spans
