@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
@@ -376,7 +377,7 @@ public final class OpampClientBuilder {
     return this;
   }
 
-  public OpampClient build(OpampClient.Callbacks callbacks) {
+  public OpampClient build(Function<OpampClient, OpampClient.Callbacks> callbacks) {
     List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
     List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
     identifyingAttributes.forEach(
