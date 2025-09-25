@@ -26,7 +26,7 @@ an issue if this causes problems.
 
 - Catching IllegalStateException in case of failed deserialization
   ([#2157](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2157))
-- Apply final to public API classes where possible - disk-buffering
+- Apply final to public API classes where possible
   ([#2216](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2216))
 - Handle empty attribute values in disk buffering
   ([#2268](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2268))
