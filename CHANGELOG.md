@@ -4,15 +4,15 @@
 
 Note: This release broadly applies some style guidelines across the repository. As a result,
 some classes that were visible might be package/private. Other non-final classes may now
-be final. See 
+be final. See
 [#2182](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2182)
 and
-[#2210](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2210) 
+[#2210](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2210)
 and
 [#2212](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
 and
 [#2213](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
-for examples and details. These changes are not expected to be breaking, so please open 
+for examples and details. These changes are not expected to be breaking, so please open
 an issue if this causes problems.
 
 ### Baggage processor
@@ -35,7 +35,7 @@ an issue if this causes problems.
 
 - Add dynamically changing the inferred span interval
   ([#2153](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2153))
-  
+
 ### JMX scraper
 
 - Implement stable service.instance.id
