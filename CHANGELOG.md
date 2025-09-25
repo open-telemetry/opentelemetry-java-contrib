@@ -38,7 +38,7 @@ an issue if this causes problems.
 
 ### JMX scraper
 
-- Implement stable service.instance.id
+- Implement stable `service.instance.id`
   ([#2270](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2270))
 
 ### Kafka exporter
