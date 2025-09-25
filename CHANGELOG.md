@@ -12,7 +12,7 @@ and
 [#2212](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
 and
 [#2213](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
-for examples and details. These changes are not expected to be breaking, so please open
+for examples and details. These changes are not expected to break anyone, so please open
 an issue if this causes problems.
 
 ### Baggage processor
