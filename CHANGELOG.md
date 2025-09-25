@@ -19,7 +19,7 @@ an issue if this causes problems.
 
 - Add baggage before it can be exported
   ([#2152](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2152))
-- Add declarative config for baggage
+- Add declarative configuration support
   ([#2031](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2031))
 
 ### Disk buffering
