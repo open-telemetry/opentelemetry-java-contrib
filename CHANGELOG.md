@@ -48,7 +48,7 @@ an issue if this causes problems.
 
 ### OpAMP client
 
-- Move important user-facing classes out of 'internal' package.
+- Move important user-facing classes out of 'internal' package
   ([#2249](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2249))
 - Exponential backoff retries on http connection failures
   ([#2274](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2274))
