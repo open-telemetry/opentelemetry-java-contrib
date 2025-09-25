@@ -33,7 +33,7 @@ an issue if this causes problems.
 
 ### Inferred spans
 
-- Add dynamically changing the inferred span interval
+- Support dynamically changing the inferred span interval
   ([#2153](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2153))
 
 ### JMX scraper
