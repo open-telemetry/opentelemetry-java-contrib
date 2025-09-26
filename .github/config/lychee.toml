@@ -6,7 +6,10 @@ max_concurrency = 4
 # Check link anchors
 include_fragments = true
 
+
 exclude = [
+  # Disabled until https://github.com/lycheeverse/lychee/issues/1729 is fixed
+  "^https://github.com/.*#.*$",
   # excluding links to pull requests and issues is done for performance
   "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
 ]
