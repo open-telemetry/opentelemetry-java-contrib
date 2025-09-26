@@ -270,7 +270,7 @@ The extension takes care of the necessary configuration required to authenticate
 
 The future of the [JMX metrics](./jmx-metrics/README.md) component,
 built on top of the
-[JMX metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics#jmx-metric-insight)
+[JMX metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/README.md#jmx-metric-insight)
 component from the opentelemetry-java-instrumentation repository.
 
 ### Maven extension
