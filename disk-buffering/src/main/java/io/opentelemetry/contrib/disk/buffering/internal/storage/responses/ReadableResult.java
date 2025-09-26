@@ -5,8 +5,14 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage.responses;
 
-public enum ReadableResult {
-  SUCCEEDED,
-  FAILED,
-  TRY_LATER
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Collection;
+
+public interface ReadableResult<T> extends Closeable {
+  /** The consumable data. */
+  Collection<T> getContent();
+
+  /** Delete the items provided in {@link #getContent()} */
+  void delete() throws IOException;
 }
