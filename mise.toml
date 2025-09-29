@@ -1,12 +1,6 @@
 [tools]
 lychee = "0.20.1"
 
-[tasks.lint-local-links]
-run = 'lychee --verbose --scheme file --include-fragments {{arg(name="files", default=".")}}'
-
-[tasks.lint-links]
-run = 'lychee --verbose --config .github/config/lychee.toml {{arg(name="files", var=true, default=".")}}'
-
 [settings]
 # Only install tools explicitly defined in the [tools] section above
 idiomatic_version_file_enable_tools = []
