@@ -25,4 +25,4 @@ jobs:
       - name: Link check (modified files only)
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: mise run lint:links-in-modified-file --base origin/${{ github.base_ref }} --head ${{ github.event.pull_request.head.sha }} --event ${{ github.event_name }}
+        run: mise run lint:links-in-modified-files --base origin/${{ github.base_ref }} --head ${{ github.event.pull_request.head.sha }} --event ${{ github.event_name }}
