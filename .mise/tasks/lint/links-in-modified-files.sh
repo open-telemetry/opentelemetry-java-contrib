@@ -7,12 +7,13 @@ set -e
 #USAGE flag "--head <head>" help="head branch to compare against" default=""
 #USAGE flag "--event <event>" help="PR name" default="pull_request"
 
+# shellcheck disable=SC2154
 if [ "$usage_head" == "''" ]; then
   usage_head=""
 fi
 
 # Check if lychee config was modified
-config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
+config_modified=$(git diff --name-only --merge-base "$usage_base" "$usage_head" \
                   | grep -E '^(\.github/config/lychee\.toml|.mise/tasks/lint|mise\.toml)$' || true)
 
 if [ -n "$config_modified" ] ; then
@@ -24,7 +25,7 @@ elif [ "$usage_event" != "pull_request" ] ; then
 else
   # Using lychee's default extension filter here to match when it runs against all files
   # Note: --diff-filter=d filters out deleted files
-  modified_files=$(git diff --name-only --diff-filter=d "$usage_base" $usage_head \
+  modified_files=$(git diff --name-only --diff-filter=d "$usage_base" "$usage_head" \
                     | grep -E '\.(md|mkd|mdx|mdown|mdwn|mkdn|mkdown|markdown|html|htm|txt)$' \
                     | tr '\n' ' ' || true)
 
@@ -33,6 +34,7 @@ else
     exit 0
   fi
 
+  # shellcheck disable=SC2086
   mise run lint:links $modified_files
 fi
 
