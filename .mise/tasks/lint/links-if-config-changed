@@ -4,12 +4,16 @@
 set -e
 
 #USAGE flag "--base <base>" help="base branch to compare against" default="origin/main"
-#USAGE flag "--head <head>" help="head branch to compare against" default="HEAD"
+#USAGE flag "--head <head>" help="head branch to compare against" default=""
 
-merge_base=$(git merge-base "$usage_base" HEAD)
+if [ "$usage_head" == "''" ]; then
+  usage_head=""
+fi
+
+# todo use .mise/tasks/lint/* for config change detection
 
 # Check if lychee config was modified
-config_modified=$(git diff --name-only "$merge_base"..."$usage_head" \
+config_modified=$(git diff --name-only --merge_base "$usage_base" $usage_head \
                   | grep -E '^(\.github/config/lychee\.toml|mise\.toml)$' || true)
 
 if [ -z "$config_modified" ] ; then

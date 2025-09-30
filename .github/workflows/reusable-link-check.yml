@@ -24,11 +24,15 @@ jobs:
 
       - name: Link check (modified files only)
         if: github.event_name == 'pull_request'
+        # todo only if config did not change
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: mise run lint:links-in-modified-file --base origin/${{ github.base_ref }} --head ${{ github.event.pull_request.head.sha }}
 
+# todo one stop commend for linting that also works locally: lint:modified-links
+
       - name: Link check (all files)
+        # todo also if not PR but config changed
         if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
