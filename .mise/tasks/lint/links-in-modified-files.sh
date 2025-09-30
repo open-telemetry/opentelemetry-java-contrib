@@ -7,7 +7,6 @@ set -e
 #USAGE flag "--head <head>" help="head branch to compare against" default=""
 #USAGE flag "--event <event>" help="PR name" default="pull_request"
 
-# shellcheck disable=SC2154
 if [ "$usage_head" == "''" ]; then
   usage_head=""
 fi

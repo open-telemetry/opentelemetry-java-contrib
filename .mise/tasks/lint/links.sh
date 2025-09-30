@@ -5,5 +5,4 @@ set -e
 
 #USAGE arg "<file>" var=#true help="files to check" default="."
 
-# shellcheck disable=SC2154
 lychee --verbose --config .github/config/lychee.toml "$usage_file"
