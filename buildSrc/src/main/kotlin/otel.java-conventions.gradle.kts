@@ -147,10 +147,14 @@ dependencies {
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
-    useJUnitJupiter("5.13.4")
+    useJUnitJupiter()
 
     dependencies {
       implementation(project(project.path))
+
+      // this is only needed to establish the version of JUnit we want to use
+      // since Renovate doesn't currently understand useJUnitJupiter("<version>")
+      implementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
 
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
@@ -160,7 +164,6 @@ testing {
       compileOnly("com.google.errorprone:error_prone_annotations")
       compileOnly("com.google.code.findbugs:jsr305")
 
-      implementation("org.junit.jupiter:junit-jupiter-params")
       implementation("org.mockito:mockito-core")
       implementation("org.mockito:mockito-junit-jupiter")
       implementation("org.assertj:assertj-core")
