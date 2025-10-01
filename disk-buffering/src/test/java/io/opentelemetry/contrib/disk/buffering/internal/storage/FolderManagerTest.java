@@ -35,7 +35,7 @@ class FolderManagerTest {
   @BeforeEach
   void setUp() {
     clock = mock();
-    folderManager = new FolderManager(rootDir, TestData.getConfiguration(rootDir), clock);
+    folderManager = new FolderManager(rootDir, TestData.getConfiguration(), clock);
   }
 
   @AfterEach
@@ -49,6 +49,19 @@ class FolderManagerTest {
     WritableFile file = folderManager.createWritableFile();
 
     assertThat(file.getFile().getName()).isEqualTo("1000");
+  }
+
+  @Test
+  void clearFiles() throws IOException {
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L));
+
+    // Creating file
+    folderManager.createWritableFile();
+    assertThat(rootDir.list()).containsExactly("1000");
+
+    // Clear
+    folderManager.clear();
+    assertThat(rootDir.list()).isEmpty();
   }
 
   @Test
