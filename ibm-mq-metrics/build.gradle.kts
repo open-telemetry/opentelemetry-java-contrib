@@ -60,6 +60,6 @@ testing {
 
 tasks.shadowJar {
   dependencies {
-    exclude(dependency("com.ibm.mq:com.ibm.mq.allclient:9.4.3.1"))
+    exclude(dependency("com.ibm.mq:com.ibm.mq.allclient"))
   }
 }
