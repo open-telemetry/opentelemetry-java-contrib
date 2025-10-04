@@ -76,6 +76,7 @@ components:
   samplers:
     - trask
     - jack-berg
+    - dol
   kafka-exporter:
     - spockz
     - vincentfree
