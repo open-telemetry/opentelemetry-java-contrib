@@ -43,7 +43,7 @@ class WritableFileTest {
         new WritableFile(
             new File(rootDir, String.valueOf(CREATED_TIME_MILLIS)),
             CREATED_TIME_MILLIS,
-            TestData.getConfiguration(rootDir),
+            TestData.getConfiguration(),
             clock);
   }
 
