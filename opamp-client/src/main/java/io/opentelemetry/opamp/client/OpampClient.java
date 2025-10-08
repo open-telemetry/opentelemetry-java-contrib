@@ -40,16 +40,19 @@ public interface OpampClient extends Closeable {
      * Called when the connection is successfully established to the Server. For WebSocket clients
      * this is called after the handshake is completed without any error. For HTTP clients this is
      * called for any request if the response status is OK.
+     *
+     * @param client The client that's connected.
      */
-    void onConnect();
+    void onConnect(OpampClient client);
 
     /**
      * Called when the connection to the Server cannot be established. May also be called if the
      * connection is lost and reconnection attempt fails.
      *
+     * @param client The client that failed to connect.
      * @param throwable The exception.
      */
-    void onConnectFailed(@Nullable Throwable throwable);
+    void onConnectFailed(OpampClient client, @Nullable Throwable throwable);
 
     /**
      * Called when the Server reports an error in response to some previously sent request. Useful
@@ -57,9 +60,10 @@ public interface OpampClient extends Closeable {
      * retrying previous operations. The client handles the ErrorResponse_UNAVAILABLE case
      * internally by performing retries as necessary.
      *
+     * @param client The client that received an error response.
      * @param errorResponse The error returned by the Server.
      */
-    void onErrorResponse(ServerErrorResponse errorResponse);
+    void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse);
 
     /**
      * Called when the Agent receives a message that needs processing. See {@link MessageData}
@@ -70,8 +74,9 @@ public interface OpampClient extends Closeable {
      * onMessage returns. This is advisable if processing can take a long time. In that case
      * returning quickly is preferable to avoid blocking the {@link OpampClient}.
      *
+     * @param client The client that received a message.
      * @param messageData The server response data that needs processing.
      */
-    void onMessage(MessageData messageData);
+    void onMessage(OpampClient client, MessageData messageData);
   }
 }
