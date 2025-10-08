@@ -3,17 +3,19 @@
 
 set -e
 
-#USAGE flag "--base <base>" help="base branch to compare against" default="origin/main"
-#USAGE flag "--head <head>" help="head branch to compare against" default=""
-#USAGE flag "--event <event>" help="PR name" default="pull_request"
+#USAGE flag "--base <base>" help="base branch to compare against (default: origin/main)" default="origin/main"
+#USAGE flag "--head <head>" help="head branch to compare against (empty for local changes) (default: empty)" default=""
+#USAGE flag "--event <event>" help="event name (default: pull_request)" default="pull_request"
 
-if [ "$usage_head" == "''" ]; then
+if [ "$usage_head" = "''" ]; then
   usage_head=""
 fi
 
 # Check if lychee config was modified
-config_modified=$(git diff --name-only --merge-base "$usage_base" "$usage_head" \
-                  | grep -E '^(\.github/config/lychee\.toml|.mise/tasks/lint|mise\.toml)$' || true)
+# shellcheck disable=SC2086
+# - because usage_head may be empty
+config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
+                  | grep -E '^(\.github/config/lychee\.toml|\.mise/tasks/lint/.*|mise\.toml)$' || true)
 
 if [ -n "$config_modified" ] ; then
   echo "config changes, checking all files."
@@ -24,7 +26,9 @@ elif [ "$usage_event" != "pull_request" ] ; then
 else
   # Using lychee's default extension filter here to match when it runs against all files
   # Note: --diff-filter=d filters out deleted files
-  modified_files=$(git diff --name-only --diff-filter=d "$usage_base" "$usage_head" \
+  # shellcheck disable=SC2086
+  # - because usage_head may be empty
+  modified_files=$(git diff --name-only --diff-filter=d "$usage_base" $usage_head \
                     | grep -E '\.(md|mkd|mdx|mdown|mdwn|mkdn|mkdown|markdown|html|htm|txt)$' \
                     | tr '\n' ' ' || true)
 

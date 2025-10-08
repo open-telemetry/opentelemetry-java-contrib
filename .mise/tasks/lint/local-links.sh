@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Lint links in all files"
+#MISE description="Lint links in local files"
 
 set -e
 
