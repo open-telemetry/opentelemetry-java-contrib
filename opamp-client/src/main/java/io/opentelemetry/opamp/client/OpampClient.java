@@ -22,7 +22,7 @@ public interface OpampClient extends Closeable {
    * Sets attributes of the Agent. The attributes will be included in the next outgoing status
    * report. This is typically used by Agents which allow their AgentDescription to change
    * dynamically while the OpAMPClient is started. May be also called from {@link
-   * Callbacks#onMessage(MessageData)}.
+   * Callbacks#onMessage(OpampClient, MessageData)}.
    *
    * @param agentDescription The new agent description.
    */
