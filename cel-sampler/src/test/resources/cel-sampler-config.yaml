@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://github.com/open-telemetry/opentelemetry-configuration/raw/refs/tags/v1.0.0-rc.2/schema/opentelemetry_configuration.json
+file_format: 1.0-rc.2
+tracer_provider:
+  sampler:
+    parent_based:
+      root:
+        cel_based:
+          fallback_sampler:
+            always_on:
+          expressions:
+            - action: DROP
+              expression: '"example.com" in attribute["http.response.header.host"] && attribute["http.response.status_code"] == 200'
+            - action: DROP
+              expression: spanKind == "SERVER" && attribute["url.path"].matches("/actuator.*")
+            - action: RECORD_AND_SAMPLE
+              expression: spanKind == "SERVER" && attribute["url.path"].matches("/actuator.*")
