@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("otel.japicmp-conventions")
   id("org.owasp.dependencycheck")
 }
 
@@ -66,9 +67,22 @@ tasks {
   withType<Test>().configureEach {
     useJUnitPlatform()
 
+    val maxTestRetries = gradle.startParameter.projectProperties["maxTestRetries"]?.toInt() ?: 0
+    develocity.testRetry {
+      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      maxRetries.set(maxTestRetries)
+    }
+
     testLogging {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
+    }
+
+    configure<JacocoTaskExtension> {
+      // only care about code coverage for code in this repository
+      // (in particular avoiding netty classes which sometimes end up
+      // causing sporadic CI failures)
+      includes = listOf("io/opentelemetry/contrib/**")
     }
   }
 
@@ -93,12 +107,13 @@ plugins.withId("otel.publish-conventions") {
     register("generateVersionResource") {
       val moduleName = otelJava.moduleName
       val propertiesDir = moduleName.map { layout.buildDirectory.file("generated/properties/${it.replace('.', '/')}") }
+      val projectVersion = project.version.toString()
 
-      inputs.property("project.version", project.version.toString())
+      inputs.property("project.version", projectVersion)
       outputs.dir(propertiesDir)
 
       doLast {
-        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${project.version}")
+        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${projectVersion}")
       }
     }
   }
@@ -135,10 +150,10 @@ testing {
     dependencies {
       implementation(project(project.path))
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.13.0"))
-      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.1"))
-      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.32.5"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.14.0"))
+      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
+      implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.4"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

@@ -1,7 +1,7 @@
 # Jetty Metrics
 
 The JMX Metric Gatherer provides built in Jetty metric gathering capabilities.
-Details about using JMX with WildFly can be found here: https://www.eclipse.org/jetty/documentation/jetty-11/operations-guide/index.html#og-jmx
+Details about using JMX with WildFly can be found here: https://jetty.org/docs/jetty/11/operations-guide/jmx/index.html
 
 ### Metrics
 * Name: `jetty.select.count`

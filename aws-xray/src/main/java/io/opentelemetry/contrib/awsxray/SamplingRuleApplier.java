@@ -5,7 +5,10 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toMap;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -19,28 +22,27 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.ServerAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 final class SamplingRuleApplier {
 
   // copied from AwsIncubatingAttributes
   private static final AttributeKey<String> AWS_ECS_CONTAINER_ARN =
-      AttributeKey.stringKey("aws.ecs.container.arn");
+      stringKey("aws.ecs.container.arn");
   // copied from CloudIncubatingAttributes
-  private static final AttributeKey<String> CLOUD_PLATFORM =
-      AttributeKey.stringKey("cloud.platform");
-  private static final AttributeKey<String> CLOUD_RESOURCE_ID =
-      AttributeKey.stringKey("cloud.resource_id");
+  private static final AttributeKey<String> CLOUD_PLATFORM = stringKey("cloud.platform");
+  private static final AttributeKey<String> CLOUD_RESOURCE_ID = stringKey("cloud.resource_id");
   // copied from CloudIncubatingAttributes.CloudPlatformIncubatingValues
   public static final String AWS_EC2 = "aws_ec2";
   public static final String AWS_ECS = "aws_ecs";
@@ -48,14 +50,18 @@ final class SamplingRuleApplier {
   public static final String AWS_LAMBDA = "aws_lambda";
   public static final String AWS_ELASTIC_BEANSTALK = "aws_elastic_beanstalk";
   // copied from HttpIncubatingAttributes
-  private static final AttributeKey<String> HTTP_HOST = AttributeKey.stringKey("http.host");
-  private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
-  private static final AttributeKey<String> HTTP_TARGET = AttributeKey.stringKey("http.target");
-  private static final AttributeKey<String> HTTP_URL = AttributeKey.stringKey("http.url");
+  private static final AttributeKey<String> HTTP_HOST = stringKey("http.host");
+  private static final AttributeKey<String> HTTP_METHOD = stringKey("http.method");
+  private static final AttributeKey<String> HTTP_TARGET = stringKey("http.target");
+  private static final AttributeKey<String> HTTP_URL = stringKey("http.url");
   // copied from NetIncubatingAttributes
-  private static final AttributeKey<String> NET_HOST_NAME = AttributeKey.stringKey("net.host.name");
+  private static final AttributeKey<String> NET_HOST_NAME = stringKey("net.host.name");
 
   private static final Map<String, String> XRAY_CLOUD_PLATFORM;
+
+  // _OTHER request method:
+  // https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/http.md?plain=1#L96
+  private static final String _OTHER_REQUEST_METHOD = "_OTHER";
 
   static {
     Map<String, String> xrayCloudPlatform = new HashMap<>();
@@ -124,7 +130,7 @@ final class SamplingRuleApplier {
     } else {
       attributeMatchers =
           rule.getAttributes().entrySet().stream()
-              .collect(Collectors.toMap(Map.Entry::getKey, e -> toMatcher(e.getValue())));
+              .collect(toMap(Map.Entry::getKey, e -> toMatcher(e.getValue())));
     }
 
     urlPathMatcher = toMatcher(rule.getUrlPath());
@@ -175,25 +181,35 @@ final class SamplingRuleApplier {
   @SuppressWarnings("deprecation") // TODO
   boolean matches(Attributes attributes, Resource resource) {
     int matchedAttributes = 0;
-    String httpTarget = null;
-    String httpUrl = null;
-    String httpMethod = null;
-    String host = null;
+
+    String httpTarget = attributes.get(UrlAttributes.URL_PATH);
+    if (httpTarget == null) {
+      httpTarget = attributes.get(HTTP_TARGET);
+    }
+
+    String httpUrl = attributes.get(UrlAttributes.URL_FULL);
+    if (httpUrl == null) {
+      httpUrl = attributes.get(HTTP_URL);
+    }
+
+    String httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD);
+    if (httpMethod == null) {
+      httpMethod = attributes.get(HTTP_METHOD);
+    }
+
+    if (httpMethod != null && httpMethod.equals(_OTHER_REQUEST_METHOD)) {
+      httpMethod = attributes.get(HttpAttributes.HTTP_REQUEST_METHOD_ORIGINAL);
+    }
+
+    String host = attributes.get(ServerAttributes.SERVER_ADDRESS);
+    if (host == null) {
+      host = attributes.get(NET_HOST_NAME);
+      if (host == null) {
+        host = attributes.get(HTTP_HOST);
+      }
+    }
 
     for (Map.Entry<AttributeKey<?>, Object> entry : attributes.asMap().entrySet()) {
-      if (entry.getKey().equals(HTTP_TARGET)) {
-        httpTarget = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_URL)) {
-        httpUrl = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_METHOD)) {
-        httpMethod = (String) entry.getValue();
-      } else if (entry.getKey().equals(NET_HOST_NAME)) {
-        host = (String) entry.getValue();
-      } else if (entry.getKey().equals(HTTP_HOST)) {
-        // TODO (trask) remove support for deprecated http.host attribute
-        host = (String) entry.getValue();
-      }
-
       Matcher matcher = attributeMatchers.get(entry.getKey().getKey());
       if (matcher == null) {
         continue;
@@ -300,7 +316,7 @@ final class SamplingRuleApplier {
     }
     long intervalNanos =
         target.getIntervalSecs() != null
-            ? TimeUnit.SECONDS.toNanos(target.getIntervalSecs())
+            ? SECONDS.toNanos(target.getIntervalSecs())
             : AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS;
     long newNextSnapshotTimeNanos = clock.nanoTime() + intervalNanos;
 

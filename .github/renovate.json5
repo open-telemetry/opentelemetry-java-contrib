@@ -6,24 +6,38 @@
   ],
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
+    'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
   ],
   prHourlyLimit: 5, // we have a large number of parallel runners
   labels: [
-    'dependencies'
+    'dependencies',
   ],
   packageRules: [
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
-      "groupName": "all patch versions",
-      "matchUpdateTypes": ["patch"],
-      "schedule": ["before 8am every weekday"]
+      groupName: 'all patch versions',
+      matchUpdateTypes: [
+        'patch',
+      ],
+      schedule: [
+        'before 8am every weekday',
+      ],
     },
     {
       // avoids these Renovate PRs from trickling in throughout the week
       // (consolidating the review process)
-      "matchUpdateTypes": ["minor", "major"],
-      "schedule": ["before 8am on Monday"]
+      matchUpdateTypes: [
+        'minor',
+        'major',
+      ],
+      schedule: [
+        'before 8am on Monday',
+      ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+      ],
     },
     {
       matchPackageNames: [
@@ -55,6 +69,17 @@
       enabled: false,
     },
     {
+      // junit 6+ requires Java 17+
+      matchPackageNames: [
+        'org.junit:**',
+        'org.junit.jupiter:**',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
       // junit-pioneer 2+ requires Java 11+
       matchPackageNames: [
         'org.junit-pioneer:junit-pioneer',
@@ -71,7 +96,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.mockito:{/,}**',
+        'org.mockito:**',
       ],
     },
     {
@@ -109,25 +134,45 @@
       matchCurrentVersion: '3.5.0',
       enabled: false,
       matchPackageNames: [
-        'org.apache.maven:{/,}**',
+        'org.apache.maven:**',
       ],
     },
     {
       groupName: 'spotless packages',
       matchPackageNames: [
-        'com.diffplug.spotless{/,}**',
+        'com.diffplug.spotless',
+        'com.diffplug.spotless:**',
       ],
     },
     {
       groupName: 'hipparchus packages',
       matchPackageNames: [
-        'org.hipparchus{/,}**',
+        'org.hipparchus:**',
       ],
     },
     {
       groupName: 'errorprone packages',
       matchPackageNames: [
-        'com.google.errorprone{/,}**',
+        'com.google.errorprone:**',
+      ],
+    },
+    {
+      groupName: 'jackson packages',
+      matchPackageNames: [
+        'com.fasterxml.jackson:**',
+        'com.fasterxml.jackson.core:**',
+      ],
+    },
+    {
+      groupName: 'develocity packages',
+      matchPackageNames: [
+        'com.gradle.develocity:**',
+      ],
+    },
+    {
+      groupName: 'bouncycastle packages',
+      matchPackageNames: [
+        'org.bouncycastle:**',
       ],
     },
     {
@@ -137,7 +182,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.openjdk.jmc{/,}**',
+        'org.openjdk.jmc:**',
       ],
     },
     {
@@ -148,7 +193,7 @@
       matchCurrentVersion: '5.0.0',
       enabled: false,
       matchPackageNames: [
-        'jakarta.servlet:{/,}**',
+        'jakarta.servlet:**',
       ],
     },
     {
@@ -161,7 +206,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.springframework.boot{/,}**',
+        'org.springframework.boot:**',
       ],
     },
   ],
@@ -170,10 +215,32 @@
       customType: 'regex',
       datasourceTemplate: 'npm',
       managerFilePatterns: [
-        '/^.github/workflows//',
+        '.github/workflows/**',
       ],
       matchStrings: [
         'npx (?<depName>[^@]+)@(?<currentValue>[^\\s]+)',
+      ],
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'java-version',
+      managerFilePatterns: [
+        '.github/workflows/**',
+      ],
+      matchStrings: [
+        '(?<currentValue>\\d+) # renovate: datasource=java-version',
+      ],
+      depNameTemplate: 'java',
+      extractVersionTemplate: '^(?<version>\\d+)',
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'github-releases',
+      managerFilePatterns: [
+        '**/build.gradle.kts',
+      ],
+      matchStrings: [
+        '"https://github.com/(?<depName>[^/]+/[^/]+)/zipball/(?<currentValue>.+?)"',
       ],
     },
   ],

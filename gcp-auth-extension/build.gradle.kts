@@ -1,8 +1,7 @@
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("com.github.johnrengelman.shadow")
-  id("org.springframework.boot") version "2.7.18"
+  id("com.gradleup.shadow")
 }
 
 description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"
@@ -14,6 +13,8 @@ val agent: Configuration by configurations.creating {
 }
 
 dependencies {
+  implementation(platform("org.springframework.boot:spring-boot-dependencies:2.7.18"))
+
   annotationProcessor("com.google.auto.service:auto-service")
   // We use `compileOnly` dependency because during runtime all necessary classes are provided by
   // javaagent itself.
@@ -23,7 +24,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.36.0")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.39.1")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -41,7 +42,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
   testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")
@@ -88,11 +89,6 @@ tasks {
   assemble {
     dependsOn(shadowJar)
   }
-
-  bootJar {
-    // disable bootJar in build since it only runs as part of test
-    enabled = false
-  }
 }
 
 val builtLibsDir = layout.buildDirectory.dir("libs").get().asFile.absolutePath
@@ -107,6 +103,9 @@ tasks.register<Copy>("copyAgent") {
 }
 
 tasks.register<Test>("IntegrationTestUserCreds") {
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+
   dependsOn(tasks.shadowJar)
   dependsOn(tasks.named("copyAgent"))
 

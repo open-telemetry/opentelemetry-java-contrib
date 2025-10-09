@@ -1,6 +1,6 @@
 plugins {
   application
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
 
   id("otel.java-conventions")
 
@@ -26,6 +26,8 @@ dependencies {
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.awaitility:awaitility")
@@ -39,9 +41,9 @@ testing {
         implementation("org.slf4j:slf4j-simple")
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
-        implementation("org.bouncycastle:bcprov-jdk18on:1.80")
-        implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
+        implementation("org.bouncycastle:bcprov-jdk18on:1.82")
+        implementation("org.bouncycastle:bcpkix-jdk18on:1.82")
       }
     }
   }
@@ -50,6 +52,8 @@ testing {
 tasks {
   shadowJar {
     mergeServiceFiles()
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
 
     manifest {
       attributes["Implementation-Version"] = project.version
@@ -64,20 +68,23 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
 
     val testAppTask = project("test-app").tasks.named<Jar>("jar")
     dependsOn(testAppTask)
+    inputs.files(layout.files(testAppTask))
     systemProperty("app.jar.path", testAppTask.get().archiveFile.get().asFile.absolutePath)
 
     val testWarTask = project("test-webapp").tasks.named<Jar>("war")
     dependsOn(testWarTask)
+    inputs.files(layout.files(testWarTask))
     systemProperty("app.war.path", testWarTask.get().archiveFile.get().asFile.absolutePath)
 
     systemProperty("gradle.project.version", "${project.version}")
 
     develocity.testRetry {
-      // You can see tests that were retried by this mechanism in the collected test reports and build scans.
+      // TODO (trask) fix flaky tests and remove this workaround
       if (System.getenv().containsKey("CI")) {
         maxRetries.set(5)
       }

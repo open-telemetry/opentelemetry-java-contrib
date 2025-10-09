@@ -1,0 +1,81 @@
+groups:
+  - id: shared.attributes
+    type: attribute_group
+    brief: Attributes of metrics.
+    attributes:
+      - id: ibm.mq.queue.manager
+        type: string
+        brief: >
+          The name of the IBM queue manager
+        stability: development
+        examples: ["MQ1"]
+      - id: messaging.destination.name
+        type: string
+        brief: >
+          The system-specific name of the messaging operation.
+        note: This is duplicated from otel semantic-conventions.
+        stability: development
+        examples: [ "dev/" ]
+      - id: ibm.mq.channel.name
+        type: string
+        brief: >
+          The name of the channel
+        stability: development
+        examples: [ "DEV.ADMIN.SVRCONN" ]
+      - id: ibm.mq.channel.type
+        type: string
+        brief: >
+          The type of the channel
+        stability: development
+        examples: [ "server-connection", "cluster-receiver", "amqp" ]
+      - id: ibm.mq.job.name
+        type: string
+        brief: >
+          The job name
+        stability: development
+        examples: [ "0000074900000003" ]
+      - id: ibm.mq.channel.start.time
+        type: int
+        brief: >
+          The start time of the channel as seconds since Epoch.
+        stability: development
+        examples: [ 1748462702 ]
+        # Use the messaging.destination.name attribute instead?
+#      - id: queue.name
+#        type: string
+#        brief: >
+#          The queue name
+#        stability: development
+#        examples: [ "DEV.DEAD.LETTER.QUEUE" ]
+      - id: ibm.mq.queue.type
+        type: string
+        brief: >
+          The queue type
+        stability: development
+        examples: [ "local-normal" ]
+      - id: ibm.mq.listener.name
+        type: string
+        brief: >
+          The listener name
+        stability: development
+        examples: [ "listener" ]
+      - id: user.name
+        type: string
+        brief: >
+          Short name or login/username of the user.
+        note: This is duplicated from otel semantic-conventions.
+        stability: development
+        examples: [ "foo", "root" ]
+      - id: service.name
+        type: string
+        brief: >
+          Logical name of the service.
+        note: This is duplicated from otel semantic-conventions.
+        stability: development
+        examples: [ "Wordle", "JMSService" ]
+      - id: error.code
+        type: string
+        brief: >
+          The reason code associated with an error
+        stability: development
+        examples: [ "2038", "2543", "2009" ]

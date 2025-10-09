@@ -1,0 +1,162 @@
+name: Reusable - Common
+
+on:
+  workflow_call:
+    inputs:
+      cache-read-only:
+        type: boolean
+        required: false
+      no-build-cache:
+        type: boolean
+        required: false
+      max-test-retries:
+        type: number
+        required: false
+        default: 0
+
+permissions:
+  contents: read
+
+jobs:
+  spotless:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Spotless
+        run: ./gradlew spotlessCheck ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Build
+        run: ./gradlew build -x spotlessCheck -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Check for jApiCmp diffs
+        # The jApiCmp diff compares current to latest, which isn't appropriate for release branches
+        if: ${{ !startsWith(github.ref_name, 'release/') && !startsWith(github.base_ref, 'release/') }}
+        run: |
+          # need to "git add" in case any generated files did not already exist
+          git add docs/apidiffs
+          if git diff --cached --quiet
+          then
+            echo "No diff detected."
+          else
+            echo "Diff detected - did you run './gradlew jApiCmp'?"
+            git diff --cached --name-only
+            git diff --cached
+            exit 1
+          fi
+
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        test-java-version:
+          - 8
+          - 11
+          - 17
+          - 21
+          - 25 # renovate: datasource=java-version
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - id: setup-java-test
+        name: Set up Java ${{ matrix.test-java-version }} for tests
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.test-java-version }}
+
+      - id: setup-java
+        name: Set up Java for build
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Test
+        run: >
+          ./gradlew test
+          "-PtestJavaVersion=${{ matrix.test-java-version }}"
+          "-Porg.gradle.java.installations.paths=${{ steps.setup-java-test.outputs.path }}"
+          "-Porg.gradle.java.installations.auto-download=false"
+          "-PmaxTestRetries=${{ inputs.max-test-retries }}"
+          ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up JDK for running Gradle
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Integration test
+        run: ./gradlew integrationTest "-PmaxTestRetries=${{ inputs.max-test-retries }}" ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+
+      - name: Build scan
+        if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
+        run: cat build-scan.txt
+
+      - name: Save integration test results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: integration-test-results
+          path: jmx-metrics/build/reports/tests/integrationTest
+
+  markdown-lint-check:
+    uses: ./.github/workflows/reusable-markdown-lint.yml
+
+  misspell-check:
+    uses: ./.github/workflows/reusable-misspell-check.yml
+
+  shell-script-check:
+    uses: ./.github/workflows/reusable-shell-script-check.yml

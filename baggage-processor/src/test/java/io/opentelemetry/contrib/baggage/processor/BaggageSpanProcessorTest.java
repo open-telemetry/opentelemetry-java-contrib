@@ -17,10 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class BaggageSpanProcessorTest {
+class BaggageSpanProcessorTest {
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
+  void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor = BaggageSpanProcessor.allowAllBaggageKeys()) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onStart(Context.current(), span);
@@ -30,7 +30,7 @@ public class BaggageSpanProcessorTest {
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
+  void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor = new BaggageSpanProcessor(key -> key.startsWith("k"))) {
       try (Scope ignore =
@@ -47,7 +47,7 @@ public class BaggageSpanProcessorTest {
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches_regex(
+  void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches_regex(
       @Mock ReadWriteSpan span) {
     Pattern pattern = Pattern.compile("k.*");
     try (BaggageSpanProcessor processor =

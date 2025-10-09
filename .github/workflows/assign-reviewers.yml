@@ -18,6 +18,7 @@ jobs:
       pull-requests: write  # for assigning reviewers
     runs-on: ubuntu-latest
     steps:
-      - uses: open-telemetry/assign-reviewers-action@cb42e3ee14a59c01abccd401f126a0f4c3991cb3 # main
+      - uses: dyladan/component-owners@58bd86e9814d23f1525d0a970682cead459fa783 # v0.1.0
         with:
           config-file: .github/component_owners.yml
+          assign-owners: false

@@ -1,7 +1,7 @@
 plugins {
   id("otel.java-conventions")
   application
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
 
   id("otel.groovy-conventions")
   id("otel.publish-conventions")
@@ -47,7 +47,7 @@ testing {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
         implementation("org.testcontainers:junit-jupiter")
         implementation("org.slf4j:slf4j-simple")
       }
@@ -58,6 +58,8 @@ testing {
 tasks {
   shadowJar {
     mergeServiceFiles()
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
 
     manifest {
       attributes["Implementation-Version"] = project.version
@@ -72,7 +74,9 @@ tasks {
 
   withType<Test>().configureEach {
     dependsOn(shadowJar)
+    inputs.files(layout.files(shadowJar))
     systemProperty("shadow.jar.path", shadowJar.get().archiveFile.get().asFile.absolutePath)
+
     systemProperty("gradle.project.version", "${project.version}")
   }
 

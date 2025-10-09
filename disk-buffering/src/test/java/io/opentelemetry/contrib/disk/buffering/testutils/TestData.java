@@ -37,6 +37,8 @@ public final class TestData {
           .put("conditions", false, true)
           .put("scores", 0L, 1L)
           .put("coins", 0.01, 0.05, 0.1)
+          .put("empty", "")
+          .put("blank", " ")
           .build();
 
   public static final Resource RESOURCE_FULL =
@@ -129,6 +131,25 @@ public final class TestData {
   private static LongExemplarData makeLongExemplarData(TraceFlags flags) {
     SpanContext context = makeContext(flags);
     return ImmutableLongExemplarData.create(ATTRIBUTES, 100L, context, 1L);
+  }
+
+  @NotNull
+  public static byte[] makeTooShortSignalBinary() {
+    return new byte[] {
+      (byte) 0x0A, // type
+      (byte) 0xFF, // defining length 255, but message is shorter
+      (byte) 0x01 // content
+    };
+  }
+
+  @NotNull
+  public static byte[] makeMalformedSignalBinary() {
+    return new byte[] {
+      (byte) 0x0A, // type
+      (byte) 0x02, // length
+      (byte) 0x08, // field 1, wire type 0 (varint) - this should be a nested message but isn't
+      (byte) 0x01 // content
+    };
   }
 
   private TestData() {}

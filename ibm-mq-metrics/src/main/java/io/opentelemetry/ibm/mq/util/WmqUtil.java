@@ -1,0 +1,78 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.ibm.mq.util;
+
+import com.ibm.mq.MQException;
+import com.ibm.mq.MQQueueManager;
+import com.ibm.mq.headers.MQDataException;
+import com.ibm.mq.headers.pcf.PCFMessageAgent;
+import io.opentelemetry.ibm.mq.WmqContext;
+import io.opentelemetry.ibm.mq.config.QueueManager;
+import java.util.Hashtable;
+import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class WmqUtil {
+
+  private static final Logger logger = LoggerFactory.getLogger(WmqUtil.class);
+
+  private WmqUtil() {}
+
+  public static PCFMessageAgent initPcfMessageAgent(
+      QueueManager queueManager, MQQueueManager ibmQueueManager) {
+    try {
+      PCFMessageAgent agent;
+      if (isNotNullOrEmpty(queueManager.getModelQueueName())
+          && isNotNullOrEmpty(queueManager.getReplyQueuePrefix())) {
+        logger.debug("Initializing the PCF agent for model queue and reply queue prefix.");
+        agent = new PCFMessageAgent();
+        agent.setModelQueueName(queueManager.getModelQueueName());
+        agent.setReplyQueuePrefix(queueManager.getReplyQueuePrefix());
+        logger.debug("Connecting to queueManager to set the modelQueueName and replyQueuePrefix.");
+        agent.connect(ibmQueueManager);
+      } else {
+        agent = new PCFMessageAgent(ibmQueueManager);
+      }
+      if (queueManager.getCcsid() != Integer.MIN_VALUE) {
+        agent.setCharacterSet(queueManager.getCcsid());
+      }
+
+      if (queueManager.getEncoding() != Integer.MIN_VALUE) {
+        agent.setEncoding(queueManager.getEncoding());
+      }
+      logger.debug(
+          "Initialized PCFMessageAgent for queueManager {} in thread {}",
+          agent.getQManagerName(),
+          Thread.currentThread().getName());
+      return agent;
+    } catch (MQDataException mqe) {
+      logger.error(mqe.getMessage(), mqe);
+      throw new IllegalStateException(mqe);
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static MQQueueManager connectToQueueManager(QueueManager queueManager) {
+    WmqContext auth = new WmqContext(queueManager);
+    Hashtable env = auth.getMqEnvironment();
+    try {
+      MQQueueManager ibmQueueManager = new MQQueueManager(queueManager.getName(), env);
+      logger.debug(
+          "MQQueueManager connection initiated for queueManager {} in thread {}",
+          queueManager.getName(),
+          Thread.currentThread().getName());
+      return ibmQueueManager;
+    } catch (MQException mqe) {
+      logger.error(mqe.getMessage(), mqe);
+      throw new IllegalStateException(mqe.getMessage());
+    }
+  }
+
+  private static boolean isNotNullOrEmpty(@Nullable String str) {
+    return str != null && !str.isEmpty();
+  }
+}

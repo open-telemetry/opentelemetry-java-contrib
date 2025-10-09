@@ -1,13 +1,12 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import ru.vyarus.gradle.plugin.animalsniffer.AnimalSniffer
 
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("com.github.johnrengelman.shadow")
+  id("otel.animalsniffer-conventions")
+  id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("ru.vyarus.animalsniffer") version "2.0.1"
-  id("com.squareup.wire") version "5.3.2"
+  id("com.squareup.wire") version "5.4.0"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -18,27 +17,13 @@ val protos by configurations.creating
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   implementation("io.opentelemetry:opentelemetry-api-incubator")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
-  signature("com.toasttab.android:gummy-bears-api-21:0.6.1:coreLib@signature")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  protos("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha@jar")
-}
-
-animalsniffer {
-  sourceSets = listOf(java.sourceSets.main.get())
-}
-
-// Always having declared output makes this task properly participate in tasks up-to-date checks
-tasks.withType<AnimalSniffer> {
-  reports.text.required.set(true)
-}
-
-// Attaching animalsniffer check to the compilation process.
-tasks.named("classes").configure {
-  finalizedBy("animalsnifferMain")
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha@jar")
 }
 
 jmh {
@@ -63,9 +48,10 @@ wire {
   }
 
   root(
-    "opentelemetry.proto.trace.v1.TracesData",
-    "opentelemetry.proto.metrics.v1.MetricsData",
-    "opentelemetry.proto.logs.v1.LogsData",
+    // These are the types used by the Java SDK's OTLP exporters.
+    "opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest",
+    "opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest",
+    "opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest",
   )
 }
 

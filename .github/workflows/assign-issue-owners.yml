@@ -1,0 +1,78 @@
+---
+name: Assign issue owners
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  assign-owners:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.label.name, 'component:')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Install yaml dependency used below
+        run: npm install .github/scripts
+
+      - name: Parse component label and assign owners
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const { parse } = require('yaml');
+
+            // Extract component name from label
+            const labelName = context.payload.label.name;
+
+            if (!labelName.startsWith('component:')) {
+              core.setFailed('Label does not match expected pattern');
+              return;
+            }
+
+            const componentName = labelName.replace('component:', '');
+            console.log(`Processing component: ${componentName}`);
+
+            // Read and parse component_owners.yml
+            const yamlContent = fs.readFileSync('.github/component_owners.yml', 'utf8');
+            const data = parse(yamlContent);
+
+            if (!data || !data.components) {
+              core.setFailed('Invalid component_owners.yml structure');
+              return;
+            }
+
+            const components = data.components;
+
+            if (!(componentName in components)) {
+              core.setFailed(`Component '${componentName}' not found in component_owners.yml`);
+              return;
+            }
+
+            const owners = components[componentName];
+
+            if (!owners || owners.length === 0) {
+              core.setFailed(`No owners found for component '${componentName}'`);
+              return;
+            }
+
+            console.log(`Found owners: ${owners.join(', ')}`);
+
+            // Assign the issue to the owners
+            const issueNumber = context.payload.issue.number;
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              assignees: owners
+            });
+
+            console.log(`Successfully assigned issue #${issueNumber} to ${owners.join(', ')}`);

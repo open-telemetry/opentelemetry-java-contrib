@@ -5,10 +5,9 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,18 +43,20 @@ class RecordingConfigurationTest {
 
   @Test
   void nullConfigThrows() {
-    assertThrows(IllegalArgumentException.class, () -> new JfcFileConfiguration(null));
+    assertThatThrownBy(() -> new JfcFileConfiguration(null))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void brokenJfcConfigFileThrowsError() {
-    assertThrows(RuntimeMBeanException.class, () -> executeRecording("brokenJfcFile.jfc"));
+    assertThatThrownBy(() -> executeRecording("brokenJfcFile.jfc"))
+        .isInstanceOf(RuntimeMBeanException.class);
   }
 
   @Test
   void jfcFileFromInputStreamCanBeRead() {
     IItemCollection recordingContent = executeRecording("sampleJfcFile.jfc");
-    assertTrue(containsEvent(recordingContent, "jdk.ThreadAllocationStatistics"));
+    assertThat(containsEvent(recordingContent, "jdk.ThreadAllocationStatistics")).isTrue();
   }
 
   @Test
@@ -68,9 +69,9 @@ class RecordingConfigurationTest {
     RecordingConfiguration recordingConfiguration = new MapConfiguration(recordingConfigAsMap);
 
     IItemCollection recordingContent = excecuteRecordingWithConfig(recordingConfiguration);
-    assertNotNull(recordingContent, "excecuteRecordingWithConfig returned null");
-    assertTrue(containsEvent(recordingContent, "jdk.ObjectAllocationInNewTLAB"));
-    assertTrue(containsEvent(recordingContent, "jdk.ObjectAllocationOutsideTLAB"));
+    assertThat(recordingContent).isNotNull();
+    assertThat(containsEvent(recordingContent, "jdk.ObjectAllocationInNewTLAB")).isTrue();
+    assertThat(containsEvent(recordingContent, "jdk.ObjectAllocationOutsideTLAB")).isTrue();
   }
 
   private static boolean containsEvent(IItemCollection recordingContent, String eventName) {
@@ -110,7 +111,7 @@ class RecordingConfigurationTest {
       }
       recording.stop();
       recording.dump(dumpFile.toString());
-      assertTrue(Files.exists(dumpFile));
+      assertThat(dumpFile).exists();
 
       try {
         return JfrLoaderToolkit.loadEvents(dumpFile.toFile());

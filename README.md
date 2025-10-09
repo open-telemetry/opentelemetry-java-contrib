@@ -26,6 +26,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
 | beta    | [GCP Resources](./gcp-resources/README.md)                        |
 | beta    | [Inferred Spans](./inferred-spans/README.md)                      |
+| alpha   | [IBM MQ Metrics](./ibm-mq-metrics/README.md)                      |
 | alpha   | [JFR Connection](./jfr-connection/README.md)                      |
 | alpha   | [JFR Events](./jfr-events/README.md)                              |
 | alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
@@ -47,56 +48,36 @@ On reaching stable status, the `otel.stable` value in `gradle.properties` should
 Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
 status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
 
-## Getting Started
-
-```bash
-# Apply formatting
-$ ./gradlew spotlessApply
-
-# Build the complete project
-$ ./gradlew build
-
-# Run integration tests
-$ ./gradlew integrationTest
-
-# Clean artifacts
-$ ./gradlew clean
-```
-
 ## Contributing
 
-The Java Contrib project was initially formed to provide methods of easy remote JMX metric gathering and reporting,
-which is actively in development.  If you have an idea for a similar use case in the metrics, traces, or logging
-domain we would be very interested in supporting it.  Please
-[open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new/choose) to share your idea or
-suggestion.  PRs are always welcome and greatly appreciated, but for larger functional changes a pre-coding introduction
-can be helpful to ensure this is the correct place and that active or conflicting efforts don't exist.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Triagers ([@open-telemetry/java-contrib-triagers](https://github.com/orgs/open-telemetry/teams/java-contrib-triagers)):
-
-- All [component owners](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/.github/component_owners.yml) are given Triager permissions to this repository.
-
-Approvers ([@open-telemetry/java-contrib-approvers](https://github.com/orgs/open-telemetry/teams/java-contrib-approvers)):
-
-- [John Watson](https://github.com/jkwatson), Verta.ai
-
-Maintainers ([@open-telemetry/java-contrib-maintainers](https://github.com/orgs/open-telemetry/teams/java-contrib-maintainers)):
+### Maintainers
 
 - [Jack Berg](https://github.com/jack-berg), New Relic
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
 
-Emeritus maintainers:
+For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer).
+
+### Approvers
+
+- [Jay DeLuca](https://github.com/jaydeluca), Grafana
+- [John Watson](https://github.com/jkwatson), Cloudera
+
+For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
+
+### Emeritus maintainers
 
 - [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
 - [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
 - [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
+For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
 
-Thanks to all the people who already contributed!
+### Thanks to all of our contributors!
 
 <a href="https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=open-telemetry/opentelemetry-java-contrib" />
+  <img alt="Repo contributors" src="https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib" />
 </a>

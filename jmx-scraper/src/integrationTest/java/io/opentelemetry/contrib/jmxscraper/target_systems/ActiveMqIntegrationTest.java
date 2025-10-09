@@ -15,7 +15,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-public class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
+class ActiveMqIntegrationTest extends TargetSystemIntegrationTest {
 
   private static final int ACTIVEMQ_PORT = 61616;
 

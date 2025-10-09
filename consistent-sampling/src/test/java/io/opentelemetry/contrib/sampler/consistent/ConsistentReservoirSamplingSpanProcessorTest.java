@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -125,7 +124,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
       return CompletableResultCode.ofSuccess();
     }
 
-    public void reset() {
+    void reset() {
       this.countDownLatch = new CountDownLatch(numberOfSpansToWaitFor);
     }
   }
@@ -566,8 +565,8 @@ class ConsistentReservoirSamplingSpanProcessorTest {
         String traceStateString =
             spanData.getSpanContext().getTraceState().get(OtelTraceState.TRACE_STATE_KEY);
         OtelTraceState traceState = OtelTraceState.parse(traceStateString);
-        assertTrue(traceState.hasValidR());
-        assertTrue(traceState.hasValidP());
+        assertThat(traceState.hasValidR()).isTrue();
+        assertThat(traceState.hasValidP()).isTrue();
         observedPvalues.merge(traceState.getP(), 1L, Long::sum);
         totalAdjustedCount += 1L << traceState.getP();
         spanNameCounts.merge(spanData.getName(), 1L, Long::sum);

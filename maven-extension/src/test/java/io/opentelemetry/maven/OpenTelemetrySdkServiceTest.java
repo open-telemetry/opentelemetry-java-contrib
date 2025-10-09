@@ -17,11 +17,11 @@ import org.junit.jupiter.api.Test;
  * Note: if otel-java-contrib bumps to Java 11+, we could use junit-pioneer's
  * {@code @SetSystemProperty} and {@code @ClearSystemProperty} but no bump is planned for now.
  */
-public class OpenTelemetrySdkServiceTest {
+class OpenTelemetrySdkServiceTest {
 
   /** Verify default config */
   @Test
-  public void testDefaultConfiguration() {
+  void testDefaultConfiguration() {
     System.clearProperty("otel.exporter.otlp.endpoint");
     System.clearProperty("otel.service.name");
     System.clearProperty("otel.resource.attributes");
@@ -40,7 +40,7 @@ public class OpenTelemetrySdkServiceTest {
 
   /** Verify overwritten `service.name`,`key1` and `key2` */
   @Test
-  public void testOverwrittenResourceAttributes() {
+  void testOverwrittenResourceAttributes() {
     System.setProperty("otel.service.name", "my-maven");
     System.setProperty("otel.resource.attributes", "key1=val1,key2=val2");
 
@@ -59,7 +59,7 @@ public class OpenTelemetrySdkServiceTest {
 
   /** Verify defining `otel.exporter.otlp.endpoint` works */
   @Test
-  public void testOverwrittenExporterConfiguration_1() {
+  void testOverwrittenExporterConfiguration_1() {
     System.setProperty("otel.exporter.otlp.endpoint", "https://example.com:4317");
 
     try (OpenTelemetrySdkService openTelemetrySdkService = new OpenTelemetrySdkService()) {
@@ -78,7 +78,7 @@ public class OpenTelemetrySdkServiceTest {
 
   /** Verify defining `otel.exporter.otlp.traces.endpoint` works */
   @Test
-  public void testOverwrittenExporterConfiguration_2() {
+  void testOverwrittenExporterConfiguration_2() {
     System.clearProperty("otel.exporter.otlp.endpoint");
     System.clearProperty("otel.traces.exporter");
     System.setProperty("otel.exporter.otlp.traces.endpoint", "https://example.com:4317/");
@@ -102,7 +102,7 @@ public class OpenTelemetrySdkServiceTest {
 
   /** Verify defining `otel.exporter.otlp.traces.endpoint` and `otel.traces.exporter` works */
   @Test
-  public void testOverwrittenExporterConfiguration_3() {
+  void testOverwrittenExporterConfiguration_3() {
     System.clearProperty("otel.exporter.otlp.endpoint");
     System.setProperty("otel.traces.exporter", "otlp");
     System.setProperty("otel.exporter.otlp.traces.endpoint", "https://example.com:4317/");
@@ -120,7 +120,7 @@ public class OpenTelemetrySdkServiceTest {
     } finally {
       System.clearProperty("otel.exporter.otlp.endpoint");
       System.clearProperty("otel.exporter.otlp.traces.endpoint");
-      System.clearProperty("otel.exporter.otlp.traces.protocol");
+      System.clearProperty("otel.traces.exporter");
     }
   }
 

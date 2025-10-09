@@ -12,7 +12,7 @@ The Maven OpenTelemetry Extension is configured using environment variables or J
 * (since Maven 3.3.1) configuring the extension in `.mvn/extensions.xml`.
 
 In the code snippets below, replace `OPENTELEMETRY_MAVEN_VERSION` with the [latest
-release](https://search.maven.org/search?q=g:io.opentelemetry.contrib%20AND%20a:opentelemetry-maven-extension).
+release](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-maven-extension).
 
 ### Adding the extension to the classpath
 
@@ -109,8 +109,8 @@ In addition to the span attributes captured on  every Maven plugin goal executio
 |----------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `http.method`                          | string | `POST`                                                                                                                                              |
 | `http.url`                             | string | Base URL of the uploaded artifact `${maven.build.repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`         |
-| `maven.build.repository.id`            | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository)  |
-| `maven.build.repository.url`           | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#repository) |
+| `maven.build.repository.id`            | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository)  |
+| `maven.build.repository.url`           | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository) |
 | `peer.service`                         | string | Maven repository hostname deduced from the Repository URL                                                                                           |
 
 The `span.kind` is set to `client`
@@ -200,7 +200,7 @@ Steps to instrument a Maven Mojo:
 
 * Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
   Replace `OPENTELEMETRY_VERSION` with the [latest
-  release](https://search.maven.org/search?q=g:io.opentelemetry%20AND%20a:opentelemetry-api).
+  release](https://central.sonatype.com/artifact/io.opentelemetry/opentelemetry-api).
 
 ```xml
 <project>

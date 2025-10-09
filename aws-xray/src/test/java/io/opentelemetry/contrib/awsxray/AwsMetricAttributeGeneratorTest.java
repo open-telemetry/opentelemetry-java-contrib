@@ -79,7 +79,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testConsumerSpanWithoutAttributes() {
+  void testConsumerSpanWithoutAttributes() {
     Attributes expectedAttributes =
         Attributes.of(
             AWS_SPAN_KIND, SpanKind.CONSUMER.name(),
@@ -89,7 +89,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testServerSpanWithoutAttributes() {
+  void testServerSpanWithoutAttributes() {
     Attributes expectedAttributes =
         Attributes.of(
             AWS_SPAN_KIND, SpanKind.SERVER.name(),
@@ -99,7 +99,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testProducerSpanWithoutAttributes() {
+  void testProducerSpanWithoutAttributes() {
     Attributes expectedAttributes =
         Attributes.of(
             AWS_SPAN_KIND, SpanKind.PRODUCER.name(),
@@ -111,7 +111,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testClientSpanWithoutAttributes() {
+  void testClientSpanWithoutAttributes() {
     Attributes expectedAttributes =
         Attributes.of(
             AWS_SPAN_KIND, SpanKind.CLIENT.name(),
@@ -123,13 +123,13 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testInternalSpan() {
+  void testInternalSpan() {
     // Spans with internal span kind should not produce any attributes.
     validateAttributesProducedForSpanOfKind(Attributes.empty(), SpanKind.INTERNAL);
   }
 
   @Test
-  public void testConsumerSpanWithAttributes() {
+  void testConsumerSpanWithAttributes() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn(SPAN_NAME_VALUE);
 
@@ -142,7 +142,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testServerSpanWithAttributes() {
+  void testServerSpanWithAttributes() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn(SPAN_NAME_VALUE);
 
@@ -155,7 +155,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testServerSpanWithNullSpanName() {
+  void testServerSpanWithNullSpanName() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn(null);
 
@@ -168,7 +168,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testServerSpanWithSpanNameAsHttpMethod() {
+  void testServerSpanWithSpanNameAsHttpMethod() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn("GET");
     mockAttribute(HTTP_METHOD, "GET");
@@ -183,7 +183,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testServerSpanWithSpanNameWithHttpTarget() {
+  void testServerSpanWithSpanNameWithHttpTarget() {
     updateResourceWithServiceName();
     when(spanDataMock.getName()).thenReturn("POST");
     mockAttribute(HTTP_METHOD, "POST");
@@ -203,7 +203,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testProducerSpanWithAttributes() {
+  void testProducerSpanWithAttributes() {
     updateResourceWithServiceName();
     mockAttribute(AWS_LOCAL_OPERATION, AWS_LOCAL_OPERATION_VALUE);
     mockAttribute(AWS_REMOTE_SERVICE, AWS_REMOTE_SERVICE_VALUE);
@@ -220,7 +220,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testClientSpanWithAttributes() {
+  void testClientSpanWithAttributes() {
     updateResourceWithServiceName();
     mockAttribute(AWS_LOCAL_OPERATION, AWS_LOCAL_OPERATION_VALUE);
     mockAttribute(AWS_REMOTE_SERVICE, AWS_REMOTE_SERVICE_VALUE);
@@ -237,7 +237,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testRemoteAttributesCombinations() {
+  void testRemoteAttributesCombinations() {
     // Set all expected fields to a test string, we will overwrite them in descending order to test
     // the priority-order logic in AwsMetricAttributeGenerator remote attribute methods.
     mockAttribute(AWS_REMOTE_SERVICE, "TestString");
@@ -333,7 +333,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testPeerServiceDoesOverrideOtherRemoteServices() {
+  void testPeerServiceDoesOverrideOtherRemoteServices() {
     validatePeerServiceDoesOverride(RPC_SERVICE);
     validatePeerServiceDoesOverride(DB_SYSTEM);
     validatePeerServiceDoesOverride(FAAS_INVOKED_PROVIDER);
@@ -346,7 +346,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testPeerServiceDoesNotOverrideAwsRemoteService() {
+  void testPeerServiceDoesNotOverrideAwsRemoteService() {
     mockAttribute(AWS_REMOTE_SERVICE, "TestString");
     mockAttribute(PEER_SERVICE, "PeerService");
 
@@ -357,7 +357,7 @@ class AwsMetricAttributeGeneratorTest {
   }
 
   @Test
-  public void testClientSpanWithRemoteTargetAttributes() {
+  void testClientSpanWithRemoteTargetAttributes() {
     // Validate behaviour of aws bucket name attribute, then remove it.
     mockAttribute(AWS_BUCKET_NAME, "aws_s3_bucket_name");
     validateRemoteTargetAttributes(AWS_REMOTE_TARGET, "aws_s3_bucket_name");

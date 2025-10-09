@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
@@ -28,7 +29,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
  * JmxConnectionBuilder and relies on containers to minimize the JMX/RMI network complications which
  * are not NAT-friendly.
  */
-public class JmxConnectionTest {
+class JmxConnectionTest {
 
   // OTLP endpoint is not used in test mode, but still has to be provided
   private static final String DUMMY_OTLP_ENDPOINT = "http://dummy-otlp-endpoint:8080/";
@@ -131,7 +132,7 @@ public class JmxConnectionTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = JmxScraperContainer.ConfigSource.class)
+  @EnumSource
   void serverSslClientSsl(JmxScraperContainer.ConfigSource configSource) {
     // Note: this could have been made simpler by relying on the fact that keystore could be used
     // as a trust store, but having clear split provides also some extra clarity
@@ -173,6 +174,42 @@ public class JmxConnectionTest {
                 .withKeyStore(clientKeyStore)
                 .withTrustStore(clientTrustStore)
                 .withConfigSource(configSource));
+  }
+
+  @Test
+  void stableServiceInstanceServiceId() {
+    // start a single app, connect twice to it and check that the service id is the same
+    try (TestAppContainer app = appContainer().withJmxPort(JMX_PORT)) {
+      app.start();
+
+      UUID firstId = startScraperAndGetServiceId();
+      UUID secondId = startScraperAndGetServiceId();
+
+      assertThat(firstId)
+          .describedAs(
+              "connecting twice to the same JVM should return the same service instance ID")
+          .isEqualTo(secondId);
+    }
+  }
+
+  private static UUID startScraperAndGetServiceId() {
+    try (JmxScraperContainer scraper =
+        scraperContainer()
+            .withRmiServiceUrl(APP_HOST, JMX_PORT)
+            // does not need to be tested on all config sources
+            .withConfigSource(JmxScraperContainer.ConfigSource.SYSTEM_PROPERTIES)) {
+      scraper.start();
+      waitTerminated(scraper);
+      String[] logLines = scraper.getLogs().split("\n");
+      UUID serviceId = null;
+      for (String logLine : logLines) {
+        if (logLine.contains("remote service instance ID")) {
+          serviceId = UUID.fromString(logLine.substring(logLine.lastIndexOf(":") + 1).trim());
+        }
+      }
+      assertThat(serviceId).describedAs("unable to get service instance ID from logs").isNotNull();
+      return serviceId;
+    }
   }
 
   private static void connectionTest(

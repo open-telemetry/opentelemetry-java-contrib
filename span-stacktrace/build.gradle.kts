@@ -15,10 +15,16 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")

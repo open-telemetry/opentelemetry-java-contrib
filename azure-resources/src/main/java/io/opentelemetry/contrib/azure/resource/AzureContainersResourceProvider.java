@@ -12,12 +12,11 @@ import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AzureContainersResourceProvider extends CloudResourceProvider {
+public final class AzureContainersResourceProvider extends CloudResourceProvider {
 
   static final String CONTAINER_APP_NAME = "CONTAINER_APP_NAME";
 
@@ -45,7 +44,7 @@ public class AzureContainersResourceProvider extends CloudResourceProvider {
   }
 
   @Override
-  public Resource createResource(ConfigProperties config) {
+  public Resource createResource() {
     return Resource.create(getAttributes());
   }
 

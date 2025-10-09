@@ -1,36 +1,34 @@
-import de.undercouch.gradle.tasks.download.Download
-import de.undercouch.gradle.tasks.download.DownloadExtension
-import groovy.json.JsonSlurper
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.URL
 
 plugins {
   id("otel.java-conventions")
-  id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.2"
+  id("otel.publish-conventions")
+  id("otel.animalsniffer-conventions")
+  id("com.squareup.wire") version "5.4.0"
 }
 
 description = "Client implementation of the OpAMP spec."
 otelJava.moduleName.set("io.opentelemetry.contrib.opamp.client")
 
 dependencies {
+  implementation("com.squareup.okhttp3:okhttp")
+  implementation("com.github.f4b6a3:uuid-creator")
+  implementation("io.opentelemetry:opentelemetry-api")
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
+  testImplementation("org.mockito:mockito-inline")
+  testImplementation("com.google.protobuf:protobuf-java-util")
+  testImplementation("com.squareup.okhttp3:mockwebserver3")
+  testImplementation("com.squareup.okhttp3:mockwebserver3-junit5")
 }
 
-val opampReleaseInfo = tasks.register<Download>("opampLastReleaseInfo") {
+val opampProtos = tasks.register<DownloadAndExtractOpampProtos>("opampProtoDownload") {
   group = "opamp"
-  src("https://api.github.com/repos/open-telemetry/opamp-spec/releases/latest")
-  dest(project.layout.buildDirectory.file("opamp/release.json"))
-}
-
-val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
-opampProtos.configure {
-  group = "opamp"
-  dependsOn(opampReleaseInfo)
-  lastReleaseInfoJson.set {
-    opampReleaseInfo.get().dest
-  }
   outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
-  downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/$name/release.zip"))
+  downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/opampProtoDownload/release.zip"))
+  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/v0.14.0")
 }
 
 wire {
@@ -40,14 +38,10 @@ wire {
   }
 }
 
-abstract class DownloadOpampProtos @Inject constructor(
-  private val download: DownloadExtension,
+abstract class DownloadAndExtractOpampProtos @Inject constructor(
   private val archiveOps: ArchiveOperations,
   private val fileOps: FileSystemOperations,
 ) : DefaultTask() {
-
-  @get:InputFile
-  abstract val lastReleaseInfoJson: RegularFileProperty
 
   @get:OutputDirectory
   abstract val outputProtosDir: DirectoryProperty
@@ -55,15 +49,20 @@ abstract class DownloadOpampProtos @Inject constructor(
   @get:Internal
   abstract val downloadedZipFile: RegularFileProperty
 
-  @Suppress("UNCHECKED_CAST")
+  @get:Input
+  abstract val zipUrl: Property<String>
+
   @TaskAction
   fun execute() {
-    val releaseInfo = JsonSlurper().parse(lastReleaseInfoJson.get().asFile) as Map<String, String>
-    val zipUrl = releaseInfo["zipball_url"]
-    download.run {
-      src(zipUrl)
-      dest(downloadedZipFile)
+    val url = URL(zipUrl.get())
+    downloadedZipFile.get().asFile.parentFile.mkdirs()
+
+    url.openStream().use { input: InputStream ->
+      downloadedZipFile.get().asFile.outputStream().use { output: FileOutputStream ->
+        input.copyTo(output)
+      }
     }
+
     val protos = archiveOps.zipTree(downloadedZipFile).matching {
       setIncludes(listOf("**/*.proto"))
     }

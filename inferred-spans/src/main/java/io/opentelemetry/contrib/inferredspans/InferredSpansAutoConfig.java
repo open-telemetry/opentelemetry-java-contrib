@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.stream.Collectors.toList;
+
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
@@ -17,7 +19,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
@@ -90,35 +91,34 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
     private final ConfigProperties properties;
 
-    public PropertiesApplier(ConfigProperties properties) {
+    PropertiesApplier(ConfigProperties properties) {
       this.properties = properties;
     }
 
-    public void applyBool(String configKey, Consumer<Boolean> funcToApply) {
+    void applyBool(String configKey, Consumer<Boolean> funcToApply) {
       applyValue(properties.getBoolean(configKey), funcToApply);
     }
 
-    public void applyInt(String configKey, Consumer<Integer> funcToApply) {
+    void applyInt(String configKey, Consumer<Integer> funcToApply) {
       applyValue(properties.getInt(configKey), funcToApply);
     }
 
-    public void applyDuration(String configKey, Consumer<Duration> funcToApply) {
+    void applyDuration(String configKey, Consumer<Duration> funcToApply) {
       applyValue(properties.getDuration(configKey), funcToApply);
     }
 
-    public void applyString(String configKey, Consumer<String> funcToApply) {
+    void applyString(String configKey, Consumer<String> funcToApply) {
       applyValue(properties.getString(configKey), funcToApply);
     }
 
-    public void applyWildcards(
-        String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
+    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
       String wildcardListString = properties.getString(configKey);
       if (wildcardListString != null && !wildcardListString.isEmpty()) {
         List<WildcardMatcher> values =
             Arrays.stream(wildcardListString.split(","))
                 .filter(str -> !str.isEmpty())
                 .map(WildcardMatcher::valueOf)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (!values.isEmpty()) {
           funcToApply.accept(values);
         }

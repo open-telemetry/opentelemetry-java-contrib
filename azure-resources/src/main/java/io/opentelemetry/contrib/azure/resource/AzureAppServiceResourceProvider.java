@@ -12,19 +12,18 @@ import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.DEPLO
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.HOST_ID;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static java.util.Objects.requireNonNull;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.internal.StringUtils;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import javax.annotation.Nullable;
 
-public class AzureAppServiceResourceProvider extends CloudResourceProvider {
+public final class AzureAppServiceResourceProvider extends CloudResourceProvider {
 
   static final AttributeKey<String> AZURE_APP_SERVICE_STAMP_RESOURCE_ATTRIBUTE =
       AttributeKey.stringKey("azure.app.service.stamp");
@@ -60,7 +59,7 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
   }
 
   @Override
-  public Resource createResource(ConfigProperties config) {
+  public Resource createResource() {
     return Resource.create(getAttributes());
   }
 
@@ -69,7 +68,7 @@ public class AzureAppServiceResourceProvider extends CloudResourceProvider {
     if (detect != AzureEnvVarPlatform.APP_SERVICE) {
       return Attributes.empty();
     }
-    String name = Objects.requireNonNull(env.get(WEBSITE_SITE_NAME));
+    String name = requireNonNull(env.get(WEBSITE_SITE_NAME));
     AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_APP_SERVICE);
     builder.put(SERVICE_NAME, name);
 

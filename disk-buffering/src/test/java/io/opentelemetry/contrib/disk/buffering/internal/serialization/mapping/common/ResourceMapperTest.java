@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.contrib.disk.buffering.testutils.TestData;
 import io.opentelemetry.proto.resource.v1.Resource;
@@ -17,7 +17,8 @@ class ResourceMapperTest {
   void verifyMapping() {
     Resource proto = mapToProto(TestData.RESOURCE_FULL);
 
-    assertEquals(TestData.RESOURCE_FULL, mapToSdk(proto, TestData.RESOURCE_FULL.getSchemaUrl()));
+    assertThat(mapToSdk(proto, TestData.RESOURCE_FULL.getSchemaUrl()))
+        .isEqualTo(TestData.RESOURCE_FULL);
   }
 
   private static Resource mapToProto(io.opentelemetry.sdk.resources.Resource sdkResource) {

@@ -12,13 +12,12 @@ import static org.mockito.Mockito.verify;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
-import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
-import io.opentelemetry.sdk.autoconfigure.internal.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.internal.SpiHelper;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
@@ -49,11 +48,15 @@ class BaggageProcessorCustomizerTest {
   private static final String MEMORY_EXPORTER = "memory";
 
   @Test
-  void test_customizer() {
+  void test_empty_customizer() {
     assertCustomizer(
         Collections.emptyMap(),
         span -> assertThat(span).hasTotalAttributeCount(0),
         logRecord -> assertThat(logRecord).hasTotalAttributeCount(0));
+  }
+
+  @Test
+  void test_customizer() {
     Map<String, String> properties = new HashMap<>();
     properties.put("otel.java.experimental.span-attributes.copy-from-baggage.include", "key");
     properties.put("otel.java.experimental.log-attributes.copy-from-baggage.include", "key");
@@ -113,50 +116,50 @@ class BaggageProcessorCustomizerTest {
                         "none",
                         "otel.logs.exporter",
                         MEMORY_EXPORTER))
-            .addPropertiesSupplier(() -> properties);
-    AutoConfigureUtil.setComponentLoader(
-        sdkBuilder,
-        new ComponentLoader() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public <T> List<T> load(Class<T> spiClass) {
-            if (spiClass == ConfigurableSpanExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableSpanExporterProvider() {
-                        @Override
-                        public SpanExporter createExporter(ConfigProperties configProperties) {
-                          return spanExporter;
-                        }
+            .addPropertiesSupplier(() -> properties)
+            .setComponentLoader(
+                new ComponentLoader() {
+                  @Override
+                  public <T> List<T> load(Class<T> spiClass) {
+                    if (spiClass.equals(ConfigurableSpanExporterProvider.class)) {
+                      return Collections.singletonList(
+                          spiClass.cast(
+                              new ConfigurableSpanExporterProvider() {
+                                @Override
+                                public SpanExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return spanExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return MEMORY_EXPORTER;
-                        }
-                      });
-            } else if (spiClass == ConfigurableLogRecordExporterProvider.class) {
-              return Collections.singletonList(
-                  (T)
-                      new ConfigurableLogRecordExporterProvider() {
-                        @Override
-                        public LogRecordExporter createExporter(ConfigProperties configProperties) {
-                          return logRecordExporter;
-                        }
+                                @Override
+                                public String getName() {
+                                  return MEMORY_EXPORTER;
+                                }
+                              }));
+                    } else if (spiClass.equals(ConfigurableLogRecordExporterProvider.class)) {
+                      return Collections.singletonList(
+                          spiClass.cast(
+                              new ConfigurableLogRecordExporterProvider() {
+                                @Override
+                                public LogRecordExporter createExporter(
+                                    ConfigProperties configProperties) {
+                                  return logRecordExporter;
+                                }
 
-                        @Override
-                        public String getName() {
-                          return MEMORY_EXPORTER;
-                        }
-                      });
-            }
-            return spiHelper.load(spiClass);
-          }
-        });
+                                @Override
+                                public String getName() {
+                                  return MEMORY_EXPORTER;
+                                }
+                              }));
+                    }
+                    return spiHelper.load(spiClass);
+                  }
+                });
     return sdkBuilder.build().getOpenTelemetrySdk();
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
+  void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
         BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("*"))) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
@@ -167,7 +170,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
+  void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
     try (BaggageSpanProcessor processor =
         BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("key"))) {
@@ -185,7 +188,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(
+  void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
         BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
@@ -198,7 +201,7 @@ class BaggageProcessorCustomizerTest {
   }
 
   @Test
-  public void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
+  void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
         BaggageProcessorCustomizer.createBaggageLogRecordProcessor(

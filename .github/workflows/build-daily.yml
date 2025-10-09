@@ -1,0 +1,35 @@
+name: Build Daily
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run daily at 7:30 AM UTC
+    - cron: '30 7 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  common:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      no-build-cache: true
+
+  link-check:
+    uses: ./.github/workflows/reusable-link-check.yml
+
+  workflow-notification:
+    permissions:
+        contents: read
+        issues: write
+    if: always()
+    needs:
+      - common
+      - link-check
+    uses: ./.github/workflows/reusable-workflow-notification.yml
+    with:
+      success: >-
+        ${{
+          needs.common.result == 'success' &&
+          needs.link-check.result == 'success'
+        }}

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -151,6 +152,7 @@ public class SamplingProfiler implements Runnable {
   private final Supplier<Tracer> tracerProvider;
 
   private final AsyncProfiler profiler;
+  @Nullable private volatile Future<?> profilingTask;
 
   /**
    * Creates a sampling profiler, optionally relying on existing files.
@@ -385,7 +387,7 @@ public class SamplingProfiler implements Runnable {
 
     if (!interrupted && !scheduler.isShutdown()) {
       long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-      scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -723,7 +725,19 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings("FutureReturnValueIgnored")
   public void start() {
-    scheduler.submit(this);
+    profilingTask = scheduler.submit(this);
+  }
+
+  @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
+  public void reschedule() {
+    Future<?> future = this.profilingTask;
+    if (future != null) {
+      if (future.cancel(true)) {
+        Duration profilingDuration = config.getProfilingDuration();
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      }
+    }
   }
 
   public void stop() throws InterruptedException, IOException {
@@ -806,7 +820,7 @@ public class SamplingProfiler implements Runnable {
   }
 
   private static class ActivationEvent {
-    public static final int SERIALIZED_SIZE =
+    static final int SERIALIZED_SIZE =
         Long.SIZE / Byte.SIZE
             + // timestamp
             TraceContext.SERIALIZED_LENGTH
@@ -826,7 +840,7 @@ public class SamplingProfiler implements Runnable {
     private long threadId;
     private boolean activation;
 
-    public void activation(
+    void activation(
         Span context,
         long threadId,
         @Nullable Span previousContext,
@@ -835,7 +849,7 @@ public class SamplingProfiler implements Runnable {
       set(context, threadId, /* activation= */ true, previousContext, nanoTime, clock);
     }
 
-    public void deactivation(
+    void deactivation(
         Span context,
         long threadId,
         @Nullable Span previousContext,
@@ -864,7 +878,7 @@ public class SamplingProfiler implements Runnable {
       this.timestamp = nanoTime;
     }
 
-    public void handle(SamplingProfiler samplingProfiler) {
+    void handle(SamplingProfiler samplingProfiler) {
       if (logger.isLoggable(Level.FINE)) {
         logger.log(
             Level.FINE,
@@ -975,7 +989,7 @@ public class SamplingProfiler implements Runnable {
       }
     }
 
-    public void serialize(ByteBuffer buf) {
+    void serialize(ByteBuffer buf) {
       buf.putLong(timestamp);
       buf.put(traceContextBuffer);
       buf.put(previousContextBuffer);
@@ -984,7 +998,7 @@ public class SamplingProfiler implements Runnable {
       buf.put(activation ? (byte) 1 : (byte) 0);
     }
 
-    public void deserialize(ByteBuffer buf) {
+    void deserialize(ByteBuffer buf) {
       timestamp = buf.getLong();
       buf.get(traceContextBuffer);
       buf.get(previousContextBuffer);

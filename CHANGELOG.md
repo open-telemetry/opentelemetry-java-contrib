@@ -2,13 +2,168 @@
 
 ## Unreleased
 
-## Version 1.47.0 (2025-05-19)
+## Version 1.50.0 (2025-09-26)
+
+Note: This release broadly applies some style guidelines across the repository. As a result,
+some classes that were visible might be package/private. Other non-final classes may now
+be final. See
+[#2182](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2182)
+and
+[#2210](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2210)
+and
+[#2212](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
+and
+[#2213](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2212)
+for examples and details. These changes are not expected to break anyone, so please open
+an issue if this causes problems.
+
+### Baggage processor
+
+- Move baggage processor to the front of the processor list
+  ([#2152](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2152))
+- Add declarative configuration support
+  ([#2031](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2031))
+
+### Disk buffering
+
+- Catching IllegalStateException in case of failed deserialization
+  ([#2157](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2157))
+- Apply final to public API classes where possible
+  ([#2216](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2216))
+- Handle empty attribute values
+  ([#2268](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2268))
+
+### Inferred spans
+
+- Support dynamically changing the inferred span interval
+  ([#2153](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2153))
+
+### JMX scraper
+
+- Implement stable `service.instance.id`
+  ([#2270](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2270))
+
+### Kafka exporter
+
+- Add Kafka connectivity error handling
+  ([#2202](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2202))
+
+### OpAMP client
+
+- Move important user-facing classes out of 'internal' package
+  ([#2249](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2249))
+- Exponential backoff retries on http connection failures
+  ([#2274](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2274))
+
+### Span stack traces
+
+- Add declarative configuration support
+  ([#2262](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2262))
+
+
+## Version 1.49.0 (2025-08-25)
+
+### Consistent sampling
+
+- Add updateable threshold sampler for dynamic sampling configuration
+  ([#2137](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2137))
+
+### Disk buffering
+
+- Introduce API changes for improved disk buffering functionality
+  ([#2084](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2084))
+- Implement more efficient serializer with direct disk write capabilities
+  ([#2138](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2138))
+
+### IBM MQ metrics - New 🌟
+
+IBM MQ metrics collection utility.
+
+### Inferred spans
+
+- Update async profiler to version 4.1 for improved performance
+  ([#2096](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2096))
+
+### OpAMP client - New 🌟
+
+OpenTelemetry Agent Management Protocol (OpAMP) client implementation.
+
+## Version 1.48.0 (2025-07-23)
+
+### AWS resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### AWS X-Ray SDK support
+
+- Update SamplerRulesApplier to recognize new HTTP/URL semconv
+  ([#1959](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1959))
+
+### Azure resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### CloudFoundry resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Consistent sampling
+
+- Refactor ConsistentFixedThresholdSampler to prepare for dynamic threshold support
+  ([#2018](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2018))
+- ConsistentRateLimitingSampler can fail if used in combination with legacy samplers
+  ([#2022](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2022))
+
+### GCP resources
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### JMX metrics
+
+- Deprecate JMX Gatherer and provide migration guide to JMX Scraper
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### JMX scraper
+
+- Update Jetty metrics configuration corresponding to Java Instrumentation 2.18.0
+  ([#2033](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2033))
+- Mark as production-ready and remove experimental status
+  ([#2034](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2034))
+
+### Maven extension
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+### Resource providers
+
+- Support for declarative configuration
+  ([#2014](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2014))
+
+## Version 1.47.0 (2025-07-04)
+
+### Disk buffering
+
+- Shared storage
+  ([#1912](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1912))
+- Implementing ExtendedLogRecordData
+  ([#1918](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1918))
+- Add missing EventName to disk-buffering LogRecordDataMapper
+  ([#1950](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1950))
 
 ### GCP authentication extension
 
 - Update the internal implementation such that the required headers are retrieved
   from the Google Auth Library instead of manually constructing and passing them.
   ([#1860](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1860))
+- Add metrics support to auth extension
+  ([#1891](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1891))
+- Update ConfigurableOptions to read from ConfigProperties
+  ([#1904](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/1904))
 
 ### Inferred spans
 
@@ -174,7 +329,7 @@ The extension takes care of the necessary configuration required to authenticate
 
 The future of the [JMX metrics](./jmx-metrics/README.md) component,
 built on top of the
-[JMX metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/javaagent#jmx-metric-insight)
+[JMX metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/README.md#jmx-metric-insight)
 component from the opentelemetry-java-instrumentation repository.
 
 ### Maven extension

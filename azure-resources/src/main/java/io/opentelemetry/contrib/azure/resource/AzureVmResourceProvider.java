@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,21 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
-public class AzureVmResourceProvider extends CloudResourceProvider {
-
-  static class Entry {
-    final AttributeKey<String> key;
-    final Function<String, String> transform;
-
-    Entry(AttributeKey<String> key) {
-      this(key, Function.identity());
-    }
-
-    Entry(AttributeKey<String> key, Function<String, String> transform) {
-      this.key = key;
-      this.transform = transform;
-    }
-  }
+public final class AzureVmResourceProvider extends CloudResourceProvider {
 
   private static final Map<String, Entry> COMPUTE_MAPPING = new HashMap<>();
 
@@ -88,7 +73,7 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
   }
 
   @Override
-  public Resource createResource(ConfigProperties config) {
+  public Resource createResource() {
     return client
         .get()
         .map(body -> parseMetadata(body, COMPUTE_MAPPING, AZURE_VM))
@@ -160,6 +145,20 @@ public class AzureVmResourceProvider extends CloudResourceProvider {
       throws IOException {
     while (parser.nextToken() != JsonToken.END_OBJECT) {
       consumer.accept(parser.currentName(), parser.nextTextValue());
+    }
+  }
+
+  static class Entry {
+    final AttributeKey<String> key;
+    final Function<String, String> transform;
+
+    Entry(AttributeKey<String> key) {
+      this(key, Function.identity());
+    }
+
+    Entry(AttributeKey<String> key, Function<String, String> transform) {
+      this.key = key;
+      this.transform = transform;
     }
   }
 }
