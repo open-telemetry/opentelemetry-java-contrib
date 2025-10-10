@@ -5,6 +5,7 @@ set -e
 
 #USAGE flag "--base <base>" help="base branch to compare against (default: origin/main)" default="origin/main"
 #USAGE flag "--head <head>" help="head branch to compare against (empty for local changes) (default: empty)" default=""
+#USAGE flag "--event <event>" help="event name (default: pull_request)" default="pull_request"
 
 if [ "$usage_head" = "''" ]; then
   usage_head=""
@@ -19,6 +20,9 @@ config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
 if [ -n "$config_modified" ] ; then
   echo "config changes, checking all files."
   mise run lint:links
+elif [ "$usage_event" != "pull_request" ] ; then
+  echo "Not a PR - skipping link linting."
+  exit 0
 else
   # Using lychee's default extension filter here to match when it runs against all files
   # Note: --diff-filter=d filters out deleted files
