@@ -16,6 +16,7 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.time.Duration;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -31,8 +32,12 @@ import org.testcontainers.utility.MountableFile;
 // to update sampling rules and assert rough ratios of sampling decisions. In the meantime, it
 // expects you to update the rules through the dashboard to see the effect on the sampling decisions
 // that are printed.
-@Testcontainers(disabledWithoutDocker = true)
+@EnabledIf("hasAwsCredentials")
 class AwsXrayRemoteSamplerIntegrationTest {
+
+  static boolean hasAwsCredentials() {
+    return System.getenv("AWS_ACCESS_KEY_ID") != null;
+  }
 
   private static final Logger logger =
       LoggerFactory.getLogger(AwsXrayRemoteSamplerIntegrationTest.class);
@@ -45,7 +50,7 @@ class AwsXrayRemoteSamplerIntegrationTest {
           .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("otel-collector")))
           .withCopyFileToContainer(
               MountableFile.forClasspathResource("/otel-collector.yml"), "/etc/otel-collector.yml")
-          .withCommand("--config /etc/otel-collector.yml --log-level DEBUG")
+          .withCommand("--config /etc/otel-collector.yml")
           .withEnv("AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"))
           .withEnv("AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY"))
           .withEnv("AWS_REGION", System.getenv("AWS_REGION"));
