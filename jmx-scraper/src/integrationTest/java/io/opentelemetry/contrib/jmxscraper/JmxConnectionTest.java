@@ -15,11 +15,13 @@ import java.util.function.Function;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -29,7 +31,17 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
  * JmxConnectionBuilder and relies on containers to minimize the JMX/RMI network complications which
  * are not NAT-friendly.
  */
+@EnabledIf("isDockerAvailable")
 class JmxConnectionTest {
+
+  static boolean isDockerAvailable() {
+    try {
+      DockerClientFactory.instance().client();
+      return true;
+    } catch (Throwable e) {
+      return false;
+    }
+  }
 
   // OTLP endpoint is not used in test mode, but still has to be provided
   private static final String DUMMY_OTLP_ENDPOINT = "http://dummy-otlp-endpoint:8080/";
