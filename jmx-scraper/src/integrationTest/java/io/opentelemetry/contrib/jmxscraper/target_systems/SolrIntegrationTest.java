@@ -14,10 +14,14 @@ import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcher;
 import io.opentelemetry.contrib.jmxscraper.assertions.AttributeMatcherGroup;
 import java.nio.file.Path;
 import java.time.Duration;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+// Java 8 has issues resolving Docker network hostnames (java.net.UnknownHostException)
+@DisabledOnJre(JRE.JAVA_8)
 class SolrIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
