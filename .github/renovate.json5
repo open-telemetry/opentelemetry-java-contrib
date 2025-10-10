@@ -4,6 +4,8 @@
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
   ],
+  ignorePaths: [], // overwrite default ignore which includes **/test/**
+                   // used to update docker image versions used in Java test files
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
     'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
@@ -242,6 +244,18 @@
       matchStrings: [
         '"https://github.com/(?<depName>[^/]+/[^/]+)/zipball/(?<currentValue>.+?)"',
       ],
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'docker',
+      managerFilePatterns: [
+        '**/*.java',
+      ],
+      matchStrings: [
+        '"(?<depName>otel/opentelemetry-collector-contrib):(?<currentValue>[^@"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"',
+      ],
+      autoReplaceStringTemplate: '"{{depName}}:{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+      versioningTemplate: 'docker',
     },
   ],
 }
