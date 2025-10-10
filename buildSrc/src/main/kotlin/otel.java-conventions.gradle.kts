@@ -173,6 +173,12 @@ testing {
   }
 }
 
+tasks {
+  check {
+    dependsOn(testing.suites)
+  }
+}
+
 fun isJavaVersionAllowed(version: JavaVersion): Boolean {
   if (otelJava.minJavaVersionSupported.get() > version) {
     return false
