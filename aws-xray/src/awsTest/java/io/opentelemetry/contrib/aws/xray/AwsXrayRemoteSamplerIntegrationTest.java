@@ -49,7 +49,7 @@ class AwsXrayRemoteSamplerIntegrationTest {
           .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("otel-collector")))
           .withCopyFileToContainer(
               MountableFile.forClasspathResource("/otel-collector.yml"), "/etc/otel-collector.yml")
-          .withCommand("--config /etc/otel-collector.yml")
+          .withCommand("--config /etc/otel-collector.yml --log-level DEBUG")
           .withEnv("AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"))
           .withEnv("AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY"))
           .withEnv("AWS_REGION", System.getenv("AWS_REGION"));
