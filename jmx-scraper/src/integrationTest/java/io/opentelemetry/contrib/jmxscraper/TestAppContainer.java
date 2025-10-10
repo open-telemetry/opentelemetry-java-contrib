@@ -36,7 +36,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private boolean clientCertificate;
 
   public TestAppContainer() {
-    super("openjdk:8u272-jre-slim");
+    super("openjdk:8u342-jre-slim");
 
     this.properties = new HashMap<>();
 
