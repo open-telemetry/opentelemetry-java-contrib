@@ -148,7 +148,7 @@ dependencies {
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project(project.path))
+      implementation(project())
 
       implementation(enforcedPlatform("org.junit:junit-bom:5.14.0"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
