@@ -252,7 +252,7 @@
         '**/*.java',
       ],
       matchStrings: [
-        '"(?<depName>otel/opentelemetry-collector-contrib):(?<currentValue>[^@"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"',
+        '"(?<depName>otel/opentelemetry-collector-contrib):(?<currentValue>[^@"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"',
       ],
       autoReplaceStringTemplate: '"{{depName}}:{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
       versioningTemplate: 'docker',
