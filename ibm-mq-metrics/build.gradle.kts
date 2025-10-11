@@ -50,7 +50,11 @@ testing {
       targets {
         all {
           testTask.configure {
-            shouldRunAfter(tasks.test)
+            // Jakarta JMS requires Java 11+
+            val testJavaVersion: String? by project
+            if (testJavaVersion == "8") {
+              enabled = false
+            }
           }
         }
       }

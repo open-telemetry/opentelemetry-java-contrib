@@ -11,11 +11,16 @@ import io.opentelemetry.contrib.jmxmetrics.AbstractIntegrationTest;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 
+// possible workaround on Java 8:
+// https://stackoverflow.com/questions/35466461/how-to-connect-with-jmx-from-host-to-docker-container-in-docker-machine
+@DisabledOnJre(JRE.JAVA_8)
 class SolrIntegrationTest extends AbstractIntegrationTest {
 
   SolrIntegrationTest() {
