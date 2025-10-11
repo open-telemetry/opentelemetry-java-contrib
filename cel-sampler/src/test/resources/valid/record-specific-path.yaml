@@ -1,0 +1,5 @@
+fallback_sampler:
+  always_off:
+expressions:
+  - action: RECORD_AND_SAMPLE
+    expression: 'attribute["url.path"] == "/v1/user"'
