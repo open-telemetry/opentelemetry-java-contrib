@@ -18,7 +18,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 
-// Java 8 has issues resolving Docker network hostnames (java.net.UnknownHostException)
+// possible workaround on Java 8:
+// https://stackoverflow.com/questions/35466461/how-to-connect-with-jmx-from-host-to-docker-container-in-docker-machine
 @DisabledOnJre(JRE.JAVA_8)
 class SolrIntegrationTest extends AbstractIntegrationTest {
 
