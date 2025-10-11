@@ -53,16 +53,59 @@ dependencies {
   agent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }
 
-tasks {
-  test {
-    useJUnitPlatform()
-    // Unset relevant environment variables to provide a clean state for the tests
-    environment("GOOGLE_CLOUD_PROJECT", "")
-    environment("GOOGLE_CLOUD_QUOTA_PROJECT", "")
-    // exclude integration test
-    exclude("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
-  }
+testing {
+  suites {
+    val test by getting(JvmTestSuite::class) {
+      targets.all {
+        testTask.configure {
+          // Unset relevant environment variables to provide a clean state for the tests
+          environment("GOOGLE_CLOUD_PROJECT", "")
+          environment("GOOGLE_CLOUD_QUOTA_PROJECT", "")
+          // exclude integration test
+          exclude("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
+        }
+      }
+    }
 
+    val integrationTestUserCreds by registering(JvmTestSuite::class) {
+      dependencies {
+        implementation(project())
+      }
+
+      targets.all {
+        testTask.configure {
+          dependsOn(tasks.shadowJar)
+          dependsOn(tasks.named("copyAgent"))
+
+          // include only the integration test file
+          include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
+
+          val fakeCredsFilePath = project.file("src/test/resources/fake_user_creds.json").absolutePath
+
+          environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
+          environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
+          jvmArgs(
+            "-javaagent:$javaAgentJarPath",
+            "-Dotel.javaagent.extensions=$authExtensionJarPath",
+            "-Dgoogle.cloud.project=my-gcp-project",
+            "-Dotel.java.global-autoconfigure.enabled=true",
+            "-Dotel.exporter.otlp.endpoint=http://localhost:4318",
+            "-Dotel.resource.providers.gcp.enabled=true",
+            "-Dotel.traces.exporter=otlp",
+            "-Dotel.bsp.schedule.delay=2000",
+            "-Dotel.metrics.exporter=none",
+            "-Dotel.logs.exporter=none",
+            "-Dotel.exporter.otlp.protocol=http/protobuf",
+            "-Dotel.javaagent.debug=false",
+            "-Dmockserver.logLevel=trace"
+          )
+        }
+      }
+    }
+  }
+}
+
+tasks {
   shadowJar {
     /**
      * Shaded version of this extension is required when using it as a OpenTelemetry Java Agent
@@ -100,36 +143,4 @@ tasks.register<Copy>("copyAgent") {
   from(configurations.named("agent") {
     rename("opentelemetry-javaagent(.*).jar", "otel-agent.jar")
   })
-}
-
-tasks.register<Test>("IntegrationTestUserCreds") {
-  testClassesDirs = sourceSets.test.get().output.classesDirs
-  classpath = sourceSets.test.get().runtimeClasspath
-
-  dependsOn(tasks.shadowJar)
-  dependsOn(tasks.named("copyAgent"))
-
-  useJUnitPlatform()
-  // include only the integration test file
-  include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
-
-  val fakeCredsFilePath = project.file("src/test/resources/fake_user_creds.json").absolutePath
-
-  environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
-  environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
-  jvmArgs = listOf(
-    "-javaagent:$javaAgentJarPath",
-    "-Dotel.javaagent.extensions=$authExtensionJarPath",
-    "-Dgoogle.cloud.project=my-gcp-project",
-    "-Dotel.java.global-autoconfigure.enabled=true",
-    "-Dotel.exporter.otlp.endpoint=http://localhost:4318",
-    "-Dotel.resource.providers.gcp.enabled=true",
-    "-Dotel.traces.exporter=otlp",
-    "-Dotel.bsp.schedule.delay=2000",
-    "-Dotel.metrics.exporter=none",
-    "-Dotel.logs.exporter=none",
-    "-Dotel.exporter.otlp.protocol=http/protobuf",
-    "-Dotel.javaagent.debug=false",
-    "-Dmockserver.logLevel=trace"
-  )
 }
