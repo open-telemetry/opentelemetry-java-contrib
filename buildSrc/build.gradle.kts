@@ -1,7 +1,7 @@
 plugins {
   `kotlin-dsl`
   // When updating, update below in dependencies too
-  id("com.diffplug.spotless") version "7.2.1"
+  id("com.diffplug.spotless") version "8.0.0"
 }
 
 repositories {
@@ -12,13 +12,13 @@ repositories {
 
 dependencies {
   // When updating, update above in plugins too
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:7.2.1")
-  implementation("net.ltgt.gradle:gradle-errorprone-plugin:4.3.0")
-  implementation("net.ltgt.gradle:gradle-nullaway-plugin:2.3.0")
-  implementation("org.owasp:dependency-check-gradle:12.1.3")
+  implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.0.0")
+  implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:4.3.0")
+  implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:2.3.0")
+  implementation("org.owasp.dependencycheck:org.owasp.dependencycheck.gradle.plugin:12.1.7")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
-  implementation("com.gradle:develocity-gradle-plugin:4.1.1")
-  implementation("me.champeau.gradle:japicmp-gradle-plugin:0.4.6")
+  implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.2.1")
+  implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
   implementation("com.google.auto.value:auto-value-annotations:1.11.0")
 }
 

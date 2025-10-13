@@ -1,0 +1,10 @@
+file_format: "1.0-rc.1"
+resource:
+  detection/development:
+    detectors:
+      - aws:
+tracer_provider:
+  processors:
+    - simple:
+        exporter:
+          console:

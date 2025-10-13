@@ -148,12 +148,12 @@ dependencies {
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project(project.path))
+      implementation(project())
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.13.4"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.14.0"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
-      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.2"))
+      implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.4"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")

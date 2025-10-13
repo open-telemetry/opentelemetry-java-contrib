@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.20.0-alpha"
+val otelInstrumentationVersion = "2.20.1-alpha"
 val semconvVersion = "1.37.0"
 
 javaPlatform {
@@ -17,7 +17,7 @@ dependencies {
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
   api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
-  api(platform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.2.1"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -27,8 +27,8 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")
     api("com.google.auto.value:auto-value-annotations:1.11.0")
-    api("com.google.errorprone:error_prone_annotations:2.41.0")
-    api("com.google.errorprone:error_prone_core:2.41.0")
+    api("com.google.errorprone:error_prone_annotations:2.42.0")
+    api("com.google.errorprone:error_prone_core:2.42.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -46,7 +46,7 @@ dependencies {
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
     api("com.uber.nullaway:nullaway:0.12.10")
-    api("org.assertj:assertj-core:3.27.4")
+    api("org.assertj:assertj-core:3.27.6")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")

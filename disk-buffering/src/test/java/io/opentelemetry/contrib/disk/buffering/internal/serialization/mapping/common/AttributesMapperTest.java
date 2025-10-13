@@ -21,6 +21,7 @@ class AttributesMapperTest {
     Attributes attributes =
         Attributes.builder()
             .put(AttributeKey.stringKey("someString"), "someValue")
+            .put(AttributeKey.stringKey("emptyString"), "")
             .put(AttributeKey.booleanKey("someBool"), true)
             .put(AttributeKey.longKey("someLong"), 10L)
             .put(AttributeKey.doubleKey("someDouble"), 10.0)

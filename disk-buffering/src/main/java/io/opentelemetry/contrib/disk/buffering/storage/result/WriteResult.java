@@ -25,7 +25,11 @@ public interface WriteResult {
   @Nullable
   Throwable getError();
 
-  static WriteResult create(boolean successful, @Nullable Throwable error) {
-    return new DefaultWriteResult(successful, error);
+  static WriteResult successful() {
+    return new DefaultWriteResult(/* successful= */ true, null);
+  }
+
+  static WriteResult error(@Nullable Throwable t) {
+    return new DefaultWriteResult(/* successful= */ false, t);
   }
 }

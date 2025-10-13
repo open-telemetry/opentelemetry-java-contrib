@@ -21,11 +21,24 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testRuntimeOnly("org.bouncycastle:bcpkix-jdk15on")
   testImplementation("com.google.guava:guava")
   testImplementation("org.skyscreamer:jsonassert")
+}
+
+tasks {
+  withType<Test>().configureEach {
+    environment(
+      "AWS_REGION" to "us-east-1",
+      "AWS_LAMBDA_FUNCTION_NAME" to "my-function",
+      "AWS_LAMBDA_FUNCTION_VERSION" to "1.2.3"
+    )
+    jvmArgs("-Dotel.experimental.config.file=${project.projectDir.resolve("src/test/resources/declarative-config.yaml")}")
+  }
 }

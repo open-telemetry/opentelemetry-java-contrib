@@ -12,48 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          fetch-depth: 0 # needed for merge-base below
+          fetch-depth: 0 # needed for merge-base used in lint:links-in-modified-files
 
-      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+      - uses: jdx/mise-action@e3d7b8d67a7958d1207f6ed871e83b1ea780e7b0 # v3.3.1
 
       - name: Link check - relative links (all files)
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: mise run lint-local-links
-
-      - name: Get modified files
-        if: github.event_name == 'pull_request'
-        id: modified-files
-        run: |
-          merge_base=$(git merge-base origin/${{ github.base_ref }} HEAD)
-          # Using lychee's default extension filter here to match when it runs against all files
-          # Note: --diff-filter=d filters out deleted files
-          modified_files=$(git diff --name-only --diff-filter=d $merge_base...${{ github.event.pull_request.head.sha }} \
-                            | grep -E '\.(md|mkd|mdx|mdown|mdwn|mkdn|mkdown|markdown|html|htm|txt)$' \
-                            | tr '\n' ' ' || true)
-          echo "files=$modified_files" >> $GITHUB_OUTPUT
-          echo "Modified files: $modified_files"
-
-      - name: Check if lychee config was modified
-        if: github.event_name == 'pull_request'
-        id: config-check
-        run: |
-          merge_base=$(git merge-base origin/${{ github.base_ref }} HEAD)
-          config_modified=$(git diff --name-only $merge_base...${{ github.event.pull_request.head.sha }} \
-                            | grep -E '^(\.github/config/lychee\.toml|mise\.toml)$' || true)
-          if [ -n "$config_modified" ]; then
-            echo "modified=true" >> $GITHUB_OUTPUT
-          fi
+        run: mise run lint:local-links
 
       - name: Link check (modified files only)
-        if: github.event_name == 'pull_request' && steps.modified-files.outputs.files != '' && steps.config-check.outputs.modified != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: mise run lint-links ${{ steps.modified-files.outputs.files }}
-
-      - name: Link check (all files)
-        if: github.event_name != 'pull_request' || steps.config-check.outputs.modified == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: mise run lint-links
+        run: mise run lint:links-in-modified-files --base origin/${{ github.base_ref }} --head ${{ github.event.pull_request.head.sha }} --event ${{ github.event_name }}
