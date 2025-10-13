@@ -5,7 +5,7 @@ There are two major components included here.
 ## Original proposal implementation
 
 The original specification for consistent probability sampling is defined by
-<https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md>
+<https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md>
 and <https://github.com/open-telemetry/opentelemetry-specification/pull/2047>.
 It supports sampling probabilities that are power of 2 (1, 1/2, 1/4, ...), and uses 8-bit `r-value` and 8-bit `p-value` in tracestate.
 
@@ -14,18 +14,18 @@ The implementation of this proposal is contained by the package `io/opentelemetr
 * **ConsistentSampler**:
   abstract base class of all consistent sampler implementations below
 * **ConsistentAlwaysOffSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md#always-off-sampler>
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#always-off-sampler>
 * **ConsistentAlwaysOnSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md#always-on-consistent-probability-sampler>
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#always-on-consistent-probability-sampler>
 * **ConsistentComposedAndSampler**:
   allows combining two consistent samplers and samples when both samplers would sample
 * **ConsistentComposedOrSampler**:
   allows combining two consistent sampler and samples when at least one of both samplers would sample,
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md#requirement-combine-multiple-consistent-probability-samplers-using-the-minimum-p-value>
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#requirement-combine-multiple-consistent-probability-samplers-using-the-minimum-p-value>
 * **ConsistentParentBasedSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md#parentconsistentprobabilitybased-sampler>
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#parentconsistentprobabilitybased-sampler>
 * **ConsistentProbabilityBasedSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling-experimental.md#consistentprobabilitybased-sampler>
+  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#consistentprobabilitybased-sampler>
 * **ConsistentRateLimitingSampler**:
   a rate limiting sampler based on exponential smoothing that dynamically adjusts the sampling
   probability based on the estimated rate of spans occurring to satisfy a given rate of sampled spans
