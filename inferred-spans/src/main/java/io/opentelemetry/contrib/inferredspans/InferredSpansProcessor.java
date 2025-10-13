@@ -57,9 +57,10 @@ public class InferredSpansProcessor implements SpanProcessor {
     }
   }
 
-  public void setProfilerInterval(Duration interval) {
-    config.setProfilerInterval(interval);
+  public Duration setProfilerInterval(Duration interval) {
+    Duration oldInterval = config.setProfilerInterval(interval);
     profiler.reschedule();
+    return oldInterval
   }
 
   public static InferredSpansProcessorBuilder builder() {
