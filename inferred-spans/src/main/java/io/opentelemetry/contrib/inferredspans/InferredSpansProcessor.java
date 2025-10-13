@@ -60,7 +60,7 @@ public class InferredSpansProcessor implements SpanProcessor {
   public Duration setProfilerInterval(Duration interval) {
     Duration oldInterval = config.setProfilerInterval(interval);
     profiler.reschedule();
-    return oldInterval
+    return oldInterval;
   }
 
   public static InferredSpansProcessorBuilder builder() {
