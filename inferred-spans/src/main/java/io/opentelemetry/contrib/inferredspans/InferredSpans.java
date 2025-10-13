@@ -42,6 +42,7 @@ public final class InferredSpans {
    *
    * @param interval the new profiler interval
    */
+  @Nullable
   public static Duration setProfilerInterval(Duration interval) {
     InferredSpansProcessor p = instance;
     if (p != null) {
