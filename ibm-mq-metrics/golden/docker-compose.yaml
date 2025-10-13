@@ -1,0 +1,52 @@
+services:
+  mq:
+    image: icr.io/ibm-messaging/mq:9.4.2.1-r1
+    ports:
+      - 1414:1414
+      - 9443:9443
+    environment:
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+      MQ_ADMIN_USER: admin
+      MQ_ADMIN_PASSWORD: passw0rd
+      MQ_APP_USER: app
+      MQ_APP_PASSWORD: passw0rd # deprecated, but needed for app user in some setups
+      MQ_ENABLE_METRICS: true
+    command: >-
+      --name ibm-mq-test
+      --health-cmd "echo > /dev/tcp/localhost/1414"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=5
+    healthcheck:
+      test: curl -k https://localhost:9443/ || exit 1
+      interval: 5s
+      retries: 20
+  collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.137.0
+    ports:
+      - 4317:4317
+      - 4318:4318
+    volumes:
+      - ./otelconf.yaml:/etc/otelcol-contrib/config.yaml
+  golden:
+    container_name: golden
+    image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/golden:v0.137.0
+    volumes:
+      - ./data:/var/data
+    command: >-
+      --expected /var/data/expected.yaml
+      --otlp-http-endpoint 0.0.0.0:4318
+      --otlp-endpoint 0.0.0.0:4317
+      --ignore-timestamp
+      --ignore-start-timestamp
+      --timeout 2m
+      --ignore-metric-attribute-value channel.start.time
+      --ignore-metric-attribute-value job.name
+      --ignore-resource-metrics-order
+      --ignore-scope-metrics-order
+      --ignore-metrics-order
+      --ignore-metrics-data-points-order
+      --ignore-metric-values
+      --ignore-data-points-attributes-order
+#      --write-expected
