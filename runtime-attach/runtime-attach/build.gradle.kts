@@ -74,8 +74,4 @@ tasks {
     })
     rename("^(.*)\\.jar\$", "otel-agent.jar")
   }
-
-  check {
-    dependsOn(testing.suites)
-  }
 }
