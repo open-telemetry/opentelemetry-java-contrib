@@ -75,7 +75,6 @@ testing {
       targets.all {
         testTask.configure {
           dependsOn(tasks.shadowJar)
-          dependsOn(tasks.named("copyAgent"))
 
           // include only the integration test file
           include("io/opentelemetry/contrib/gcp/auth/GcpAuthExtensionEndToEndTest.class")
@@ -84,21 +83,27 @@ testing {
 
           environment("GOOGLE_CLOUD_QUOTA_PROJECT", "quota-project-id")
           environment("GOOGLE_APPLICATION_CREDENTIALS", fakeCredsFilePath)
-          jvmArgs(
-            "-javaagent:$javaAgentJarPath",
-            "-Dotel.javaagent.extensions=$authExtensionJarPath",
-            "-Dgoogle.cloud.project=my-gcp-project",
-            "-Dotel.java.global-autoconfigure.enabled=true",
-            "-Dotel.exporter.otlp.endpoint=http://localhost:4318",
-            "-Dotel.resource.providers.gcp.enabled=true",
-            "-Dotel.traces.exporter=otlp",
-            "-Dotel.bsp.schedule.delay=2000",
-            "-Dotel.metrics.exporter=none",
-            "-Dotel.logs.exporter=none",
-            "-Dotel.exporter.otlp.protocol=http/protobuf",
-            "-Dotel.javaagent.debug=false",
-            "-Dmockserver.logLevel=trace"
-          )
+
+          val agentJar = configurations.named("agent").map { it.singleFile.absolutePath }
+          val extensionJarPath = tasks.shadowJar.flatMap { it.archiveFile }.map { it.asFile.absolutePath }
+
+          jvmArgumentProviders.add(CommandLineArgumentProvider {
+            listOf(
+              "-javaagent:${agentJar.get()}",
+              "-Dotel.javaagent.extensions=${extensionJarPath.get()}",
+              "-Dgoogle.cloud.project=my-gcp-project",
+              "-Dotel.java.global-autoconfigure.enabled=true",
+              "-Dotel.exporter.otlp.endpoint=http://localhost:4318",
+              "-Dotel.resource.providers.gcp.enabled=true",
+              "-Dotel.traces.exporter=otlp",
+              "-Dotel.bsp.schedule.delay=2000",
+              "-Dotel.metrics.exporter=none",
+              "-Dotel.logs.exporter=none",
+              "-Dotel.exporter.otlp.protocol=http/protobuf",
+              "-Dotel.javaagent.debug=false",
+              "-Dmockserver.logLevel=trace"
+            )
+          })
         }
       }
     }
@@ -132,15 +137,4 @@ tasks {
   assemble {
     dependsOn(shadowJar)
   }
-}
-
-val builtLibsDir = layout.buildDirectory.dir("libs").get().asFile.absolutePath
-val javaAgentJarPath = "$builtLibsDir/otel-agent.jar"
-val authExtensionJarPath = "${tasks.shadowJar.get().archiveFile.get()}"
-
-tasks.register<Copy>("copyAgent") {
-  into(layout.buildDirectory.dir("libs"))
-  from(configurations.named("agent") {
-    rename("opentelemetry-javaagent(.*).jar", "otel-agent.jar")
-  })
 }
