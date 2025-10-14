@@ -150,7 +150,7 @@ testing {
     useJUnitJupiter()
 
     dependencies {
-      implementation(project(project.path))
+      implementation(project())
 
       // this is only needed to establish the version of JUnit we want to use
       // since Renovate doesn't currently understand useJUnitJupiter("<version>")
@@ -170,6 +170,12 @@ testing {
       implementation("org.awaitility:awaitility")
       implementation("io.github.netmikey.logunit:logunit-jul")
     }
+  }
+}
+
+tasks {
+  check {
+    dependsOn(testing.suites)
   }
 }
 

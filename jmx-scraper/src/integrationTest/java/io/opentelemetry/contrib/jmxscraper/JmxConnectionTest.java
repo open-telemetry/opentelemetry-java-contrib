@@ -23,12 +23,14 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Tests all supported ways to connect to remote JMX interface. This indirectly tests
  * JmxConnectionBuilder and relies on containers to minimize the JMX/RMI network complications which
  * are not NAT-friendly.
  */
+@Testcontainers(disabledWithoutDocker = true)
 class JmxConnectionTest {
 
   // OTLP endpoint is not used in test mode, but still has to be provided
