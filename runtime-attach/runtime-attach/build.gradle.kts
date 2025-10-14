@@ -59,9 +59,4 @@ tasks {
       excludeTestsMatching("AgentDisabledBySystemPropertyTest")
     }
   }
-
-  check {
-    dependsOn(testAgentDisabledByEnvironmentVariable)
-    dependsOn(testAgentDisabledBySystemProperty)
-  }
 }

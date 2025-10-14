@@ -17,12 +17,12 @@ fi
 config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
                   | grep -E '^(\.github/config/lychee\.toml|\.mise/tasks/lint/.*|mise\.toml)$' || true)
 
-if [ -n "$config_modified" ] ; then
+if [ "$usage_event" != "pull_request" ] ; then
+  echo "Not a PR - checking all files."
+  mise run lint:links
+elif [ -n "$config_modified" ] ; then
   echo "config changes, checking all files."
   mise run lint:links
-elif [ "$usage_event" != "pull_request" ] ; then
-  echo "Not a PR - skipping link linting."
-  exit 0
 else
   # Using lychee's default extension filter here to match when it runs against all files
   # Note: --diff-filter=d filters out deleted files

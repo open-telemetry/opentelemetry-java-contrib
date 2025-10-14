@@ -8,6 +8,7 @@ package io.opentelemetry.opamp.client.internal.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -199,7 +200,8 @@ class OpampClientImplTest {
     // Await for onMessage call
     await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onMessageCalls.get() == 1);
 
-    verify(callbacks).onMessage(MessageData.builder().setRemoteConfig(remoteConfig).build());
+    verify(callbacks)
+        .onMessage(client, MessageData.builder().setRemoteConfig(remoteConfig).build());
   }
 
   @Test
@@ -214,7 +216,7 @@ class OpampClientImplTest {
     // Giving some time for the callback to get called
     await().during(Duration.ofSeconds(1));
 
-    verify(callbacks, never()).onMessage(any());
+    verify(callbacks, never()).onMessage(eq(client), any());
   }
 
   @Test
@@ -257,8 +259,8 @@ class OpampClientImplTest {
 
     await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onConnectCalls.get() == 1);
 
-    verify(callbacks).onConnect();
-    verify(callbacks, never()).onConnectFailed(any());
+    verify(callbacks).onConnect(client);
+    verify(callbacks, never()).onConnectFailed(eq(client), any());
   }
 
   @Test
@@ -301,8 +303,8 @@ class OpampClientImplTest {
 
     await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onErrorResponseCalls.get() == 1);
 
-    verify(callbacks).onErrorResponse(errorResponse);
-    verify(callbacks, never()).onMessage(any());
+    verify(callbacks).onErrorResponse(client, errorResponse);
+    verify(callbacks, never()).onMessage(eq(client), any());
   }
 
   @Test
@@ -312,7 +314,7 @@ class OpampClientImplTest {
 
     client.onConnectionFailed(throwable);
 
-    verify(callbacks).onConnectFailed(throwable);
+    verify(callbacks).onConnectFailed(client, throwable);
   }
 
   @Test
@@ -450,22 +452,22 @@ class OpampClientImplTest {
     private final AtomicInteger onMessageCalls = new AtomicInteger();
 
     @Override
-    public void onConnect() {
+    public void onConnect(OpampClient client) {
       onConnectCalls.incrementAndGet();
     }
 
     @Override
-    public void onConnectFailed(@Nullable Throwable throwable) {
+    public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {
       onConnectFailedCalls.incrementAndGet();
     }
 
     @Override
-    public void onErrorResponse(ServerErrorResponse errorResponse) {
+    public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {
       onErrorResponseCalls.incrementAndGet();
     }
 
     @Override
-    public void onMessage(MessageData messageData) {
+    public void onMessage(OpampClient client, MessageData messageData) {
       onMessageCalls.incrementAndGet();
     }
   }

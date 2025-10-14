@@ -22,16 +22,16 @@ OpampClient client =
         .build(
             new OpampClient.Callbacks() {
               @Override
-              public void onConnect() {}
+              public void onConnect(OpampClient client) {}
 
               @Override
-              public void onConnectFailed(@Nullable Throwable throwable) {}
+              public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {}
 
               @Override
-              public void onErrorResponse(ServerErrorResponse errorResponse) {}
+              public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {}
 
               @Override
-              public void onMessage(MessageData messageData) {
+              public void onMessage(OpampClient client, MessageData messageData) {
                 AgentRemoteConfig remoteConfig = messageData.getRemoteConfig();
                 if (remoteConfig != null) {
                   // A remote config was received

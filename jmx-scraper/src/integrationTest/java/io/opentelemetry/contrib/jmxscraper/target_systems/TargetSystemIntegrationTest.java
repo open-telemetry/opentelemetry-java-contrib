@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jmxscraper.target_systems;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.grpc.GrpcService;
@@ -35,11 +36,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+@Testcontainers(disabledWithoutDocker = true)
 public abstract class TargetSystemIntegrationTest {
   private static final Logger logger = LoggerFactory.getLogger(TargetSystemIntegrationTest.class);
   private static final Logger targetSystemLogger = LoggerFactory.getLogger("TargetSystemContainer");
@@ -72,7 +74,7 @@ public abstract class TargetSystemIntegrationTest {
     network = Network.newNetwork();
     otlpServer = new OtlpGrpcServer();
     otlpServer.start();
-    Testcontainers.exposeHostPorts(otlpServer.httpPort());
+    exposeHostPorts(otlpServer.httpPort());
     otlpEndpoint = "http://" + OTLP_HOST + ":" + otlpServer.httpPort();
   }
 
