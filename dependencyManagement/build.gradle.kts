@@ -17,7 +17,7 @@ dependencies {
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
   api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
-  api(platform("com.squareup.okhttp3:okhttp-bom:5.1.0"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.2.1"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")

@@ -42,10 +42,12 @@ public final class InferredSpans {
    *
    * @param interval the new profiler interval
    */
-  public static void setProfilerInterval(Duration interval) {
+  @Nullable
+  public static Duration setProfilerInterval(Duration interval) {
     InferredSpansProcessor p = instance;
     if (p != null) {
-      p.setProfilerInterval(interval);
+      return p.setProfilerInterval(interval);
     }
+    return null;
   }
 }

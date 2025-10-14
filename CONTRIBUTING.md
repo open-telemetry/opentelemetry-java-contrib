@@ -31,12 +31,6 @@ To run the tests:
 ./gradlew test
 ```
 
-Some modules include integration tests that can be run with:
-
-```bash
-./gradlew integrationTest
-```
-
 ## Snapshot Builds
 
 Snapshot builds of the `main` branch are available from the Sonatype snapshot repository at:

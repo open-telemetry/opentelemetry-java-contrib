@@ -84,8 +84,10 @@ public class InferredSpansConfiguration {
     return profilerInterval;
   }
 
-  public void setProfilerInterval(Duration profilerInterval) {
+  public Duration setProfilerInterval(Duration profilerInterval) {
+    Duration oldInterval = this.profilerInterval;
     this.profilerInterval = profilerInterval;
+    return oldInterval;
   }
 
   public Duration getProfilingDuration() {
