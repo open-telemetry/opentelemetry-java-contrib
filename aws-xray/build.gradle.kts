@@ -11,6 +11,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
   implementation("com.squareup.okhttp3:okhttp")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
@@ -28,6 +29,7 @@ dependencies {
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("com.google.guava:guava")
   testImplementation("org.slf4j:slf4j-simple")
