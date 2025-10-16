@@ -6,7 +6,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-telemetry/opentelemetry-java-contrib/badge)](https://scorecard.dev/viewer/?uri=github.com/open-telemetry/opentelemetry-java-contrib)
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--java-blue.svg?logo=slack)](https://cloud-native.slack.com/archives/C014L2KCTE3)
 
-This project provides helpfal libraries and standalone OpenTelemetry-based utilities that don't fit
+This project provides helpful libraries and standalone OpenTelemetry-based utilities that don't fit
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or
 [Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects. If you need an
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
