@@ -25,6 +25,11 @@ components:
   baggage-processor:
     - mikegoldsmith
     - zeitlinger
+  cel-sampler:
+    - dol
+    - trask
+    - jack-berg
+    - breedx-splk
   cloudfoundry-resources:
     - KarstenSchnitter
   compressors:
