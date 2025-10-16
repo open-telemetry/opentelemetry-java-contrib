@@ -21,6 +21,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +69,9 @@ public final class CelBasedSampler implements Sampler {
    * @param fallback The fallback sampler to use when no expressions match
    */
   public CelBasedSampler(List<CelBasedSamplingExpression> expressions, Sampler fallback) {
-    this.expressions = requireNonNull(expressions, "expressions must not be null");
+    this.expressions =
+        Collections.unmodifiableList(
+            new ArrayList<>(requireNonNull(expressions, "expressions must not be null")));
     this.expressions.forEach(
         expr -> {
           if (!expr.getAbstractSyntaxTree().isChecked()) {
@@ -111,7 +115,7 @@ public final class CelBasedSampler implements Sampler {
         CelRuntime.Program program = celRuntime.createProgram(expression.getAbstractSyntaxTree());
         Object result = program.eval(evaluationContext);
         // Happy path: Perform sampling based on the boolean result
-        if (result instanceof Boolean && ((Boolean) result)) {
+        if (Boolean.TRUE.equals(result)) {
           return expression
               .getDelegate()
               .shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);

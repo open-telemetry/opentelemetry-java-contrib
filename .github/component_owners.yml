@@ -27,6 +27,9 @@ components:
     - zeitlinger
   cel-sampler:
     - dol
+    - trask
+    - jack-berg
+    - breedx-splk
   cloudfoundry-resources:
     - KarstenSchnitter
   compressors:

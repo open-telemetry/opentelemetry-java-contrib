@@ -75,6 +75,8 @@ tracer_provider:
 ## Component owners
 
 * [Dominic Lüchinger](https://github.com/dol), SIX Group
-* TBD
+* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Trask Stalnaker](https://github.com/trask), Microsoft
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

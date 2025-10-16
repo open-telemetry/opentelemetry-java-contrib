@@ -21,7 +21,6 @@ import javax.annotation.Nullable;
  */
 public final class CelBasedSamplingExpression {
   private final CelAbstractSyntaxTree abstractSyntaxTree;
-  private final String expression;
   private final Sampler delegate;
 
   /**
@@ -33,7 +32,6 @@ public final class CelBasedSamplingExpression {
   CelBasedSamplingExpression(CelAbstractSyntaxTree abstractSyntaxTree, Sampler delegate) {
     this.abstractSyntaxTree =
         requireNonNull(abstractSyntaxTree, "abstractSyntaxTree must not be null");
-    this.expression = abstractSyntaxTree.getSource().getContent().toString();
     this.delegate = requireNonNull(delegate, "delegate must not be null");
   }
 
@@ -52,7 +50,7 @@ public final class CelBasedSamplingExpression {
    * @return The expression string
    */
   String getExpression() {
-    return expression;
+    return abstractSyntaxTree.getSource().getContent().toString();
   }
 
   /**
@@ -68,7 +66,7 @@ public final class CelBasedSamplingExpression {
   public String toString() {
     return "CelBasedSamplingExpression{"
         + "expression='"
-        + expression
+        + getExpression()
         + "', delegate="
         + delegate
         + "}";
@@ -84,12 +82,12 @@ public final class CelBasedSamplingExpression {
     }
     CelBasedSamplingExpression that = (CelBasedSamplingExpression) o;
     return Objects.equals(abstractSyntaxTree, that.abstractSyntaxTree)
-        && Objects.equals(expression, that.expression)
+        && Objects.equals(getExpression(), that.getExpression())
         && Objects.equals(delegate, that.delegate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(abstractSyntaxTree, expression, delegate);
+    return Objects.hash(abstractSyntaxTree, getExpression(), delegate);
   }
 }
