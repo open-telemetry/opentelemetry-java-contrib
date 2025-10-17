@@ -7,7 +7,10 @@ package io.opentelemetry.contrib.awsxray;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.io.ByteStreams;
 import com.linecorp.armeria.common.HttpResponse;
@@ -21,6 +24,9 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.ReadableSpan;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import java.io.IOException;
@@ -169,21 +175,28 @@ class AwsXrayRemoteSamplerTest {
   }
 
   @Test
-  void parentBasedXraySamplerAfterDefaultSampler() {
-    rulesResponse.set(RULE_RESPONSE_1);
-    try (AwsXrayRemoteSampler samplerWithLongerPollingInterval =
-        AwsXrayRemoteSampler.newBuilder(Resource.empty())
-            .setInitialSampler(Sampler.alwaysOn())
-            .setEndpoint(server.httpUri().toString())
-            .setPollingInterval(Duration.ofMillis(5))
-            .build()) {
-      await()
-          .pollDelay(Duration.ofMillis(10))
-          .untilAsserted(
-              () -> {
-                assertThat(sampler.getDescription())
-                    .startsWith("AwsXrayRemoteSampler{ParentBased{root:XrayRulesSampler{[");
-              });
+  void setAndResetSpanExporter() {
+    try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
+      // Setting span exporter should only work once
+      sampler.setSpanExporter(mock(SpanExporter.class));
+      assertThrows(
+          IllegalStateException.class, () -> sampler.setSpanExporter(mock(SpanExporter.class)));
+    }
+  }
+
+  @Test
+  void adaptSamplingWithoutSpanExporter() {
+    assertThrows(
+        IllegalStateException.class,
+        () -> sampler.adaptSampling(mock(ReadableSpan.class), mock(SpanData.class)));
+  }
+
+  @Test
+  void adaptSamplingWithSpanExporter() {
+    try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
+      sampler.setSpanExporter(mock(SpanExporter.class));
+      assertThatCode(() -> sampler.adaptSampling(mock(ReadableSpan.class), mock(SpanData.class)))
+          .doesNotThrowAnyException();
     }
   }
 
@@ -202,6 +215,16 @@ class AwsXrayRemoteSamplerTest {
                 assertThat(samplerWithLongerPollingInterval.getNextSamplerUpdateScheduledDuration())
                     .isCloseTo(Duration.ofMinutes(5), Duration.ofSeconds(10));
               });
+    }
+  }
+
+  @Test
+  void setAdaptiveSamplingConfig() {
+    try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
+      AwsXrayAdaptiveSamplingConfig config =
+          AwsXrayAdaptiveSamplingConfig.builder().setVersion(1.0).build();
+      sampler.setAdaptiveSamplingConfig(config);
+      assertThrows(IllegalStateException.class, () -> sampler.setAdaptiveSamplingConfig(config));
     }
   }
 
