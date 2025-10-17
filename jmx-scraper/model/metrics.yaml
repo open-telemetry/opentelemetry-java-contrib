@@ -1,0 +1,146 @@
+groups:
+  - id: jvm.class.loaded
+    type: metric
+    brief: "Number of classes loaded by the JVM."
+    metric_name: jvm.class.loaded
+    instrument: updowncounter
+    unit: "{class}"
+    stability: beta
+
+  - id: jvm.gc.collections.count
+    type: metric
+    brief: "Total number of garbage collection that have occurred."
+    metric_name: jvm.gc.collections.count
+    instrument: counter
+    unit: "{collection}"
+    stability: beta
+    attributes:
+      - ref: gc.name
+        requirement_level: required
+
+  - id: jvm.gc.collections.elapsed
+    type: metric
+    brief: "Approximate accumulated garbage collection elapsed time in milliseconds."
+    metric_name: jvm.gc.collections.elapsed
+    instrument: counter
+    unit: ms
+    stability: beta
+    attributes:
+      - ref: gc.name
+        requirement_level: required
+
+  - id: jvm.memory.heap.committed
+    type: metric
+    brief: "Current committed heap memory usage."
+    metric_name: jvm.memory.heap.committed
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.heap.init
+    type: metric
+    brief: "Initial heap memory usage."
+    metric_name: jvm.memory.heap.init
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.heap.max
+    type: metric
+    brief: "Maximum heap memory usage."
+    metric_name: jvm.memory.heap.max
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.heap.used
+    type: metric
+    brief: "Current heap memory usage."
+    metric_name: jvm.memory.heap.used
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.nonheap.committed
+    type: metric
+    brief: "Current committed non-heap memory usage."
+    metric_name: jvm.memory.nonheap.committed
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.nonheap.init
+    type: metric
+    brief: "Initial non-heap memory usage."
+    metric_name: jvm.memory.nonheap.init
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.nonheap.max
+    type: metric
+    brief: "Maximum non-heap memory usage."
+    metric_name: jvm.memory.nonheap.max
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.nonheap.used
+    type: metric
+    brief: "Current non-heap memory usage."
+    metric_name: jvm.memory.nonheap.used
+    instrument: gauge
+    unit: By
+    stability: beta
+
+  - id: jvm.memory.pool.committed
+    type: metric
+    brief: "Current memory pool committed usage."
+    metric_name: jvm.memory.pool.committed
+    instrument: gauge
+    unit: By
+    stability: beta
+    attributes:
+      - ref: pool.name
+        requirement_level: required
+
+  - id: jvm.memory.pool.init
+    type: metric
+    brief: "Initial memory pool usage."
+    metric_name: jvm.memory.pool.init
+    instrument: gauge
+    unit: By
+    stability: beta
+    attributes:
+      - ref: pool.name
+        requirement_level: required
+
+  - id: jvm.memory.pool.max
+    type: metric
+    brief: "Maximum memory pool usage."
+    metric_name: jvm.memory.pool.max
+    instrument: gauge
+    unit: By
+    stability: beta
+    attributes:
+      - ref: pool.name
+        requirement_level: required
+
+  - id: jvm.memory.pool.used
+    type: metric
+    brief: "Current memory pool used usage."
+    metric_name: jvm.memory.pool.used
+    instrument: gauge
+    unit: By
+    stability: beta
+    attributes:
+      - ref: pool.name
+        requirement_level: required
+
+  - id: jvm.threads.count
+    type: metric
+    brief: "Current number of thread count"
+    metric_name: jvm.threads.count
+    instrument: gauge
+    unit: "{thread}"
+    stability: beta
