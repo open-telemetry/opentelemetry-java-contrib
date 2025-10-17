@@ -3,7 +3,7 @@
 WEAVER_CONTAINER=otel/weaver@sha256:5425ade81dc22ddd840902b0638b4b6a9186fb654c5b50c1d1ccd31299437390
 
 # Next - we want to run docker as our local file user, so generated code is not
-# owned by root, and we don't give unecessary access.
+# owned by root, and we don't give unnecessary access.
 #
 # Determine if "docker" is actually podman
 DOCKER_VERSION_OUTPUT := $(shell docker --version 2>&1)
