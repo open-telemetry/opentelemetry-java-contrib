@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 public class InferredSpansConfiguration {
 
+  private final boolean enabled;
   private final boolean profilerLoggingEnabled;
   private final boolean backupDiagnosticFiles;
   private final int asyncProfilerSafeMode;
@@ -30,6 +31,7 @@ public class InferredSpansConfiguration {
 
   @SuppressWarnings("TooManyParameters")
   public InferredSpansConfiguration(
+      boolean enabled,
       boolean profilerLoggingEnabled,
       boolean backupDiagnosticFiles,
       int asyncProfilerSafeMode,
@@ -42,6 +44,7 @@ public class InferredSpansConfiguration {
       Duration profilingDuration,
       @Nullable String profilerLibDirectory,
       BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler) {
+    this.enabled = enabled;
     this.profilerLoggingEnabled = profilerLoggingEnabled;
     this.backupDiagnosticFiles = backupDiagnosticFiles;
     this.asyncProfilerSafeMode = asyncProfilerSafeMode;
@@ -54,6 +57,10 @@ public class InferredSpansConfiguration {
     this.profilingDuration = profilingDuration;
     this.profilerLibDirectory = profilerLibDirectory;
     this.parentOverrideHandler = parentOverrideHandler;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
   public boolean isProfilingLoggingEnabled() {
