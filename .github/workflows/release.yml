@@ -17,6 +17,8 @@ jobs:
   release:
     permissions:
       contents: write # for creating the release
+      id-token: write # for signing artifacts with Sigstore
+      attestations: write # for uploading attestations
     runs-on: ubuntu-latest
     needs:
       - common
@@ -152,16 +154,24 @@ jobs:
           .github/scripts/generate-release-contributors.sh v$PRIOR_VERSION >> /tmp/release-notes.txt
           fi
 
-      - id: create-github-release
-        name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Simplify paths for attaching
         run: |
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
           cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
           cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar
           cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc opentelemetry-jmx-scraper.jar.asc
-          
+
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        with:
+          subject-path: |
+            opentelemetry-jmx-metrics.jar
+            opentelemetry-jmx-scraper.jar
+
+      - id: create-github-release
+        name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           gh release create --target $GITHUB_REF_NAME \
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
