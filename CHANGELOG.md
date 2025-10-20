@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.51.0 (2025-10-20)
 
 ### AWS X-Ray SDK support and propagator
 
