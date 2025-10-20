@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
-  api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
+  api(platform("com.google.protobuf:protobuf-bom:4.33.0"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.2.1"))
 
   constraints {
