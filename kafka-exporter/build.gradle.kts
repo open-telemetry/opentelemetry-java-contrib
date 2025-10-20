@@ -31,8 +31,8 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-api")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("com.google.guava:guava")
-  testImplementation("org.testcontainers:junit-jupiter")
-  testImplementation("org.testcontainers:kafka")
+  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+  testImplementation("org.testcontainers:testcontainers-kafka")
   testImplementation("org.rnorth.duct-tape:duct-tape")
   testImplementation("org.testcontainers:testcontainers")
 

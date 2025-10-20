@@ -42,7 +42,7 @@ testing {
       dependencies {
         implementation("io.opentelemetry:opentelemetry-exporter-otlp")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
-        implementation("org.testcontainers:junit-jupiter")
+        implementation("org.testcontainers:testcontainers-junit-jupiter")
         runtimeOnly("org.slf4j:slf4j-simple")
       }
     }
