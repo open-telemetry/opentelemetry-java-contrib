@@ -9,7 +9,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.compressor.zstd")
 dependencies {
   api("io.opentelemetry:opentelemetry-exporter-common")
 
-  implementation("com.github.luben:zstd-jni:1.5.7-5")
+  implementation("com.github.luben:zstd-jni:1.5.7-6")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
