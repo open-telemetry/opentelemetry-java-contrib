@@ -3,11 +3,13 @@ pluginManagement {
     id("com.gradleup.shadow") version "9.2.2"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("com.gradle.develocity") version "4.2.2"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
   }
 }
 
 plugins {
   id("com.gradle.develocity")
+  id("org.gradle.toolchains.foojay-resolver-convention")
 }
 
 dependencyResolutionManagement {
