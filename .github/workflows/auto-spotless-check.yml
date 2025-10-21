@@ -36,6 +36,8 @@ jobs:
 
       - name: Spotless
         run: ./gradlew spotlessApply
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - id: create-patch
         name: Create patch file

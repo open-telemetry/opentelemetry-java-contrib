@@ -15,3 +15,10 @@ private admin repo.
   - Maximum pull requests to merge: 5
   - Only merge non-failing pull requests: CHECKED
   - Status check timeout: 60 minutes
+
+  ## Secrets and variables > Actions
+
+  - `DEVELOCITY_ACCESS_KEY` - stored in OpenTelemetry-Java 1Password
+    - Generated at https://develocity.opentelemetry.io > My settings > Access keys
+    - Format of env var is `develocity.opentelemetry.io=<access key>`,
+      see [docs](https://docs.gradle.com/enterprise/gradle-plugin/#via_environment_variable)
