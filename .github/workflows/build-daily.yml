@@ -14,6 +14,8 @@ jobs:
     uses: ./.github/workflows/build-common.yml
     with:
       no-build-cache: true
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   link-check:
     uses: ./.github/workflows/reusable-link-check.yml
