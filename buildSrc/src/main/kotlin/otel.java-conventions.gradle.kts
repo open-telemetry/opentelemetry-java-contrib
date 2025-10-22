@@ -128,7 +128,6 @@ plugins.withId("otel.publish-conventions") {
 val dependencyManagement by configurations.creating {
   isCanBeConsumed = false
   isCanBeResolved = false
-  isVisible = false
 }
 
 dependencies {
