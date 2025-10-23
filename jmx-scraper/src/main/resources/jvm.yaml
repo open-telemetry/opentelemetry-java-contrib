@@ -35,15 +35,15 @@ rules:
     mapping:
       HeapMemoryUsage.committed:
         metric: heap.committed
-        desc: current heap usage
+        desc: current heap size
         type: gauge
       HeapMemoryUsage.init:
         metric: heap.init
-        desc: current heap usage
+        desc: initial heap size
         type: gauge
       HeapMemoryUsage.max:
         metric: heap.max
-        desc: current heap usage
+        desc: max heap size
         type: gauge
       HeapMemoryUsage.used:
         metric: heap.used
@@ -51,15 +51,15 @@ rules:
         type: gauge
       NonHeapMemoryUsage.committed:
         metric: nonheap.committed
-        desc: current non-heap usage
+        desc: current non-heap size
         type: gauge
       NonHeapMemoryUsage.init:
         metric: nonheap.init
-        desc: current non-heap usage
+        desc: initial non-heap size
         type: gauge
       NonHeapMemoryUsage.max:
         metric: nonheap.max
-        desc: current non-heap usage
+        desc: max non-heap size
         type: gauge
       NonHeapMemoryUsage.used:
         metric: nonheap.used

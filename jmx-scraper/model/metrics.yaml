@@ -1,15 +1,15 @@
 groups:
-  - id: jvm.class.loaded
+  - id: jvm.classes.loaded
     type: metric
-    brief: "Number of classes loaded by the JVM."
-    metric_name: jvm.class.loaded
+    brief: "number of loaded classes"
+    metric_name: jvm.classes.loaded
     instrument: updowncounter
     unit: "{class}"
     stability: beta
 
   - id: jvm.gc.collections.count
     type: metric
-    brief: "Total number of garbage collection that have occurred."
+    brief: "total number of collections that have occurred"
     metric_name: jvm.gc.collections.count
     instrument: counter
     unit: "{collection}"
@@ -20,7 +20,7 @@ groups:
 
   - id: jvm.gc.collections.elapsed
     type: metric
-    brief: "Approximate accumulated garbage collection elapsed time in milliseconds."
+    brief: "the approximate accumulated collection elapsed time in milliseconds"
     metric_name: jvm.gc.collections.elapsed
     instrument: counter
     unit: ms
@@ -31,7 +31,7 @@ groups:
 
   - id: jvm.memory.heap.committed
     type: metric
-    brief: "Current committed heap memory usage."
+    brief: "current heap size"
     metric_name: jvm.memory.heap.committed
     instrument: gauge
     unit: By
@@ -39,7 +39,7 @@ groups:
 
   - id: jvm.memory.heap.init
     type: metric
-    brief: "Initial heap memory usage."
+    brief: "initial heap size"
     metric_name: jvm.memory.heap.init
     instrument: gauge
     unit: By
@@ -47,7 +47,7 @@ groups:
 
   - id: jvm.memory.heap.max
     type: metric
-    brief: "Maximum heap memory usage."
+    brief: "max heap size"
     metric_name: jvm.memory.heap.max
     instrument: gauge
     unit: By
@@ -55,7 +55,7 @@ groups:
 
   - id: jvm.memory.heap.used
     type: metric
-    brief: "Current heap memory usage."
+    brief: "current heap usage"
     metric_name: jvm.memory.heap.used
     instrument: gauge
     unit: By
@@ -63,7 +63,7 @@ groups:
 
   - id: jvm.memory.nonheap.committed
     type: metric
-    brief: "Current committed non-heap memory usage."
+    brief: "current non-heap size"
     metric_name: jvm.memory.nonheap.committed
     instrument: gauge
     unit: By
@@ -71,7 +71,7 @@ groups:
 
   - id: jvm.memory.nonheap.init
     type: metric
-    brief: "Initial non-heap memory usage."
+    brief: "initial non-heap size"
     metric_name: jvm.memory.nonheap.init
     instrument: gauge
     unit: By
@@ -79,7 +79,7 @@ groups:
 
   - id: jvm.memory.nonheap.max
     type: metric
-    brief: "Maximum non-heap memory usage."
+    brief: "max non-heap size"
     metric_name: jvm.memory.nonheap.max
     instrument: gauge
     unit: By
@@ -87,7 +87,7 @@ groups:
 
   - id: jvm.memory.nonheap.used
     type: metric
-    brief: "Current non-heap memory usage."
+    brief: "current non-heap usage"
     metric_name: jvm.memory.nonheap.used
     instrument: gauge
     unit: By
@@ -95,7 +95,7 @@ groups:
 
   - id: jvm.memory.pool.committed
     type: metric
-    brief: "Current memory pool committed usage."
+    brief: "current memory pool size"
     metric_name: jvm.memory.pool.committed
     instrument: gauge
     unit: By
@@ -106,7 +106,7 @@ groups:
 
   - id: jvm.memory.pool.init
     type: metric
-    brief: "Initial memory pool usage."
+    brief: "initial memory pool size"
     metric_name: jvm.memory.pool.init
     instrument: gauge
     unit: By
@@ -117,7 +117,7 @@ groups:
 
   - id: jvm.memory.pool.max
     type: metric
-    brief: "Maximum memory pool usage."
+    brief: "max memory pool size"
     metric_name: jvm.memory.pool.max
     instrument: gauge
     unit: By
@@ -128,7 +128,7 @@ groups:
 
   - id: jvm.memory.pool.used
     type: metric
-    brief: "Current memory pool used usage."
+    brief: "current memory pool usage"
     metric_name: jvm.memory.pool.used
     instrument: gauge
     unit: By
@@ -139,7 +139,7 @@ groups:
 
   - id: jvm.threads.count
     type: metric
-    brief: "Current number of thread count"
+    brief: "current number of thread count"
     metric_name: jvm.threads.count
     instrument: gauge
     unit: "{thread}"

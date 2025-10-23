@@ -1,15 +1,16 @@
 ---
-
+{# Define a variable for the common "jvm.memory." prefix #}
+{%- set jvm_memory_prefix = "jvm.memory." %}
 rules:
   # Rule for ClassLoading metrics
   - bean: java.lang:type=ClassLoading
     mapping:
       LoadedClassCount:
-        {%- set m_class_loaded = (ctx.groups | selectattr("id", "equalto", "jvm.class.loaded") | first) %}
-        metric: jvm.classes.loaded
+        {%- set m_class_loaded = (ctx.groups | selectattr("id", "equalto", "jvm.classes.loaded") | first) %}
+        metric: {{ m_class_loaded.metric_name | safe }}
         type: gauge
         unit: "{{ m_class_loaded.unit | safe }}"
-        desc: number of loaded classes
+        desc: {{ m_class_loaded.brief | safe }}
 
   # Rule for Garbage Collector metrics
   - bean: java.lang:type=GarbageCollector,name=*
@@ -20,7 +21,7 @@ rules:
         metric: {{ m.id | safe }}
         type: {{ m.instrument | safe }}
         unit: "{{ m.unit | safe }}"
-        desc: total number of collections that have occurred
+        desc: {{ m.brief | safe }}
         metricAttribute:
           name: param(name)
       {%- elif m.id == "jvm.gc.collections.elapsed" %}
@@ -28,7 +29,7 @@ rules:
         metric: {{ m.id | safe}}
         type: {{ m.instrument | safe }}
         unit: {{ m.unit | safe }}
-        desc: the approximate accumulated collection elapsed time in milliseconds
+        desc: {{ m.brief | safe }}
         metricAttribute:
           name: param(name)
       {%- endif %}
@@ -37,51 +38,51 @@ rules:
   # Rule for Heap and Non-Heap Memory metrics
   - bean: java.lang:type=Memory
     unit: By
-    prefix: jvm.memory.
+    prefix: {{ jvm_memory_prefix | safe }}
     mapping:
-      {%- for m in ctx.groups if m.id.startswith("jvm.memory.heap") %}
-      {%- if m.id == "jvm.memory.heap.committed" %}
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "heap") %}
+      {%- if m.id == jvm_memory_prefix + "heap.committed" %}
       HeapMemoryUsage.committed:
-        metric: heap.committed
-        desc: current heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.heap.init" %}
+      {%- elif m.id == jvm_memory_prefix + "heap.init" %}
       HeapMemoryUsage.init:
-        metric: heap.init
-        desc: current heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.heap.max" %}
+      {%- elif m.id == jvm_memory_prefix + "heap.max" %}
       HeapMemoryUsage.max:
-        metric: heap.max
-        desc: current heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.heap.used" %}
+      {%- elif m.id == jvm_memory_prefix + "heap.used" %}
       HeapMemoryUsage.used:
-        metric: heap.used
-        desc: current heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
       {%- endif %}
       {%- endfor %}
-      {%- for m in ctx.groups if m.id.startswith("jvm.memory.nonheap") %}
-      {%- if m.id == "jvm.memory.nonheap.committed" %}
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "nonheap") %}
+      {%- if m.id == jvm_memory_prefix + "nonheap.committed" %}
       NonHeapMemoryUsage.committed:
-        metric: nonheap.committed
-        desc: current non-heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.nonheap.init" %}
+      {%- elif m.id == jvm_memory_prefix + "nonheap.init" %}
       NonHeapMemoryUsage.init:
-        metric: nonheap.init
-        desc: current non-heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.nonheap.max" %}
+      {%- elif m.id == jvm_memory_prefix + "nonheap.max" %}
       NonHeapMemoryUsage.max:
-        metric: nonheap.max
-        desc: current non-heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
-      {%- elif m.id == "jvm.memory.nonheap.used" %}
+      {%- elif m.id == jvm_memory_prefix + "nonheap.used" %}
       NonHeapMemoryUsage.used:
-        metric: nonheap.used
-        desc: current non-heap usage
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
         type: gauge
       {%- endif %}
       {%- endfor %}
@@ -93,22 +94,22 @@ rules:
     metricAttribute:
       name: param(name)
     mapping:
-      {%- for m in ctx.groups if m.id.startswith("jvm.memory.pool") %}
-      {%- if m.id == "jvm.memory.pool.committed" %}
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "pool") %}
+      {%- if m.id == jvm_memory_prefix + "pool.committed" %}
       Usage.committed:
-        metric: jvm.memory.pool.committed
+        metric: {{ m.id | safe }}
         desc: current memory pool usage
-      {%- elif m.id == "jvm.memory.pool.init" %}
+      {%- elif m.id == jvm_memory_prefix + "pool.init" %}
       Usage.init:
-        metric: jvm.memory.pool.init
+        metric: {{ m.id | safe }}
         desc: current memory pool usage
-      {%- elif m.id == "jvm.memory.pool.max" %}
+      {%- elif m.id == jvm_memory_prefix + "pool.max" %}
       Usage.max:
-        metric: jvm.memory.pool.max
+        metric: {{ m.id | safe }}
         desc: current memory pool usage
-      {%- elif m.id == "jvm.memory.pool.used" %}
+      {%- elif m.id == jvm_memory_prefix + "pool.used" %}
       Usage.used:
-        metric: jvm.memory.pool.used
+        metric: {{ m.id | safe }}
         desc: current memory pool usage
       {%- endif %}
       {%- endfor %}
