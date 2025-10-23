@@ -5,66 +5,86 @@ rules:
   - bean: java.lang:type=ClassLoading
     mapping:
       LoadedClassCount:
+        {%- set m_class_loaded = (ctx.groups | selectattr("id", "equalto", "jvm.class.loaded") | first) %}
         metric: jvm.classes.loaded
         type: gauge
-        unit: "{class}"
+        unit: "{{ m_class_loaded.unit | safe }}"
         desc: number of loaded classes
 
   # Rule for Garbage Collector metrics
   - bean: java.lang:type=GarbageCollector,name=*
     mapping:
+      {%- for m in ctx.groups if m.id in ["jvm.gc.collections.count", "jvm.gc.collections.elapsed"] -%}
+      {%- if m.id == "jvm.gc.collections.count" %}
       CollectionCount:
-        metric: jvm.gc.collections.count
-        type: counter
-        unit: "{collection}"
+        metric: {{ m.id | safe }}
+        type: {{ m.instrument | safe }}
+        unit: "{{ m.unit | safe }}"
         desc: total number of collections that have occurred
         metricAttribute:
           name: param(name)
+      {%- elif m.id == "jvm.gc.collections.elapsed" %}
       CollectionTime:
-        metric: jvm.gc.collections.elapsed
-        type: counter
-        unit: ms
+        metric: {{ m.id | safe}}
+        type: {{ m.instrument | safe }}
+        unit: {{ m.unit | safe }}
         desc: the approximate accumulated collection elapsed time in milliseconds
         metricAttribute:
           name: param(name)
+      {%- endif %}
+      {%- endfor %}
 
   # Rule for Heap and Non-Heap Memory metrics
   - bean: java.lang:type=Memory
     unit: By
     prefix: jvm.memory.
     mapping:
+      {%- for m in ctx.groups if m.id.startswith("jvm.memory.heap") %}
+      {%- if m.id == "jvm.memory.heap.committed" %}
       HeapMemoryUsage.committed:
         metric: heap.committed
         desc: current heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.heap.init" %}
       HeapMemoryUsage.init:
         metric: heap.init
         desc: current heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.heap.max" %}
       HeapMemoryUsage.max:
         metric: heap.max
         desc: current heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.heap.used" %}
       HeapMemoryUsage.used:
         metric: heap.used
         desc: current heap usage
         type: gauge
+      {%- endif %}
+      {%- endfor %}
+      {%- for m in ctx.groups if m.id.startswith("jvm.memory.nonheap") %}
+      {%- if m.id == "jvm.memory.nonheap.committed" %}
       NonHeapMemoryUsage.committed:
         metric: nonheap.committed
         desc: current non-heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.nonheap.init" %}
       NonHeapMemoryUsage.init:
         metric: nonheap.init
         desc: current non-heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.nonheap.max" %}
       NonHeapMemoryUsage.max:
         metric: nonheap.max
         desc: current non-heap usage
         type: gauge
+      {%- elif m.id == "jvm.memory.nonheap.used" %}
       NonHeapMemoryUsage.used:
         metric: nonheap.used
         desc: current non-heap usage
         type: gauge
+      {%- endif %}
+      {%- endfor %}
 
   # Rule for Memory Pool metrics
   - bean: java.lang:type=MemoryPool,name=*
@@ -73,23 +93,31 @@ rules:
     metricAttribute:
       name: param(name)
     mapping:
+      {%- for m in ctx.groups if m.id.startswith("jvm.memory.pool") %}
+      {%- if m.id == "jvm.memory.pool.committed" %}
       Usage.committed:
         metric: jvm.memory.pool.committed
         desc: current memory pool usage
+      {%- elif m.id == "jvm.memory.pool.init" %}
       Usage.init:
         metric: jvm.memory.pool.init
         desc: current memory pool usage
+      {%- elif m.id == "jvm.memory.pool.max" %}
       Usage.max:
         metric: jvm.memory.pool.max
         desc: current memory pool usage
+      {%- elif m.id == "jvm.memory.pool.used" %}
       Usage.used:
         metric: jvm.memory.pool.used
         desc: current memory pool usage
+      {%- endif %}
+      {%- endfor %}
 
   # Rule for Threading metrics
   - bean: java.lang:type=Threading
     mapping:
       ThreadCount:
-        metric: jvm.threads.count
-        unit: "{thread}"
+        {%- set m_threads_count = (ctx.groups | selectattr("id", "equalto", "jvm.threads.count") | first) %}
+        metric: {{ m_threads_count.id | safe}}
+        unit: "{{ m_threads_count.unit | safe }}"
         desc: number of threads

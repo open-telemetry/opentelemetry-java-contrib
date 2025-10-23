@@ -1,3 +1,8 @@
 name: JMX scraper
 semconv_version: v0.1.0
 schema_base_url: https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-scraper/model
+
+# Define where weaver should look for templates
+templates:
+  - id: jvm
+    file: templates/registry/rules/jvm.yaml.j2

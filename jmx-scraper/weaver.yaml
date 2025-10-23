@@ -1,4 +1,4 @@
 templates:
-  - pattern: metadata.yaml.j2
+  - pattern: jvm.yaml.j2
     filter: '.'
     application_mode: single

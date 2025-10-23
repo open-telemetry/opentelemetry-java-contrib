@@ -24,16 +24,33 @@ ifeq ($(DOCKER_COMMAND),podman)
  DOCKER_USER_IS_HOST_USER_ARG=--userns=keep-id -u $(DOCKER_USER)
 endif
 
-
-.PHONY: generate-metadata
-generate-metadata:
+# Generate the rules files from the model
+.PHONY: generate-rules
+generate-rules:
+	mkdir -p output
 	$(DOCKER_RUN) \
 		$(DOCKER_USER_IS_HOST_USER_ARG) \
 		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/model,readonly' \
 		--mount 'type=bind,source=$(PWD)/templates,target=/home/weaver/templates,readonly' \
-		--mount 'type=bind,source=$(PWD)/,target=/home/weaver/target' \
+		--mount 'type=bind,source=$(PWD)/output,target=/home/weaver/output' \
+		--mount 'type=bind,source=$(PWD),target=/home/weaver' \
 		${WEAVER_CONTAINER} registry generate \
-		--registry=/home/weaver/model \
-		metadata \
+		--registry /home/weaver/model \
+		rules \
 		--future \
-		/home/weaver/target
+		/home/weaver/output
+	cp ./output/jvm.yaml ./src/main/resources/jvm.yaml
+
+# for Debugging purposes only:  run a shell in the weaver container
+.PHONY: weaver-shell
+weaver-shell:
+	mkdir -p output
+	@echo "DOCKER_USER_IS_HOST_USER_ARG is: $(DOCKER_USER_IS_HOST_USER_ARG)"
+	$(DOCKER_RUN) \
+		$(DOCKER_USER_IS_HOST_USER_ARG) \
+		--mount 'type=bind,source=$(PWD)/model,target=/home/weaver/model,readonly' \
+		--mount 'type=bind,source=$(PWD)/templates,target=/home/weaver/templates,readonly' \
+		--mount 'type=bind,source=$(PWD)/output,target=/home/weaver/output' \
+		--mount 'type=bind,source=$(PWD),target=/home/weaver' \
+		--entrypoint sh \
+		-it ${WEAVER_CONTAINER}
