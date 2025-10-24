@@ -1,7 +1,7 @@
 ---
 
 rules:
-
+  # Rule for ClassLoading metrics
   - bean: java.lang:type=ClassLoading
     mapping:
       LoadedClassCount:
@@ -10,6 +10,7 @@ rules:
         unit: "{class}"
         desc: number of loaded classes
 
+  # Rule for Garbage Collector metrics
   - bean: java.lang:type=GarbageCollector,name=*
     mapping:
       CollectionCount:
@@ -27,21 +28,22 @@ rules:
         metricAttribute:
           name: param(name)
 
+  # Rule for Heap and Non-Heap Memory metrics
   - bean: java.lang:type=Memory
     unit: By
     prefix: jvm.memory.
     mapping:
       HeapMemoryUsage.committed:
         metric: heap.committed
-        desc: current heap usage
+        desc: current heap size
         type: gauge
       HeapMemoryUsage.init:
         metric: heap.init
-        desc: current heap usage
+        desc: initial heap size
         type: gauge
       HeapMemoryUsage.max:
         metric: heap.max
-        desc: current heap usage
+        desc: max heap size
         type: gauge
       HeapMemoryUsage.used:
         metric: heap.used
@@ -49,21 +51,22 @@ rules:
         type: gauge
       NonHeapMemoryUsage.committed:
         metric: nonheap.committed
-        desc: current non-heap usage
+        desc: current non-heap size
         type: gauge
       NonHeapMemoryUsage.init:
         metric: nonheap.init
-        desc: current non-heap usage
+        desc: initial non-heap size
         type: gauge
       NonHeapMemoryUsage.max:
         metric: nonheap.max
-        desc: current non-heap usage
+        desc: max non-heap size
         type: gauge
       NonHeapMemoryUsage.used:
         metric: nonheap.used
         desc: current non-heap usage
         type: gauge
 
+  # Rule for Memory Pool metrics
   - bean: java.lang:type=MemoryPool,name=*
     type: gauge
     unit: By
@@ -83,6 +86,7 @@ rules:
         metric: jvm.memory.pool.used
         desc: current memory pool usage
 
+  # Rule for Threading metrics
   - bean: java.lang:type=Threading
     mapping:
       ThreadCount:

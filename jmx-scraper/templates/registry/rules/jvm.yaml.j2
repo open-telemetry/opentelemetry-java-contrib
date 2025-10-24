@@ -1,0 +1,124 @@
+---
+{# Define a variable for the common "jvm.memory." prefix #}
+{%- set jvm_memory_prefix = "jvm.memory." %}
+rules:
+  # Rule for ClassLoading metrics
+  - bean: java.lang:type=ClassLoading
+    mapping:
+      LoadedClassCount:
+        {%- set m_class_loaded = (ctx.groups | selectattr("id", "equalto", "jvm.classes.loaded") | first) %}
+        metric: {{ m_class_loaded.metric_name | safe }}
+        type: gauge
+        unit: "{{ m_class_loaded.unit | safe }}"
+        desc: {{ m_class_loaded.brief | safe }}
+
+  # Rule for Garbage Collector metrics
+  - bean: java.lang:type=GarbageCollector,name=*
+    mapping:
+      {%- for m in ctx.groups if m.id in ["jvm.gc.collections.count", "jvm.gc.collections.elapsed"] -%}
+      {%- if m.id == "jvm.gc.collections.count" %}
+      CollectionCount:
+        metric: {{ m.id | safe }}
+        type: {{ m.instrument | safe }}
+        unit: "{{ m.unit | safe }}"
+        desc: {{ m.brief | safe }}
+        metricAttribute:
+          name: param(name)
+      {%- elif m.id == "jvm.gc.collections.elapsed" %}
+      CollectionTime:
+        metric: {{ m.id | safe}}
+        type: {{ m.instrument | safe }}
+        unit: {{ m.unit | safe }}
+        desc: {{ m.brief | safe }}
+        metricAttribute:
+          name: param(name)
+      {%- endif %}
+      {%- endfor %}
+
+  # Rule for Heap and Non-Heap Memory metrics
+  - bean: java.lang:type=Memory
+    unit: By
+    prefix: {{ jvm_memory_prefix | safe }}
+    mapping:
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "heap") %}
+      {%- if m.id == jvm_memory_prefix + "heap.committed" %}
+      HeapMemoryUsage.committed:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "heap.init" %}
+      HeapMemoryUsage.init:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "heap.max" %}
+      HeapMemoryUsage.max:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "heap.used" %}
+      HeapMemoryUsage.used:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- endif %}
+      {%- endfor %}
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "nonheap") %}
+      {%- if m.id == jvm_memory_prefix + "nonheap.committed" %}
+      NonHeapMemoryUsage.committed:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "nonheap.init" %}
+      NonHeapMemoryUsage.init:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "nonheap.max" %}
+      NonHeapMemoryUsage.max:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- elif m.id == jvm_memory_prefix + "nonheap.used" %}
+      NonHeapMemoryUsage.used:
+        metric: {{ m.id | replace(jvm_memory_prefix, "") | safe }}
+        desc: {{ m.brief | safe }}
+        type: gauge
+      {%- endif %}
+      {%- endfor %}
+
+  # Rule for Memory Pool metrics
+  - bean: java.lang:type=MemoryPool,name=*
+    type: gauge
+    unit: By
+    metricAttribute:
+      name: param(name)
+    mapping:
+      {%- for m in ctx.groups if m.id.startswith(jvm_memory_prefix + "pool") %}
+      {%- if m.id == jvm_memory_prefix + "pool.committed" %}
+      Usage.committed:
+        metric: {{ m.id | safe }}
+        desc: current memory pool usage
+      {%- elif m.id == jvm_memory_prefix + "pool.init" %}
+      Usage.init:
+        metric: {{ m.id | safe }}
+        desc: current memory pool usage
+      {%- elif m.id == jvm_memory_prefix + "pool.max" %}
+      Usage.max:
+        metric: {{ m.id | safe }}
+        desc: current memory pool usage
+      {%- elif m.id == jvm_memory_prefix + "pool.used" %}
+      Usage.used:
+        metric: {{ m.id | safe }}
+        desc: current memory pool usage
+      {%- endif %}
+      {%- endfor %}
+
+  # Rule for Threading metrics
+  - bean: java.lang:type=Threading
+    mapping:
+      ThreadCount:
+        {%- set m_threads_count = (ctx.groups | selectattr("id", "equalto", "jvm.threads.count") | first) %}
+        metric: {{ m_threads_count.id | safe}}
+        unit: "{{ m_threads_count.unit | safe }}"
+        desc: number of threads
