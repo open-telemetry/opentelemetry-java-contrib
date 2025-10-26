@@ -44,7 +44,6 @@ final class CelBasedSamplingExpressionTest {
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
             Sampler.alwaysOn());
 
-    assertThat(celExpressionOneEqualsOne1).isEqualTo(celExpressionOneEqualsOne1);
     assertThat(celExpressionOneEqualsOne1).isNotEqualTo(null);
 
     CelBasedSamplingExpression celExpressionOneEqualsOne2 =
