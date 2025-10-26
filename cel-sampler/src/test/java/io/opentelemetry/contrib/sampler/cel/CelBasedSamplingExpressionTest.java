@@ -5,9 +5,8 @@
 
 package io.opentelemetry.contrib.sampler.cel;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import dev.cel.common.CelAbstractSyntaxTree;
 import dev.cel.common.CelValidationException;
@@ -35,7 +34,7 @@ final class CelBasedSamplingExpressionTest {
     CelBasedSamplingExpression celExpression =
         new CelBasedSamplingExpression(ast, Sampler.alwaysOn());
     String expected = "CelBasedSamplingExpression{expression='1 == 1', delegate=AlwaysOnSampler}";
-    assertEquals(expected, celExpression.toString());
+    assertThat(celExpression.toString()).isEqualTo(expected);
   }
 
   @Test
@@ -45,28 +44,28 @@ final class CelBasedSamplingExpressionTest {
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
             Sampler.alwaysOn());
 
-    assertEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOne1);
-    assertNotEquals(celExpressionOneEqualsOne1, null);
+    assertThat(celExpressionOneEqualsOne1).isEqualTo(celExpressionOneEqualsOne1);
+    assertThat(celExpressionOneEqualsOne1).isNotEqualTo(null);
 
     CelBasedSamplingExpression celExpressionOneEqualsOne2 =
         new CelBasedSamplingExpression(
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
             Sampler.alwaysOn());
 
-    assertEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOne2);
+    assertThat(celExpressionOneEqualsOne1).isEqualTo(celExpressionOneEqualsOne2);
 
     CelBasedSamplingExpression celExpressionTwoEqualsTwo =
         new CelBasedSamplingExpression(
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("2 == 2").getAst(),
             Sampler.alwaysOn());
 
-    assertNotEquals(celExpressionOneEqualsOne1, celExpressionTwoEqualsTwo);
+    assertThat(celExpressionOneEqualsOne1).isNotEqualTo(celExpressionTwoEqualsTwo);
 
     CelBasedSamplingExpression celExpressionOneEqualsOneSamplerOff =
         new CelBasedSamplingExpression(
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
             Sampler.alwaysOff());
-    assertNotEquals(celExpressionOneEqualsOne1, celExpressionOneEqualsOneSamplerOff);
+    assertThat(celExpressionOneEqualsOne1).isNotEqualTo(celExpressionOneEqualsOneSamplerOff);
   }
 
   @Test
@@ -78,13 +77,13 @@ final class CelBasedSamplingExpressionTest {
     int expectedHashCode1 = celExpression1.hashCode();
     int expectedHashCode2 = celExpression1.hashCode();
 
-    assertEquals(expectedHashCode1, expectedHashCode2);
+    assertThat(expectedHashCode1).isEqualTo(expectedHashCode2);
 
     CelBasedSamplingExpression celExpression2 =
         new CelBasedSamplingExpression(
             CelCompilerFactory.standardCelCompilerBuilder().build().compile("1 == 1").getAst(),
             Sampler.alwaysOn());
 
-    assertEquals(expectedHashCode1, celExpression2.hashCode());
+    assertThat(expectedHashCode1).isEqualTo(celExpression2.hashCode());
   }
 }

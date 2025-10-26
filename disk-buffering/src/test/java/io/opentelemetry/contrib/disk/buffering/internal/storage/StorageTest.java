@@ -13,9 +13,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.THIRD_LOG_RECORD;
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
@@ -65,7 +63,7 @@ class StorageTest {
     forwardToReadTime();
 
     ReadableResult<LogRecordData> readResult = storage.readNext(DESERIALIZER);
-    assertNotNull(readResult);
+    assertThat(readResult).isNotNull();
     assertThat(readResult.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
     assertThat(destinationDir.list()).hasSize(1);
 
@@ -73,7 +71,7 @@ class StorageTest {
     readResult.delete();
     readResult.close();
     ReadableResult<LogRecordData> readResult2 = storage.readNext(DESERIALIZER);
-    assertNotNull(readResult2);
+    assertThat(readResult2).isNotNull();
     assertThat(readResult2.getContent()).containsExactly(THIRD_LOG_RECORD);
     assertThat(destinationDir.list()).hasSize(1);
 
@@ -88,7 +86,7 @@ class StorageTest {
 
     // Read again when no more data is available (delete file)
     readResult2.close();
-    assertNull(storage.readNext(DESERIALIZER));
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
     assertThat(destinationDir.list()).isEmpty();
   }
 
@@ -100,7 +98,7 @@ class StorageTest {
     forwardToReadTime();
 
     // Reading
-    assertNull(storage.readNext(DESERIALIZER));
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
 
     // Writing
     assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isFalse();
@@ -125,7 +123,7 @@ class StorageTest {
 
     // Read
     ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
-    assertNotNull(result);
+    assertThat(result).isNotNull();
     assertThat(result.getContent()).containsExactly(THIRD_LOG_RECORD);
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
@@ -156,7 +154,7 @@ class StorageTest {
 
     // Read
     ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
-    assertNotNull(result);
+    assertThat(result).isNotNull();
     assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
@@ -166,7 +164,7 @@ class StorageTest {
 
     // Read again
     ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
-    assertNotNull(result2);
+    assertThat(result2).isNotNull();
     assertThat(result2.getContent()).containsExactly(THIRD_LOG_RECORD);
     assertThat(destinationDir.list()).containsExactly(String.valueOf(secondFileWriteTime));
     result2.close();
@@ -188,7 +186,7 @@ class StorageTest {
     currentTimeMillis.set(4000 + MIN_FILE_AGE_FOR_READ_MILLIS);
 
     // Read
-    assertNull(storage.readNext(DESERIALIZER));
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
     assertThat(destinationDir.list()).containsExactly("4000"); // it tries 3 times max per call.
   }
 
