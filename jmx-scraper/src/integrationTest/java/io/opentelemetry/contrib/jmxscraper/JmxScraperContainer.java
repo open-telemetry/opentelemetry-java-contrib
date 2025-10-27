@@ -54,6 +54,7 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
     ENVIRONMENT_VARIABLES;
   }
 
+  @SuppressWarnings("this-escape")
   public JmxScraperContainer(String otlpEndpoint, String baseImage) {
     super(baseImage);
 

@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 public class AutoConfigTestProperties extends TemporaryProperties {
 
+  @SuppressWarnings("this-escape")
   public AutoConfigTestProperties() {
     put("otel.java.global-autoconfigure.enabled", "true");
     put("otel.traces.exporter", "logging");
