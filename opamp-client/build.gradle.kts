@@ -1,6 +1,6 @@
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.URL
+import java.net.URI
 
 plugins {
   id("otel.java-conventions")
@@ -62,7 +62,7 @@ abstract class DownloadAndExtractOpampProtos @Inject constructor(
 
   @TaskAction
   fun execute() {
-    val url = URL(zipUrl.get())
+    val url = URI.create(zipUrl.get()).toURL()
     downloadedZipFile.get().asFile.parentFile.mkdirs()
 
     url.openStream().use { input: InputStream ->
