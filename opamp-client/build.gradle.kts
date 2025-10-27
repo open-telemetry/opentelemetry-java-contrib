@@ -1,6 +1,6 @@
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.URL
+import java.net.URI
 
 plugins {
   id("otel.java-conventions")
@@ -38,6 +38,14 @@ wire {
   }
 }
 
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
+  }
+}
+
 abstract class DownloadAndExtractOpampProtos @Inject constructor(
   private val archiveOps: ArchiveOperations,
   private val fileOps: FileSystemOperations,
@@ -54,7 +62,7 @@ abstract class DownloadAndExtractOpampProtos @Inject constructor(
 
   @TaskAction
   fun execute() {
-    val url = URL(zipUrl.get())
+    val url = URI.create(zipUrl.get()).toURL()
     downloadedZipFile.get().asFile.parentFile.mkdirs()
 
     url.openStream().use { input: InputStream ->

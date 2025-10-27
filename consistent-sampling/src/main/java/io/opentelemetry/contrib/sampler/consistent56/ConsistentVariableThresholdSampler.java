@@ -16,7 +16,7 @@ public class ConsistentVariableThresholdSampler extends ConsistentThresholdSampl
   private volatile String description = "";
 
   protected ConsistentVariableThresholdSampler(double samplingProbability) {
-    setSamplingProbability(samplingProbability);
+    updateSamplingProbability(samplingProbability);
   }
 
   @Override
@@ -30,6 +30,10 @@ public class ConsistentVariableThresholdSampler extends ConsistentThresholdSampl
   }
 
   public void setSamplingProbability(double samplingProbability) {
+    updateSamplingProbability(samplingProbability);
+  }
+
+  private void updateSamplingProbability(double samplingProbability) {
     long threshold = calculateThreshold(samplingProbability);
     checkThreshold(threshold);
     this.threshold = threshold;
