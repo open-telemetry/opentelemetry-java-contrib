@@ -35,6 +35,7 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
   private int jmxRmiPort;
   private boolean clientCertificate;
 
+  @SuppressWarnings("this-escape")
   public TestAppContainer() {
     super("openjdk:8u272-jre-slim");
 
