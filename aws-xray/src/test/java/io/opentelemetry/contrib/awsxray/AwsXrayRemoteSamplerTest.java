@@ -7,9 +7,9 @@ package io.opentelemetry.contrib.awsxray;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.io.ByteStreams;
@@ -179,16 +179,15 @@ class AwsXrayRemoteSamplerTest {
     try (AwsXrayRemoteSampler sampler = AwsXrayRemoteSampler.newBuilder(Resource.empty()).build()) {
       // Setting span exporter should only work once
       sampler.setSpanExporter(mock(SpanExporter.class));
-      assertThrows(
-          IllegalStateException.class, () -> sampler.setSpanExporter(mock(SpanExporter.class)));
+      assertThatThrownBy(() -> sampler.setSpanExporter(mock(SpanExporter.class)))
+          .isInstanceOf(IllegalStateException.class);
     }
   }
 
   @Test
   void adaptSamplingWithoutSpanExporter() {
-    assertThrows(
-        IllegalStateException.class,
-        () -> sampler.adaptSampling(mock(ReadableSpan.class), mock(SpanData.class)));
+    assertThatThrownBy(() -> sampler.adaptSampling(mock(ReadableSpan.class), mock(SpanData.class)))
+        .isInstanceOf(IllegalStateException.class);
   }
 
   @Test
@@ -224,7 +223,8 @@ class AwsXrayRemoteSamplerTest {
       AwsXrayAdaptiveSamplingConfig config =
           AwsXrayAdaptiveSamplingConfig.builder().setVersion(1.0).build();
       sampler.setAdaptiveSamplingConfig(config);
-      assertThrows(IllegalStateException.class, () -> sampler.setAdaptiveSamplingConfig(config));
+      assertThatThrownBy(() -> sampler.setAdaptiveSamplingConfig(config))
+          .isInstanceOf(IllegalStateException.class);
     }
   }
 

@@ -33,7 +33,7 @@ public class JmxClient {
   private final boolean registrySsl;
   @Nullable private JMXConnector jmxConn;
 
-  JmxClient(final JmxConfig config) throws MalformedURLException {
+  JmxClient(JmxConfig config) throws MalformedURLException {
     this.url = new JMXServiceURL(config.serviceUrl);
     this.username = config.username;
     this.password = config.password;
@@ -65,7 +65,7 @@ public class JmxClient {
         env.put(
             "jmx.remote.sasl.callback.handler",
             new ClientCallbackHandler(this.username, this.password, this.realm));
-      } catch (final ReflectiveOperationException e) {
+      } catch (ReflectiveOperationException e) {
         logger.warning("SASL unsupported in current environment: " + e.getMessage());
       }
 
@@ -83,7 +83,7 @@ public class JmxClient {
    * @param objectName ObjectName to query
    * @return the sorted list of applicable ObjectName instances found by server
    */
-  public List<ObjectName> query(final ObjectName objectName) {
+  public List<ObjectName> query(ObjectName objectName) {
     MBeanServerConnection mbsc = getConnection();
     if (mbsc == null) {
       return Collections.emptyList();
