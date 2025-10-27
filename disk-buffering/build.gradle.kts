@@ -63,6 +63,12 @@ tasks.named<ShadowJar>("shadowJar") {
   mustRunAfter("jar")
 }
 
+tasks {
+  test {
+    dependsOn("shadowJar")
+  }
+}
+
 // The javadoc from wire's generated classes has errors that make the task that generates the "javadoc" artifact to fail. This
 // makes the javadoc task to ignore those generated classes.
 tasks.withType(Javadoc::class.java) {
