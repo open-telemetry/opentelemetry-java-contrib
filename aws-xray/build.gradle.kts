@@ -26,7 +26,7 @@ dependencies {
 
   implementation("com.fasterxml.jackson.core:jackson-core")
   implementation("com.fasterxml.jackson.core:jackson-databind")
-  implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
+  implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
