@@ -60,7 +60,6 @@ tasks {
       if (name.contains("Test")) {
         // serialVersionUI is basically guaranteed to be useless in tests
         compilerArgs.add("-Xlint:-serial")
-        compilerArgs.add("-Xlint:-this-escape")
       }
     }
   }
