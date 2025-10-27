@@ -17,7 +17,7 @@ Pull requests for bug fixes are always welcome!
 
 ## Building and Testing
 
-While most modules target Java 8, building this project requires Java 17 or higher.
+While most modules target Java 8, building this project requires Java 21 or higher.
 
 To build the project:
 

@@ -27,7 +27,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /** A simple HTTP client based on OkHttp. Not meant for high throughput. */
 final class SimpleHttpClient {
@@ -83,8 +82,7 @@ final class SimpleHttpClient {
                 + response.message());
         return "";
       }
-      ResponseBody body = response.body();
-      return body != null ? body.string() : "";
+      return response.body().string();
     } catch (IOException e) {
       logger.log(FINE, "SimpleHttpClient fetch string failed.", e);
     }

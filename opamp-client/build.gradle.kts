@@ -38,6 +38,14 @@ wire {
   }
 }
 
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
+  }
+}
+
 abstract class DownloadAndExtractOpampProtos @Inject constructor(
   private val archiveOps: ArchiveOperations,
   private val fileOps: FileSystemOperations,

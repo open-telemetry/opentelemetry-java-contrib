@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Increase gradle daemon heap size
         run: |

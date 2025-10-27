@@ -18,7 +18,7 @@ group = "io.opentelemetry.contrib"
 base.archivesName.set("opentelemetry-${project.name}")
 
 // Version to use to compile code and run tests.
-val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
+val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_21
 
 java {
   toolchain {

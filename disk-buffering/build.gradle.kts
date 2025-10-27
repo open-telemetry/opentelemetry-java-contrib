@@ -75,3 +75,11 @@ tasks.withType(Javadoc::class.java) {
 tasks.named("sourcesJar", Jar::class.java) {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
+  }
+}
