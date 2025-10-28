@@ -82,6 +82,16 @@
       enabled: false,
     },
     {
+      // caffeine 3+ requires Java 11+
+      matchPackageNames: [
+        'com.github.ben-manes.caffeine:caffeine',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
       // junit-pioneer 2+ requires Java 11+
       matchPackageNames: [
         'org.junit-pioneer:junit-pioneer',
