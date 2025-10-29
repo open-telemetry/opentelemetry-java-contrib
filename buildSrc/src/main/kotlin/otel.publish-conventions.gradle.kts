@@ -3,6 +3,8 @@ plugins {
   signing
 }
 
+val tagVersion: String by rootProject.extra
+
 publishing {
   publications {
     register<MavenPublication>("maven") {
@@ -55,7 +57,18 @@ publishing {
         scm {
           connection.set("scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git")
           developerConnection.set("scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git")
-          url.set("git@github.com:open-telemetry/opentelemetry-java-contrib.git")
+          tag.set(tagVersion)
+          url.set("https://github.com/open-telemetry/opentelemetry-java-contrib/tree/${tagVersion}")
+        }
+
+        issueManagement {
+          system.set("GitHub Issues")
+          url.set("https://github.com/open-telemetry/opentelemetry-java-contrib/issues")
+        }
+
+        ciManagement {
+          system.set("GitHub Actions")
+          url.set("https://github.com/open-telemetry/opentelemetry-java-contrib/actions")
         }
 
         withXml {
