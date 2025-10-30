@@ -20,7 +20,6 @@ private admin repo.
 
 ### Repository secrets
 
-- `COPILOT_ASSIGNING_PAT` - owned by [@trask](https://github.com/trask)
 - `GPG_PASSWORD` - stored in OpenTelemetry-Java 1Password
 - `GPG_PRIVATE_KEY` - stored in OpenTelemetry-Java 1Password
 - `NVD_API_KEY` - stored in OpenTelemetry-Java 1Password
