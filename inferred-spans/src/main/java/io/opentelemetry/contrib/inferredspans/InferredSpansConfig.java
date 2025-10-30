@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -37,7 +38,24 @@ class InferredSpansConfig {
   static final String PARENT_OVERRIDE_HANDLER_OPTION =
       "otel.inferred.spans.parent.override.handler";
 
-  static SpanProcessor create(ConfigProperties properties) {
+  static final List<String> ALL_PROPERTIES =
+      unmodifiableList(
+          Arrays.asList(
+              ENABLED_OPTION,
+              LOGGING_OPTION,
+              DIAGNOSTIC_FILES_OPTION,
+              SAFEMODE_OPTION,
+              POSTPROCESSING_OPTION,
+              SAMPLING_INTERVAL_OPTION,
+              MIN_DURATION_OPTION,
+              INCLUDED_CLASSES_OPTION,
+              EXCLUDED_CLASSES_OPTION,
+              INTERVAL_OPTION,
+              DURATION_OPTION,
+              LIB_DIRECTORY_OPTION,
+              PARENT_OVERRIDE_HANDLER_OPTION));
+
+  static SpanProcessor createSpanProcessor(ConfigProperties properties) {
     InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
 
     PropertiesApplier applier = new PropertiesApplier(properties);

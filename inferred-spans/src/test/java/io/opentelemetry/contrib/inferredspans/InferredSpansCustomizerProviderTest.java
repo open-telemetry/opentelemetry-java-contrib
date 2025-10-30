@@ -37,9 +37,7 @@ class InferredSpansCustomizerProviderTest {
             + "  processors:\n"
             + "    - experimental_inferred_spans:\n"
             + "        enabled: false\n"
-            + "        backup:\n"
-            + "          diagnostic:\n"
-            + "            files: true\n";
+            + "        backup_diagnostic_files: true\n";
 
     OpenTelemetrySdk sdk =
         DeclarativeConfiguration.parseAndCreate(
