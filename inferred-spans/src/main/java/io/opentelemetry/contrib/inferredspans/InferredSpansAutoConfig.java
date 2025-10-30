@@ -22,7 +22,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
           if (properties.getBoolean(ENABLED_OPTION, false)) {
-            providerBuilder.addSpanProcessor(InferredSpansConfig.create(properties));
+            providerBuilder.addSpanProcessor(InferredSpansConfig.createSpanProcessor(properties));
           } else {
             log.finest(
                 "Not enabling inferred spans processor because " + ENABLED_OPTION + " is not set");

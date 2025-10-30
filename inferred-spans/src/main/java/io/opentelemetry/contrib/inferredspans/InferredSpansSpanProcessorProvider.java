@@ -13,7 +13,9 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class InferredSpansComponentProvider implements ComponentProvider<SpanProcessor> {
+public class InferredSpansSpanProcessorProvider implements ComponentProvider<SpanProcessor> {
+
+  private static final String PREFIX = "otel.inferred.spans.";
 
   @Override
   public String getName() {
@@ -22,12 +24,16 @@ public class InferredSpansComponentProvider implements ComponentProvider<SpanPro
 
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
-    return InferredSpansConfig.create(
-        new DeclarativeConfigPropertiesBridgeBuilder()
-            // crop the prefix, because the properties are under the "experimental_inferred_spans"
-            // processor
-            .addMapping("otel.inferred.spans.", "")
-            .build(config));
+    DeclarativeConfigPropertiesBridgeBuilder builder =
+        new DeclarativeConfigPropertiesBridgeBuilder();
+
+    for (String property : InferredSpansConfig.ALL_PROPERTIES) {
+      // 1. crop the prefix, because the properties are under the "experimental_inferred_spans"
+      // 2. we want all properties flat under "otel.inferred.spans.*"
+      builder.addMapping(property, property.substring(PREFIX.length()).replace('.', '_'));
+    }
+
+    return InferredSpansConfig.createSpanProcessor(builder.build(config));
   }
 
   @Override
