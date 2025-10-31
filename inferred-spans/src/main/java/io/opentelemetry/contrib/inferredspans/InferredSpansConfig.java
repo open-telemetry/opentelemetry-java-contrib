@@ -56,11 +56,10 @@ class InferredSpansConfig {
               PARENT_OVERRIDE_HANDLER_OPTION));
 
   static SpanProcessor createSpanProcessor(ConfigProperties properties) {
-    InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder();
+    InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder().profilerEnabled(true);
 
     PropertiesApplier applier = new PropertiesApplier(properties);
 
-    applier.applyBool(ENABLED_OPTION, builder::profilerEnabled);
     applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
     applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
     applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
