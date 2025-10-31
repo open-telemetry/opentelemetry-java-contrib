@@ -90,7 +90,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.heap.committed",
             metric ->
                 metric
-                    .hasDescription("current heap usage")
+                    .hasDescription("current heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
@@ -98,7 +98,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.heap.init",
             metric ->
                 metric
-                    .hasDescription("current heap usage")
+                    .hasDescription("initial heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
@@ -106,7 +106,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.heap.max",
             metric ->
                 metric
-                    .hasDescription("current heap usage")
+                    .hasDescription("max heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
