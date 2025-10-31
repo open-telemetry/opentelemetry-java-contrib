@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 
 @DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
-class InferredSpansCustomizerProviderTest {
+class InferredSpansSpanProcessorProviderTest {
 
   @BeforeEach
   @AfterEach
@@ -36,7 +36,6 @@ class InferredSpansCustomizerProviderTest {
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - experimental_inferred_spans:\n"
-            + "        enabled: false\n"
             + "        backup_diagnostic_files: true\n";
 
     OpenTelemetrySdk sdk =
@@ -52,5 +51,29 @@ class InferredSpansCustomizerProviderTest {
         .extracting("config")
         .extracting("backupDiagnosticFiles")
         .isEqualTo(true);
+  }
+
+  @Test
+  void declarativeConfigDisabled() {
+    String yaml =
+        "file_format: 1.0-rc.1\n"
+            + "tracer_provider:\n"
+            + "  processors:\n"
+            + "    - experimental_inferred_spans:\n"
+            + "        enabled: false\n";
+
+    OpenTelemetrySdk sdk =
+        DeclarativeConfiguration.parseAndCreate(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+    assertThat(sdk)
+        .extracting("tracerProvider")
+        .extracting("delegate")
+        .extracting("sharedState")
+        .extracting("activeSpanProcessor")
+        .satisfies(
+            p ->
+                assertThat(p.getClass().getName())
+                    .isEqualTo("io.opentelemetry.sdk.trace.NoopSpanProcessor"));
   }
 }

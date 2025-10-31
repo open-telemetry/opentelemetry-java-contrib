@@ -8,12 +8,17 @@ package io.opentelemetry.contrib.inferredspans;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.util.logging.Logger;
 
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
 public class InferredSpansSpanProcessorProvider implements ComponentProvider<SpanProcessor> {
+
+  private static final Logger log =
+      Logger.getLogger(InferredSpansSpanProcessorProvider.class.getName());
 
   private static final String PREFIX = "otel.inferred.spans.";
 
@@ -23,7 +28,7 @@ public class InferredSpansSpanProcessorProvider implements ComponentProvider<Spa
   }
 
   @Override
-  public SpanProcessor create(DeclarativeConfigProperties config) {
+  public SpanProcessor create(DeclarativeConfigProperties declarativeConfigProperties) {
     DeclarativeConfigPropertiesBridgeBuilder builder =
         new DeclarativeConfigPropertiesBridgeBuilder();
 
@@ -33,7 +38,13 @@ public class InferredSpansSpanProcessorProvider implements ComponentProvider<Spa
       builder.addMapping(property, property.substring(PREFIX.length()).replace('.', '_'));
     }
 
-    return InferredSpansConfig.createSpanProcessor(builder.build(config));
+    ConfigProperties properties = builder.build(declarativeConfigProperties);
+    if (properties.getBoolean(InferredSpansConfig.ENABLED_OPTION, true)) {
+      return InferredSpansConfig.createSpanProcessor(properties);
+    } else {
+      log.finest("Not enabling inferred spans processor because enabled=false");
+      return SpanProcessor.composite();
+    }
   }
 
   @Override
