@@ -122,7 +122,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.nonheap.committed",
             metric ->
                 metric
-                    .hasDescription("current non-heap usage")
+                    .hasDescription("current non-heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
@@ -130,7 +130,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.nonheap.init",
             metric ->
                 metric
-                    .hasDescription("current non-heap usage")
+                    .hasDescription("initial non-heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
@@ -138,7 +138,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.nonheap.max",
             metric ->
                 metric
-                    .hasDescription("current non-heap usage")
+                    .hasDescription("max non-heap size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithoutAttributes())
@@ -154,7 +154,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.pool.committed",
             metric ->
                 metric
-                    .hasDescription("current memory pool usage")
+                    .hasDescription("current memory pool size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
@@ -162,7 +162,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.pool.init",
             metric ->
                 metric
-                    .hasDescription("current memory pool usage")
+                    .hasDescription("initial memory pool size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
@@ -170,7 +170,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.memory.pool.max",
             metric ->
                 metric
-                    .hasDescription("current memory pool usage")
+                    .hasDescription("max memory pool size")
                     .hasUnit("By")
                     .isGauge()
                     .hasDataPointsWithAttributes(memoryAttributes))
