@@ -12,10 +12,9 @@ client [spec](https://github.com/open-telemetry/opamp-spec/blob/main/specificati
 ```java
 // Initializing it
 
-RequestService requestService = HttpRequestService.create(OkHttpSender.create("[OPAMP_SERVICE_URL]"));
-// RequestService requestService = WebSocketRequestService.create(OkHttpWebSocket.create("[OPAMP_SERVICE_URL]")); // Use this instead to connect to the server via WebSocket.
 OpampClient client =
     OpampClient.builder()
+        .setEndpoint("[OPAMP_SERVICE_URL]")
         .putIdentifyingAttribute("service.name", "My service name")
         .enableRemoteConfig()
         .setRequestService(requestService)

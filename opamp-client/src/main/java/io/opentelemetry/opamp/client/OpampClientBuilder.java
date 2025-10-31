@@ -7,19 +7,23 @@ package io.opentelemetry.opamp.client;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.opentelemetry.opamp.client.internal.Experimental;
 import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
+import io.opentelemetry.opamp.client.internal.connectivity.websocket.OkHttpWebSocket;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientImpl;
 import io.opentelemetry.opamp.client.internal.impl.OpampClientState;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
+import io.opentelemetry.opamp.client.internal.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.request.service.WebSocketRequestService;
 import io.opentelemetry.opamp.client.internal.state.State;
-import io.opentelemetry.opamp.client.request.service.RequestService;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
@@ -30,27 +34,57 @@ import opamp.proto.RemoteConfigStatus;
 
 /** Builds an {@link OpampClient} instance. */
 public final class OpampClientBuilder {
+  private static final String DEFAULT_ENDPOINT_URL = "http://localhost:4320/v1/opamp";
+  private static final URI DEFAULT_ENDPOINT = URI.create(DEFAULT_ENDPOINT_URL);
+
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
   private long capabilities = 0;
-  private RequestService service =
-      HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
+  private Function<URI, RequestService> serviceFactory =
+      endpoint -> {
+        String scheme = endpoint.getScheme();
+        if ("ws".equalsIgnoreCase(scheme) || "wss".equalsIgnoreCase(scheme)) {
+          return WebSocketRequestService.create(OkHttpWebSocket.create(endpoint.toString()));
+        } else {
+          return HttpRequestService.create(OkHttpSender.create(endpoint.toString()));
+        }
+      };
+
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
+  @Nullable private URI endpoint = DEFAULT_ENDPOINT;
+
+  static {
+    Experimental.internalSetServiceFactory(
+        (builder, serviceFactory) -> builder.serviceFactory = serviceFactory);
+  }
 
   OpampClientBuilder() {}
 
   /**
-   * Sets an implementation of a {@link RequestService} to handle the request's sending process.
-   * There are 2 possible options, either {@link HttpRequestService} to use HTTP, or {@link
-   * WebSocketRequestService} to use WebSocket.
+   * Sets the OpAMP endpoint to connect to. If unset, defaults to {@value DEFAULT_ENDPOINT_URL}. The
+   * endpoint must start with either http://, https://, ws:// or wss://. Sets the address of the
+   * OpAMP Server.
    *
-   * @param service The request service implementation.
+   * @param endpoint The OpAMP endpoint.
    * @return this
    */
   @CanIgnoreReturnValue
-  public OpampClientBuilder setRequestService(RequestService service) {
-    this.service = service;
+  public OpampClientBuilder setEndpoint(String endpoint) {
+    return setEndpoint(URI.create(endpoint));
+  }
+
+  /**
+   * Sets the OpAMP endpoint to connect to. If unset, defaults to {@value DEFAULT_ENDPOINT_URL}. The
+   * endpoint must start with either http://, https://, ws:// or wss://. Sets the address of the
+   * OpAMP Server.
+   *
+   * @param endpoint The OpAMP endpoint.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder setEndpoint(URI endpoint) {
+    this.endpoint = endpoint;
     return this;
   }
 
@@ -402,7 +436,7 @@ public final class OpampClientBuilder {
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
-    return OpampClientImpl.create(service, state, callbacks);
+    return OpampClientImpl.create(serviceFactory.apply(endpoint), state, callbacks);
   }
 
   private static State.EffectiveConfig createEffectiveConfigNoop() {
