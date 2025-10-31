@@ -75,13 +75,13 @@ rules:
     mapping:
       Usage.committed:
         metric: jvm.memory.pool.committed
-        desc: current memory pool usage
+        desc: current memory pool size
       Usage.init:
         metric: jvm.memory.pool.init
-        desc: current memory pool usage
+        desc: initial memory pool size
       Usage.max:
         metric: jvm.memory.pool.max
-        desc: current memory pool usage
+        desc: max memory pool size
       Usage.used:
         metric: jvm.memory.pool.used
         desc: current memory pool usage
@@ -92,4 +92,4 @@ rules:
       ThreadCount:
         metric: jvm.threads.count
         unit: "{thread}"
-        desc: number of threads
+        desc: current number of thread count

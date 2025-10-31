@@ -98,19 +98,19 @@ rules:
       {%- if m.id == jvm_memory_prefix + "pool.committed" %}
       Usage.committed:
         metric: {{ m.id | safe }}
-        desc: current memory pool usage
+        desc: {{ m.brief | safe }}
       {%- elif m.id == jvm_memory_prefix + "pool.init" %}
       Usage.init:
         metric: {{ m.id | safe }}
-        desc: current memory pool usage
+        desc: {{ m.brief | safe }}
       {%- elif m.id == jvm_memory_prefix + "pool.max" %}
       Usage.max:
         metric: {{ m.id | safe }}
-        desc: current memory pool usage
+        desc: {{ m.brief | safe }}
       {%- elif m.id == jvm_memory_prefix + "pool.used" %}
       Usage.used:
         metric: {{ m.id | safe }}
-        desc: current memory pool usage
+        desc: {{ m.brief | safe }}
       {%- endif %}
       {%- endfor %}
 
@@ -121,4 +121,4 @@ rules:
         {%- set m_threads_count = (ctx.groups | selectattr("id", "equalto", "jvm.threads.count") | first) %}
         metric: {{ m_threads_count.id | safe}}
         unit: "{{ m_threads_count.unit | safe }}"
-        desc: number of threads
+        desc: {{ m_threads_count.brief | safe }}

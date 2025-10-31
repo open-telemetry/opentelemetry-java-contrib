@@ -186,7 +186,7 @@ class JvmIntegrationTest extends TargetSystemIntegrationTest {
             "jvm.threads.count",
             metric ->
                 metric
-                    .hasDescription("number of threads")
+                    .hasDescription("current number of thread count")
                     .hasUnit("{thread}")
                     .isGauge()
                     .hasDataPointsWithoutAttributes());
