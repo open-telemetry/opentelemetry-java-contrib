@@ -53,7 +53,7 @@ file_format: 1.0-rc.1
 tracer_provider:
   processors:
     - experimental_inferred_spans:
-        enabled: true
+        enabled: true # true by default unlike autoconfiguration described above
         sampling_interval: 25ms
         included_classes: "org.example.myapp.*"
         excluded_classes: "java.*"
