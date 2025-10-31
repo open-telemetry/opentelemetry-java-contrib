@@ -1,0 +1,4 @@
+templates:
+  - pattern: jvm.yaml.j2
+    filter: '.'
+    application_mode: single
