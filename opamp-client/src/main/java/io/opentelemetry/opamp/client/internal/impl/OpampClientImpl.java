@@ -19,12 +19,12 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfig
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
 import io.opentelemetry.opamp.client.internal.request.Field;
 import io.opentelemetry.opamp.client.internal.request.Request;
+import io.opentelemetry.opamp.client.internal.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.internal.state.ObservableState;
 import io.opentelemetry.opamp.client.internal.state.State;
-import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
