@@ -3,6 +3,7 @@ plugins {
   id("com.gradleup.shadow")
   id("otel.java-conventions")
   id("otel.publish-conventions")
+  id("otel.weaver-conventions")
 }
 
 description = "IBM-MQ metrics"
