@@ -25,7 +25,6 @@ dependencies {
   runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
-
   implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   testImplementation("org.junit-pioneer:junit-pioneer")
@@ -97,6 +96,46 @@ tasks {
   withType<GenerateModuleMetadata>().configureEach {
     enabled = false
   }
+}
+
+//
+// task that run weaver within gradle;
+tasks.register("runWeaver", Exec::class) {
+  standardOutput = System.out
+  executable = "docker"
+
+  val WEAVER_CONTAINER = "otel/weaver@sha256:5425ade81dc22ddd840902b0638b4b6a9186fb654c5b50c1d1ccd31299437390"
+  val projectRoot = project.layout.projectDirectory.asFile.absolutePath
+  val modelPath = project.layout.projectDirectory.dir("model").asFile.absolutePath
+  val templatePath = project.layout.projectDirectory.dir("templates").asFile.absolutePath
+  val outputPath = project.layout.projectDirectory.file("src/main/resources").asFile.absolutePath
+
+  val file_args = if (org.gradle.internal.os.OperatingSystem.current().isWindows())
+    // Don't need to worry about file system permissions in docker.
+    listOf()
+  else {
+    // Make sure we run as local file user
+    val unix = com.sun.security.auth.module.UnixSystem()
+    val uid = unix.getUid() // $(id -u $USERNAME)
+    val gid = unix.getGid() // $(id -g $USERNAME)
+    listOf("-u", "$uid:$gid")
+  }
+
+  val weaver_args = listOf(
+    "--rm",
+    "--platform=linux/x86_64",
+    "--mount", "type=bind,source=${modelPath},target=/home/weaver/source,readonly",
+    "--mount", "type=bind,source=${templatePath},target=/home/weaver/templates,readonly",
+    "--mount", "type=bind,source=${outputPath},target=/home/weaver/target",
+    "--mount", "type=bind,source=${projectRoot},target=/home/weaver",
+    "${WEAVER_CONTAINER}",
+    "registry", "generate",
+    "--registry=/home/weaver/source",
+    "--templates=/home/weaver/templates",
+    "rules",
+    "/home/weaver/target/")
+
+  setArgs(listOf("run") + file_args + weaver_args)
 }
 
 // Don't publish non-shadowed jar (shadowJar is in shadowRuntimeElements)
