@@ -86,7 +86,6 @@ Generates Java code, markdown documentation, and YAML configuration.
 
 - Outputs to `src/main/java/{configured-package}/`
 - **Automatically formats** generated code with `spotlessJavaApply`
-- Runs before `compileJava` task
 
 ### Generate Documentation
 

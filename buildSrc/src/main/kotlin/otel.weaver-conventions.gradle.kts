@@ -137,7 +137,7 @@ if (hasWeaverModel) {
     }
   }
 
-  // Make spotless tasks depend on weaver generation
+  // Make spotless tasks always run after the generate task
   tasks
     .matching {
       it.name == "spotlessJava" || it.name == "spotlessJavaApply" || it.name == "spotlessApply"

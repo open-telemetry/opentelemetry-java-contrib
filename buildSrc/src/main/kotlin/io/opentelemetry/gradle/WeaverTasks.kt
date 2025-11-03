@@ -60,7 +60,6 @@ abstract class WeaverTasks @Inject constructor(
 
   @TaskAction
   fun runWeaver() {
-    // Validate Docker is available
     validateDockerAvailable()
 
     val mounts = mutableListOf(
