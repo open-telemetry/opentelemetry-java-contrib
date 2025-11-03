@@ -35,7 +35,7 @@ class InferredSpansSpanProcessorProviderTest {
         "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  processors:\n"
-            + "    - experimental_inferred_spans:\n"
+            + "    - inferred_spans/development:\n"
             + "        backup_diagnostic_files: true\n";
 
     OpenTelemetrySdk sdk =
@@ -59,7 +59,7 @@ class InferredSpansSpanProcessorProviderTest {
         "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  processors:\n"
-            + "    - experimental_inferred_spans:\n"
+            + "    - inferred_spans/development:\n"
             + "        enabled: false\n";
 
     OpenTelemetrySdk sdk =

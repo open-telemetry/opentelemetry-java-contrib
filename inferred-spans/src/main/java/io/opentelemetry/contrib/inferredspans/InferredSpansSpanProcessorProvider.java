@@ -24,7 +24,7 @@ public class InferredSpansSpanProcessorProvider implements ComponentProvider<Spa
 
   @Override
   public String getName() {
-    return "experimental_inferred_spans";
+    return "inferred_spans/development";
   }
 
   @Override
@@ -33,7 +33,7 @@ public class InferredSpansSpanProcessorProvider implements ComponentProvider<Spa
         new DeclarativeConfigPropertiesBridgeBuilder();
 
     for (String property : InferredSpansConfig.ALL_PROPERTIES) {
-      // 1. crop the prefix, because the properties are under the "experimental_inferred_spans"
+      // 1. crop the prefix, because the properties are under the "inferred_spans/development"
       // 2. we want all properties flat under "otel.inferred.spans.*"
       builder.addMapping(property, property.substring(PREFIX.length()).replace('.', '_'));
     }
