@@ -111,6 +111,7 @@ semantic convention models in the `model/` directory.
 ```
 
 The generation produces:
+
 - `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
 - `docs/metrics.md` - Markdown documentation for all metrics
 - `config.yml` - YAML configuration template
