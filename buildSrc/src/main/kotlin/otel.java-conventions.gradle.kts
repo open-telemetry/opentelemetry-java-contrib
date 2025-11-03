@@ -150,7 +150,7 @@ testing {
     dependencies {
       implementation(project())
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.14.0"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.14.1"))
       implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:2.0.1"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
       implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.4"))
