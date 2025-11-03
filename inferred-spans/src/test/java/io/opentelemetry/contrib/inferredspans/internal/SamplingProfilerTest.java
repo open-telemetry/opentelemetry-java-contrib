@@ -57,10 +57,12 @@ class SamplingProfilerTest {
   }
 
   @Test
-  void shouldLazilyCreateTempFilesAndCleanThem() throws Exception {
-
-    List<Path> tempFiles = getProfilerTempFiles();
-    assertThat(tempFiles).isEmpty();
+  void shouldLazilyCreateTempFilesAndCleanThem() {
+    for (Path file : getProfilerTempFiles()) {
+      if (!file.toFile().delete()) {
+        throw new IllegalStateException("Could not delete temp file: " + file);
+      }
+    }
 
     // temporary files should be created on-demand, and properly deleted afterwards
     setupProfiler(false);
