@@ -63,6 +63,12 @@ tasks.named<ShadowJar>("shadowJar") {
   mustRunAfter("jar")
 }
 
+tasks {
+  test {
+    dependsOn("shadowJar")
+  }
+}
+
 // The javadoc from wire's generated classes has errors that make the task that generates the "javadoc" artifact to fail. This
 // makes the javadoc task to ignore those generated classes.
 tasks.withType(Javadoc::class.java) {
@@ -74,4 +80,12 @@ tasks.withType(Javadoc::class.java) {
 // This allows to ignore any subsequent files with the same path when creating the "sources" artifact.
 tasks.named("sourcesJar", Jar::class.java) {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
+  }
 }

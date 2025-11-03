@@ -15,3 +15,28 @@ private admin repo.
   - Maximum pull requests to merge: 5
   - Only merge non-failing pull requests: CHECKED
   - Status check timeout: 60 minutes
+
+## Secrets and variables > Actions
+
+### Repository secrets
+
+- `GPG_PASSWORD` - stored in OpenTelemetry-Java 1Password
+- `GPG_PRIVATE_KEY` - stored in OpenTelemetry-Java 1Password
+- `NVD_API_KEY` - stored in OpenTelemetry-Java 1Password
+  - Generated at https://nvd.nist.gov/developers/request-an-api-key
+  - Key is associated with [@trask](https://github.com/trask)'s gmail address
+- `SONATYPE_KEY` - owned by [@trask](https://github.com/trask)
+- `SONATYPE_USER` - owned by [@trask](https://github.com/trask)
+
+### Organization secrets
+
+- `CODECOV_TOKEN`
+- `DEVELOCITY_ACCESS_KEY` (scoped only to Java repos)
+- `FOSSA_API_KEY`
+- `OTELBOT_JAVA_CONTRIB_PRIVATE_KEY` (scoped only to this repo)
+- `OTELBOT_PRIVATE_KEY`
+
+### Organization variables
+
+- `OSSF_SCORECARD_APP_ID`
+- `OTELBOT_APP_ID`

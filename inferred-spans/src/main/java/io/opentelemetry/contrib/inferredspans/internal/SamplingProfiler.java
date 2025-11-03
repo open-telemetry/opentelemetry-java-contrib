@@ -165,6 +165,7 @@ public class SamplingProfiler implements Runnable {
    * @param activationEventsFile activation events file, if {@literal null} a temp file will be used
    * @param jfrFile java flight recorder file, if {@literal null} a temp file will be used instead
    */
+  @SuppressWarnings("this-escape")
   public SamplingProfiler(
       InferredSpansConfiguration config,
       SpanAnchoredClock nanoClock,

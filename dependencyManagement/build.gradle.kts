@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.20.1-alpha"
+val otelInstrumentationVersion = "2.21.0-alpha"
 val semconvVersion = "1.37.0"
 
 javaPlatform {
@@ -15,8 +15,8 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(platform("com.fasterxml.jackson:jackson-bom:2.20.0"))
-  api(platform("com.google.protobuf:protobuf-bom:4.32.1"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
+  api(platform("com.google.protobuf:protobuf-bom:4.33.0"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.2.1"))
 
   constraints {
@@ -27,8 +27,8 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.0")
     api("com.google.auto.value:auto-value-annotations:1.11.0")
-    api("com.google.errorprone:error_prone_annotations:2.42.0")
-    api("com.google.errorprone:error_prone_core:2.42.0")
+    api("com.google.errorprone:error_prone_annotations:2.43.0")
+    api("com.google.errorprone:error_prone_core:2.43.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -52,10 +52,10 @@ dependencies {
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.1.0")
-    api("org.testcontainers:kafka:1.21.3")
+    api("org.testcontainers:testcontainers-kafka:2.0.1")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:4.1")
+    api("tools.profiler:async-profiler:4.2")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("org.agrona:agrona:1.22.0")
     api("com.github.f4b6a3:uuid-creator:6.1.1")

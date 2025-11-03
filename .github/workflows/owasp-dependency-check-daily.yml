@@ -4,8 +4,7 @@ name: OWASP dependency check (daily)
 
 on:
   schedule:
-    # daily at 1:30 UTC
-    - cron: "30 1 * * *"
+    - cron: "30 1 * * *" # daily at 1:30 UTC
   workflow_dispatch:
 
 permissions:
@@ -21,7 +20,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Increase gradle daemon heap size
         run: |
@@ -32,10 +31,11 @@ jobs:
       - run: ./gradlew dependencyCheckAnalyze
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           path: "**/build/reports"
 

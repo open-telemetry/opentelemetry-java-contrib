@@ -46,7 +46,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 final class XraySamplerClient {
 
@@ -125,11 +124,7 @@ final class XraySamplerClient {
       return "";
     }
 
-    ResponseBody body = response.body();
-    if (body != null) {
-      return body.string();
-    }
-    return "";
+    return response.body().string();
   }
 
   // Visible for testing

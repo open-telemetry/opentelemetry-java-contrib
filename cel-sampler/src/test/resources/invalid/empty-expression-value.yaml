@@ -1,0 +1,5 @@
+fallback_sampler:
+  always_on:
+expressions:
+  - action: DROP
+    expression: ''

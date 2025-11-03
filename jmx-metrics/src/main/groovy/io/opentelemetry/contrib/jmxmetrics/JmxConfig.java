@@ -80,7 +80,7 @@ class JmxConfig {
 
   final boolean aggregateAcrossMBeans;
 
-  JmxConfig(final Properties props) {
+  JmxConfig(Properties props) {
     properties = new Properties();
     // putAll() instead of using constructor defaults
     // to ensure they will be recorded to underlying map
@@ -138,7 +138,7 @@ class JmxConfig {
     this(new Properties());
   }
 
-  private int getProperty(final String key, final int dfault) {
+  private int getProperty(String key, int dfault) {
     String propVal = properties.getProperty(key);
     if (propVal == null) {
       return dfault;
@@ -153,7 +153,7 @@ class JmxConfig {
   /**
    * Similar to getProperty(key, defaultValue) but sets the property to default if not in object.
    */
-  private String getAndSetProperty(final String key, final String defaultValue) {
+  private String getAndSetProperty(String key, String defaultValue) {
     String propVal = properties.getProperty(key, defaultValue);
     if (propVal.equals(defaultValue)) {
       properties.setProperty(key, defaultValue);
@@ -161,7 +161,7 @@ class JmxConfig {
     return propVal;
   }
 
-  private int getAndSetProperty(final String key, final int defaultValue) {
+  private int getAndSetProperty(String key, int defaultValue) {
     int propVal = getProperty(key, defaultValue);
     if (propVal == defaultValue) {
       properties.setProperty(key, String.valueOf(defaultValue));
@@ -202,7 +202,7 @@ class JmxConfig {
    * @param s - {@link String} to evaluate
    * @return - if s is null or without non-whitespace chars.
    */
-  static boolean isBlank(final String s) {
+  static boolean isBlank(String s) {
     if (s == null) {
       return true;
     }

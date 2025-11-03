@@ -11,6 +11,7 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.37.0")
 
   implementation("com.squareup.okhttp3:okhttp")
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
@@ -25,6 +26,7 @@ dependencies {
 
   implementation("com.fasterxml.jackson.core:jackson-core")
   implementation("com.fasterxml.jackson.core:jackson-databind")
+  implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -40,7 +42,7 @@ testing {
       dependencies {
         implementation("io.opentelemetry:opentelemetry-exporter-otlp")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
-        implementation("org.testcontainers:junit-jupiter")
+        implementation("org.testcontainers:testcontainers-junit-jupiter")
         runtimeOnly("org.slf4j:slf4j-simple")
       }
     }

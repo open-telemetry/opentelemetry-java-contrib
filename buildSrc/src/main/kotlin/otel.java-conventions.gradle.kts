@@ -18,7 +18,7 @@ group = "io.opentelemetry.contrib"
 base.archivesName.set("opentelemetry-${project.name}")
 
 // Version to use to compile code and run tests.
-val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
+val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_21
 
 java {
   toolchain {
@@ -60,6 +60,7 @@ tasks {
       if (name.contains("Test")) {
         // serialVersionUI is basically guaranteed to be useless in tests
         compilerArgs.add("-Xlint:-serial")
+        compilerArgs.add("-Xlint:-this-escape")
       }
     }
   }
@@ -128,7 +129,6 @@ plugins.withId("otel.publish-conventions") {
 val dependencyManagement by configurations.creating {
   isCanBeConsumed = false
   isCanBeResolved = false
-  isVisible = false
 }
 
 dependencies {
@@ -151,7 +151,7 @@ testing {
       implementation(project())
 
       implementation(enforcedPlatform("org.junit:junit-bom:5.14.0"))
-      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
+      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:2.0.1"))
       implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
       implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.4"))
 
