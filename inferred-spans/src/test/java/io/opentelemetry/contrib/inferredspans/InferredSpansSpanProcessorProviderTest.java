@@ -8,8 +8,6 @@ package io.opentelemetry.contrib.inferredspans;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 
-import io.opentelemetry.contrib.inferredspans.internal.ProfilingActivationListener;
-import io.opentelemetry.contrib.inferredspans.internal.util.OtelReflectionUtils;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import java.io.ByteArrayInputStream;
@@ -22,11 +20,19 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 @DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
 class InferredSpansSpanProcessorProviderTest {
 
+  private ProfilerTestSetup setup;
+
   @BeforeEach
+  void setUp() {
+    setup = ProfilerTestSetup.create(c -> {});
+  }
+
   @AfterEach
-  public void resetGlobalOtel() {
-    ProfilingActivationListener.ensureInitialized();
-    OtelReflectionUtils.shutdownAndResetGlobalOtel();
+  void tearDown() {
+    if (setup != null) {
+      setup.close();
+    }
+    InferredSpans.setInstance(null);
   }
 
   @Test
