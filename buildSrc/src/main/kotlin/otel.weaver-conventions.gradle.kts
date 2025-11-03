@@ -1,253 +1,174 @@
-import io.opentelemetry.gradle.OtelJavaExtension
+import io.opentelemetry.gradle.WeaverTasks
+import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
-import java.io.File
 
 // Weaver code generation convention plugin for OpenTelemetry
 // Apply this plugin to modules that have a model/ directory with weaver model files
 // It will generate Java code, documentation, and YAML configs using the OpenTelemetry Weaver tool
 
-/**
- * Extension for configuring Weaver code generation.
- */
+val weaverContainer =
+  "otel/weaver:v0.18.0@sha256:5425ade81dc22ddd840902b0638b4b6a9186fb654c5b50c1d1ccd31299437390"
+
+// Auto-detect platform for Docker, with fallback to x86_64
+val dockerPlatform = System.getProperty("os.arch").let { arch ->
+  when {
+    arch == "aarch64" || arch == "arm64" -> "linux/arm64"
+    else -> "linux/x86_64"
+  }
+}
+
 interface OtelWeaverExtension {
   /**
-   * The Java package path where generated code will be placed.
-   * Path should use forward slashes (e.g., "io/opentelemetry/contrib/mymodule/metrics").
+   * REQUIRED: The Java package path where generated code will be placed. Path should use forward
+   * slashes (e.g., "io/opentelemetry/ibm/mq/metrics").
    *
-   * Defaults to deriving the path from otelJava.moduleName by:
-   * 1. Removing "io.opentelemetry.contrib." prefix
-   * 2. Converting dots and hyphens to forward slashes
-   * 3. Prepending "io/opentelemetry/"
-   *
-   * Example: "io.opentelemetry.contrib.ibm-mq-metrics" → "io/opentelemetry/ibm/mq/metrics"
+   * Example configuration in build.gradle.kts:
+   * ```kotlin
+   * otelWeaver {
+   *   javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
+   * }
+   * ```
    */
   val javaOutputPackage: Property<String>
 }
 
-/**
- * Derives a Java package path from the otelJava.moduleName.
- * Converts module name format to filesystem path format.
- */
-fun derivePackagePathFromModuleName(): String {
-  val otelJava = extensions.findByType(OtelJavaExtension::class.java)
-  if (otelJava != null && otelJava.moduleName.isPresent) {
-    val moduleName = otelJava.moduleName.get()
-
-    // Remove common prefix and convert to path
-    return moduleName
-      .removePrefix("io.opentelemetry.contrib.")
-      .removePrefix("io.opentelemetry.")
-      .replace('.', '/')
-      .replace('-', '/')
-      .let { "io/opentelemetry/$it" }
-  }
-
-  // Fallback if otelJava extension not found
-  return "io/opentelemetry/metrics"
-}
-
-fun configureWeaverTask(task: Exec) {
-  task.group = "weaver"
-  task.standardOutput = System.out
-  task.errorOutput = System.err
-  task.executable = "docker"
-}
-
-// Create the weaver extension for configuration
 val weaverExtension = extensions.create("otelWeaver", OtelWeaverExtension::class.java)
 
-// Check if this module has a model directory
-val modelDir = File(project.projectDir, "model")
-val hasWeaverModel = modelDir.exists() && modelDir.isDirectory
+val projectModelDir = layout.projectDirectory.dir("model")
+val hasWeaverModel = projectModelDir.asFile.exists() && projectModelDir.asFile.isDirectory
 
 if (hasWeaverModel) {
-  val templatesDir = File(project.projectDir, "templates")
-  val docsDir = File(project.projectDir, "docs")
-  val weaverContainer = "otel/weaver:v0.18.0@sha256:5425ade81dc22ddd840902b0638b4b6a9186fb654c5b50c1d1ccd31299437390"
-
-  // Configure default after project is evaluated so otelJava.moduleName is available
-  afterEvaluate {
-    if (!weaverExtension.javaOutputPackage.isPresent) {
-      weaverExtension.javaOutputPackage.set(derivePackagePathFromModuleName())
-    }
-  }
+  val projectTemplatesDir = layout.projectDirectory.dir("templates")
+  val projectDocsDir = layout.projectDirectory.dir("docs")
 
   logger.lifecycle("Weaver model found in ${project.name}")
-  logger.lifecycle("  Model directory: ${modelDir.absolutePath}")
-  logger.lifecycle("  Templates directory: ${templatesDir.absolutePath}")
+  logger.lifecycle("  Model directory: ${projectModelDir.asFile.absolutePath}")
+  logger.lifecycle("  Templates directory: ${projectTemplatesDir.asFile.absolutePath}")
   logger.lifecycle("  Container: $weaverContainer")
 
-
-  tasks.register<Exec>("weaverCheck") {
-    configureWeaverTask(this)
+  tasks.register<WeaverTasks>("weaverCheck") {
+    group = "weaver"
     description = "Check the weaver model for errors"
 
-    val modelDirPath = modelDir.absolutePath
-    val templatesDirPath = templatesDir.absolutePath
-    val hasTemplates = templatesDir.exists() && templatesDir.isDirectory
+    dockerExecutable.set("docker")
+    platform.set(dockerPlatform)
+    image.set(weaverContainer)
 
-    inputs.dir(modelDir)
-    if (hasTemplates) {
-      inputs.dir(templatesDir)
-    }
+    modelDir.set(projectModelDir)
+    templatesDir.set(projectTemplatesDir)
+    outputDir.set(layout.buildDirectory.dir("weaver-check"))
 
-    val tempDir = layout.buildDirectory.dir("weaver-check").get().asFile
+    toolArgs.set(listOf("registry", "check", "--registry=/home/weaver/model"))
 
-    doFirst {
-      tempDir.mkdirs()
-
-      val mountArgs = mutableListOf(
-        "--mount", "type=bind,source=$modelDirPath,target=/home/weaver/model,readonly"
-      )
-      if (hasTemplates) {
-        mountArgs.addAll(listOf(
-          "--mount", "type=bind,source=$templatesDirPath,target=/home/weaver/templates,readonly"
-        ))
-      }
-      mountArgs.addAll(listOf(
-        "--mount", "type=bind,source=${tempDir.absolutePath},target=/home/weaver/target"
-      ))
-
-      args = listOf("run", "--rm", "--platform=linux/x86_64") +
-        mountArgs +
-        listOf(weaverContainer, "registry", "check", "--registry=/home/weaver/model")
-    }
+    // Always run check task to ensure model validity, even if inputs haven't changed.
+    // This is intentional as validation should always run when explicitly requested.
+    outputs.upToDateWhen { false }
   }
 
-  tasks.register<Exec>("weaverGenerateDocs") {
-    configureWeaverTask(this)
+  tasks.register<WeaverTasks>("weaverGenerateDocs") {
+    group = "weaver"
     description = "Generate markdown documentation from weaver model"
 
-    val modelDirPath = modelDir.absolutePath
-    val templatesDirPath = templatesDir.absolutePath
-    val docsDirPath = docsDir.absolutePath
-    val hasTemplates = templatesDir.exists() && templatesDir.isDirectory
+    dockerExecutable.set("docker")
+    platform.set(dockerPlatform)
+    image.set(weaverContainer)
 
-    inputs.dir(modelDir)
-    if (hasTemplates) {
-      inputs.dir(templatesDir)
-    }
-    outputs.dir(docsDir)
+    modelDir.set(projectModelDir)
+    templatesDir.set(projectTemplatesDir)
+    outputDir.set(projectDocsDir)
 
-    doFirst {
-      docsDir.mkdirs()
-
-      val mountArgs = mutableListOf(
-        "--mount", "type=bind,source=$modelDirPath,target=/home/weaver/model,readonly"
+    toolArgs.set(
+      listOf(
+        "registry",
+        "generate",
+        "--registry=/home/weaver/model",
+        "markdown",
+        "--future",
+        "/home/weaver/target"
       )
-      if (hasTemplates) {
-        mountArgs.addAll(listOf(
-          "--mount", "type=bind,source=$templatesDirPath,target=/home/weaver/templates,readonly"
-        ))
-      }
-      mountArgs.addAll(listOf(
-        "--mount", "type=bind,source=$docsDirPath,target=/home/weaver/target"
-      ))
-
-      args = listOf("run", "--rm", "--platform=linux/x86_64") +
-        mountArgs +
-        listOf(weaverContainer, "registry", "generate", "--registry=/home/weaver/model", "markdown", "--future", "/home/weaver/target")
-    }
+    )
   }
 
-  val weaverGenerateJavaTask = tasks.register<Exec>("weaverGenerateJava") {
-    configureWeaverTask(this)
-    description = "Generate Java code from weaver model"
+  val weaverGenerateJavaTask =
+    tasks.register<WeaverTasks>("weaverGenerateJava") {
+      group = "weaver"
+      description = "Generate Java code from weaver model"
 
-    val modelDirPath = modelDir.absolutePath
-    val templatesDirPath = templatesDir.absolutePath
-    val hasTemplates = templatesDir.exists() && templatesDir.isDirectory
+      dockerExecutable.set("docker")
+      platform.set(dockerPlatform)
+      image.set(weaverContainer)
 
-    inputs.dir(modelDir)
-    if (hasTemplates) {
-      inputs.dir(templatesDir)
-    }
+      modelDir.set(projectModelDir)
+      templatesDir.set(projectTemplatesDir)
 
-    // Register outputs lazily using provider
-    val javaOutputDirProvider = weaverExtension.javaOutputPackage.map {
-      File(project.projectDir, "src/main/java/$it")
-    }
-    outputs.dir(javaOutputDirProvider)
+      // Map the javaOutputPackage to the output directory
+      // Finalize the value to ensure it's set at configuration time and avoid capturing the extension
+      val javaPackage = weaverExtension.javaOutputPackage
+      javaPackage.finalizeValueOnRead()
+      outputDir.set(javaPackage.map { layout.projectDirectory.dir("src/main/java/$it") })
 
-    doFirst {
-      val outputDir = javaOutputDirProvider.get()
-      logger.lifecycle("  Java output: ${outputDir.absolutePath}")
-      outputDir.mkdirs()
-
-      val mountArgs = mutableListOf(
-        "--mount", "type=bind,source=$modelDirPath,target=/home/weaver/model,readonly"
+      toolArgs.set(
+        listOf(
+          "registry",
+          "generate",
+          "--registry=/home/weaver/model",
+          "java",
+          "--future",
+          "/home/weaver/target"
+        )
       )
-      if (hasTemplates) {
-        mountArgs.addAll(listOf(
-          "--mount", "type=bind,source=$templatesDirPath,target=/home/weaver/templates,readonly"
-        ))
-      }
-      mountArgs.addAll(listOf(
-        "--mount", "type=bind,source=${outputDir.absolutePath},target=/home/weaver/target"
-      ))
 
-      // Build base docker run command
-      val baseDockerArgs = mutableListOf("run", "--rm", "--platform=linux/x86_64")
+      doFirst { logger.lifecycle("  Java output: ${outputDir.get().asFile.absolutePath}") }
+    }
 
-      // Add user mapping for Linux (not needed on macOS with Docker Desktop)
-      val os = System.getProperty("os.name").lowercase()
-      if (os.contains("linux")) {
-        try {
-          val userId = ProcessBuilder("id", "-u").start().inputStream.bufferedReader().readText().trim()
-          val groupId = ProcessBuilder("id", "-g").start().inputStream.bufferedReader().readText().trim()
-          baseDockerArgs.addAll(listOf("-u", "$userId:$groupId"))
-        } catch (e: Exception) {
-          logger.warn("Failed to get user/group ID, generated files may be owned by root: ${e.message}")
+  // Validate the required configuration at configuration time (not execution time)
+  afterEvaluate {
+    if (weaverExtension.javaOutputPackage.orNull == null) {
+      throw GradleException(
+        """
+        otelWeaver.javaOutputPackage must be configured in project '${project.name}'.
+
+        Add this to your build.gradle.kts:
+        otelWeaver {
+          javaOutputPackage.set("io/opentelemetry/your/package")
         }
-      }
-
-      args = baseDockerArgs + mountArgs +
-        listOf(weaverContainer, "registry", "generate", "--registry=/home/weaver/model", "java", "--future", "/home/weaver/target")
+        """.trimIndent()
+      )
     }
   }
 
   // Make spotless tasks depend on weaver generation
-  tasks.matching { it.name == "spotlessJava" || it.name == "spotlessJavaApply" || it.name == "spotlessApply" }.configureEach {
-    mustRunAfter(weaverGenerateJavaTask)
-  }
+  tasks
+    .matching {
+      it.name == "spotlessJava" || it.name == "spotlessJavaApply" || it.name == "spotlessApply"
+    }
+    .configureEach { mustRunAfter(weaverGenerateJavaTask) }
 
   // Make weaverGenerateJava automatically format generated code
-  weaverGenerateJavaTask.configure {
-    finalizedBy("spotlessJavaApply")
-  }
+  weaverGenerateJavaTask.configure { finalizedBy("spotlessJavaApply") }
 
-  tasks.register<Exec>("weaverGenerateYaml") {
-    configureWeaverTask(this)
+  tasks.register<WeaverTasks>("weaverGenerateYaml") {
+    group = "weaver"
     description = "Generate YAML configuration from weaver model"
 
-    val modelDirPath = modelDir.absolutePath
-    val templatesDirPath = templatesDir.absolutePath
-    val projectDirPath = project.projectDir.absolutePath
-    val hasTemplates = templatesDir.exists() && templatesDir.isDirectory
+    dockerExecutable.set("docker")
+    platform.set(dockerPlatform)
+    image.set(weaverContainer)
 
-    inputs.dir(modelDir)
-    if (hasTemplates) {
-      inputs.dir(templatesDir)
-    }
-    outputs.file(File(project.projectDir, "config.yml"))
+    modelDir.set(projectModelDir)
+    templatesDir.set(projectTemplatesDir)
+    outputFile.set(layout.projectDirectory.file("config.yml"))
 
-    doFirst {
-      val mountArgs = mutableListOf(
-        "--mount", "type=bind,source=$modelDirPath,target=/home/weaver/model,readonly"
+    toolArgs.set(
+      listOf(
+        "registry",
+        "generate",
+        "--registry=/home/weaver/model",
+        "yaml",
+        "--future",
+        "/home/weaver/target"
       )
-      if (hasTemplates) {
-        mountArgs.addAll(listOf(
-          "--mount", "type=bind,source=$templatesDirPath,target=/home/weaver/templates,readonly"
-        ))
-      }
-      mountArgs.addAll(listOf(
-        "--mount", "type=bind,source=$projectDirPath,target=/home/weaver/target"
-      ))
-
-      args = listOf("run", "--rm", "--platform=linux/x86_64") +
-        mountArgs +
-        listOf(weaverContainer, "registry", "generate", "--registry=/home/weaver/model", "yaml", "--future", "/home/weaver/target")
-    }
+    )
   }
 
   tasks.register("weaverGenerate") {
@@ -256,9 +177,9 @@ if (hasWeaverModel) {
     dependsOn("weaverGenerateJava", "weaverGenerateDocs", "weaverGenerateYaml")
   }
 
-  tasks.named("compileJava") {
-    dependsOn("weaverGenerateJava")
-  }
+  tasks.named("compileJava") { dependsOn("weaverGenerateJava") }
 } else {
-  logger.debug("No weaver model directory found in ${project.name}, skipping weaver task registration")
+  logger.debug(
+    "No weaver model directory found in ${project.name}, skipping weaver task registration"
+  )
 }

@@ -31,31 +31,29 @@ tasks.
 
 ### Configuring Java Output Package
 
-By default, the plugin derives the Java output package path from your `otelJava.moduleName`:
-
-```kotlin
-otelJava.moduleName.set("io.opentelemetry.contrib.ibm-mq-metrics")
-// Generates to: src/main/java/io/opentelemetry/ibm/mq/metrics/
-```
-
-**Derivation logic:**
-1. Remove `io.opentelemetry.contrib.` or `io.opentelemetry.` prefix
-2. Convert dots (`.`) and hyphens (`-`) to forward slashes (`/`)
-3. Prepend `io/opentelemetry/`
-
-**Example transformations:**
-- `io.opentelemetry.contrib.ibm-mq-metrics` → `io/opentelemetry/ibm/mq/metrics`
-- `io.opentelemetry.contrib.my-module` → `io/opentelemetry/my/module`
-
-To override the default, configure the extension explicitly:
+**REQUIRED:** You must explicitly configure the Java output package path:
 
 ```kotlin
 otelWeaver {
-  javaOutputPackage.set("io/opentelemetry/custom/path/metrics")
+  javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
 }
 ```
 
-**Note:** Use forward slashes (`/`) for the path, not dots or backslashes.
+This determines where generated Java code will be placed under `src/main/java/`.
+
+**Important:**
+- Use forward slashes (`/`) for the path, not dots or backslashes
+- The path should match your module's package structure
+- Generated code will be placed in `src/main/java/{your-path}/`
+
+**Example:**
+```kotlin
+// For module "io.opentelemetry.contrib.ibm-mq-metrics"
+otelWeaver {
+  javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
+}
+// Generates to: src/main/java/io/opentelemetry/ibm/mq/metrics/
+```
 
 ### Module Structure
 
@@ -86,7 +84,7 @@ Generates Java code, markdown documentation, and YAML configuration.
 ./gradlew :your-module:weaverGenerateJava
 ```
 
-- Outputs to `src/main/java/{inferred-package}/`
+- Outputs to `src/main/java/{configured-package}/`
 - **Automatically formats** generated code with `spotlessJavaApply`
 - Runs before `compileJava` task
 
@@ -116,21 +114,20 @@ Validates the weaver model for errors without generating code.
 
 ## Example
 
-The `ibm-mq-metrics` module demonstrates weaver usage. The plugin automatically derives the output
-path from the module name:
+The `ibm-mq-metrics` module demonstrates weaver usage:
 
 ```kotlin
 // ibm-mq-metrics/build.gradle.kts
-otelJava.moduleName.set("io.opentelemetry.contrib.ibm-mq-metrics")
-// Result: Generates to src/main/java/io/opentelemetry/ibm/mq/metrics/
-```
-
-To use a custom path:
-
-```kotlin
-otelWeaver {
-  javaOutputPackage.set("io/opentelemetry/custom/metrics")
+plugins {
+  id("otel.weaver-conventions")
 }
+
+otelJava.moduleName.set("io.opentelemetry.contrib.ibm-mq-metrics")
+
+otelWeaver {
+  javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
+}
+// Generates to: src/main/java/io/opentelemetry/ibm/mq/metrics/
 ```
 
 ## Resources
