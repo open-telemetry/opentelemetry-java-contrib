@@ -42,11 +42,13 @@ otelWeaver {
 This determines where generated Java code will be placed under `src/main/java/`.
 
 **Important:**
+
 - Use forward slashes (`/`) for the path, not dots or backslashes
 - The path should match your module's package structure
 - Generated code will be placed in `src/main/java/{your-path}/`
 
 **Example:**
+
 ```kotlin
 // For module "io.opentelemetry.contrib.ibm-mq-metrics"
 otelWeaver {

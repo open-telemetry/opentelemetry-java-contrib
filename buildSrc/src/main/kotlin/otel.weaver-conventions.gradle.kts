@@ -177,7 +177,10 @@ if (hasWeaverModel) {
     dependsOn("weaverGenerateJava", "weaverGenerateDocs", "weaverGenerateYaml")
   }
 
-  tasks.named("compileJava") { dependsOn("weaverGenerateJava") }
+  // Ensure proper task ordering without forcing automatic execution
+  // Use mustRunAfter so weaver generation only runs when explicitly invoked
+  tasks.named("compileJava") { mustRunAfter(weaverGenerateJavaTask) }
+  tasks.named("sourcesJar") { mustRunAfter(weaverGenerateJavaTask) }
 } else {
   logger.debug(
     "No weaver model directory found in ${project.name}, skipping weaver task registration"
