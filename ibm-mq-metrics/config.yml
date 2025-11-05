@@ -200,6 +200,8 @@ metrics:
     enabled: true
   "ibm.mq.manager.max.handles":  # Max open handles
     enabled: true
+  "ibm.mq.connection.errors":  # Number of connection errors
+    enabled: true
 
 sslConnection:
   trustStorePath: ""

@@ -3,11 +3,16 @@ plugins {
   id("com.gradleup.shadow")
   id("otel.java-conventions")
   id("otel.publish-conventions")
+  id("otel.weaver-conventions")
 }
 
 description = "IBM-MQ metrics"
 otelJava.moduleName.set("io.opentelemetry.contrib.ibm-mq-metrics")
 application.mainClass.set("io.opentelemetry.ibm.mq.opentelemetry.Main")
+
+otelWeaver {
+  javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
+}
 
 val ibmClientJar: Configuration by configurations.creating {
   isCanBeResolved = true

@@ -58,7 +58,7 @@ publishing {
           connection.set("scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git")
           developerConnection.set("scm:git:git@github.com:open-telemetry/opentelemetry-java-contrib.git")
           tag.set(tagVersion)
-          url.set("https://github.com/open-telemetry/opentelemetry-java-contrib/tree/${tagVersion}")
+          url.set("https://github.com/open-telemetry/opentelemetry-java-contrib/tree/$tagVersion")
         }
 
         issueManagement {
