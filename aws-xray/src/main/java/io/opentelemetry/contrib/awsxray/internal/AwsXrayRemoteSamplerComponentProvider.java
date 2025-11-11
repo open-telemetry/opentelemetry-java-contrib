@@ -9,9 +9,13 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.awsxray.AwsXrayRemoteSampler;
 import io.opentelemetry.contrib.awsxray.AwsXrayRemoteSamplerBuilder;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.AutoConfigureListener;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
+import io.opentelemetry.sdk.extension.incubator.ExtendedOpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.function.Supplier;
 
 /**
  * File configuration SPI implementation for {@link AwsXrayRemoteSampler}.
@@ -21,7 +25,13 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
  */
 @SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class AwsXrayRemoteSamplerComponentProvider implements ComponentProvider<Sampler> {
+public class AwsXrayRemoteSamplerComponentProvider
+    implements ComponentProvider<Sampler>, AutoConfigureListener {
+
+  private Resource resource;
+
+  private final Supplier<Resource> resourceSupplier = () -> resource;
+
   @Override
   public Class<Sampler> getType() {
     return Sampler.class;
@@ -34,8 +44,7 @@ public class AwsXrayRemoteSamplerComponentProvider implements ComponentProvider<
 
   @Override
   public Sampler create(DeclarativeConfigProperties config) {
-    Resource resource = io.opentelemetry.contrib.awsxray.ResourceHolder.getResource();
-    AwsXrayRemoteSamplerBuilder builder = AwsXrayRemoteSampler.newBuilder(resource);
+    AwsXrayRemoteSamplerBuilder builder = AwsXrayRemoteSampler.newBuilder(resourceSupplier);
 
     String endpoint = config.getString("endpoint");
     if (endpoint != null) {
@@ -43,5 +52,12 @@ public class AwsXrayRemoteSamplerComponentProvider implements ComponentProvider<
     }
 
     return builder.build();
+  }
+
+  @Override
+  public void afterAutoConfigure(OpenTelemetrySdk sdk) {
+    if (sdk instanceof ExtendedOpenTelemetrySdk) {
+      this.resource = ((ExtendedOpenTelemetrySdk) sdk).getResource();
+    }
   }
 }

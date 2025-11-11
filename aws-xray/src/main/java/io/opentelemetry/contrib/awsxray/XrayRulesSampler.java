@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -60,7 +61,7 @@ final class XrayRulesSampler implements Sampler {
   private static final AttributeKey<String> HTTP_METHOD = AttributeKey.stringKey("http.method");
 
   private final String clientId;
-  private final Resource resource;
+  private final Supplier<Resource> resource;
   private final Clock clock;
   private final Sampler fallbackSampler;
   private final SamplingRuleApplier[] ruleAppliers;
@@ -75,7 +76,7 @@ final class XrayRulesSampler implements Sampler {
 
   XrayRulesSampler(
       String clientId,
-      Resource resource,
+      Supplier<Resource> resource,
       Clock clock,
       Sampler fallbackSampler,
       List<GetSamplingRulesResponse.SamplingRule> rules,
@@ -91,7 +92,7 @@ final class XrayRulesSampler implements Sampler {
             .map(
                 rule ->
                     new SamplingRuleApplier(
-                        clientId, rule, resource.getAttribute(SERVICE_NAME), clock))
+                        clientId, rule, resource.get().getAttribute(SERVICE_NAME), clock))
             .toArray(SamplingRuleApplier[]::new),
         createRuleHashMaps(rules),
         rules.stream().anyMatch(r -> r.getSamplingRateBoost() != null),
@@ -105,7 +106,7 @@ final class XrayRulesSampler implements Sampler {
 
   private XrayRulesSampler(
       String clientId,
-      Resource resource,
+      Supplier<Resource> resource,
       Clock clock,
       Sampler fallbackSampler,
       SamplingRuleApplier[] ruleAppliers,
@@ -161,7 +162,7 @@ final class XrayRulesSampler implements Sampler {
               : null;
     }
     for (SamplingRuleApplier applier : ruleAppliers) {
-      if (applier.matches(attributes, resource)) {
+      if (applier.matches(attributes, resource.get())) {
         SamplingResult result =
             applier.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
 
@@ -263,7 +264,7 @@ final class XrayRulesSampler implements Sampler {
           ruleToReportTo = applier;
           break;
         }
-        if (applier.matches(spanData.getAttributes(), resource)) {
+        if (applier.matches(spanData.getAttributes(), resource.get())) {
           matchedRule = applier;
         }
       }
