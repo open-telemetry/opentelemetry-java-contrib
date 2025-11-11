@@ -77,7 +77,8 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
         });
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings(
+      "unchecked") // provided class must implement BiConsumer<SpanBuilder, SpanContext>
   private static BiConsumer<SpanBuilder, SpanContext> constructParentOverrideHandler(String name) {
     try {
       Class<?> clazz = Class.forName(name);

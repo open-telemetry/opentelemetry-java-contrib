@@ -68,16 +68,14 @@ public final class ConfigWrapper {
   }
 
   @NotNull
-  @SuppressWarnings("unchecked")
   List<String> getQueueManagerNames() {
     return getQueueManagers().stream()
-        .map(o -> (Map<String, String>) o)
-        .map(x -> x.get("name"))
+        .map(x -> String.valueOf(x.get("name")))
         .collect(Collectors.toList());
   }
 
   @NotNull
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // reading list from yaml
   public List<Map<String, ?>> getQueueManagers() {
     List<Map<String, ?>> result = (List<Map<String, ?>>) config.get("queueManagers");
     if (result == null) {
@@ -87,7 +85,7 @@ public final class ConfigWrapper {
   }
 
   @NotNull
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // reading map from yaml
   public Map<String, String> getSslConnection() {
     Map<String, String> result = (Map<String, String>) config.get("sslConnection");
     if (result == null) {
@@ -105,7 +103,7 @@ public final class ConfigWrapper {
   }
 
   @NotNull
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // reading map from yaml
   public Map<String, ?> getMetrics() {
     Object metrics = config.get("metrics");
     if (!(metrics instanceof Map)) {
@@ -119,7 +117,7 @@ public final class ConfigWrapper {
     return val instanceof Integer ? (Integer) val : defaultValue;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // reading map from yaml
   private Map<String, ?> getTaskSchedule() {
     if (config.get("taskSchedule") instanceof Map) {
       return (Map<String, ?>) config.get("taskSchedule");
