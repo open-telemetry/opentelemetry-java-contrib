@@ -19,7 +19,7 @@ dependencies {
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
   implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.2.2")
   implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
-  implementation("com.google.auto.value:auto-value-annotations:1.11.0")
+  implementation("com.google.auto.value:auto-value-annotations:1.11.1")
 }
 
 spotless {
