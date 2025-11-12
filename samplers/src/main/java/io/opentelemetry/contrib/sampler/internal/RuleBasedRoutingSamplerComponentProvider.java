@@ -22,7 +22,7 @@ import java.util.List;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvider<Sampler> {
+public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvider {
 
   private static final String ACTION_RECORD_AND_SAMPLE = "RECORD_AND_SAMPLE";
   private static final String ACTION_DROP = "DROP";

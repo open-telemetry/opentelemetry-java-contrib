@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 
-public class GcpResourceDetector implements ComponentProvider<Resource> {
+public class GcpResourceDetector implements ComponentProvider {
 
   @Override
   public Class<Resource> getType() {

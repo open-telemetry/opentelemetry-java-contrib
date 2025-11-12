@@ -44,7 +44,7 @@ public final class AttributesMapper {
     return builder.build();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // data type is checked before casting
   private static AnyValue attributeValueToProto(AttributeType type, Object value) {
     switch (type) {
       case STRING:

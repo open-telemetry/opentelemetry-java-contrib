@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.maven
+
 pluginManagement {
   plugins {
     id("com.gradleup.shadow") version "9.2.2"
@@ -22,6 +24,10 @@ dependencyResolutionManagement {
       content {
         includeGroupByRegex("""org\.terracotta.*""")
       }
+    }
+    // for otel snapshots
+    maven {
+      url = uri("https://central.sonatype.com/repository/maven-snapshots/")
     }
   }
 }

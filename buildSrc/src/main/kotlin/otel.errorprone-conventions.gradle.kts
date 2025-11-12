@@ -83,6 +83,7 @@ tasks {
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names
           disable("MemberName")
+          disable("SuppressWarningsWithoutExplanation")
         }
 
         option("NullAway:CustomContractAnnotations", "io.opentelemetry.api.internal.Contract")

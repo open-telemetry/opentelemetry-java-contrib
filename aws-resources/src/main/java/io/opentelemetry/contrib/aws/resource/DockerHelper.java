@@ -9,8 +9,9 @@ import static java.util.logging.Level.WARNING;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 class DockerHelper {
@@ -35,9 +36,8 @@ class DockerHelper {
    *
    * @return docker container ID. Empty string if it can`t be found.
    */
-  @SuppressWarnings("DefaultCharset")
   public String getContainerId() {
-    try (BufferedReader br = new BufferedReader(new FileReader(cgroupPath))) {
+    try (BufferedReader br = Files.newBufferedReader(Paths.get(cgroupPath))) {
       String line;
       while ((line = br.readLine()) != null) {
         if (line.length() > CONTAINER_ID_LENGTH) {
