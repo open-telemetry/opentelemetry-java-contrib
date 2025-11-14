@@ -15,6 +15,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /** A builder for {@link AwsXrayRemoteSampler}. */
@@ -23,14 +24,14 @@ public final class AwsXrayRemoteSamplerBuilder {
   private static final String DEFAULT_ENDPOINT = "http://localhost:2000";
   private static final long DEFAULT_POLLING_INTERVAL_SECS = 300;
 
-  private final Resource resource;
+  private final Supplier<Resource> resource;
 
   private Clock clock = Clock.getDefault();
   private String endpoint = DEFAULT_ENDPOINT;
   @Nullable private Sampler initialSampler;
   private long pollingIntervalNanos = SECONDS.toNanos(DEFAULT_POLLING_INTERVAL_SECS);
 
-  AwsXrayRemoteSamplerBuilder(Resource resource) {
+  AwsXrayRemoteSamplerBuilder(Supplier<Resource> resource) {
     this.resource = resource;
   }
 

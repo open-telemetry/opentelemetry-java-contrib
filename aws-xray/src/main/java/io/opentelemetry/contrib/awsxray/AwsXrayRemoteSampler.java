@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -56,8 +57,9 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   // Default batch size to be same as OTel BSP default
   private static final int maxExportBatchSize = 512;
 
-  private final Resource resource;
+  private final Supplier<Resource> resource;
   private final Clock clock;
+  private final String endpoint;
   private final Sampler initialSampler;
   private final XraySamplerClient client;
   private final ScheduledExecutorService executor;
@@ -80,18 +82,19 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
    */
   // TODO(anuraaga): Deprecate after
   // https://github.com/open-telemetry/opentelemetry-specification/issues/1588
-  public static AwsXrayRemoteSamplerBuilder newBuilder(Resource resource) {
+  public static AwsXrayRemoteSamplerBuilder newBuilder(Supplier<Resource> resource) {
     return new AwsXrayRemoteSamplerBuilder(resource);
   }
 
   AwsXrayRemoteSampler(
-      Resource resource,
+      Supplier<Resource> resource,
       Clock clock,
       String endpoint,
       Sampler initialSampler,
       long pollingIntervalNanos) {
     this.resource = resource;
     this.clock = clock;
+    this.endpoint = endpoint;
     this.initialSampler = initialSampler;
     client = new XraySamplerClient(endpoint);
     executor =
@@ -294,6 +297,11 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
   // Visible for testing
   Resource getResource() {
-    return resource;
+    return resource.get();
+  }
+
+  @Override
+  public String toString() {
+    return "AwsXrayRemoteSampler{endpoint=" + endpoint + '}';
   }
 }
