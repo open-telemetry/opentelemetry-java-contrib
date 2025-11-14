@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
-  api(platform("com.google.protobuf:protobuf-bom:4.33.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.33.1"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.3.0"))
 
   constraints {
@@ -51,7 +51,7 @@ dependencies {
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.1.0")
+    api("org.apache.kafka:kafka-clients:4.1.1")
     api("org.testcontainers:testcontainers-kafka:2.0.1")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
