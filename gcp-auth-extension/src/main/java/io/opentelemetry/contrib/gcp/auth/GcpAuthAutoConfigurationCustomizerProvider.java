@@ -111,7 +111,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
                 customizeMetricExporter(metricExporter, credentials, configProperties))
-        .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
+        .addResourceCustomizer(
+            (resource, configProperties) ->
+                customizeResource(resource, credentials, configProperties));
   }
 
   @Override
@@ -228,9 +230,19 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
-  private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
+  // Note that credentials can be passed from `customize` function directly
+  private static Resource customizeResource(
+      Resource resource, GoogleCredentials credentials, ConfigProperties configProperties) {
+    String gcpProjectId;
+    try {
+      gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
+    } catch (io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException e) {
+      gcpProjectId = credentials.getProjectId();
+      if (gcpProjectId == null) {
+        // this exception will still contain the accurate message.
+        throw e;
+      }
+    }
     Resource res = Resource.create(Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
     return resource.merge(res);
   }
