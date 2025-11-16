@@ -240,7 +240,7 @@
         '.github/workflows/**',
       ],
       matchStrings: [
-        '(?<currentValue>\\d+) # renovate: datasource=java-version',
+        '(?<currentValue>\\d+) # renovate\\(java-version\\)',
       ],
       depNameTemplate: 'java',
       extractVersionTemplate: '^(?<version>\\d+)',
