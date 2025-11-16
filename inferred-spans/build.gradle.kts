@@ -16,11 +16,11 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
-  implementation("com.lmax:disruptor")
+  implementation("com.lmax:disruptor:3.4.4")
   implementation("org.jctools:jctools-core")
   implementation("tools.profiler:async-profiler")
   implementation("com.blogspot.mydailyjava:weak-lock-free")
-  implementation("org.agrona:agrona")
+  implementation("org.agrona:agrona:1.22.0")
 
   testAnnotationProcessor("com.google.auto.service:auto-service")
   testCompileOnly("com.google.auto.service:auto-service-annotations")

@@ -53,11 +53,9 @@ dependencies {
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.1.1")
     api("org.testcontainers:testcontainers-kafka:2.0.2")
-    api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:4.2")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
-    api("org.agrona:agrona:1.22.0")
     api("com.github.f4b6a3:uuid-creator:6.1.1")
   }
 }
