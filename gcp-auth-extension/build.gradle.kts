@@ -42,7 +42,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
+  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
   testImplementation("org.springframework.boot:spring-boot-starter-web:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter:2.7.18")
   testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.18")

@@ -30,7 +30,7 @@ dependencies {
     api("com.google.errorprone:error_prone_annotations:2.43.0")
     api("com.google.errorprone:error_prone_core:2.43.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
-    api("io.opentelemetry.proto:opentelemetry-proto:1.8.0-alpha")
+    api("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
     api("io.prometheus:simpleclient_common:0.16.0")
     api("io.prometheus:simpleclient_httpserver:0.16.0")
