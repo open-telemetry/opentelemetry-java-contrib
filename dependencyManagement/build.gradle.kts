@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
-  api(platform("com.google.protobuf:protobuf-bom:4.33.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.33.1"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.3.0"))
 
   constraints {
@@ -25,8 +25,8 @@ dependencies {
 
     api("com.google.auto.service:auto-service:1.1.1")
     api("com.google.auto.service:auto-service-annotations:1.1.1")
-    api("com.google.auto.value:auto-value:1.11.0")
-    api("com.google.auto.value:auto-value-annotations:1.11.0")
+    api("com.google.auto.value:auto-value:1.11.1")
+    api("com.google.auto.value:auto-value-annotations:1.11.1")
     api("com.google.errorprone:error_prone_annotations:2.44.0")
     api("com.google.errorprone:error_prone_core:2.44.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
@@ -51,8 +51,8 @@ dependencies {
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.1.0")
-    api("org.testcontainers:testcontainers-kafka:2.0.1")
+    api("org.apache.kafka:kafka-clients:4.1.1")
+    api("org.testcontainers:testcontainers-kafka:2.0.2")
     api("com.lmax:disruptor:3.4.4")
     api("org.jctools:jctools-core:4.0.5")
     api("tools.profiler:async-profiler:4.2")
