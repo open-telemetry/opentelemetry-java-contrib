@@ -13,8 +13,12 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install misspell
+        env:
+          # renovate: datasource=github-releases depName=golangci/misspell
+          MISSPELL_VERSION: v0.7.0
         run: |
-          curl -sfL https://raw.githubusercontent.com/golangci/misspell/master/install-misspell.sh | sh -s -- -b bin
+          curl -sfL https://raw.githubusercontent.com/golangci/misspell/${MISSPELL_VERSION}/install-misspell.sh \
+            | sh -s -- -b bin ${MISSPELL_VERSION}
 
       - name: Run misspell
         run: bin/misspell -error .
