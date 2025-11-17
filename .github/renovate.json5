@@ -3,6 +3,7 @@
   extends: [
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
+    'customManagers:githubActionsVersions',
   ],
   ignorePaths: [], // overwrite default ignore which includes **/test/**
                    // used to update docker image versions used in Java test files
@@ -252,8 +253,9 @@
         '**/build.gradle.kts',
       ],
       matchStrings: [
-        '"https://github.com/(?<depName>[^/]+/[^/]+)/zipball/(?<currentValue>.+?)"',
+        '"(?<currentValue>.+?)" // renovate\\(github-releases\\): (?<depName>[^\\s]+)',
       ],
+      versioningTemplate: 'semver',
     },
     {
       customType: 'regex',
