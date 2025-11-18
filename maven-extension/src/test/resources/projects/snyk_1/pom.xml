@@ -15,7 +15,6 @@
       <plugin>
         <groupId>io.snyk</groupId>
         <artifactId>snyk-maven-plugin</artifactId>
-        <version>2.3.0</version>
         <configuration>
           <apiToken>${snyk.token}</apiToken>
           <args>
