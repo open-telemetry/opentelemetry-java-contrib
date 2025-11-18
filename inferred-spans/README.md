@@ -43,6 +43,31 @@ So if you are using an autoconfigured OpenTelemetry SDK, you'll only need to add
 | otel.inferred.spans.lib.directory <br/> OTEL_INFERRED_SPANS_LIB_DIRECTORY                     | Defaults to the value of `java.io.tmpdir`                                                                                                                                                                                                                         | Profiling requires that the [async-profiler](https://github.com/async-profiler/async-profiler) shared library  is exported to a temporary location and loaded by the JVM. The partition backing this location must be executable, however in some server-hardened environments,  `noexec` may be set on the standard `/tmp` partition, leading to `java.lang.UnsatisfiedLinkError` errors. Set this property to an alternative directory (e.g. `/var/tmp`) to resolve this.                                                                                                                                                       |
 | otel.inferred.spans.parent.override.handler <br/> OTEL_INFERRED_SPANS_PARENT_OVERRIDE_HANDLER | Defaults to a handler adding span-links to the inferred span                                                                                                                                                                                                      | Inferred spans sometimes need to be inserted as the new parent of a normal span, which is not directly possible because that span has already been sent. For this reason, this relationship needs to be represented differently, which normally is done by adding a span-link to the inferred span. This configuration can be used to override that behaviour by providing the fully qualified name of a class implementing `BiConsumer<SpanBuilder, SpanContext>`: The biconsumer will be invoked with the inferred span as first argument and the span for which the inferred one was detected as new parent as second argument |
 
+### Usage with declarative configuration
+
+You can configure the inferred spans processor using declarative YAML configuration with the
+OpenTelemetry SDK. For example:
+
+```yaml
+file_format: 1.0-rc.1
+tracer_provider:
+  processors:
+    - inferred_spans/development:
+        enabled: true # true by default unlike autoconfiguration described above
+        sampling_interval: 25ms
+        included_classes: "org.example.myapp.*"
+        excluded_classes: "java.*"
+        min_duration: 10ms
+        interval: 5s
+        duration: 5s
+        lib_directory: "/var/tmp"
+        parent_override_handler: "com.example.MyParentOverrideHandler"
+```
+
+All the same settings as for [autoconfiguration](#autoconfiguration) can be used here,
+just with the `otel.inferred.spans.` prefix stripped.
+For example, `otel.inferred.spans.sampling.interval` becomes `sampling_interval` in YAML.
+
 ### Manual SDK setup
 
 If you manually set-up your `OpenTelemetrySDK`, you need to create and register an `InferredSpansProcessor` with your `TracerProvider`:

@@ -3,6 +3,7 @@
   extends: [
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
+    'customManagers:githubActionsVersions',
   ],
   ignorePaths: [], // overwrite default ignore which includes **/test/**
                    // used to update docker image versions used in Java test files
@@ -62,6 +63,9 @@
     },
     {
       // disruptor 4+ requires Java 11+
+      matchFileNames: [
+        'inferred-spans/build.gradle.kts',
+      ],
       matchPackageNames: [
         'com.lmax:disruptor',
       ],
@@ -83,6 +87,9 @@
     },
     {
       // caffeine 3+ requires Java 11+
+      matchFileNames: [
+        'aws-xray/build.gradle.kts',
+      ],
       matchPackageNames: [
         'com.github.ben-manes.caffeine:caffeine',
       ],
@@ -113,6 +120,9 @@
     },
     {
       // agrona 1.23+ requires Java 17+
+      matchFileNames: [
+        'inferred-spans/build.gradle.kts',
+      ],
       matchPackageNames: [
         'org.agrona:agrona',
       ],
@@ -135,6 +145,9 @@
     },
     {
       // pinned version for compatibility
+      matchFileNames: [
+        'micrometer-meter-provider/build.gradle.kts',
+      ],
       matchPackageNames: [
         'io.micrometer:micrometer-core',
       ],
@@ -143,6 +156,9 @@
     },
     {
       // pinned version for compatibility
+      matchFileNames: [
+        'maven-extension/build.gradle.kts',
+      ],
       matchCurrentVersion: '3.5.0',
       enabled: false,
       matchPackageNames: [
@@ -189,6 +205,9 @@
     },
     {
       // pinned version for compatibility with java 8 JFR parsing
+      matchFileNames: [
+        'jfr-connection/build.gradle.kts',
+      ],
       matchUpdateTypes: [
         'major',
       ],
@@ -240,7 +259,7 @@
         '.github/workflows/**',
       ],
       matchStrings: [
-        '(?<currentValue>\\d+) # renovate: datasource=java-version',
+        '(?<currentValue>\\d+) # renovate\\(java-version\\)',
       ],
       depNameTemplate: 'java',
       extractVersionTemplate: '^(?<version>\\d+)',
@@ -252,8 +271,9 @@
         '**/build.gradle.kts',
       ],
       matchStrings: [
-        '"https://github.com/(?<depName>[^/]+/[^/]+)/zipball/(?<currentValue>.+?)"',
+        '"(?<currentValue>.+?)" // renovate\\(github-releases\\): (?<depName>[^\\s]+)',
       ],
+      versioningTemplate: 'semver',
     },
     {
       customType: 'regex',

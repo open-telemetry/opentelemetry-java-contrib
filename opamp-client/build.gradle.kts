@@ -2,6 +2,8 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
 
+val opampSpecVersion = "v0.14.0" // renovate(github-releases): open-telemetry/opamp-spec
+
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
@@ -28,7 +30,7 @@ val opampProtos = tasks.register<DownloadAndExtractOpampProtos>("opampProtoDownl
   group = "opamp"
   outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
   downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/opampProtoDownload/release.zip"))
-  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/v0.14.0")
+  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/$opampSpecVersion")
 }
 
 wire {
