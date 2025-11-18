@@ -131,8 +131,5 @@ jobs:
   markdown-lint-check:
     uses: ./.github/workflows/reusable-markdown-lint.yml
 
-  misspell-check:
-    uses: ./.github/workflows/reusable-misspell-check.yml
-
   shell-script-check:
     uses: ./.github/workflows/reusable-shell-script-check.yml
