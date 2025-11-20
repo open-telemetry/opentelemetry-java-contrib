@@ -1,9 +1,0 @@
-{
-  "//": "Dependencies for GitHub Actions workflows that use actions/github-script",
-  "name": "github-scripts",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "yaml": "2.8.1"
-  }
-}
