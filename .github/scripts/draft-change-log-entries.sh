@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash -e
 
 version=$("$(dirname "$0")/get-version.sh")
 
