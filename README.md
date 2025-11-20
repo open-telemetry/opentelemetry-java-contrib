@@ -64,6 +64,7 @@ For more information about the maintainer role, see the [community repository](h
 
 ### Approvers
 
+- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
 - [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
 - [John Watson](https://github.com/jkwatson), Cloudera
 
