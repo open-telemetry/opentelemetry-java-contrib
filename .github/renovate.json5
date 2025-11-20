@@ -53,6 +53,7 @@
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
       ignoreUnstable: false,
+      allowedVersions: '!/\\-SNAPSHOT$/',
     },
     {
       // prevent 3.0.1u2 -> 3.0.1
