@@ -67,7 +67,14 @@ abstract class DownloadAndExtractOpampProtos @Inject constructor(
     val url = URI.create(zipUrl.get()).toURL()
     downloadedZipFile.get().asFile.parentFile.mkdirs()
 
-    url.openStream().use { input: InputStream ->
+    val connection = url.openConnection()
+    // Use GitHub token if available to avoid rate limiting
+    val githubToken = System.getenv("GITHUB_TOKEN")
+    if (githubToken != null && githubToken.isNotEmpty()) {
+      connection.setRequestProperty("Authorization", "Bearer $githubToken")
+    }
+
+    connection.getInputStream().use { input: InputStream ->
       downloadedZipFile.get().asFile.outputStream().use { output: FileOutputStream ->
         input.copyTo(output)
       }

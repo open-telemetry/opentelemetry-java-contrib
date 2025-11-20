@@ -65,6 +65,7 @@ jobs:
         run: ./gradlew assemble --no-build-cache --no-daemon
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3

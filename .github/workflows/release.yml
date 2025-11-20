@@ -100,6 +100,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Download artifacts from Maven Central (when already published)
         if: ${{ inputs.already-published }}
@@ -244,6 +245,7 @@ jobs:
           VERSION: ${{ needs.release.outputs.version }}
           PRIOR_VERSION: ${{ needs.release.outputs.prior-version }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           ./gradlew japicmp -PapiBaseVersion=$PRIOR_VERSION -PapiNewVersion=$VERSION
           ./gradlew --refresh-dependencies japicmp
