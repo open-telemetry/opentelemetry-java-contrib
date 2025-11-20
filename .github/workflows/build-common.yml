@@ -59,6 +59,7 @@ jobs:
         run: ./gradlew build -x spotlessCheck -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Check for jApiCmp diffs
         # The jApiCmp diff compares current to latest, which isn't appropriate for release branches
@@ -123,6 +124,7 @@ jobs:
           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Build scan
         if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
