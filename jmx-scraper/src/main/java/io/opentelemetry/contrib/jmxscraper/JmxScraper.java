@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -229,15 +231,37 @@ public final class JmxScraper {
   private JmxScraper(
       JmxConnectorBuilder client, OpenTelemetry openTelemetry, JmxScraperConfig config) {
     this.client = client;
-    this.jmxTelemetry = jmxTelemetry(openTelemetry, config);
+    this.jmxTelemetry = createJmxTelemetry(openTelemetry, config);
   }
 
-  private static JmxTelemetry jmxTelemetry(OpenTelemetry openTelemetry, JmxScraperConfig config) {
-    JmxTelemetryBuilder jmxTelemetryBuilder =
-        JmxTelemetry.builder(openTelemetry).beanDiscoveryDelay(config.getSamplingInterval());
-    config.getTargetSystems().forEach(jmxTelemetryBuilder::addClassPathRules);
-    config.getJmxConfig().stream().map(Paths::get).forEach(jmxTelemetryBuilder::addCustomRules);
-    return jmxTelemetryBuilder.build();
+  private static JmxTelemetry createJmxTelemetry(
+      OpenTelemetry openTelemetry, JmxScraperConfig config) {
+
+    JmxTelemetryBuilder builder = JmxTelemetry.builder(openTelemetry);
+    builder.beanDiscoveryDelay(config.getSamplingInterval());
+
+    // Unfortunately we can't use the convenient 'addClassPathRules' here as it does not yet
+    // allow to customize the path of the yaml resources in classpath.
+    // config.getTargetSystems().forEach(builder::addClassPathRules);
+    //
+    // As a temporary workaround we load configuration through temporary files and register them
+    // as if they were custom rules.
+    config
+        .getTargetSystems()
+        .forEach(
+            system -> {
+              try (InputStream input = config.getTargetSystemYaml(system)) {
+                Path tempFile = Files.createTempFile("jmx-scraper-" + system, ".yaml");
+                Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                builder.addCustomRules(tempFile);
+                Files.delete(tempFile);
+              } catch (IOException e) {
+                throw new IllegalStateException(e);
+              }
+            });
+
+    config.getJmxConfig().stream().map(Paths::get).forEach(builder::addCustomRules);
+    return builder.build();
   }
 
   private void start() throws IOException {
