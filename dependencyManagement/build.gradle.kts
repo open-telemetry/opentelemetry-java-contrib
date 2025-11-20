@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.21.0-alpha"
+val otelInstrumentationVersion = "2.22.0-alpha-SNAPSHOT"
 val semconvVersion = "1.37.0"
 
 javaPlatform {
@@ -27,8 +27,8 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.1")
     api("com.google.auto.value:auto-value-annotations:1.11.1")
-    api("com.google.errorprone:error_prone_annotations:2.43.0")
-    api("com.google.errorprone:error_prone_core:2.43.0")
+    api("com.google.errorprone:error_prone_annotations:2.44.0")
+    api("com.google.errorprone:error_prone_core:2.44.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")

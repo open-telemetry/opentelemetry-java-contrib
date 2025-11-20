@@ -80,7 +80,7 @@ class InferredSpansConfig {
     return builder.build();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // handler must implement BiConsumer<SpanBuilder, SpanContext>
   private static BiConsumer<SpanBuilder, SpanContext> constructParentOverrideHandler(String name) {
     try {
       Class<?> clazz = Class.forName(name);

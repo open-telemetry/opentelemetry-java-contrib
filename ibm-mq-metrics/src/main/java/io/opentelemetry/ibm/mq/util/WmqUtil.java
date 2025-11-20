@@ -55,10 +55,9 @@ public final class WmqUtil {
     }
   }
 
-  @SuppressWarnings("rawtypes")
   public static MQQueueManager connectToQueueManager(QueueManager queueManager) {
     WmqContext auth = new WmqContext(queueManager);
-    Hashtable env = auth.getMqEnvironment();
+    Hashtable<String, ?> env = auth.getMqEnvironment();
     try {
       MQQueueManager ibmQueueManager = new MQQueueManager(queueManager.getName(), env);
       logger.debug(

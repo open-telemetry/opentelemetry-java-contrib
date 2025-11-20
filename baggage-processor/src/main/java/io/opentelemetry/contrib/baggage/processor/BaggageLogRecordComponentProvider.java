@@ -11,9 +11,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.internal.IncludeExcludePredicate;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 
-@SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class BaggageLogRecordComponentProvider implements ComponentProvider<LogRecordProcessor> {
+public class BaggageLogRecordComponentProvider implements ComponentProvider {
   @Override
   public String getName() {
     return "baggage";
