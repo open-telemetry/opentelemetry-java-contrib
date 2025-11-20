@@ -13,6 +13,9 @@ on:
         type: number
         required: false
         default: 0
+    secrets:
+      DEVELOCITY_ACCESS_KEY:
+        required: false
 
 permissions:
   contents: read
