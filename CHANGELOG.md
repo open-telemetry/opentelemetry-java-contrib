@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.52.0 (2025-11-20)
+
 ### AWS X-Ray propagator
 
 - Update xray lambda component provider name
