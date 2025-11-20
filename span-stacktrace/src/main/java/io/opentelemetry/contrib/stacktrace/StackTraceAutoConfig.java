@@ -99,7 +99,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   }
 
   @Nullable
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // filterType must implement Predicate<ReadableSpan>
   private static Predicate<ReadableSpan> getFilterInstance(Class<?> filterType) {
     try {
       Constructor<?> constructor = filterType.getConstructor();

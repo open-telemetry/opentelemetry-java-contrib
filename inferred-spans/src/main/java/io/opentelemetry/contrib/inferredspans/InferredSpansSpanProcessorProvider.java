@@ -13,9 +13,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.util.logging.Logger;
 
-@SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class InferredSpansSpanProcessorProvider implements ComponentProvider<SpanProcessor> {
+public class InferredSpansSpanProcessorProvider implements ComponentProvider {
 
   private static final Logger log =
       Logger.getLogger(InferredSpansSpanProcessorProvider.class.getName());
