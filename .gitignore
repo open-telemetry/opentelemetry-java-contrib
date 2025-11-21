@@ -56,3 +56,6 @@ bin
 
 # Gradle build scans
 build-scan.txt
+
+# Node
+node_modules

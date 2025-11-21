@@ -1,0 +1,9 @@
+{
+  "name": "workflows",
+  "version": "1.0.0",
+  "description": "Dependencies for GitHub Action workflows",
+  "private": true,
+  "dependencies": {
+    "yaml": "2.8.1"
+  }
+}
