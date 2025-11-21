@@ -31,5 +31,9 @@ jobs:
 
       - name: Parse component label and assign owners
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          NODE_PATH: ${{ github.workspace }}/.github/scripts/node_modules
         with:
-          script-path: .github/scripts/assign-issue-owners.js
+          script: |
+            const script = require('./.github/scripts/assign-issue-owners.js');
+            await script({ github, context, core });
