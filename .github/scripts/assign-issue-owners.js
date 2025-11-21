@@ -1,13 +1,18 @@
 const fs = require('fs');
 const { parse } = require('yaml');
+const { Octokit } = require('@octokit/rest');
 
-module.exports = async ({ github, context, core }) => {
-  // Extract component name from label
-  const labelName = context.payload.label.name;
+async function main() {
+  // Get inputs from environment
+  const token = process.env.GITHUB_TOKEN;
+  const labelName = process.env.LABEL_NAME;
+  const issueNumber = parseInt(process.env.ISSUE_NUMBER);
+  const owner = process.env.REPO_OWNER;
+  const repo = process.env.REPO_NAME;
 
   if (!labelName.startsWith('component:')) {
-    core.setFailed('Label does not match expected pattern');
-    return;
+    console.error('Label does not match expected pattern');
+    process.exit(1);
   }
 
   const componentName = labelName.replace('component:', '');
@@ -18,35 +23,40 @@ module.exports = async ({ github, context, core }) => {
   const data = parse(yamlContent);
 
   if (!data || !data.components) {
-    core.setFailed('Invalid component_owners.yml structure');
-    return;
+    console.error('Invalid component_owners.yml structure');
+    process.exit(1);
   }
 
   const components = data.components;
 
   if (!(componentName in components)) {
-    core.setFailed(`Component '${componentName}' not found in component_owners.yml`);
-    return;
+    console.error(`Component '${componentName}' not found in component_owners.yml`);
+    process.exit(1);
   }
 
   const owners = components[componentName];
 
   if (!owners || owners.length === 0) {
-    core.setFailed(`No owners found for component '${componentName}'`);
-    return;
+    console.error(`No owners found for component '${componentName}'`);
+    process.exit(1);
   }
 
   console.log(`Found owners: ${owners.join(', ')}`);
 
   // Assign the issue to the owners
-  const issueNumber = context.payload.issue.number;
+  const octokit = new Octokit({ auth: token });
 
-  await github.rest.issues.addAssignees({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
+  await octokit.rest.issues.addAssignees({
+    owner,
+    repo,
     issue_number: issueNumber,
     assignees: owners
   });
 
   console.log(`Successfully assigned issue #${issueNumber} to ${owners.join(', ')}`);
-};
+}
+
+main().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

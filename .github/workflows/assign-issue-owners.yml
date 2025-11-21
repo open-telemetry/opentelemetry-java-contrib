@@ -29,11 +29,11 @@ jobs:
         run: npm ci
         working-directory: .github/scripts
 
-      - name: Parse component label and assign owners
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      - name: Assign issue to component owners
+        run: node .github/scripts/assign-issue-owners.js
         env:
-          NODE_PATH: ${{ github.workspace }}/.github/scripts/node_modules
-        with:
-          script: |
-            const script = require('./.github/scripts/assign-issue-owners.js');
-            await script({ github, context, core });
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
