@@ -1,0 +1,10 @@
+{
+  "name": "workflows",
+  "version": "1.0.0",
+  "description": "Dependencies for GitHub Action workflows",
+  "private": true,
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "yaml": "2.8.1"
+  }
+}
