@@ -98,3 +98,6 @@ components:
   ibm-mq-metrics:
     - breedx-splk
     - atoulme
+  dynamic-control:
+    - jackshirazi
+    - LikeTheSalad
