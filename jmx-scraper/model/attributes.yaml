@@ -1,0 +1,16 @@
+groups:
+  - id: metric.attributes
+    type: attribute_group
+    brief: "Metric attributes."
+    attributes:
+      - id: pool.name
+        brief: "Pool name."
+        type: string
+        stability: beta
+        examples: [ "Memory pool 1", "Code Cache", "Metaspace", "Compressed Class Space"]
+
+      - id: gc.name
+        brief: "Garbage Collector name."
+        type: string
+        stability: beta
+        examples: [ "Parallel GC", "G1 Young Generation"]
