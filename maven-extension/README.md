@@ -105,26 +105,26 @@ Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with
 
 In addition to the span attributes captured on  every Maven plugin goal execution as described above:
 
-| Span attribute                         |  Type  | Description                                                                                                                                         |
-|----------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `http.method`                          | string | `POST`                                                                                                                                              |
-| `http.url`                             | string | Base URL of the uploaded artifact `${maven.build.repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`         |
-| `maven.build.repository.id`            | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository)  |
-| `maven.build.repository.url`           | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository) |
-| `peer.service`                         | string | Maven repository hostname deduced from the Repository URL                                                                                           |
+| Span attribute                         |  Type  | Description                                                                                                                                                             |
+|----------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------  --|
+| `http.method`                          | string | `POST`                                                                                                                                                                  |
+| `http.url`                             | string | Base URL of the uploaded artifact `${maven.build.repository.url}/${groupId}/${artifactId}/${version}` where the `.` of `${groupId}` are replaced by `/`               |
+| `maven.build.repository.id`            | string | ID of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository)                     |
+| `maven.build.repository.url`           | string | URL of the Maven repository to which the artifact is deployed. See [Maven POM reference / Repository](https://maven.apache.org/pom.html#Repository)                    |
+| `peer.service`                         | string | Maven repository hostname deduced from the Repository URL                                                                                                               |
 
 The `span.kind` is set to `client`
 
 ### `jib:build`
 
-| Span attribute                                  |  Type    | Description                                                                                                |
-|-------------------------------------------------|----------|------------------------------------------------------------------------------------------------------------|
-| `http.method`                                   | string   | `POST`                                                                                                     |
-| `http.url`                                      | string   | URL on the Docker registry deduced from the Docker image specified in the `build` goal configuration.      |
-| `maven.build.container.image.name`              | string   | Name of the produced Docker image                                                                          |
-| `maven.build.container.image.tags`              | string[] | Tags of the produced Docker image                                                                          |
-| `maven.build.container.registry.url`            | string   | URL of the container registry to which this image is uploaded.                                             |
-| `peer.service`                                  | string   | Docker Registry hostname.                                                                                  |
+| Span attribute                                  |  Type    | Description                                                                                                                |
+|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------|
+| `http.method`                                   | string   | `POST`                                                                                                                     |
+| `http.url`                                      | string   | URL on the Docker registry deduced from the Docker image specified in the `build` goal configuration.                      |
+| `maven.build.container.image.name`              | string   | Name of the produced Docker image                                                                                          |
+| `maven.build.container.image.tags`              | string[] | Tags of the produced Docker image                                                                                          |
+| `maven.build.container.registry.url`            | string   | URL of the container registry to which this image is uploaded.                                                             |
+| `peer.service`                                  | string   | Docker Registry hostname.                                                                                                  |
 
 The `span.kind` is set to `client`
 
@@ -132,12 +132,12 @@ The `span.kind` is set to `client`
 
 See <https://github.com/snyk/snyk-maven-plugin>.
 
-| Span attribute |  Type  | Description                                                                                    |
-|----------------|--------|------------------------------------------------------------------------------------------------|
-| `http.method`  | string | `POST`                                                               |
-| `http.url`     | string | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin.|
-| `rpc.method`   | string | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.|
-| `peer.service` | string | `snyk.io`                                                            |
+| Span attribute |  Type  | Description                                                                                             |
+|----------------|--------|-------------------------------------------------------------------------------------------------------- -|
+| `http.method`  | string | `POST`                                                                                                  |
+| `http.url`     | string | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin.        |
+| `rpc.method`   | string | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.                                 |
+| `peer.service` | string | `snyk.io`                                                                                               |
 
 The `span.kind` is set to `client`
 
