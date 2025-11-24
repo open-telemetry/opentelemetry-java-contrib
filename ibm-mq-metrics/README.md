@@ -9,7 +9,7 @@ program-to-program messaging across multiple platforms.
 
 The IBM MQ metrics utility here can monitor multiple queues managers and their resources,
 namely queues, topics, channels and listeners The metrics are extracted out using the
-[PCF command messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm).
+[PCF command messages](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=tasks-introduction-programmable-command-formats).
 
 The metrics for queue manager, queue, topic, channel and listener can be configured.
 
@@ -83,6 +83,17 @@ java \
    ./my-config.yml
 ```
 
+## Generate code with Weaver
+
+Weaver generates code, documentation and configuration for this program.
+
+```shell
+make generate
+```
+
+This generates `config.yaml`, the `docs` folder, the `src/main/java/io/opentelemetry/ibm/mq/metrics`
+Java code folder.
+
 ## Connection
 
 There are two transport modes in which this extension can be run:
@@ -120,7 +131,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 2. Please add the following JVM arguments to the MA start up command or script.
 
    ```-Dcom.ibm.mq.cfg.useIBMCipherMappings=false```  (If you are using IBM Cipher Suites, set the
-   flag to true. Please visit [this link](http://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.dev.doc/q113210_.htm) for more details.
+   flag to true. Please visit [this link](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=java-ssltls-cipherspecs-ciphersuites-in-mq-classes) for more details.
    )
 3. To configure SSL, the MA's trust store and keystore needs to be setup with the JKS filepath.
    They can be passed either as Machine Agent JVM arguments or configured in config.yml (sslConnection) <br />
@@ -147,21 +158,20 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 
 **Note** : Please make sure to not use tab (\t) while editing yaml files. You may want to validate
 the yaml file using a [yaml validator](https://jsonformatter.org/yaml-validator). Configure the monitor by copying and editing the
-config.yml file in <code>src/main/resources/config.yml</code>.
+config.yml file.
 
 1. Configure the queueManagers with appropriate fields and filters. You can configure multiple
    queue managers in one configuration file.
 2. To run the extension at a frequency > 1 minute, please configure the taskSchedule section.
-   Refer to the [Task Schedule](https://community.appdynamics.com/t5/Knowledge-Base/Task-Schedule-for-Extensions/ta-p/35414) doc for details.
 
 ### Monitoring Workings - Internals
 
-This software extracts metrics through [PCF framework](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q019990_.htm).
+This software extracts metrics through [PCF framework](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=tasks-introduction-programmable-command-formats).
 [A complete list of PCF commands are listed here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.adm.doc/q086870_.htm).
 Each queue manager has an administration queue with a standard queue name and
 the extension sends PCF command messages to that queue. On Windows and Unix platforms, the PCF
 commands are sent is always sent to the SYSTEM.ADMIN.COMMAND.QUEUE queue.
-[More details mentioned here](https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.adm.doc/q020010_.htm)
+[More details mentioned here](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=formats-pcf-command-messages)
 
 By default, the PCF responses are sent to the SYSTEM.DEFAULT.MODEL.QUEUE. Using this queue causes
 a temporary dynamic queue to be created. You can override the default here by using the

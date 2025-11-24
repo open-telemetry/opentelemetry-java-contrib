@@ -56,9 +56,9 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
 
     public abstract Builder setInstrumentationScopeInfo(InstrumentationScopeInfo value);
 
-    public abstract Builder setTimestampEpochNanos(Long value);
+    public abstract Builder setTimestampEpochNanos(long value);
 
-    public abstract Builder setObservedTimestampEpochNanos(Long value);
+    public abstract Builder setObservedTimestampEpochNanos(long value);
 
     public abstract Builder setSpanContext(SpanContext value);
 
@@ -70,7 +70,7 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
 
     public abstract Builder setAttributes(Attributes value);
 
-    public abstract Builder setTotalAttributeCount(Integer value);
+    public abstract Builder setTotalAttributeCount(int value);
 
     public abstract Builder setEventName(String value);
 

@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.ProtoLogsDataMapper;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
@@ -29,10 +28,5 @@ public final class LogRecordDataDeserializer implements SignalDeserializer<LogRe
     } catch (IOException | IllegalStateException e) {
       throw new DeserializationException(e);
     }
-  }
-
-  @Override
-  public String signalType() {
-    return SignalTypes.logs.name();
   }
 }

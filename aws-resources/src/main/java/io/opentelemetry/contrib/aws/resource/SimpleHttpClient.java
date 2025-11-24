@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.WARNING;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -13,7 +16,6 @@ import java.security.cert.CertificateFactory;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
@@ -25,7 +27,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /** A simple HTTP client based on OkHttp. Not meant for high throughput. */
 final class SimpleHttpClient {
@@ -72,7 +73,7 @@ final class SimpleHttpClient {
       int responseCode = response.code();
       if (responseCode != 200) {
         logger.log(
-            Level.FINE,
+            FINE,
             "Error response from "
                 + urlStr
                 + " code ("
@@ -81,10 +82,9 @@ final class SimpleHttpClient {
                 + response.message());
         return "";
       }
-      ResponseBody body = response.body();
-      return body != null ? body.string() : "";
+      return response.body().string();
     } catch (IOException e) {
-      logger.log(Level.FINE, "SimpleHttpClient fetch string failed.", e);
+      logger.log(FINE, "SimpleHttpClient fetch string failed.", e);
     }
 
     return "";
@@ -101,7 +101,7 @@ final class SimpleHttpClient {
       tmf.init(keyStore);
       return (X509TrustManager) tmf.getTrustManagers()[0];
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
+      logger.log(WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
       return null;
     }
   }
@@ -117,7 +117,7 @@ final class SimpleHttpClient {
       return context.getSocketFactory();
 
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
+      logger.log(WARNING, "Build SslSocketFactory for K8s restful client exception.", e);
     }
     return null;
   }
@@ -138,7 +138,7 @@ final class SimpleHttpClient {
       }
       return trustStore;
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Cannot load KeyStore from " + certPath);
+      logger.log(WARNING, "Cannot load KeyStore from " + certPath);
       return null;
     }
   }

@@ -119,7 +119,7 @@ public class GroovyMetricEnvironment {
    *
    * @param config - used to establish exporter type (logging by default) and connection info
    */
-  public GroovyMetricEnvironment(final JmxConfig config) {
+  public GroovyMetricEnvironment(JmxConfig config) {
     this(
         config,
         "io.opentelemetry.contrib.jmxmetrics",
@@ -131,7 +131,7 @@ public class GroovyMetricEnvironment {
     meterProvider.forceFlush().join(10, TimeUnit.SECONDS);
   }
 
-  protected static Attributes mapToAttributes(@Nullable final Map<String, String> labelMap) {
+  protected static Attributes mapToAttributes(@Nullable Map<String, String> labelMap) {
     if (labelMap == null) {
       return Attributes.empty();
     }

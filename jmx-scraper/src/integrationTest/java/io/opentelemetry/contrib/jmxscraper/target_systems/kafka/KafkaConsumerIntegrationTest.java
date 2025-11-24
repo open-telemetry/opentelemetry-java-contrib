@@ -25,7 +25,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
+class KafkaConsumerIntegrationTest extends TargetSystemIntegrationTest {
 
   @Override
   protected Collection<GenericContainer<?>> createPrerequisiteContainers() {

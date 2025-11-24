@@ -3,7 +3,10 @@
   extends: [
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
+    'customManagers:githubActionsVersions',
   ],
+  ignorePaths: [], // overwrite default ignore which includes **/test/**
+                   // used to update docker image versions used in Java test files
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
     'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
@@ -50,6 +53,7 @@
       // major.minor.patch, under the assumption that you would want to update to the stable version
       // of that release instead of the unstable version for a future release
       ignoreUnstable: false,
+      allowedVersions: '!/\\-SNAPSHOT$/',
     },
     {
       // prevent 3.0.1u2 -> 3.0.1
@@ -60,8 +64,35 @@
     },
     {
       // disruptor 4+ requires Java 11+
+      matchFileNames: [
+        'inferred-spans/build.gradle.kts',
+      ],
       matchPackageNames: [
         'com.lmax:disruptor',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
+      // junit 6+ requires Java 17+
+      matchPackageNames: [
+        'org.junit:**',
+        'org.junit.jupiter:**',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
+      // caffeine 3+ requires Java 11+
+      matchFileNames: [
+        'aws-xray/build.gradle.kts',
+      ],
+      matchPackageNames: [
+        'com.github.ben-manes.caffeine:caffeine',
       ],
       matchUpdateTypes: [
         'major',
@@ -85,11 +116,14 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.mockito:{/,}**',
+        'org.mockito:**',
       ],
     },
     {
       // agrona 1.23+ requires Java 17+
+      matchFileNames: [
+        'inferred-spans/build.gradle.kts',
+      ],
       matchPackageNames: [
         'org.agrona:agrona',
       ],
@@ -112,6 +146,9 @@
     },
     {
       // pinned version for compatibility
+      matchFileNames: [
+        'micrometer-meter-provider/build.gradle.kts',
+      ],
       matchPackageNames: [
         'io.micrometer:micrometer-core',
       ],
@@ -120,38 +157,64 @@
     },
     {
       // pinned version for compatibility
+      matchFileNames: [
+        'maven-extension/build.gradle.kts',
+      ],
       matchCurrentVersion: '3.5.0',
       enabled: false,
       matchPackageNames: [
-        'org.apache.maven:{/,}**',
+        'org.apache.maven:**',
       ],
     },
     {
       groupName: 'spotless packages',
       matchPackageNames: [
-        'com.diffplug.spotless{/,}**',
+        'com.diffplug.spotless',
+        'com.diffplug.spotless:**',
       ],
     },
     {
       groupName: 'hipparchus packages',
       matchPackageNames: [
-        'org.hipparchus{/,}**',
+        'org.hipparchus:**',
       ],
     },
     {
       groupName: 'errorprone packages',
       matchPackageNames: [
-        'com.google.errorprone{/,}**',
+        'com.google.errorprone:**',
+      ],
+    },
+    {
+      groupName: 'jackson packages',
+      matchPackageNames: [
+        'com.fasterxml.jackson:**',
+        'com.fasterxml.jackson.core:**',
+      ],
+    },
+    {
+      groupName: 'develocity packages',
+      matchPackageNames: [
+        'com.gradle.develocity:**',
+      ],
+    },
+    {
+      groupName: 'bouncycastle packages',
+      matchPackageNames: [
+        'org.bouncycastle:**',
       ],
     },
     {
       // pinned version for compatibility with java 8 JFR parsing
+      matchFileNames: [
+        'jfr-connection/build.gradle.kts',
+      ],
       matchUpdateTypes: [
         'major',
       ],
       enabled: false,
       matchPackageNames: [
-        'org.openjdk.jmc{/,}**',
+        'org.openjdk.jmc:**',
       ],
     },
     {
@@ -162,7 +225,7 @@
       matchCurrentVersion: '5.0.0',
       enabled: false,
       matchPackageNames: [
-        'jakarta.servlet:{/,}**',
+        'jakarta.servlet:**',
       ],
     },
     {
@@ -175,7 +238,7 @@
       ],
       enabled: false,
       matchPackageNames: [
-        'org.springframework.boot{/,}**',
+        'org.springframework.boot:**',
       ],
     },
   ],
@@ -197,10 +260,33 @@
         '.github/workflows/**',
       ],
       matchStrings: [
-        '(?<currentValue>\\d+) # renovate: datasource=java-version',
+        '(?<currentValue>\\d+) # renovate\\(java-version\\)',
       ],
       depNameTemplate: 'java',
       extractVersionTemplate: '^(?<version>\\d+)',
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'github-releases',
+      managerFilePatterns: [
+        '**/build.gradle.kts',
+      ],
+      matchStrings: [
+        '"(?<currentValue>.+?)" // renovate\\(github-releases\\): (?<depName>[^\\s]+)',
+      ],
+      versioningTemplate: 'semver',
+    },
+    {
+      customType: 'regex',
+      datasourceTemplate: 'docker',
+      managerFilePatterns: [
+        '**/*.java',
+      ],
+      matchStrings: [
+        '"(?<depName>otel/opentelemetry-collector-contrib):(?<currentValue>[^@"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"',
+      ],
+      autoReplaceStringTemplate: '"{{depName}}:{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+      versioningTemplate: 'docker',
     },
   ],
 }

@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.sampler.consistent;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
@@ -25,7 +24,7 @@ import org.hipparchus.stat.inference.GTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ConsistentProbabilityBasedSamplerTest {
+class ConsistentProbabilityBasedSamplerTest {
 
   private Context parentContext;
   private String traceId;
@@ -63,8 +62,8 @@ public class ConsistentProbabilityBasedSamplerTest {
                 .getUpdatedTraceState(TraceState.getDefault())
                 .get(OtelTraceState.TRACE_STATE_KEY);
         OtelTraceState traceState = OtelTraceState.parse(traceStateString);
-        assertTrue(traceState.hasValidR());
-        assertTrue(traceState.hasValidP());
+        assertThat(traceState.hasValidR()).isTrue();
+        assertThat(traceState.hasValidP()).isTrue();
         observedPvalues.merge(traceState.getP(), 1L, Long::sum);
       }
     }
@@ -72,7 +71,7 @@ public class ConsistentProbabilityBasedSamplerTest {
   }
 
   @Test
-  public void test() {
+  void test() {
 
     // fix seed to get reproducible results
     SplittableRandom random = new SplittableRandom(0);

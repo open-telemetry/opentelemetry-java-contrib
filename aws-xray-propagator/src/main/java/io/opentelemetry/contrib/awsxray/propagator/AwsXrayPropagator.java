@@ -6,9 +6,11 @@
 package io.opentelemetry.contrib.awsxray.propagator;
 
 import static io.opentelemetry.api.internal.OtelEncodingUtils.isValidBase16String;
+import static java.util.Collections.singletonList;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
+import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -20,7 +22,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -80,7 +81,10 @@ public final class AwsXrayPropagator implements TextMapPropagator {
   private static final String INVALID_LINEAGE = "-1:11111111:0";
   private static final int NUM_OF_LINEAGE_DELIMITERS = 2;
 
-  private static final List<String> FIELDS = Collections.singletonList(TRACE_HEADER_KEY);
+  // Copied from AwsSamplingResult in aws-xray extension
+  private static final String AWS_XRAY_SAMPLING_RULE_TRACE_STATE_KEY = "xrsr";
+
+  private static final List<String> FIELDS = singletonList(TRACE_HEADER_KEY);
 
   private static final AwsXrayPropagator INSTANCE = new AwsXrayPropagator();
 
@@ -140,6 +144,16 @@ public final class AwsXrayPropagator implements TextMapPropagator {
 
     Baggage baggage = Baggage.fromContext(context);
     String lineageHeader = baggage.getEntryValue(LINEAGE_KEY);
+    // Get sampling rule from trace state and inject into baggage
+    // This is a back up in case the next service does not have trace state propagation
+    String ruleFromTraceState =
+        spanContext.getTraceState().get(AWS_XRAY_SAMPLING_RULE_TRACE_STATE_KEY);
+    if (ruleFromTraceState != null) {
+      baggage =
+          baggage.toBuilder()
+              .put(AWS_XRAY_SAMPLING_RULE_TRACE_STATE_KEY, ruleFromTraceState)
+              .build();
+    }
 
     if (lineageHeader != null) {
       traceHeader
@@ -152,6 +166,9 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     // add 256 character truncation
     String truncatedTraceHeader = traceHeader.substring(0, Math.min(traceHeader.length(), 256));
     setter.set(carrier, TRACE_HEADER_KEY, truncatedTraceHeader);
+
+    // Ensure baggage is propagated with any modifications
+    W3CBaggagePropagator.getInstance().inject(context.with(baggage), carrier, setter);
   }
 
   @Override
@@ -245,12 +262,15 @@ public final class AwsXrayPropagator implements TextMapPropagator {
       logger.finest("Both traceId and spanId are required to extract a valid span context. ");
     }
 
+    SpanContext upstreamSpanContext = Span.fromContext(context).getSpanContext();
     SpanContext spanContext =
         SpanContext.createFromRemoteParent(
             StringUtils.padLeft(traceId, TraceId.getLength()),
             spanId,
             isSampled ? TraceFlags.getSampled() : TraceFlags.getDefault(),
-            TraceState.getDefault());
+            upstreamSpanContext.isValid()
+                ? upstreamSpanContext.getTraceState()
+                : TraceState.getDefault());
 
     if (spanContext.isValid()) {
       context = context.with(Span.wrap(spanContext));

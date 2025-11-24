@@ -5,7 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.impl;
 
-import io.opentelemetry.opamp.client.internal.OpampClient;
+import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.internal.impl.recipe.AgentToServerAppenders;
 import io.opentelemetry.opamp.client.internal.impl.recipe.RecipeManager;
 import io.opentelemetry.opamp.client.internal.impl.recipe.RequestRecipe;
@@ -19,12 +19,12 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfig
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
 import io.opentelemetry.opamp.client.internal.request.Field;
 import io.opentelemetry.opamp.client.internal.request.Request;
-import io.opentelemetry.opamp.client.internal.request.service.RequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import io.opentelemetry.opamp.client.internal.response.OpampServerResponseException;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.internal.state.ObservableState;
 import io.opentelemetry.opamp.client.internal.state.State;
+import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -146,12 +146,12 @@ public final class OpampClientImpl
 
   @Override
   public void onConnectionSuccess() {
-    callbacks.onConnect();
+    callbacks.onConnect(this);
   }
 
   @Override
   public void onConnectionFailed(Throwable throwable) {
-    callbacks.onConnectFailed(throwable);
+    callbacks.onConnectFailed(this, throwable);
   }
 
   @Override
@@ -168,7 +168,7 @@ public final class OpampClientImpl
     preserveFailedRequestRecipe();
     if (throwable instanceof OpampServerResponseException) {
       ServerErrorResponse errorResponse = ((OpampServerResponseException) throwable).errorResponse;
-      callbacks.onErrorResponse(errorResponse);
+      callbacks.onErrorResponse(this, errorResponse);
     }
   }
 
@@ -195,7 +195,7 @@ public final class OpampClientImpl
     }
 
     if (notifyOnMessage) {
-      callbacks.onMessage(messageBuilder.build());
+      callbacks.onMessage(this, messageBuilder.build());
     }
   }
 

@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 public class InferredSpansConfiguration {
 
+  private final boolean enabled;
   private final boolean profilerLoggingEnabled;
   private final boolean backupDiagnosticFiles;
   private final int asyncProfilerSafeMode;
@@ -23,13 +24,14 @@ public class InferredSpansConfiguration {
   private final Duration inferredSpansMinDuration;
   private final List<WildcardMatcher> includedClasses;
   private final List<WildcardMatcher> excludedClasses;
-  private final Duration profilerInterval;
+  private volatile Duration profilerInterval;
   private final Duration profilingDuration;
   @Nullable private final String profilerLibDirectory;
   private final BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler;
 
   @SuppressWarnings("TooManyParameters")
   public InferredSpansConfiguration(
+      boolean enabled,
       boolean profilerLoggingEnabled,
       boolean backupDiagnosticFiles,
       int asyncProfilerSafeMode,
@@ -42,6 +44,7 @@ public class InferredSpansConfiguration {
       Duration profilingDuration,
       @Nullable String profilerLibDirectory,
       BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler) {
+    this.enabled = enabled;
     this.profilerLoggingEnabled = profilerLoggingEnabled;
     this.backupDiagnosticFiles = backupDiagnosticFiles;
     this.asyncProfilerSafeMode = asyncProfilerSafeMode;
@@ -54,6 +57,10 @@ public class InferredSpansConfiguration {
     this.profilingDuration = profilingDuration;
     this.profilerLibDirectory = profilerLibDirectory;
     this.parentOverrideHandler = parentOverrideHandler;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
   public boolean isProfilingLoggingEnabled() {
@@ -82,6 +89,12 @@ public class InferredSpansConfiguration {
 
   public Duration getProfilingInterval() {
     return profilerInterval;
+  }
+
+  public Duration setProfilerInterval(Duration profilerInterval) {
+    Duration oldInterval = this.profilerInterval;
+    this.profilerInterval = profilerInterval;
+    return oldInterval;
   }
 
   public Duration getProfilingDuration() {

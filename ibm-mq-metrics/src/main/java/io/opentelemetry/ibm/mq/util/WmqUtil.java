@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WmqUtil {
+public final class WmqUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqUtil.class);
 
@@ -55,10 +55,9 @@ public class WmqUtil {
     }
   }
 
-  @SuppressWarnings("rawtypes")
   public static MQQueueManager connectToQueueManager(QueueManager queueManager) {
     WmqContext auth = new WmqContext(queueManager);
-    Hashtable env = auth.getMqEnvironment();
+    Hashtable<String, ?> env = auth.getMqEnvironment();
     try {
       MQQueueManager ibmQueueManager = new MQQueueManager(queueManager.getName(), env);
       logger.debug(

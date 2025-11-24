@@ -5,8 +5,8 @@ plugins {
   id("maven-publish")
 }
 
-description = "OpenTelemetry GCP Resources Support"
-otelJava.moduleName.set("io.opentelemetry.contrib.gcp.resource")
+description = "OpenTelemetry Azure Resources Support"
+otelJava.moduleName.set("io.opentelemetry.contrib.azure.resource")
 
 // enable publishing to maven local
 java {
@@ -29,11 +29,22 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
-//  testImplementation("org.mockito:mockito-core")
   testImplementation("com.google.guava:guava")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testImplementation("org.assertj:assertj-core")
   testImplementation("com.linecorp.armeria:armeria-junit5")
+}
+
+tasks {
+  withType<Test>().configureEach {
+    environment(
+      "WEBSITE_SITE_NAME" to "my-function",
+      "FUNCTIONS_EXTENSION_VERSION" to "1.2.3"
+    )
+    jvmArgs("-Dotel.experimental.config.file=${project.projectDir.resolve("src/test/resources/declarative-config.yaml")}")
+  }
 }

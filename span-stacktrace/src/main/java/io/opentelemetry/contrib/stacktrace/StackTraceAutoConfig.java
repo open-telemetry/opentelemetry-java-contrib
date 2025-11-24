@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.SEVERE;
+
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -23,23 +26,24 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
-  private static final String CONFIG_MIN_DURATION =
-      "otel.java.experimental.span-stacktrace.min.duration";
+  static final String PREFIX = "otel.java.experimental.span-stacktrace.";
+  static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
   private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
-
-  private static final String CONFIG_FILTER = "otel.java.experimental.span-stacktrace.filter";
+  private static final String CONFIG_FILTER = PREFIX + "filter";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          long minDuration = getMinDuration(properties);
-          if (minDuration >= 0) {
-            Predicate<ReadableSpan> filter = getFilterPredicate(properties);
-            providerBuilder.addSpanProcessor(new StackTraceSpanProcessor(minDuration, filter));
+          if (getMinDuration(properties) >= 0) {
+            providerBuilder.addSpanProcessor(create(properties));
           }
           return providerBuilder;
         });
+  }
+
+  static StackTraceSpanProcessor create(ConfigProperties properties) {
+    return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
   // package-private for testing
@@ -50,7 +54,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
       log.fine("Stack traces capture is disabled");
     } else {
       log.log(
-          Level.FINE,
+          FINE,
           "Stack traces will be added to spans with a minimum duration of {0} nanos",
           minDuration);
     }
@@ -70,7 +74,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
     if (filter == null) {
       // if value is set, lack of filtering is likely an error and must be reported
-      Level disabledLogLevel = filterClass != null ? Level.SEVERE : Level.FINE;
+      Level disabledLogLevel = filterClass != null ? SEVERE : FINE;
       log.log(disabledLogLevel, "Span stacktrace filtering disabled");
       return span -> true;
     } else {
@@ -95,7 +99,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   }
 
   @Nullable
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // filterType must implement Predicate<ReadableSpan>
   private static Predicate<ReadableSpan> getFilterInstance(Class<?> filterType) {
     try {
       Constructor<?> constructor = filterType.getConstructor();

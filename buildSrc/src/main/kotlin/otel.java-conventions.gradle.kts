@@ -7,6 +7,7 @@ plugins {
 
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
+  id("otel.japicmp-conventions")
   id("org.owasp.dependencycheck")
 }
 
@@ -17,7 +18,7 @@ group = "io.opentelemetry.contrib"
 base.archivesName.set("opentelemetry-${project.name}")
 
 // Version to use to compile code and run tests.
-val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_17
+val DEFAULT_JAVA_VERSION = JavaVersion.VERSION_21
 
 java {
   toolchain {
@@ -59,6 +60,7 @@ tasks {
       if (name.contains("Test")) {
         // serialVersionUI is basically guaranteed to be useless in tests
         compilerArgs.add("-Xlint:-serial")
+        compilerArgs.add("-Xlint:-this-escape")
       }
     }
   }
@@ -76,7 +78,7 @@ tasks {
       exceptionFormat = TestExceptionFormat.FULL
       showStandardStreams = true
     }
-    
+
     configure<JacocoTaskExtension> {
       // only care about code coverage for code in this repository
       // (in particular avoiding netty classes which sometimes end up
@@ -106,12 +108,13 @@ plugins.withId("otel.publish-conventions") {
     register("generateVersionResource") {
       val moduleName = otelJava.moduleName
       val propertiesDir = moduleName.map { layout.buildDirectory.file("generated/properties/${it.replace('.', '/')}") }
+      val projectVersion = project.version.toString()
 
-      inputs.property("project.version", project.version.toString())
+      inputs.property("project.version", projectVersion)
       outputs.dir(propertiesDir)
 
       doLast {
-        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${project.version}")
+        File(propertiesDir.get().get().asFile, "version.properties").writeText("contrib.version=${projectVersion}")
       }
     }
   }
@@ -126,7 +129,6 @@ plugins.withId("otel.publish-conventions") {
 val dependencyManagement by configurations.creating {
   isCanBeConsumed = false
   isCanBeResolved = false
-  isVisible = false
 }
 
 dependencies {
@@ -146,12 +148,12 @@ dependencies {
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     dependencies {
-      implementation(project(project.path))
+      implementation(project())
 
-      implementation(enforcedPlatform("org.junit:junit-bom:5.13.4"))
-      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:1.21.3"))
-      implementation(enforcedPlatform("com.google.guava:guava-bom:33.4.8-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.1"))
+      implementation(enforcedPlatform("org.junit:junit-bom:5.14.1"))
+      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:2.0.2"))
+      implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
+      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.33.4"))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
@@ -168,6 +170,12 @@ testing {
       runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
       runtimeOnly("org.junit.platform:junit-platform-launcher")
     }
+  }
+}
+
+tasks {
+  check {
+    dependsOn(testing.suites)
   }
 }
 

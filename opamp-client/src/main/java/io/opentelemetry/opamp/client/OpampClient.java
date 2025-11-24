@@ -1,0 +1,82 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.opamp.client;
+
+import io.opentelemetry.opamp.client.internal.response.MessageData;
+import java.io.Closeable;
+import javax.annotation.Nullable;
+import opamp.proto.AgentDescription;
+import opamp.proto.RemoteConfigStatus;
+import opamp.proto.ServerErrorResponse;
+
+public interface OpampClient extends Closeable {
+
+  static OpampClientBuilder builder() {
+    return new OpampClientBuilder();
+  }
+
+  /**
+   * Sets attributes of the Agent. The attributes will be included in the next outgoing status
+   * report. This is typically used by Agents which allow their AgentDescription to change
+   * dynamically while the OpAMPClient is started. May be also called from {@link
+   * Callbacks#onMessage(OpampClient, MessageData)}.
+   *
+   * @param agentDescription The new agent description.
+   */
+  void setAgentDescription(AgentDescription agentDescription);
+
+  /**
+   * Sets the current remote config status which will be sent in the next agent to server request.
+   *
+   * @param remoteConfigStatus The new remote config status.
+   */
+  void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus);
+
+  interface Callbacks {
+    /**
+     * Called when the connection is successfully established to the Server. For WebSocket clients
+     * this is called after the handshake is completed without any error. For HTTP clients this is
+     * called for any request if the response status is OK.
+     *
+     * @param client The client that's connected.
+     */
+    void onConnect(OpampClient client);
+
+    /**
+     * Called when the connection to the Server cannot be established. May also be called if the
+     * connection is lost and reconnection attempt fails.
+     *
+     * @param client The client that failed to connect.
+     * @param throwable The exception.
+     */
+    void onConnectFailed(OpampClient client, @Nullable Throwable throwable);
+
+    /**
+     * Called when the Server reports an error in response to some previously sent request. Useful
+     * for logging purposes. The Agent should not attempt to process the error by reconnecting or
+     * retrying previous operations. The client handles the ErrorResponse_UNAVAILABLE case
+     * internally by performing retries as necessary.
+     *
+     * @param client The client that received an error response.
+     * @param errorResponse The error returned by the Server.
+     */
+    void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse);
+
+    /**
+     * Called when the Agent receives a message that needs processing. See {@link MessageData}
+     * definition for the data that may be available for processing. During onMessage execution the
+     * {@link OpampClient} functions that change the status of the client may be called, e.g. if
+     * RemoteConfig is processed then {@link #setRemoteConfigStatus(opamp.proto.RemoteConfigStatus)}
+     * should be called to reflect the processing result. These functions may also be called after
+     * onMessage returns. This is advisable if processing can take a long time. In that case
+     * returning quickly is preferable to avoid blocking the {@link OpampClient}.
+     *
+     * @param client The client that received a message.
+     * @param messageData The server response data that needs processing.
+     */
+    void onMessage(OpampClient client, MessageData messageData);
+  }
+}

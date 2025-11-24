@@ -5,48 +5,49 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
-import static io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult.TRY_LATER;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.FIRST_LOG_RECORD;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_READ_MILLIS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MAX_FILE_AGE_FOR_WRITE_MILLIS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.SECOND_LOG_RECORD;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.THIRD_LOG_RECORD;
+import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration;
-import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.ByteArraySerializer;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.files.reader.ProcessResult;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
+import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
-import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
 import java.io.IOException;
-import java.util.function.Function;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-@SuppressWarnings("unchecked")
 class StorageTest {
+  @TempDir private File destinationDir;
   private FolderManager folderManager;
-  private Storage storage;
-  private Function<byte[], ProcessResult> processing;
-  private ReadableFile readableFile;
-  private WritableFile writableFile;
+  private Storage<LogRecordData> storage;
+  private SignalSerializer<LogRecordData> serializer;
+  private AtomicLong currentTimeMillis;
+  private static final SignalDeserializer<LogRecordData> DESERIALIZER = SignalDeserializer.ofLogs();
 
   @BeforeEach
-  void setUp() throws IOException {
-    folderManager = mock();
-    readableFile = mock();
-    writableFile = createWritableFile();
-    processing = mock();
-    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.SUCCEEDED);
-    storage = new Storage(folderManager, true);
+  void setUp() {
+    currentTimeMillis = new AtomicLong(0);
+    serializer = SignalSerializer.ofLogs();
+    folderManager = FolderManager.create(destinationDir, getConfiguration(), new TestClock());
+    storage = new Storage<>(folderManager);
   }
 
   @AfterEach
@@ -55,203 +56,167 @@ class StorageTest {
   }
 
   @Test
-  void whenReadingAndProcessingSuccessfully_returnSuccess() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile);
+  void writeAndRead() throws IOException {
+    assertThat(write(Arrays.asList(FIRST_LOG_RECORD, SECOND_LOG_RECORD))).isTrue();
+    assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
+    assertThat(destinationDir.list()).hasSize(1);
+    forwardToReadTime();
 
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
+    ReadableResult<LogRecordData> readResult = storage.readNext(DESERIALIZER);
+    assertThat(readResult).isNotNull();
+    assertThat(readResult.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
+    assertThat(destinationDir.list()).hasSize(1);
 
-    verify(readableFile).readAndProcess(processing);
+    // Delete result and read again
+    readResult.delete();
+    readResult.close();
+    ReadableResult<LogRecordData> readResult2 = storage.readNext(DESERIALIZER);
+    assertThat(readResult2).isNotNull();
+    assertThat(readResult2.getContent()).containsExactly(THIRD_LOG_RECORD);
+    assertThat(destinationDir.list()).hasSize(1);
+
+    // Read again without closing previous result
+    try {
+      storage.readNext(DESERIALIZER);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e)
+          .hasMessage("You must close any previous ReadableResult before requesting a new one");
+    }
+
+    // Read again when no more data is available (delete file)
+    readResult2.close();
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
+    assertThat(destinationDir.list()).isEmpty();
   }
 
   @Test
-  void whenReadableFileProcessingFails_returnTryLater() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile);
-    when(readableFile.readAndProcess(processing)).thenReturn(TRY_LATER);
-
-    assertEquals(TRY_LATER, storage.readAndProcess(processing));
-
-    verify(readableFile).readAndProcess(processing);
-  }
-
-  @Test
-  void whenReadingMultipleTimes_reuseReader() throws IOException {
-    ReadableFile anotherReadable = mock();
-    when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(anotherReadable);
-
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
-    assertEquals(ReadableResult.SUCCEEDED, storage.readAndProcess(processing));
-
-    verify(readableFile, times(2)).readAndProcess(processing);
-    verify(folderManager, times(1)).getReadableFile();
-    verifyNoInteractions(anotherReadable);
-  }
-
-  @Test
-  void whenWritingMultipleTimes_reuseWriter() throws IOException {
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-    WritableFile anotherWriter = createWritableFile();
-    when(folderManager.createWritableFile()).thenReturn(writableFile).thenReturn(anotherWriter);
-
-    storage.write(data);
-    storage.write(data);
-
-    verify(writableFile, times(2)).append(data);
-    verify(folderManager, times(1)).createWritableFile();
-    verifyNoInteractions(anotherWriter);
-  }
-
-  @Test
-  void whenAttemptingToReadAfterClosed_returnFailed() throws IOException {
+  void interactionAfterClosed() throws IOException {
+    assertThat(write(Arrays.asList(FIRST_LOG_RECORD, SECOND_LOG_RECORD))).isTrue();
     storage.close();
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
-  }
+    assertThat(destinationDir.list()).hasSize(1);
+    forwardToReadTime();
 
-  @Test
-  void whenAttemptingToWriteAfterClosed_returnFalse() throws IOException {
-    storage.close();
-    assertFalse(storage.write(new ByteArraySerializer(new byte[1])));
-  }
+    // Reading
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
 
-  @Test
-  void whenNoFileAvailableForReading_returnFailed() throws IOException {
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
+    // Writing
+    assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isFalse();
   }
 
   @Test
   void whenTheReadTimeExpires_lookForNewFileToRead() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
+    long firstFileWriteTime = 1000;
+    long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
+    currentTimeMillis.set(firstFileWriteTime);
+    assertThat(write(Arrays.asList(FIRST_LOG_RECORD, SECOND_LOG_RECORD))).isTrue();
 
-    storage.readAndProcess(processing);
+    // Forward past first file write time
+    currentTimeMillis.set(secondFileWriteTime);
+    assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
+    assertThat(destinationDir.list())
+        .containsExactlyInAnyOrder(
+            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
 
-    verify(folderManager, times(2)).getReadableFile();
+    // Forward past first time read
+    currentTimeMillis.set(firstFileWriteTime + MAX_FILE_AGE_FOR_READ_MILLIS + 1);
+
+    // Read
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(THIRD_LOG_RECORD);
+    assertThat(destinationDir.list())
+        .containsExactlyInAnyOrder(
+            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+
+    // Purge expired files on write
+    currentTimeMillis.set(50000);
+    assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
+    assertThat(destinationDir.list()).containsExactly("50000");
   }
 
   @Test
   void whenNoMoreLinesToRead_lookForNewFileToRead() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
+    long firstFileWriteTime = 1000;
+    long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
+    currentTimeMillis.set(firstFileWriteTime);
+    assertThat(write(Arrays.asList(FIRST_LOG_RECORD, SECOND_LOG_RECORD))).isTrue();
 
-    storage.readAndProcess(processing);
+    // Forward past first file write time
+    currentTimeMillis.set(secondFileWriteTime);
+    assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
+    assertThat(destinationDir.list())
+        .containsExactlyInAnyOrder(
+            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
 
-    verify(folderManager, times(2)).getReadableFile();
+    // Forward to all files read time
+    currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+
+    // Read
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
+    assertThat(destinationDir.list())
+        .containsExactlyInAnyOrder(
+            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+    result.delete();
+    result.close();
+
+    // Read again
+    ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
+    assertThat(result2).isNotNull();
+    assertThat(result2.getContent()).containsExactly(THIRD_LOG_RECORD);
+    assertThat(destinationDir.list()).containsExactly(String.valueOf(secondFileWriteTime));
+    result2.close();
   }
 
   @Test
-  void whenResourceClosed_lookForNewFileToRead() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile).thenReturn(null);
-    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
+  void deleteFilesWithCorruptedData() throws IOException {
+    // Add files with invalid data
+    Files.write(
+        new File(destinationDir, "1000").toPath(), "random data".getBytes(StandardCharsets.UTF_8));
+    Files.write(
+        new File(destinationDir, "2000").toPath(), "random data".getBytes(StandardCharsets.UTF_8));
+    Files.write(
+        new File(destinationDir, "3000").toPath(), "random data".getBytes(StandardCharsets.UTF_8));
+    Files.write(
+        new File(destinationDir, "4000").toPath(), "random data".getBytes(StandardCharsets.UTF_8));
 
-    storage.readAndProcess(processing);
+    // Set time ready to read all files
+    currentTimeMillis.set(4000 + MIN_FILE_AGE_FOR_READ_MILLIS);
 
-    verify(folderManager, times(2)).getReadableFile();
+    // Read
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
+    assertThat(destinationDir.list()).containsExactly("4000"); // it tries 3 times max per call.
   }
 
-  @Test
-  void whenEveryNewFileFoundCannotBeRead_returnContentNotAvailable() throws IOException {
-    when(folderManager.getReadableFile()).thenReturn(readableFile);
-    when(readableFile.readAndProcess(processing)).thenReturn(ReadableResult.FAILED);
-
-    assertEquals(ReadableResult.FAILED, storage.readAndProcess(processing));
-
-    verify(folderManager, times(3)).getReadableFile();
+  private void forwardToReadTime() {
+    forwardCurrentTimeByMillis(MIN_FILE_AGE_FOR_READ_MILLIS);
   }
 
-  @Test
-  void appendDataToFile() throws IOException {
-    when(folderManager.createWritableFile()).thenReturn(writableFile);
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-
-    storage.write(data);
-
-    verify(writableFile).append(data);
+  private void forwardCurrentTimeByMillis(long millis) {
+    currentTimeMillis.set(currentTimeMillis.get() + millis);
   }
 
-  @Test
-  void whenWritingTimeoutHappens_retryWithNewFile() throws IOException {
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-    WritableFile workingWritableFile = createWritableFile();
-    when(folderManager.createWritableFile())
-        .thenReturn(writableFile)
-        .thenReturn(workingWritableFile);
-    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
-
-    storage.write(data);
-
-    verify(folderManager, times(2)).createWritableFile();
+  private boolean write(Collection<LogRecordData> items) throws IOException {
+    serializer.initialize(items);
+    try {
+      return storage.write(serializer);
+    } finally {
+      serializer.reset();
+    }
   }
 
-  @Test
-  void whenThereIsNoSpaceAvailableForWriting_retryWithNewFile() throws IOException {
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-    WritableFile workingWritableFile = createWritableFile();
-    when(folderManager.createWritableFile())
-        .thenReturn(writableFile)
-        .thenReturn(workingWritableFile);
-    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
+  private class TestClock implements Clock {
 
-    storage.write(data);
+    @Override
+    public long now() {
+      return TimeUnit.MILLISECONDS.toNanos(currentTimeMillis.get());
+    }
 
-    verify(folderManager, times(2)).createWritableFile();
-  }
-
-  @Test
-  void whenWritingResourceIsClosed_retryWithNewFile() throws IOException {
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-    WritableFile workingWritableFile = createWritableFile();
-    when(folderManager.createWritableFile())
-        .thenReturn(writableFile)
-        .thenReturn(workingWritableFile);
-    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
-
-    storage.write(data);
-
-    verify(folderManager, times(2)).createWritableFile();
-  }
-
-  @Test
-  void whenEveryAttemptToWriteFails_returnFalse() throws IOException {
-    ByteArraySerializer data = new ByteArraySerializer(new byte[1]);
-    when(folderManager.createWritableFile()).thenReturn(writableFile);
-    when(writableFile.append(data)).thenReturn(WritableResult.FAILED);
-
-    assertFalse(storage.write(data));
-
-    verify(folderManager, times(3)).createWritableFile();
-  }
-
-  @Test
-  void whenClosing_closeWriterAndReaderIfNotNull() throws IOException {
-    when(folderManager.createWritableFile()).thenReturn(writableFile);
-    when(folderManager.getReadableFile()).thenReturn(readableFile);
-    storage.write(new ByteArraySerializer(new byte[1]));
-    storage.readAndProcess(processing);
-
-    storage.close();
-
-    verify(writableFile).close();
-    verify(readableFile).close();
-  }
-
-  @Test
-  void whenMinFileReadIsNotGraterThanMaxFileWrite_throwException() {
-    StorageConfiguration invalidConfig =
-        StorageConfiguration.builder()
-            .setMaxFileAgeForWriteMillis(2)
-            .setMinFileAgeForReadMillis(1)
-            .setRootDir(new File("."))
-            .build();
-
-    assertThatThrownBy(
-            () -> Storage.builder(SignalTypes.logs).setStorageConfiguration(invalidConfig))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(
-            "The configured max file age for writing must be lower than the configured min file age for reading");
-  }
-
-  private static WritableFile createWritableFile() throws IOException {
-    WritableFile mock = mock();
-    when(mock.append(any())).thenReturn(WritableResult.SUCCEEDED);
-    return mock;
+    @Override
+    public long nanoTime() {
+      return 0;
+    }
   }
 }

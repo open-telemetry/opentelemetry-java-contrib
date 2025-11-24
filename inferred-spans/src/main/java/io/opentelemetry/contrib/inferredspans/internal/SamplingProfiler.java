@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -149,8 +150,10 @@ public class SamplingProfiler implements Runnable {
   private final ProfilingActivationListener activationListener;
 
   private final Supplier<Tracer> tracerProvider;
+  @Nullable private final File tempDir;
 
   private final AsyncProfiler profiler;
+  @Nullable private volatile Future<?> profilingTask;
 
   /**
    * Creates a sampling profiler, optionally relying on existing files.
@@ -163,14 +166,17 @@ public class SamplingProfiler implements Runnable {
    * @param activationEventsFile activation events file, if {@literal null} a temp file will be used
    * @param jfrFile java flight recorder file, if {@literal null} a temp file will be used instead
    */
+  @SuppressWarnings("this-escape")
   public SamplingProfiler(
       InferredSpansConfiguration config,
       SpanAnchoredClock nanoClock,
       Supplier<Tracer> tracerProvider,
       @Nullable File activationEventsFile,
-      @Nullable File jfrFile) {
+      @Nullable File jfrFile,
+      @Nullable File tempDir) {
     this.config = config;
     this.tracerProvider = tracerProvider;
+    this.tempDir = tempDir;
     this.scheduler =
         Executors.newSingleThreadScheduledExecutor(
             r -> {
@@ -250,12 +256,13 @@ public class SamplingProfiler implements Runnable {
 
   private synchronized void createFilesIfRequired() throws IOException {
     if (jfrFile == null || !jfrFile.exists()) {
-      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr");
+      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr", tempDir);
       jfrFile.deleteOnExit();
       canDeleteJfrFile = true;
     }
     if (activationEventsFile == null || !activationEventsFile.exists()) {
-      activationEventsFile = File.createTempFile("otel-inferred-activation-events-", ".bin");
+      activationEventsFile =
+          File.createTempFile("otel-inferred-activation-events-", ".bin", tempDir);
       activationEventsFile.deleteOnExit();
       canDeleteActivationEventsFile = true;
     }
@@ -350,6 +357,10 @@ public class SamplingProfiler implements Runnable {
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
   public void run() {
+    if (!config.isEnabled()) {
+      logger.fine("Profiling is disabled, not starting profiling session");
+      return;
+    }
 
     // lazily create temporary files
     try {
@@ -385,7 +396,7 @@ public class SamplingProfiler implements Runnable {
 
     if (!interrupted && !scheduler.isShutdown()) {
       long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-      scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -723,7 +734,19 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings("FutureReturnValueIgnored")
   public void start() {
-    scheduler.submit(this);
+    profilingTask = scheduler.submit(this);
+  }
+
+  @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
+  public void reschedule() {
+    Future<?> future = this.profilingTask;
+    if (future != null) {
+      if (future.cancel(true)) {
+        Duration profilingDuration = config.getProfilingDuration();
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      }
+    }
   }
 
   public void stop() throws InterruptedException, IOException {

@@ -141,7 +141,7 @@ class MBeanHelperTest {
     mBeanHelper.fetch();
 
     assertThat(mBeanHelper.getAttribute("SomeAttribute"))
-        .hasSameElementsAs(Stream.of(new String[] {"otherValue"}).collect(Collectors.toList()));
+        .hasSameElementsAs(Stream.of("otherValue").collect(Collectors.toList()));
   }
 
   @Test
@@ -169,10 +169,9 @@ class MBeanHelperTest {
     mBeanHelper.fetch();
 
     assertThat(mBeanHelper.getAttribute("SomeAttribute"))
-        .hasSameElementsAs(Stream.of(new String[] {"newValue"}).collect(Collectors.toList()));
+        .hasSameElementsAs(Stream.of("newValue").collect(Collectors.toList()));
     assertThat(mBeanHelper.getAttribute("AnotherAttribute"))
-        .hasSameElementsAs(
-            Stream.of(new String[] {"anotherNewValue"}).collect(Collectors.toList()));
+        .hasSameElementsAs(Stream.of("anotherNewValue").collect(Collectors.toList()));
   }
 
   @Test
@@ -190,7 +189,7 @@ class MBeanHelperTest {
     mBeanHelper.fetch();
 
     assertThat(mBeanHelper.getAttribute("CustomAttribute"))
-        .hasSameElementsAs(Stream.of(new String[] {"customValue"}).collect(Collectors.toList()));
+        .hasSameElementsAs(Stream.of("customValue").collect(Collectors.toList()));
   }
 
   private static void registerThings(String thingName) throws Exception {

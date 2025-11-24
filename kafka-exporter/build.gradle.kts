@@ -14,7 +14,7 @@ otelJava {
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
   api("io.opentelemetry:opentelemetry-sdk-common")
-  api("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
+  api("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
   api("org.apache.kafka:kafka-clients")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -31,8 +31,8 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-api")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("com.google.guava:guava")
-  testImplementation("org.testcontainers:junit-jupiter")
-  testImplementation("org.testcontainers:kafka")
+  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+  testImplementation("org.testcontainers:testcontainers-kafka")
   testImplementation("org.rnorth.duct-tape:duct-tape")
   testImplementation("org.testcontainers:testcontainers")
 

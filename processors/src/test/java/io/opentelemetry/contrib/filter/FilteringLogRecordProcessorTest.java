@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.filter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.trace.Span;
@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class FilteringLogRecordProcessorTest {
+class FilteringLogRecordProcessorTest {
 
   private final InMemoryLogRecordExporter memoryLogRecordExporter =
       InMemoryLogRecordExporter.create();
@@ -79,7 +79,7 @@ public class FilteringLogRecordProcessorTest {
                     logRecordData -> {
                       SpanContext spanContext = logRecordData.getSpanContext();
                       return spanContext.isSampled();
-                    }) {})
+                    }))
             .build()
             .get("TestScope");
   }
@@ -93,14 +93,14 @@ public class FilteringLogRecordProcessorTest {
       sdk.getLogsBridge().get("test").logRecordBuilder().setBody("One Log").emit();
       List<LogRecordData> finishedLogRecordItems =
           memoryLogRecordExporter.getFinishedLogRecordItems();
-      assertEquals(1, finishedLogRecordItems.size());
+      assertThat(finishedLogRecordItems.size()).isEqualTo(1);
       try (Scope scope = span.makeCurrent()) {
 
       } finally {
         span.end();
       }
       List<SpanData> finishedSpans = spansExporter.getFinishedSpanItems();
-      assertEquals(1, finishedSpans.size());
+      assertThat(finishedSpans.size()).isEqualTo(1);
     }
   }
 
@@ -109,6 +109,6 @@ public class FilteringLogRecordProcessorTest {
     logger.logRecordBuilder().setBody("One Log").emit();
     List<LogRecordData> finishedLogRecordItems =
         memoryLogRecordExporter.getFinishedLogRecordItems();
-    assertEquals(0, finishedLogRecordItems.size());
+    assertThat(finishedLogRecordItems.size()).isEqualTo(0);
   }
 }

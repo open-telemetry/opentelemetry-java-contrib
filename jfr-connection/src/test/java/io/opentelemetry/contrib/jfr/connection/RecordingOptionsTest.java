@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.jfr.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.errorprone.annotations.Keep;
 import java.util.HashMap;
@@ -33,14 +33,14 @@ class RecordingOptionsTest {
   @MethodSource
   void testGetName(String testValue, String expected) {
     RecordingOptions opts = new RecordingOptions.Builder().name(testValue).build();
-    assertEquals(expected, opts.getName());
+    assertThat(opts.getName()).isEqualTo(expected);
   }
 
   @Test
   void testGetNameDefault() {
     String expected = "";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getName());
+    assertThat(opts.getName()).isEqualTo(expected);
   }
 
   @Keep
@@ -64,14 +64,14 @@ class RecordingOptionsTest {
   @MethodSource
   void testGetMaxAge(String testValue, String expected) {
     RecordingOptions opts = new RecordingOptions.Builder().maxAge(testValue).build();
-    assertEquals(expected, opts.getMaxAge());
+    assertThat(opts.getMaxAge()).isEqualTo(expected);
   }
 
   @Test
   void testGetMaxAgeDefault() {
     String expected = "0";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getMaxAge());
+    assertThat(opts.getMaxAge()).isEqualTo(expected);
   }
 
   @Keep
@@ -91,9 +91,8 @@ class RecordingOptionsTest {
   @ParameterizedTest
   @MethodSource
   void testGetMaxAgeNegative(String badValue) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new RecordingOptions.Builder().maxAge(badValue).build());
+    assertThatThrownBy(() -> new RecordingOptions.Builder().maxAge(badValue).build())
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Keep
@@ -113,14 +112,14 @@ class RecordingOptionsTest {
   @MethodSource
   void testGetMaxSize(String testValue, String expected) {
     RecordingOptions opts = new RecordingOptions.Builder().maxSize(testValue).build();
-    assertEquals(expected, opts.getMaxSize());
+    assertThat(opts.getMaxSize()).isEqualTo(expected);
   }
 
   @Test
   void testGetMaxSizeDefault() {
     String expected = "0";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getMaxSize());
+    assertThat(opts.getMaxSize()).isEqualTo(expected);
   }
 
   @Keep
@@ -135,30 +134,29 @@ class RecordingOptionsTest {
   @ParameterizedTest
   @MethodSource
   void testGetMaxSizeNegative(String badValue) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new RecordingOptions.Builder().maxSize(badValue).build());
+    assertThatThrownBy(() -> new RecordingOptions.Builder().maxSize(badValue).build())
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void testGetDumpOnExit() {
     String expected = "true";
     RecordingOptions opts = new RecordingOptions.Builder().dumpOnExit(expected).build();
-    assertEquals(expected, opts.getDumpOnExit());
+    assertThat(opts.getDumpOnExit()).isEqualTo(expected);
   }
 
   @Test
   void testGetDumpOnExitDefault() {
     String expected = "false";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getDumpOnExit());
+    assertThat(opts.getDumpOnExit()).isEqualTo(expected);
   }
 
   @Test
   void testGetDumpOnExitBadValue() {
     String expected = "false";
     RecordingOptions opts = new RecordingOptions.Builder().dumpOnExit("BAD_VALUE").build();
-    assertEquals(expected, opts.getDumpOnExit());
+    assertThat(opts.getDumpOnExit()).isEqualTo(expected);
   }
 
   @Keep
@@ -175,35 +173,35 @@ class RecordingOptionsTest {
   @MethodSource
   void testGetDestination(String testValue, String expected) {
     RecordingOptions opts = new RecordingOptions.Builder().destination(testValue).build();
-    assertEquals(expected, opts.getDestination());
+    assertThat(opts.getDestination()).isEqualTo(expected);
   }
 
   @Test
   void testGetDestinationDefault() {
     String expected = "";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getDestination());
+    assertThat(opts.getDestination()).isEqualTo(expected);
   }
 
   @Test
   void testGetDisk() {
     String expected = "true";
     RecordingOptions opts = new RecordingOptions.Builder().disk(expected).build();
-    assertEquals(expected, opts.getDisk());
+    assertThat(opts.getDisk()).isEqualTo(expected);
   }
 
   @Test
   void testGetDiskDefault() {
     String expected = "false";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getDisk());
+    assertThat(opts.getDisk()).isEqualTo(expected);
   }
 
   @Test
   void testGetDiskBadValue() {
     String expected = "false";
     RecordingOptions opts = new RecordingOptions.Builder().disk("BAD_VALUE").build();
-    assertEquals(expected, opts.getDisk());
+    assertThat(opts.getDisk()).isEqualTo(expected);
   }
 
   @Keep
@@ -227,14 +225,14 @@ class RecordingOptionsTest {
   @MethodSource
   void testGetDuration(String testValue, String expected) {
     RecordingOptions opts = new RecordingOptions.Builder().duration(testValue).build();
-    assertEquals(expected, opts.getDuration());
+    assertThat(opts.getDuration()).isEqualTo(expected);
   }
 
   @Test
   void testGetDurationDefault() {
     String expected = "0";
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getDuration());
+    assertThat(opts.getDuration()).isEqualTo(expected);
   }
 
   @Keep
@@ -254,9 +252,8 @@ class RecordingOptionsTest {
   @ParameterizedTest
   @MethodSource
   void testGetDurationNegative(String badValue) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new RecordingOptions.Builder().duration(badValue).build());
+    assertThatThrownBy(() -> new RecordingOptions.Builder().duration(badValue).build())
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -279,7 +276,7 @@ class RecordingOptionsTest {
             .disk("true")
             .duration("120 s")
             .build();
-    assertEquals(expected, opts.getRecordingOptions());
+    assertThat(opts.getRecordingOptions()).isEqualTo(expected);
   }
 
   @Test
@@ -289,6 +286,6 @@ class RecordingOptionsTest {
     // to insure consistent behaviour.
     expected.put("disk", "false");
     RecordingOptions opts = new RecordingOptions.Builder().build();
-    assertEquals(expected, opts.getRecordingOptions());
+    assertThat(opts.getRecordingOptions()).isEqualTo(expected);
   }
 }

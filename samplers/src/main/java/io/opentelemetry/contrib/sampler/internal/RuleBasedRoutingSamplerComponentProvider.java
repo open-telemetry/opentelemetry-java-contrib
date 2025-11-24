@@ -22,7 +22,7 @@ import java.util.List;
  * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
  * at any time.
  */
-public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvider<Sampler> {
+public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvider {
 
   private static final String ACTION_RECORD_AND_SAMPLE = "RECORD_AND_SAMPLE";
   private static final String ACTION_DROP = "DROP";
@@ -49,7 +49,7 @@ public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvid
       fallbackSampler = DeclarativeConfiguration.createSampler(fallbackModel);
     } catch (DeclarativeConfigException e) {
       throw new DeclarativeConfigException(
-          "rule_Based_routing sampler failed to create .fallback sampler", e);
+          "rule_based_routing sampler failed to create .fallback sampler", e);
     }
 
     String spanKindString = config.getString("span_kind", "SERVER");
@@ -92,7 +92,7 @@ public class RuleBasedRoutingSamplerComponentProvider implements ComponentProvid
         builder.drop(attributeKey, pattern);
       } else {
         throw new DeclarativeConfigException(
-            "rule_based_routing sampler .rules[].action is must be "
+            "rule_based_routing sampler .rules[].action must be "
                 + ACTION_RECORD_AND_SAMPLE
                 + " or "
                 + ACTION_DROP);

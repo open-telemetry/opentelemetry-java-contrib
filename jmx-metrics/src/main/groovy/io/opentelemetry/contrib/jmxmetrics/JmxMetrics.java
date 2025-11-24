@@ -24,7 +24,7 @@ class JmxMetrics {
   private final GroovyRunner runner;
   private final JmxConfig config;
 
-  JmxMetrics(final JmxConfig config) {
+  JmxMetrics(JmxConfig config) {
     this.config = config;
 
     JmxClient jmxClient;
@@ -60,7 +60,7 @@ class JmxMetrics {
     exec.shutdown();
   }
 
-  private static JmxConfig getConfigFromArgs(final String[] args) {
+  private static JmxConfig getConfigFromArgs(String[] args) {
     if (args.length != 0 && (args.length != 2 || !args[0].equalsIgnoreCase("-config"))) {
       System.out.println(
           "Usage: java io.opentelemetry.contrib.jmxmetrics.JmxMetrics "
@@ -105,11 +105,11 @@ class JmxMetrics {
    *
    * @param args - must be of the form "-config {jmx_config_path,'-'}"
    */
-  public static void main(final String[] args) {
+  public static void main(String[] args) {
     JmxConfig config = getConfigFromArgs(args);
     config.validate();
 
-    final JmxMetrics jmxMetrics = new JmxMetrics(config);
+    JmxMetrics jmxMetrics = new JmxMetrics(config);
     jmxMetrics.start();
 
     Runtime.getRuntime()

@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 
-public class AzureResourceDetector implements ComponentProvider<Resource> {
+public final class AzureResourceDetector implements ComponentProvider {
 
   @Override
   public Class<Resource> getType() {

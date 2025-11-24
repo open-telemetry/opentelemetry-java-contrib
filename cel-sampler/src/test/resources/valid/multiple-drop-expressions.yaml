@@ -1,0 +1,7 @@
+fallback_sampler:
+  always_off:
+expressions:
+  - action: DROP
+    expression: 'attribute["http.request.method"] == "GET"'
+  - action: DROP
+    expression: 'attribute["url.path"] == "/foo/bar"'

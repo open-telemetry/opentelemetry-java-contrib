@@ -1,13 +1,14 @@
-import de.undercouch.gradle.tasks.download.DownloadExtension
-import java.net.HttpURLConnection
-import java.net.URL
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.URI
+
+val opampSpecVersion = "v0.14.0" // renovate(github-releases): open-telemetry/opamp-spec
 
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("otel.animalsniffer-conventions")
-  id("de.undercouch.download") version "5.6.0"
-  id("com.squareup.wire") version "5.3.11"
+  id("com.squareup.wire") version "5.4.0"
 }
 
 description = "Client implementation of the OpAMP spec."
@@ -25,11 +26,11 @@ dependencies {
   testImplementation("com.squareup.okhttp3:mockwebserver3-junit5")
 }
 
-val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
-opampProtos.configure {
+val opampProtos = tasks.register<DownloadAndExtractOpampProtos>("opampProtoDownload") {
   group = "opamp"
   outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
-  downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/$name/release.zip"))
+  downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/opampProtoDownload/release.zip"))
+  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/$opampSpecVersion")
 }
 
 wire {
@@ -39,8 +40,15 @@ wire {
   }
 }
 
-abstract class DownloadOpampProtos @Inject constructor(
-  private val download: DownloadExtension,
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
+  }
+}
+
+abstract class DownloadAndExtractOpampProtos @Inject constructor(
   private val archiveOps: ArchiveOperations,
   private val fileOps: FileSystemOperations,
 ) : DefaultTask() {
@@ -51,26 +59,27 @@ abstract class DownloadOpampProtos @Inject constructor(
   @get:Internal
   abstract val downloadedZipFile: RegularFileProperty
 
+  @get:Input
+  abstract val zipUrl: Property<String>
+
   @TaskAction
   fun execute() {
-    // Get the latest release tag by following the redirect from GitHub's latest release URL
-    val latestReleaseUrl = "https://github.com/open-telemetry/opamp-spec/releases/latest"
-    val connection = URL(latestReleaseUrl).openConnection() as HttpURLConnection
-    connection.instanceFollowRedirects = false
-    connection.requestMethod = "HEAD"
+    val url = URI.create(zipUrl.get()).toURL()
+    downloadedZipFile.get().asFile.parentFile.mkdirs()
 
-    val redirectLocation = connection.getHeaderField("Location")
-    connection.disconnect()
-
-    // Extract tag from URL like: https://github.com/open-telemetry/opamp-spec/releases/tag/v0.12.0
-    val latestTag = redirectLocation.substringAfterLast("/")
-    // Download the source code for the latest release
-    val zipUrl = "https://github.com/open-telemetry/opamp-spec/zipball/$latestTag"
-
-    download.run {
-      src(zipUrl)
-      dest(downloadedZipFile)
+    val connection = url.openConnection()
+    // Use GitHub token if available to avoid rate limiting
+    val githubToken = System.getenv("GITHUB_TOKEN")
+    if (githubToken != null && githubToken.isNotEmpty()) {
+      connection.setRequestProperty("Authorization", "Bearer $githubToken")
     }
+
+    connection.getInputStream().use { input: InputStream ->
+      downloadedZipFile.get().asFile.outputStream().use { output: FileOutputStream ->
+        input.copyTo(output)
+      }
+    }
+
     val protos = archiveOps.zipTree(downloadedZipFile).matching {
       setIncludes(listOf("**/*.proto"))
     }

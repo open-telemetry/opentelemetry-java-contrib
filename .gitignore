@@ -53,3 +53,9 @@ bin
 .swp
 
 .gitpod.yml
+
+# Gradle build scans
+build-scan.txt
+
+# Node
+node_modules

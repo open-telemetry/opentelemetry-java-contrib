@@ -5,7 +5,14 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
+import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesSupplier;
@@ -13,27 +20,32 @@ import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
 import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
 import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
-public class JmxScraper {
+public final class JmxScraper {
+
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
   private static final String CONFIG_ARG = "-config";
   private static final String TEST_ARG = "-test";
@@ -55,79 +67,107 @@ public class JmxScraper {
     // set log format
     System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%n");
 
-    List<String> effectiveArgs = new ArrayList<>(Arrays.asList(args));
+    List<String> effectiveArgs = new ArrayList<>(asList(args));
     boolean testMode = effectiveArgs.remove(TEST_ARG);
 
     try {
       Properties argsConfig = argsToConfig(effectiveArgs);
       propagateToSystemProperties(argsConfig);
 
-      // auto-configure and register SDK
       PropertiesCustomizer configCustomizer = new PropertiesCustomizer();
-      AutoConfiguredOpenTelemetrySdk.builder()
-          .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
-          .addPropertiesCustomizer(configCustomizer)
-          .setResultAsGlobal()
-          .build();
 
+      // we rely on the config customizer to be executed first to get effective config.
+      BiFunction<Resource, ConfigProperties, Resource> resourceCustomizer =
+          (resource, configProperties) -> {
+            UUID instanceId = getRemoteServiceInstanceId(configCustomizer.getConnectorBuilder());
+            if (resource.getAttribute(SERVICE_INSTANCE_ID) != null || instanceId == null) {
+              return resource;
+            }
+            logger.log(INFO, "remote service instance ID: " + instanceId);
+            return resource.merge(
+                Resource.create(Attributes.of(SERVICE_INSTANCE_ID, instanceId.toString())));
+          };
+
+      // auto-configure SDK
+      OpenTelemetry openTelemetry =
+          AutoConfiguredOpenTelemetrySdk.builder()
+              .addPropertiesSupplier(new PropertiesSupplier(argsConfig))
+              .addPropertiesCustomizer(configCustomizer)
+              .addResourceCustomizer(resourceCustomizer)
+              .build()
+              .getOpenTelemetrySdk();
+
+      // scraper configuration and connector builder are built using effective SDK configuration
+      // thus we have to get it after the SDK is built
       JmxScraperConfig scraperConfig = configCustomizer.getScraperConfig();
-
-      long exportSeconds = scraperConfig.getSamplingInterval().toMillis() / 1000;
-      logger.log(Level.INFO, "metrics export interval (seconds) =  " + exportSeconds);
-
-      JmxMetricInsight service =
-          JmxMetricInsight.createService(
-              GlobalOpenTelemetry.get(), scraperConfig.getSamplingInterval().toMillis());
-      JmxConnectorBuilder connectorBuilder =
-          JmxConnectorBuilder.createNew(scraperConfig.getServiceUrl());
-
-      Optional.ofNullable(scraperConfig.getUsername()).ifPresent(connectorBuilder::withUser);
-      Optional.ofNullable(scraperConfig.getPassword()).ifPresent(connectorBuilder::withPassword);
-
-      if (scraperConfig.isRegistrySsl()) {
-        connectorBuilder.withSslRegistry();
-      }
+      JmxConnectorBuilder connectorBuilder = configCustomizer.getConnectorBuilder();
 
       if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
-        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, service, scraperConfig);
+        JmxMetricInsight jmxInsight =
+            JmxMetricInsight.createService(
+                openTelemetry, scraperConfig.getSamplingInterval().toMillis());
+        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, jmxInsight, scraperConfig);
         jmxScraper.start();
       }
     } catch (ConfigurationException e) {
-      logger.log(Level.SEVERE, "invalid configuration: " + e.getMessage(), e);
+      logger.log(SEVERE, "invalid configuration: " + e.getMessage(), e);
       System.exit(1);
     } catch (InvalidArgumentException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
+      logger.log(SEVERE, e.getMessage(), e);
       logger.info("Usage: java -jar <path_to_jmxscraper.jar> [-test] [-config <conf>]");
       logger.info("  -test           test JMX connection with provided configuration and exit");
       logger.info(
           "  -config <conf>  provide configuration, where <conf> is - for stdin, or <path_to_config.properties>");
       System.exit(1);
     } catch (IOException e) {
-      logger.log(Level.SEVERE, "Unable to connect ", e);
+      logger.log(SEVERE, "Unable to connect ", e);
       System.exit(2);
     } catch (RuntimeException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
+      logger.log(SEVERE, e.getMessage(), e);
       System.exit(3);
     }
   }
 
   private static boolean testConnection(JmxConnectorBuilder connectorBuilder) {
     try (JMXConnector connector = connectorBuilder.build()) {
-
       MBeanServerConnection connection = connector.getMBeanServerConnection();
       Integer mbeanCount = connection.getMBeanCount();
       if (mbeanCount > 0) {
-        logger.log(Level.INFO, "JMX connection test OK");
+        logger.log(INFO, "JMX connection test OK");
         return true;
       } else {
-        logger.log(Level.SEVERE, "JMX connection test ERROR");
+        logger.log(SEVERE, "JMX connection test ERROR");
         return false;
       }
     } catch (IOException e) {
-      logger.log(Level.SEVERE, "JMX connection test ERROR", e);
+      logger.log(SEVERE, "JMX connection test ERROR", e);
       return false;
+    }
+  }
+
+  @Nullable
+  private static UUID getRemoteServiceInstanceId(JmxConnectorBuilder connectorBuilder) {
+    try (JMXConnector jmxConnector = connectorBuilder.build()) {
+      MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
+
+      StringBuilder id = new StringBuilder();
+      try {
+        ObjectName objectName = new ObjectName("java.lang:type=Runtime");
+        for (String attribute : Arrays.asList("StartTime", "Name")) {
+          Object value = connection.getAttribute(objectName, attribute);
+          if (id.length() > 0) {
+            id.append(" ");
+          }
+          id.append(value);
+        }
+        return UUID.nameUUIDFromBytes(id.toString().getBytes(StandardCharsets.UTF_8));
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    } catch (IOException e) {
+      return null;
     }
   }
 
@@ -210,7 +250,7 @@ public class JmxScraper {
 
     try (JMXConnector connector = client.build()) {
       MBeanServerConnection connection = connector.getMBeanServerConnection();
-      service.startRemote(getMetricConfig(config), () -> Collections.singletonList(connection));
+      service.startRemote(getMetricConfig(config), () -> singletonList(connection));
 
       running.set(true);
       logger.info("JMX scraping started");

@@ -21,6 +21,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
 | alpha   | [Baggage Processors](./baggage-processor/README.md)               |
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
+| alpha   | [CEL-Based Sampler](./cel-sampler/README.md)                     |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
 | alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
@@ -48,34 +49,13 @@ On reaching stable status, the `otel.stable` value in `gradle.properties` should
 Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
 status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
 
-## Getting Started
-
-```bash
-# Apply formatting
-$ ./gradlew spotlessApply
-
-# Build the complete project
-$ ./gradlew build
-
-# Run integration tests
-$ ./gradlew integrationTest
-
-# Clean artifacts
-$ ./gradlew clean
-```
-
 ## Contributing
 
-The Java Contrib project was initially formed to provide methods of easy remote JMX metric gathering and reporting,
-which is actively in development.  If you have an idea for a similar use case in the metrics, traces, or logging
-domain we would be very interested in supporting it.  Please
-[open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new/choose) to share your idea or
-suggestion.  PRs are always welcome and greatly appreciated, but for larger functional changes a pre-coding introduction
-can be helpful to ensure this is the correct place and that active or conflicting efforts don't exist.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Maintainers
 
-- [Jack Berg](https://github.com/jack-berg), New Relic
+- [Jack Berg](https://github.com/jack-berg), Grafana Labs
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
 - [Lauri Tulmin](https://github.com/laurit), Splunk
 - [Trask Stalnaker](https://github.com/trask), Microsoft
@@ -84,7 +64,9 @@ For more information about the maintainer role, see the [community repository](h
 
 ### Approvers
 
-- [John Watson](https://github.com/jkwatson), Verta.ai
+- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
+- [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
+- [John Watson](https://github.com/jkwatson), Cloudera
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 

@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.Arrays.asList;
+
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.contrib.inferredspans.internal.CallTree;
@@ -12,13 +14,13 @@ import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguratio
 import io.opentelemetry.contrib.inferredspans.internal.SpanAnchoredClock;
 import java.io.File;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("CanIgnoreReturnValueSuggester")
 public class InferredSpansProcessorBuilder {
+  private boolean enabled = true;
   private boolean profilerLoggingEnabled = true;
   private boolean backupDiagnosticFiles = false;
   private int asyncProfilerSafeMode = 0;
@@ -27,7 +29,7 @@ public class InferredSpansProcessorBuilder {
   private Duration inferredSpansMinDuration = Duration.ZERO;
   private List<WildcardMatcher> includedClasses = WildcardMatcher.matchAllList();
   private List<WildcardMatcher> excludedClasses =
-      Arrays.asList(
+      asList(
           WildcardMatcher.caseSensitiveMatcher("java.*"),
           WildcardMatcher.caseSensitiveMatcher("javax.*"),
           WildcardMatcher.caseSensitiveMatcher("sun.*"),
@@ -43,13 +45,11 @@ public class InferredSpansProcessorBuilder {
           WildcardMatcher.caseSensitiveMatcher("io.undertow.*"));
   private Duration profilerInterval = Duration.ofSeconds(5);
   private Duration profilingDuration = Duration.ofSeconds(5);
-
   @Nullable private String profilerLibDirectory = null;
 
   // The following options are only intended to be modified in tests
   private SpanAnchoredClock clock = new SpanAnchoredClock();
   private boolean startScheduledProfiling = true;
-
   @Nullable private File activationEventsFile = null;
   @Nullable private File jfrFile = null;
   private BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler =
@@ -60,6 +60,7 @@ public class InferredSpansProcessorBuilder {
   public InferredSpansProcessor build() {
     InferredSpansConfiguration config =
         new InferredSpansConfiguration(
+            enabled,
             profilerLoggingEnabled,
             backupDiagnosticFiles,
             asyncProfilerSafeMode,
@@ -72,8 +73,16 @@ public class InferredSpansProcessorBuilder {
             profilingDuration,
             profilerLibDirectory,
             parentOverrideHandler);
-    return new InferredSpansProcessor(
-        config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+    InferredSpansProcessor processor =
+        new InferredSpansProcessor(
+            config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+    InferredSpans.setInstance(processor);
+    return processor;
+  }
+
+  public InferredSpansProcessorBuilder profilerEnabled(boolean profilerEnabled) {
+    this.enabled = profilerEnabled;
+    return this;
   }
 
   /**

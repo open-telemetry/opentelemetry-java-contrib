@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 public interface StreamReader extends Closeable {
   @Nullable
-  ReadResult readNext() throws IOException;
+  byte[] readNext() throws IOException;
 
   interface Factory {
     StreamReader create(InputStream stream);

@@ -26,6 +26,8 @@ dependencies {
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-jmx-metrics")
 
+  implementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.awaitility:awaitility")
@@ -35,13 +37,13 @@ testing {
   suites {
     val integrationTest by registering(JvmTestSuite::class) {
       dependencies {
-        implementation("org.testcontainers:junit-jupiter")
+        implementation("org.testcontainers:testcontainers-junit-jupiter")
         implementation("org.slf4j:slf4j-simple")
         implementation("com.linecorp.armeria:armeria-junit5")
         implementation("com.linecorp.armeria:armeria-grpc")
-        implementation("io.opentelemetry.proto:opentelemetry-proto:1.7.0-alpha")
-        implementation("org.bouncycastle:bcprov-jdk18on:1.81")
-        implementation("org.bouncycastle:bcpkix-jdk18on:1.81")
+        implementation("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
+        implementation("org.bouncycastle:bcprov-jdk18on:1.82")
+        implementation("org.bouncycastle:bcpkix-jdk18on:1.82")
       }
     }
   }

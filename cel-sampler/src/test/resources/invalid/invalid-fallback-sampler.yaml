@@ -1,0 +1,5 @@
+fallback_sampler:
+  foo:
+expressions:
+  - action: DROP
+    expression: 'spanKind == "CLIENT"'

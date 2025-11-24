@@ -9,13 +9,18 @@ This is an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
 ## Release
 
 This project is released as part of the [OpenTelemetry Java Contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) project.
-The latest release is available from [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
-or can be browsed via [MVN Repository](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper).
+The latest release is available from:
+
+- [GitHub Release assets](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/latest/download/opentelemetry-jmx-scraper.jar)
+- [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
 
 ## Usage
 
 The general command to invoke JMX scraper is `java -jar scraper.jar <config>`, where `scraper.jar`
-is the `build/libs/opentelemetry-jmx-scraper-<version>.jar` packaged binary when building this module.
+is the packaged binary:
+
+- `build/libs/opentelemetry-jmx-scraper-<version>.jar` when building from sources
+- `.jar` file downloaded from Maven central or Release assets
 
 Minimal configuration required
 
@@ -68,7 +73,7 @@ Supported values for `otel.jmx.target.system` and support for `otel.jmx.target.s
 | `activemq`               | Apache ActiveMQ       | [`activemq.yaml`](src/main/resources/activemq.yaml)             |                                                                                                                                                                                                                                                                                                                       |
 | `cassandra`              | Apache Cassandra      | [`cassandra.yaml`](src/main/resources/cassandra.yaml)           |                                                                                                                                                                                                                                                                                                                       |
 | `hbase`                  | Apache HBase          | [`hbase.yaml`](src/main/resources/hbase.yaml)                   |                                                                                                                                                                                                                                                                                                                       |
-| `hadoop`                 | Apache Hadoop         | [`hadoop.yaml`](src/main/resources/hadoop.yaml)                 |                                                                                                                                                                                                                                                                                                                       |
+| `hadoop`                 | Apache Hadoop         | [`hadoop.yaml`](src/main/resources/hadoop.yaml)                 | [`hadoop.yaml`](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/hadoop.yaml) ([doc](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/hadoop.md))     |
 | `jetty`                  | Eclipse Jetty         | [`jetty.yaml`](src/main/resources/jetty.yaml)                   | [`jetty.yaml`](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/jetty.yaml) ([doc](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/jetty.md))       |
 | `jvm`                    | JVM runtime metrics   | [`jvm.yaml`](src/main/resources/jvm.yaml)                       | [`jvm.yaml`](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/jvm.yaml) ([doc](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/jvm.md))             |
 | `kafka`                  | Apache Kafka          | [`kafka.yaml`](src/main/resources/kafka.yaml)                   |                                                                                                                                                                                                                                                                                                                       |

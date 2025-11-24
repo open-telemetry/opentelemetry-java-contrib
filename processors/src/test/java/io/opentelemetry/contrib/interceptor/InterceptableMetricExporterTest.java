@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.interceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
@@ -55,8 +54,8 @@ class InterceptableMetricExporterTest {
     meterProvider.forceFlush();
 
     List<MetricData> finishedMetricItems = memoryMetricExporter.getFinishedMetricItems();
-    assertEquals(1, finishedMetricItems.size());
-    assertEquals("ModifiedName", finishedMetricItems.get(0).getName());
+    assertThat(finishedMetricItems.size()).isEqualTo(1);
+    assertThat(finishedMetricItems.get(0).getName()).isEqualTo("ModifiedName");
   }
 
   @Test
@@ -75,7 +74,7 @@ class InterceptableMetricExporterTest {
     meterProvider.forceFlush();
 
     List<MetricData> finishedMetricItems = memoryMetricExporter.getFinishedMetricItems();
-    assertEquals(2, finishedMetricItems.size());
+    assertThat(finishedMetricItems.size()).isEqualTo(2);
     List<String> names = new ArrayList<>();
     for (MetricData item : finishedMetricItems) {
       names.add(item.getName());

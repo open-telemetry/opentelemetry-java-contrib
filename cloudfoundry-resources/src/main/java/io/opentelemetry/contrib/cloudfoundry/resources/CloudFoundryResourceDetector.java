@@ -9,7 +9,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
-public class CloudFoundryResourceDetector implements ComponentProvider<Resource> {
+public final class CloudFoundryResourceDetector implements ComponentProvider {
 
   @Override
   public Class<Resource> getType() {

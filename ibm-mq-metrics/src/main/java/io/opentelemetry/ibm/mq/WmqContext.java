@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * authorization.<br>
  * It also validates the arguments passed for various scenarios.
  */
-public class WmqContext {
+public final class WmqContext {
   private static final String TRANSPORT_TYPE_CLIENT = "Client";
   private static final String TRANSPORT_TYPE_BINDINGS = "Bindings";
 
@@ -31,8 +31,8 @@ public class WmqContext {
 
   /** Note: This Hashtable type is needed for IBM client classes. */
   @SuppressWarnings("JdkObsolete")
-  public Hashtable<String, ?> getMqEnvironment() {
-    Hashtable<String, ?> env = new Hashtable<>();
+  public Hashtable<String, Object> getMqEnvironment() {
+    Hashtable<String, Object> env = new Hashtable<>();
     addEnvProperty(env, CMQC.HOST_NAME_PROPERTY, queueManager.getHost());
     addEnvProperty(env, CMQC.PORT_PROPERTY, queueManager.getPort());
     addEnvProperty(env, CMQC.CHANNEL_PROPERTY, queueManager.getChannelName());
@@ -56,8 +56,8 @@ public class WmqContext {
     return env;
   }
 
-  @SuppressWarnings({"unused", "unchecked", "rawtypes"})
-  private static void addEnvProperty(Hashtable env, String propName, @Nullable Object propVal) {
+  private static void addEnvProperty(
+      Hashtable<String, Object> env, String propName, @Nullable Object propVal) {
     if (null != propVal) {
       if (propVal instanceof String) {
         String propString = (String) propVal;

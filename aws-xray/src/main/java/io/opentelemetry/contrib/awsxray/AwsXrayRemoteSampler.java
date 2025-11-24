@@ -5,20 +5,34 @@
 
 package io.opentelemetry.contrib.awsxray;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.function.Function.identity;
+import static java.util.logging.Level.FINE;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.awsxray.GetSamplingRulesResponse.SamplingRuleRecord;
+import io.opentelemetry.contrib.awsxray.GetSamplingTargetsRequest.SamplingBoostStatisticsDocument;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsRequest.SamplingStatisticsDocument;
 import io.opentelemetry.contrib.awsxray.GetSamplingTargetsResponse.SamplingTargetDocument;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.data.LinkData;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.io.Closeable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -29,19 +43,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /** Remote sampler that gets sampling configuration from AWS X-Ray. */
 public final class AwsXrayRemoteSampler implements Sampler, Closeable {
 
-  static final long DEFAULT_TARGET_INTERVAL_NANOS = TimeUnit.SECONDS.toNanos(10);
+  static final long DEFAULT_TARGET_INTERVAL_NANOS = SECONDS.toNanos(10);
 
   private static final Logger logger = Logger.getLogger(AwsXrayRemoteSampler.class.getName());
+
+  // Default batch size to be same as OTel BSP default
+  private static final int maxExportBatchSize = 512;
 
   private final Resource resource;
   private final Clock clock;
@@ -56,8 +69,10 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   @Nullable private volatile ScheduledFuture<?> pollFuture;
   @Nullable private volatile ScheduledFuture<?> fetchTargetsFuture;
   @Nullable private volatile GetSamplingRulesResponse previousRulesResponse;
-  @Nullable private volatile XrayRulesSampler internalXrayRulesSampler;
   private volatile Sampler sampler;
+
+  @Nullable private AwsXrayAdaptiveSamplingConfig adaptiveSamplingConfig;
+  @Nullable private BatchSpanProcessor bsp;
 
   /**
    * Returns a {@link AwsXrayRemoteSamplerBuilder} with the given {@link Resource}. This {@link
@@ -120,13 +135,47 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     return "AwsXrayRemoteSampler{" + sampler.getDescription() + "}";
   }
 
+  public void setAdaptiveSamplingConfig(AwsXrayAdaptiveSamplingConfig config) {
+    if (this.adaptiveSamplingConfig != null) {
+      throw new IllegalStateException("Programming bug - Adaptive sampling config is already set");
+    } else if (config != null && this.adaptiveSamplingConfig == null) {
+      // Save here and also pass to XrayRulesSampler directly as it already exists
+      this.adaptiveSamplingConfig = config;
+      if (sampler instanceof XrayRulesSampler) {
+        ((XrayRulesSampler) sampler).setAdaptiveSamplingConfig(config);
+      }
+    }
+  }
+
+  public void setSpanExporter(SpanExporter spanExporter) {
+    if (this.bsp != null) {
+      throw new IllegalStateException("Programming bug - BatchSpanProcessor is already set");
+    } else if (spanExporter != null && this.bsp == null) {
+      this.bsp =
+          BatchSpanProcessor.builder(spanExporter)
+              .setExportUnsampledSpans(true) // Required to capture the unsampled anomaly spans
+              .setMaxExportBatchSize(maxExportBatchSize)
+              .build();
+    }
+  }
+
+  public void adaptSampling(ReadableSpan span, SpanData spanData) {
+    if (this.bsp == null) {
+      throw new IllegalStateException(
+          "Programming bug - BatchSpanProcessor is null while trying to adapt sampling");
+    }
+    if (sampler instanceof XrayRulesSampler) {
+      ((XrayRulesSampler) sampler).adaptSampling(span, spanData, this.bsp::onEnd);
+    }
+  }
+
   private void getAndUpdateSampler() {
     try {
       // No pagination support yet, or possibly ever.
       GetSamplingRulesResponse response =
           client.getSamplingRules(GetSamplingRulesRequest.create(null));
       if (!response.equals(previousRulesResponse)) {
-        updateInternalSamplers(
+        sampler =
             new XrayRulesSampler(
                 clientId,
                 resource,
@@ -134,26 +183,25 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
                 initialSampler,
                 response.getSamplingRules().stream()
                     .map(SamplingRuleRecord::getRule)
-                    .collect(Collectors.toList())));
-
+                    .collect(toList()),
+                adaptiveSamplingConfig);
         previousRulesResponse = response;
         ScheduledFuture<?> existingFetchTargetsFuture = fetchTargetsFuture;
         if (existingFetchTargetsFuture != null) {
           existingFetchTargetsFuture.cancel(false);
         }
         fetchTargetsFuture =
-            executor.schedule(
-                this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+            executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, NANOSECONDS);
       }
     } catch (Throwable t) {
-      logger.log(Level.FINE, "Failed to update sampler", t);
+      logger.log(FINE, "Failed to update sampler", t);
     }
     scheduleSamplerUpdate();
   }
 
   private void scheduleSamplerUpdate() {
     long delay = pollingIntervalNanos + jitterNanos.next();
-    pollFuture = executor.schedule(this::getAndUpdateSampler, delay, TimeUnit.NANOSECONDS);
+    pollFuture = executor.schedule(this::getAndUpdateSampler, delay, NANOSECONDS);
   }
 
   /**
@@ -168,41 +216,54 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     if (pollFuture == null) {
       return null;
     }
-    return Duration.ofNanos(pollFuture.getDelay(TimeUnit.NANOSECONDS));
+    return Duration.ofNanos(pollFuture.getDelay(NANOSECONDS));
   }
 
   private void fetchTargets() {
-    if (this.internalXrayRulesSampler == null) {
+    if (!(sampler instanceof XrayRulesSampler)) {
       throw new IllegalStateException("Programming bug.");
     }
 
-    XrayRulesSampler xrayRulesSampler = this.internalXrayRulesSampler;
+    XrayRulesSampler xrayRulesSampler = (XrayRulesSampler) sampler;
     try {
       Date now = Date.from(Instant.ofEpochSecond(0, clock.now()));
-      List<SamplingStatisticsDocument> statistics = xrayRulesSampler.snapshot(now);
+      List<SamplingRuleApplier.SamplingRuleStatisticsSnapshot> statisticsSnapshot =
+          xrayRulesSampler.snapshot(now);
+      List<SamplingStatisticsDocument> statistics = new ArrayList<SamplingStatisticsDocument>();
+      List<SamplingBoostStatisticsDocument> boostStatistics =
+          new ArrayList<SamplingBoostStatisticsDocument>();
+      statisticsSnapshot.stream()
+          .forEach(
+              snapshot -> {
+                if (snapshot.getStatisticsDocument() != null) {
+                  statistics.add(snapshot.getStatisticsDocument());
+                }
+                if (snapshot.getBoostStatisticsDocument() != null
+                    && snapshot.getBoostStatisticsDocument().getTotalCount() > 0) {
+                  boostStatistics.add(snapshot.getBoostStatisticsDocument());
+                }
+              });
       Set<String> requestedTargetRuleNames =
-          statistics.stream()
-              .map(SamplingStatisticsDocument::getRuleName)
-              .collect(Collectors.toSet());
+          statistics.stream().map(SamplingStatisticsDocument::getRuleName).collect(toSet());
 
-      GetSamplingTargetsResponse response =
-          client.getSamplingTargets(GetSamplingTargetsRequest.create(statistics));
+      GetSamplingTargetsRequest req = GetSamplingTargetsRequest.create(statistics, boostStatistics);
+      GetSamplingTargetsResponse response = client.getSamplingTargets(req);
       Map<String, SamplingTargetDocument> targets =
           response.getDocuments().stream()
-              .collect(Collectors.toMap(SamplingTargetDocument::getRuleName, Function.identity()));
-      updateInternalSamplers(xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now));
+              .collect(toMap(SamplingTargetDocument::getRuleName, identity()));
+      sampler =
+          xrayRulesSampler = xrayRulesSampler.withTargets(targets, requestedTargetRuleNames, now);
     } catch (Throwable t) {
       // Might be a transient API failure, try again after a default interval.
       fetchTargetsFuture =
-          executor.schedule(
-              this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, TimeUnit.NANOSECONDS);
+          executor.schedule(this::fetchTargets, DEFAULT_TARGET_INTERVAL_NANOS, NANOSECONDS);
       return;
     }
 
     long nextTargetFetchIntervalNanos =
         xrayRulesSampler.nextTargetFetchTimeNanos() - clock.nanoTime();
     fetchTargetsFuture =
-        executor.schedule(this::fetchTargets, nextTargetFetchIntervalNanos, TimeUnit.NANOSECONDS);
+        executor.schedule(this::fetchTargets, nextTargetFetchIntervalNanos, NANOSECONDS);
   }
 
   @Override
@@ -224,11 +285,6 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       clientIdChars[i] = hex[rand.nextInt(hex.length)];
     }
     return new String(clientIdChars);
-  }
-
-  private void updateInternalSamplers(XrayRulesSampler xrayRulesSampler) {
-    this.internalXrayRulesSampler = xrayRulesSampler;
-    this.sampler = Sampler.parentBased(internalXrayRulesSampler);
   }
 
   // Visible for testing

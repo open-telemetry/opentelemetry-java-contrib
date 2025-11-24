@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 
-public class StackTraceAutoConfigTest {
+class StackTraceAutoConfigTest {
 
   @Test
   void defaultConfig() {

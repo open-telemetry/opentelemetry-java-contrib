@@ -35,7 +35,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.io.TempDir;
 
 @DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
-public class InferredSpansAutoConfigTest {
+class InferredSpansAutoConfigTest {
 
   @BeforeEach
   @AfterEach
@@ -56,20 +56,20 @@ public class InferredSpansAutoConfigTest {
     String libDir = tmpDir.resolve("foo").resolve("bar").toString();
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansAutoConfig.LOGGING_OPTION, "false")
-            .put(InferredSpansAutoConfig.DIAGNOSTIC_FILES_OPTION, "true")
-            .put(InferredSpansAutoConfig.SAFEMODE_OPTION, "16")
-            .put(InferredSpansAutoConfig.POSTPROCESSING_OPTION, "false")
-            .put(InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "7ms")
-            .put(InferredSpansAutoConfig.MIN_DURATION_OPTION, "2ms")
-            .put(InferredSpansAutoConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
-            .put(InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
-            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
-            .put(InferredSpansAutoConfig.DURATION_OPTION, "3s")
-            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)
+            .put(InferredSpansConfig.ENABLED_OPTION, "true")
+            .put(InferredSpansConfig.LOGGING_OPTION, "false")
+            .put(InferredSpansConfig.DIAGNOSTIC_FILES_OPTION, "true")
+            .put(InferredSpansConfig.SAFEMODE_OPTION, "16")
+            .put(InferredSpansConfig.POSTPROCESSING_OPTION, "false")
+            .put(InferredSpansConfig.SAMPLING_INTERVAL_OPTION, "7ms")
+            .put(InferredSpansConfig.MIN_DURATION_OPTION, "2ms")
+            .put(InferredSpansConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
+            .put(InferredSpansConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
+            .put(InferredSpansConfig.INTERVAL_OPTION, "2s")
+            .put(InferredSpansConfig.DURATION_OPTION, "3s")
+            .put(InferredSpansConfig.LIB_DIRECTORY_OPTION, libDir)
             .put(
-                InferredSpansAutoConfig.PARENT_OVERRIDE_HANDLER_OPTION,
+                InferredSpansConfig.PARENT_OVERRIDE_HANDLER_OPTION,
                 NoOpParentOverrideHandler.class.getName())) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
@@ -99,7 +99,7 @@ public class InferredSpansAutoConfigTest {
   }
 
   @Test
-  public void checkDisabledbyDefault() {
+  void checkDisabledbyDefault() {
     try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
@@ -109,7 +109,7 @@ public class InferredSpansAutoConfigTest {
 
   @DisabledOnOpenJ9
   @Test
-  public void checkProfilerWorking() {
+  void checkProfilerWorking() {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
             .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")

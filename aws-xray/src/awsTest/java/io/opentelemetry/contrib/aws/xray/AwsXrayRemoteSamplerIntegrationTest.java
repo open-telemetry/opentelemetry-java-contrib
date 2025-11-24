@@ -16,13 +16,13 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.time.Duration;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -31,15 +31,21 @@ import org.testcontainers.utility.MountableFile;
 // to update sampling rules and assert rough ratios of sampling decisions. In the meantime, it
 // expects you to update the rules through the dashboard to see the effect on the sampling decisions
 // that are printed.
-@Testcontainers(disabledWithoutDocker = true)
+@EnabledIf("hasAwsCredentials")
 class AwsXrayRemoteSamplerIntegrationTest {
+
+  static boolean hasAwsCredentials() {
+    return System.getenv("AWS_ACCESS_KEY_ID") != null;
+  }
 
   private static final Logger logger =
       LoggerFactory.getLogger(AwsXrayRemoteSamplerIntegrationTest.class);
 
   @Container
   private static final GenericContainer<?> otelCollector =
-      new GenericContainer<>(DockerImageName.parse("otel/opentelemetry-collector-contrib:latest"))
+      new GenericContainer<>(
+              DockerImageName.parse(
+                  "otel/opentelemetry-collector-contrib:0.140.1@sha256:5901567d6f684547bafee53f02403869b5655e13a4e0af65aa6ae9f6301075d9"))
           .withExposedPorts(13133, 2000)
           .waitingFor(Wait.forHttp("/").forPort(13133))
           .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("otel-collector")))
