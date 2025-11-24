@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## Version 1.52.0 (2025-11-20)
+
+### AWS X-Ray propagator
+
+- Update xray lambda component provider name
+  ([#2423](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2423))
+
+### Inferred spans
+
+- Add declarative config support.
+  ([#2030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2030))
+- Fix occasional/sporadic NPE.
+  ([#2443](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2443))
+
+### Span stack traces
+
+- Fix stacktrace processor name for declarative config.
+  ([#2415](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2415))
+
 ## Version 1.51.0 (2025-10-20)
 
 ### AWS X-Ray SDK support and propagator
