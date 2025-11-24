@@ -43,6 +43,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -153,6 +154,7 @@ public class SamplingProfiler implements Runnable {
   @Nullable private final File tempDir;
 
   private final AsyncProfiler profiler;
+  private final ReentrantLock profilerLock = new ReentrantLock();
   @Nullable private volatile Future<?> profilingTask;
 
   /**
@@ -394,9 +396,14 @@ public class SamplingProfiler implements Runnable {
         config.isNonStopProfiling() && !interrupted && postProcessingEnabled;
     setProfilingSessionOngoing(continueProfilingSession);
 
-    if (!interrupted && !scheduler.isShutdown()) {
-      long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-      profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+    profilerLock.lock();
+    try {
+      if (!isInterrupted && !scheduler.isShutdown()) {
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      }
+    } finally {
+      profilerLock.unlock();
     }
   }
 
@@ -406,25 +413,25 @@ public class SamplingProfiler implements Runnable {
       String startCommand = createStartCommand();
       String startMessage = profiler.execute(startCommand);
       logger.fine(startMessage);
-      if (!profiledThreads.isEmpty()) {
-        restoreFilterState(profiler);
+      try {
+        if (!profiledThreads.isEmpty()) {
+          restoreFilterState(profiler);
+        }
+        // Doesn't need to be atomic as this field is being updated only by a single thread
+        profilingSessions++;
+
+        // When post-processing is disabled activation events are ignored, but we still need to
+        // invoke this method as it is the one enforcing the sampling session duration. As a side
+        // effect it will also consume residual activation events if post-processing is disabled
+        // dynamically
+        consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
+      } finally {
+        String stopMessage = profiler.execute("stop");
+        logger.fine(stopMessage);
       }
-      // Doesn't need to be atomic as this field is being updated only by a single thread
-      profilingSessions++;
-
-      // When post-processing is disabled activation events are ignored, but we still need to invoke
-      // this method
-      // as it is the one enforcing the sampling session duration. As a side effect it will also
-      // consume
-      // residual activation events if post-processing is disabled dynamically
-      consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
-
-      String stopMessage = profiler.execute("stop");
-      logger.fine(stopMessage);
 
       // When post-processing is disabled, jfr file will not be parsed and the heavy processing will
-      // not occur
-      // as this method aborts when no activation events are buffered
+      // not occur as this method aborts when no activation events are buffered
       processTraces();
     } catch (InterruptedException | ClosedByInterruptException e) {
       try {
@@ -739,13 +746,18 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
   public void reschedule() {
-    Future<?> future = this.profilingTask;
-    if (future != null) {
-      if (future.cancel(true)) {
-        Duration profilingDuration = config.getProfilingDuration();
-        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+    profilerLock.lock();
+    try {
+      Future<?> future = this.profilingTask;
+      if (future != null) {
+        if (future.cancel(true)) {
+          Duration profilingDuration = config.getProfilingDuration();
+          long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+          profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+        }
       }
+    } finally {
+      profilerLock.unlock();
     }
   }
 
