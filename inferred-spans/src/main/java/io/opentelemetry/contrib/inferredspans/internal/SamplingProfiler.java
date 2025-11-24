@@ -398,7 +398,7 @@ public class SamplingProfiler implements Runnable {
 
     profilerLock.lock();
     try {
-      if (!isInterrupted && !scheduler.isShutdown()) {
+      if (!Thread.currentThread().isInterrupted() && !scheduler.isShutdown()) {
         long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
         profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
       }
