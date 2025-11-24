@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * AutoConfigurationCustomizerProvider for dynamic control extension.
  *
- * <p>This extension provides a skeleton for dynamic control of agent features. Currently, it only
+ * <p>This extension provides a skeleton for dynamic control of agent features. Currently, it just
  * logs when loaded by the agent.
  */
 @AutoService(AutoConfigurationCustomizerProvider.class)
