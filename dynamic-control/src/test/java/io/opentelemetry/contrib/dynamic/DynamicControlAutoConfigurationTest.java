@@ -26,7 +26,7 @@ class DynamicControlAutoConfigurationTest {
 
   @Test
   void testOrder() {
-    //This is a placeholder test, just to have something
+    // This is a placeholder test, just to have something
     DynamicControlAutoConfiguration config = new DynamicControlAutoConfiguration();
     // Default order should be 0
     assertThat(config.order()).isEqualTo(0);
