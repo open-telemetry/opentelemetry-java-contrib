@@ -84,7 +84,7 @@ public final class MetricDataMapper {
     return metric.build();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // data type is checked before casting
   public MetricData mapToSdk(Metric source, Resource resource, InstrumentationScopeInfo scope) {
     if (source.gauge != null) {
       DataWithType gaugeDataWithType = mapGaugeToSdk(source.gauge);
@@ -153,7 +153,7 @@ public final class MetricDataMapper {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // data type is checked before casting
   private static void addDataToProto(MetricData source, Metric.Builder target) {
     switch (source.getType()) {
       case LONG_GAUGE:

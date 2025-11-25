@@ -40,7 +40,8 @@ public class SpanAnchoredClock {
    * translation.
    */
   public long getAnchor(Span span) {
-    return nanoTimeOffsetMap.get(span);
+    Long val = nanoTimeOffsetMap.get(span);
+    return val != null ? val : 0L;
   }
 
   /**

@@ -7,7 +7,7 @@ package io.opentelemetry.contrib.awsxray;
 
 import static io.opentelemetry.semconv.HttpAttributes.HTTP_RESPONSE_STATUS_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -710,7 +710,8 @@ class XrayRulesSamplerTest {
     AwsXrayAdaptiveSamplingConfig config =
         AwsXrayAdaptiveSamplingConfig.builder().setVersion(1.0).build();
     sampler.setAdaptiveSamplingConfig(config);
-    assertThrows(IllegalStateException.class, () -> sampler.setAdaptiveSamplingConfig(config));
+    assertThatThrownBy(() -> sampler.setAdaptiveSamplingConfig(config))
+        .isInstanceOf(IllegalStateException.class);
   }
 
   @Test

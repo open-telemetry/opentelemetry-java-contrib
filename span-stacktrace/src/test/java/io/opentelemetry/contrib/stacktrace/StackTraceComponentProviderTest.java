@@ -22,7 +22,7 @@ class StackTraceComponentProviderTest {
         "file_format: 1.0-rc.1\n"
             + "tracer_provider:\n"
             + "  processors:\n"
-            + "    - experimental_stacktrace: \n"
+            + "    - stacktrace/development: \n"
             + "        min_duration: 100\n"
             + "        filter: io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessorTest$YesPredicate\n";
 

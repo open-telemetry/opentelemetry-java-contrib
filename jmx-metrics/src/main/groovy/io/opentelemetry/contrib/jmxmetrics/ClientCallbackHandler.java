@@ -26,14 +26,14 @@ public class ClientCallbackHandler implements CallbackHandler {
    * @param password - authenticating password (plaintext)
    * @param realm - authenticating realm
    */
-  public ClientCallbackHandler(final String username, final String password, final String realm) {
+  public ClientCallbackHandler(String username, String password, String realm) {
     this.username = username;
     this.password = password != null ? password.toCharArray() : null;
     this.realm = realm;
   }
 
   @Override
-  public void handle(final Callback[] callbacks) throws UnsupportedCallbackException {
+  public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
     for (Callback callback : callbacks) {
       if (callback instanceof NameCallback) {
         ((NameCallback) callback).setName(this.username);

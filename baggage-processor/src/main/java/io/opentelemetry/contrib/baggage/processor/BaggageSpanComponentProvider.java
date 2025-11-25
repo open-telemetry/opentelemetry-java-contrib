@@ -11,9 +11,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.internal.IncludeExcludePredicate;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
-@SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class BaggageSpanComponentProvider implements ComponentProvider<SpanProcessor> {
+public class BaggageSpanComponentProvider implements ComponentProvider {
   @Override
   public String getName() {
     return "baggage";

@@ -10,4 +10,4 @@ for f in $usage_file; do
 done
 
 # shellcheck disable=SC2086
-lychee --verbose --scheme file --include-fragments $usage_file
+lychee --verbose --scheme file --include-fragments --config .github/config/lychee.toml $usage_file

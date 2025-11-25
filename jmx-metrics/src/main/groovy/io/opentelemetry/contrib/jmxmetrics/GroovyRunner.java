@@ -44,7 +44,7 @@ public class GroovyRunner {
     List<String> scriptSources = new ArrayList<>();
     try {
       if (config.targetSystems.size() != 0) {
-        for (final String target : config.targetSystems) {
+        for (String target : config.targetSystems) {
           String systemResourcePath = "target-systems/" + target + ".groovy";
           scriptSources.add(getTargetSystemResourceAsString(systemResourcePath));
         }
@@ -59,7 +59,7 @@ public class GroovyRunner {
 
     this.scripts = new ArrayList<>();
     try {
-      for (final String source : scriptSources) {
+      for (String source : scriptSources) {
         this.scripts.add(new GroovyShell().parse(source));
       }
     } catch (CompilationFailedException e) {
@@ -74,18 +74,18 @@ public class GroovyRunner {
         new OtelHelper(jmxClient, this.groovyMetricEnvironment, config.aggregateAcrossMBeans);
     binding.setVariable("otel", otelHelper);
 
-    for (final Script script : scripts) {
+    for (Script script : scripts) {
       script.setBinding(binding);
     }
   }
 
-  private static String getFileAsString(final String fileName) throws IOException {
+  private static String getFileAsString(String fileName) throws IOException {
     try (InputStream is = new FileInputStream(fileName)) {
       return getFileFromInputStream(is);
     }
   }
 
-  private String getTargetSystemResourceAsString(final String targetSystem) throws IOException {
+  private String getTargetSystemResourceAsString(String targetSystem) throws IOException {
     URL res = getClass().getClassLoader().getResource(targetSystem);
     if (res == null) {
       throw new ConfigurationException("Failed to load " + targetSystem);
@@ -98,15 +98,15 @@ public class GroovyRunner {
   }
 
   private static String getTargetSystemResourceFromJarAsString(URL res) throws IOException {
-    final String[] array = res.toString().split("!");
+    String[] array = res.toString().split("!");
     if (array.length != 2) {
       throw new ConfigurationException(
           "Invalid path for target system resource from jar: " + res.toString());
     }
 
-    final Map<String, String> env = Collections.emptyMap();
+    Map<String, String> env = Collections.emptyMap();
     try {
-      try (final FileSystem fs = FileSystems.newFileSystem(URI.create(array[0]), env)) {
+      try (FileSystem fs = FileSystems.newFileSystem(URI.create(array[0]), env)) {
         Path path = fs.getPath(array[1]);
         try (InputStream is = Files.newInputStream(path)) {
           return getFileFromInputStream(is);
@@ -117,7 +117,7 @@ public class GroovyRunner {
     }
   }
 
-  private static String getFileFromInputStream(final InputStream is) throws IOException {
+  private static String getFileFromInputStream(InputStream is) throws IOException {
     if (is == null) {
       return null;
     }
@@ -134,7 +134,7 @@ public class GroovyRunner {
   }
 
   public void run() {
-    for (final Script script : scripts) {
+    for (Script script : scripts) {
       script.run();
     }
   }

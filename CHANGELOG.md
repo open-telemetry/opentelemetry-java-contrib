@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+## Version 1.52.0 (2025-11-20)
+
+### AWS X-Ray propagator
+
+- Update xray lambda component provider name
+  ([#2423](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2423))
+
+### Inferred spans
+
+- Add declarative config support.
+  ([#2030](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2030))
+- Fix occasional/sporadic NPE.
+  ([#2443](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2443))
+
+### Span stack traces
+
+- Fix stacktrace processor name for declarative config.
+  ([#2415](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2415))
+
+## Version 1.51.0 (2025-10-20)
+
+### AWS X-Ray SDK support and propagator
+
+- Add AWS X-Ray adaptive sampling support
+  ([#2147](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2147)).
+
+### Common Expression Language sampler - New 🌟
+
+A rule-based sampler backed by Common Expression Language (CEL)
+expressions for declarative sampling rules
+
+### Disk buffering
+
+- Implement the disk buffering API
+  ([#2183](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2183)).
+
+### Inferred spans
+
+- Return the previous profiler interval from `setInterval`
+  ([#2354](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2354)).
+
+### OpAMP client
+
+- Restore the client parameter to OpAMP callbacks
+  ([#2336](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2336)).
+
 ## Version 1.50.0 (2025-09-26)
 
 Note: This release broadly applies some style guidelines across the repository. As a result,

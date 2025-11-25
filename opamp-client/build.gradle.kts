@@ -1,6 +1,8 @@
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.URL
+import java.net.URI
+
+val opampSpecVersion = "v0.14.0" // renovate(github-releases): open-telemetry/opamp-spec
 
 plugins {
   id("otel.java-conventions")
@@ -28,13 +30,21 @@ val opampProtos = tasks.register<DownloadAndExtractOpampProtos>("opampProtoDownl
   group = "opamp"
   outputProtosDir.set(project.layout.buildDirectory.dir("opamp/protos"))
   downloadedZipFile.set(project.layout.buildDirectory.file("intermediate/opampProtoDownload/release.zip"))
-  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/v0.14.0")
+  zipUrl.set("https://github.com/open-telemetry/opamp-spec/zipball/$opampSpecVersion")
 }
 
 wire {
   java {}
   sourcePath {
     srcDir(opampProtos)
+  }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+  with(options) {
+    // classes generated from proto trigger
+    // warning: [serial] non-transient instance field of a serializable class declared with a non-serializable type
+    compilerArgs.add("-Xlint:-serial")
   }
 }
 
@@ -54,10 +64,17 @@ abstract class DownloadAndExtractOpampProtos @Inject constructor(
 
   @TaskAction
   fun execute() {
-    val url = URL(zipUrl.get())
+    val url = URI.create(zipUrl.get()).toURL()
     downloadedZipFile.get().asFile.parentFile.mkdirs()
 
-    url.openStream().use { input: InputStream ->
+    val connection = url.openConnection()
+    // Use GitHub token if available to avoid rate limiting
+    val githubToken = System.getenv("GITHUB_TOKEN")
+    if (githubToken != null && githubToken.isNotEmpty()) {
+      connection.setRequestProperty("Authorization", "Bearer $githubToken")
+    }
+
+    connection.getInputStream().use { input: InputStream ->
       downloadedZipFile.get().asFile.outputStream().use { output: FileOutputStream ->
         input.copyTo(output)
       }

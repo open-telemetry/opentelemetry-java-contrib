@@ -51,15 +51,15 @@ public abstract class SpanDataImpl implements SpanData {
 
     public abstract Builder setStatus(StatusData value);
 
-    public abstract Builder setStartEpochNanos(Long value);
+    public abstract Builder setStartEpochNanos(long value);
 
-    public abstract Builder setTotalAttributeCount(Integer value);
+    public abstract Builder setTotalAttributeCount(int value);
 
-    public abstract Builder setTotalRecordedEvents(Integer value);
+    public abstract Builder setTotalRecordedEvents(int value);
 
-    public abstract Builder setTotalRecordedLinks(Integer value);
+    public abstract Builder setTotalRecordedLinks(int value);
 
-    public abstract Builder setEndEpochNanos(Long value);
+    public abstract Builder setEndEpochNanos(long value);
 
     public abstract Builder setAttributes(Attributes value);
 

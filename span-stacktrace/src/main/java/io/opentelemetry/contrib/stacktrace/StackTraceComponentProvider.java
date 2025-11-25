@@ -11,12 +11,11 @@ import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertie
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
-@SuppressWarnings("rawtypes")
 @AutoService(ComponentProvider.class)
-public class StackTraceComponentProvider implements ComponentProvider<SpanProcessor> {
+public class StackTraceComponentProvider implements ComponentProvider {
   @Override
   public String getName() {
-    return "experimental_stacktrace";
+    return "stacktrace/development";
   }
 
   @Override

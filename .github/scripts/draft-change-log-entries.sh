@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+
+set -e
 
 version=$("$(dirname "$0")/get-version.sh")
 
@@ -29,6 +31,7 @@ component_names["aws-xray/"]="AWS X-Ray SDK support"
 component_names["aws-xray-propagator/"]="AWS X-Ray propagator"
 component_names["azure-resources/"]="Azure resources"
 component_names["baggage-processor/"]="Baggage processor"
+component_names["cel-sampler/"]="Common Expression Language sampler"
 component_names["cloudfoundry-resources/"]="CloudFoundry resources"
 component_names["compressors/"]="Compressors"
 component_names["consistent-sampling/"]="Consistent sampling"
