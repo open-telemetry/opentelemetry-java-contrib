@@ -53,7 +53,7 @@ logger_provider:
 
 This will configure the respective processor to include baggage keys listed in `included` and
 exclude those in `excluded` as explained in
-[Properties which pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-which-pattern-matching).
+[Properties requiring pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-requiring-pattern-matching).
 
 ### Usage through programmatic activation
 
