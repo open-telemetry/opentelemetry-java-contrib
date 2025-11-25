@@ -1,14 +1,18 @@
 # Tomcat Metrics
 
 The JMX Metric Gatherer provides built in Tomcat metric gathering capabilities.
-These metrics are sourced from: https://docs.oracle.com/cd/E11857_01/em.111/e10115/middleware_apache_tomcat.htm
+These metrics are sourced from: <https://docs.oracle.com/cd/E11857_01/em.111/e10115/middleware_apache_tomcat.htm>
 
-### Metrics
+## Metrics
+
+### tomcat.sessions
 
 * Name: `tomcat.sessions`
 * Description: The number of active sessions.
 * Unit: `sessions`
 * Instrument Type: DoubleValueCallback
+
+### tomcat.errors
 
 * Name: `tomcat.errors`
 * Description: The number of errors encountered.
@@ -16,11 +20,15 @@ These metrics are sourced from: https://docs.oracle.com/cd/E11857_01/em.111/e101
 * Labels: `proto_handler`
 * Instrument Type: LongCounterCallback
 
+### tomcat.processing_time
+
 * Name: `tomcat.processing_time`
 * Description: The total processing time.
 * Unit: `ms`
 * Labels: `proto_handler`
 * Instrument Type: LongCounterCallback
+
+### tomcat.traffic
 
 * Name: `tomcat.traffic`
 * Description: The number of bytes transmitted and received.
@@ -28,17 +36,23 @@ These metrics are sourced from: https://docs.oracle.com/cd/E11857_01/em.111/e101
 * Labels: `proto_handler`, `direction`
 * Instrument Type: LongCounterCallback
 
+### tomcat.threads
+
 * Name: `tomcat.threads`
 * Description: The number of threads.
 * Unit: `threads`
 * Labels: `proto_handler`, `state`
 * Instrument Type: LongValueCallback
 
+### tomcat.max_time
+
 * Name: `tomcat.max_time`
 * Description: Maximum time to process a request.
 * Unit: `ms`
 * Labels: `proto_handler`
 * Instrument Type: longValueCallback
+
+### tomcat.request_count
 
 * Name: `tomcat.request_count`
 * Description: The total requests.

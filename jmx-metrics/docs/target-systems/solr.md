@@ -1,11 +1,11 @@
 # Solr Metrics
 
 The JMX Metric Gatherer provides built in Solr metric gathering capabilities.
-Details about using JMX with Solr can be found here: https://solr.apache.org/guide/6_6/using-jmx-with-solr.html
+Details about using JMX with Solr can be found here: <https://solr.apache.org/guide/6_6/using-jmx-with-solr.html>
 
 ## Metrics
 
-### Core Metrics
+### solr.document.count
 
 * Name: `solr.document.count`
 * Description: The total number of indexed documents.
@@ -13,6 +13,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`
 * Instrument Type: ObservableLongUpDownCounter
 
+### solr.index.size
 
 * Name: `solr.index.size`
 * Description: The total index size.
@@ -20,6 +21,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`
 * Instrument Type: ObservableLongUpDownCounter
 
+### solr.request.count
 
 * Name: `solr.request.count`
 * Description: The number of queries made.
@@ -27,6 +29,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
+### solr.request.time.average
 
 * Name: `solr.request.time.average`
 * Description: The average time of a query, based on Solr's histogram configuration.
@@ -34,6 +37,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableDoubleValue
 
+### solr.request.error.count
 
 * Name: `solr.request.error.count`
 * Description: The number of queries resulting in an error.
@@ -41,6 +45,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
+### solr.request.timeout.count
 
 * Name: `solr.request.timeout.count`
 * Description: The number of queries resulting in a timeout.
@@ -48,6 +53,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `type`, `handler`
 * Instrument Type: ObservableLongCounter
 
+### solr.cache.eviction.count
 
 * Name: `solr.cache.eviction.count`
 * Description: The number of evictions from a cache.
@@ -55,6 +61,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
+### solr.cache.hit.count
 
 * Name: `solr.cache.hit.count`
 * Description: The number of hits from a cache.
@@ -62,6 +69,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
+### solr.cache.insert.count
 
 * Name: `solr.cache.insert.count`
 * Description: The number of inserts from a cache.
@@ -69,6 +77,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
+### solr.cache.lookup.count
 
 * Name: `solr.cache.lookup.count`
 * Description: The number of lookups from a cache.
@@ -76,6 +85,7 @@ Details about using JMX with Solr can be found here: https://solr.apache.org/gui
 * Labels: `core`, `cache`
 * Instrument Type: ObservableLongCounter
 
+### solr.cache.size
 
 * Name: `solr.cache.size`
 * Description: The size of the cache occupied in memory.
