@@ -5,7 +5,7 @@
 set -e
 
 if [ "${usage_fix}" = "true" ]; then
-  markdownlint-cli2 --fix "**/*.md"
-else
-  markdownlint-cli2 "**/*.md"
+  opt_fix="--fix"
 fi
+
+markdownlint-cli2 ${opt_fix} "**/*.md" "#**/build" "#**/node_modules" "#CHANGELOG.md" "#ibm-mq-metrics/docs/metrics.md" "#.github/pull_request_template.md"
