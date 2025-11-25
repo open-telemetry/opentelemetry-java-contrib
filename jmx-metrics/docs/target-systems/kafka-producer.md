@@ -1,7 +1,7 @@
 # Kafka Producer Metrics
 
 The JMX Metric Gatherer provides built in Kafka producer metric gathering capabilities for versions v0.8.2.x and above.
-These metrics are sourced from Kafka's exposed Yammer metrics for each instance: <https://kafka.apache.org/documentation/#monitoring>
+These metrics are sourced from Kafka's exposed JMX metrics for each instance: <https://kafka.apache.org/documentation/#monitoring>
 
 ## Producer Metrics
 
