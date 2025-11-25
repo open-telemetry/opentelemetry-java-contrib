@@ -17,10 +17,7 @@ fi
 config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
                   | grep -E '^(\.github/config/lychee\.toml|\.mise/tasks/lint/.*|mise\.toml)$' || true)
 
-if [ "$usage_event" != "pull_request" ] ; then
-  echo "Not a PR - checking all files."
-  mise run lint:links
-elif [ -n "$config_modified" ] ; then
+if [ -n "$config_modified" ] ; then
   echo "config changes, checking all files."
   mise run lint:links
 else
