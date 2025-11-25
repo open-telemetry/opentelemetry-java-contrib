@@ -1,9 +1,11 @@
 # ActiveMQ Metrics
 
 The JMX Metric Gatherer provides built in ActiveMQ metric gathering capabilities.
-These metrics are sourced from: https://activemq.apache.org/jmx
+These metrics are sourced from: <https://activemq.apache.org/jmx>
 
-### Metrics
+## Metrics
+
+### activemq.consumer.count
 
 * Name: `activemq.consumer.count`
 * Description: The number of consumers currently reading from the broker.
@@ -11,6 +13,7 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongUpDownCounter
 
+### activemq.producer.count
 
 * Name: `activemq.producer.count`
 * Description: The number of producers currently attached to the broker.
@@ -18,12 +21,14 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongUpDownCounter
 
+### activemq.connectin.count
 
 * Name: `activemq.connectin.count`
 * Description: The total number of current connections.
 * Unit: `connections`
 * Instrument Type: ObservableLongUpDownCounter
 
+### activemq.memory.usage
 
 * Name: `activemq.memory.usage`
 * Description: The percentage of configured memory used.
@@ -31,18 +36,21 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableDoubleValue
 
+### activemq.disk.store_usage
 
 * Name: `activemq.disk.store_usage`
 * Description: The percentage of configured disk used for persistent messages.
 * Unit: `%`
 * Instrument Type: ObservableDoubleValue
 
+### activemq.disk.temp_usage
 
 * Name: `activemq.disk.temp_usage`
 * Description: The percentage of configured disk used for non-persistent messages.
 * Unit: `%`
 * Instrument Type: ObservableDoubleValue
 
+### activemq.message.current
 
 * Name: `activemq.message.current`
 * Description: The current number of messages waiting to be consumed.
@@ -50,6 +58,7 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongUpDownCounter
 
+### activemq.message.expired
 
 * Name: `activemq.message.expired`
 * Description: The total number of messages not delivered because they expired.
@@ -57,6 +66,7 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongCounter
 
+### activemq.message.enqueued
 
 * Name: `activemq.message.enqueued`
 * Description: The total number of messages received by the broker.
@@ -64,6 +74,7 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongCounter
 
+### activemq.message.dequeued
 
 * Name: `activemq.message.dequeued`
 * Description: The total number of messages delivered to consumers.
@@ -71,6 +82,7 @@ These metrics are sourced from: https://activemq.apache.org/jmx
 * Labels: `destination`
 * Instrument Type: ObservableLongCounter
 
+### activemq.message.wait_time.avg
 
 * Name: `activemq.message.wait_time.avg`
 * Description: The average time a message was held on a destination.
