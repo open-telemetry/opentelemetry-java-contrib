@@ -31,6 +31,24 @@ To run the tests:
 ./gradlew test
 ```
 
+## Markdown linting
+
+This repository uses [markdownlint](https://github.com/DavidAnson/markdownlint) via `markdownlint-cli2` managed by [mise](https://github.com/jdx/mise).
+
+To check all Markdown files:
+
+```bash
+mise run lint:markdown
+```
+
+(note: Windows users may need to run `mise install` first)
+
+To automatically fix fixable issues:
+
+```bash
+mise run lint:markdown --fix
+```
+
 ## Snapshot Builds
 
 Snapshot builds of the `main` branch are available from the Sonatype snapshot repository at:
