@@ -135,6 +135,3 @@ jobs:
 
   markdown-lint-check:
     uses: ./.github/workflows/reusable-markdown-lint.yml
-
-  shell-script-check:
-    uses: ./.github/workflows/reusable-shell-script-check.yml

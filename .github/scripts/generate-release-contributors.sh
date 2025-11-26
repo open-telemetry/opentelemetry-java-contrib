@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-# shellcheck disable=SC2016
-# shellcheck disable=SC2086
-
 # this should be run on the release branch
 
 # NOTE if you need to run this script locally, you will need to first:
