@@ -11,6 +11,3 @@ idiomatic_version_file_enable_tools = []
 windows_executable_extensions = ["sh"]
 windows_default_file_shell_args = "bash"
 use_file_shell_for_executable_tasks = true
-
-[tasks."lint:markdown"]
-file = ".mise/tasks/lint/markdown.sh"
