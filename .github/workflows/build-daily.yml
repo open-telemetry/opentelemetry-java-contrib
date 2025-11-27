@@ -60,7 +60,7 @@ jobs:
     uses: ./.github/workflows/reusable-workflow-notification.yml
     with:
       success: >-
-        ${{{
+        ${{
           needs.common.result == 'success' &&
           needs.link-check.result == 'success' &&
           needs.publish-snapshots.result == 'success'
