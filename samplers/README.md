@@ -9,6 +9,7 @@ The following samplers support [declarative configuration](https://opentelemetry
 To use:
 
 * Add a dependency on `io.opentelemetry.contrib:opentelemetry-samplers:<version>`
+  * NOTE: if using the java agent, this sampler is already included in versions 2.21+ and no additional dependency is required.
 * Follow the [instructions](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/incubator/README.md#declarative-configuration) to configure OpenTelemetry with declarative configuration.
 * Configure the `.tracer_provider.sampler` to include the `rule_based_routing` sampler.
 
