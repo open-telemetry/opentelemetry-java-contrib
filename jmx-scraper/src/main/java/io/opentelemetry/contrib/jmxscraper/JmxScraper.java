@@ -252,9 +252,12 @@ public final class JmxScraper {
             system -> {
               try (InputStream input = config.getTargetSystemYaml(system)) {
                 Path tempFile = Files.createTempFile("jmx-scraper-" + system, ".yaml");
-                Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
-                builder.addCustomRules(tempFile);
-                Files.delete(tempFile);
+                try {
+                  Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                  builder.addCustomRules(tempFile);
+                } finally {
+                  Files.delete(tempFile);
+                }
               } catch (IOException e) {
                 throw new IllegalStateException(e);
               }
