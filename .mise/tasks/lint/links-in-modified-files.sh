@@ -12,21 +12,16 @@ if [ "$usage_head" = "''" ]; then
 fi
 
 # Check if lychee config was modified
-# shellcheck disable=SC2086
 # - because usage_head may be empty
 config_modified=$(git diff --name-only --merge-base "$usage_base" $usage_head \
                   | grep -E '^(\.github/config/lychee\.toml|\.mise/tasks/lint/.*|mise\.toml)$' || true)
 
-if [ "$usage_event" != "pull_request" ] ; then
-  echo "Not a PR - checking all files."
-  mise run lint:links
-elif [ -n "$config_modified" ] ; then
+if [ -n "$config_modified" ] ; then
   echo "config changes, checking all files."
   mise run lint:links
 else
   # Using lychee's default extension filter here to match when it runs against all files
   # Note: --diff-filter=d filters out deleted files
-  # shellcheck disable=SC2086
   # - because usage_head may be empty
   modified_files=$(git diff --name-only --diff-filter=d "$usage_base" $usage_head \
                     | grep -E '\.(md|mkd|mdx|mdown|mdwn|mkdn|mkdown|markdown|html|htm|txt)$' \
@@ -37,7 +32,6 @@ else
     exit 0
   fi
 
-  # shellcheck disable=SC2086
   mise run lint:links $modified_files
 fi
 

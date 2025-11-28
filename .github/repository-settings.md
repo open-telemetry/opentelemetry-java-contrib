@@ -23,7 +23,7 @@ private admin repo.
 - `GPG_PASSWORD` - stored in OpenTelemetry-Java 1Password
 - `GPG_PRIVATE_KEY` - stored in OpenTelemetry-Java 1Password
 - `NVD_API_KEY` - stored in OpenTelemetry-Java 1Password
-  - Generated at https://nvd.nist.gov/developers/request-an-api-key
+  - Generated at <https://nvd.nist.gov/developers/request-an-api-key>
   - Key is associated with [@trask](https://github.com/trask)'s gmail address
 - `SONATYPE_KEY` - owned by [@trask](https://github.com/trask)
 - `SONATYPE_USER` - owned by [@trask](https://github.com/trask)
