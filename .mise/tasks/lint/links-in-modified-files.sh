@@ -5,7 +5,6 @@ set -e
 
 #USAGE flag "--base <base>" help="base branch to compare against (default: origin/main)" default="origin/main"
 #USAGE flag "--head <head>" help="head branch to compare against (empty for local changes) (default: empty)" default=""
-#USAGE flag "--event <event>" help="event name (default: pull_request)" default="pull_request"
 
 if [ "$usage_head" = "''" ]; then
   usage_head=""
