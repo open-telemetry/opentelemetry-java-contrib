@@ -21,7 +21,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
 | alpha   | [Baggage Processors](./baggage-processor/README.md)               |
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
-| alpha   | [CEL-Based Sampler](./cel-sampler/README.md)                     |
+| alpha   | [CEL-Based Sampler](./cel-sampler/README.md)                      |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
 | alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
