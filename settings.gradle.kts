@@ -18,13 +18,6 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     mavenLocal()
-    // terracotta repository for jmxmp connector
-    maven {
-      setUrl("https://repo.terracotta.org/maven2")
-      content {
-        includeGroupByRegex("""org\.terracotta.*""")
-      }
-    }
     // for otel snapshots
     maven {
       url = uri("https://central.sonatype.com/repository/maven-snapshots/")

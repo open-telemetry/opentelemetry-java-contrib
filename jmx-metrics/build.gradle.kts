@@ -14,6 +14,17 @@ application.mainClass.set("io.opentelemetry.contrib.jmxmetrics.JmxMetrics")
 
 val groovyVersion = "3.0.25"
 
+repositories {
+  mavenCentral()
+  // terracotta repository for jmxmp connector
+  maven {
+    setUrl("https://repo.terracotta.org/maven2")
+    content {
+      includeGroupByRegex("""org\.terracotta.*""")
+    }
+  }
+}
+
 dependencies {
   api(platform("org.codehaus.groovy:groovy-bom:$groovyVersion"))
 
