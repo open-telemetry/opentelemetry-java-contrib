@@ -398,6 +398,9 @@ public class SamplingProfiler implements Runnable {
 
     profilerLock.lock();
     try {
+      // it's possible for an interruption to occur just before the lock was acquired. This is
+      // handled by re-reading Thread.currentThread().isInterrupted() to ensure no task is scheduled
+      // if an interruption occurred just before acquiring the lock
       if (!Thread.currentThread().isInterrupted() && !scheduler.isShutdown()) {
         long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
         profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
@@ -414,6 +417,8 @@ public class SamplingProfiler implements Runnable {
       String startMessage = profiler.execute(startCommand);
       logger.fine(startMessage);
       try {
+        // try-finally because if the code is interrupted we want to ensure the
+        // profiler.execute("stop") is called
         if (!profiledThreads.isEmpty()) {
           restoreFilterState(profiler);
         }
@@ -749,12 +754,10 @@ public class SamplingProfiler implements Runnable {
     profilerLock.lock();
     try {
       Future<?> future = this.profilingTask;
-      if (future != null) {
-        if (future.cancel(true)) {
-          Duration profilingDuration = config.getProfilingDuration();
-          long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-          profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
-        }
+      if (future != null && future.cancel(true)) {
+        Duration profilingDuration = config.getProfilingDuration();
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
       }
     } finally {
       profilerLock.unlock();
