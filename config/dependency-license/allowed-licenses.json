@@ -1,0 +1,38 @@
+{
+  "allowedLicenses": [
+    {
+      "moduleLicense": "Apache License, Version 2.0"
+    },
+    {
+      "moduleLicense": "Bouncy Castle Licence"
+    },
+    {
+      "moduleLicense": "The 3-Clause BSD License"
+    },
+    {
+      "moduleLicense": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0"
+    },
+    {
+      "moduleLicense": "GNU LESSER GENERAL PUBLIC LICENSE, Version 3"
+    },
+    {
+      "moduleLicense": "GNU Lesser General Public License Version 3 or greater"
+    },
+    {
+      "moduleLicense": "Go License"
+    },
+    {
+      "moduleLicense": "MIT License"
+    },
+    {
+      "moduleLicense": "PUBLIC DOMAIN"
+    },
+    {
+      "moduleVersion": "1.0",
+      "moduleName": "net.jcip:jcip-annotations"
+    },
+    {
+      "moduleName": "opentelemetry-java-contrib:dependencyManagement"
+    }
+  ]
+}
