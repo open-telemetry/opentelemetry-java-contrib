@@ -101,7 +101,7 @@ import org.agrona.collections.Long2ObjectHashMap;
  * stack trace}.
  */
 public class SamplingProfiler implements Runnable {
-  // fake comment to bump for more test runs
+
   private static final String LIB_DIR_PROPERTY_NAME = "one.profiler.extractPath";
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
@@ -319,6 +319,9 @@ public class SamplingProfiler implements Runnable {
       if (previouslyActive == null) {
         profiler.addThread(Thread.currentThread());
       }
+      if (!config.isPostProcessingEnabled()) {
+        return true;
+      }
       boolean success =
           eventBuffer.tryPublishEvent(activationEventTranslator, activeSpan, previouslyActive);
       if (!success) {
@@ -344,6 +347,9 @@ public class SamplingProfiler implements Runnable {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
         profiler.removeThread(Thread.currentThread());
+      }
+      if (!config.isPostProcessingEnabled()) {
+        return true;
       }
       boolean success =
           eventBuffer.tryPublishEvent(
