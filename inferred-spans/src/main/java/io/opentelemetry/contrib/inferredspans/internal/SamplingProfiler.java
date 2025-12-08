@@ -764,10 +764,10 @@ public class SamplingProfiler implements Runnable {
     }
   }
 
+  @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
   public void stop() throws InterruptedException, IOException {
     // cancels/interrupts the profiling thread
     if (profilingTask != null) {
-      @SuppressWarnings("Interruption")
       profilingTask.cancel(true);
     }
     // implicitly clears profiled threads
