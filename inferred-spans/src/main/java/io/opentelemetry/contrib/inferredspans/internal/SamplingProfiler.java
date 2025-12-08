@@ -414,7 +414,21 @@ public class SamplingProfiler implements Runnable {
   private void profile(Duration profilingDuration) throws Exception {
     try {
       String startCommand = createStartCommand();
-      String startMessage = profiler.execute(startCommand);
+      String startMessage;
+      try {
+        startMessage = profiler.execute(startCommand);
+      } catch (IllegalStateException e) {
+        if (e.getMessage() != null && e.getMessage().contains("already started")) {
+          logger.fine("Profiler already started. Stopping and restarting.");
+          try {
+            profiler.stop();
+          } catch (Exception ignore) {
+          }
+          startMessage = profiler.execute(startCommand);
+        } else {
+          throw e;
+        }
+      }
       logger.fine(startMessage);
       try {
         // try-finally because if the code is interrupted we want to ensure the
