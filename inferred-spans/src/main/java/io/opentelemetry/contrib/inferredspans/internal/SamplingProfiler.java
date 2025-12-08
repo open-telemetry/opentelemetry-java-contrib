@@ -101,7 +101,7 @@ import org.agrona.collections.Long2ObjectHashMap;
  * stack trace}.
  */
 public class SamplingProfiler implements Runnable {
-  // fake comment to bump for more test runs
+
   private static final String LIB_DIR_PROPERTY_NAME = "one.profiler.extractPath";
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
