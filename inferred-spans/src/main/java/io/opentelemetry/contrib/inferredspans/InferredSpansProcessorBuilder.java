@@ -52,6 +52,7 @@ public class InferredSpansProcessorBuilder {
   private boolean startScheduledProfiling = true;
   @Nullable private File activationEventsFile = null;
   @Nullable private File jfrFile = null;
+  @Nullable private File tempDir = null;
   private BiConsumer<SpanBuilder, SpanContext> parentOverrideHandler =
       CallTree.DEFAULT_PARENT_OVERRIDE;
 
@@ -75,7 +76,7 @@ public class InferredSpansProcessorBuilder {
             parentOverrideHandler);
     InferredSpansProcessor processor =
         new InferredSpansProcessor(
-            config, clock, startScheduledProfiling, activationEventsFile, jfrFile);
+            config, clock, startScheduledProfiling, activationEventsFile, jfrFile, tempDir);
     InferredSpans.setInstance(processor);
     return processor;
   }
@@ -194,14 +195,20 @@ public class InferredSpansProcessorBuilder {
   }
 
   /** For testing only. */
-  InferredSpansProcessorBuilder activationEventsFile(@Nullable File activationEventsFile) {
+  public InferredSpansProcessorBuilder activationEventsFile(@Nullable File activationEventsFile) {
     this.activationEventsFile = activationEventsFile;
     return this;
   }
 
   /** For testing only. */
-  InferredSpansProcessorBuilder jfrFile(@Nullable File jfrFile) {
+  public InferredSpansProcessorBuilder jfrFile(@Nullable File jfrFile) {
     this.jfrFile = jfrFile;
+    return this;
+  }
+
+  /** For testing only. */
+  public InferredSpansProcessorBuilder tempDir(@Nullable File tempDir) {
+    this.tempDir = tempDir;
     return this;
   }
 
