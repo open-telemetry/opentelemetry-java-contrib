@@ -422,7 +422,8 @@ public class SamplingProfiler implements Runnable {
           logger.fine("Profiler already started. Stopping and restarting.");
           try {
             profiler.stop();
-          } catch (Exception ignore) {
+          } catch (RuntimeException ignore) {
+            logger.log(Level.FINE, "Ignored error on stopping profiler", ignore);
           }
           startMessage = profiler.execute(startCommand);
         } else {
