@@ -43,6 +43,10 @@ import org.junit.jupiter.api.io.TempDir;
 @DisabledOnOpenJ9
 class SamplingProfilerTest {
 
+  static {
+    ProfilingActivationListener.ensureInitialized();
+  }
+
   private ProfilerTestSetup setup;
 
   @TempDir private Path tempDir;
