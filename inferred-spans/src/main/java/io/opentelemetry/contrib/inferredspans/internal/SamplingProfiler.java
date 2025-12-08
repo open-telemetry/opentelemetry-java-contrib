@@ -532,6 +532,9 @@ public class SamplingProfiler implements Runnable {
   }
 
   public void processTraces() throws IOException {
+    if (!config.isPostProcessingEnabled()) {
+      return;
+    }
     if (jfrParser == null) {
       jfrParser = new JfrParser();
     }
