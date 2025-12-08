@@ -101,7 +101,7 @@ import org.agrona.collections.Long2ObjectHashMap;
  * stack trace}.
  */
 public class SamplingProfiler implements Runnable {
-  // fake comment to bump for more test runs
+
   private static final String LIB_DIR_PROPERTY_NAME = "one.profiler.extractPath";
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
@@ -375,7 +375,9 @@ public class SamplingProfiler implements Runnable {
     Duration profilingDuration = config.getProfilingDuration();
     boolean postProcessingEnabled = config.isPostProcessingEnabled();
 
-    setProfilingSessionOngoing(postProcessingEnabled);
+    // We need to enable the session so that onActivation is called and threads are added to the
+    // profiler (profiler.addThread). Otherwise, with the "filter" option, nothing is profiled.
+    setProfilingSessionOngoing(true);
 
     if (postProcessingEnabled) {
       logger.fine("Start full profiling session (async-profiler and agent processing)");
