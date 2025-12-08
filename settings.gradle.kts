@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.maven
 
 pluginManagement {
   plugins {
-    id("com.gradleup.shadow") version "9.2.2"
+    id("com.gradleup.shadow") version "9.3.0"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("com.gradle.develocity") version "4.2.2"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
