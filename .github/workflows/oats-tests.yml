@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - .mise.toml
+      - .github/workflows/oats-tests.yml
       - cel-sampler/**
       - .mise/tasks/oats-tests.sh
   workflow_dispatch:
