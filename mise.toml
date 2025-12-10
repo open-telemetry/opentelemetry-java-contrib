@@ -1,6 +1,7 @@
 [tools]
 lychee = "0.21.0"
 markdownlint-cli2 = "0.19.1"
+"go:github.com/grafana/oats" = "0.6.0"
 
 [settings]
 # Only install tools explicitly defined in the [tools] section above
@@ -10,6 +11,5 @@ idiomatic_version_file_enable_tools = []
 # Based on: https://github.com/jdx/mise/discussions/4461
 windows_executable_extensions = ["sh"]
 windows_default_file_shell_args = "bash"
+unix_default_file_shell_args = "bash"
 use_file_shell_for_executable_tasks = true
-
-unix_default_file_shell = "bash"
