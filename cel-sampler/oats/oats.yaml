@@ -1,0 +1,34 @@
+# OATS is an acceptance testing framework for OpenTelemetry - https://github.com/grafana/oats
+oats-schema-version: 2
+
+docker-compose:
+  files:
+    - ./docker-compose.yml
+
+input:
+  - path: /hello
+  - path: /api/data
+  - path: /healthcheck
+  - path: /metrics
+
+expected:
+  traces:
+    # Verify that /hello and /api/data endpoints are sampled
+    - traceql: '{ span.http.route = "/hello" }'
+      equals: "GET /hello"
+      attributes:
+        http.request.method: "GET"
+        http.route: "/hello"
+    - traceql: '{ span.http.route = "/api/data" }'
+      equals: "GET /api/data"
+      attributes:
+        http.request.method: "GET"
+        http.response.status_code: 200
+
+    # Verify that health check and metrics endpoints are dropped:
+    - traceql: '{ span.http.route = "/healthcheck" }'
+      count:
+        max: 0
+    - traceql: '{ span.http.route = "/metrics" }'
+      count:
+        max: 0

@@ -1,0 +1,27 @@
+# OpenTelemetry Declarative Configuration for CEL-based Sampler Integration Test
+
+file_format: "1.0-rc.2"
+
+resource:
+  attributes:
+    - name: service.name
+      value: cel-sampler-test
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
+  sampler:
+    parent_based:
+      root:
+        cel_based:
+          expressions:
+            - expression: 'attribute["url.path"] == "/healthcheck"'
+              action: DROP
+            - expression: 'attribute["url.path"] == "/metrics"'
+              action: DROP
+          # Fallback sampler: sample everything else (including /api/ endpoints)
+          fallback_sampler:
+            always_on: {}
