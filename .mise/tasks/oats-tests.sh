@@ -12,5 +12,4 @@ echo "==> Building test application..."
 
 echo "==> Running OATS integration tests..."
 # Use full path to oats binary or ensure it's in PATH
-OATS="${OATS:-${HOME}/go/bin/oats}"
-(cd cel-sampler && "${OATS}" -timeout 5m oats/oats.yaml)
+(cd cel-sampler && oats -timeout 5m oats/oats.yaml)
