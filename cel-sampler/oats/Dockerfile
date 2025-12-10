@@ -5,11 +5,9 @@ WORKDIR /usr/src/app/
 # renovate: datasource=github-releases depName=open-telemetry/opentelemetry-java-instrumentation
 ENV OPENTELEMETRY_JAVA_INSTRUMENTATION_VERSION=v2.22.0
 
-# Add the test application JAR
 COPY ./cel-sampler/testapp/build/libs/testapp.jar ./app.jar
 
-# Add the CEL sampler extension JAR (shadow JAR with dependencies)
-# Copy all shadow JARs to extensions directory
+# Add the CEL sampler extension JAR
 COPY ./cel-sampler/build/libs/*-shadow.jar ./extensions/
 
 COPY ./cel-sampler/oats/otel-config.yaml ./otel-config.yaml

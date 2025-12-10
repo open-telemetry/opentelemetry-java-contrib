@@ -11,5 +11,4 @@ echo "==> Building test application..."
 (cd cel-sampler/testapp && ../../gradlew jar)
 
 echo "==> Running OATS integration tests..."
-# Use full path to oats binary or ensure it's in PATH
 (cd cel-sampler && oats -timeout 5m oats/oats.yaml)

@@ -33,8 +33,6 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  runtimeOnly("org.terracotta:jmxremote_optional-tc:1.0.8")
-
   testImplementation("org.slf4j:slf4j-api")
   testImplementation("org.slf4j:slf4j-simple")
   testImplementation("org.junit-pioneer:junit-pioneer")
