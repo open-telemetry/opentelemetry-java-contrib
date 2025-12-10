@@ -112,10 +112,10 @@ class InferredSpansAutoConfigTest {
   void checkProfilerWorking() {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansConfig.DURATION_OPTION, "500ms")
-            .put(InferredSpansConfig.INTERVAL_OPTION, "500ms")
-            .put(InferredSpansConfig.SAMPLING_INTERVAL_OPTION, "5ms")) {
+            .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
+            .put(InferredSpansAutoConfig.DURATION_OPTION, "1000ms")
+            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "1000ms")
+            .put(InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "5ms")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
       assertThat(processors).filteredOn(proc -> proc instanceof InferredSpansProcessor).hasSize(1);
@@ -159,7 +159,7 @@ class InferredSpansAutoConfigTest {
 
   private static void doSleep() {
     try {
-      Thread.sleep(100);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
