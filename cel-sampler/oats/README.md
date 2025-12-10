@@ -6,6 +6,7 @@ This directory contains acceptance tests for the CEL-based sampler extension usi
 ## Overview
 
 These tests verify that the CEL sampler correctly:
+
 - Drops traces for health check endpoints (`/healthcheck`, `/metrics`)
 - Samples traces for regular API endpoints (`/hello`, `/api/data`)
 - Loads correctly as a Java agent extension
