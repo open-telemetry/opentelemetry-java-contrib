@@ -195,13 +195,13 @@ public class InferredSpansProcessorBuilder {
   }
 
   /** For testing only. */
-  public InferredSpansProcessorBuilder activationEventsFile(@Nullable File activationEventsFile) {
+  InferredSpansProcessorBuilder activationEventsFile(@Nullable File activationEventsFile) {
     this.activationEventsFile = activationEventsFile;
     return this;
   }
 
   /** For testing only. */
-  public InferredSpansProcessorBuilder jfrFile(@Nullable File jfrFile) {
+  InferredSpansProcessorBuilder jfrFile(@Nullable File jfrFile) {
     this.jfrFile = jfrFile;
     return this;
   }
