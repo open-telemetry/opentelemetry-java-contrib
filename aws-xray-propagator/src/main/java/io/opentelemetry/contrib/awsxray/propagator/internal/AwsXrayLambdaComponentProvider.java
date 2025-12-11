@@ -18,7 +18,7 @@ public class AwsXrayLambdaComponentProvider implements ComponentProvider {
 
   @Override
   public String getName() {
-    return "xray_lambda";
+    return "xray-lambda";
   }
 
   @Override

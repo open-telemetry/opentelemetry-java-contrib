@@ -25,7 +25,7 @@ class AwsComponentProviderTest {
             + "propagator:\n"
             + "  composite:\n"
             + "    - xray:\n"
-            + "    - xray_lambda:\n";
+            + "    - xray-lambda:\n";
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
