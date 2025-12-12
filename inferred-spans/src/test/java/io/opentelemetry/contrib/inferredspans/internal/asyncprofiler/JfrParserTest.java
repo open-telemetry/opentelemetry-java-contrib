@@ -60,4 +60,16 @@ class JfrParserTest {
         });
     assertThat(stackTraces.get()).isEqualTo(92);
   }
+
+  @Test
+  void testParseEmptyFile() throws Exception {
+    File file = File.createTempFile("empty", ".jfr");
+    try {
+      JfrParser jfrParser = new JfrParser();
+      jfrParser.parse(file, Collections.emptyList(), Collections.emptyList());
+      jfrParser.consumeStackTraces((threadId, stackTraceId, nanoTime) -> {});
+    } finally {
+      file.delete();
+    }
+  }
 }

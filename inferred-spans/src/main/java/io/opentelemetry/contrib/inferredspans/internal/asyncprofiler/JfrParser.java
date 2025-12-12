@@ -93,6 +93,9 @@ public class JfrParser implements Recyclable {
     this.includedClasses = includedClasses;
     bufferedFile.setFile(file);
     long fileSize = bufferedFile.size();
+    if (fileSize == 0) {
+      return;
+    }
 
     int chunkSize = readChunk(0);
     if (chunkSize < fileSize) {
