@@ -44,6 +44,7 @@ import org.junit.jupiter.api.io.TempDir;
 class SamplingProfilerTest {
 
   static {
+    // Needed to ensure ordering because tests things out of order
     ProfilingActivationListener.ensureInitialized();
   }
 
