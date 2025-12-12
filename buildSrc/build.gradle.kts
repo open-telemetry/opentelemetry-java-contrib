@@ -20,6 +20,9 @@ dependencies {
   implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.2.2")
   implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
   implementation("com.google.auto.value:auto-value-annotations:1.11.1")
+  implementation("com.gradleup.shadow:com.gradleup.shadow.gradle.plugin:9.2.2")
+  implementation("com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin:3.0.1")
+  implementation("org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin:3.1.0")
 }
 
 spotless {
