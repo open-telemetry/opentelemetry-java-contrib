@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.22.0-alpha"
+val otelInstrumentationVersion = "2.23.0-alpha"
 val semconvVersion = "1.37.0"
 
 javaPlatform {
