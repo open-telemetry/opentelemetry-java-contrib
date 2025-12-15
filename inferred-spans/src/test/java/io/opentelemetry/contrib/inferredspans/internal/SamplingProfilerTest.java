@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +43,11 @@ import org.junit.jupiter.api.io.TempDir;
 @DisabledOnOpenJ9
 class SamplingProfilerTest {
 
+  static {
+    // Needed to ensure ordering because tests things out of order
+    ProfilingActivationListener.ensureInitialized();
+  }
+
   private ProfilerTestSetup setup;
 
   @TempDir private Path tempDir;
@@ -58,12 +62,6 @@ class SamplingProfilerTest {
 
   @Test
   void shouldLazilyCreateTempFilesAndCleanThem() {
-    for (Path file : getProfilerTempFiles()) {
-      if (!file.toFile().delete()) {
-        throw new IllegalStateException("Could not delete temp file: " + file);
-      }
-    }
-
     // temporary files should be created on-demand, and properly deleted afterwards
     setupProfiler(false);
 
@@ -91,9 +89,8 @@ class SamplingProfilerTest {
         .isEmpty();
   }
 
-  private static List<Path> getProfilerTempFiles() {
-    Path tempFolder = Paths.get(System.getProperty("java.io.tmpdir"));
-    try (Stream<Path> files = Files.list(tempFolder)) {
+  private List<Path> getProfilerTempFiles() {
+    try (Stream<Path> files = Files.list(tempDir)) {
       return files
           .filter(f -> f.getFileName().toString().startsWith("otel-inferred-"))
           .sorted()
@@ -327,7 +324,8 @@ class SamplingProfilerTest {
               config
                   .profilingDuration(Duration.ofMillis(500))
                   .profilerInterval(Duration.ofMillis(500))
-                  .samplingInterval(Duration.ofMillis(5));
+                  .samplingInterval(Duration.ofMillis(5))
+                  .tempDir(tempDir.toFile());
               configCustomizer.accept(config);
             });
   }
