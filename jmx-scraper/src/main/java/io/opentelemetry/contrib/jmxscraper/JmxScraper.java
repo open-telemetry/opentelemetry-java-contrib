@@ -238,14 +238,14 @@ public final class JmxScraper {
     JmxTelemetryBuilder builder = JmxTelemetry.builder(openTelemetry);
     builder.beanDiscoveryDelay(config.getSamplingInterval());
 
-    config
-        .getTargetSystems()
-        .forEach(
-            system -> {
-              try (InputStream input = config.getTargetSystemYaml(system)) {
-                builder.addRules(input);
-              }
-            });
+    for (String system : config.getTargetSystems()) {
+      try (InputStream input = config.getTargetSystemYaml(system)) {
+        builder.addRules(input);
+      } catch (IOException e) {
+        // can only be triggered by close(), thus very unlikely to be triggered in practice
+        throw new IllegalStateException("IO error loading rules for system: " + system, e);
+      }
+    }
 
     config.getJmxConfig().stream().map(Paths::get).forEach(path -> builder.addRules(path));
     return builder.build();
