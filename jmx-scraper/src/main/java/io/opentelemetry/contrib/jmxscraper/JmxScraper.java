@@ -27,9 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -240,30 +238,16 @@ public final class JmxScraper {
     JmxTelemetryBuilder builder = JmxTelemetry.builder(openTelemetry);
     builder.beanDiscoveryDelay(config.getSamplingInterval());
 
-    // Unfortunately we can't use the convenient 'addClassPathRules' here as it does not yet
-    // allow to customize the path of the yaml resources in classpath.
-    // config.getTargetSystems().forEach(builder::addClassPathRules);
-    //
-    // As a temporary workaround we load configuration through temporary files and register them
-    // as if they were custom rules.
     config
         .getTargetSystems()
         .forEach(
             system -> {
               try (InputStream input = config.getTargetSystemYaml(system)) {
-                Path tempFile = Files.createTempFile("jmx-scraper-" + system, ".yaml");
-                try {
-                  Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
-                  builder.addCustomRules(tempFile);
-                } finally {
-                  Files.delete(tempFile);
-                }
-              } catch (IOException e) {
-                throw new IllegalStateException(e);
+                builder.addRules(input);
               }
             });
 
-    config.getJmxConfig().stream().map(Paths::get).forEach(builder::addCustomRules);
+    config.getJmxConfig().stream().map(Paths::get).forEach(path -> builder.addRules(path));
     return builder.build();
   }
 
