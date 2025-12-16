@@ -461,7 +461,7 @@ public class SamplingProfiler implements Runnable {
           if (e.getMessage() != null && e.getMessage().contains("Profiler is not active")) {
             logger.fine("Profiler already stopped");
           } else {
-            throw e;
+            logger.log(Level.WARNING, "Failure shutting down profiler", e);
           }
         }
       }
