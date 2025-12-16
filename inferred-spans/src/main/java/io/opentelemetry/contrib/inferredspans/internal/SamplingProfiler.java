@@ -454,8 +454,16 @@ public class SamplingProfiler implements Runnable {
         // dynamically
         consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
       } finally {
-        String stopMessage = profiler.execute("stop");
-        logger.fine(stopMessage);
+        try {
+          String stopMessage = profiler.execute("stop");
+          logger.fine(stopMessage);
+        } catch (IllegalStateException e) {
+          if (e.getMessage() != null && e.getMessage().contains("Profiler is not active")) {
+            logger.fine("Profiler already stopped");
+          } else {
+            throw e;
+          }
+        }
       }
 
       // When post-processing is disabled, jfr file will not be parsed and the heavy processing will
