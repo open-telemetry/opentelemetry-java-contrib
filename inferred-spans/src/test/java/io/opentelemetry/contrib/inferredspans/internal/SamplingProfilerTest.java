@@ -177,7 +177,8 @@ class SamplingProfilerTest {
     try (Scope scope = tx.makeCurrent()) {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
-      Thread.sleep(600);
+      int currentSession = setup.profiler.getProfilingSessions();
+      await().until(() -> setup.profiler.getProfilingSessions() > currentSession);
       profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
       aInferred(tracer);
     } finally {
