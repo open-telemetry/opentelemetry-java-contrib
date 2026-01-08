@@ -108,11 +108,24 @@ In order to read data, we can iterate through our signal storage objects and the
 a network exporter, as shown in the example for spans below.
 
 ```java
-// Example of reading an exporting spans from disk
-OtlpHttpSpanExporter networkExporter;
-Iterator<Collection<SpanData>> spanCollections = spanStorage.iterator();
-while(spanCollections.hasNext()){
-    networkExporter.export(spanCollections.next());
+/**
+ * Example of reading and exporting spans from disk.
+ *
+ * @return true, if the exporting was successful, false, if it needs to be retried
+ */
+public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
+    for (Collection<SpanData> spanData : spanStorage) {
+        CompletableResultCode resultCode = networkExporter.export(spanData);
+        resultCode.join(timeout, TimeUnit.MILLISECONDS);
+
+        if (!resultCode.isSuccess()) {
+            logger.trace("Error while exporting", resultCode.getFailureThrowable());
+            // The iteration should be aborted here to avoid consuming batches, which were not exported successfully
+            return false;
+        }
+    }
+    logger.trace("Finished exporting");
+    return true;
 }
 ```
 
