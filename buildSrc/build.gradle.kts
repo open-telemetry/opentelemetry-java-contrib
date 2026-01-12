@@ -15,7 +15,7 @@ dependencies {
   implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.1.0")
   implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:4.3.0")
   implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:2.3.0")
-  implementation("org.owasp.dependencycheck:org.owasp.dependencycheck.gradle.plugin:12.1.9")
+  implementation("org.owasp.dependencycheck:org.owasp.dependencycheck.gradle.plugin:12.2.0")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
   implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.3")
   implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
