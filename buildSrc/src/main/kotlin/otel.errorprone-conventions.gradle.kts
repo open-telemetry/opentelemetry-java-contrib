@@ -17,6 +17,7 @@ val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean()
 tasks {
   withType<JavaCompile>().configureEach {
     with(options) {
+      compilerArgs.add("-XDaddTypeAnnotationsToSymbol=true")
       errorprone {
         if (disableErrorProne) {
           logger.warn("Errorprone has been disabled. Build may not result in a valid PR build.")
@@ -78,6 +79,7 @@ tasks {
         disable("YodaCondition")
 
         // Requires adding compile dependency to JSpecify
+        disable("AddNullMarkedToClass")
         disable("AddNullMarkedToPackageInfo")
 
         if (name.contains("Jmh") || name.contains("Test")) {
