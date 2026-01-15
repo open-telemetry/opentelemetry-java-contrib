@@ -16,9 +16,8 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.jmxscraper.config.JmxScraperConfig;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesCustomizer;
 import io.opentelemetry.contrib.jmxscraper.config.PropertiesSupplier;
-import io.opentelemetry.instrumentation.jmx.engine.JmxMetricInsight;
-import io.opentelemetry.instrumentation.jmx.engine.MetricConfiguration;
-import io.opentelemetry.instrumentation.jmx.yaml.RuleParser;
+import io.opentelemetry.instrumentation.jmx.JmxTelemetry;
+import io.opentelemetry.instrumentation.jmx.JmxTelemetryBuilder;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,10 +49,9 @@ public final class JmxScraper {
   private static final String TEST_ARG = "-test";
 
   private final JmxConnectorBuilder client;
-  private final JmxMetricInsight service;
-  private final JmxScraperConfig config;
 
   private final AtomicBoolean running = new AtomicBoolean(false);
+  private final JmxTelemetry jmxTelemetry;
 
   /**
    * Main method to create and run a {@link JmxScraper} instance.
@@ -105,10 +102,7 @@ public final class JmxScraper {
       if (testMode) {
         System.exit(testConnection(connectorBuilder) ? 0 : 1);
       } else {
-        JmxMetricInsight jmxInsight =
-            JmxMetricInsight.createService(
-                openTelemetry, scraperConfig.getSamplingInterval().toMillis());
-        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, jmxInsight, scraperConfig);
+        JmxScraper jmxScraper = new JmxScraper(connectorBuilder, openTelemetry, scraperConfig);
         jmxScraper.start();
       }
     } catch (ConfigurationException e) {
@@ -233,10 +227,28 @@ public final class JmxScraper {
   }
 
   private JmxScraper(
-      JmxConnectorBuilder client, JmxMetricInsight service, JmxScraperConfig config) {
+      JmxConnectorBuilder client, OpenTelemetry openTelemetry, JmxScraperConfig config) {
     this.client = client;
-    this.service = service;
-    this.config = config;
+    this.jmxTelemetry = createJmxTelemetry(openTelemetry, config);
+  }
+
+  private static JmxTelemetry createJmxTelemetry(
+      OpenTelemetry openTelemetry, JmxScraperConfig config) {
+
+    JmxTelemetryBuilder builder = JmxTelemetry.builder(openTelemetry);
+    builder.beanDiscoveryDelay(config.getSamplingInterval());
+
+    for (String system : config.getTargetSystems()) {
+      try (InputStream input = config.getTargetSystemYaml(system)) {
+        builder.addRules(input);
+      } catch (IOException e) {
+        // can only be triggered by close(), thus very unlikely to be triggered in practice
+        throw new IllegalStateException("IO error loading rules for system: " + system, e);
+      }
+    }
+
+    config.getJmxConfig().stream().map(Paths::get).forEach(path -> builder.addRules(path));
+    return builder.build();
   }
 
   private void start() throws IOException {
@@ -250,7 +262,8 @@ public final class JmxScraper {
 
     try (JMXConnector connector = client.build()) {
       MBeanServerConnection connection = connector.getMBeanServerConnection();
-      service.startRemote(getMetricConfig(config), () -> singletonList(connection));
+
+      jmxTelemetry.start(() -> singletonList(connection));
 
       running.set(true);
       logger.info("JMX scraping started");
@@ -262,34 +275,6 @@ public final class JmxScraper {
           // silently ignored
         }
       }
-    }
-  }
-
-  private static MetricConfiguration getMetricConfig(JmxScraperConfig scraperConfig) {
-    MetricConfiguration config = new MetricConfiguration();
-    for (String system : scraperConfig.getTargetSystems()) {
-      try (InputStream yaml = scraperConfig.getTargetSystemYaml(system)) {
-        RuleParser.get().addMetricDefsTo(config, yaml, system);
-      } catch (IOException e) {
-        throw new IllegalStateException("Error while loading rules for system " + system, e);
-      }
-    }
-    for (String file : scraperConfig.getJmxConfig()) {
-      addRulesFromFile(file, config);
-    }
-    return config;
-  }
-
-  private static void addRulesFromFile(String file, MetricConfiguration conf) {
-    Path path = Paths.get(file);
-    if (!Files.isReadable(path)) {
-      throw new IllegalArgumentException("Unable to read file: " + path);
-    }
-
-    try (InputStream inputStream = Files.newInputStream(path)) {
-      RuleParser.get().addMetricDefsTo(conf, inputStream, file);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Error while loading rules from file: " + file, e);
     }
   }
 }

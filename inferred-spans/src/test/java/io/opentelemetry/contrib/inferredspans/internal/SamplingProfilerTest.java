@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -32,25 +31,26 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledForJreRange;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 // async-profiler doesn't work on Windows
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnOpenJ9
 class SamplingProfilerTest {
 
+  static {
+    // Needed to ensure ordering because tests things out of order
+    ProfilingActivationListener.ensureInitialized();
+  }
+
   private ProfilerTestSetup setup;
 
-  @BeforeEach
-  void setup() {
-    // avoids any test failure to make other tests to fail
-    getProfilerTempFiles().forEach(SamplingProfilerTest::silentDeleteFile);
-  }
+  @TempDir private Path tempDir;
 
   @AfterEach
   void tearDown() {
@@ -58,15 +58,10 @@ class SamplingProfilerTest {
       setup.close();
       setup = null;
     }
-    getProfilerTempFiles().forEach(SamplingProfilerTest::silentDeleteFile);
   }
 
   @Test
-  void shouldLazilyCreateTempFilesAndCleanThem() throws Exception {
-
-    List<Path> tempFiles = getProfilerTempFiles();
-    assertThat(tempFiles).isEmpty();
-
+  void shouldLazilyCreateTempFilesAndCleanThem() {
     // temporary files should be created on-demand, and properly deleted afterwards
     setupProfiler(false);
 
@@ -94,9 +89,8 @@ class SamplingProfilerTest {
         .isEmpty();
   }
 
-  private static List<Path> getProfilerTempFiles() {
-    Path tempFolder = Paths.get(System.getProperty("java.io.tmpdir"));
-    try (Stream<Path> files = Files.list(tempFolder)) {
+  private List<Path> getProfilerTempFiles() {
+    try (Stream<Path> files = Files.list(tempDir)) {
       return files
           .filter(f -> f.getFileName().toString().startsWith("otel-inferred-"))
           .sorted()
@@ -117,8 +111,8 @@ class SamplingProfilerTest {
       defaultConfig = ProfilerTestSetup.extractProfilerImpl(profiler1).getConfig();
     }
 
-    Path tempFile1 = Files.createTempFile("otel-inferred-provided", "test.bin");
-    Path tempFile2 = Files.createTempFile("otel-inferred-provided", "test.jfr");
+    Path tempFile1 = Files.createTempFile(tempDir, "otel-inferred-provided", "test.bin");
+    Path tempFile2 = Files.createTempFile(tempDir, "otel-inferred-provided", "test.jfr");
 
     try (OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().build()) {
 
@@ -128,7 +122,8 @@ class SamplingProfilerTest {
               new FixedClock(),
               () -> sdk.getTracer("my-tracer"),
               tempFile1.toFile(),
-              tempFile2.toFile());
+              tempFile2.toFile(),
+              tempDir.toFile());
 
       otherProfiler.start();
       awaitProfilerStarted(otherProfiler);
@@ -182,7 +177,8 @@ class SamplingProfilerTest {
     try (Scope scope = tx.makeCurrent()) {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
-      Thread.sleep(600);
+      int currentSession = setup.profiler.getProfilingSessions();
+      await().until(() -> setup.profiler.getProfilingSessions() > currentSession);
       profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
       aInferred(tracer);
     } finally {
@@ -329,7 +325,8 @@ class SamplingProfilerTest {
               config
                   .profilingDuration(Duration.ofMillis(500))
                   .profilerInterval(Duration.ofMillis(500))
-                  .samplingInterval(Duration.ofMillis(5));
+                  .samplingInterval(Duration.ofMillis(5))
+                  .tempDir(tempDir.toFile());
               configCustomizer.accept(config);
             });
   }
@@ -340,13 +337,5 @@ class SamplingProfilerTest {
         .pollDelay(Duration.ofMillis(10))
         .timeout(Duration.ofSeconds(6))
         .until(() -> profiler.getProfilingSessions() > 1);
-  }
-
-  private static void silentDeleteFile(Path f) {
-    try {
-      Files.delete(f);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
   }
 }

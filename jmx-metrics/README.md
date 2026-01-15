@@ -75,7 +75,7 @@ capable of being specified via the `otel.jmx.target.system` property as a comma-
 currently supported target systems are:
 
 | `otel.jmx.target.system` |
-|--------------------------|
+| ------------------------ |
 | [`jvm`](./docs/target-systems/jvm.md) |
 | [`activemq`](./docs/target-systems/activemq.md) |
 | [`cassandra`](./docs/target-systems/cassandra.md) |
@@ -257,7 +257,7 @@ file contents can also be provided via stdin on startup when using `-config -` a
 
 | Property | Required | Description |
 | ------------- | -------- | ----------- |
-| `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`).|
+| `otel.jmx.service.url` | **yes** | The service URL for the JMX RMI/JMXMP endpoint (generally of the form `service:jmx:rmi:///jndi/rmi://<host>:<port>/jmxrmi` or `service:jmx:jmxmp://<host>:<port>`). |
 | `otel.jmx.groovy.script` | if not using `otel.jmx.target.system` | The path for the desired Groovy script. |
 | `otel.jmx.target.system` | if not using `otel.jmx.groovy.script` | A comma-separated list of the supported target applications with built in Groovy scripts. |
 | `otel.jmx.interval.milliseconds` | no | How often, in milliseconds, the Groovy script should be run. Value will also be used for `otel.metric.export.interval`, if unset, to control asynchronous updates and metric exporting. 10000 by default. |
@@ -265,12 +265,12 @@ file contents can also be provided via stdin on startup when using `-config -` a
 | `otel.jmx.password` | no | Password for JMX authentication, if applicable. |
 | `otel.jmx.remote.profile` | no | Supported JMX remote profiles are TLS in combination with SASL profiles: SASL/PLAIN, SASL/DIGEST-MD5 and SASL/CRAM-MD5. Thus valid `jmxRemoteProfiles` values are: `SASL/PLAIN`, `SASL/DIGEST-MD5`, `SASL/CRAM-MD5`, `TLS SASL/PLAIN`, `TLS SASL/DIGEST-MD5` and `TLS SASL/CRAM-MD5`. |
 | `otel.jmx.realm` | no | The realm is required by profile SASL/DIGEST-MD5. |
-| `otel.metrics.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`).  `logging` by default. |
-| `otel.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`.  |
-| `otel.exporter.otlp.headers` | no | Any headers to include in otlp exporter metric submissions.  Of the form `header1=value1,header2=value2` |
-| `otel.exporter.otlp.timeout` | no | The otlp exporter request timeout (in milliseconds).  Default is 1000.  |
-| `otel.exporter.prometheus.host` | no | The prometheus collector server host. Default is `0.0.0.0`.  |
-| `otel.exporter.prometheus.port` | no | The prometheus collector server port. Default is `9464`.  |
+| `otel.metrics.exporter` | no | The type of metric exporter to use: (`otlp`, `prometheus`, `inmemory`, `logging`). `logging` by default. |
+| `otel.exporter.otlp.endpoint` | no | The otlp exporter endpoint to use, Required for `otlp`. |
+| `otel.exporter.otlp.headers` | no | Any headers to include in otlp exporter metric submissions. Of the form `header1=value1,header2=value2` |
+| `otel.exporter.otlp.timeout` | no | The otlp exporter request timeout (in milliseconds). Default is 1000. |
+| `otel.exporter.prometheus.host` | no | The prometheus collector server host. Default is `0.0.0.0`. |
+| `otel.exporter.prometheus.port` | no | The prometheus collector server port. Default is `9464`. |
 | `javax.net.ssl.keyStore` | no | The key store path is required if client authentication is enabled on the target JVM. |
 | `javax.net.ssl.keyStorePassword` | no | The key store file password if required. |
 | `javax.net.ssl.keyStoreType` | no | The key store type. |

@@ -43,6 +43,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -150,8 +151,10 @@ public class SamplingProfiler implements Runnable {
   private final ProfilingActivationListener activationListener;
 
   private final Supplier<Tracer> tracerProvider;
+  @Nullable private final File tempDir;
 
   private final AsyncProfiler profiler;
+  private final ReentrantLock profilerLock = new ReentrantLock();
   @Nullable private volatile Future<?> profilingTask;
 
   /**
@@ -171,9 +174,11 @@ public class SamplingProfiler implements Runnable {
       SpanAnchoredClock nanoClock,
       Supplier<Tracer> tracerProvider,
       @Nullable File activationEventsFile,
-      @Nullable File jfrFile) {
+      @Nullable File jfrFile,
+      @Nullable File tempDir) {
     this.config = config;
     this.tracerProvider = tracerProvider;
+    this.tempDir = tempDir;
     this.scheduler =
         Executors.newSingleThreadScheduledExecutor(
             r -> {
@@ -253,12 +258,13 @@ public class SamplingProfiler implements Runnable {
 
   private synchronized void createFilesIfRequired() throws IOException {
     if (jfrFile == null || !jfrFile.exists()) {
-      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr");
+      jfrFile = File.createTempFile("otel-inferred-traces-", ".jfr", tempDir);
       jfrFile.deleteOnExit();
       canDeleteJfrFile = true;
     }
     if (activationEventsFile == null || !activationEventsFile.exists()) {
-      activationEventsFile = File.createTempFile("otel-inferred-activation-events-", ".bin");
+      activationEventsFile =
+          File.createTempFile("otel-inferred-activation-events-", ".bin", tempDir);
       activationEventsFile.deleteOnExit();
       canDeleteActivationEventsFile = true;
     }
@@ -313,6 +319,9 @@ public class SamplingProfiler implements Runnable {
       if (previouslyActive == null) {
         profiler.addThread(Thread.currentThread());
       }
+      if (!config.isPostProcessingEnabled()) {
+        return true;
+      }
       boolean success =
           eventBuffer.tryPublishEvent(activationEventTranslator, activeSpan, previouslyActive);
       if (!success) {
@@ -339,6 +348,9 @@ public class SamplingProfiler implements Runnable {
       if (previouslyActive == null) {
         profiler.removeThread(Thread.currentThread());
       }
+      if (!config.isPostProcessingEnabled()) {
+        return true;
+      }
       boolean success =
           eventBuffer.tryPublishEvent(
               deactivationEventTranslator, deactivatedSpan, previouslyActive);
@@ -353,6 +365,10 @@ public class SamplingProfiler implements Runnable {
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
   public void run() {
+    if (!config.isEnabled()) {
+      logger.fine("Profiling is disabled, not starting profiling session");
+      return;
+    }
 
     // lazily create temporary files
     try {
@@ -365,7 +381,9 @@ public class SamplingProfiler implements Runnable {
     Duration profilingDuration = config.getProfilingDuration();
     boolean postProcessingEnabled = config.isPostProcessingEnabled();
 
-    setProfilingSessionOngoing(postProcessingEnabled);
+    // We need to enable the session so that onActivation is called and threads are added to the
+    // profiler (profiler.addThread). Otherwise, with the "filter" option, nothing is profiled.
+    setProfilingSessionOngoing(true);
 
     if (postProcessingEnabled) {
       logger.fine("Start full profiling session (async-profiler and agent processing)");
@@ -386,9 +404,17 @@ public class SamplingProfiler implements Runnable {
         config.isNonStopProfiling() && !interrupted && postProcessingEnabled;
     setProfilingSessionOngoing(continueProfilingSession);
 
-    if (!interrupted && !scheduler.isShutdown()) {
-      long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
-      profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+    profilerLock.lock();
+    try {
+      // it's possible for an interruption to occur just before the lock was acquired. This is
+      // handled by re-reading Thread.currentThread().isInterrupted() to ensure no task is scheduled
+      // if an interruption occurred just before acquiring the lock
+      if (!Thread.currentThread().isInterrupted() && !scheduler.isShutdown()) {
+        long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
+        profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
+      }
+    } finally {
+      profilerLock.unlock();
     }
   }
 
@@ -396,27 +422,52 @@ public class SamplingProfiler implements Runnable {
   private void profile(Duration profilingDuration) throws Exception {
     try {
       String startCommand = createStartCommand();
-      String startMessage = profiler.execute(startCommand);
-      logger.fine(startMessage);
-      if (!profiledThreads.isEmpty()) {
-        restoreFilterState(profiler);
+      String startMessage;
+      try {
+        startMessage = profiler.execute(startCommand);
+      } catch (IllegalStateException e) {
+        if (e.getMessage() != null && e.getMessage().contains("already started")) {
+          logger.fine("Profiler already started. Stopping and restarting.");
+          try {
+            profiler.stop();
+          } catch (RuntimeException ignore) {
+            logger.log(Level.FINE, "Ignored error on stopping profiler", ignore);
+          }
+          startMessage = profiler.execute(startCommand);
+        } else {
+          throw e;
+        }
       }
-      // Doesn't need to be atomic as this field is being updated only by a single thread
-      profilingSessions++;
+      logger.fine(startMessage);
+      try {
+        // try-finally because if the code is interrupted we want to ensure the
+        // profiler.execute("stop") is called
+        if (!profiledThreads.isEmpty()) {
+          restoreFilterState(profiler);
+        }
+        // Doesn't need to be atomic as this field is being updated only by a single thread
+        profilingSessions++;
 
-      // When post-processing is disabled activation events are ignored, but we still need to invoke
-      // this method
-      // as it is the one enforcing the sampling session duration. As a side effect it will also
-      // consume
-      // residual activation events if post-processing is disabled dynamically
-      consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
-
-      String stopMessage = profiler.execute("stop");
-      logger.fine(stopMessage);
+        // When post-processing is disabled activation events are ignored, but we still need to
+        // invoke this method as it is the one enforcing the sampling session duration. As a side
+        // effect it will also consume residual activation events if post-processing is disabled
+        // dynamically
+        consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
+      } finally {
+        try {
+          String stopMessage = profiler.execute("stop");
+          logger.fine(stopMessage);
+        } catch (IllegalStateException e) {
+          if (e.getMessage() != null && e.getMessage().contains("Profiler is not active")) {
+            logger.fine("Profiler already stopped");
+          } else {
+            logger.log(Level.WARNING, "Failure shutting down profiler", e);
+          }
+        }
+      }
 
       // When post-processing is disabled, jfr file will not be parsed and the heavy processing will
-      // not occur
-      // as this method aborts when no activation events are buffered
+      // not occur as this method aborts when no activation events are buffered
       processTraces();
     } catch (InterruptedException | ClosedByInterruptException e) {
       try {
@@ -497,6 +548,9 @@ public class SamplingProfiler implements Runnable {
   }
 
   public void processTraces() throws IOException {
+    if (!config.isPostProcessingEnabled()) {
+      return;
+    }
     if (jfrParser == null) {
       jfrParser = new JfrParser();
     }
@@ -530,26 +584,34 @@ public class SamplingProfiler implements Runnable {
         processActivationEventsUpTo(stackTrace.nanoTime, eof, event);
         CallTree.Root root = profiledThreads.get(stackTrace.threadId);
         if (root != null) {
-          jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
-          if (stackFrames.size() == MAX_STACK_DEPTH) {
-            logger.fine(
-                "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");
-          }
-          // stack frames may not contain any Java frames
-          // see
-          // https://github.com/jvm-profiling-tools/async-profiler/issues/271#issuecomment-582430233
-          if (!stackFrames.isEmpty()) {
-            try {
-              root.addStackTrace(
-                  stackFrames, stackTrace.nanoTime, callTreePool, inferredSpansMinDuration);
-            } catch (Throwable e) {
-              logger.log(
-                  Level.WARNING,
-                  "Removing call tree for thread {0} because of exception while adding a stack trace: {1} {2}",
-                  new Object[] {stackTrace.threadId, e.getClass(), e.getMessage()});
-              logger.log(Level.FINE, e.getMessage(), e);
-              profiledThreads.remove(stackTrace.threadId);
+          try {
+            jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
+            if (stackFrames.size() == MAX_STACK_DEPTH) {
+              logger.fine(
+                  "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");
             }
+            // stack frames may not contain any Java frames
+            // see
+            // https://github.com/jvm-profiling-tools/async-profiler/issues/271#issuecomment-582430233
+            if (!stackFrames.isEmpty()) {
+              try {
+                root.addStackTrace(
+                    stackFrames, stackTrace.nanoTime, callTreePool, inferredSpansMinDuration);
+              } catch (Throwable e) {
+                logger.log(
+                    Level.WARNING,
+                    "Removing call tree for thread {0} because of exception while adding a stack trace: {1} {2}",
+                    new Object[] {stackTrace.threadId, e.getClass(), e.getMessage()});
+                logger.log(Level.FINE, e.getMessage(), e);
+                profiledThreads.remove(stackTrace.threadId);
+              }
+            }
+          } catch (Throwable e) {
+            logger.log(
+                Level.WARNING,
+                "Failed to resolve stack trace for thread {0}: {1}",
+                new Object[] {stackTrace.threadId, e.getMessage()});
+            logger.log(Level.FINE, e.getMessage(), e);
           }
         }
         stackFrames.clear();
@@ -731,18 +793,25 @@ public class SamplingProfiler implements Runnable {
 
   @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
   public void reschedule() {
-    Future<?> future = this.profilingTask;
-    if (future != null) {
-      if (future.cancel(true)) {
+    profilerLock.lock();
+    try {
+      Future<?> future = this.profilingTask;
+      if (future != null && future.cancel(true)) {
         Duration profilingDuration = config.getProfilingDuration();
         long delay = config.getProfilingInterval().toMillis() - profilingDuration.toMillis();
         profilingTask = scheduler.schedule(this, delay, TimeUnit.MILLISECONDS);
       }
+    } finally {
+      profilerLock.unlock();
     }
   }
 
+  @SuppressWarnings({"FutureReturnValueIgnored", "Interruption"})
   public void stop() throws InterruptedException, IOException {
     // cancels/interrupts the profiling thread
+    if (profilingTask != null) {
+      profilingTask.cancel(true);
+    }
     // implicitly clears profiled threads
     scheduler.shutdown();
     scheduler.awaitTermination(10, TimeUnit.SECONDS);

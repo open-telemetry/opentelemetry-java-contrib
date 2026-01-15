@@ -10,17 +10,20 @@ import static org.awaitility.Awaitility.await;
 
 import io.opentelemetry.contrib.inferredspans.internal.SamplingProfiler;
 import io.opentelemetry.contrib.inferredspans.internal.util.DisabledOnOpenJ9;
+import java.nio.file.Path;
 import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnOpenJ9
 class InferredSpansTest {
 
+  @TempDir Path tempDir;
   private ProfilerTestSetup setup;
 
   @BeforeEach
@@ -40,7 +43,7 @@ class InferredSpansTest {
   void testIsEnabled() {
     assertThat(InferredSpans.isEnabled()).isFalse();
 
-    setup = ProfilerTestSetup.create(c -> {});
+    setup = ProfilerTestSetup.create(c -> c.tempDir(tempDir.toFile()));
 
     assertThat(InferredSpans.isEnabled()).isTrue();
 
@@ -61,7 +64,8 @@ class InferredSpansTest {
         ProfilerTestSetup.create(
             c ->
                 c.profilerInterval(Duration.ofSeconds(10))
-                    .profilingDuration(Duration.ofMillis(500)));
+                    .profilingDuration(Duration.ofMillis(500))
+                    .tempDir(tempDir.toFile()));
 
     // assert that the interval set before the profiler was initialized is ignored
     assertThat(setup.profiler.getConfig().getProfilingInterval()).isEqualTo(Duration.ofSeconds(10));
@@ -73,7 +77,8 @@ class InferredSpansTest {
         ProfilerTestSetup.create(
             c ->
                 c.profilerInterval(Duration.ofSeconds(10))
-                    .profilingDuration(Duration.ofMillis(500)));
+                    .profilingDuration(Duration.ofMillis(500))
+                    .tempDir(tempDir.toFile()));
 
     SamplingProfiler profiler = setup.profiler;
     await()

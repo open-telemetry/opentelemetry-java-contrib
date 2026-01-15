@@ -15,7 +15,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 
-public class AwsResourceDetector implements ComponentProvider<Resource> {
+public class AwsResourceDetector implements ComponentProvider {
 
   @Override
   public Class<Resource> getType() {

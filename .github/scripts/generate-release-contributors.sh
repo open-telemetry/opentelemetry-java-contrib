@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-# shellcheck disable=SC2016
-# shellcheck disable=SC2086
-
 # this should be run on the release branch
 
 # NOTE if you need to run this script locally, you will need to first:
@@ -72,7 +69,7 @@ query($q: String!, $endCursor: String) {
   }
 }
 ' --jq '.data.search.edges.[].node.body' \
-  | grep -oE "#[0-9]{3,}$|#[0-9]{3,}[^0-9<]|$GITHUB_REPOSITORY/issues/[0-9]{3,}" \
+  | grep -oE "#[0-9]{3,}$|#[0-9]{3,}[^0-9<&#;]|$GITHUB_REPOSITORY/issues/[0-9]{3,}" \
   | grep -oE "[0-9]{3,}" \
   | xargs -I{} gh issue view {} --json 'author,url' --jq '[.author.login,.url]' \
   | grep -v '/pull/' \
@@ -83,8 +80,11 @@ query($q: String!, $endCursor: String) {
 echo $contributors1 $contributors2 \
   | sed 's/ /\n/g' \
   | sort -uf \
-  | grep -v linux-foundation-easycla \
+  | grep -v copilot-pull-request-reviewer \
+  | grep -v copilot-swe-agent \
   | grep -v github-actions \
+  | grep -v github-advanced-security \
+  | grep -v linux-foundation-easycla \
   | grep -v renovate \
   | grep -v otelbot \
   | sed 's/^/@/'
