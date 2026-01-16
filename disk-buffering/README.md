@@ -116,7 +116,7 @@ a network exporter, as shown in the example for spans below.
 public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
   Iterator<Collection<SpanData>> spansIterator = spanStorage.iterator();
   while (spansIterator.hasNext()) {
-    CompletableResultCode resultCode = networkExporter.export(spanData);
+    CompletableResultCode resultCode = networkExporter.export(spansIterator.next());
     resultCode.join(timeout, TimeUnit.MILLISECONDS);
 
     if (resultCode.isSuccess()) {
