@@ -114,26 +114,37 @@ a network exporter, as shown in the example for spans below.
  * @return true, if the exporting was successful, false, if it needs to be retried
  */
 public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
-    for (Collection<SpanData> spanData : spanStorage) {
-        CompletableResultCode resultCode = networkExporter.export(spanData);
-        resultCode.join(timeout, TimeUnit.MILLISECONDS);
+  Iterator<Collection<SpanData>> spansIterator = spanStorage.iterator();
+  while (spansIterator.hasNext()) {
+    CompletableResultCode resultCode = networkExporter.export(spanData);
+    resultCode.join(timeout, TimeUnit.MILLISECONDS);
 
-        if (!resultCode.isSuccess()) {
-            logger.trace("Error while exporting", resultCode.getFailureThrowable());
-            // The iteration should be aborted here to avoid consuming batches, which were not exported successfully
-            return false;
-        }
+    if (resultCode.isSuccess()) {
+      spansIterator.remove(); // Remove the current item, as it was successfully exported to the network
+    } else {
+      logger.trace("Error while exporting", resultCode.getFailureThrowable());
+      // The iteration should be aborted here to avoid consuming batches, which were not exported successfully
+      return false;
     }
-    logger.trace("Finished exporting");
-    return true;
+  }
+  logger.trace("Finished exporting");
+  return true;
 }
 ```
 
-The `File*Storage` iterators delete the previously returned collection when `next()` is called,
-assuming that if the next collection is requested is because the previous one was successfully
-consumed.
+### Deleting data
 
-Both the writing and reading processes can run in parallel and they don't overlap
+There are 2 ways to delete data previously stored by calling the `SignalStorage.write(items)`
+function:
+
+* During iteration. This is done by calling `Iterator.remove()` as shown in the example above. This
+  will remove the last item retrieved from the iterator. Ideally, this should be done after the data
+  has been successfully exported to the network.
+* Clearing all data at once by calling `SignalStorage.clear()`.
+
+### More details on the writing and reading processes
+
+Both the writing and reading processes can run in parallel as they won't overlap
 because each is supposed to happen in different files. We ensure that reader and writer don't
 accidentally meet in the same file by using the configurable parameters. These parameters set
 non-overlapping time frames for each action to be done on a single file at a time. On top of that,
