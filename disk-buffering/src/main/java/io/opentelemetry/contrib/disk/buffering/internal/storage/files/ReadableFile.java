@@ -33,6 +33,7 @@ public final class ReadableFile implements FileOperations {
   private final FileStream fileStream;
   private final StreamReader reader;
   private final Clock clock;
+  private final long createdTimeMillis;
   private final long expireTimeMillis;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
@@ -56,6 +57,7 @@ public final class ReadableFile implements FileOperations {
       throws IOException {
     this.file = file;
     this.clock = clock;
+    this.createdTimeMillis = createdTimeMillis;
     expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForReadMillis();
     fileStream = FileStream.create(file);
     reader = readerFactory.create(fileStream);
@@ -76,7 +78,7 @@ public final class ReadableFile implements FileOperations {
     }
     byte[] resultBytes = reader.readNext();
     if (resultBytes == null) {
-      clear();
+      close();
       return null;
     }
     return resultBytes;
@@ -85,6 +87,10 @@ public final class ReadableFile implements FileOperations {
   @Override
   public synchronized boolean hasExpired() {
     return nowMillis(clock) >= expireTimeMillis;
+  }
+
+  public long getCreatedTimeMillis() {
+    return createdTimeMillis;
   }
 
   @Override

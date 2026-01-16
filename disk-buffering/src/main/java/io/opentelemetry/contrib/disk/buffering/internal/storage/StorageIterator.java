@@ -71,7 +71,6 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
         if (!currentResultConsumed) {
           return true;
         }
-        currentResult.delete();
         currentResult.close();
         currentResult = null;
       }

@@ -64,6 +64,9 @@ class IntegrationTest {
   @Mock private ExporterCallback<LogRecordData> logCallback;
   @Mock private ExporterCallback<MetricData> metricCallback;
   @TempDir private File rootDir;
+  private File spansDir;
+  private File logsDir;
+  private File metricsDir;
   private static final long DELAY_BEFORE_READING_MILLIS = 500;
 
   @BeforeEach
@@ -75,20 +78,23 @@ class IntegrationTest {
             .build();
 
     // Setting up spans
-    spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), storageConfig);
+    spansDir = new File(rootDir, "spans");
+    spanStorage = FileSpanStorage.create(spansDir, storageConfig);
     spanToDiskExporter =
         SpanToDiskExporter.builder(spanStorage).setExporterCallback(spanCallback).build();
     tracer = createTracerProvider(spanToDiskExporter).get("SpanInstrumentationScope");
 
     // Setting up metrics
-    metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"), storageConfig);
+    metricsDir = new File(rootDir, "metrics");
+    metricStorage = FileMetricStorage.create(metricsDir, storageConfig);
     metricToDiskExporter =
         MetricToDiskExporter.builder(metricStorage).setExporterCallback(metricCallback).build();
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
     // Setting up logs
-    logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"), storageConfig);
+    logsDir = new File(rootDir, "logs");
+    logStorage = FileLogRecordStorage.create(logsDir, storageConfig);
     logToDiskExporter =
         LogRecordToDiskExporter.builder(logStorage).setExporterCallback(logCallback).build();
     logger = createLoggerProvider(logToDiskExporter).get("LogInstrumentationScope");
@@ -150,6 +156,11 @@ class IntegrationTest {
     assertThat(storedSpans).hasSize(1);
     assertThat(storedLogs).hasSize(1);
     assertThat(storedMetrics).hasSize(1);
+
+    // Check that data is still in disk
+    assertThat(spansDir).isNotEmptyDirectory();
+    assertThat(logsDir).isNotEmptyDirectory();
+    assertThat(metricsDir).isNotEmptyDirectory();
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {
