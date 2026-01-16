@@ -25,6 +25,7 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -111,7 +112,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
                 customizeMetricExporter(metricExporter, credentials, configProperties))
-        .addResourceCustomizer(GcpAuthAutoConfigurationCustomizerProvider::customizeResource);
+        .addResourceCustomizer(
+            (resource, configProperties) ->
+                customizeResource(resource, credentials, configProperties));
   }
 
   @Override
@@ -228,9 +231,17 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
-  private static Resource customizeResource(Resource resource, ConfigProperties configProperties) {
-    String gcpProjectId =
-        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
+  private static Resource customizeResource(
+      Resource resource, GoogleCredentials credentials, ConfigProperties configProperties) {
+    String gcpProjectId;
+    try {
+      gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
+    } catch (ConfigurationException e) {
+      gcpProjectId = credentials.getProjectId();
+      if (gcpProjectId == null || gcpProjectId.isEmpty()) {
+        throw e;
+      }
+    }
     Resource res = Resource.create(Attributes.of(stringKey(GCP_USER_PROJECT_ID_KEY), gcpProjectId));
     return resource.merge(res);
   }

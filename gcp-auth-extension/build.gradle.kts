@@ -31,6 +31,7 @@ dependencies {
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testCompileOnly("org.junit.jupiter:junit-jupiter-params")
+  testImplementation("org.junit-pioneer:junit-pioneer")
 
   testImplementation("io.opentelemetry:opentelemetry-api")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
