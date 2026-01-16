@@ -17,6 +17,16 @@ val dockerPlatform = System.getProperty("os.arch").let { arch ->
   }
 }
 
+// Docker executable path: use env var DOCKER_EXECUTABLE or usual platform defaults
+val dockerExecutablePath = System.getenv("DOCKER_EXECUTABLE") ?: run {
+  val os = System.getProperty("os.name").lowercase()
+  when {
+    os.contains("mac") || os.contains("darwin") -> "/usr/local/bin/docker"
+    os.contains("windows") -> "docker"
+    else -> "docker" // Linux typically has docker in PATH
+  }
+}
+
 interface OtelWeaverExtension {
   /**
    * REQUIRED: The Java package path where generated code will be placed. Path should use forward
@@ -50,7 +60,7 @@ if (hasWeaverModel) {
     group = "weaver"
     description = "Check the weaver model for errors"
 
-    dockerExecutable.set("docker")
+    dockerExecutable.set(dockerExecutablePath)
     platform.set(dockerPlatform)
     image.set(weaverContainer)
 
@@ -69,7 +79,7 @@ if (hasWeaverModel) {
     group = "weaver"
     description = "Generate markdown documentation from weaver model"
 
-    dockerExecutable.set("docker")
+    dockerExecutable.set(dockerExecutablePath)
     platform.set(dockerPlatform)
     image.set(weaverContainer)
 
@@ -94,7 +104,7 @@ if (hasWeaverModel) {
       group = "weaver"
       description = "Generate Java code from weaver model"
 
-      dockerExecutable.set("docker")
+      dockerExecutable.set(dockerExecutablePath)
       platform.set(dockerPlatform)
       image.set(weaverContainer)
 
@@ -151,7 +161,7 @@ if (hasWeaverModel) {
     group = "weaver"
     description = "Generate YAML configuration from weaver model"
 
-    dockerExecutable.set("docker")
+    dockerExecutable.set(dockerExecutablePath)
     platform.set(dockerPlatform)
     image.set(weaverContainer)
 
