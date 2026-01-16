@@ -188,7 +188,12 @@ class SamplingProfilerTest {
     await()
         .pollDelay(Duration.ofMillis(10))
         .timeout(Duration.ofSeconds(5))
-        .untilAsserted(() -> assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6));
+        .untilAsserted(
+            () -> {
+              assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6);
+              assertThat(setup.getSpans())
+                  .anySatisfy(span -> assertThat(span.getName()).isEqualTo("transaction"));
+            });
 
     assertThat(profilingActiveOnThread).isTrue();
 
