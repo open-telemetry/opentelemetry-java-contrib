@@ -88,8 +88,7 @@ class ReadableFileTest {
   }
 
   @Test
-  void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
-      throws IOException {
+  void whenNoMoreLinesAvailableToRead_close_and_returnNoContentStatus() throws IOException {
     File emptyFile = new File(dir, "emptyFile");
     if (!emptyFile.createNewFile()) {
       fail("Could not create file for tests");
@@ -101,7 +100,7 @@ class ReadableFileTest {
     assertThat(emptyReadableFile.readNext()).isNull();
 
     assertThat(emptyReadableFile.isClosed()).isTrue();
-    assertThat(emptyFile.exists()).isFalse();
+    assertThat(emptyFile.exists()).isTrue();
   }
 
   @Test
