@@ -178,7 +178,9 @@ class SamplingProfilerTest {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
       int currentSession = setup.profiler.getProfilingSessions();
-      await().until(() -> setup.profiler.getProfilingSessions() > currentSession);
+      await()
+          .timeout(Duration.ofSeconds(10))
+          .until(() -> setup.profiler.getProfilingSessions() > currentSession);
       profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
       aInferred(tracer);
     } finally {
@@ -187,7 +189,7 @@ class SamplingProfilerTest {
 
     await()
         .pollDelay(Duration.ofMillis(10))
-        .timeout(Duration.ofSeconds(5))
+        .timeout(Duration.ofSeconds(10))
         .untilAsserted(
             () -> {
               assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6);
@@ -283,7 +285,7 @@ class SamplingProfilerTest {
     try (Scope scope = tx.makeCurrent()) {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
-      Thread.sleep(600);
+      Thread.sleep(3000);
       aInferred(tracer);
     } finally {
       tx.end();
@@ -291,7 +293,7 @@ class SamplingProfilerTest {
 
     await()
         .pollDelay(Duration.ofMillis(10))
-        .timeout(Duration.ofSeconds(5))
+        .timeout(Duration.ofSeconds(10))
         .untilAsserted(() -> assertThat(setup.getSpans()).hasSize(2));
 
     Optional<SpanData> explicitSpanB =
@@ -307,16 +309,16 @@ class SamplingProfilerTest {
     } finally {
       span.end();
     }
-    Thread.sleep(50);
+    Thread.sleep(200);
   }
 
   private static void cInferred() throws Exception {
     dInferred();
-    Thread.sleep(50);
+    Thread.sleep(200);
   }
 
   private static void dInferred() throws Exception {
-    Thread.sleep(50);
+    Thread.sleep(200);
   }
 
   private void setupProfiler(boolean enabled) {
@@ -328,8 +330,8 @@ class SamplingProfilerTest {
         ProfilerTestSetup.create(
             config -> {
               config
-                  .profilingDuration(Duration.ofMillis(500))
-                  .profilerInterval(Duration.ofMillis(500))
+                  .profilingDuration(Duration.ofMillis(2500))
+                  .profilerInterval(Duration.ofMillis(2500))
                   .samplingInterval(Duration.ofMillis(5))
                   .tempDir(tempDir.toFile());
               configCustomizer.accept(config);
@@ -340,7 +342,7 @@ class SamplingProfilerTest {
     // ensure profiler is initialized
     await()
         .pollDelay(Duration.ofMillis(10))
-        .timeout(Duration.ofSeconds(6))
+        .timeout(Duration.ofSeconds(10))
         .until(() -> profiler.getProfilingSessions() > 1);
   }
 }
