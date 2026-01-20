@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+### AWS X-Ray propagator
+
+- Revert xray lambda propagator component name change
+  ([#2517](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2517))
+
+### Disk buffering
+
+- Improve disk buffering example to retry exporting failed batches
+  ([#2539](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2539))
+
+### Dynamic control
+
+- Initial module seeding
+  ([#2418](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2418))
+- Add skeleton extension
+  ([#2470](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2470))
+
+### GCP authentication extension
+
+- Resolve `GCP_PROJECT` from Google credentials if not provided 
+  ([#2109](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2109))
+
+### IBM MQ metrics
+
+- Gradle plugin for generating weaver files 
+  ([#2413](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2413))
+
+### JMX metrics
+
+- Remove JMXMP protocol support
+  ([#2502](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2502))
+
+### JMX scraper
+
+- Remove JMXMP protocol support
+  ([#2502](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2502))
+
 ## Version 1.52.0 (2025-11-20)
 
 ### AWS X-Ray propagator
