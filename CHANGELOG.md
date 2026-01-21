@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.53.0 (2026-01-21)
+
 ### AWS X-Ray propagator
 
 - Revert xray lambda propagator component name change
