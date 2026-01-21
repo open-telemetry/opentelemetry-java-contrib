@@ -1,5 +1,5 @@
-val stableVersion = "1.53.0-SNAPSHOT"
-val alphaVersion = "1.53.0-alpha-SNAPSHOT"
+val stableVersion = "1.54.0-SNAPSHOT"
+val alphaVersion = "1.54.0-alpha-SNAPSHOT"
 val tagVersion by extra { "v$stableVersion" }
 
 allprojects {
