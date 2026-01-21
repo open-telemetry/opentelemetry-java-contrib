@@ -1,0 +1,3837 @@
+resourceMetrics:
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - description: The queue service interval
+            gauge:
+              dataPoints:
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: model-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.APP.MODEL.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.service.interval
+            unit: '{percent}'
+          - description: Active connections count
+            gauge:
+              dataPoints:
+                - asInt: "25"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.connection.count
+            unit: '{connection}'
+          - description: Maximum queue depth
+            gauge:
+              dataPoints:
+                - asInt: "5000"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "5000"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "5000"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "5000"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "5000"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: model-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.APP.MODEL.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.max.queue.depth
+            unit: '{message}'
+          - description: The current high queue depth
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.high.queue.depth
+            unit: '{percent}'
+          - description: Number of bytes received
+            gauge:
+              dataPoints:
+                - asInt: "17120"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16976"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16320"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "9672"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16320"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "14780"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16320"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "17124"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16320"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "16320"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.byte.received
+            unit: By
+          - description: Number of bytes sent
+            gauge:
+              dataPoints:
+                - asInt: "102660"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "67460"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "71332"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "71332"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "67460"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "67460"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "70224"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "11884"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "70224"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "53660"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "70224"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "71332"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "71332"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "67460"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "71332"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "66352"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "70224"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.byte.sent
+            unit: By
+          - description: Queue manager heartbeat
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.heartbeat
+            unit: "1"
+          - description: The queue manager active maximum channels limit
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.manager.active.channels
+            unit: '{channel}'
+          - description: Channel status
+            gauge:
+              dataPoints:
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "3"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.status
+            unit: "1"
+          - description: The amount of space occupied, in megabytes, by log extents available to be reused.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.reusable.log.size
+            unit: By
+          - description: Buffers received
+            gauge:
+              dataPoints:
+                - asInt: "114"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "112"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "34"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "99"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.buffers.received
+            unit: '{buffer}'
+          - description: Current number of conversations permitted on this channel instance.
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.current.sharing.conversations
+            unit: '{conversation}'
+          - description: Max channel instances
+            gauge:
+              dataPoints:
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.APP.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.max.instances
+            unit: '{instance}'
+          - description: Buffers sent
+            gauge:
+              dataPoints:
+                - asInt: "113"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "109"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "33"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "109"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "97"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "109"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "111"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "109"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "109"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.buffers.sent
+            unit: '{buffer}'
+          - description: Number of uncommitted messages
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.uncommitted.messages
+            unit: '{message}'
+          - description: Current queue file size
+            gauge:
+              dataPoints:
+                - asInt: "1048576"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1048576"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1048576"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "1048576"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.current.queue.filesize
+            unit: By
+          - description: Queue manager statistics interval
+            gauge:
+              dataPoints:
+                - asInt: "1800"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.manager.statistics.interval
+            unit: "1"
+          - description: Size of the log data required for restart recovery in megabytes.
+            gauge:
+              dataPoints:
+                - asInt: "1048576"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.restart.log.size
+            unit: By
+          - description: Current queue depth
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.queue.depth
+            unit: '{message}'
+          - description: Queue message oldest age
+            gauge:
+              dataPoints:
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.oldest.msg.age
+            unit: microseconds
+          - description: Number of messages received
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.APP.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.received.count
+            unit: '{message}'
+          - description: Instances per client
+            gauge:
+              dataPoints:
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "999999999"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.APP.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.instances.per.client
+            unit: '{instance}'
+          - description: Topic publication count
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: dev
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: dev/
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.publish.count
+            unit: '{publication}'
+          - description: Queue manager max active channels
+            gauge:
+              dataPoints:
+                - asInt: "4200"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.manager.max.active.channels
+            unit: '{channel}'
+          - description: Topic subscription count
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: dev
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: dev/
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.subscription.count
+            unit: '{subscription}'
+          - description: Queue manager archive log size
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.archive.log.size
+            unit: By
+          - description: Queue manager status
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.manager.status
+            unit: "1"
+          - description: Amount of time, in microseconds, that a message spent on the queue, over a short period
+            gauge:
+              dataPoints:
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.onqtime.short_period
+            unit: microseconds
+          - description: Count of applications consuming messages from the queue
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.open.output.count
+            unit: '{application}'
+          - description: Number of messages sent
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.APP.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.sent.count
+            unit: '{message}'
+          - description: Number of message retries
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.APP.SVRCONN
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.retry.count
+            unit: '{message}'
+          - description: Current maximum queue file size
+            gauge:
+              dataPoints:
+                - asInt: "2190433320960"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "2190433320960"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "2190433320960"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "2190433320960"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.current.max.queue.filesize
+            unit: By
+          - description: Message count
+            gauge:
+              dataPoints:
+                - asInt: "110"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "106"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "30"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "106"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "94"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "106"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "108"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "106"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "106"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.count
+            unit: '{message}'
+          - description: Message dequeue count
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.deq.count
+            unit: '{message}'
+          - description: Message enqueue count
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.message.enq.count
+            unit: '{message}'
+          - description: Count of applications sending messages to the queue
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.open.input.count
+            unit: '{application}'
+          - description: Queue service interval event
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: model-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.APP.MODEL.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.service.interval.event
+            unit: "1"
+          - description: Maximum number of conversations permitted on this channel instance.
+            gauge:
+              dataPoints:
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988505"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000007"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988565"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988625"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000000F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988685"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000013"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988745"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000017"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988805"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988865"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000001F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988925"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000023"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759988985"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000027"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989045"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989105"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000002F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989165"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000033"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989225"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000037"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989285"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003B
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989345"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: 000007360000003F
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989405"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000043"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "10"
+                  attributes:
+                    - key: ibm.mq.channel.name
+                      value:
+                        stringValue: DEV.ADMIN.SVRCONN
+                    - key: ibm.mq.channel.start.time
+                      value:
+                        intValue: "1759989465"
+                    - key: ibm.mq.channel.type
+                      value:
+                        stringValue: server-connection
+                    - key: ibm.mq.job.name
+                      value:
+                        stringValue: "0000073600000045"
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.max.sharing.conversations
+            unit: '{conversation}'
+          - description: Amount of time, in microseconds, that a message spent on the queue, over a longer period
+            gauge:
+              dataPoints:
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.DEAD.LETTER.QUEUE
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "-1"
+                  attributes:
+                    - key: ibm.mq.queue.manager
+                      value:
+                        stringValue: QM1
+                    - key: ibm.mq.queue.type
+                      value:
+                        stringValue: local-normal
+                    - key: messaging.destination.name
+                      value:
+                        stringValue: DEV.QUEUE.3
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: ibm.mq.onqtime.long_period
+            unit: microseconds
+        scope:
+          name: websphere/mq
