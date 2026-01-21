@@ -21,12 +21,12 @@
 
 ### GCP authentication extension
 
-- Resolve `GCP_PROJECT` from Google credentials if not provided 
+- Resolve `GCP_PROJECT` from Google credentials if not provided
   ([#2109](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2109))
 
 ### IBM MQ metrics
 
-- Gradle plugin for generating weaver files 
+- Gradle plugin for generating weaver files
   ([#2413](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2413))
 
 ### JMX metrics
