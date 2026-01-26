@@ -46,7 +46,7 @@ testing {
   suites {
     val integrationTest by registering(JvmTestSuite::class) {
       dependencies {
-        implementation("org.assertj:assertj-core:3.27.7")
+        implementation("org.assertj:assertj-core")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
         implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.4.1")
         implementation("jakarta.jms:jakarta.jms-api:3.1.0")
