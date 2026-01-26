@@ -46,7 +46,7 @@ dependencies {
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
     api("com.uber.nullaway:nullaway:0.12.15")
-    api("org.assertj:assertj-core:3.27.6")
+    api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
@@ -54,7 +54,7 @@ dependencies {
     api("org.apache.kafka:kafka-clients:4.1.1")
     api("org.testcontainers:testcontainers-kafka:2.0.3")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:4.2")
+    api("tools.profiler:async-profiler:4.3")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("com.github.f4b6a3:uuid-creator:6.1.1")
   }

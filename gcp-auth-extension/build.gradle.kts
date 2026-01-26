@@ -24,7 +24,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.41.0")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.42.1")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -113,25 +113,20 @@ testing {
 
 tasks {
   shadowJar {
-    /**
-     * Shaded version of this extension is required when using it as a OpenTelemetry Java Agent
-     * extension. Shading bundles the dependencies required by this extension in the resulting JAR,
-     * ensuring their presence on the classpath at runtime.
-     *
-     * See http://gradleup.com/shadow/introduction/#introduction for reference.
-     */
+    // Shaded version of this extension is required when using it as a OpenTelemetry Java Agent extension.
+    // Shading bundles the dependencies required by this extension in the resulting JAR,
+    // ensuring their presence on the classpath at runtime.
+    //
+    // See http://gradleup.com/shadow/introduction/#introduction for reference.
     archiveClassifier.set("shadow")
   }
 
   jar {
-    /**
-     * We need to publish both - shaded and unshaded variants of the dependency
-     * Shaded dependency is required for use with the Java agent.
-     * Unshaded dependency can be used with OTel Autoconfigure module.
-     *
-     * Not overriding the classifier to empty results in an implicit classifier 'plain' being
-     * used with the standard JAR.
-     */
+    // We need to publish both - shaded and unshaded variants of the dependency
+    // Shaded dependency is required for use with the Java agent.
+    // Unshaded dependency can be used with OTel Autoconfigure module.
+    // Not overriding the classifier to empty results in an implicit classifier 'plain' being
+    // used with the standard JAR.
     archiveClassifier.set("")
   }
 
