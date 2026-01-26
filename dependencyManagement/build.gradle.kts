@@ -54,7 +54,7 @@ dependencies {
     api("org.apache.kafka:kafka-clients:4.1.1")
     api("org.testcontainers:testcontainers-kafka:2.0.3")
     api("org.jctools:jctools-core:4.0.5")
-    api("tools.profiler:async-profiler:4.2")
+    api("tools.profiler:async-profiler:4.3")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("com.github.f4b6a3:uuid-creator:6.1.1")
   }
