@@ -16,6 +16,7 @@ public class TelemetryPolicy {
   @Nullable private final JsonNode spec;
 
   public TelemetryPolicy(String type, @Nullable JsonNode spec) {
+    Objects.requireNonNull(type, "type cannot be null");
     this.type = type;
     this.spec = spec;
   }
