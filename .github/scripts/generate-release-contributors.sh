@@ -10,7 +10,7 @@
 from_version=$1
 
 # get the date of the first commit that was not in the from_version
-from=$(git log --reverse --pretty=format:"%cI" $from_version..HEAD | head -1)
+from=$(git log --reverse --pretty=format:"%cI" "$from_version..HEAD" | head -1)
 
 # get the last commit on main that was included in the release
 to=$(git merge-base origin/main HEAD | xargs git log -1 --pretty=format:"%cI")
@@ -69,22 +69,22 @@ query($q: String!, $endCursor: String) {
   }
 }
 ' --jq '.data.search.edges.[].node.body' \
-  | grep -oE "#[0-9]{3,}$|#[0-9]{3,}[^0-9<&#;]|$GITHUB_REPOSITORY/issues/[0-9]{3,}" \
-  | grep -oE "[0-9]{3,}" \
+  | grep -oE "#[0-9]{4,}$|#[0-9]{4,}[^0-9<]|$GITHUB_REPOSITORY/issues/[0-9]{4,}" \
+  | grep -oE "[0-9]{4,}" \
   | xargs -I{} gh issue view {} --json 'author,url' --jq '[.author.login,.url]' \
   | grep -v '/pull/' \
   | sed 's/^\["//' \
   | sed 's/".*//')
 
-# TODO (trask) can remove dependabot line after next release
-echo $contributors1 $contributors2 \
+echo "$contributors1" "$contributors2" \
   | sed 's/ /\n/g' \
   | sort -uf \
+  | grep -v codecov \
   | grep -v copilot-pull-request-reviewer \
   | grep -v copilot-swe-agent \
   | grep -v github-actions \
   | grep -v github-advanced-security \
   | grep -v linux-foundation-easycla \
-  | grep -v renovate \
   | grep -v otelbot \
+  | grep -v renovate \
   | sed 's/^/@/'
