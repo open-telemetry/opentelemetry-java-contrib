@@ -17,7 +17,7 @@ dependencies {
   implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:2.4.0")
   implementation("org.owasp.dependencycheck:org.owasp.dependencycheck.gradle.plugin:12.2.0")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
-  implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.3.1")
+  implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.3.2")
   implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
   implementation("com.google.auto.value:auto-value-annotations:1.11.1")
 }
