@@ -584,26 +584,34 @@ public class SamplingProfiler implements Runnable {
         processActivationEventsUpTo(stackTrace.nanoTime, eof, event);
         CallTree.Root root = profiledThreads.get(stackTrace.threadId);
         if (root != null) {
-          jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
-          if (stackFrames.size() == MAX_STACK_DEPTH) {
-            logger.fine(
-                "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");
-          }
-          // stack frames may not contain any Java frames
-          // see
-          // https://github.com/jvm-profiling-tools/async-profiler/issues/271#issuecomment-582430233
-          if (!stackFrames.isEmpty()) {
-            try {
-              root.addStackTrace(
-                  stackFrames, stackTrace.nanoTime, callTreePool, inferredSpansMinDuration);
-            } catch (Throwable e) {
-              logger.log(
-                  Level.WARNING,
-                  "Removing call tree for thread {0} because of exception while adding a stack trace: {1} {2}",
-                  new Object[] {stackTrace.threadId, e.getClass(), e.getMessage()});
-              logger.log(Level.FINE, e.getMessage(), e);
-              profiledThreads.remove(stackTrace.threadId);
+          try {
+            jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
+            if (stackFrames.size() == MAX_STACK_DEPTH) {
+              logger.fine(
+                  "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");
             }
+            // stack frames may not contain any Java frames
+            // see
+            // https://github.com/jvm-profiling-tools/async-profiler/issues/271#issuecomment-582430233
+            if (!stackFrames.isEmpty()) {
+              try {
+                root.addStackTrace(
+                    stackFrames, stackTrace.nanoTime, callTreePool, inferredSpansMinDuration);
+              } catch (Throwable e) {
+                logger.log(
+                    Level.WARNING,
+                    "Removing call tree for thread {0} because of exception while adding a stack trace: {1} {2}",
+                    new Object[] {stackTrace.threadId, e.getClass(), e.getMessage()});
+                logger.log(Level.FINE, e.getMessage(), e);
+                profiledThreads.remove(stackTrace.threadId);
+              }
+            }
+          } catch (Throwable e) {
+            logger.log(
+                Level.WARNING,
+                "Failed to resolve stack trace for thread {0}: {1}",
+                new Object[] {stackTrace.threadId, e.getMessage()});
+            logger.log(Level.FINE, e.getMessage(), e);
           }
         }
         stackFrames.clear();

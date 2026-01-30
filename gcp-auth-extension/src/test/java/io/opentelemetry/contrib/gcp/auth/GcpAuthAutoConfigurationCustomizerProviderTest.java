@@ -74,6 +74,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -457,6 +458,86 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @ParameterizedTest
+  @MethodSource("provideProjectIdBehaviorTestCases")
+  @ClearSystemProperty(key = "google.cloud.project")
+  @ClearSystemProperty(key = "google.otel.auth.target.signals")
+  @SuppressWarnings("CannotMockMethod")
+  void testProjectIdBehavior(ProjectIdTestBehavior testCase) throws IOException {
+
+    // configure environment according to test case
+    String userSpecifiedProjectId = testCase.getUserSpecifiedProjectId();
+    if (userSpecifiedProjectId != null) {
+      System.setProperty(
+          ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), userSpecifiedProjectId);
+    }
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_TRACES);
+
+    // prepare request metadata (may or may not be called depending on test scenario)
+    AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
+    ImmutableMap<String, List<String>> mockedRequestMetadata =
+        ImmutableMap.of(
+            "Authorization",
+            Collections.singletonList("Bearer " + fakeAccessToken.getTokenValue()));
+    Mockito.lenient()
+        .when(mockedGoogleCredentials.getRequestMetadata())
+        .thenReturn(mockedRequestMetadata);
+
+    // only mock getProjectId() if it will be called (i.e., user didn't specify project ID)
+    boolean shouldFallbackToCredentials =
+        userSpecifiedProjectId == null || userSpecifiedProjectId.isEmpty();
+    if (shouldFallbackToCredentials) {
+      Mockito.when(mockedGoogleCredentials.getProjectId())
+          .thenReturn(testCase.getCredentialsProjectId());
+    }
+
+    // prepare mock exporter
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      if (testCase.getExpectedToThrow()) {
+        // expect exception to be thrown when project ID is not available
+        assertThatThrownBy(() -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter))
+            .isInstanceOf(ConfigurationException.class);
+        // verify getProjectId() was called to attempt fallback
+        Mockito.verify(mockedGoogleCredentials, Mockito.times(1)).getProjectId();
+      } else {
+        // export telemetry and verify resource attributes contain expected project ID
+        OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+        generateTestSpan(sdk);
+        CompletableResultCode code = sdk.shutdown();
+        CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+        assertThat(joinResult.isSuccess()).isTrue();
+
+        assertThat(exportedSpans).hasSizeGreaterThan(0);
+        for (SpanData spanData : exportedSpans) {
+          assertThat(spanData.getResource().getAttributes().asMap())
+              .containsEntry(
+                  AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
+                  testCase.getExpectedProjectIdInResource());
+        }
+
+        // verify whether getProjectId() was called based on whether fallback was needed
+        if (shouldFallbackToCredentials) {
+          Mockito.verify(mockedGoogleCredentials, Mockito.times(1)).getProjectId();
+        } else {
+          Mockito.verify(mockedGoogleCredentials, Mockito.never()).getProjectId();
+        }
+      }
+    }
+  }
+
+  @ParameterizedTest
   @MethodSource("provideTargetSignalBehaviorTestCases")
   void testTargetSignalsBehavior(TargetSignalBehavior testCase) {
     // Set resource project system property
@@ -666,6 +747,72 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   /**
+   * Test cases specifying expected value for the project ID in the resource given the user input
+   * and the current credentials state.
+   *
+   * <p>{@code null} for {@link ProjectIdTestBehavior#getUserSpecifiedProjectId()} indicates the
+   * case of user not specifying the project ID.
+   *
+   * <p>{@code null} value for {@link ProjectIdTestBehavior#getCredentialsProjectId()} indicates
+   * that the mocked credentials are not providing a project ID.
+   *
+   * <p>{@code true} for {@link ProjectIdTestBehavior#getExpectedToThrow()} indicates the
+   * expectation that an exception should be thrown.
+   */
+  private static Stream<Arguments> provideProjectIdBehaviorTestCases() {
+    return Stream.of(
+        // User specified project ID takes precedence
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId(DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .setCredentialsProjectId("credentials-project-id")
+                .setExpectedProjectIdInResource(DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .setExpectedToThrow(false)
+                .build()),
+        // If user specified project ID is empty, fallback to credentials.getProjectId()
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId("")
+                .setCredentialsProjectId("credentials-project-id")
+                .setExpectedProjectIdInResource("credentials-project-id")
+                .setExpectedToThrow(false)
+                .build()),
+        // If user doesn't specify project ID, fallback to credentials.getProjectId()
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId(null)
+                .setCredentialsProjectId("credentials-project-id")
+                .setExpectedProjectIdInResource("credentials-project-id")
+                .setExpectedToThrow(false)
+                .build()),
+        // If user doesn't specify and credentials.getProjectId() returns null, throw exception
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId(null)
+                .setCredentialsProjectId(null)
+                .setExpectedProjectIdInResource(null)
+                .setExpectedToThrow(true)
+                .build()),
+        // If user specified project ID is empty and credentials.getProjectId() returns null, throw
+        // exception
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId("")
+                .setCredentialsProjectId(null)
+                .setExpectedProjectIdInResource(null)
+                .setExpectedToThrow(true)
+                .build()),
+        // If user specifies empty and credentials returns empty (edge case), throw exception
+        Arguments.of(
+            ProjectIdTestBehavior.builder()
+                .setUserSpecifiedProjectId("")
+                .setCredentialsProjectId("")
+                .setExpectedProjectIdInResource(null)
+                .setExpectedToThrow(true)
+                .build()));
+  }
+
+  /**
    * Test cases specifying expected value for the user quota project header given the user input and
    * the current credentials state.
    *
@@ -837,6 +984,42 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     Mockito.lenient()
         .when(mockOtlpGrpcMetricExporter.getMemoryMode())
         .thenReturn(MemoryMode.IMMUTABLE_DATA);
+  }
+
+  @AutoValue
+  abstract static class ProjectIdTestBehavior {
+    // A null user specified project ID represents the use case where user omits specifying it
+    @Nullable
+    abstract String getUserSpecifiedProjectId();
+
+    // The project ID that credentials.getProjectId() returns (can be null)
+    @Nullable
+    abstract String getCredentialsProjectId();
+
+    // The expected project ID in the resource attributes (null if exception expected)
+    @Nullable
+    abstract String getExpectedProjectIdInResource();
+
+    // Whether an exception is expected to be thrown
+    abstract boolean getExpectedToThrow();
+
+    static Builder builder() {
+      return new AutoValue_GcpAuthAutoConfigurationCustomizerProviderTest_ProjectIdTestBehavior
+          .Builder();
+    }
+
+    @AutoValue.Builder
+    abstract static class Builder {
+      abstract Builder setUserSpecifiedProjectId(String projectId);
+
+      abstract Builder setCredentialsProjectId(String projectId);
+
+      abstract Builder setExpectedProjectIdInResource(String projectId);
+
+      abstract Builder setExpectedToThrow(boolean expectedToThrow);
+
+      abstract ProjectIdTestBehavior build();
+    }
   }
 
   @AutoValue

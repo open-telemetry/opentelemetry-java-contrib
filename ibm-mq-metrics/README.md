@@ -85,14 +85,39 @@ java \
 
 ## Generate code with Weaver
 
-Weaver generates code, documentation and configuration for this program.
+Weaver generates code, documentation and configuration for this program from the OpenTelemetry
+semantic convention models in the `model/` directory.
+
+### Generate all artifacts (Java, docs, YAML)
 
 ```shell
-make generate
+../gradlew :ibm-mq-metrics:weaverGenerate
 ```
 
-This generates `config.yaml`, the `docs` folder, the `src/main/java/io/opentelemetry/ibm/mq/metrics`
-Java code folder.
+### Generate specific artifacts
+
+```shell
+# Generate Java code only (automatically formatted with spotless)
+../gradlew :ibm-mq-metrics:weaverGenerateJava
+
+# Generate markdown documentation
+../gradlew :ibm-mq-metrics:weaverGenerateDocs
+
+# Generate YAML configuration
+../gradlew :ibm-mq-metrics:weaverGenerateYaml
+
+# Check weaver model for errors
+../gradlew :ibm-mq-metrics:weaverCheck
+```
+
+The generation produces:
+
+- `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
+- `docs/metrics.md` - Markdown documentation for all metrics
+- `config.yml` - YAML configuration template
+
+**Note:** The Java code generation automatically runs `spotlessJavaApply` to ensure the generated
+code follows the project's code style guidelines.
 
 ## Connection
 
@@ -232,7 +257,7 @@ See [docs/metrics.md](docs/metrics.md).
 
 ## Component Owners
 
-- [Antoine Toulme Sharma](https://github.com/atoulme), Splunk
+- [Antoine Toulme](https://github.com/atoulme), Splunk
 - [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

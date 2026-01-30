@@ -63,20 +63,21 @@ class LogRecordDataMapperTest {
   void verifyEmptyBodyMapping() throws IOException {
     LogRecord proto = encodeAndDecode(mapToProto(LOG_RECORD_WITH_EMPTY_STRING_BODY));
 
-    LogRecord emptyBodyProto = proto.newBuilder()
-        // It can't be replicated in tests, but in production, after decoding the protobuf,
-        // we ended up with an empty AnyValue when the original body was an empty string.
-        // So we are faking it.
-        .body(new AnyValue.Builder().build())
-        .build();
+    LogRecord emptyBodyProto =
+        proto
+            .newBuilder()
+            // It can't be replicated in tests, but in production, after decoding the protobuf,
+            // we ended up with an empty AnyValue when the original body was an empty string.
+            // So we are faking it.
+            .body(new AnyValue.Builder().build())
+            .build();
 
     assertThat(
-        mapToSdk(
-            emptyBodyProto,
-            LOG_RECORD_WITH_EMPTY_STRING_BODY.getResource(),
-            LOG_RECORD_WITH_EMPTY_STRING_BODY.getInstrumentationScopeInfo()
-        )
-    ).isEqualTo(LOG_RECORD_WITH_EMPTY_STRING_BODY);
+            mapToSdk(
+                emptyBodyProto,
+                LOG_RECORD_WITH_EMPTY_STRING_BODY.getResource(),
+                LOG_RECORD_WITH_EMPTY_STRING_BODY.getInstrumentationScopeInfo()))
+        .isEqualTo(LOG_RECORD_WITH_EMPTY_STRING_BODY);
   }
 
   private static LogRecord mapToProto(LogRecordData data) {
