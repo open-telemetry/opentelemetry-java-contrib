@@ -29,6 +29,8 @@ public final class LogRecordDataMapper {
 
   private static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();
 
+  private static final AnyValue EMPTY_BODY = new AnyValue.Builder().build();
+
   public static LogRecordDataMapper getInstance() {
     return INSTANCE;
   }
@@ -135,6 +137,8 @@ public final class LogRecordDataMapper {
           source.array_value.values.stream()
               .map(LogRecordDataMapper::anyValueToBody)
               .collect(toList()));
+    } else if (source.equals(EMPTY_BODY)) {
+      return Value.of("");
     }
     throw new IllegalArgumentException("Unrecognized AnyValue type");
   }
