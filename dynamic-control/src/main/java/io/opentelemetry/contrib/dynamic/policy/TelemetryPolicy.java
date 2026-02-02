@@ -13,16 +13,16 @@ import javax.annotation.Nullable;
  * Represents a single Telemetry Policy, comprising a type and a specification.
  *
  * <p>A {@code TelemetryPolicy} instance encapsulates a specific rule or configuration intent
- * identified by its {@link #getType() type}. The behavior of the policy is defined by its
- * {@link #getSpec() specification}, which is a JSON object.
+ * identified by its {@link #getType() type}. The behavior of the policy is defined by its {@link
+ * #getSpec() specification}, which is a JSON object.
  *
  * <p>Policies are typically immutable data carriers. The {@code spec} can be {@code null}, which
- * conventionally signifies the removal or absence of a policy for the given type in certain contexts
- * (e.g., when calculating diffs or updates).
+ * conventionally signifies the removal or absence of a policy for the given type in certain
+ * contexts (e.g., when calculating diffs or updates).
  *
- * <p>As an example take the JSON structure `{"trace-sampling": {"probability" : 0.5}}`
- * This is of type "trace-sampling", with spec `{"probability" : 0.5}`, indicating the intent that
- * the trace sampling-probability be set to 50%
+ * <p>As an example take the JSON structure `{"trace-sampling": {"probability" : 0.5}}` This is of
+ * type "trace-sampling", with spec `{"probability" : 0.5}`, indicating the intent that the trace
+ * sampling-probability be set to 50%
  *
  * @see io.opentelemetry.contrib.dynamic.policy
  */
