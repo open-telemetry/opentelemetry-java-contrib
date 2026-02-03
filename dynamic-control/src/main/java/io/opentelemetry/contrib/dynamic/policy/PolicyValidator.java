@@ -37,7 +37,11 @@ public interface PolicyValidator {
    */
   @Nullable
   default TelemetryPolicy validateAlias(String key, String value) {
-    throw new UnsupportedOperationException("PolicyValidator.validateAlias");
+    throw new UnsupportedOperationException(
+        "Alias validation is not supported by validator "
+            + getClass().getName()
+            + " for key "
+            + key);
   }
 
   /**
