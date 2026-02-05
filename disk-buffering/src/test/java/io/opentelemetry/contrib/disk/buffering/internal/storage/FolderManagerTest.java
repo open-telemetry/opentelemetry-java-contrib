@@ -21,6 +21,7 @@ import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.function.Predicate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,7 +99,7 @@ class FolderManagerTest {
     when(clock.now())
         .thenReturn(MILLISECONDS.toNanos(createdFileTime + MIN_FILE_AGE_FOR_READ_MILLIS));
 
-    ReadableFile readableFile = folderManager.getReadableFile();
+    ReadableFile readableFile = getReadableFile();
 
     assertThat(readableFile.getFile()).isEqualTo(writableFile.getFile());
     assertThat(writableFile.isClosed()).isTrue();
@@ -117,7 +118,7 @@ class FolderManagerTest {
     fillWithBytes(existingFile3, MAX_FILE_SIZE);
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L + MIN_FILE_AGE_FOR_READ_MILLIS));
 
-    ReadableFile readableFile = folderManager.getReadableFile();
+    ReadableFile readableFile = getReadableFile();
     assertThat(readableFile.getFile()).isEqualTo(existingFile1);
 
     folderManager.createWritableFile();
@@ -175,7 +176,7 @@ class FolderManagerTest {
     createFiles(expiredReadableFile, expiredWritableFile, expiredReadableFileBeingRead);
 
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(900 + MIN_FILE_AGE_FOR_READ_MILLIS));
-    ReadableFile readableFile = folderManager.getReadableFile();
+    ReadableFile readableFile = getReadableFile();
     assertThat(readableFile.getFile()).isEqualTo(expiredReadableFileBeingRead);
 
     when(clock.now()).thenReturn(MILLISECONDS.toNanos(11_500L));
@@ -199,40 +200,66 @@ class FolderManagerTest {
     File readableFile = new File(rootDir, String.valueOf(readableFileCreationTime));
     createFiles(writableFile, readableFile);
 
-    ReadableFile file = folderManager.getReadableFile();
+    ReadableFile file = getReadableFile();
 
     assertThat(file.getFile()).isEqualTo(readableFile);
   }
 
   @Test
   void provideOldestFileForRead_whenMultipleReadableFilesAreAvailable() throws IOException {
-    long newerReadableFileCreationTime = 1000;
-    long olderReadableFileCreationTime = 900;
+    long firstReadableFileTimestamp = 900;
+    long secondReadableFileTimestamp = 1000;
+    long thirdReadableFileTimestamp = 1500;
     long currentTime =
-        MILLISECONDS.toNanos(newerReadableFileCreationTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+        MILLISECONDS.toNanos(thirdReadableFileTimestamp + MIN_FILE_AGE_FOR_READ_MILLIS);
     when(clock.now()).thenReturn(currentTime);
     File writableFile = new File(rootDir, String.valueOf(currentTime));
-    File readableFileOlder = new File(rootDir, String.valueOf(olderReadableFileCreationTime));
-    File readableFileNewer = new File(rootDir, String.valueOf(newerReadableFileCreationTime));
-    createFiles(writableFile, readableFileNewer, readableFileOlder);
+    File firstReadableFile = new File(rootDir, String.valueOf(firstReadableFileTimestamp));
+    File secondReadableFile = new File(rootDir, String.valueOf(secondReadableFileTimestamp));
+    File thirdReadableFile = new File(rootDir, String.valueOf(thirdReadableFileTimestamp));
+    createFiles(writableFile, firstReadableFile, secondReadableFile, thirdReadableFile);
 
-    ReadableFile file = folderManager.getReadableFile();
+    ReadableFile file = getReadableFile();
 
-    assertThat(file.getFile()).isEqualTo(readableFileOlder);
+    assertThat(file.getFile()).isEqualTo(firstReadableFile);
+  }
+
+  @Test
+  void provideOldestFileForRead_withCustomFilter() throws IOException {
+    long firstReadableFileTimestamp = 900;
+    long secondReadableFileTimestamp = 1000;
+    long thirdReadableFileTimestamp = 1500;
+    long currentTime =
+        MILLISECONDS.toNanos(thirdReadableFileTimestamp + MIN_FILE_AGE_FOR_READ_MILLIS);
+    when(clock.now()).thenReturn(currentTime);
+    File writableFile = new File(rootDir, String.valueOf(currentTime));
+    File firstReadableFile = new File(rootDir, String.valueOf(firstReadableFileTimestamp));
+    File secondReadableFile = new File(rootDir, String.valueOf(secondReadableFileTimestamp));
+    File thirdReadableFile = new File(rootDir, String.valueOf(thirdReadableFileTimestamp));
+    createFiles(writableFile, firstReadableFile, secondReadableFile, thirdReadableFile);
+
+    ReadableFile file =
+        getReadableFile(
+            it -> {
+              // Exclude the oldest file so that the next oldest is selected.
+              return it.createdTimeMillis <= firstReadableFileTimestamp;
+            });
+
+    assertThat(file.getFile()).isEqualTo(secondReadableFile);
   }
 
   @Test
   void provideNullFileForRead_whenNoFilesAreAvailable() throws IOException {
-    assertThat(folderManager.getReadableFile()).isNull();
+    assertThat(getReadableFile()).isNull();
   }
 
   @Test
-  void provideNullFileForRead_whenOnlyReadableFilesAreAvailable() throws IOException {
+  void provideNullFileForRead_whenOnlyWritableFilesAreAvailable() throws IOException {
     long currentTime = 1000;
     File writableFile = new File(rootDir, String.valueOf(currentTime));
     createFiles(writableFile);
 
-    assertThat(folderManager.getReadableFile()).isNull();
+    assertThat(getReadableFile()).isNull();
   }
 
   @Test
@@ -243,7 +270,16 @@ class FolderManagerTest {
     createFiles(expiredReadableFile1, expiredReadableFile2);
     when(clock.now()).thenReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS);
 
-    assertThat(folderManager.getReadableFile()).isNull();
+    assertThat(getReadableFile()).isNull();
+  }
+
+  private ReadableFile getReadableFile() throws IOException {
+    return getReadableFile(file -> false);
+  }
+
+  private ReadableFile getReadableFile(Predicate<FolderManager.CacheFile> exclude)
+      throws IOException {
+    return folderManager.getReadableFile(exclude);
   }
 
   private static void fillWithBytes(File file, int size) throws IOException {

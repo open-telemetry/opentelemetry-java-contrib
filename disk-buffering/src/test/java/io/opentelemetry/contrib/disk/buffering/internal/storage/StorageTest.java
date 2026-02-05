@@ -84,10 +84,10 @@ class StorageTest {
           .hasMessage("You must close any previous ReadableResult before requesting a new one");
     }
 
-    // Read again when no more data is available (delete file)
+    // Read again when no more data is available
     readResult2.close();
     assertThat(storage.readNext(DESERIALIZER)).isNull();
-    assertThat(destinationDir.list()).isEmpty();
+    assertThat(destinationDir.list()).hasSize(1);
   }
 
   @Test
