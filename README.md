@@ -66,7 +66,7 @@ For more information about the maintainer role, see the [community repository](h
 
 - [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
 - [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
-- [John Watson](https://github.com/jkwatson), Cloudera
+- [John Watson](https://github.com/jkwatson), Sublime Security
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
