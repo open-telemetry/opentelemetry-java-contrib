@@ -12,14 +12,14 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 
 public class DelegatingSampler implements Sampler {
 
   private final AtomicReference<Sampler> delegate;
 
-  public DelegatingSampler(Sampler initialDelegate) {
+  public DelegatingSampler(@Nullable Sampler initialDelegate) {
     this.delegate =
         new AtomicReference<>(initialDelegate != null ? initialDelegate : Sampler.alwaysOn());
   }
@@ -28,11 +28,12 @@ public class DelegatingSampler implements Sampler {
     this(Sampler.alwaysOn());
   }
 
-  public void setDelegate(Sampler sampler) {
+  public void setDelegate(@Nullable Sampler sampler) {
     delegate.set(sampler != null ? sampler : Sampler.alwaysOn());
   }
 
   @Override
+  @SuppressWarnings("NullAway")
   public SamplingResult shouldSample(
       Context ctx,
       String traceId,
@@ -40,13 +41,13 @@ public class DelegatingSampler implements Sampler {
       SpanKind kind,
       Attributes attrs,
       List<LinkData> links) {
-    return Objects.requireNonNull(delegate.get())
-        .shouldSample(ctx, traceId, name, kind, attrs, links);
+    return delegate.get().shouldSample(ctx, traceId, name, kind, attrs, links);
   }
 
   @Override
+  @SuppressWarnings("NullAway")
   public String getDescription() {
-    return "delegating/" + Objects.requireNonNull(delegate.get()).getDescription();
+    return "delegating/" + delegate.get().getDescription();
   }
 
   @Override
