@@ -13,7 +13,7 @@ repositories {
 dependencies {
   // When updating, update above in plugins too
   implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.2.1")
-  implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:4.4.0")
+  implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:5.0.0")
   implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:3.0.0")
   implementation("org.owasp.dependencycheck:org.owasp.dependencycheck.gradle.plugin:12.2.0")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
