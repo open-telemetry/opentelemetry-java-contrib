@@ -22,6 +22,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -72,7 +73,7 @@ class LambdaResourceTest {
   @Test
   void shouldReadCloudAccountIdFromSymlink(@TempDir Path tempDir) throws Exception {
     Path symlink = tempDir.resolve(".otel-account-id");
-    Files.createSymbolicLink(symlink, Path.of("123456789012"));
+    Files.createSymbolicLink(symlink, Paths.get("123456789012"));
 
     Resource resource =
         LambdaResource.buildResource(
@@ -106,7 +107,7 @@ class LambdaResourceTest {
   @Test
   void shouldPreserveLeadingZerosInAccountId(@TempDir Path tempDir) throws Exception {
     Path symlink = tempDir.resolve(".otel-account-id");
-    Files.createSymbolicLink(symlink, Path.of("012345678901"));
+    Files.createSymbolicLink(symlink, Paths.get("012345678901"));
 
     Resource resource =
         LambdaResource.buildResource(

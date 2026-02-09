@@ -21,6 +21,7 @@ import io.opentelemetry.semconv.SchemaUrls;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -40,12 +41,12 @@ public final class LambdaResource {
   }
 
   private static Resource buildResource() {
-    return buildResource(System.getenv(), Path.of(ACCOUNT_ID_SYMLINK_PATH));
+    return buildResource(System.getenv(), Paths.get(ACCOUNT_ID_SYMLINK_PATH));
   }
 
   // Visible for testing
   static Resource buildResource(Map<String, String> environmentVariables) {
-    return buildResource(environmentVariables, Path.of(ACCOUNT_ID_SYMLINK_PATH));
+    return buildResource(environmentVariables, Paths.get(ACCOUNT_ID_SYMLINK_PATH));
   }
 
   // Visible for testing
