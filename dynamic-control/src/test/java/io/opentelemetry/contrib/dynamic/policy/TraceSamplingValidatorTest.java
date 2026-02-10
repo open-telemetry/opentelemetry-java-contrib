@@ -11,34 +11,44 @@ import org.junit.jupiter.api.Test;
 
 class TraceSamplingValidatorTest {
 
+  private static final String TRACE_SAMPLING_POLICY_TYPE = "trace-sampling";
+  private static final String PROBABILITY_FIELD = "probability";
+  private static final String TRACE_SAMPLING_ALIAS = "trace-sampling.probability";
+
   private final TraceSamplingValidator validator = new TraceSamplingValidator();
 
   @Test
   void testGetPolicyType() {
-    assertThat(validator.getPolicyType()).isEqualTo("trace-sampling");
+    assertThat(validator.getPolicyType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
   }
 
   @Test
   void testGetAlias() {
-    assertThat(validator.getAlias()).isEqualTo("trace-sampling.probability");
+    assertThat(validator.getAlias()).isEqualTo(TRACE_SAMPLING_ALIAS);
   }
 
   @Test
   void testValidate_ValidJson() {
-    String json = "{\"trace-sampling\": {\"probability\": 0.5}}";
+    String json = jsonForProbability(0.5);
     TelemetryPolicy policy = validator.validate(json);
     assertThat(policy).isNotNull();
-    assertThat(policy.getType()).isEqualTo("trace-sampling");
-    assertThat(policy.getSpec().get("probability").asDouble()).isEqualTo(0.5);
+    assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(0.5);
   }
 
   @Test
   void testValidate_ValidJson_BoundaryValues() {
-    String json0 = "{\"trace-sampling\": {\"probability\": 0.0}}";
-    assertThat(validator.validate(json0)).isNotNull();
+    String json0 = jsonForProbability(0.0);
+    TelemetryPolicy policy0 = validator.validate(json0);
+    assertThat(policy0).isNotNull();
+    assertThat(policy0.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy0.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(0.0);
 
-    String json1 = "{\"trace-sampling\": {\"probability\": 1.0}}";
-    assertThat(validator.validate(json1)).isNotNull();
+    String json1 = jsonForProbability(1.0);
+    TelemetryPolicy policy1 = validator.validate(json1);
+    assertThat(policy1).isNotNull();
+    assertThat(policy1.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy1.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(1.0);
   }
 
   @Test
@@ -55,37 +65,45 @@ class TraceSamplingValidatorTest {
 
   @Test
   void testValidate_InvalidJson_MissingProbability() {
-    String json = "{\"trace-sampling\": {\"other-field\": 0.5}}";
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"other-field\": 0.5}}";
     assertThat(validator.validate(json)).isNull();
   }
 
   @Test
   void testValidate_InvalidJson_ProbabilityNotNumber() {
-    String json = "{\"trace-sampling\": {\"probability\": \"high\"}}";
+    String json =
+        "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"" + PROBABILITY_FIELD + "\": \"high\"}}";
     assertThat(validator.validate(json)).isNull();
   }
 
   @Test
   void testValidate_InvalidJson_ProbabilityOutOfRange() {
-    String jsonLow = "{\"trace-sampling\": {\"probability\": -0.1}}";
+    String jsonLow = jsonForProbability(-0.1);
     assertThat(validator.validate(jsonLow)).isNull();
 
-    String jsonHigh = "{\"trace-sampling\": {\"probability\": 1.1}}";
+    String jsonHigh = jsonForProbability(1.1);
     assertThat(validator.validate(jsonHigh)).isNull();
   }
 
   @Test
   void testValidateAlias_Valid() {
-    TelemetryPolicy policy = validator.validateAlias("trace-sampling.probability", "0.5");
+    TelemetryPolicy policy = validator.validateAlias(TRACE_SAMPLING_ALIAS, "0.5");
     assertThat(policy).isNotNull();
-    assertThat(policy.getType()).isEqualTo("trace-sampling");
-    assertThat(policy.getSpec().get("probability").asDouble()).isEqualTo(0.5);
+    assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(0.5);
   }
 
   @Test
   void testValidateAlias_Valid_BoundaryValues() {
-    assertThat(validator.validateAlias("trace-sampling.probability", "0.0")).isNotNull();
-    assertThat(validator.validateAlias("trace-sampling.probability", "1.0")).isNotNull();
+    TelemetryPolicy policy0 = validator.validateAlias(TRACE_SAMPLING_ALIAS, "0.0");
+    assertThat(policy0).isNotNull();
+    assertThat(policy0.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy0.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(0.0);
+
+    TelemetryPolicy policy1 = validator.validateAlias(TRACE_SAMPLING_ALIAS, "1.0");
+    assertThat(policy1).isNotNull();
+    assertThat(policy1.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy1.getSpec().get(PROBABILITY_FIELD).asDouble()).isEqualTo(1.0);
   }
 
   @Test
@@ -95,12 +113,22 @@ class TraceSamplingValidatorTest {
 
   @Test
   void testValidateAlias_InvalidValue_NotNumber() {
-    assertThat(validator.validateAlias("trace-sampling.probability", "invalid")).isNull();
+    assertThat(validator.validateAlias(TRACE_SAMPLING_ALIAS, "invalid")).isNull();
   }
 
   @Test
   void testValidateAlias_InvalidValue_OutOfRange() {
-    assertThat(validator.validateAlias("trace-sampling.probability", "-0.1")).isNull();
-    assertThat(validator.validateAlias("trace-sampling.probability", "1.1")).isNull();
+    assertThat(validator.validateAlias(TRACE_SAMPLING_ALIAS, "-0.1")).isNull();
+    assertThat(validator.validateAlias(TRACE_SAMPLING_ALIAS, "1.1")).isNull();
+  }
+
+  private static String jsonForProbability(double probability) {
+    return "{\""
+        + TRACE_SAMPLING_POLICY_TYPE
+        + "\": {\""
+        + PROBABILITY_FIELD
+        + "\": "
+        + probability
+        + "}}";
   }
 }
