@@ -65,6 +65,7 @@ public class DelegatingSampler implements Sampler {
   }
 
   @Override
+  // delegate AtomicReference is guaranteed to be non-null
   @SuppressWarnings("NullAway")
   public SamplingResult shouldSample(
       Context ctx,
