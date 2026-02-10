@@ -21,8 +21,8 @@ import javax.annotation.Nullable;
  * reconfigured at runtime without rebuilding the {@code TracerSdkProvider} or recreating
  * instrumented components.
  *
- * <p>This class is thread-safe. All access to the current delegate sampler is performed through
- * an {@link AtomicReference}, so sampling decisions and delegate updates may occur concurrently
+ * <p>This class is thread-safe. All access to the current delegate sampler is performed through an
+ * {@link AtomicReference}, so sampling decisions and delegate updates may occur concurrently
  * without additional synchronization.
  *
  * <p>The delegate sampler can be updated dynamically via {@link #setDelegate(Sampler)}. Passing
@@ -36,8 +36,8 @@ public class DelegatingSampler implements Sampler {
   /**
    * Creates a new {@link DelegatingSampler} with the given initial delegate.
    *
-   * <p>If {@code initialDelegate} is {@code null}, {@link Sampler#alwaysOn()} will be used as
-   * the initial delegate.
+   * <p>If {@code initialDelegate} is {@code null}, {@link Sampler#alwaysOn()} will be used as the
+   * initial delegate.
    *
    * @param initialDelegate the initial {@link Sampler} to delegate to, or {@code null} to use
    *     {@link Sampler#alwaysOn()} by default
@@ -57,8 +57,8 @@ public class DelegatingSampler implements Sampler {
    * <p>If {@code sampler} is {@code null}, this method will instead use {@link Sampler#alwaysOn()}
    * as the delegate.
    *
-   * @param sampler the new delegate sampler to use, or {@code null} to fall back to
-   *     {@link Sampler#alwaysOn()}
+   * @param sampler the new delegate sampler to use, or {@code null} to fall back to {@link
+   *     Sampler#alwaysOn()}
    */
   public void setDelegate(@Nullable Sampler sampler) {
     delegate.set(sampler != null ? sampler : Sampler.alwaysOn());
