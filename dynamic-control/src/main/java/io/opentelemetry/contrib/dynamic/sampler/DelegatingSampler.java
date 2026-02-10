@@ -15,6 +15,20 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
+/**
+ * A {@link Sampler} implementation that delegates sampling decisions to another {@link Sampler}
+ * instance held in an {@link AtomicReference}. This allows the effective sampling strategy to be
+ * reconfigured at runtime without rebuilding the {@code TracerSdkProvider} or recreating
+ * instrumented components.
+ *
+ * <p>This class is thread-safe. All access to the current delegate sampler is performed through
+ * an {@link AtomicReference}, so sampling decisions and delegate updates may occur concurrently
+ * without additional synchronization.
+ *
+ * <p>The delegate sampler can be updated dynamically via {@link #setDelegate(Sampler)}. Passing
+ * {@code null} to {@code setDelegate} or the constructor will cause {@link Sampler#alwaysOn()} to
+ * be used as the fallback delegate.
+ */
 public class DelegatingSampler implements Sampler {
 
   private final AtomicReference<Sampler> delegate;
