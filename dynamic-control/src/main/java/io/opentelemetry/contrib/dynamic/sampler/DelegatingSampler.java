@@ -33,6 +33,15 @@ public class DelegatingSampler implements Sampler {
 
   private final AtomicReference<Sampler> delegate;
 
+  /**
+   * Creates a new {@link DelegatingSampler} with the given initial delegate.
+   *
+   * <p>If {@code initialDelegate} is {@code null}, {@link Sampler#alwaysOn()} will be used as
+   * the initial delegate.
+   *
+   * @param initialDelegate the initial {@link Sampler} to delegate to, or {@code null} to use
+   *     {@link Sampler#alwaysOn()} by default
+   */
   public DelegatingSampler(@Nullable Sampler initialDelegate) {
     this.delegate =
         new AtomicReference<>(initialDelegate != null ? initialDelegate : Sampler.alwaysOn());
