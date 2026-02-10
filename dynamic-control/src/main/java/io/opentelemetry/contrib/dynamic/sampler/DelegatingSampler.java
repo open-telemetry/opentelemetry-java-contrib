@@ -51,6 +51,15 @@ public class DelegatingSampler implements Sampler {
     this(Sampler.alwaysOn());
   }
 
+  /**
+   * Updates the delegate {@link Sampler} used by this {@code DelegatingSampler} at runtime.
+   *
+   * <p>If {@code sampler} is {@code null}, this method will instead use {@link Sampler#alwaysOn()}
+   * as the delegate.
+   *
+   * @param sampler the new delegate sampler to use, or {@code null} to fall back to
+   *     {@link Sampler#alwaysOn()}
+   */
   public void setDelegate(@Nullable Sampler sampler) {
     delegate.set(sampler != null ? sampler : Sampler.alwaysOn());
   }
