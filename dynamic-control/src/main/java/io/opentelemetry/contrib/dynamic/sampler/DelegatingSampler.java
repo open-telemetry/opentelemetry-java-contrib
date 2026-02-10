@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 /**
  * A {@link Sampler} implementation that delegates sampling decisions to another {@link Sampler}
  * instance held in an {@link AtomicReference}. This allows the effective sampling strategy to be
- * reconfigured at runtime without rebuilding the {@code TracerSdkProvider} or recreating
+ * reconfigured at runtime without rebuilding the {@code SdkTracerProvider} or recreating
  * instrumented components.
  *
  * <p>This class is thread-safe. All access to the current delegate sampler is performed through an
