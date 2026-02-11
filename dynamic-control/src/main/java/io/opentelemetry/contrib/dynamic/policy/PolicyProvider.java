@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -24,6 +25,9 @@ public interface PolicyProvider {
    * {@link #fetchPolicies()}.
    *
    * @param onUpdate A consumer that accepts the new list of policies when an update occurs.
+   * @return A {@link Closeable} that stops watching when closed.
    */
-  default void startWatching(Consumer<List<TelemetryPolicy>> onUpdate) {}
+  default Closeable startWatching(Consumer<List<TelemetryPolicy>> onUpdate) {
+    return () -> {};
+  }
 }
