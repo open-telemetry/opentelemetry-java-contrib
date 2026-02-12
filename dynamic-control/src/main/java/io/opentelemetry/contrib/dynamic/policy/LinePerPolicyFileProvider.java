@@ -45,6 +45,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
   public List<TelemetryPolicy> fetchPolicies() throws IOException {
     List<TelemetryPolicy> policies = new ArrayList<>();
     if (!Files.exists(file)) {
+      logger.info("Policy file does not exist: " + file);
       return policies;
     }
 
