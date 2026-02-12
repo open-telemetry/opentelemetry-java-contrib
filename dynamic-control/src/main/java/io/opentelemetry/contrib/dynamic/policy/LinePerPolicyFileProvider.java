@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
  */
-public final class LinePerPolicyFileProvider implements PolicyProvider {
+final class LinePerPolicyFileProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(LinePerPolicyFileProvider.class.getName());
   private final Path file;
   private final List<PolicyValidator> validators;
@@ -75,7 +76,14 @@ public final class LinePerPolicyFileProvider implements PolicyProvider {
                 for (PolicyValidator validator : validators) {
                   String alias = validator.getAlias();
                   if (alias != null && alias.equals(key)) {
-                    policy = validator.validateAlias(key, valueStr);
+                    try {
+                      policy = validator.validateAlias(key, valueStr);
+                    } catch (UnsupportedOperationException e) {
+                      logger.info(
+                          "Validator does not support alias validation: "
+                              + validator.getClass().getName());
+                      continue;
+                    }
                     if (policy != null) {
                       break;
                     }
