@@ -12,18 +12,17 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 /**
  * A {@link Sampler} implementation that delegates sampling decisions to another {@link Sampler}
- * instance held in an {@link AtomicReference}. This allows the effective sampling strategy to be
- * reconfigured at runtime without rebuilding the {@code TracerSdkProvider} or recreating
- * instrumented components.
+ * instance held in a volatile field. This allows the effective sampling strategy to be reconfigured
+ * at runtime without rebuilding the {@code TracerSdkProvider} or recreating instrumented
+ * components.
  *
- * <p>This class is thread-safe. All access to the current delegate sampler is performed through an
- * {@link AtomicReference}, so sampling decisions and delegate updates may occur concurrently
- * without additional synchronization.
+ * <p>This class is thread-safe. All access to the current delegate sampler is performed through a
+ * volatile reference, so sampling decisions and delegate updates may occur concurrently without
+ * additional synchronization.
  *
  * <p>The delegate sampler can be updated dynamically via {@link #setDelegate(Sampler)}. Passing
  * {@code null} to {@code setDelegate} or the constructor will cause {@link Sampler#alwaysOn()} to
@@ -31,7 +30,7 @@ import javax.annotation.Nullable;
  */
 public class DelegatingSampler implements Sampler {
 
-  private final AtomicReference<Sampler> delegate;
+  private volatile Sampler delegate;
 
   /**
    * Creates a new {@link DelegatingSampler} with the given initial delegate.
@@ -43,8 +42,7 @@ public class DelegatingSampler implements Sampler {
    *     {@link Sampler#alwaysOn()} by default
    */
   public DelegatingSampler(@Nullable Sampler initialDelegate) {
-    this.delegate =
-        new AtomicReference<>(initialDelegate != null ? initialDelegate : Sampler.alwaysOn());
+    this.delegate = initialDelegate != null ? initialDelegate : Sampler.alwaysOn();
   }
 
   public DelegatingSampler() {
@@ -61,12 +59,10 @@ public class DelegatingSampler implements Sampler {
    *     Sampler#alwaysOn()}
    */
   public void setDelegate(@Nullable Sampler sampler) {
-    delegate.set(sampler != null ? sampler : Sampler.alwaysOn());
+    delegate = sampler != null ? sampler : Sampler.alwaysOn();
   }
 
   @Override
-  // delegate AtomicReference is guaranteed to be non-null
-  @SuppressWarnings("NullAway")
   public SamplingResult shouldSample(
       Context ctx,
       String traceId,
@@ -74,13 +70,12 @@ public class DelegatingSampler implements Sampler {
       SpanKind kind,
       Attributes attrs,
       List<LinkData> links) {
-    return delegate.get().shouldSample(ctx, traceId, name, kind, attrs, links);
+    return delegate.shouldSample(ctx, traceId, name, kind, attrs, links);
   }
 
   @Override
-  @SuppressWarnings("NullAway")
   public String getDescription() {
-    return "delegating/" + delegate.get().getDescription();
+    return "delegating/" + delegate.getDescription();
   }
 
   @Override
