@@ -35,6 +35,7 @@ public final class LinePerPolicyFileProvider implements PolicyProvider {
   private final List<PolicyValidator> validators;
 
   public LinePerPolicyFileProvider(Path file, List<PolicyValidator> validators) {
+    Objects.requireNonNull(file, "file cannot be null");
     this.file = file;
     this.validators = new ArrayList<>(validators);
   }
