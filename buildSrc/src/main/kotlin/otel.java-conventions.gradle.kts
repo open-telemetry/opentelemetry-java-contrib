@@ -48,6 +48,10 @@ tasks {
             "-Xlint:-processing",
             // We suppress the "options" warning because it prevents compilation on modern JDKs
             "-Xlint:-options",
+            // We suppress the "deprecation" warning because --release 8 causes javac to warn on
+            // importing deprecated classes (fixed in JDK 9+, see https://bugs.openjdk.org/browse/JDK-8032211).
+            // We use a custom Error Prone check instead (OtelDeprecatedApiUsage).
+            "-Xlint:-deprecation",
 
             // Fail build on any warning
             "-Werror",

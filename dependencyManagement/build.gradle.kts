@@ -29,6 +29,7 @@ dependencies {
     api("com.google.auto.value:auto-value-annotations:1.11.1")
     api("com.google.errorprone:error_prone_annotations:2.47.0")
     api("com.google.errorprone:error_prone_core:2.47.0")
+    api("com.google.errorprone:error_prone_test_helpers:2.47.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.9.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
