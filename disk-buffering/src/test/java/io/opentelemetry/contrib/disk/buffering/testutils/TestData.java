@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.testutils;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
@@ -37,7 +38,7 @@ public final class TestData {
           .put("conditions", false, true)
           .put("scores", 0L, 1L)
           .put("coins", 0.01, 0.05, 0.1)
-          .put("empty", "")
+          .put("empty", Value.empty())
           .put("blank", " ")
           .build();
 

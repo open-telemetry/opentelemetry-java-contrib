@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.compressor.zstd;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.luben.zstd.ZstdInputStream;
+import io.opentelemetry.sdk.common.export.Compressor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,7 +24,8 @@ class ZstdCompressorTest {
     String content = "hello world";
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    OutputStream os = ZstdCompressor.getInstance().compress(baos);
+    Compressor compressor = new ZstdCompressor();
+    OutputStream os = compressor.compress(baos);
     os.write(content.getBytes(StandardCharsets.UTF_8));
     os.close();
 
