@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
@@ -37,7 +38,7 @@ public class OkHttpWebSocket implements WebSocket {
   @Override
   public void open(Listener listener) {
     if (status.compareAndSet(Status.NOT_RUNNING, Status.STARTING)) {
-      okhttp3.Request request = new okhttp3.Request.Builder().url(url).build();
+      Request request = new Request.Builder().url(url).build();
       webSocket.set(client.newWebSocket(request, new ListenerAdapter(listener)));
     }
   }
