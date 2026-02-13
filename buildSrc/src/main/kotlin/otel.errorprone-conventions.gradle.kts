@@ -10,6 +10,7 @@ plugins {
 dependencies {
   errorprone("com.google.errorprone:error_prone_core")
   errorprone("com.uber.nullaway:nullaway")
+  errorprone(project(":custom-checks"))
 }
 
 val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean() ?: false
@@ -107,6 +108,17 @@ tasks {
       errorprone.nullaway {
         severity.set(CheckSeverity.ERROR)
       }
+    }
+  }
+}
+
+// Our conventions apply this project as a dependency in the errorprone configuration, which would cause
+// a circular dependency if trying to compile this project with that still there. So we filter this
+// project out.
+configurations {
+  named("errorprone") {
+    dependencies.removeIf {
+      it is ProjectDependency && it.name == project.name
     }
   }
 }
