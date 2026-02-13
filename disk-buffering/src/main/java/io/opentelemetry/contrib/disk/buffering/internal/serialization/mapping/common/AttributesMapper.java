@@ -169,8 +169,9 @@ public final class AttributesMapper {
     } else if (value.kvlist_value != null) {
       builder.put(AttributeKey.valueKey(key), anyValueToValue(value));
     } else {
-      // Empty value
-      builder.put(AttributeKey.valueKey(key), Value.empty());
+      // Update after SDK v1.60.0 is released which includes:
+      // https://github.com/open-telemetry/opentelemetry-java/pull/8014
+      builder.put(AttributeKey.stringKey(key), "");
     }
   }
 
