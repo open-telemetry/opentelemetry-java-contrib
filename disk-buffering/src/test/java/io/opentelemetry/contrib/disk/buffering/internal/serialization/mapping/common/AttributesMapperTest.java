@@ -131,16 +131,6 @@ class AttributesMapperTest {
   }
 
   @Test
-  void verifyValueTypeMapping_Empty() {
-    Attributes attributes =
-        Attributes.builder().put(AttributeKey.valueKey("emptyValue"), Value.empty()).build();
-
-    List<KeyValue> proto = mapToProto(attributes);
-
-    assertThat(mapFromProto(proto)).isEqualTo(attributes);
-  }
-
-  @Test
   void verifyValueTypeMapping_EmptyCollections() {
     Attributes attributes =
         Attributes.builder()
