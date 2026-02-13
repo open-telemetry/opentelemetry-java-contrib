@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Fix IllegalArgumentException: Unrecognized AnyValue type on empty LogRecord.body
+  ([#2529](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2529))
+
+### Dynamic control
+
+- Add initial TelemetryPolicy
+  ([#2592](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2592))
+- Add trace sampling validation
+  ([#2604](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2604))
+
 ## Version 1.53.0 (2026-01-21)
 
 ### AWS X-Ray propagator
