@@ -17,6 +17,7 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.contrib.interceptor.common.ComposableInterceptor;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
@@ -138,7 +139,7 @@ class InterceptableLogRecordExporterTest {
 
     @Override
     @SuppressWarnings("deprecation") // implement deprecated method
-    public io.opentelemetry.sdk.logs.data.Body getBody() {
+    public Body getBody() {
       return delegate.getBody();
     }
 
