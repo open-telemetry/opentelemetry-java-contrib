@@ -126,7 +126,7 @@ There are two transport modes in which this extension can be run:
 * **Binding** : Requires WMQ Extension to be deployed in machine agent on the same machine where
   WMQ server is installed.
 * **Client** : In this mode, the WMQ extension is installed on a different host than the IBM MQ
-  server. Please install the [IBM MQ Client](https://developer.ibm.com/messaging/mq-downloads/)
+  server. Please install the [IBM MQ Client](https://developer.ibm.com/articles/mq-downloads/)
   for this mode to get the necessary jars as mentioned previously.
 
 If this extension is configured for **CLIENT** transport type
