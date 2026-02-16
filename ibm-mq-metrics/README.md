@@ -44,7 +44,7 @@ These jar files are typically found in ```/opt/mqm/java/lib``` on a UNIX server 
 found in an alternate location depending upon your environment.
 
 In case of **CLIENT** transport type, IBM MQ Client must be installed to get the MQ jars.
-[The IBM MQ Client jars can be downloaded here](https://developer.ibm.com/messaging/mq-downloads/).
+[The IBM MQ Client jars can be downloaded here](https://developer.ibm.com/articles/mq-downloads/).
 
 ### MQ monitoring configuration
 
