@@ -86,7 +86,7 @@ class TraceSamplingRatePolicyImplementerTest {
             "test-span",
             SpanKind.INTERNAL,
             Attributes.empty(),
-            Collections.<LinkData>emptyList());
+            Collections.emptyList());
     return result.getDecision();
   }
 
