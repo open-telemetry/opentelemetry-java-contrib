@@ -25,6 +25,9 @@ import java.util.Objects;
  * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
  * policies produced by that validator.
  *
+ * <p>Policies with a non-null spec that omit {@code probability} are ignored, which should not
+ * occur if validation is functioning correctly.
+ * 
  * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
  * with sampling operations on the associated {@link DelegatingSampler}.
  */
@@ -32,6 +35,8 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
 
   private static final String TRACE_SAMPLING_TYPE = "trace-sampling";
   private static final String PROBABILITY_FIELD = "probability";
+private static final List<PolicyValidator> VALIDATORS =
+      Collections.<PolicyValidator>singletonList(new TraceSamplingValidator());
 
   private final DelegatingSampler delegatingSampler;
 
@@ -47,7 +52,7 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
 
   @Override
   public List<PolicyValidator> getValidators() {
-    return Collections.singletonList(new TraceSamplingValidator());
+    return VALIDATORS;
   }
 
   @Override

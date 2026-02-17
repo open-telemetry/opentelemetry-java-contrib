@@ -63,6 +63,19 @@ class TraceSamplingRatePolicyImplementerTest {
   }
 
   @Test
+  void ignoresTraceSamplingPolicyWithoutProbability() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingRatePolicyImplementer implementer =
+        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+
+    implementer.onPoliciesChanged(
+        Collections.singletonList(
+            new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
+  }
+
+  @Test
   void lastTraceSamplingPolicyWins() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
