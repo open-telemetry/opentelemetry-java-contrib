@@ -13,7 +13,6 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.dynamic.sampler.DelegatingSampler;
-import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -69,8 +68,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        Collections.singletonList(
-            new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
+        Collections.singletonList(new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
   }
