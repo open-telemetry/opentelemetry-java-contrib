@@ -24,6 +24,9 @@ import java.util.Objects;
  *
  * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
  * policies produced by that validator.
+ *
+ * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
+ * with sampling operations on the associated {@link DelegatingSampler}.
  */
 public final class TraceSamplingRatePolicyImplementer implements PolicyImplementer {
 
