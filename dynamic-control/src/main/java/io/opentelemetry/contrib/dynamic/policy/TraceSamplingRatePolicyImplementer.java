@@ -10,6 +10,7 @@ import io.opentelemetry.contrib.dynamic.sampler.DelegatingSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Implements the {@code trace-sampling} policy by updating a {@link DelegatingSampler}.
@@ -37,6 +38,7 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
    * @param delegatingSampler the sampler to update when policies change
    */
   public TraceSamplingRatePolicyImplementer(DelegatingSampler delegatingSampler) {
+    Objects.requireNonNull(delegatingSampler, "delegatingSampler cannot be null");
     this.delegatingSampler = delegatingSampler;
   }
 
