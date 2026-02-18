@@ -2,8 +2,15 @@
 
 ## Unreleased
 
+### Compressors
+
+- Update zstd compressor to use new Compressor SPI from SDK
+  ([#2625](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2625))
+
 ### Disk buffering
 
+- Add support for complex attributes (arrays, nested structures)
+  ([#2625](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2625))
 - Fix IllegalArgumentException: Unrecognized AnyValue type on empty LogRecord.body
   ([#2529](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2529))
 
