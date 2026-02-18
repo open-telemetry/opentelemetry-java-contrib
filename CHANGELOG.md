@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.54.0 (2026-02-18)
+
 ### Compressors
 
 - Update zstd compressor to use new Compressor SPI from SDK
