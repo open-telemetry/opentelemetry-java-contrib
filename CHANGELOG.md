@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### AWS Lambda resource detector
+
+- Read `cloud.account.id` from symlink created by the OTel Lambda Extension
+  ([#2619](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2619))
+
 ## Version 1.53.0 (2026-01-21)
 
 ### AWS X-Ray propagator

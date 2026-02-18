@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
@@ -19,10 +20,14 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.SchemaUrls;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class LambdaResourceTest {
   @Test
@@ -63,6 +68,53 @@ class LambdaResourceTest {
             entry(CLOUD_REGION, "us-east-1"),
             entry(FAAS_NAME, "my-function"),
             entry(FAAS_VERSION, "1.2.3"));
+  }
+
+  @Test
+  void shouldReadCloudAccountIdFromSymlink(@TempDir Path tempDir) throws Exception {
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
+    Files.createSymbolicLink(symlink, Paths.get("123456789012"));
+
+    Resource resource =
+        LambdaResource.buildResource(
+            singletonMap("AWS_LAMBDA_FUNCTION_NAME", "my-function"), symlink);
+    Attributes attributes = resource.getAttributes();
+
+    assertThat(attributes)
+        .containsOnly(
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_lambda"),
+            entry(FAAS_NAME, "my-function"),
+            entry(CLOUD_ACCOUNT_ID, "123456789012"));
+  }
+
+  @Test
+  void shouldSkipCloudAccountIdWhenSymlinkMissing(@TempDir Path tempDir) {
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
+
+    Resource resource =
+        LambdaResource.buildResource(
+            singletonMap("AWS_LAMBDA_FUNCTION_NAME", "my-function"), symlink);
+    Attributes attributes = resource.getAttributes();
+
+    assertThat(attributes)
+        .containsOnly(
+            entry(CLOUD_PROVIDER, "aws"),
+            entry(CLOUD_PLATFORM, "aws_lambda"),
+            entry(FAAS_NAME, "my-function"));
+  }
+
+  @Test
+  void shouldPreserveLeadingZerosInAccountId(@TempDir Path tempDir) throws Exception {
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
+    Files.createSymbolicLink(symlink, Paths.get("012345678901"));
+
+    Resource resource =
+        LambdaResource.buildResource(
+            singletonMap("AWS_LAMBDA_FUNCTION_NAME", "my-function"), symlink);
+    Attributes attributes = resource.getAttributes();
+
+    assertThat(attributes).containsEntry(CLOUD_ACCOUNT_ID, "012345678901");
   }
 
   @Test
