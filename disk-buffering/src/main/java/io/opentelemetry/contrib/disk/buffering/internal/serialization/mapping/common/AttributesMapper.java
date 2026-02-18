@@ -16,6 +16,7 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.common.v1.KeyValueList;
+import okio.ByteString;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +120,7 @@ public final class AttributesMapper {
 
   private static AnyValue bytesToAnyValue(byte[] bytes) {
     AnyValue.Builder anyValue = new AnyValue.Builder();
-    anyValue.bytes_value(okio.ByteString.of(bytes));
+    anyValue.bytes_value(ByteString.of(bytes));
     return anyValue.build();
   }
 
