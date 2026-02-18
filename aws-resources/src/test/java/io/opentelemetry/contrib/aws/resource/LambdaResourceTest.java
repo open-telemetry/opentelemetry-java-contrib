@@ -72,7 +72,7 @@ class LambdaResourceTest {
 
   @Test
   void shouldReadCloudAccountIdFromSymlink(@TempDir Path tempDir) throws Exception {
-    Path symlink = tempDir.resolve(".otel-account-id");
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
     Files.createSymbolicLink(symlink, Paths.get("123456789012"));
 
     Resource resource =
@@ -90,7 +90,7 @@ class LambdaResourceTest {
 
   @Test
   void shouldSkipCloudAccountIdWhenSymlinkMissing(@TempDir Path tempDir) {
-    Path symlink = tempDir.resolve(".otel-account-id");
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
 
     Resource resource =
         LambdaResource.buildResource(
@@ -106,7 +106,7 @@ class LambdaResourceTest {
 
   @Test
   void shouldPreserveLeadingZerosInAccountId(@TempDir Path tempDir) throws Exception {
-    Path symlink = tempDir.resolve(".otel-account-id");
+    Path symlink = tempDir.resolve(".otel-aws-account-id");
     Files.createSymbolicLink(symlink, Paths.get("012345678901"));
 
     Resource resource =

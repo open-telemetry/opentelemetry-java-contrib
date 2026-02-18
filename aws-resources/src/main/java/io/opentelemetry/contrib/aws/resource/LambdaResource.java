@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 /** A factory for a {@link Resource} which provides information about the AWS Lambda function. */
 public final class LambdaResource {
 
-  private static final String ACCOUNT_ID_SYMLINK_PATH = "/tmp/.otel-account-id";
+  private static final String ACCOUNT_ID_SYMLINK_PATH = "/tmp/.otel-aws-account-id";
 
   private static final Resource INSTANCE = buildResource();
 
