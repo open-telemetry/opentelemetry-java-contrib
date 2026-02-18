@@ -16,10 +16,10 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.common.v1.KeyValueList;
-import okio.ByteString;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import okio.ByteString;
 
 public final class AttributesMapper {
 
