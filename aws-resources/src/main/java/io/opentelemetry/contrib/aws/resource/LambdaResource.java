@@ -23,10 +23,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /** A factory for a {@link Resource} which provides information about the AWS Lambda function. */
 public final class LambdaResource {
+
+  private static final Logger logger = Logger.getLogger(LambdaResource.class.getName());
 
   private static final String ACCOUNT_ID_SYMLINK_PATH = "/tmp/.otel-aws-account-id";
 
@@ -78,7 +82,7 @@ public final class LambdaResource {
         builder.put(CLOUD_ACCOUNT_ID, accountId);
       }
     } catch (IOException | UnsupportedOperationException e) {
-      // Symlink doesn't exist or readlink not supported — silently skip
+      logger.log(Level.FINE, "cloud.account.id not available via symlink", e);
     }
 
     return Resource.create(builder.build(), SchemaUrls.V1_25_0);
