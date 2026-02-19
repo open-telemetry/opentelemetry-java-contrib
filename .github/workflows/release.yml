@@ -26,6 +26,7 @@ jobs:
       - common
     outputs:
       version: ${{ steps.create-github-release.outputs.version }}
+      prior-version: ${{ steps.create-github-release.outputs.prior-version }}
     steps:
       - run: |
           if [[ $GITHUB_REF_NAME != release/* ]]; then
@@ -185,7 +186,9 @@ jobs:
                             opentelemetry-jmx-scraper.jar \
                             opentelemetry-jmx-scraper.jar.asc
 
+          # these are used as job outputs
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "prior-version=$PRIOR_VERSION" >> $GITHUB_OUTPUT
 
   post-release-updates:
     permissions:
