@@ -264,7 +264,7 @@ jobs:
 
       - name: Create pull request against main
         env:
-          VERSION: ${{ needs.release.outputs.version }}gi
+          VERSION: ${{ needs.release.outputs.version }}
           # not using secrets.GITHUB_TOKEN since pull requests from that token do not run workflows
           GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
