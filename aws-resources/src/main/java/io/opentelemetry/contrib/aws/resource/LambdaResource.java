@@ -13,6 +13,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudPl
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CloudProviderIncubatingValues.AWS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.FAAS_VERSION;
+import static java.util.logging.Level.FINE;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
@@ -23,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -82,7 +82,7 @@ public final class LambdaResource {
         builder.put(CLOUD_ACCOUNT_ID, accountId);
       }
     } catch (IOException | UnsupportedOperationException e) {
-      logger.log(Level.FINE, "cloud.account.id not available via symlink", e);
+      logger.log(FINE, "cloud.account.id not available via symlink", e);
     }
 
     return Resource.create(builder.build(), SchemaUrls.V1_25_0);
