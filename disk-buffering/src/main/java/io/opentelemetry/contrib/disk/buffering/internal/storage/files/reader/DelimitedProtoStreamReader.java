@@ -32,7 +32,7 @@ public final class DelimitedProtoStreamReader implements StreamReader {
       offset += readCt;
     } while (readCt != -1 && offset < itemSize);
     if (offset != itemSize) {
-      return null; // unable to read the whole item correctly
+      throw new IOException("Unable to read the whole item correctly");
     }
     return bytes;
   }
