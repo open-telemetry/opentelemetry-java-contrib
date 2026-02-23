@@ -22,7 +22,7 @@ val ibmClientJar: Configuration by configurations.creating {
 dependencies {
   api("com.google.code.findbugs:jsr305:3.0.2")
   api("io.swagger:swagger-annotations:1.6.16")
-  api("org.jetbrains:annotations:26.0.2-1")
+  api("org.jetbrains:annotations:26.1.0")
   api("com.ibm.mq:com.ibm.mq.allclient:9.4.5.0")
   api("org.yaml:snakeyaml:2.5")
   api("com.fasterxml.jackson.core:jackson-databind:2.21.0")
