@@ -5,8 +5,8 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +32,7 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy("trace-sampling", null)));
+    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("trace-sampling", null)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
