@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Collections.singletonList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        Collections.singletonList(new TelemetryPolicy("trace-sampling", null)));
+        singletonList(new TelemetryPolicy("trace-sampling", null)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -44,7 +45,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        Collections.singletonList(new TelemetryPolicy("trace-sampling", spec("probability", 1.0))));
+        singletonList(new TelemetryPolicy("trace-sampling", spec("probability", 1.0))));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -56,7 +57,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        Collections.singletonList(new TelemetryPolicy("other-policy", spec("value", 1.0))));
+        singletonList(new TelemetryPolicy("other-policy", spec("value", 1.0))));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
   }
@@ -68,7 +69,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        Collections.singletonList(new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
+        singletonList(new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
   }
