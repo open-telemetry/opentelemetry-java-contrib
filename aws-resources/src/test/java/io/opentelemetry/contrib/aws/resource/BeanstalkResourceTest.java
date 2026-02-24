@@ -6,11 +6,11 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAMESPACE;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
-import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_NAMESPACE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.entry;
 
